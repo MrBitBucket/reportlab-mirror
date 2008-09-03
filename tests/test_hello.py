@@ -8,8 +8,8 @@ __doc__="""most basic test possible that makes a PDF.
 Useful if you want to test that a really minimal PDF is healthy,
 since the output is about the smallest thing we can make."""
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.pdfgen.canvas import Canvas
 
 

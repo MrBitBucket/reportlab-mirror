@@ -5,11 +5,11 @@
 __version__=''' $Id$ '''
 __doc__='checks callbacks work'
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.test.test_pdfgen_general import makeDocument
+from tests.test_pdfgen_general import makeDocument
 
 _PAGE_COUNT = 0
 

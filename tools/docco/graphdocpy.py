@@ -1,18 +1,12 @@
 #!/usr/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/tools/docco/graphdocpy.py
-
 """Generate documentation for reportlab.graphics classes.
-
 Type the following for usage info:
 
   python graphdocpy.py -h
 """
-
-
 __version__ = '0.8'
-
 
 import sys
 sys.path.insert(0, '.')
@@ -962,9 +956,12 @@ def main():
         print "Saved %s." % builder.outPath
 
     #if doing the usual, put a copy in docs
-    if builder.outPath == 'reportlab.graphics.pdf':
-        import shutil, reportlab
-        dst = os.path.join(os.path.dirname(reportlab.__file__),'docs','graphics_reference.pdf')
+    if builder.outPath=='reportlab.graphics.pdf':
+        import shutil, tools
+        topDir=tools.__path__[0]
+        if not os.path.isabs(topDir): topDir=os.path.abspath(topDir)
+        topDir=os.path.dirname(topDir)
+        dst = os.path.join(topDir,'docs','graphics_reference.pdf')
         shutil.copyfile('reportlab.graphics.pdf', dst)
         if not isSilent:
             print 'copied to '+dst

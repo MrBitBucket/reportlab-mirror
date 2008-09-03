@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
 This is PythonPoint!
 
@@ -116,10 +115,8 @@ To create the PythonPoint user guide, do:
 class FontNameNotFoundError(Exception):
     pass
 
-
 class FontFilesNotFoundError(Exception):
     pass
-
 
 ##def findFontName(path):
 ##    "Extract a Type-1 font name from an AFM file."
@@ -182,8 +179,6 @@ class FontFilesNotFoundError(Exception):
 ##    pdfmetrics.registerTypeFace(T1face)
 ##    T1font = pdfmetrics.Font(name, T1faceName, 'WinAnsiEncoding')
 ##    pdfmetrics.registerFont(T1font)
-
-
 def registerFont0(sourceFile, name, path):
     "Register Type-1 font for future use, simple version."
 
@@ -934,9 +929,12 @@ class PPFigure:
         return self.figure
 
 def getSampleStyleSheet():
-    from reportlab.tools.pythonpoint.styles.standard import getParagraphStyles
+    from tools.pythonpoint.styles.standard import getParagraphStyles
     return getParagraphStyles()
 
+def toolsDir():
+    import tools
+    return tools.__path__[0]
 
 #make a singleton and a function to access it
 _styles = None
@@ -959,10 +957,10 @@ def validate(rawdata):
             import pyRXP
         except ImportError:
             return
-        from reportlab.lib.utils import open_and_read, _RL_DIR, rl_isfile
+        from reportlab.lib.utils import open_and_read, rl_isfile
         dtd = 'pythonpoint.dtd'
         if not rl_isfile(dtd):
-            dtd = os.path.join(_RL_DIR,'tools','pythonpoint','pythonpoint.dtd')
+            dtd = os.path.join(toolsDir(),'pythonpoint','pythonpoint.dtd')
             if not rl_isfile(dtd): return
         def eocb(URI,dtdText=open_and_read(dtd),dtd=dtd):
             if os.path.basename(URI)=='pythonpoint.dtd': return dtd,dtdText
@@ -985,7 +983,7 @@ def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=
 
 def _process(rawdata, datafilename, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None, fx=1):
     #print 'inner process fx=%d' % fx
-    from reportlab.tools.pythonpoint.stdparser import PPMLParser
+    from tools.pythonpoint.stdparser import PPMLParser
     parser = PPMLParser()
     parser.fx = fx
     parser.sourceFilename = datafilename

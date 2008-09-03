@@ -1,12 +1,11 @@
 #!/bin/env python
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_platypus_tables.py
 __version__=''' $Id$ '''
 __doc__='Test script for reportlab.tables'
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import os,unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
@@ -509,8 +508,7 @@ LIST_STYLE = TableStyle(
         lst.append(Spacer(0,6))
 
     lst.append(PageBreak())
-    import os, reportlab.platypus
-    I = Image(os.path.join(os.path.dirname(reportlab.platypus.__file__),'..','tools','pythonpoint','demos','leftlogo.gif'))
+    I = Image(os.path.join(os.path.dirname(testsFolder),'tools','pythonpoint','demos','leftlogo.gif'))
     I.drawHeight = 1.25*inch*I.drawHeight / I.drawWidth
     I.drawWidth = 1.25*inch
     #I.drawWidth = 9.25*inch #uncomment to see better messaging

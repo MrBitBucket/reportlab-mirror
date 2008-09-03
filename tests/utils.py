@@ -2,7 +2,7 @@
 """
 import sys, os, string, fnmatch, copy, re
 from ConfigParser import ConfigParser
-from reportlab.test import unittest
+import unittest
 
 # Helper functions.
 def isWritable(D):
@@ -278,7 +278,6 @@ class NearTestCase(unittest.TestCase):
                     raise AssertionError("%s not near %s" % (a, b))
     assertNear = staticmethod(assertNear)
 
-
 class ScriptThatMakesFileTest(unittest.TestCase):
     """Runs a Python script at OS level, expecting it to produce a file.
 
@@ -292,16 +291,13 @@ class ScriptThatMakesFileTest(unittest.TestCase):
         unittest.TestCase.__init__(self)
 
     def setUp(self):
-
         self.cwd = os.getcwd()
-        #change to reportlab directory first, so that
-        #relative paths may be given to scriptdir
-        import reportlab
-        self.rl_dir = os.path.dirname(reportlab.__file__)
-        self.fn = __file__
-        os.chdir(self.rl_dir)
+        from tests.utils import testsFolder
+        scriptDir=self.scriptDir
+        if not os.path.isabs(scriptDir):
+            scriptDir=os.path.join(testsFolder,scriptDir)
 
-        os.chdir(self.scriptDir)
+        os.chdir(scriptDir)
         assert os.path.isfile(self.scriptName), "Script %s not found!" % self.scriptName
         if os.path.isfile(self.outFileName):
             os.remove(self.outFileName)
@@ -317,3 +313,14 @@ class ScriptThatMakesFileTest(unittest.TestCase):
             print out
         status = p.close()
         assert os.path.isfile(self.outFileName), "File %s not created!" % self.outFileName
+
+import tests as testsFolder
+testsFolder=testsFolder.__path__[0]
+if not os.path.isabs(testsFolder): testsFolder=os.path.normpath(os.path.abspath(testsFolder))
+RL_HOME=os.path.join(testsFolder,'src','reportlab')
+if not os.path.isdir(RL_HOME):
+    RL_HOME=os.path.join(testsFolder,'reportlab')
+if not os.path.isdir(RL_HOME):
+    import reportlab as RL_HOME
+    RL_HOME=RL_HOME.__path__[0]
+    if not os.path.isabs(RL_HOME): RL_HOME=os.path.normpath(os.path.abspath(RL_HOME))

@@ -21,8 +21,8 @@ from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 
 def markPage(c,height=letter[1],width=letter[0]):
     height = height / inch

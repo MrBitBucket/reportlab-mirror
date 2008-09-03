@@ -7,8 +7,8 @@ __doc__="""Verfy that if in invariant mode, repeated runs
 make identical file.  This does NOT test across platforms
 or python versions, only a user can do that :-)"""
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
 from reportlab.pdfgen.canvas import Canvas
 filename = outputfile('test_invariant.pdf')
 
@@ -20,7 +20,7 @@ class InvarTestCase(unittest.TestCase):
         c = Canvas(filename, invariant=1, pageCompression=0)
         c.setFont('Helvetica-Bold', 36)
         c.drawString(100,700, 'Hello World')
-        gif = os.path.join(os.path.dirname(unittest.__file__),'pythonpowered.gif')
+        gif = os.path.join(testsFolder,'pythonpowered.gif')
         c.drawImage(gif,100,600)
         c.save()
 

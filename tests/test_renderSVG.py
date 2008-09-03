@@ -4,8 +4,8 @@ import sys, string
 from xml.dom import minidom
 from xml.sax._exceptions import SAXReaderNotAvailable
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.graphics.shapes import *
 from reportlab.graphics import renderSVG

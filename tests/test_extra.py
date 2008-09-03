@@ -1,19 +1,9 @@
 """This executes tests defined outside the normal test suite.
-
 See docstring for class ExternalTestCase for more information.
 """
-
-
-import os, string, fnmatch, re, sys
-
-import reportlab
-from reportlab.test import unittest
-from reportlab.test.utils import SecureTestCase, printLocation
-
-
-RL_HOME = os.path.dirname(reportlab.__file__)
+import os, string, fnmatch, re, sys, unittest
+from tests.utils import SecureTestCase, printLocation, RL_HOME
 EXTRA_FILE = 'extra.txt'
-
 
 class ExternalTestCase(SecureTestCase):
     """Test case starting cases external to the normal RL suite.

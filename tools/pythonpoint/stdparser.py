@@ -13,25 +13,25 @@ from reportlab.lib import xmllib
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import recursiveImport
-from reportlab.tools.pythonpoint import pythonpoint
+from tools.pythonpoint import pythonpoint
 from reportlab.platypus import figures
 
 
-def getModule(modulename,fromPath='reportlab.tools.pythonpoint.styles'):
+def getModule(modulename,fromPath='tools.pythonpoint.styles'):
     """Get a module containing style declarations.
 
     Search order is:
-        reportlab/tools/pythonpoint/
-        reportlab/tools/pythonpoint/styles/
+        tools/pythonpoint/
+        tools/pythonpoint/styles/
         ./
     """
 
     try:
-        exec 'from reportlab.tools.pythonpoint import '+modulename
+        exec 'from tools.pythonpoint import '+modulename
         return eval(modulename)
     except ImportError:
         try:
-            exec 'from reportlab.tools.pythonpoint.styles import '+modulename
+            exec 'from tools.pythonpoint.styles import '+modulename
             return eval(modulename)
         except ImportError:
             exec 'import '+modulename

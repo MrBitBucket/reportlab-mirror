@@ -1,11 +1,11 @@
 import os
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
-from reportlab.test.test_pdfbase_pdfmetrics import makeWidthTestForAllGlyphs
+from tests.test_pdfbase_pdfmetrics import makeWidthTestForAllGlyphs
 
 
 class EmbeddingTestCase(unittest.TestCase):

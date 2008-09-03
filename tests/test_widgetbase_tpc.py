@@ -8,8 +8,8 @@ Tests for TypedPropertyCollection class.
 import os, sys, copy
 from os.path import join, basename, splitext
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, printLocation
 
 from reportlab.graphics.widgetbase import PropHolder, TypedPropertyCollection
 from reportlab.lib.attrmap import AttrMap, AttrMapValue

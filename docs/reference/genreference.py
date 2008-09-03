@@ -8,14 +8,16 @@ This module contains the script for building the reference.
 """
 def run(verbose=None, outDir=None):
     import os, sys, shutil
-    from reportlab.tools.docco import yaml2pdf
-    from reportlab.lib.utils import _RL_DIR
     if verbose is None: verbose=('-s' not in sys.argv)
+    cwd = os.getcwd()
+    docsDir=os.path.dirname(os.path.dirname(sys.argv[0]) or cwd)
+    topDir=os.path.dirname(docsDir)
+    sys.path.insert(0,topDir)
+    from tools.docco import yaml2pdf
     yaml2pdf.run('reference.yml','reference.pdf')
     if verbose: print 'Saved reference.pdf'
-    docdir = os.path.join(_RL_DIR,'docs')
-    if outDir: docDir = outDir
-    destfn = docdir + os.sep + 'reference.pdf'
+    if not outDir: outDir = os.path.join(topDir,'docs')
+    destfn = os.path.join(outDir,'reference.pdf')
     shutil.copyfile('reference.pdf', destfn)
     if verbose: print 'copied to %s' % destfn
 

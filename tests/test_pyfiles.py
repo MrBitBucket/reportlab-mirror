@@ -1,22 +1,14 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_pyfiles.py
+__version__=''' $Id$ '''
 """Tests performed on all Python source files of the ReportLab distribution.
 """
-
-
 import os, sys, string, fnmatch, re
-
-import reportlab
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker, outputfile, printLocation, RL_HOME
 from reportlab.lib.utils import open_and_read, open_and_readlines
 
-RL_HOME = os.path.dirname(reportlab.__file__)
-
-
 # Helper function and class.
-
 def unique(seq):
     "Remove elements from a list that occur more than once."
 
@@ -73,8 +65,6 @@ class AsciiFileTestCase(unittest.TestCase):
 
     def testAscii(self):
         "Test if Python files are pure ASCII ones."
-
-        RL_HOME = os.path.dirname(reportlab.__file__)
         allPyFiles = GlobDirectoryWalker(RL_HOME, '*.py')
 
         for path in allPyFiles:

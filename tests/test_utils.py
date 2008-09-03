@@ -4,8 +4,8 @@
 __version__='''$Id$'''
 __doc__="""Test reportlab.lib.util module"""
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 
 
 class FmtTestCase(unittest.TestCase):

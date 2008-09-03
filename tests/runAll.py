@@ -1,16 +1,14 @@
 #!/usr/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/runAll.py
 """Runs all test files in all subfolders.
 """
-import os, glob, sys, string, traceback
-from reportlab.test import unittest
-from reportlab.test.utils import GlobDirectoryWalker, outputfile, printLocation
+__version__=''' $Id$ '''
+import os, glob, sys, string, traceback, unittest
+from tests.utils import GlobDirectoryWalker, outputfile, printLocation
 
 def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
     "Build a test suite of all available test files."
-
     allTests = unittest.TestSuite()
 
     if os.path.isdir(folder): sys.path.insert(0, folder)
@@ -36,7 +34,7 @@ def main(pattern='test_*.py'):
     except:
         folder = os.path.dirname(sys.argv[0]) or os.getcwd()
     #allow for Benn's "screwball cygwin distro":
-    if folder == '':
+    if not folder:
         folder = '.'
     from reportlab.lib.utils import isSourceDistro
     haveSRC = isSourceDistro()
@@ -79,7 +77,7 @@ def mainEx():
         os.close(sys.stderr.fileno())
 
 def runExternally():
-    cmd = sys.executable+' -c"from reportlab.test import runAll;runAll.mainEx()"'
+    cmd = sys.executable+' -c"from tests import runAll;runAll.mainEx()"'
     i,o,e=os.popen3(cmd)
     i.close()
     out = o.read()

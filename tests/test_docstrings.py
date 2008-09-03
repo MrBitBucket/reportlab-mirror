@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_docstrings.py
 
 """This is a test on a package level that find all modules,
 classes, methods and functions that do not have a doc string
@@ -10,16 +9,10 @@ and lists them in individual log files.
 Currently, methods with leading and trailing double underscores
 are skipped.
 """
-
-import os, sys, glob, string, re
+import os, sys, glob, string, re, unittest
 from types import ModuleType, ClassType, MethodType, FunctionType
-
+from tests.utils import SecureTestCase, GlobDirectoryWalker, outputfile, printLocation, RL_HOME
 import reportlab
-from reportlab.test import unittest
-from reportlab.test.utils import SecureTestCase, GlobDirectoryWalker, outputfile, printLocation
-
-
-RL_HOME = os.path.dirname(reportlab.__file__)
 
 def getModuleObjects(folder, rootName, typ, pattern='*.py'):
     "Get a list of all objects defined *somewhere* in a package."

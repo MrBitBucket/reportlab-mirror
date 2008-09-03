@@ -8,8 +8,8 @@ __doc__='testscript for reportlab.pdfgen'
 
 import os, string
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
 
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
@@ -669,7 +669,7 @@ cost to performance.""")
     c.drawText(t)
 
     if haveImages:
-        gif = os.path.join(os.path.dirname(unittest.__file__),'pythonpowered.gif')
+        gif = os.path.join(testsFolder,'pythonpowered.gif')
         c.drawInlineImage(gif,2*inch, 7*inch)
     else:
         c.rect(2*inch, 7*inch, 110, 44)
@@ -727,10 +727,10 @@ cost to performance.""")
     c.rect(1*inch, 6+14.4*inch, w, h)
     c.rect(3*inch, 6+14.4*inch, w, h)
     if haveImages:
-        png = os.path.join(os.path.dirname(unittest.__file__),'solid_red_alpha.png')
+        png = os.path.join(testsFolder,'solid_red_alpha.png')
         c.drawImage(png, 1*inch, 8*inch+14.4, w, h, mask=None)
         c.drawImage(png, 3*inch, 8*inch+14.4, w, h, mask='auto')
-        png = os.path.join(os.path.dirname(unittest.__file__),'alpha_test.png')
+        png = os.path.join(testsFolder,'alpha_test.png')
         c.drawImage(png, 1*inch, 6*inch+14.4, w, h, mask=None)
         c.drawImage(png, 3*inch, 6*inch+14.4, w, h, mask='auto')
     c.showPage()

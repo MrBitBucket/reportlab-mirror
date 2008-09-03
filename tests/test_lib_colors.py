@@ -7,8 +7,8 @@
 
 import os, math
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.pdfgen.canvas import Canvas
 import reportlab.pdfgen.canvas

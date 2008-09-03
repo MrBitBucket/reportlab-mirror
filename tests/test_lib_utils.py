@@ -1,12 +1,24 @@
+#Copyright ReportLab Europe Ltd. 2000-2008
+#see license.txt for license details
 """Tests for reportlab.lib.utils
 """
+__version__=''' $Id$ '''
 import os
 import reportlab
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, printLocation, testsFolder
 from reportlab.lib import colors
 from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetAttr, rl_isfile, \
                                 isCompactDistro
+
+def _rel_open_and_read(fn):
+    from reportlab.lib.utils import open_and_read
+    cwd = os.getcwd()
+    os.chdir(testsFolder)
+    try:
+        return open_and_read(fn)
+    finally:
+        os.chdir(cwd)
 
 class ImporterTestCase(unittest.TestCase):
     "Test import utilities"
@@ -36,7 +48,7 @@ class ImporterTestCase(unittest.TestCase):
 
     def test2(self):
         "try under a well known directory NOT on the path"
-        D = os.path.join(os.path.dirname(reportlab.__file__), 'tools','pythonpoint')
+        D = os.path.join(testsFolder,'..','tools','pythonpoint')
         fn = os.path.join(D,'stdparser.py')
         if rl_isfile(fn) or rl_isfile(fn+'c') or rl_isfile(fn+'o'):
             m1 = recursiveImport('stdparser', baseDir=D)
@@ -87,13 +99,11 @@ class ImporterTestCase(unittest.TestCase):
 
     def test7(self):
         "test open and read of a simple relative file"
-        from reportlab.lib.utils import open_and_read
-        b = open_and_read('../docs/images/Edit_Prefs.gif')
+        b = _rel_open_and_read('../docs/images/Edit_Prefs.gif')
 
     def test8(self):
         "test open and read of a relative file: URL"
-        from reportlab.lib.utils import open_and_read
-        b = open_and_read('file:../docs/images/Edit_Prefs.gif')
+        b = _rel_open_and_read('file:../docs/images/Edit_Prefs.gif')
 
     def test9(self):
         "test open and read of an http: URL"
@@ -103,12 +113,11 @@ class ImporterTestCase(unittest.TestCase):
     def test10(self):
         "test open and read of a simple relative file"
         from reportlab.lib.utils import open_and_read, getStringIO
-        b = getStringIO(open_and_read('../docs/images/Edit_Prefs.gif'))
+        b = getStringIO(_rel_open_and_read('../docs/images/Edit_Prefs.gif'))
         b = open_and_read(b)
 
 def makeSuite():
     return makeSuiteForClasses(ImporterTestCase)
-
 
 if __name__ == "__main__": #noruntests
     unittest.TextTestRunner().run(makeSuite())

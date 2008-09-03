@@ -9,8 +9,8 @@ __doc__="""Tests of intra-paragraph parsing behaviour in Platypus."""
 from types import TupleType, ListType, StringType, UnicodeType
 from pprint import pprint as pp
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile
 from reportlab.platypus import cleanBlockQuotedText
 from reportlab.platypus.paraparser import ParaParser, ParaFrag
 from reportlab.lib.colors import black

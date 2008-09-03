@@ -8,8 +8,8 @@ Serif Regular and is covered under the license in ../fonts/luxiserif_licence.txt
 import string
 from cStringIO import StringIO
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation, NearTestCase
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation, NearTestCase
 
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics

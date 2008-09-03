@@ -8,8 +8,8 @@ with and without attribute checking.
 __version__ = ''' $Id $ '''
 import os, sys, time
 import reportlab.rl_config
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.pdfgen.canvas import Canvas

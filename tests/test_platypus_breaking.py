@@ -9,8 +9,8 @@ from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib import colors

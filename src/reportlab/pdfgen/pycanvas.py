@@ -2,7 +2,7 @@
 # Author : Jerome Alet - <alet@librelogiciel.com>
 # License : ReportLab's license
 #
-# $Id: pycanvas.py,v 1.8 2002/11/06 17:11:15 rgbecker Exp $
+# $Id$
 #
 __doc__ = """pycanvas.Canvas : a Canvas class which can also output Python source code.
 

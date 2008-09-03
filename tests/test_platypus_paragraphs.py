@@ -1,16 +1,14 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
 """Tests for the reportlab.platypus.paragraphs module.
 """
+__version__=''' $Id$ '''
 
-import sys, os
+import sys, os, unittest
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
-
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
 
 from reportlab.pdfbase.pdfmetrics import stringWidth, registerFont, registerFontFamily
 from reportlab.pdfbase.ttfonts import TTFont
@@ -123,8 +121,8 @@ I guess I'm hoping that I've missed something, and that
 it's actually easy to do using platypus.
 '''
         from reportlab.platypus.flowables import ParagraphAndImage, Image
-        from reportlab.lib.utils import _RL_DIR
-        gif = os.path.join(_RL_DIR,'test','pythonpowered.gif')
+        import tests
+        gif = os.path.join(testsFolder,'pythonpowered.gif')
         story.append(ParagraphAndImage(Paragraph(text,bt),Image(gif)))
         phrase = 'This should be a paragraph spanning at least three pages. '
         description = ''.join([('%d: '%i)+phrase for i in xrange(250)])
@@ -160,8 +158,8 @@ Use scheme "pdf:" to indicate an external PDF link, "http:", "https:" to indicat
 your browser. If an internal link begins with something that looks like a scheme, precede with "document:". <strike>This text should have a strike through it.</strike>
 '''
         from reportlab.platypus.flowables import ImageAndFlowables, Image
-        from reportlab.lib.utils import _RL_DIR
-        gif = os.path.join(_RL_DIR,'test','pythonpowered.gif')
+        import tests
+        gif = os.path.join(testsFolder,'pythonpowered.gif')
         heading = Paragraph('This is a heading',h3)
         story.append(ImageAndFlowables(Image(gif),[heading,Paragraph(text,bt)]))
         phrase = 'This should be a paragraph spanning at least three pages. '
@@ -391,11 +389,11 @@ class AutoLeadingTestCase(unittest.TestCase):
         normal_sp = ParagraphStyle(name='normal_sp',parent=normal,alignment=TA_JUSTIFY,spaceBefore=12)
         texts = ['''Furthermore, a subset of <font size="14">English sentences</font> interesting on quite
 independent grounds is not quite equivalent to a stipulation to place
-<font color="blue">the constructions <img src="../docs/images/testimg.gif"/> into these various categories.</font>''',
+<font color="blue">the constructions <img src="%(testsFolder)s/../docs/images/testimg.gif"/> into these various categories.</font>'''%dict(testsFolder=testsFolder),
         '''We will bring <font size="18">Ugly Things</font> in favor of
 The following thesis:  most of the methodological work in Modern
-Linguistics can be <img src="../docs/images/testimg.gif" valign="baseline" /> defined in such <img src="../docs/images/testimg.gif" valign="10" /> a way as to impose problems of
-phonemic and <u>morphological <img src="../docs/images/testimg.gif" valign="top"/> </u> analysis.''']
+Linguistics can be <img src="%(testsFolder)s/../docs/images/testimg.gif" valign="baseline" /> defined in such <img src="%(testsFolder)s/../docs/images/testimg.gif" valign="10" /> a way as to impose problems of
+phonemic and <u>morphological <img src="%(testsFolder)s/../docs/images/testimg.gif" valign="top"/> </u> analysis.'''%dict(testsFolder=testsFolder)]
         story =[]
         a = story.append
         t = 'u'
@@ -407,16 +405,16 @@ phonemic and <u>morphological <img src="../docs/images/testimg.gif" valign="top"
                             autoLeading,
                             t,' '.join((n+1)*['A']),t,texts[0],t,' '.join((n+1)*['A']),t,texts[1]),
                             style=s))
-        a(Paragraph('''<img src="../docs/images/testimg.gif" valign="top"/> image is very first thing in the line.''', style=normal))
+        a(Paragraph('''<img src="%(testsFolder)s/../docs/images/testimg.gif" valign="top"/> image is very first thing in the line.'''%dict(testsFolder=testsFolder), style=normal))
         a(Paragraph('some text.... some more.... some text.... some more....', normal))
-        a(Paragraph('<img src="../docs/images/testimg.gif" width="0.57in" height="0.19in" /> some text <br /> ', normal))
+        a(Paragraph('<img src="%(testsFolder)s/../docs/images/testimg.gif" width="0.57in" height="0.19in" /> some text <br /> '%dict(testsFolder=testsFolder), normal))
         a(Paragraph('some text.... some more.... some text.... some more....', normal))
-        a(Paragraph('<img src="../docs/images/testimg.gif" width="0.57in" height="0.19in" /> <br /> ', normal))
+        a(Paragraph('<img src="%(testsFolder)s/../docs/images/testimg.gif" width="0.57in" height="0.19in" /> <br /> '%dict(testsFolder=testsFolder), normal))
         a(Paragraph('some text.... some more.... some text.... some more....', normal))
 
         #Volker Haas' valign tests
         fmt = '''<font color="red">%(valign)s</font>: Furthermore, a <u>subset</u> <strike>of</strike> <font size="14">English sentences</font> interesting on quite
-independent grounds is not quite equivalent to a stipulation to place <img src="../docs/images/redsquare.png" width="0.5in" height="0.5in" valign="%(valign)s"/>
+independent grounds is not quite equivalent to a stipulation to place <img src="%(testsFolder)s/../docs/images/redsquare.png" width="0.5in" height="0.5in" valign="%(valign)s"/>
 the constructions into these <u>various</u> categories. We will bring <font size="18">Ugly Things</font> in favor of
 The following thesis:  most of the methodological work in Modern
 Linguistics can be defined in such a way as to impose problems of
@@ -436,8 +434,8 @@ phonemic and <u>morphological</u> <strike>analysis</strike>.'''
                 '0%',
                 '2in',
                 ):
-            a(Paragraph(fmt % {'valign':valign},p_style))
-            a(XPreformatted(fmt % {'valign':valign},p_style))
+            a(Paragraph(fmt % dict(valign=valign,testsFolder=testsFolder),p_style))
+            a(XPreformatted(fmt % dict(valign=valign,testsFolder=testsFolder),p_style))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_autoleading.pdf'))
         doc.build(story)
 

@@ -7,8 +7,8 @@
 
 import sys, random
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, printLocation
 from reportlab.lib.sequencer import Sequencer
 
 

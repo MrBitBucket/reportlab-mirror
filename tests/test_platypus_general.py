@@ -12,12 +12,8 @@ return the 'story' for each.  The run() function gets the stories, then
 builds a special "document model" in which the frames are added to each page
 and drawn into.
 """
-
 import string, copy, sys, os
-
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
-
+from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
 from reportlab.pdfgen import canvas
 from reportlab import platypus
 from reportlab.platypus import BaseDocTemplate, PageTemplate, Flowable, FrameBreak
@@ -27,14 +23,16 @@ from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyl
 from reportlab.lib import colors
 from reportlab.rl_config import defaultPageSize
 from reportlab.lib.utils import haveImages, _RL_DIR, rl_isfile, open_for_read, fileName2Utf8
+import unittest
+import tests
 if haveImages:
-    _GIF = os.path.join(_RL_DIR,'test','pythonpowered.gif')
+    _GIF = os.path.join(testsFolder,'pythonpowered.gif')
     if not rl_isfile(_GIF): _GIF = None
 else:
     _GIF = None
 if _GIF: _GIFUTF8=fileName2Utf8(_GIF)
 
-_JPG = os.path.join(_RL_DIR,'docs','images','lj8100.jpg')
+_JPG = os.path.join(testsFolder,'..','docs','images','lj8100.jpg')
 if not rl_isfile(_JPG): _JPG = None
 
 def getFurl(fn):
@@ -285,7 +283,7 @@ def getCommentary():
     reportlab.rl_config.warnOnMissingFontGlyphs = 0
 
     from reportlab.pdfbase import pdfmetrics
-    fontDir = os.path.join(os.path.dirname(reportlab.__file__),'fonts')
+    fontDir = os.path.join(_RL_DIR,'fonts')
     face = pdfmetrics.EmbeddedType1Face(os.path.join(fontDir,'LeERC___.AFM'),
             os.path.join(fontDir,'LeERC___.PFB'))
     faceName = face.name  # should be 'LettErrorRobot-Chrome'
@@ -468,7 +466,7 @@ def getExamples():
     reportlab.rl_config.warnOnMissingFontGlyphs = 0
 
     from reportlab.pdfbase import pdfmetrics
-    fontDir = os.path.join(os.path.dirname(reportlab.__file__),'fonts')
+    fontDir = os.path.join(_RL_DIR,'fonts')
     face = pdfmetrics.EmbeddedType1Face(os.path.join(fontDir,'LeERC___.AFM'),os.path.join(fontDir,'LeERC___.PFB'))
     faceName = face.name  # should be 'LettErrorRobot-Chrome'
     pdfmetrics.registerTypeFace(face)
@@ -582,7 +580,7 @@ class PlatypusTestCase(unittest.TestCase):
 
         story = [Paragraph("The section header", header), d,
                 ]
-        doc = SimpleDocTemplate('test_drawing_keepwithnext.pdf')
+        doc = SimpleDocTemplate(outputfile('test_drawing_keepwithnext.pdf'))
         doc.build(story)
 
     def test2(self):
@@ -610,7 +608,7 @@ class PlatypusTestCase(unittest.TestCase):
                 DocWhile('i',[DocPara('i',format='The value of i is %(__expr__)d',style=normal),DocExec('i-=1')]),
                 DocPara('repr(doc._nameSpace)',escape=True),
                 ]
-        doc = SimpleDocTemplate('test_doc_programming.pdf')
+        doc = SimpleDocTemplate(outputfile('test_doc_programming.pdf'))
         doc.build(story)
 
 def makeSuite():

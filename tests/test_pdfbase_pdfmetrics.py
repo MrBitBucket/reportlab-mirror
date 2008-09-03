@@ -8,8 +8,8 @@ Various tests for PDF metrics.
 The main test prints out a PDF documents enabling checking of widths of every
 glyph in every standard font.  Long!
 """
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase import _fontdata
 from reportlab.pdfgen.canvas import Canvas

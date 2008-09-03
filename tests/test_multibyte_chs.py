@@ -10,8 +10,8 @@ by classes in reportlab.pdfbase.cidfonts
 
 import string, os
 import codecs
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas

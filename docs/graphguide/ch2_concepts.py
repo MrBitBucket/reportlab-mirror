@@ -1,7 +1,7 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/docs/graphguide/ch2_concepts.py
-from reportlab.tools.docco.rl_doc_utils import *
+__version__=''' $Id$ '''
+from tools.docco.rl_doc_utils import *
 
 heading1("General Concepts")
 

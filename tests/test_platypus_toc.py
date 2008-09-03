@@ -13,8 +13,8 @@ import sys, os
 from os.path import join, basename, splitext
 from math import sqrt
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4

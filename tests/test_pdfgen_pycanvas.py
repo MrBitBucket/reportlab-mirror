@@ -1,19 +1,17 @@
 #!/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
 __version__=''' $Id$ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas and the pycanvas module to output Python source code.
 
-import string, os
-
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import string, os, unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
 
 from reportlab.pdfgen import pycanvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
-from reportlab.lib.utils import haveImages, _RL_DIR, rl_isfile
+from reportlab.lib.utils import haveImages, rl_isfile
 
 #################################################################
 #
@@ -639,8 +637,8 @@ cost to performance.""")
         space if you use images more than once.""")
 
     c.drawText(t)
-
-    gif = os.path.join(_RL_DIR,'test','pythonpowered.gif')
+    import tests
+    gif = os.path.join(testsFolder,'pythonpowered.gif')
     if haveImages and rl_isfile(gif):
         c.drawInlineImage(gif,2*inch, 7*inch)
     else:

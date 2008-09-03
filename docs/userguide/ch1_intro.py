@@ -1,7 +1,7 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/docs/userguide/ch1_intro.py
-from reportlab.tools.docco.rl_doc_utils import *
+from tools.docco.rl_doc_utils import *
 import reportlab
 
 title("ReportLab PDF Library")
@@ -478,7 +478,7 @@ $http://diveintopython.org/$
 
 
 from reportlab.lib.codecharts import SingleByteEncodingChart
-from reportlab.tools.docco.stylesheet import getStyleSheet
+from tools.docco.stylesheet import getStyleSheet
 styles = getStyleSheet()
 indent0_style = styles['Indent0']
 indent1_style = styles['Indent1']

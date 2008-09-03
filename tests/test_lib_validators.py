@@ -1,8 +1,8 @@
 """Tests (incomplete) for the reportlab.lib.validators module.
 """
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, printLocation
 from reportlab.lib import colors
 from reportlab.lib import validators
 

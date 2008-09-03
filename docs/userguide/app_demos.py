@@ -1,7 +1,7 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/docs/userguide/app_demos.py
-from reportlab.tools.docco.rl_doc_utils import *
+from tools.docco.rl_doc_utils import *
 
 Appendix1("ReportLab Demos")
 disc("""In the subdirectories of $reportlab/demos$ there are a number of working examples showing

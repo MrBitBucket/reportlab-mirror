@@ -1,8 +1,8 @@
 """Tests for the PythonPoint tool.
 """
 import os, sys, string
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
 import reportlab
 
 class PythonPointTestCase(unittest.TestCase):
@@ -11,8 +11,7 @@ class PythonPointTestCase(unittest.TestCase):
         "Test if pythonpoint.pdf can be created from pythonpoint.xml."
 
         join, dirname, isfile, abspath = os.path.join, os.path.dirname, os.path.isfile, os.path.abspath
-        rlDir = abspath(dirname(reportlab.__file__))
-        from reportlab.tools.pythonpoint import pythonpoint
+        from tools.pythonpoint import pythonpoint
         from reportlab.lib.utils import isCompactDistro, open_for_read
         ppDir = dirname(pythonpoint.__file__)
         xml = join(ppDir, 'demos', 'pythonpoint.xml')

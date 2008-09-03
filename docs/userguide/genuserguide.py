@@ -7,18 +7,22 @@ __doc__ = """
 This module contains the script for building the user guide.
 """
 def run(pagesize=None, verbose=0, outDir=None):
-    import os
-    from reportlab.tools.docco.rl_doc_utils import setStory, getStory, RLDocTemplate, defaultPageSize
-    from reportlab.tools.docco import rl_doc_utils
-    from reportlab.lib.utils import open_and_read, _RL_DIR
-    if not outDir: outDir = os.path.join(_RL_DIR,'docs')
+    import sys,os
+    from reportlab.lib.utils import open_and_read
+    cwd = os.getcwd()
+    docsDir=os.path.dirname(os.path.dirname(sys.argv[0]) or cwd)
+    topDir=os.path.dirname(docsDir)
+    if not outDir: outDir=docsDir
+    G = {}
+    sys.path.insert(0,topDir)
+    from tools.docco.rl_doc_utils import setStory, getStory, RLDocTemplate, defaultPageSize
+    from tools.docco import rl_doc_utils
+    exec 'from tools.docco.rl_doc_utils import *' in G, G
     destfn = os.path.join(outDir,'userguide.pdf')
     doc = RLDocTemplate(destfn,pagesize = pagesize or defaultPageSize)
 
     #this builds the story
     setStory()
-    G = {}
-    exec 'from reportlab.tools.docco.rl_doc_utils import *' in G, G
     for f in (
         'ch1_intro',
         'ch2_graphics',

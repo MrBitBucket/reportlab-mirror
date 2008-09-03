@@ -1,20 +1,22 @@
 #!/bin/env python
 import os, sys, traceback
-def _genAll(d=None,verbose=1):
-    if not d: d = '.'
-    if not os.path.isabs(d):
-        d = os.path.normpath(os.path.join(os.getcwd(),d))
-    L = ['reference/genreference.py',
-        'userguide/genuserguide.py',
-        'graphguide/gengraphguide.py',
-        '../tools/docco/graphdocpy.py',
+def _genAll(verbose=1):
+    from tests.utils import testsFolder
+    topDir=os.path.dirname(testsFolder)
+    L = [os.path.join(topDir,f) for f in (
+            'docs/reference/genreference.py',
+            'docs/userguide/genuserguide.py',
+            'docs/graphguide/gengraphguide.py',
+            'tools/docco/graphdocpy.py',
+            )   
         ]
-    if os.path.isdir('../rl_addons'):
-        L = L + ['../rl_addons/pyRXP/docs/PyRXP_Documentation.rml']
-    elif os.path.isdir('../../rl_addons'):
-        L = L + ['../../rl_addons/pyRXP/docs/PyRXP_Documentation.rml']
+    for f in ('src/rl_addons/pyRXP/docs/PyRXP_Documentation.rml',
+            ):
+        f = os.path.join(topDir,f)
+        if os.path.isfile(f):
+            L += [f]
+            break
     for p in L:
-        os.chdir(d)
         os.chdir(os.path.dirname(p))
         if p[-4:]=='.rml':
             try:
@@ -34,4 +36,10 @@ if __name__=='__main__':
         verbose = 0
     else:
         verbose = 1
-    _genAll(os.path.dirname(sys.argv[0]),verbose)
+    d = os.path.dirname(sys.argv[0])
+    if not d:
+        d = os.getcwd()
+    elif not os.path.isabs(d):
+        d = os.path.abspath(d)
+    sys.path.insert(0,os.path.dirname(d))
+    _genAll(verbose)

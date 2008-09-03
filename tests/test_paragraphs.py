@@ -3,8 +3,8 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_paragraphs.py
 # tests some paragraph styles
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, printLocation
 
 from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter, XPreformatted
 from reportlab.lib.styles import ParagraphStyle

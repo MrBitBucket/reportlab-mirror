@@ -1,17 +1,14 @@
 #!/usr/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_source_chars.py
-
 """This tests for things in source files.  Initially, absence of tabs :-)
 """
-
+__version__=''' $Id$ '''
 import os, sys, glob, string, re
 from types import ModuleType, ClassType, MethodType, FunctionType
-
 import reportlab
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, SecureTestCase, GlobDirectoryWalker, printLocation
+import unittest
+from tests.utils import makeSuiteForClasses, outputfile, SecureTestCase, GlobDirectoryWalker, printLocation, testsFolder, RL_HOME
 from reportlab.lib.utils import open_and_read
 
 
@@ -49,8 +46,7 @@ class SourceTester(SecureTestCase):
             self.output.write("file %s contains %d trailing spaces, or %0.2f%% wastage\n" % (filename, badChars, 100.0*badChars/initSize))
 
     def testFiles(self):
-        topDir = os.path.dirname(reportlab.__file__)
-        w = GlobDirectoryWalker(topDir, '*.py')
+        w = GlobDirectoryWalker(RL_HOME, '*.py')
         for filename in w:
             self.checkFileForTabs(filename)
             self.checkFileForTrailingSpaces(filename)
