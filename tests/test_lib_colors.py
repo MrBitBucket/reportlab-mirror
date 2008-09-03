@@ -1,20 +1,15 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_lib_colors.py
 """Tests for the reportlab.lib.colors module.
 """
-
-
+__version__='''$Id:$'''
 import os, math
-
 import unittest
 from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.pdfgen.canvas import Canvas
 import reportlab.pdfgen.canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch, cm
-
 
 def framePage(canvas, title):
     canvas.setFont('Times-BoldItalic',20)

@@ -1,9 +1,8 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_platypus_breaking.py
 """Tests pageBreakBefore, frameBreakBefore, keepWithNext...
 """
-
+__version__='''$Id:$'''
 import sys, os, time
 from string import split, strip, join, whitespace
 from operator import truth

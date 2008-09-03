@@ -1,5 +1,8 @@
+#Copyright ReportLab Europe Ltd. 2000-2008
+#see license.txt for license details
 """Utilities for testing Python packages.
 """
+__version__='''$Id:$'''
 import sys, os, string, fnmatch, copy, re
 from ConfigParser import ConfigParser
 import unittest

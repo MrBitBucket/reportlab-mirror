@@ -11,13 +11,13 @@ class ExternalTestCase(SecureTestCase):
     This test case runs additional test cases defined in external
     modules which must also be using the unittest framework.
     These additional modules must be defined in a file named
-    'extra.txt' which needs to be located in the reportlab/test
+    'extra.txt' which needs to be located in the tests
     folder and contains one path per line.
 
     The paths of these modules can contain stuff from the Unix
     world like '~', '.', '..' and '$HOME' and can have absolute
     or relative paths. If they are relative they start from the
-    reportlab/test folder.
+    tests folder.
 
     This is a sample 'extra.txt' file:
 

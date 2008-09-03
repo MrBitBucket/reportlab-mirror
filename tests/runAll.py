@@ -48,10 +48,10 @@ def main(pattern='test_*.py'):
                 except:
                     pass
 
-    # special case for reportlab/test directory - clean up
+    # special case for tests directory - clean up
     # all PDF & log files before starting run.  You don't
     # want this if reusing runAll anywhere else.
-    if string.find(folder, 'reportlab' + os.sep + 'test') > -1: cleanup(folder)
+    if string.find(folder, os.sep+'tests') > -1: cleanup(folder)
     cleanup(outputfile(''))
     NI = []
     cleanOnly = '--clean' in sys.argv

@@ -1,8 +1,7 @@
 #!/bin/env python
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_hello.py
-__version__=''' $Id'''
+__version__='''$Id$'''
 __doc__="""most basic test possible that makes a PDF.
 
 Useful if you want to test that a really minimal PDF is healthy,

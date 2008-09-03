@@ -1,14 +1,12 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_platypus_toc.py
 """Tests for the Platypus TableOfContents class.
 
 Currently there is only one such test. Most such tests, like this
 one, will be generating a PDF document that needs to be eye-balled
 in order to find out if it is 'correct'.
 """
-
-
+__version__='''$Id:$'''
 import sys, os
 from os.path import join, basename, splitext
 from math import sqrt

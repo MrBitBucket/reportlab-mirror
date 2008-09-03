@@ -1,6 +1,6 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/demos/colors/colortest.py
+__version__='''$Id:$'''
 import reportlab.pdfgen.canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch

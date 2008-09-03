@@ -1,7 +1,5 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/demos/stdfonts/stdfonts.py
-__version__=''' $Id$ '''
 __doc__="""
 This generates tables showing the 14 standard fonts in both
 WinAnsi and MacRoman encodings, and their character codes.
@@ -11,6 +9,7 @@ sequences in Python literals.
 
 usage: standardfonts.py [dec|hex|oct]
 """
+__version__=''' $Id$ '''
 import sys
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas

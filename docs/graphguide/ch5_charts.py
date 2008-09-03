@@ -239,7 +239,7 @@ caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Label properties""")
 disc("""
 To see many more examples of $Label$ objects with different
 combinations of properties, please have a look into the
-ReportLab test suite in the folder $reportlab/test$, run the
+ReportLab test suite in the folder $tests$, run the
 script $test_charts_textlabels.py$ and look at the PDF document
 it generates!
 """)

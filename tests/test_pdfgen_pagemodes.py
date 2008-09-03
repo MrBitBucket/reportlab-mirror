@@ -1,14 +1,10 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_pdfgen_pagemodes.py
 # full screen test
-
 """Tests for PDF page modes support in reportlab.pdfgen.
 """
-
-
+__version__='''$Id:$'''
 import os
-
 import unittest
 from tests.utils import makeSuiteForClasses, outputfile, printLocation
 

@@ -1518,5 +1518,5 @@ LIST_STYLE = TableStyle(
 # of colors e.g. Blue, None, Blue, None as you move
 # down.
 if __name__ == '__main__':
-    from reportlab.test.test_platypus_tables import old_tables_test
+    from tests.test_platypus_tables import old_tables_test
     old_tables_test()

@@ -411,10 +411,10 @@ disc("""The old coding style with explicit encodings should still work, but is n
 only relevant if you need to construct vertical text.  We aim to add more readable options
 for horizontal and vertical text to the UnicodeCIDFont constructor in future.
 The following four test scripts generate samples in the corresponding languages:""")
-eg("""reportlab/test/test_multibyte_jpn.py
-reportlab/test/test_multibyte_kor.py
-reportlab/test/test_multibyte_chs.py
-reportlab/test/test_multibyte_cht.py""")
+eg("""tests/test_multibyte_jpn.py
+tests/test_multibyte_kor.py
+tests/test_multibyte_chs.py
+tests/test_multibyte_cht.py""")
 
 ## put back in when we have vertical text...
 ##disc("""The illustration below shows part of the first page

@@ -45,7 +45,7 @@ def run(pagesize=None, verbose=0, outDir=None):
 
 def makeSuite():
     "standard test harness support - run self as separate process"
-    from reportlab.test.utils import ScriptThatMakesFileTest
+    from tests.utils import ScriptThatMakesFileTest
     return ScriptThatMakesFileTest('../docs/userguide', 'genuserguide.py', 'userguide.pdf')
 
 def main():

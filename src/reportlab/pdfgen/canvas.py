@@ -1522,4 +1522,4 @@ if _instanceEscapePDF:
     Canvas._escape = new.instancemethod(_instanceEscapePDF,None,Canvas)
 
 if __name__ == '__main__':
-    print 'For test scripts, look in reportlab/test'
+    print 'For test scripts, look in tests'

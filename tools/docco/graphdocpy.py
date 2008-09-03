@@ -968,7 +968,7 @@ def main():
 
 def makeSuite():
     "standard test harness support - run self as separate process"
-    from reportlab.test.utils import ScriptThatMakesFileTest
+    from tests.utils import ScriptThatMakesFileTest
     return ScriptThatMakesFileTest('tools/docco',
                                    'graphdocpy.py',
                                    'reportlab.graphics.pdf')

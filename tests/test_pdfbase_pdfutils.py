@@ -1,18 +1,13 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_pdfbase_pdfutils.py
 """Tests for utility functions in reportlab.pdfbase.pdfutils.
 """
-
-
+__version__='''$Id:$'''
 import os
-
 import unittest
 from tests.utils import makeSuiteForClasses, printLocation
-
 from reportlab.pdfbase.pdfutils import _AsciiHexEncode, _AsciiHexDecode
 from reportlab.pdfbase.pdfutils import _AsciiBase85Encode, _AsciiBase85Decode
-
 
 class PdfEncodingTestCase(unittest.TestCase):
     "Test various encodings used in PDF files."

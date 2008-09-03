@@ -1,16 +1,13 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_widgetbase_tpc.py
 """
 Tests for TypedPropertyCollection class.
 """
-
+__version__='''$Id:$'''
 import os, sys, copy
 from os.path import join, basename, splitext
-
 import unittest
 from tests.utils import makeSuiteForClasses, printLocation
-
 from reportlab.graphics.widgetbase import PropHolder, TypedPropertyCollection
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.lib.validators import isNumber

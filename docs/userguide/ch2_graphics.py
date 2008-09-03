@@ -289,7 +289,7 @@ pencilnote()
 disc("""
 You need the Python Imaging Library (PIL) to use images with the ReportLab package.
 Examnples of the techniques below can be found by running the script $test_pdfgen_general.py$
-in our $test$ subdirectory and looking at page 7 of the output.
+in our $tests$ subdirectory and looking at page 7 of the output.
 """)
 
 disc("""

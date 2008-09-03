@@ -1,11 +1,10 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_graphics_speed.py
 """
 This does a test drawing with lots of things in it, running
 with and without attribute checking.
 """
-__version__ = ''' $Id $ '''
+__version__ = '''$Id$'''
 import os, sys, time
 import reportlab.rl_config
 import unittest

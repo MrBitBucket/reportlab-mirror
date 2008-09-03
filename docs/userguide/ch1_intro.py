@@ -174,7 +174,7 @@ list("""Unpack the rl_addons package and build the C extensions with distutils; 
 corresponding .pyd files from our download page. """)
 
 
-list("""$cd$ to ^reportlab/test^ and execute $runAll.py$.
+list("""$cd$ to ^tests^ and execute $runAll.py$.
 This will create many PDF files. """)
 list("""You may also want to download and run the ^rl_check.py^ on our site, which
 health-checks an installation and reports on any missing options.  """)
@@ -240,7 +240,7 @@ the bottom of the ^http://www.reportlab.org/downloads.html^ downloads page, and 
 them into ^C:\Python24\lib\site-packages^ (or its equivalent for other Python versions""")
 
 list("""Open up a $MS-DOS$ command prompt and CD to
-"$..\\reportlab\\test$".  Enter "$runAll.py$". You should see lots of dots
+"$reportlab\\..\\tests$".  Enter "$runAll.py$". You should see lots of dots
 and no error messages.  This will also create many PDF files and generate
 the manuals in ^reportlab/docs^ (including this one). """)
 

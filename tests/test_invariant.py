@@ -1,11 +1,10 @@
 #!/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_invariant.py
-__version__=''' $Id'''
 __doc__="""Verfy that if in invariant mode, repeated runs
 make identical file.  This does NOT test across platforms
 or python versions, only a user can do that :-)"""
+__version__='''$Id:$'''
 
 import unittest
 from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder

@@ -10,8 +10,6 @@ from reportlab.graphics.barcode.usps import *
 from reportlab.graphics.barcode.usps4s import USPS_4State
 
 
-from reportlab.test import unittest
-from reportlab.test.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle, Preformatted, PageBreak
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors

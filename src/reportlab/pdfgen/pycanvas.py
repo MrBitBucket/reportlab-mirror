@@ -25,14 +25,14 @@ unset or not used at all (it then defaults to being unset) then None
 is returned and the doIt() function is much much faster, it is also
 much faster than the original non-serialized program.
 
-the reportlab/test/test_pdfgen_pycanvas.py program is the test suite
+the tests/test_pdfgen_pycanvas.py program is the test suite
 for pycanvas, you can do the following to run it :
 
     First set verbose=1 in reportlab/rl_config.py
 
     then from the command interpreter :
 
-    $ cd reportlab/test
+    $ cd tests
     $ python test_pdfgen_pycanvas.py >n1.py
 
     this will produce both n1.py and test_pdfgen_pycanvas.pdf
@@ -306,4 +306,4 @@ class Canvas :
         self._pyfile.write("%s\n" % pycode)
 
 if __name__ == '__main__':
-    print 'For test scripts, look in reportlab/test'
+    print 'For test scripts, look in tests'

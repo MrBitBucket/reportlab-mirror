@@ -1,8 +1,8 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/test/test_platypus_indents.py
 """Tests for context-dependent indentation
 """
+__version__='''$Id:$'''
 
 import sys, os, random
 from string import split, strip, join, whitespace

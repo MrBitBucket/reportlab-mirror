@@ -1,6 +1,5 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/demos/odyssey/odyssey.py
 __version__=''' $Id$ '''
 ___doc__=''
 #odyssey.py

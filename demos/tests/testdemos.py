@@ -1,9 +1,8 @@
 #!/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/demos/tests/testdemos.py
-__version__=''' $Id$ '''
 __doc__='Test all demos'
+__version__=''' $Id$ '''
 _globals=globals().copy()
 import os, sys
 from reportlab import pdfgen
