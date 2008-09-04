@@ -190,7 +190,10 @@ class Frame:
         y = self._y
         p = self._y1p
         s = 0
-        if not self._atTop: s = flowable.getSpaceBefore()
+        if not self._atTop:
+            s = flowable.getSpaceBefore()
+            if self._oASpace:
+                s = max(s-self._prevASpace,0)
         flowable.canv = canv    #some flowables might need this
         r = flowable.split(self._aW, y-p-s)
         del flowable.canv
