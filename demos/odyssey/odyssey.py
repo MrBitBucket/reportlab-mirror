@@ -105,11 +105,7 @@ def run(verbose=1):
     data = open(fn,'r').readlines()
     for line in data:
         #this just does it the fast way...
-        tx.textLine(line)
-        #this forces it to do text metrics, which would be the slow
-        #part if we were wrappng paragraphs.
-        #canv.textOut(line)
-        #canv.textLine('')
+        tx.textLine(line.rstrip())
 
         #page breaking
         y = tx.getY()   #get y coordinate

@@ -1,9 +1,11 @@
 This contains a number of benchmarks and demos
 based on Homer's Odyssey (which is widely available
-in plain, line-oriented text format). There are a large 
-selection of online books at:
-	http://classics.mit.edu/
+in plain, line-oriented text format). 
 
+The version used here was obtained from Project Gutenberg.
+
+The URL is as follows:
+http://www.gutenberg.org/etext/1727
 
 Our distribution ships with just the first chapter
 in odyssey.txt.  For a more meaningful speed test,
