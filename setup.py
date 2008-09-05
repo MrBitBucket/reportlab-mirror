@@ -128,7 +128,7 @@ class _rl_dir_info:
             return None
 
 def _cmp_rl_ccode_dirs(a,b):
-    return cmp(_rl_accel_dir_info(b),_rl_accel_dir_info(a))
+    return cmp(_rl_dir_info(b),_rl_dir_info(a))
 
 def _find_rl_ccode(dn='rl_accel',cn='_rl_accel.c'):
     '''locate where the accelerator code lives'''
@@ -298,19 +298,20 @@ def main():
             for d in I:
                 if isfile(pjoin(d, "ft2build.h")):
                     ftv = 21
-                    d = pjoin(d, "freetype2")
+                    FT_INC_DIR=[d,pjoin(d, "freetype2")]
                     break
                 d = pjoin(d, "freetype2")
                 if isfile(pjoin(d, "ft2build.h")):
                     ftv = 21
+                    FT_INC_DIR=[d]
                     break
                 if isdir(pjoin(d, "freetype")):
                     ftv = 20
+                    FT_INC_DIR=[d]
                     break
             if ftv:
                 FT_LIB=['freetype']
                 FT_LIB_DIR=L
-                FT_INC_DIR=[d]
                 FT_MACROS = [('RENDERPM_FT',None)]
                 infoline('# installing with freetype version %d' % ftv)
             else:
