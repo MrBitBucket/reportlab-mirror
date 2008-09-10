@@ -957,7 +957,12 @@ def main():
 
     #if doing the usual, put a copy in docs
     if builder.outPath=='reportlab.graphics.pdf':
-        import shutil, tools
+        import shutil
+        try:
+            import tools
+        except ImportError: #probably running in tools/docco
+            sys.path.insert(0, os.path.dirname(os.path.dirname(os.getcwd())))
+            import tools
         topDir=tools.__path__[0]
         if not os.path.isabs(topDir): topDir=os.path.abspath(topDir)
         topDir=os.path.dirname(topDir)
