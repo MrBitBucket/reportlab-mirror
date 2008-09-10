@@ -1,8 +1,8 @@
 
 """Test TrueType font subsetting & embedding code.
 
-This test uses a sample font (luxiserif.ttf) taken from XFree86 which is called Luxi
-Serif Regular and is covered under the license in ../fonts/luxiserif_licence.txt.
+This test uses a sample font (Vera.ttf) taken from Bitstream which is called Vera
+Serif Regular and is covered under the license in ../fonts/bitstream-vera-license.txt.
 """
 
 import string
@@ -63,7 +63,7 @@ def _simple_subset_generation(fn,npages,alter=0):
     c.drawString(100,700, 'Unicode TrueType Font Test %d pages' % npages)
     # Draw a table of Unicode characters
     for p in xrange(npages):
-        for fontName in ('TestFont','RinaFont'):
+        for fontName in ('Vera','VeraBI'):
             c.setFont(fontName, 10)
             for i in xrange(32):
                 for j in xrange(32):
@@ -77,8 +77,8 @@ class TTFontsTestCase(unittest.TestCase):
 
     def testTTF(self):
         "Test PDF generation with TrueType fonts"
-        pdfmetrics.registerFont(TTFont("TestFont", "luxiserif.ttf"))
-        pdfmetrics.registerFont(TTFont("RinaFont", "rina.ttf"))
+        pdfmetrics.registerFont(TTFont("Vera", "Vera.ttf"))
+        pdfmetrics.registerFont(TTFont("VeraBI", "VeraBI.ttf"))
         _simple_subset_generation('test_pdfbase_ttfonts1.pdf',1)
         _simple_subset_generation('test_pdfbase_ttfonts3.pdf',3)
         _simple_subset_generation('test_pdfbase_ttfonts35.pdf',3,5)
@@ -86,7 +86,7 @@ class TTFontsTestCase(unittest.TestCase):
         # Do it twice with the same font object
         c = Canvas(outputfile('test_pdfbase_ttfontsadditional.pdf'))
         # Draw a table of Unicode characters
-        c.setFont('TestFont', 10)
+        c.setFont('Vera', 10)
         c.drawString(100, 700, 'Hello, ' + utf8(0xffee))
         c.save()
 
@@ -123,16 +123,16 @@ class TTFontFileTestCase(NearTestCase):
 
     def testFontFile(self):
         "Tests TTFontFile and TTF parsing code"
-        ttf = TTFontFile("luxiserif.ttf")
-        self.assertEquals(ttf.name, "LuxiSerif")
+        ttf = TTFontFile("Vera.ttf")
+        self.assertEquals(ttf.name, "BitstreamVeraSans-Roman")
         self.assertEquals(ttf.flags, FF_SYMBOLIC)
         self.assertEquals(ttf.italicAngle, 0.0)
-        self.assertNear(ttf.ascent,783.203125)    # FIXME: or 992?
-        self.assertNear(ttf.descent,-205.078125)    # FIXME: or -210?
-        self.assertEquals(ttf.capHeight, 0)
-        self.assertNear(ttf.bbox, [-203.125, -210.9375, 983.3984375, 992.67578125])
+        self.assertNear(ttf.ascent,759.765625)
+        self.assertNear(ttf.descent,-240.234375)
+        self.assertEquals(ttf.capHeight, 759.765625)
+        self.assertNear(ttf.bbox, [-183.10546875, -235.83984375, 1287.109375, 928.22265625])
         self.assertEquals(ttf.stemV, 87)
-        self.assertEquals(ttf.defaultWidth, 250)
+        self.assertEquals(ttf.defaultWidth, 600.09765625)
 
     def testAdd32(self):
         "Test add32"
@@ -158,7 +158,7 @@ class TTFontFileTestCase(NearTestCase):
 
     def testFontFileChecksum(self):
         "Tests TTFontFile and TTF parsing code"
-        file = TTFOpenFile("luxiserif.ttf")[1].read()
+        file = TTFOpenFile("Vera.ttf")[1].read()
         TTFontFile(StringIO(file), validate=1) # should not fail
         file1 = file[:12345] + "\xFF" + file[12346:] # change one byte
         self.assertRaises(TTFError, TTFontFile, StringIO(file1), validate=1)
@@ -167,7 +167,7 @@ class TTFontFileTestCase(NearTestCase):
 
     def testSubsetting(self):
         "Tests TTFontFile and TTF parsing code"
-        ttf = TTFontFile("luxiserif.ttf")
+        ttf = TTFontFile("Vera.ttf")
         subset = ttf.makeSubset([0x41, 0x42])
         subset = TTFontFile(StringIO(subset), 0)
         for tag in ('cmap', 'head', 'hhea', 'hmtx', 'maxp', 'name', 'OS/2',
@@ -179,13 +179,13 @@ class TTFontFileTestCase(NearTestCase):
             pos = subset.read_ushort()    # this is actually offset / 2
             self.failIf(pos % 2 != 0, "glyph %d at +%d should be long aligned" % (n, pos * 2))
 
-        self.assertEquals(subset.name, "LuxiSerif")
+        self.assertEquals(subset.name, "BitstreamVeraSans-Roman")
         self.assertEquals(subset.flags, FF_SYMBOLIC)
         self.assertEquals(subset.italicAngle, 0.0)
-        self.assertNear(subset.ascent,783.203125)       # FIXME: or 992?
-        self.assertNear(subset.descent,-205.078125)     # FIXME: or -210?
-        self.assertEquals(subset.capHeight, 0)
-        self.assertNear(subset.bbox, [-203.125, -210.9375, 983.3984375, 992.67578125])
+        self.assertNear(subset.ascent,759.765625)
+        self.assertNear(subset.descent,-240.234375)
+        self.assertEquals(subset.capHeight, 759.765625)
+        self.assertNear(subset.bbox, [-183.10546875, -235.83984375, 1287.109375, 928.22265625])
         self.assertEquals(subset.stemV, 87)
 
     def testFontMaker(self):
@@ -205,7 +205,7 @@ class TTFontFaceTestCase(unittest.TestCase):
 
     def testAddSubsetObjects(self):
         "Tests TTFontFace.addSubsetObjects"
-        face = TTFontFace("luxiserif.ttf")
+        face = TTFontFace("Vera.ttf")
         doc = PDFDocument()
         fontDescriptor = face.addSubsetObjects(doc, "TestFont", [ 0x78, 0x2017 ])
         fontDescriptor = doc.idToObject[fontDescriptor.name].dict
@@ -243,7 +243,7 @@ class TTFontTestCase(NearTestCase):
 
     def testStringWidth(self):
         "Test TTFont.stringWidth"
-        font = TTFont("TestFont", "luxiserif.ttf")
+        font = TTFont("Vera", "Vera.ttf")
         self.assert_(font.stringWidth("test", 10) > 0)
         width = font.stringWidth(utf8(0x2260) * 2, 1000)
         expected = font.face.getCharWidth(0x2260) * 2
@@ -252,7 +252,7 @@ class TTFontTestCase(NearTestCase):
     def testSplitString(self):
         "Tests TTFont.splitString"
         doc = PDFDocument()
-        font = TTFont("TestFont", "luxiserif.ttf")
+        font = TTFont("Vera", "Vera.ttf")
         text = string.join(map(utf8, xrange(0, 511)), "")
         allchars = string.join(map(chr, xrange(0, 256)), "")
         nospace = allchars[:32] + allchars[33:]
@@ -273,7 +273,7 @@ class TTFontTestCase(NearTestCase):
         # that code in any subset, or word spacing will be applied to it.
 
         doc = PDFDocument()
-        font = TTFont("TestFont", "luxiserif.ttf")
+        font = TTFont("Vera", "Vera.ttf")
         text = string.join(map(utf8, range(512, -1, -1)), "")
         chunks = font.splitString(text, doc)
         state = font.state[doc]
@@ -284,7 +284,7 @@ class TTFontTestCase(NearTestCase):
     def testSubsetInternalName(self):
         "Tests TTFont.getSubsetInternalName"
         doc = PDFDocument()
-        font = TTFont("TestFont", "luxiserif.ttf")
+        font = TTFont("Vera", "Vera.ttf")
         # Actually generate some subsets
         text = string.join(map(utf8, range(0, 513)), "")
         font.splitString(text, doc)
@@ -297,7 +297,7 @@ class TTFontTestCase(NearTestCase):
 
     def testAddObjectsEmpty(self):
         "TTFont.addObjects should not fail when no characters were used"
-        font = TTFont("TestFont", "luxiserif.ttf")
+        font = TTFont("Vera", "Vera.ttf")
         doc = PDFDocument()
         font.addObjects(doc)
 
@@ -305,7 +305,7 @@ class TTFontTestCase(NearTestCase):
         "Test that TTFont.addObjects resets the font"
         # Actually generate some subsets
         doc = PDFDocument()
-        font = TTFont("TestFont", "luxiserif.ttf")
+        font = TTFont("Vera", "Vera.ttf")
         font.splitString('a', doc)            # create some subset
         doc = PDFDocument()
         font.addObjects(doc)
@@ -319,7 +319,7 @@ class TTFontTestCase(NearTestCase):
         "Test that TTFont can be used for different documents at the same time"
         doc1 = PDFDocument()
         doc2 = PDFDocument()
-        font = TTFont("TestFont", "luxiserif.ttf")
+        font = TTFont("Vera", "Vera.ttf")
         self.assertEquals(font.splitString(u'hello ', doc1), [(0, 'hello ')])
         self.assertEquals(font.splitString(u'hello ', doc2), [(0, 'hello ')])
         self.assertEquals(font.splitString(u'\u0410\u0411'.encode('UTF-8'), doc1), [(0, '\x80\x81')])
@@ -332,14 +332,14 @@ class TTFontTestCase(NearTestCase):
         "Test TTFont.addObjects"
         # Actually generate some subsets
         doc = PDFDocument()
-        font = TTFont("TestFont", "luxiserif.ttf")
+        font = TTFont("Vera", "Vera.ttf")
         font.splitString('a', doc)            # create some subset
         internalName = font.getSubsetInternalName(0, doc)[1:]
         font.addObjects(doc)
         pdfFont = doc.idToObject[internalName]
         self.assertEquals(doc.idToObject['BasicFonts'].dict[internalName], pdfFont)
         self.assertEquals(pdfFont.Name, internalName)
-        self.assertEquals(pdfFont.BaseFont, "AAAAAA+LuxiSerif")
+        self.assertEquals(pdfFont.BaseFont, "AAAAAA+BitstreamVeraSans-Roman")
         self.assertEquals(pdfFont.FirstChar, 0)
         self.assertEquals(pdfFont.LastChar, 127)
         self.assertEquals(len(pdfFont.Widths.sequence), 128)

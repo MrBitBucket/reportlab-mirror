@@ -113,8 +113,8 @@ will be embedded in the PDF document.""")
 
 disc("""
 You can use the mechanism described below to include arbitrary
-fonts in your documents. Just van Rossum has kindly donated a Type 1
-font named <i>LettErrorRobot-Chrome</i> which we may
+fonts in your documents. We have an open source
+font named <i>DarkGardenMK</i> which we may
 use for testing and/or documenting purposes (and which you may
 use as well). It comes bundled with the ReportLab distribution in the
 directory $reportlab/fonts$.
@@ -127,7 +127,7 @@ former is an ASCII file and contains information about the characters
 ('glyphs') in the font such as height, width, bounding box info and
 other 'metrics', while the latter is a binary file that describes the
 shapes of the font. The $reportlab/fonts$ directory contains the files
-$'LeERC___.AFM'$ and $'LeERC___.PFB'$ that are used as an example
+$'DarkGardenMK.afm'$ and $'DarkGardenMK.pfb'$ that are used as an example
 font.
 """)
 
@@ -142,21 +142,21 @@ eg("""
 import os
 import reportlab
 folder = os.path.dirname(reportlab.__file__) + os.sep + 'fonts'
-afmFile = os.path.join(folder, 'LeERC___.AFM')
-pfbFile = os.path.join(folder, 'LeERC___.PFB')
+afmFile = os.path.join(folder, 'DarkGardenMK.afm')
+pfbFile = os.path.join(folder, 'DarkGardenMK.pfb')
 
 from reportlab.pdfbase import pdfmetrics
 justFace = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
-faceName = 'LettErrorRobot-Chrome' # pulled from AFM file
+faceName = 'DarkGardenMK' # pulled from AFM file
 pdfmetrics.registerTypeFace(justFace)
-justFont = pdfmetrics.Font('LettErrorRobot-Chrome',
+justFont = pdfmetrics.Font('DarkGardenMK',
                            faceName,
                            'WinAnsiEncoding')
 pdfmetrics.registerFont(justFont)
 
-canvas.setFont('LettErrorRobot-Chrome', 32)
+canvas.setFont('DarkGardenMK', 32)
 canvas.drawString(10, 150, 'This should be in')
-canvas.drawString(10, 100, 'LettErrorRobot-Chrome')
+canvas.drawString(10, 100, 'DarkGardenMK')
 """)
 
 
@@ -201,7 +201,7 @@ def findFontName(path):
 """)
 
 disc("""
-In the <i>LettErrorRobot-Chrome</i> example we explicitely specified
+In the <i>DarkGardenMK</i> example we explicitely specified
 the place of the font description files to be loaded.
 In general, you'll prefer to store your fonts in some canonic
 locations and make the embedding mechanism aware of them.
@@ -299,12 +299,15 @@ reportlab.rl_config.warnOnMissingFontGlyphs = 0
 
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-pdfmetrics.registerFont(TTFont('Rina', 'rina.ttf'))
-canvas.setFont(Rina, 32)
+pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+pdfmetrics.registerFont(TTFont('VeraBd', 'VeraBd.ttf'))
+pdfmetrics.registerFont(TTFont('VeraIt', 'VeraIt.ttf'))
+pdfmetrics.registerFont(TTFont('VeraBI', 'VeraBI.ttf'))
+canvas.setFont('Vera', 32)
 canvas.drawString(10, 150, "Some text encoded in UTF-8")
-canvas.drawString(10, 100, "In the Rina TT Font!")
+canvas.drawString(10, 100, "In the Vera TT Font!")
 """)
-illust(examples.ttffont1, "Using a the Rina TrueType Font")
+illust(examples.ttffont1, "Using a the Vera TrueType Font")
 disc("""In the above example the true type font object is created using""")
 eg("""
     TTFont(name,filename)
@@ -317,30 +320,24 @@ specified by $reportlab.rl_config.TTFSearchpath$!""")
 
 from reportlab.lib.styles import ParagraphStyle
 
-from reportlab.lib.fonts import addMapping
-addMapping('Rina', 0, 0, 'Rina')
-addMapping('Rina', 0, 1, 'Rina')
-addMapping('Rina', 1, 0, 'Rina')
-addMapping('Rina', 1, 1, 'Rina')
+from reportlab.pdfbase.pdfmetrics import registerFontFamily
+registerFontFamily('Vera',normal='Vera',bold='VeraBd',italic='VeraIt',boldItalic='VeraBI')
 
 disc("""Before using the TT Fonts in Platypus we should add a mapping from the family name to the
 individual font names that describe the behaviour under the $<b>$ and $<i>$ attributes.""")
 
 eg("""
-from reportlab.lib.fonts import addMapping
-addMapping('Rina', 0, 0, 'Rina')    #normal
-addMapping('Rina', 0, 1, 'Rina')    #italic
-addMapping('Rina', 1, 0, 'Rina')    #bold
-addMapping('Rina', 1, 1, 'Rina')    #italic and bold
+from reportlab.pdfbase.pdfmetrics import registerFontFamily
+registerFontFamily('Vera',normal='Vera',bold='VeraBd',italic='VeraIt',boldItalic='VeraBI')
 """)
 
-disc("""We only have a Rina regular font, no bold or italic, so we must map all to the
+disc("""If we only have a Vera regular font, no bold or italic then we must map all to the
 same internal fontname.  ^&lt;b&gt;^ and ^&lt;i&gt;^ tags may now be used safely, but
 have no effect.
 After registering and mapping
-the Rina font as above we can use paragraph text like""")
+the Vera font as above we can use paragraph text like""")
 parabox2("""<font name="Times-Roman" size="14">This is in Times-Roman</font>
-<font name="Rina" color="magenta" size="14">and this is in magenta <b>Rina!</b></font>""","Using TTF fonts in paragraphs")
+<font name="Vera" color="magenta" size="14">and this is in magenta <b>Vera!</b></font>""","Using TTF fonts in paragraphs")
 
 
 

@@ -223,7 +223,7 @@ and the renderers all know how to render Type 1 fonts.
 disc("""
 Here is a more fancy example using the code snippet below.
 Please consult the ReportLab User Guide to see how non-standard
-like 'LettErrorRobot-Chrome' fonts are being registered!
+like 'DarkGardenMK' fonts are being registered!
 """)
 
 eg("""
@@ -238,7 +238,7 @@ eg("""
                  fontSize=36))
 
     d.add(String(150, 160, 'Hello World',
-                 fontName='LettErrorRobot-Chrome',
+                 fontName='DarkGardenMK',
                  fontSize=36))
 """)
 
@@ -247,7 +247,7 @@ from reportlab import rl_config
 rl_config.warnOnMissingFontGlyphs = 0
 afmFile, pfbFile = getJustFontPaths()
 T1face = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
-T1faceName = 'LettErrorRobot-Chrome'
+T1faceName = 'DarkGardenMK'
 pdfmetrics.registerTypeFace(T1face)
 T1font = pdfmetrics.Font(T1faceName, T1faceName, 'WinAnsiEncoding')
 pdfmetrics.registerFont(T1font)
@@ -263,7 +263,7 @@ d.add(String(130, 120, 'Hello World',
              fontSize=36))
 
 d.add(String(150, 160, 'Hello World',
-             fontName='LettErrorRobot-Chrome',
+             fontName='DarkGardenMK',
              fontSize=36))
 
 draw(d, 'fancy font example')

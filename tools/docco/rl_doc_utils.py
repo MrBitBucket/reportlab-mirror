@@ -102,7 +102,7 @@ def getJustFontPaths():
     '''return afm and pfb for Just's files'''
     import reportlab
     folder = os.path.dirname(reportlab.__file__) + os.sep + 'fonts'
-    return os.path.join(folder, 'LeERC___.AFM'), os.path.join(folder, 'LeERC___.PFB')
+    return os.path.join(folder, 'DarkGardenMK.afm'), os.path.join(folder, 'DarkGardenMK.pfb')
 
 # for testing
 def NOP(*x,**y):

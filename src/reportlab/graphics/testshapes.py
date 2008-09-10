@@ -383,7 +383,7 @@ def getDrawing12():
     on the font patch given in rl_config.py,
     for example in reportlab/lib/fonts/.
     """
-    faceName = "LettErrorRobot-Chrome"
+    faceName = "DarkGardenMK"
     D = Drawing(400, 200)
     for size in range(12, 36, 4):
         D.add(String(10+size*2,
@@ -396,15 +396,13 @@ def getDrawing12():
 def getDrawing13():
     'Test Various TTF Fonts'
     from reportlab.pdfbase import pdfmetrics, ttfonts
-    pdfmetrics.registerFont(ttfonts.TTFont("LuxiSerif", "luxiserif.ttf"))
-    pdfmetrics.registerFont(ttfonts.TTFont("Rina", "rina.ttf"))
     pdfmetrics.registerFont(ttfonts.TTFont("Vera", "Vera.ttf"))
     pdfmetrics.registerFont(ttfonts.TTFont("VeraBd", "VeraBd.ttf"))
     pdfmetrics.registerFont(ttfonts.TTFont("VeraIt", "VeraIt.ttf"))
     pdfmetrics.registerFont(ttfonts.TTFont("VeraBI", "VeraBI.ttf"))
-    _FONTS[1] = 'LuxiSerif'
-    _FONTS[2] = 'Rina'
-    F = ['Times-Roman','Courier','Helvetica','LuxiSerif', 'Rina', 'Vera', 'VeraBd', 'VeraIt', 'VeraBI']
+    _FONTS[1]='Vera'
+    _FONTS[1]='VeraBI'
+    F = ['Times-Roman','Courier','Helvetica','Vera', 'VeraBd', 'VeraIt', 'VeraBI']
     if sys.platform=='win32':
         for name, ttf in [
             ('Adventurer Light SF','Advlit.ttf'),('ArialMS','ARIAL.TTF'),

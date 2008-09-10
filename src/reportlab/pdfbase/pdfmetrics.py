@@ -86,7 +86,7 @@ def parseAFMFile(afmFileName):
     topLevel = {}
     glyphLevel = []
 
-    lines = map(string.strip, lines)
+    lines = [l for l in map(string.strip, lines) if not l.lower().startswith('comment')]
     #pass 1 - get the widths
     inMetrics = 0  # os 'TOP', or 'CHARMETRICS'
     for line in lines:

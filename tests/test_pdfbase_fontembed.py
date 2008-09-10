@@ -59,22 +59,22 @@ class EmbeddingTestCase(unittest.TestCase):
 
         # LettError sample - creates on demand, we hope
         y = 550
-##        justFace = pdfmetrics.EmbeddedType1Face('LeERC___.AFM','LeERC___.PFB')
+##        dgmkFace = pdfmetrics.EmbeddedType1Face('DarkGardenMK.afm','DarkGardenMK.PFB')
 ##
-##        faceName = 'LettErrorRobot-Chrome'  # pulled from AFM file
-##        pdfmetrics.registerTypeFace(justFace)
+##        faceName = 'DarkGardenMK'  # pulled from AFM file
+##        pdfmetrics.registerTypeFace(dgmkFace)
 ##
-##        justFont = pdfmetrics.Font('LettErrorRobot-Chrome', faceName, 'WinAnsiEncoding')
-##        pdfmetrics.registerFont(justFont)
+##        dgmkFont = pdfmetrics.Font('DarkGardenMK', faceName, 'WinAnsiEncoding')
+##        pdfmetrics.registerFont(dgmk)
 
-        c.setFont('LettErrorRobot-Chrome', 12)
-        c.drawString(100, y, 'This should be in LettErrorRobot-Chrome')
+        c.setFont('DarkGardenMK', 12)
+        c.drawString(100, y, 'This should be in DarkGardenMK')
 
         def testNamedFont(canv, fontName):
             canv.showPage()
             makeWidthTestForAllGlyphs(canv, fontName, outlining=0)
 
-        testNamedFont(c, 'LettErrorRobot-Chrome')
+        testNamedFont(c, 'DarkGardenMK')
 
         c.save()
 

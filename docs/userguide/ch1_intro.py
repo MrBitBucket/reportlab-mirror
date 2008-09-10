@@ -144,11 +144,11 @@ Gary Poster, Steve Halasz, Andrew Mercer, Paul McNett, Chad Miller, Tim Roberts,
 Jorge Godoy and Benn B.""")
 
 disc("""Special thanks go to Just van Rossum for his valuable assistance with
-font technicalities and the LettErrorRobot-Chrome type 1 font.""")
+font technicalities.""")
 
 disc("""Marius Gedminas deserves a big hand for contributing the work on TrueType fonts and we
-are glad to include these in the toolkit. Finally we thank Bigelow &amp; Holmes Inc ($design@bigelowandholmes.com$)
-for Luxi Serif Regular and Ray Larabie ($http://www.larabiefonts.com$) for the Rina TrueType font.""")
+are glad to include these in the toolkit. Finally we thank Michal Kosmulski for the DarkGarden font
+for and Bitstream Inc. for the Vera fonts.""")
 
 heading2("Installation and Setup")
 

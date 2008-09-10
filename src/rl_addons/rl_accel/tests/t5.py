@@ -2,8 +2,8 @@ from reportlab.pdfbase.pdfmetrics import getFont, registerFont
 from reportlab.pdfbase.ttfonts import TTFont
 import time
 from sys import getrefcount
-registerFont(TTFont("Luxi-Serif", "luxiserif.ttf"))
-font = getFont('Luxi-Serif')
+registerFont(TTFont("Vera", "Vera.ttf"))
+font = getFont('Vera')
 _py_getCharWidth = font.face._py_getCharWidth
 getCharWidth = font.face.getCharWidth
 #assert stringWidth!=_py_stringWidth

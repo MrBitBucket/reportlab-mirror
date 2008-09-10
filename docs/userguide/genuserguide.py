@@ -15,6 +15,14 @@ def run(pagesize=None, verbose=0, outDir=None):
     if not outDir: outDir=docsDir
     G = {}
     sys.path.insert(0,topDir)
+    from reportlab.pdfbase.pdfmetrics import registerFontFamily
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
+    pdfmetrics.registerFont(TTFont('VeraBd', 'VeraBd.ttf'))
+    pdfmetrics.registerFont(TTFont('VeraIt', 'VeraIt.ttf'))
+    pdfmetrics.registerFont(TTFont('VeraBI', 'VeraBI.ttf'))
+    registerFontFamily('Vera',normal='Vera',bold='VeraBd',italic='VeraIt',boldItalic='VeraBI')
     from tools.docco.rl_doc_utils import setStory, getStory, RLDocTemplate, defaultPageSize
     from tools.docco import rl_doc_utils
     exec 'from tools.docco.rl_doc_utils import *' in G, G

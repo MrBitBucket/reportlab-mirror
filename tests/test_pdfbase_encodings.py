@@ -48,23 +48,23 @@ class TextEncodingTestCase(NearTestCase):
     """Tests of expected Unicode and encoding behaviour
     """
     def setUp(self):
-        self.luxi = TTFont("Luxi", "luxiserif.ttf")
-        pdfmetrics.registerFont(self.luxi)
+        self.vera = TTFont("Vera", "Vera.ttf")
+        pdfmetrics.registerFont(self.vera)
         self.styNormal = ParagraphStyle(name='Helvetica',  fontName='Helvetica-Oblique')
-        self.styTrueType = ParagraphStyle(name='TrueType',  fontName='luxi')
+        self.styTrueType = ParagraphStyle(name='TrueType',  fontName='Vera')
 
     def testStringWidth(self):
         msg = 'Hello World'
         self.assertNear(pdfmetrics.stringWidth(msg, 'Courier', 10),66.0)
         self.assertNear(pdfmetrics.stringWidth(msg, 'Helvetica', 10),51.67)
         self.assertNear(pdfmetrics.stringWidth(msg, 'Times-Roman', 10),50.27)
-        self.assertNear(pdfmetrics.stringWidth(msg, 'Luxi', 10),50.263671875)
+        self.assertNear(pdfmetrics.stringWidth(msg, 'Vera', 10),57.7685546875)
 
         uniMsg1 = u"Hello World"
         self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Courier', 10),66.0)
         self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Helvetica', 10),51.67)
         self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Times-Roman', 10),50.27)
-        self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Luxi', 10),50.263671875)
+        self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Vera', 10),57.7685546875)
 
 
         # Courier are all 600 ems wide.  So if one 'measures as utf8' one will
@@ -81,8 +81,8 @@ class TextEncodingTestCase(NearTestCase):
 
 
         # now try a TrueType font.  Should be able to accept Unicode or UTF8
-        self.assertNear(pdfmetrics.stringWidth(testUTF8, 'Luxi', 10),224.638671875)
-        self.assertNear(pdfmetrics.stringWidth(testUni, 'Luxi', 10),224.638671875)
+        self.assertNear(pdfmetrics.stringWidth(testUTF8, 'Vera', 10),279.809570313)
+        self.assertNear(pdfmetrics.stringWidth(testUni, 'Vera', 10),279.809570313)
 
     def testUtf8Canvas(self):
         """Verify canvas declared as utf8 autoconverts.
@@ -96,7 +96,7 @@ class TextEncodingTestCase(NearTestCase):
         c.drawString(100,700, testUTF8)
 
         # Set a font with UTF8 encoding
-        c.setFont('Luxi', 12)
+        c.setFont('Vera', 12)
 
         # This should pass the UTF8 through unchanged
         c.drawString(100,600, testUTF8)
@@ -137,7 +137,7 @@ class TextEncodingTestCase(NearTestCase):
         # now a graphic in utf8
         d2 = Drawing(400,50)
         d2.add(Ellipse(200,25,200,12.5, fillColor=None))
-        d2.add(String(200,25,testUTF8, fontName='Luxi', textAnchor='middle', encoding='utf-8'))
+        d2.add(String(200,25,testUTF8, fontName='Vera', textAnchor='middle', encoding='utf-8'))
         d2.drawOn(c, 100, 100)
 
         # now a graphic in Unicode with T1 font
@@ -149,13 +149,13 @@ class TextEncodingTestCase(NearTestCase):
         # now a graphic in Unicode with TT font
         d4 = Drawing(400,50)
         d4.add(Ellipse(200,25,200,12.5, fillColor=None))
-        d4.add(String(200,25,testUni, fontName='Luxi', textAnchor='middle'))
+        d4.add(String(200,25,testUni, fontName='Vera', textAnchor='middle'))
         d4.drawOn(c, 100, 0)
 
         extracted = extractText(c.getCurrentPageContent())
         self.assertEquals(extracted[0], expectedCp1252)
         self.assertEquals(extracted[1], extracted[2])
-        #self.assertEquals(subsetToUnicode(self.luxi, extracted[1]), testUni)
+        #self.assertEquals(subsetToUnicode(self.vera, extracted[1]), testUni)
         c.save()
 
 class FontEncodingTestCase(unittest.TestCase):

@@ -461,16 +461,16 @@ def customfont1(canvas):
     from reportlab.pdfbase import pdfmetrics
     afmFile, pfbFile = rl_doc_utils.getJustFontPaths()
     justFace = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
-    faceName = 'LettErrorRobot-Chrome' # pulled from AFM file
+    faceName = 'DarkGardenMK' # pulled from AFM file
     pdfmetrics.registerTypeFace(justFace)
-    justFont = pdfmetrics.Font('LettErrorRobot-Chrome',
+    justFont = pdfmetrics.Font('DarkGardenMK',
                                faceName,
                                'WinAnsiEncoding')
     pdfmetrics.registerFont(justFont)
 
-    canvas.setFont('LettErrorRobot-Chrome', 32)
+    canvas.setFont('DarkGardenMK', 32)
     canvas.drawString(10, 150, 'This should be in')
-    canvas.drawString(10, 100, 'LettErrorRobot-Chrome')
+    canvas.drawString(10, 100, 'DarkGardenMK')
 """
 
 testttffont1 = """
@@ -480,12 +480,12 @@ def ttffont1(canvas):
     reportlab.rl_config.warnOnMissingFontGlyphs = 0
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
-    pdfmetrics.registerFont(TTFont('Rina', 'rina.ttf'))
+    pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
     from reportlab.pdfgen.canvas import Canvas
 
-    canvas.setFont('Rina', 32)
+    canvas.setFont('Vera', 32)
     canvas.drawString(10, 150, "Some UTF-8 text encoded")
-    canvas.drawString(10, 100, "in the Rina TT Font!")
+    canvas.drawString(10, 100, "in the Vera TT Font!")
 """
 
 testcursormoves1 = """

@@ -39,8 +39,8 @@ the initial list, use getFamilyNames; these will be in alpha order.
 
 >>> ff.getFamilyNames()
 ['Bitstream Vera Sans', 'Century Schoolbook L', 'Dingbats', 'LettErrorRobot',
-'Luxi Serif', 'MS Gothic', 'MS Mincho', 'Nimbus Mono L', 'Nimbus Roman No9 L',
-'Nimbus Sans L', 'Rina', 'Standard Symbols L',
+'MS Gothic', 'MS Mincho', 'Nimbus Mono L', 'Nimbus Roman No9 L',
+'Nimbus Sans L', 'Vera', 'Standard Symbols L',
 'URW Bookman L', 'URW Chancery L', 'URW Gothic L', 'URW Palladio L']
 
 One can then obtain a specific font as follows

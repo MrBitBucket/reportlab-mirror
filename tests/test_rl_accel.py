@@ -67,9 +67,9 @@ class RlAccelTestCase(unittest.TestCase):
         from _rl_accel import stringWidthU
         from reportlab.pdfbase.pdfmetrics import _py_stringWidth, getFont, registerFont, _fonts 
         from reportlab.pdfbase.ttfonts import TTFont
-        ttfn = 'Luxi-Serif'
+        ttfn = 'Vera'
         t1fn = 'Times-Roman'
-        registerFont(TTFont(ttfn, "luxiserif.ttf"))
+        registerFont(TTFont(ttfn, "Vera.ttf"))
         ttf = getFont(ttfn)
         t1f = getFont(t1fn)
         testCp1252 = 'copyright %s trademark %s registered %s ReportLab! Ol%s!' % (chr(169), chr(153),chr(174), chr(0xe9))
@@ -97,9 +97,9 @@ class RlAccelTestCase(unittest.TestCase):
     def test_instanceStringWidth(self):
         from reportlab.pdfbase.pdfmetrics import registerFont, getFont, _fonts, unicode2T1
         from reportlab.pdfbase.ttfonts import TTFont
-        ttfn = 'Luxi-Serif'
+        ttfn = 'Vera'
         t1fn = 'Times-Roman'
-        registerFont(TTFont(ttfn, "luxiserif.ttf"))
+        registerFont(TTFont(ttfn, "Vera.ttf"))
         ttf = getFont(ttfn)
         t1f = getFont(t1fn)
         testCp1252 = 'copyright %s trademark %s registered %s ReportLab! Ol%s!' % (chr(169), chr(153),chr(174), chr(0xe9))
