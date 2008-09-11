@@ -28,7 +28,6 @@ will need at least build-essentials and python-devel.
 On Windows you need the correct version of Visual Studio
 for the Python you are using.
 
-
 (2) Manual installation without C compiler (e.g. Windows):
 
 - either place the src/ folder on your path, or move
@@ -41,11 +40,10 @@ make PDFs without these but will go slower and lack
 bitmap image generation capabilities.
    http://www.reportlab.org/ftp/win32-dlls/
 
-
 (3) Built distributions (e.g. windows .exe)
 
 We are starting to experiment with these.  At the time of the
-writing (Sep 11 2008), distutils builds selff-installing EXEs
+writing (Sep 11 2008), distutils builds self-installing EXEs
 but fails to copy some of the needed resources such as fonts.
 If we get this working we'll put up the relevant installers
 and people using them will not even see this README.
@@ -58,6 +56,7 @@ C extensions.  We welcome contributions to improve this
 for future releases.
 
 (5) Minimal install
+
 A minimal, pure-python-only install can be achieved
 simply by placing the directory 'src/reportlab' on your
 path.  It should make PDFs but will lack certain
