@@ -13,22 +13,78 @@ BSD license.  See LICENSE.txt for details
 
 Installation
 ============
-This should now (Sep 2008) be distutils-compliant.  Use
-'python setup.py install' for a classic distutils
-installation.
+This should now (Sep 2008) be distutils-compliant. Installation
+depends which distribution you are using.
 
-We also have a setuptools-based setup script, setup_egg.py
 
+(1). Subversion or source distributions:
+
+Use
+   python setup.py install
+
+This assumes you have a C compiler and the necessary
+packages to build Python extensions.  On ubuntu, you
+will need at least build-essentials and python-devel.
+On Windows you need the correct version of Visual Studio
+for the Python you are using.
+
+
+(2) Manual installation without C compiler (e.g. Windows):
+
+- either place the src/ folder on your path, or move
+the 'reportlab' package inside it to somewhere on your
+path such as site-packages
+
+- on Win32, get the DLLs for your Python version from
+here and copy them into site-packages.  The library can
+make PDFs without these but will go slower and lack
+bitmap image generation capabilities.
+   http://www.reportlab.org/ftp/win32-dlls/
+
+
+(3) Built distributions (e.g. windows .exe)
+
+We are starting to experiment with these.  At the time of the
+writing (Sep 11 2008), distutils builds selff-installing EXEs
+but fails to copy some of the needed resources such as fonts.
+If we get this working we'll put up the relevant installers
+and people using them will not even see this README.
+
+(4) setuptools / easy-install 
+
+We also have a setuptools-based setup script, setup_egg.py,
+contributed by Dirk Holtwick.  It does not yet build the
+C extensions.  We welcome contributions to improve this
+for future releases.
+
+(5) Minimal install
 A minimal, pure-python-only install can be achieved
 simply by placing the directory 'src/reportlab' on your
 path.  It should make PDFs but will lack certain
-capabilities.  
+capabilities.
+
+
+Prerequisites / dependencies
+============================
+This works with Python 23, 2.4 and 2.5.
+2.6 is not tested yet but you are welcome to try.
+
+There are no absolute prerequisites beyond the Python
+standard library; but the Python Imaging Library (PIL)
+is needed to include images other than JPG inside PDF files.
+
+The C extension are optional but anyone able to do so should
+use _rl_accel as it helps achieve acceptable speeds.  The
+_renderPM extension allows graphics (such as charts) to be saved
+as bitmap images for the web, as well as inside PDFs.
+
+
 
 Documentation
 =============
 Naturally, we generate our own manuals using the library.
 In a 'built' distribution, they may already be present in the
-docs directory.  If not, execute "python genAll.py" in
+docs/ directory.  If not, execute "python genAll.py" in
 that directory, and it will create the manuals.
 
 
