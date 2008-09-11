@@ -23,8 +23,10 @@ Use
    python setup.py install
 
 This assumes you have a C compiler and the necessary
-packages to build Python extensions.  On ubuntu, you
+packages to build Python extensions.  On Ubuntu, you
 will need at least build-essentials and python-devel.
+Most other Linux and xBSD distributions have packages with
+similar names.
 On Windows you need the correct version of Visual Studio
 for the Python you are using.
 
@@ -34,34 +36,26 @@ for the Python you are using.
 the 'reportlab' package inside it to somewhere on your
 path such as site-packages
 
-- on Win32, get the DLLs for your Python version from
+- Optional: on Win32, get the DLLs for your Python version from
 here and copy them into site-packages.  The library can
 make PDFs without these but will go slower and lack
 bitmap image generation capabilities.
    http://www.reportlab.org/ftp/win32-dlls/
 
-(3) Built distributions (e.g. windows .exe)
-
-We are starting to experiment with these.  At the time of the
-writing (Sep 11 2008), distutils builds self-installing EXEs
-but fails to copy some of the needed resources such as fonts.
-If we get this working we'll put up the relevant installers
-and people using them will not even see this README.
-
-(4) setuptools / easy-install 
+(3) setuptools / easy-install 
 
 We also have a setuptools-based setup script, setup_egg.py,
 contributed by Dirk Holtwick.  It does not yet build the
 C extensions.  We welcome contributions to improve this
 for future releases.
 
-(5) Minimal install
+(4) Binary distributions (e.g. windows .exe)
 
-A minimal, pure-python-only install can be achieved
-simply by placing the directory 'src/reportlab' on your
-path.  It should make PDFs but will lack certain
-capabilities.
-
+We are starting to experiment with these.  At the time of the
+writing (Sep 11 2008), distutils builds self-installing EXEs
+but fails to copy some of the needed resources such as fonts.
+If we get this working we'll put up the relevant installers
+and people using them will not even see this README.
 
 Prerequisites / dependencies
 ============================
