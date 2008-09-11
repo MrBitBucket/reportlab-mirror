@@ -1,5 +1,4 @@
 #copyright ReportLab Inc. 2000-2008
-
 #see LICENSE.txt for license details
 
 This is the ReportLab PDF Library.
@@ -7,9 +6,11 @@ It allows rapid creation of rich PDF documents,
 and also creation of charts in a variety of bitmap
 and vector formats.
 
+
 Licensing
 =========
 BSD license.  See LICENSE.txt for details
+
 
 Installation
 ============
@@ -50,12 +51,11 @@ C extensions.  We welcome contributions to improve this
 for future releases.
 
 (4) Binary distributions (e.g. windows .exe)
-
 We are starting to experiment with these.  At the time of the
-writing (Sep 11 2008), distutils builds self-installing EXEs
-but fails to copy some of the needed resources such as fonts.
-If we get this working we'll put up the relevant installers
-and people using them will not even see this README.
+writing (Sep 11 2008), distutils builds self-installing EXEs.
+As and when these get built they will appear at
+http://www.reportlab.org/downloads.
+
 
 Prerequisites / dependencies
 ============================
@@ -70,7 +70,6 @@ The C extension are optional but anyone able to do so should
 use _rl_accel as it helps achieve acceptable speeds.  The
 _renderPM extension allows graphics (such as charts) to be saved
 as bitmap images for the web, as well as inside PDFs.
-
 
 
 Documentation

@@ -1,4 +1,705 @@
 #################################################################################
+#################### RELEASE 2.2  at 18:00 GMT  10/Sep/2008     #################
+#################################################################################
+# Contributors in no order and apologies to those accidentally not here:
+# Matt Folwell
+# Jerome Alet
+# Harald Armin Massa
+# kevin@booksys.com
+# Sebastian Ware
+# Martin Tate
+# Wietse Jacobs
+# Christian Jacobs
+# Volker Haas
+# Dinu Gherman
+# Dirk Datzert
+# Yuan Hong
+
+# Ilpo Nyyss”nen
+# Thomas Heller
+# Gael Chardon
+# Alex Smishlajev
+# Martin Loewis
+# Dirk Holtwick
+# Philippe Makowskic
+# Ian Sparks
+# Albertas Agejevas
+# Gary Poster
+# Martin Zohlhuber
+# Francesco Pierfederici
+# michael@stroeder.com
+# Derik Barclay
+# Publio da Costa Melo 
+# Jon Dyte
+# David Horkoff
+# picodello@yahoo.it
+# Rüdiger Mähl
+# Paul Winkler
+# Bernhard Herzog
+# Alex Martelli
+# Stuart Bishop
+# Gael Chardon
+#################################################################################
+r3281 | andy | 2008-09-10 23:39:57 +0100 (Wed, 10 Sep 2008) | 1 line
+Changed paths:
+   M /reportlab/trunk/tests/00readme.txt
+   M /reportlab/trunk/tests/runAll.py
+   M /reportlab/trunk/tools/docco/graphdocpy.py
+fixed so test suite can be run in test dir
+r3280 | rgbecker | 2008-09-10 18:57:51 +0100 (Wed, 10 Sep 2008) | 1 line
+Changed paths:
+   M /reportlab/trunk/docs/graphguide/ch3_shapes.py
+   M /reportlab/trunk/docs/userguide/ch1_intro.py
+   M /reportlab/trunk/docs/userguide/ch2a_fonts.py
+   M /reportlab/trunk/docs/userguide/genuserguide.py
+   M /reportlab/trunk/setup.py
+   A /reportlab/trunk/src/reportlab/fonts/DarkGarden-changelog.txt
+   A /reportlab/trunk/src/reportlab/fonts/DarkGarden-copying-gpl.txt
+   A /reportlab/trunk/src/reportlab/fonts/DarkGarden-copying.txt
+   A /reportlab/trunk/src/reportlab/fonts/DarkGarden-readme.txt
+   A /reportlab/trunk/src/reportlab/fonts/DarkGarden.sfd
+   A /reportlab/trunk/src/reportlab/fonts/DarkGardenMK.afm
+   A /reportlab/trunk/src/reportlab/fonts/DarkGardenMK.pfb
+   D /reportlab/trunk/src/reportlab/fonts/LeERC___.AFM
+   D /reportlab/trunk/src/reportlab/fonts/LeERC___.PFB
+   D /reportlab/trunk/src/reportlab/fonts/luxiserif.ttf
+   D /reportlab/trunk/src/reportlab/fonts/luxiserif_license.txt
+   D /reportlab/trunk/src/reportlab/fonts/rina.ttf
+   D /reportlab/trunk/src/reportlab/fonts/rina_license.txt
+   M /reportlab/trunk/src/reportlab/graphics/testshapes.py
+   M /reportlab/trunk/src/reportlab/lib/fontfinder.py
+   M /reportlab/trunk/src/reportlab/pdfbase/pdfmetrics.py
+   D /reportlab/trunk/src/rl_addons/rl_accel/setup.py
+   M /reportlab/trunk/src/rl_addons/rl_accel/tests/t4.py
+   M /reportlab/trunk/src/rl_addons/rl_accel/tests/t5.py
+   M /reportlab/trunk/tests/test_pdfbase_encodings.py
+   M /reportlab/trunk/tests/test_pdfbase_fontembed.py
+   M /reportlab/trunk/tests/test_pdfbase_ttfonts.py
+   M /reportlab/trunk/tests/test_platypus_general.py
+   M /reportlab/trunk/tests/test_rl_accel.py
+   M /reportlab/trunk/tools/docco/examples.py
+   M /reportlab/trunk/tools/docco/rl_doc_utils.py
+   D /reportlab/trunk/tools/pythonpoint/demos/LeERC___.AFM
+   D /reportlab/trunk/tools/pythonpoint/demos/LeERC___.PFB
+reportlab: remove LetErrorRobot-Chrome, rina & luxi. Add DarkGardenMK and fix tests
+r3278 | rptlab | 2008-09-05 18:32:23 +0100 (Fri, 05 Sep 2008) | 1 line
+Changed paths:
+   M /reportlab/trunk/setup.py
+setup.py: now works on freeBSD; how _rl_accel_dir_info ever got by I know not
+r3277 | rptlab | 2008-09-05 10:41:11 +0100 (Fri, 05 Sep 2008) | 1 line
+	D /reportlab/trunk/src/reportlab/setup.py
+	reportlab: removed old setup.py
+r3276 | andy | 2008-09-04 20:21:53 +0100 (Thu, 04 Sep 2008) | 1 line
+	M /reportlab/trunk/src/reportlab/__init__.py
+	bumped version in __init__.py
+r3272 | rgbecker | 2008-09-04 14:19:45 +0100 (Thu, 04 Sep 2008) | 1 line
+	M /reportlab/trunk/src/reportlab/platypus/frames.py
+	frames.py: bug & fix in Frame.split contributed by Matt Folwell
+r3270 | andy | 2008-09-03 21:32:21 +0100 (Wed, 03 Sep 2008) | 1 line
+	M /reportlab/trunk/src/reportlab/license.txt
+	D /reportlab/trunk/src/reportlab/README
+	A /reportlab/trunk/license.txt
+	A /reportlab/trunk/00readme.txt
+	tidy up license files and readme
+r3269 | rgbecker | 2008-09-03 18:22:41 +0100 (Wed, 03 Sep 2008) | 1 line
+	M /reportlab/trunk/tools/pythonpoint/pythonpoint.py
+	M /reportlab/trunk/tools/docco/graphdocpy.py
+	M /reportlab/trunk/tests/utils.py
+	M /reportlab/trunk/tests/test_widgetbase_tpc.py
+	M /reportlab/trunk/tests/test_platypus_xref.py
+	M /reportlab/trunk/tests/test_platypus_toc.py
+	M /reportlab/trunk/tests/test_platypus_pleaseturnover.py
+	M /reportlab/trunk/tests/test_platypus_leftright.py
+	M /reportlab/trunk/tests/test_platypus_indents.py
+	M /reportlab/trunk/tests/test_platypus_general.py
+	M /reportlab/trunk/tests/test_platypus_breaking.py
+	M /reportlab/trunk/tests/test_pdfgen_pagemodes.py
+	M /reportlab/trunk/tests/test_pdfgen_links.py
+	M /reportlab/trunk/tests/test_pdfgen_general.py
+	M /reportlab/trunk/tests/test_pdfgen_callback.py
+	M /reportlab/trunk/tests/test_pdfbase_postscript.py
+	M /reportlab/trunk/tests/test_pdfbase_pdfutils.py
+	M /reportlab/trunk/tests/test_pdfbase_pdfmetrics.py
+	M /reportlab/trunk/tests/test_paragraphs.py
+	M /reportlab/trunk/tests/test_lib_sequencer.py
+	M /reportlab/trunk/tests/test_lib_colors.py
+	M /reportlab/trunk/tests/test_invariant.py
+	M /reportlab/trunk/tests/test_hello.py
+	M /reportlab/trunk/tests/test_graphics_speed.py
+	M /reportlab/trunk/tests/test_graphics_layout.py
+	M /reportlab/trunk/tests/test_graphics_charts.py
+	M /reportlab/trunk/tests/test_extra.py
+	M /reportlab/trunk/tests/test_charts_textlabels.py
+	M /reportlab/trunk/tests/runAll.py
+	M /reportlab/trunk/tests/__init__.py
+	M /reportlab/trunk/src/reportlab/platypus/tables.py
+	M /reportlab/trunk/src/reportlab/pdfgen/pycanvas.py
+	M /reportlab/trunk/src/reportlab/pdfgen/canvas.py
+	M /reportlab/trunk/src/reportlab/graphics/barcode/test.py
+	A /reportlab/trunk/setup.cfg
+	M /reportlab/trunk/docs/userguide/genuserguide.py
+	M /reportlab/trunk/docs/userguide/ch2a_fonts.py
+	M /reportlab/trunk/docs/userguide/ch2_graphics.py
+	M /reportlab/trunk/docs/userguide/ch1_intro.py
+	M /reportlab/trunk/docs/reference/genreference.py
+	M /reportlab/trunk/docs/graphguide/gengraphguide.py
+	M /reportlab/trunk/docs/graphguide/ch5_charts.py
+	M /reportlab/trunk/demos/tests/testdemos.py
+	M /reportlab/trunk/demos/stdfonts/stdfonts.py
+	M /reportlab/trunk/demos/odyssey/odyssey.py
+	M /reportlab/trunk/demos/odyssey/fodyssey.py
+	M /reportlab/trunk/demos/odyssey/dodyssey.py
+	M /reportlab/trunk/demos/gadflypaper/gfe.py
+	M /reportlab/trunk/demos/colors/colortest.py
+	A /reportlab/trunk/INSTALL.txt
+	reportlab-2.2: first stage changes in on the trunk
+r3268 | rgbecker | 2008-09-03 17:18:43 +0100 (Wed, 03 Sep 2008) | 1 line
+	M /reportlab/trunk/tools/pythonpoint/stdparser.py
+	M /reportlab/trunk/tools/pythonpoint/pythonpoint.py
+	M /reportlab/trunk/tools/docco/graphdocpy.py
+	M /reportlab/trunk/tests/utils.py
+	D /reportlab/trunk/tests/unittest.py
+	M /reportlab/trunk/tests/test_widgets_grids.py
+	M /reportlab/trunk/tests/test_widgetbase_tpc.py
+	M /reportlab/trunk/tests/test_utils.py
+	M /reportlab/trunk/tests/test_tools_pythonpoint.py
+	M /reportlab/trunk/tests/test_table_layout.py
+	M /reportlab/trunk/tests/test_source_chars.py
+	M /reportlab/trunk/tests/test_rl_accel.py
+	M /reportlab/trunk/tests/test_renderSVG.py
+	M /reportlab/trunk/tests/test_pyfiles.py
+	M /reportlab/trunk/tests/test_platypus_xref.py
+	M /reportlab/trunk/tests/test_platypus_toc.py
+	M /reportlab/trunk/tests/test_platypus_tables.py
+	M /reportlab/trunk/tests/test_platypus_pleaseturnover.py
+	M /reportlab/trunk/tests/test_platypus_paraparser.py
+	M /reportlab/trunk/tests/test_platypus_paragraphs.py
+	M /reportlab/trunk/tests/test_platypus_leftright.py
+	M /reportlab/trunk/tests/test_platypus_indents.py
+	M /reportlab/trunk/tests/test_platypus_general.py
+	M /reportlab/trunk/tests/test_platypus_breaking.py
+	M /reportlab/trunk/tests/test_pdfgen_pycanvas.py
+	M /reportlab/trunk/tests/test_pdfgen_pagemodes.py
+	M /reportlab/trunk/tests/test_pdfgen_links.py
+	M /reportlab/trunk/tests/test_pdfgen_general.py
+	M /reportlab/trunk/tests/test_pdfgen_callback.py
+	M /reportlab/trunk/tests/test_pdfbase_ttfonts.py
+	M /reportlab/trunk/tests/test_pdfbase_postscript.py
+	M /reportlab/trunk/tests/test_pdfbase_pdfutils.py
+	M /reportlab/trunk/tests/test_pdfbase_pdfmetrics.py
+	M /reportlab/trunk/tests/test_pdfbase_fontembed.py
+	M /reportlab/trunk/tests/test_pdfbase_encodings.py
+	M /reportlab/trunk/tests/test_paragraphs.py
+	M /reportlab/trunk/tests/test_multibyte_kor.py
+	M /reportlab/trunk/tests/test_multibyte_jpn.py
+	M /reportlab/trunk/tests/test_multibyte_cht.py
+	M /reportlab/trunk/tests/test_multibyte_chs.py
+	M /reportlab/trunk/tests/test_lib_validators.py
+	M /reportlab/trunk/tests/test_lib_utils.py
+	M /reportlab/trunk/tests/test_lib_sequencer.py
+	M /reportlab/trunk/tests/test_lib_colors.py
+	M /reportlab/trunk/tests/test_invariant.py
+	M /reportlab/trunk/tests/test_images.py
+	M /reportlab/trunk/tests/test_hello.py
+	M /reportlab/trunk/tests/test_graphics_speed.py
+	M /reportlab/trunk/tests/test_graphics_layout.py
+	M /reportlab/trunk/tests/test_graphics_images.py
+	M /reportlab/trunk/tests/test_graphics_charts.py
+	M /reportlab/trunk/tests/test_extra.py
+	M /reportlab/trunk/tests/test_docstrings.py
+	M /reportlab/trunk/tests/test_docs_build.py
+	M /reportlab/trunk/tests/test_charts_textlabels.py
+	M /reportlab/trunk/tests/runAll.py
+	M /reportlab/trunk/src/reportlab/pdfgen/pycanvas.py
+	M /reportlab/trunk/docs/userguide/genuserguide.py
+	M /reportlab/trunk/docs/userguide/ch9_future.py
+	M /reportlab/trunk/docs/userguide/ch7_custom.py
+	M /reportlab/trunk/docs/userguide/ch6_tables.py
+	M /reportlab/trunk/docs/userguide/ch5_paragraphs.py
+	M /reportlab/trunk/docs/userguide/ch4_platypus_concepts.py
+	M /reportlab/trunk/docs/userguide/ch3_pdffeatures.py
+	M /reportlab/trunk/docs/userguide/ch2a_fonts.py
+	M /reportlab/trunk/docs/userguide/ch2_graphics.py
+	M /reportlab/trunk/docs/userguide/ch1_intro.py
+	M /reportlab/trunk/docs/userguide/app_demos.py
+	M /reportlab/trunk/docs/reference/genreference.py
+	M /reportlab/trunk/docs/graphguide/gengraphguide.py
+	M /reportlab/trunk/docs/graphguide/ch5_charts.py
+	M /reportlab/trunk/docs/graphguide/ch4_widgets.py
+	M /reportlab/trunk/docs/graphguide/ch3_shapes.py
+	M /reportlab/trunk/docs/graphguide/ch2_concepts.py
+	M /reportlab/trunk/docs/graphguide/ch1_intro.py
+	M /reportlab/trunk/docs/genAll.py
+	reportlab-2.2: major changes to make tests run
+r3266 | rgbecker | 2008-09-03 17:10:51 +0100 (Wed, 03 Sep 2008) | 2 lines
+	A /reportlab/trunk/src/reportlab (from /reportlab/trunk/reportlab:3265)
+	D /reportlab/trunk/reportlab
+	reportlab-2.2: second stage of major re-org
+r3265 | rgbecker | 2008-09-03 17:05:15 +0100 (Wed, 03 Sep 2008) | 1 line
+	M /reportlab/trunk/tools/pythonpoint/demos/figures.xml
+	A /reportlab/trunk/tools (from /reportlab/trunk/reportlab/tools:3263)
+	A /reportlab/trunk/tests (from /reportlab/trunk/reportlab/test:3263)
+	A /reportlab/trunk/setup.py
+	D /reportlab/trunk/reportlab/tools
+	D /reportlab/trunk/reportlab/test
+	D /reportlab/trunk/reportlab/docs
+	D /reportlab/trunk/reportlab/demos
+	A /reportlab/trunk/docs (from /reportlab/trunk/reportlab/docs:3263)
+	A /reportlab/trunk/demos (from /reportlab/trunk/reportlab/demos:3263)
+	reportlab-2.2: first stage of major re-org
+r3257 | rgbecker | 2008-09-01 16:11:43 +0100 (Mon, 01 Sep 2008) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_pleaseturnover.py
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	M /reportlab/trunk/reportlab/test/test_platypus_general.py
+	M /reportlab/trunk/reportlab/test/test_graphics_speed.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	M /reportlab/trunk/reportlab/platypus/flowables.py
+	reportlab: minor changes to allow running without accelerators
+r3256 | rgbecker | 2008-08-30 13:25:07 +0100 (Sat, 30 Aug 2008) | 1 line
+	M /reportlab/trunk/reportlab/platypus/flowables.py
+	M /reportlab/trunk/reportlab/platypus/doctemplate.py
+	platypus: improve DocProgramming constructs
+r3255 | rgbecker | 2008-08-22 11:31:32 +0100 (Fri, 22 Aug 2008) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_general.py
+	M /reportlab/trunk/reportlab/platypus/flowables.py
+	M /reportlab/trunk/reportlab/platypus/doctemplate.py
+	reportlab: added DocIf & DocWhile flowables
+r3254 | rgbecker | 2008-08-21 17:50:11 +0100 (Thu, 21 Aug 2008) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_general.py
+	M /reportlab/trunk/reportlab/platypus/flowables.py
+	M /reportlab/trunk/reportlab/platypus/doctemplate.py
+	reportlab: start of doc programming
+r3253 | rgbecker | 2008-08-21 14:15:24 +0100 (Thu, 21 Aug 2008) | 1 line
+	M /reportlab/trunk/reportlab/rl_config.py
+	M /reportlab/trunk/reportlab/lib/utils.py
+	reportlab: implement Ralf Schmitt's open files limiter
+r3252 | rgbecker | 2008-08-18 18:35:54 +0100 (Mon, 18 Aug 2008) | 1 line
+	M /reportlab/trunk/reportlab/lib/utils.py
+	reportlab: improve ImageReader so it works with Image flowables in the absence of PIL
+r3251 | rgbecker | 2008-08-18 17:17:01 +0100 (Mon, 18 Aug 2008) | 1 line
+	M /reportlab/trunk/reportlab/rl_config.py
+	M /reportlab/trunk/reportlab/pdfbase/pdfutils.py
+	M /reportlab/trunk/reportlab/lib/utils.py
+	reportlab: add rl_config.internImageFiles and extra support in ImageReader
+r3250 | rgbecker | 2008-08-18 17:13:05 +0100 (Mon, 18 Aug 2008) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paraparser.py
+	paraparser.py: add a small checker for underlines
+r3249 | rgbecker | 2008-08-18 15:42:09 +0100 (Mon, 18 Aug 2008) | 1 line
+	M /reportlab/trunk/reportlab/platypus/frames.py
+	M /reportlab/trunk/reportlab/platypus/flowables.py
+	M /reportlab/trunk/reportlab/platypus/doctemplate.py
+	platypus: add support for FramSplitter flowable
+r3247 | rgbecker | 2008-08-14 15:14:22 +0100 (Thu, 14 Aug 2008) | 1 line
+	M /reportlab/trunk/reportlab/pdfbase/rl_codecs.py
+	rl_codecs.py: attempted improvement of symbol encoding contributed by Matt Folwell<mjf@pearson.co.uk>
+r3244 | rgbecker | 2008-08-05 14:06:50 +0100 (Tue, 05 Aug 2008) | 1 line
+	M /reportlab/trunk/reportlab/lib/rparsexml.py
+	rparsexml: allow override of parse parameters
+r3243 | rgbecker | 2008-07-29 16:00:22 +0100 (Tue, 29 Jul 2008) | 1 line
+	M /reportlab/trunk/reportlab/pdfbase/pdfdoc.py
+	pdfdoc.py: abandon unused var
+r3242 | rgbecker | 2008-07-14 09:57:50 +0100 (Mon, 14 Jul 2008) | 1 line
+	M /reportlab/trunk/reportlab/pdfbase/pdfmetrics.py
+	double encoding bug fix from Max Folwell mjf@pearson.co.uk
+r3241 | rgbecker | 2008-07-10 17:32:06 +0100 (Thu, 10 Jul 2008) | 1 line
+	M /reportlab/trunk/reportlab/lib/utils.py
+	reportlab/lib/utils.py: slight extensions to DebugMemo
+r3239 | rgbecker | 2008-07-01 14:19:19 +0100 (Tue, 01 Jul 2008) | 1 line
+	M /reportlab/trunk/reportlab/test/test_multibyte_jpn.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	M /reportlab/trunk/reportlab/lib/textsplit.py
+	reportlab: add multi-frag cjk
+r3238 | rgbecker | 2008-06-18 14:21:08 +0100 (Wed, 18 Jun 2008) | 1 line
+	M /reportlab/trunk/reportlab/rl_config.py
+	reportlab: rl_config added allowShortTableRows
+r3237 | rgbecker | 2008-06-18 14:03:25 +0100 (Wed, 18 Jun 2008) | 1 line
+	M /reportlab/trunk/reportlab/platypus/tables.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: fix encoding bug
+r3236 | rgbecker | 2008-06-05 12:55:44 +0100 (Thu, 05 Jun 2008) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	test_platypus_paragraphs.py add simple textTransform tests
+r3235 | rgbecker | 2008-06-04 16:45:52 +0100 (Wed, 04 Jun 2008) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: make textTransformFrags externall callable
+r3234 | rgbecker | 2008-06-04 14:31:50 +0100 (Wed, 04 Jun 2008) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	platypus: improve capitalize so it works
+r3233 | rgbecker | 2008-06-04 12:45:01 +0100 (Wed, 04 Jun 2008) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	reportlab: fix test\test_platypus_paragraphs.py
+r3232 | rgbecker | 2008-06-03 17:45:56 +0100 (Tue, 03 Jun 2008) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: fix syntax error
+r3231 | rgbecker | 2008-06-03 17:42:41 +0100 (Tue, 03 Jun 2008) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	M /reportlab/trunk/reportlab/lib/styles.py
+	platypus: initial try at textTransform style attribute
+r3230 | rgbecker | 2008-05-23 11:06:23 +0100 (Fri, 23 May 2008) | 1 line
+	M /reportlab/trunk/reportlab/platypus/figures.py
+	figures.py: fix captionGap=None case
+r3229 | andy | 2008-05-21 13:45:34 +0100 (Wed, 21 May 2008) | 1 line
+	M /reportlab/trunk/reportlab/platypus/figures.py
+	fixed disappearing figure.captionGap
+r3228 | andy | 2008-05-21 11:24:47 +0100 (Wed, 21 May 2008) | 1 line
+	M /reportlab/trunk/reportlab/lib/utils.py
+	added nifty triple iterator
+r3227 | rgbecker | 2008-05-15 13:19:25 +0100 (Thu, 15 May 2008) | 1 line
+	M /reportlab/trunk/reportlab/graphics/barcode/lto.py
+	lto.py: apply Jerome Alet's patch 000
+r3226 | rgbecker | 2008-05-15 10:00:21 +0100 (Thu, 15 May 2008) | 1 line
+	A /reportlab/trunk/reportlab/graphics/barcode/lto.py
+	graphics: lto.py 'Linear Tape Open' contributed by Jerome Alet <alet@librelogiciel.com>
+r3225 | rgbecker | 2008-05-08 13:48:22 +0100 (Thu, 08 May 2008) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/textlabels.py
+	textlabels.py: fix bug found by Martin Tate
+r3222 | andy | 2008-04-10 22:11:04 +0100 (Thu, 10 Apr 2008) | 1 line
+	M /reportlab/trunk/reportlab/test/test_pdfgen_general.py
+	M /reportlab/trunk/reportlab/rl_config.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	M /reportlab/trunk/reportlab/platypus/doctemplate.py
+	some improvements to tests and error tracebacks
+r3221 | rgbecker | 2008-04-01 17:46:50 +0100 (Tue, 01 Apr 2008) | 1 line
+	M /reportlab/trunk/reportlab/pdfbase/pdfdoc.py
+	reportlab: attempt to make heuristic for PDFString formatting more sensible
+r3217 | rgbecker | 2008-03-25 14:44:02 +0000 (Tue, 25 Mar 2008) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_breaking.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	M /reportlab/trunk/reportlab/lib/styles.py
+	M /reportlab/trunk/reportlab/docs/userguide/ch5_paragraphs.py
+	reportlab: add in some widows/orphans control
+r3215 | rgbecker | 2008-03-18 18:59:45 +0000 (Tue, 18 Mar 2008) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/axes.py
+	charts: add labelAxisMode,tickAxisMode to valueAxes
+r3214 | rgbecker | 2008-02-28 15:31:43 +0000 (Thu, 28 Feb 2008) | 1 line
+	M /reportlab/trunk/reportlab/pdfbase/pdfdoc.py
+	pdfdoc.py: some conveniences and a minor change
+r3213 | rgbecker | 2008-02-23 10:22:27 +0000 (Sat, 23 Feb 2008) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	reportlab: test_platypus_paragraphs.py add paragraph CMYKColor usage
+r3208 | rgbecker | 2008-02-13 11:23:55 +0000 (Wed, 13 Feb 2008) | 1 line
+	M /reportlab/trunk/reportlab/tools/py2pdf/py2pdf.py
+	M /reportlab/trunk/reportlab/lib/colors.py
+	reportlab: obsoletisms removed
+r3207 | rgbecker | 2008-02-13 10:58:03 +0000 (Wed, 13 Feb 2008) | 1 line
+	M /reportlab/trunk/reportlab/tools/py2pdf/py2pdf.py
+	M /reportlab/trunk/reportlab/platypus/tables.py
+	M /reportlab/trunk/reportlab/platypus/frames.py
+	M /reportlab/trunk/reportlab/pdfgen/textobject.py
+	M /reportlab/trunk/reportlab/pdfgen/canvas.py
+	M /reportlab/trunk/reportlab/pdfbase/pdfdoc.py
+	reportlab: obsoletisms removed
+r3206 | rgbecker | 2008-01-29 17:04:09 +0000 (Tue, 29 Jan 2008) | 1 line
+	M /reportlab/trunk/reportlab/platypus/tables.py
+	tables.py: attempt to fix center align versus leftPadding
+r3205 | rgbecker | 2008-01-23 10:33:43 +0000 (Wed, 23 Jan 2008) | 1 line
+	M /reportlab/trunk/reportlab/platypus/tables.py
+	tables.py: try to use keywords in onward calls
+r3204 | rgbecker | 2008-01-04 18:11:29 +0000 (Fri, 04 Jan 2008) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: fix inline img at eol bug
+r3202 | rgbecker | 2007-12-29 14:23:08 +0000 (Sat, 29 Dec 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: fix leftIndent problem
+r3201 | rgbecker | 2007-12-20 10:49:28 +0000 (Thu, 20 Dec 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/xpreformatted.py
+	xpreformatted: fix nasty XPRE scaling bug
+r3198 | rgbecker | 2007-12-10 11:03:21 +0000 (Mon, 10 Dec 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_pdfgen_general.py
+	A /reportlab/trunk/reportlab/test/solid_red_alpha.png
+	A /reportlab/trunk/reportlab/test/alpha_test.png
+	reportlab: add png transparency tests
+r3196 | rptlab | 2007-12-07 10:17:34 +0000 (Fri, 07 Dec 2007) | 1 line
+	M /reportlab/trunk/reportlab/pdfgen/canvas.py
+	canvas.py: fix call to pdfdoc.PDFObjectReference
+r3195 | rgbecker | 2007-12-06 17:48:09 +0000 (Thu, 06 Dec 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/flowables.py
+	M /reportlab/trunk/reportlab/pdfgen/canvas.py
+	canvas.py: attempt to fix possible redefines of the soft mask thingy
+r3194 | rgbecker | 2007-12-06 16:36:40 +0000 (Thu, 06 Dec 2007) | 1 line
+	M /reportlab/trunk/reportlab/pdfgen/canvas.py
+	M /reportlab/trunk/reportlab/pdfbase/pdfdoc.py
+	M /reportlab/trunk/reportlab/lib/utils.py
+	reportlab: add in RGBA functionality for sensible images
+r3193 | rgbecker | 2007-12-04 14:00:06 +0000 (Tue, 04 Dec 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: remove unwanted print
+r3192 | rgbecker | 2007-12-04 13:59:08 +0000 (Tue, 04 Dec 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: fix simple paragraph vertical position
+r3191 | rgbecker | 2007-11-27 16:53:07 +0000 (Tue, 27 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	attempt to fix offset problems with images
+r3190 | rgbecker | 2007-11-27 12:46:56 +0000 (Tue, 27 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: fix longstanding split bug
+r3186 | rgbecker | 2007-11-23 18:24:07 +0000 (Fri, 23 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: add auto mask for inline images
+r3185 | rgbecker | 2007-11-23 18:23:31 +0000 (Fri, 23 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paraparser.py
+	paraparser.py: improved checking on <a> tag attributes
+r3184 | rgbecker | 2007-11-19 13:03:54 +0000 (Mon, 19 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_breaking.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph: improved <a> syntax checks and better test
+r3183 | rgbecker | 2007-11-13 11:40:50 +0000 (Tue, 13 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/tables.py
+	tables.py: attempt to improve error messages
+r3182 | rgbecker | 2007-11-12 18:25:32 +0000 (Mon, 12 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/pdfgen/canvas.py
+	canvas.py: allow for dynamic basefont
+r3181 | rgbecker | 2007-11-09 15:26:47 +0000 (Fri, 09 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/rl_config.py
+	M /reportlab/trunk/reportlab/pdfgen/canvas.py
+	reportlab: added rl_config.canvas_basefontname
+r3180 | rgbecker | 2007-11-08 18:47:06 +0000 (Thu, 08 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	M /reportlab/trunk/reportlab/pdfbase/pdfmetrics.py
+	paragraph.py: better initialization for maxSize/maxAscent etc
+r3179 | rgbecker | 2007-11-07 12:02:13 +0000 (Wed, 07 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	M /reportlab/trunk/reportlab/rl_config.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	reprotlab: add platypus_link_underline and fix some paragraph issues
+r3178 | rgbecker | 2007-11-06 18:05:45 +0000 (Tue, 06 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/xpreformatted.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: fix some bugs in paragraph and bring xpreformatted nearer
+r3177 | rgbecker | 2007-11-02 17:08:26 +0000 (Fri, 02 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_general.py
+	M /reportlab/trunk/reportlab/platypus/doctemplate.py
+	reprotlab: fix keepWithnext bug found by Wietse Jacobs
+r3176 | rgbecker | 2007-11-01 10:33:11 +0000 (Thu, 01 Nov 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: fix Paragraph draw to be compatible with XPReformatted oldstyle
+r3175 | rgbecker | 2007-10-31 15:38:06 +0000 (Wed, 31 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: use proper ascent/descent info
+r3174 | rgbecker | 2007-10-31 15:11:48 +0000 (Wed, 31 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: minor change to initial draw y value
+r3173 | rgbecker | 2007-10-31 12:17:55 +0000 (Wed, 31 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	A /reportlab/trunk/reportlab/docs/images/redsquare.png
+	paragraph.py: fix autoLeading
+r3172 | rgbecker | 2007-10-29 11:09:32 +0000 (Mon, 29 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/tables.py
+	tables.py: eliminated unwanted print duh :(
+r3171 | rgbecker | 2007-10-27 14:51:47 +0100 (Sat, 27 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_tables.py
+	M /reportlab/trunk/reportlab/platypus/tables.py
+	tables.py: slightly better spanned row height calcs
+r3170 | rgbecker | 2007-10-26 17:16:38 +0100 (Fri, 26 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_tables.py
+	M /reportlab/trunk/reportlab/platypus/tables.py
+	reportlab: fix cell spanning bug in tables.py (from Volker Haas)
+r3169 | rgbecker | 2007-10-24 13:34:59 +0100 (Wed, 24 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	platypus: fix maxSize/minDescent initialization
+r3168 | rgbecker | 2007-10-22 14:18:11 +0100 (Mon, 22 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_leftright.py
+	reportlab: fix missing property
+r3165 | rgbecker | 2007-10-22 14:05:12 +0100 (Mon, 22 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/flowables.py
+	flowables.py: start on fix for copying problems in imageAndFlowables
+r3164 | rgbecker | 2007-10-22 13:53:28 +0100 (Mon, 22 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	test_platypus_paragraphs.py: added case with inline img at front
+r3163 | rgbecker | 2007-10-22 12:08:39 +0100 (Mon, 22 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: attempt to fix problem when inline img is first in line
+r3160 | rgbecker | 2007-10-10 19:04:56 +0100 (Wed, 10 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_pdfgen_general.py
+	M /reportlab/trunk/reportlab/pdfgen/canvas.py
+	M /reportlab/trunk/reportlab/pdfbase/pdfdoc.py
+	reportlab: add in PageLabel stuff from Christian jacobs and Date fix from Dinu Gherman
+r3159 | rgbecker | 2007-10-10 11:14:25 +0100 (Wed, 10 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/textlabels.py
+	textlabels.py: fix undefined variable bug reported by riek@zem.uni-bonn.de
+r3157 | andy | 2007-10-05 22:09:18 +0100 (Fri, 05 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/tools/pythonpoint/stdparser.py
+	bullet character corrected
+r3156 | rgbecker | 2007-10-05 17:50:45 +0100 (Fri, 05 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	paragraph.py: attempt to fix up inline images across paragraph split
+r3155 | rgbecker | 2007-10-05 11:55:52 +0100 (Fri, 05 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/lib/formatters.py
+	M /reportlab/trunk/reportlab/graphics/charts/axes.py
+	reportlab: add places='auto' capability to DecimalFormatter
+r3154 | rgbecker | 2007-10-04 15:41:54 +0100 (Thu, 04 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	M /reportlab/trunk/reportlab/docs/userguide/ch5_paragraphs.py
+	paragraph.py: restore & fix the attempt at ascent/descent auto leading
+r3153 | rgbecker | 2007-10-04 10:52:29 +0100 (Thu, 04 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	platypus: revert vertical positioning change
+r3152 | rgbecker | 2007-10-04 10:24:02 +0100 (Thu, 04 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paraparser.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	platypus: autoLeading vertical pos improvement
+r3151 | rgbecker | 2007-10-03 11:31:55 +0100 (Wed, 03 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paraparser.py
+	M /reportlab/trunk/reportlab/test/test_paragraphs.py
+	M /reportlab/trunk/reportlab/platypus/paraparser.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	platypus: added bulletOffsetY inspired by haraldarminmassa@gmail.com
+r3150 | rgbecker | 2007-10-03 10:07:34 +0100 (Wed, 03 Oct 2007) | 1 line
+	A /reportlab/trunk/reportlab/docs/images/testimg.gif
+	images: add testimage
+r3149 | rgbecker | 2007-10-01 18:29:36 +0100 (Mon, 01 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/pdfgen/canvas.py
+	canvap.py: added setViewerPreference stuff inspired by kevin@booksys.com
+r3148 | rgbecker | 2007-10-01 16:25:36 +0100 (Mon, 01 Oct 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	M /reportlab/trunk/reportlab/platypus/paraparser.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	reprotlab: inline images horizontal positioning OK
+r3147 | rgbecker | 2007-09-28 13:52:01 +0100 (Fri, 28 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/spider.py
+	M /reportlab/trunk/reportlab/graphics/charts/piecharts.py
+	M /reportlab/trunk/reportlab/graphics/charts/linecharts.py
+	M /reportlab/trunk/reportlab/graphics/charts/legends.py
+	M /reportlab/trunk/reportlab/graphics/charts/barcharts.py
+	charts: fix unicode labels using _objStr (bug from Sebastian Ware sebastian@urbantalk.se)
+r3146 | rgbecker | 2007-09-24 10:06:49 +0100 (Mon, 24 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/para.py
+	para.py: added in support for value attribute in <li>(suggested by Stephan Diehl)
+r3145 | rgbecker | 2007-09-21 14:22:28 +0100 (Fri, 21 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/pdfgen/pdfimages.py
+	pdfimages.py: attempt to allow for jpeg spoofing images
+r3144 | rgbecker | 2007-09-21 14:21:23 +0100 (Fri, 21 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/pdfbase/pdfutils.py
+	pdfutils.py: improvements to en/decoders
+r3143 | rgbecker | 2007-09-20 14:28:20 +0100 (Thu, 20 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/pdfbase/pdfdoc.py
+	pdfdoc.py: added setPageLayout and setPageMode
+r3142 | rgbecker | 2007-09-17 18:25:09 +0100 (Mon, 17 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/flowables.py
+	flowables.py: restore attempted jpeg read as a memory saver, but alow to fail
+r3141 | rgbecker | 2007-09-14 12:12:19 +0100 (Fri, 14 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/flowables.py
+	flowables.py: remove unwanted code
+r3140 | rgbecker | 2007-09-13 11:17:45 +0100 (Thu, 13 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/widgets/markers.py
+	markers.py: add arrowhead
+r3139 | rgbecker | 2007-09-12 18:15:26 +0100 (Wed, 12 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/lineplots.py
+	M /reportlab/trunk/reportlab/graphics/charts/axes.py
+	charts: more changes to axes and lineplots
+r3138 | rgbecker | 2007-09-12 12:50:18 +0100 (Wed, 12 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/utils.py
+	M /reportlab/trunk/reportlab/graphics/charts/axes.py
+	graphics: fix utils and factorize some axis behaviour
+r3137 | rgbecker | 2007-09-11 18:40:19 +0100 (Tue, 11 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/utils.py
+	M /reportlab/trunk/reportlab/graphics/charts/axes.py
+	charts: added axes skipEndL and some utilities
+r3136 | rgbecker | 2007-09-10 16:08:35 +0100 (Mon, 10 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/rl_config.py
+	rl_config: allow standardization of library odbc connection
+r3135 | rgbecker | 2007-09-10 15:35:16 +0100 (Mon, 10 Sep 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/legends.py
+	legeds.py: proper subCols in the legend texts
+r3132 | hassan | 2007-08-30 12:39:14 +0100 (Thu, 30 Aug 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	fixed _getFragWords
+r3131 | rgbecker | 2007-08-30 11:23:34 +0100 (Thu, 30 Aug 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_breaking.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	reportlab: fixes to paragraph <br/> tag
+r3129 | rgbecker | 2007-08-28 17:13:53 +0100 (Tue, 28 Aug 2007) | 1 line
+	M /reportlab/trunk/reportlab/pdfbase/pdfdoc.py
+	M /reportlab/trunk/reportlab/lib/utils.py
+	pdfdoc.py: improve PDFImageXObject robustness
+r3128 | hassan | 2007-08-23 10:51:05 +0100 (Thu, 23 Aug 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/flowables.py
+	imageAndFlowables rightPadding fix
+r3127 | rgbecker | 2007-08-09 10:56:48 +0100 (Thu, 09 Aug 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	M /reportlab/trunk/reportlab/platypus/paraparser.py
+	M /reportlab/trunk/reportlab/platypus/paragraph.py
+	platypus: add support for autoLeading
+r3126 | rgbecker | 2007-07-23 18:31:27 +0100 (Mon, 23 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/piecharts.py
+	piecharts.py: allow for negative numbers
+r3120 | rgbecker | 2007-07-19 16:52:20 +0100 (Thu, 19 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/flowables.py
+	flowables.py: use semi-deep copy for PTO split
+r3119 | rgbecker | 2007-07-19 15:20:46 +0100 (Thu, 19 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/pdfbase/ttfonts.py
+	ttfonts.py: improve error message about bad psName
+r3117 | rgbecker | 2007-07-18 19:38:52 +0100 (Wed, 18 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/pdfbase/ttfonts.py
+	ttfonts.py: remove deprecation warning
+r3116 | rgbecker | 2007-07-18 19:38:12 +0100 (Wed, 18 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/linecharts.py
+	linecharts.py: allow empty lables
+r3115 | rgbecker | 2007-07-13 16:14:36 +0100 (Fri, 13 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/axes.py
+	axes.py: try to stamp out another buglet
+r3113 | rgbecker | 2007-07-13 13:20:01 +0100 (Fri, 13 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/renderbase.py
+	renderbase.py: attempt to fix problems with copy in renderScaledDrawing
+r3112 | rgbecker | 2007-07-11 17:27:18 +0100 (Wed, 11 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/charts/axes.py
+	axes.py: fix tickmarking to obey final setRangeDecision
+r3111 | rgbecker | 2007-07-11 10:57:10 +0100 (Wed, 11 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/lib/extformat.py
+	extformat.py: fix bad bug in dictformat
+r3110 | rgbecker | 2007-07-10 17:40:30 +0100 (Tue, 10 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/pdfbase/_fontdata.py
+	_fontdata.py: force all t1 defaults to be lowercase
+r3109 | andy | 2007-07-10 15:46:15 +0100 (Tue, 10 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/barcode/__init__.py
+	now only calls validate for codes which support it
+r3108 | andy | 2007-07-10 00:27:05 +0100 (Tue, 10 Jul 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/barcode/__init__.py
+	enable validation for barcodes in createBarcodeDrawing
+r3107 | rgbecker | 2007-06-30 12:43:41 +0100 (Sat, 30 Jun 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/widgets/grids.py
+	grids.py: validation fix from Dirk Datzert
+r3106 | rgbecker | 2007-06-27 17:22:39 +0100 (Wed, 27 Jun 2007) | 1 line
+	M /reportlab/trunk/reportlab/rl_config.py
+	rl_config.py: add eps_ttf_embed_uid
+r3105 | rgbecker | 2007-06-12 11:56:44 +0100 (Tue, 12 Jun 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_tables.py
+	M /reportlab/trunk/reportlab/platypus/tables.py
+	tables.py: fix inspired by Yuan Hong's bug report
+r3104 | rgbecker | 2007-06-08 15:08:37 +0100 (Fri, 08 Jun 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/renderPM.py
+	renderPM.py: added preConvert/preSaveCB args and also invert option
+r3101 | rgbecker | 2007-06-04 15:05:14 +0100 (Mon, 04 Jun 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_paragraphs.py
+	M /reportlab/trunk/reportlab/pdfbase/pdfmetrics.py
+	M /reportlab/trunk/reportlab/lib/fonts.py
+	reportlab: added registerFontFamily
+r3100 | rgbecker | 2007-06-02 12:45:57 +0100 (Sat, 02 Jun 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/tables.py
+	tables.py: revert bg ordering
+r3099 | rgbecker | 2007-05-31 18:16:58 +0100 (Thu, 31 May 2007) | 1 line
+	M /reportlab/trunk/reportlab/test/test_platypus_general.py
+	M /reportlab/trunk/reportlab/test/test_pdfgen_general.py
+	M /reportlab/trunk/reportlab/rl_config.py
+	M /reportlab/trunk/reportlab/lib/utils.py
+	reportlab: add fsEncodings to rl_config, add fileName2Utf8
+r3098 | rgbecker | 2007-05-31 16:20:42 +0100 (Thu, 31 May 2007) | 1 line
+	M /reportlab/trunk/reportlab/platypus/tables.py
+	tables.py: support for NOSPLIT, imroved cell backgrounding
+r3097 | rgbecker | 2007-05-24 17:49:19 +0100 (Thu, 24 May 2007) | 1 line
+	M /reportlab/trunk/reportlab/graphics/shapes.py
+	M /reportlab/trunk/reportlab/graphics/renderPM.py
+	reportlab/graphics: add tiffl, tiff1 formats & allow for kwds in asString
+r3093 | rgbecker | 2007-05-24 11:08:18 +0100 (Thu, 24 May 2007) | 1 line
+	M /reportlab/trunk/reportlab/changes
+	M /reportlab/trunk/reportlab/__init__.py
+	prepare for 2.1
+#################################################################################
 #################### RELEASE 2.1  at 15:00 GMT  24/May/2007     #################
 #################################################################################
 # Contributors in no order and apologies to those accidentally not here:        #

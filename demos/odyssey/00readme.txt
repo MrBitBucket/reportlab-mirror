@@ -11,8 +11,6 @@ Our distribution ships with just the first chapter
 in odyssey.txt.  For a more meaningful speed test,
 download the full copy from
   http://www.reportlab.com/ftp/odyssey.full.zip
-or
- ftp://ftp.reportlab.com/odyssey.full.zip
 and unzip to extract odyssey.full.txt (608kb).
 
 Benchmark speed depends quite critically

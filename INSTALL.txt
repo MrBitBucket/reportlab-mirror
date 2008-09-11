@@ -3,7 +3,6 @@
 	Windows edit setup.cfg to add the path to the freetype2 .lib
 	and the freetype2 include files
 
-
 1)	python setup.py tests-preinstall
 
 2)	python setup.py install

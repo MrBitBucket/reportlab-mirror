@@ -1,7 +1,7 @@
 #Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
 __version__=''' $Id$ '''
-import os, sys, glob, ConfigParser
+import os, sys, glob, ConfigParser, shutil
 platform = sys.platform
 pjoin = os.path.join
 abspath = os.path.abspath
@@ -172,13 +172,8 @@ def infoline(t):
     print t
     INFOLINES.append(t)
 
-_FILES= [
-        'README',
-        'changes',
-        'license.txt',
-
+reportlab_files= [
         'extensions/README',
-
         'fonts/00readme.txt',
         'fonts/bitstream-vera-license.txt',
         'fonts/DarkGarden-copying-gpl.txt',
@@ -192,7 +187,6 @@ _FILES= [
         'fonts/VeraBI.ttf',
         'fonts/VeraIt.ttf',
         ]
-_FILES_PFX=pjoin(pkgDir,'src','reportlab')
 
 def main():
     #test to see if we've a special command
@@ -208,7 +202,7 @@ def main():
         os.system("%s runAll.py" % sys.executable)
         return
 
-    DATA_FILES = {}
+    SPECIAL_PACKAGE_DATA = {}
     RL_ACCEL = _find_rl_ccode('rl_accel','_rl_accel.c')
     LIBS = []
     LIBRARIES=[]
@@ -223,8 +217,8 @@ def main():
         infoline( '#Attempting install of _rl_accel, sgmlop & pyHnj')
         infoline( '#extensions from %r'%RL_ACCEL)
         infoline( '################################################')
-        fn = pjoin(RL_ACCEL,'lib','hyphen.mashed')
-        if isfile(fn): DATA_FILES[pjoin(package_path, 'lib')] = [fn]
+        fn = pjoin(RL_ACCEL,'hyphen.mashed')
+        SPECIAL_PACKAGE_DATA = {fn: pjoin('lib','hyphen.mashed')}
         EXT_MODULES += [
                     Extension( '_rl_accel',
                                 [pjoin(RL_ACCEL,'_rl_accel.c')],
@@ -353,28 +347,24 @@ def main():
                             ]
         infoline('################################################')
 
-    for fn in _FILES:
-        fn = os.sep.join(fn.split('/'))
-        rfn = pjoin(_FILES_PFX,fn)
-        if isfile(rfn):
-            tn = dirname(fn)
-            tn = tn and pjoin(package_path,tn) or package_path
-            DATA_FILES.setdefault(tn,[]).append(rfn)
-    setup(
+    #copy some special case files into place so package_data will treat them properly
+    PACKAGE_DIR = {'reportlab': pjoin('src','reportlab')}
+    for fn,dst in SPECIAL_PACKAGE_DATA.iteritems():
+        shutil.copyfile(fn,pjoin(PACKAGE_DIR['reportlab'],dst))
+        reportlab_files.append(dst)
+
+    try:
+        setup(
             name="reportlab",
             version=get_version(),
             license="BSD license (see license.txt for details), Copyright (c) 2000-2008, ReportLab Inc.",
             description="The Reportlab Toolkit",
-            long_description="""The ReportLab Toolkit.
-An Open Source Python library for generating PDFs and graphics.
-""",
+            long_description="""The ReportLab Toolkit. An Open Source Python library for generating PDFs and graphics.""",
 
             author="Robinson, Watters, Lee, Precedo, Becker and many more...",
             author_email="info@reportlab.com",
             url="http://www.reportlab.com/",
-            package_dir = {'': 'src'},
-
-            packages=[ # include anything with an __init__
+            packages=[
                     'reportlab',
                     'reportlab.extensions',
                     'reportlab.graphics.charts',
@@ -386,14 +376,19 @@ An Open Source Python library for generating PDFs and graphics.
                     'reportlab.pdfbase',
                     'reportlab.pdfgen',
                     'reportlab.platypus',
-                     ],
-            data_files = DATA_FILES.items(),
+                    ],
+            package_dir = PACKAGE_DIR,
+            package_data = {'reportlab': reportlab_files},
             libraries = LIBRARIES,
             ext_modules =   EXT_MODULES,
-        )
-    print
-    print '########## SUMMARY INFO #########'
-    print '\n'.join(INFOLINES)
+            )
+        print
+        print '########## SUMMARY INFO #########'
+        print '\n'.join(INFOLINES)
+    finally:
+        for dst in SPECIAL_PACKAGE_DATA.itervalues():
+            os.remove(pjoin(PACKAGE_DIR['reportlab'],dst))
+            reportlab_files.remove(dst)
 
 if __name__=='__main__':
     main()
