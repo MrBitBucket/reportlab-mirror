@@ -326,7 +326,7 @@ class PDFTextObject(_PDFColorSetter):
                     text = text.decode('utf8')
                 except UnicodeDecodeError,e:
                     i,j = e.args[2:4]
-                    raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[i-10:i],text[i:j],text[j:j+10]),)))
+                    raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[max(i-10,0):i],text[i:j],text[j:j+10]),)))
 
             for f, t in pdfmetrics.unicode2T1(text,[font]+font.substitutionFonts):
                 if f!=fc:
