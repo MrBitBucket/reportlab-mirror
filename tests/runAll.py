@@ -21,8 +21,8 @@ if __name__=='__main__':
             topDir = os.path.dirname(__file__)
         topDir = os.path.dirname(os.path.abspath(topDir))
         if not os.path.isdir(os.path.join(topDir,'reportlab')):
-            topDir=os.path.normpath(os.path.join(topDir,'src','..','reportlab'))
-            assert os.path.isdir(topDir), "Cannot find reportlab"
+            topDir=os.path.join(topDir,'src')
+            assert os.path.isdir(os.path.join(topDir,'reportlab')), "Cannot find reportlab"
         sys.path.insert(0, topDir)
         P.append(topDir)
         del topDir
@@ -94,6 +94,15 @@ def main(pattern='test_*.py'):
     if not cleanOnly:
         testSuite = makeSuite(folder,nonImportable=NI,pattern=pattern+(not haveSRC and 'c' or ''))
         unittest.TextTestRunner().run(testSuite)
+        
+        try:
+            from rlextra.testall import makeSuite as makeExtraSuite
+        except:
+            sys.stderr.write('\nCould not find rlextra, so not tested.\n')
+        else:
+            sys.stdout.write('\nTesting rlextra:\n')
+            unittest.TextTestRunner().run(makeExtraSuite())
+
     if haveSRC: cleanup(folder,patterns=('*.pyc','*.pyo'))
     if not cleanOnly:
         if NI:
