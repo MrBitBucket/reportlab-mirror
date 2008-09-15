@@ -98,9 +98,8 @@ def main(pattern='test_*.py'):
         try:
             from rlextra.testall import makeSuite as makeExtraSuite
         except:
-            sys.stderr.write('\nCould not find rlextra, so not tested.\n')
+            pass
         else:
-            sys.stdout.write('\nTesting rlextra:\n')
             unittest.TextTestRunner().run(makeExtraSuite())
 
     if haveSRC: cleanup(folder,patterns=('*.pyc','*.pyo'))
