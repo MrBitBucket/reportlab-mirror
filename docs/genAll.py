@@ -1,7 +1,8 @@
 #!/bin/env python
 import os, sys, traceback
 def _genAll(verbose=1):
-    from tests.utils import testsFolder
+    from reportlab.lib.testutils import setOutDir,testsFolder
+    setOutDir(__name__)
     topDir=os.path.dirname(testsFolder)
     L = [os.path.join(topDir,f) for f in (
             'docs/reference/genreference.py',
