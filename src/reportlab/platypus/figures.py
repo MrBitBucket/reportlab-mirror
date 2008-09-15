@@ -47,6 +47,8 @@ class Figure(Flowable):
         self.spaceBefore = spaceBefore
         self.spaceAfter = spaceAfter
 
+        self._getCaptionPara()  #Larry Meyn's fix - otherwise they all get the number of the last chapter.
+
     def _getCaptionPara(self):
         caption = self.caption
         captionFont = self.captionFont
