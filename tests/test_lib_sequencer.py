@@ -2,10 +2,11 @@
 #see license.txt for license details
 """Tests for the reportlab.lib.sequencer module.
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
+setOutDir(__name__)
 import sys, random
 import unittest
-from tests.utils import makeSuiteForClasses, printLocation
 from reportlab.lib.sequencer import Sequencer
 
 

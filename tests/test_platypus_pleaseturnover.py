@@ -2,10 +2,11 @@
 #see license.txt for license details
 """Tests pleaseTurnOver, pageBreakBefore, frameBreakBefore, keepWithNext...
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import sys
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.platypus.flowables import Flowable, PTOContainer, KeepInFrame
 from reportlab.lib.units import cm
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle

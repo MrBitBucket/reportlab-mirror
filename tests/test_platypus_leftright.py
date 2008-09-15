@@ -2,14 +2,14 @@
 #see license.txt for license details
 """Tests ability to cycle through multiple page templates
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import sys, os, time
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4

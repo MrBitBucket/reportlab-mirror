@@ -2,16 +2,14 @@
 #see license.txt for license details
 """Tests for context-dependent indentation
 """
-__version__='''$Id:$'''
-
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import sys, os, random
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.paraparser import ParaParser
 from reportlab.platypus.flowables import Flowable

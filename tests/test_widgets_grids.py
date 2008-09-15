@@ -1,7 +1,6 @@
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.lib import colors
 from reportlab.graphics.shapes import Drawing, Group, Line, Rect
 from reportlab.graphics.widgetbase import Widget

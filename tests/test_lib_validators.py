@@ -1,11 +1,10 @@
 """Tests (incomplete) for the reportlab.lib.validators module.
 """
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
+setOutDir(__name__)
 import unittest
-from tests.utils import makeSuiteForClasses, printLocation
 from reportlab.lib import colors
 from reportlab.lib import validators
-
 
 class ValidatorTestCase(unittest.TestCase):
     "Test validating functions."

@@ -3,10 +3,9 @@
 #see license.txt for license details
 __version__='''$Id$'''
 __doc__="""Test reportlab.lib.util module"""
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 
 class FmtTestCase(unittest.TestCase):
 

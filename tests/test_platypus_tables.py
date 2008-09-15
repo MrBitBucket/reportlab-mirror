@@ -3,13 +3,12 @@
 #see license.txt for license details
 __version__=''' $Id$ '''
 __doc__='Test script for reportlab.tables'
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+setOutDir(__name__)
 import os,unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
-
 
 def getTable():
     t = Table((('','North','South','East','West'),

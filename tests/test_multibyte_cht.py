@@ -5,13 +5,10 @@
 """
 Test of traditional Chinese (as written in Taiwan)
 """
-
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import string, os
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors

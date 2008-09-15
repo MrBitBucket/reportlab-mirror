@@ -7,9 +7,10 @@ Various tests for PDF metrics.
 The main test prints out a PDF documents enabling checking of widths of every
 glyph in every standard font.  Long!
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase import _fontdata
 from reportlab.pdfgen.canvas import Canvas

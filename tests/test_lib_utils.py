@@ -3,10 +3,11 @@
 """Tests for reportlab.lib.utils
 """
 __version__=''' $Id$ '''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation, testsFolder
+setOutDir(__name__)
 import os
 import reportlab
 import unittest
-from tests.utils import makeSuiteForClasses, printLocation, testsFolder
 from reportlab.lib import colors
 from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetAttr, rl_isfile, \
                                 isCompactDistro

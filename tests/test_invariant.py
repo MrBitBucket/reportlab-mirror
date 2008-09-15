@@ -4,10 +4,11 @@
 __doc__="""Verfy that if in invariant mode, repeated runs
 make identical file.  This does NOT test across platforms
 or python versions, only a user can do that :-)"""
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+setOutDir(__name__)
 
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
 from reportlab.pdfgen.canvas import Canvas
 filename = outputfile('test_invariant.pdf')
 

@@ -3,12 +3,12 @@
 """
 Tests for chart class.
 """
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 
 import os, sys, copy
 from os.path import join, basename, splitext
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.pagesizes import A4
@@ -21,9 +21,7 @@ from reportlab.platypus.flowables import Spacer, PageBreak
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
-from reportlab.platypus.doctemplate \
-     import PageTemplate, BaseDocTemplate
-
+from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.graphics.charts.linecharts import HorizontalLineChart
 from reportlab.graphics.charts.lineplots import LinePlot

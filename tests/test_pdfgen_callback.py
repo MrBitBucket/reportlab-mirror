@@ -3,15 +3,13 @@
 #see license.txt for license details
 __doc__='checks callbacks work'
 __version__=''' $Id$ '''
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.pdfgen.canvas import Canvas
 from tests.test_pdfgen_general import makeDocument
 
 _PAGE_COUNT = 0
-
 
 class CallBackTestCase(unittest.TestCase):
     "checks it gets called"

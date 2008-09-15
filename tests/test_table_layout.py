@@ -1,5 +1,6 @@
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import operator, string
-
 from reportlab.platypus import *
 #from reportlab import rl_config
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
@@ -8,16 +9,9 @@ from reportlab.platypus.paragraph import Paragraph
 #from reportlab.lib.utils import fp_str
 #from reportlab.pdfbase import pdfmetrics
 from reportlab.platypus.flowables import PageBreak
-
-
 import os
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
-
 from types import TupleType, ListType, StringType
-
 
 class TableTestCase(unittest.TestCase):
 

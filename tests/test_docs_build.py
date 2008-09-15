@@ -1,8 +1,9 @@
 __version__=''' $Id$ '''
 """Tests that all manuals can be built.
 """
+from reportlab.lib.testutils import setOutDir,SecureTestCase, printLocation, testsFolder
+setOutDir(__name__)
 import os, sys, unittest
-from tests.utils import SecureTestCase, printLocation, testsFolder
 
 class ManualTestCase(SecureTestCase):
     "Runs all 3 manual-builders from the top."

@@ -4,10 +4,9 @@
 __version__=''' $Id$ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas and the pycanvas module to output Python source code.
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+setOutDir(__name__)
 import string, os, unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
-
 from reportlab.pdfgen import pycanvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors

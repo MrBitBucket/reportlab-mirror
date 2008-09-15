@@ -1,11 +1,10 @@
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, NearTestCase
+setOutDir(__name__)
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation, NearTestCase
-
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfutils
-
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.graphics.shapes import Drawing, String, Ellipse

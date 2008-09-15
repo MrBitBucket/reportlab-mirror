@@ -5,7 +5,8 @@ Tests for getBounds methods of various graphical widgets
 """
 
 import unittest
-from tests.utils import makeSuiteForClasses, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
+setOutDir(__name__)
 
 from reportlab.graphics import shapes
 ##from reportlab.graphics.charts.barcharts import VerticalBarChart

@@ -5,10 +5,11 @@ This does a test drawing with lots of things in it, running
 with and without attribute checking.
 """
 __version__ = '''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import os, sys, time
 import reportlab.rl_config
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.pdfgen.canvas import Canvas

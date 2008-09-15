@@ -10,13 +10,20 @@ import os, glob, sys, string, traceback, unittest
 #run 'setup.py tests', but won't be if you CD into the tests
 #directory and run this directly
 try:
-    from tests.utils import GlobDirectoryWalker, outputfile, printLocation
+    from reportlab.lib.testutils import setOutDir,GlobDirectoryWalker, outputfile, printLocation
 except ImportError:
-    directoryAboveMe = os.path.dirname(os.getcwd())
-    sys.path.insert(0, directoryAboveMe)
-    from tests.utils import GlobDirectoryWalker, outputfile, printLocation
-    
-    
+    if __name__=='__main__':
+        topDir = os.path.dirname(sys.argv[0])
+        if not topDir: topDir = os.getcwd()
+    else:
+        topDir = os.path.dirname(__file__)
+    topDir = os.path.dirname(os.path.abspath(topDir))
+    sys.path.insert(0, topDir)
+    pp=os.environ.get('PYTHONPATH','')
+    pp = pp and os.sep.join(topDir,pp) or topDir
+    os.environ['PYTHONPATH'] = pp
+    from reportlab.lib.testutils import setOutDir,GlobDirectoryWalker, outputfile, printLocation
+setOutDir(__name__)
 
 def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
     "Build a test suite of all available test files."

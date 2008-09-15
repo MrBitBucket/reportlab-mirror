@@ -6,14 +6,13 @@ Currently there is only one such test. Most such tests, like this
 one, will be generating a PDF document that needs to be eye-balled
 in order to find out if it is 'correct'.
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import sys, os
 from os.path import join, basename, splitext
 from math import sqrt
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle

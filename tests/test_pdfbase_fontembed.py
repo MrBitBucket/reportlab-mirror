@@ -1,12 +1,10 @@
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import os
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from tests.test_pdfbase_pdfmetrics import makeWidthTestForAllGlyphs
-
 
 class EmbeddingTestCase(unittest.TestCase):
     "Make documents with embedded fonts"

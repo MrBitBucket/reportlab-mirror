@@ -3,11 +3,12 @@
 """
 Tests for TypedPropertyCollection class.
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
+setOutDir(__name__)
 import os, sys, copy
 from os.path import join, basename, splitext
 import unittest
-from tests.utils import makeSuiteForClasses, printLocation
 from reportlab.graphics.widgetbase import PropHolder, TypedPropertyCollection
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.lib.validators import isNumber

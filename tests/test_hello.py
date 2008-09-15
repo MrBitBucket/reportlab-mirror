@@ -6,11 +6,10 @@ __doc__="""most basic test possible that makes a PDF.
 
 Useful if you want to test that a really minimal PDF is healthy,
 since the output is about the smallest thing we can make."""
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.pdfgen.canvas import Canvas
-
 
 class HelloTestCase(unittest.TestCase):
     "Simplest test that makes PDF"

@@ -4,7 +4,9 @@
 """
 Tests for internal links and destinations
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 
 #
 # Fit tests
@@ -22,7 +24,6 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
 
 def markPage(c,height=letter[1],width=letter[0]):
     height = height / inch

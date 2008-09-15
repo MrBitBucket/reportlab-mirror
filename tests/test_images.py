@@ -5,10 +5,10 @@ __version__='''$Id$'''
 __doc__="""Tests to do with image handling.
 
 Most of them make use of test\pythonpowereed.gif."""
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation, testsFolder
+setOutDir(__name__)
 import os,md5
-
 import unittest
-from tests.utils import makeSuiteForClasses, printLocation, testsFolder
 from reportlab.lib.utils import ImageReader
 
 

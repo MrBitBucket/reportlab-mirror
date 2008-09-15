@@ -4,13 +4,11 @@
 This test uses a sample font (Vera.ttf) taken from Bitstream which is called Vera
 Serif Regular and is covered under the license in ../fonts/bitstream-vera-license.txt.
 """
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, NearTestCase
+setOutDir(__name__)
 import string
 from cStringIO import StringIO
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation, NearTestCase
-
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.pdfdoc import PDFDocument, PDFError

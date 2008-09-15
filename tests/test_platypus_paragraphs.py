@@ -3,13 +3,12 @@
 """Tests for the reportlab.platypus.paragraphs module.
 """
 __version__=''' $Id$ '''
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+setOutDir(__name__)
 import sys, os, unittest
 from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
-from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
-
 from reportlab.pdfbase.pdfmetrics import stringWidth, registerFont, registerFontFamily
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus.paraparser import ParaParser

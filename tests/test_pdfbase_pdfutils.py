@@ -2,10 +2,11 @@
 #see license.txt for license details
 """Tests for utility functions in reportlab.pdfbase.pdfutils.
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
+setOutDir(__name__)
 import os
 import unittest
-from tests.utils import makeSuiteForClasses, printLocation
 from reportlab.pdfbase.pdfutils import _AsciiHexEncode, _AsciiHexDecode
 from reportlab.pdfbase.pdfutils import _AsciiBase85Encode, _AsciiBase85Decode
 

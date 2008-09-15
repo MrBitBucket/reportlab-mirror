@@ -5,12 +5,11 @@
 #$Header$
 __version__=''' $Id'''
 __doc__="""Tests of intra-paragraph parsing behaviour in Platypus."""
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile
+setOutDir(__name__)
 from types import TupleType, ListType, StringType, UnicodeType
 from pprint import pprint as pp
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile
 from reportlab.platypus import cleanBlockQuotedText
 from reportlab.platypus.paraparser import ParaParser, ParaFrag
 from reportlab.lib.colors import black

@@ -3,13 +3,12 @@
 # full screen test
 """Tests for PDF page modes support in reportlab.pdfgen.
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import os
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.pdfgen.canvas import Canvas
-
 
 def fileDoesExist(path):
     "Check if a file does exist."

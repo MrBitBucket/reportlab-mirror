@@ -1,8 +1,9 @@
 """This executes tests defined outside the normal test suite.
 See docstring for class ExternalTestCase for more information.
 """
+from reportlab.lib.testutils import setOutDir,SecureTestCase, printLocation, RL_HOME
+setOutDir(__name__)
 import os, string, fnmatch, re, sys, unittest
-from tests.utils import SecureTestCase, printLocation, RL_HOME
 EXTRA_FILE = 'extra.txt'
 
 class ExternalTestCase(SecureTestCase):

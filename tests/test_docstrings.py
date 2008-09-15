@@ -9,9 +9,10 @@ and lists them in individual log files.
 Currently, methods with leading and trailing double underscores
 are skipped.
 """
+from reportlab.lib.testutils import setOutDir,SecureTestCase, GlobDirectoryWalker, outputfile, printLocation, RL_HOME
+setOutDir(__name__)
 import os, sys, glob, string, re, unittest
 from types import ModuleType, ClassType, MethodType, FunctionType
-from tests.utils import SecureTestCase, GlobDirectoryWalker, outputfile, printLocation, RL_HOME
 import reportlab
 
 def getModuleObjects(folder, rootName, typ, pattern='*.py'):

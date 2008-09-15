@@ -6,13 +6,11 @@
 The code in this module will disappear any day now and be replaced
 by classes in reportlab.pdfbase.cidfonts
 """
-
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import string, os
 import codecs
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
@@ -20,7 +18,6 @@ from reportlab.lib.codecharts import KutenRowCodeChart, hBoxText
 
 global VERBOSE
 VERBOSE = 0
-
 
 class CHSFontTests(unittest.TestCase):
 

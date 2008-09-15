@@ -3,9 +3,10 @@
 __version__=''' $Id$ '''
 """Tests performed on all Python source files of the ReportLab distribution.
 """
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker, outputfile, printLocation, RL_HOME
+setOutDir(__name__)
 import os, sys, string, fnmatch, re
 import unittest
-from tests.utils import makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker, outputfile, printLocation, RL_HOME
 from reportlab.lib.utils import open_and_read, open_and_readlines
 
 # Helper function and class.

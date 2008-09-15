@@ -4,9 +4,10 @@
 __doc__='testscript for reportlab.pdfgen'
 __version__=''' $Id$ '''
 #tests and documents new low-level canvas
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+setOutDir(__name__)
 import os, string
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors

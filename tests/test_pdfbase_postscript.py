@@ -6,12 +6,11 @@ __doc__="""Tests Postscript XObjects.
 Nothing visiblke in Acrobat, but the resulting files
 contain graphics and tray commands if exported to
 a Postscript device in Acrobat 4.0"""
-__version__='''$Id:$'''
-
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.pdfgen.canvas import Canvas
-
 
 class PostScriptTestCase(unittest.TestCase):
     "Simplest test that makes PDF"

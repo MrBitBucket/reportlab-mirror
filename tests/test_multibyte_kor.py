@@ -1,9 +1,7 @@
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import string, os
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
@@ -11,8 +9,6 @@ from reportlab.lib.codecharts import KutenRowCodeChart, hBoxText
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont, findCMapFile
 global VERBOSE
 VERBOSE = 0
-
-
 
 class KoreanFontTests(unittest.TestCase):
 

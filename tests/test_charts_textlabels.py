@@ -3,12 +3,12 @@
 """
 Tests for the text Label class.
 """
+from reportlab.lib.testutils import setOutDir,setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 
 import os, sys, copy
 from os.path import join, basename, splitext
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.pagesizes import A4

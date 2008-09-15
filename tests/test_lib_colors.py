@@ -2,10 +2,11 @@
 #see license.txt for license details
 """Tests for the reportlab.lib.colors module.
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import os, math
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.pdfgen.canvas import Canvas
 import reportlab.pdfgen.canvas
 from reportlab.lib import colors

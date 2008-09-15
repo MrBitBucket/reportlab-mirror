@@ -2,13 +2,14 @@
 #see license.txt for license details
 """Test long documents with indexes, tables and cross-references
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import sys, os, time
 from string import split, strip, join, whitespace, find
 from operator import truth
 from types import StringType, ListType
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -17,7 +18,6 @@ from reportlab.platypus import Paragraph, Flowable, Frame, PageTemplate, BaseDoc
 from reportlab.platypus.frames import Frame
 from reportlab.lib.randomtext import randomText, PYTHON
 from reportlab.platypus.tableofcontents import TableOfContents, SimpleIndex
-
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."

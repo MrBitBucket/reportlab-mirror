@@ -1,8 +1,9 @@
 """Tests for the PythonPoint tool.
 """
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+setOutDir(__name__)
 import os, sys, string
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation, testsFolder
 import reportlab
 
 class PythonPointTestCase(unittest.TestCase):

@@ -1,11 +1,10 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 # tests some paragraph styles
-__version__='''$Id:$'''
-
+__version__='''$Id$'''
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter, XPreformatted
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
@@ -14,7 +13,6 @@ from reportlab.lib.randomtext import randomText
 from reportlab.rl_config import defaultPageSize
 
 (PAGE_WIDTH, PAGE_HEIGHT) = defaultPageSize
-
 
 def myFirstPage(canvas, doc):
     canvas.saveState()

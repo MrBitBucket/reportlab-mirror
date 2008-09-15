@@ -1,17 +1,12 @@
 #!/usr/bin/env python
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import sys, string
 from xml.dom import minidom
 from xml.sax._exceptions import SAXReaderNotAvailable
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.graphics.shapes import *
 from reportlab.graphics import renderSVG
-
-
-
 
 def warnIgnoredRestofTest():
     "Raise a warning (if possible) about a not fully completed test."
@@ -25,11 +20,7 @@ def warnIgnoredRestofTest():
         # should better also be printed only once...
         print msg
 
-
-
-
 # Check if we have a default XML parser available or not.
-
 try:
     import xml
     from xml.sax import make_parser
@@ -38,18 +29,12 @@ try:
 except SAXReaderNotAvailable:
     HAVE_XML_PARSER = 0
 
-
-
-
 def load(path):
     "Helper function to read the generated SVG again."
 
     doc = minidom.parse(path)
     doc.normalize()
     return doc.documentElement
-
-
-
 
 class RenderSvgSimpleTestCase(unittest.TestCase):
     "Testing renderSVG module."
@@ -77,7 +62,6 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         assert t0 == 'foo'
         assert t1 == 'bar'
 
-
     def test1(self):
         "Test two strings in group in drawing."
 
@@ -104,7 +88,6 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
 
         assert t0 == 'foo'
         assert t1 == 'bar'
-
 
     def test2(self):
         "Test two strings in transformed group in drawing."
@@ -135,9 +118,6 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         assert t0 == 'foo'
         assert t1 == 'bar'
 
-
-
-
 class RenderSvgAxesTestCase(unittest.TestCase):
     "Testing renderSVG module on Axes widgets."
 
@@ -150,14 +130,8 @@ class RenderSvgAxesTestCase(unittest.TestCase):
         d = XCategoryAxis().demo()
         renderSVG.drawToFile(d, path)
 
-
-
-
 def makeSuite():
     return makeSuiteForClasses(RenderSvgSimpleTestCase, RenderSvgAxesTestCase)
-
-
-
 
 #noruntests
 if __name__ == "__main__":

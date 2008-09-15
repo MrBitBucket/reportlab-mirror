@@ -3,12 +3,10 @@
 """
 Tests for RLG Image shapes.
 """
-
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+setOutDir(__name__)
 import os
-
 import unittest
-from tests.utils import makeSuiteForClasses, outputfile, printLocation
-
 from reportlab.graphics.shapes import Image, Drawing
 from reportlab.graphics import renderPDF
 from reportlab.lib.pagesizes import A4
