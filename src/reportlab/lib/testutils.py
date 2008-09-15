@@ -21,12 +21,14 @@ def isWritable(D):
         return 0
 
 _OUTDIR = None
+RL_HOME = None
+testsFolder = None
 def setOutDir(name):
     """Is it a writable file system distro being invoked within
     test directory?  If so, can write test output here.  If not,
     it had better go in a temp directory.  Only do this once per
     process"""
-    global _OUTDIR
+    global _OUTDIR, RL_HOME, testsFolder
     if _OUTDIR: return _OUTDIR
     D = [d[9:] for d in sys.argv if d.startswith('--outdir=')]
     if D:
@@ -44,6 +46,16 @@ def setOutDir(name):
 
     if not isWritable(_OUTDIR):
         _OUTDIR = get_rl_tempdir('reportlab_test')
+
+    import reportlab
+    RL_HOME=reportlab.__path__[0]
+    if not os.path.isabs(RL_HOME): RL_HOME=os.path.normpath(os.path.abspath(RL_HOME))
+    topDir = os.path.dirname(RL_HOME)
+    testsFolder = os.path.join(topDir,'tests')
+    if not os.path.isdir(testsFolder):
+        testsFolder = os.path.join(os.path.dirname(topDir),'tests')
+    if not os.path.isdir(testsFolder):
+        testsFolder = None
     return _OUTDIR
 
 def outputfile(fn):
@@ -306,13 +318,3 @@ class ScriptThatMakesFileTest(unittest.TestCase):
         status = p.close()
         assert os.path.isfile(self.outFileName), "File %s not created!" % self.outFileName
 
-import tests as testsFolder
-testsFolder=testsFolder.__path__[0]
-if not os.path.isabs(testsFolder): testsFolder=os.path.normpath(os.path.abspath(testsFolder))
-RL_HOME=os.path.join(testsFolder,'src','reportlab')
-if not os.path.isdir(RL_HOME):
-    RL_HOME=os.path.join(testsFolder,'reportlab')
-if not os.path.isdir(RL_HOME):
-    import reportlab as RL_HOME
-    RL_HOME=RL_HOME.__path__[0]
-    if not os.path.isabs(RL_HOME): RL_HOME=os.path.normpath(os.path.abspath(RL_HOME))
