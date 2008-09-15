@@ -3,7 +3,7 @@
 """Tests for the reportlab.platypus.paragraphs module.
 """
 __version__=''' $Id$ '''
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os, unittest
 from string import split, strip, join, whitespace
@@ -120,7 +120,7 @@ I guess I'm hoping that I've missed something, and that
 it's actually easy to do using platypus.
 '''
         from reportlab.platypus.flowables import ParagraphAndImage, Image
-        import tests
+        from reportlab.lib.testutils import testsFolder
         gif = os.path.join(testsFolder,'pythonpowered.gif')
         story.append(ParagraphAndImage(Paragraph(text,bt),Image(gif)))
         phrase = 'This should be a paragraph spanning at least three pages. '
@@ -157,7 +157,7 @@ Use scheme "pdf:" to indicate an external PDF link, "http:", "https:" to indicat
 your browser. If an internal link begins with something that looks like a scheme, precede with "document:". <strike>This text should have a strike through it.</strike>
 '''
         from reportlab.platypus.flowables import ImageAndFlowables, Image
-        import tests
+        from reportlab.lib.testutils import testsFolder
         gif = os.path.join(testsFolder,'pythonpowered.gif')
         heading = Paragraph('This is a heading',h3)
         story.append(ImageAndFlowables(Image(gif),[heading,Paragraph(text,bt)]))
@@ -383,6 +383,7 @@ class AutoLeadingTestCase(unittest.TestCase):
                                 ),
                         ])
 
+        from reportlab.lib.testutils import testsFolder
         styleSheet = getSampleStyleSheet()
         normal = ParagraphStyle(name='normal',fontName='Times-Roman',fontSize=12,leading=1.2*12,parent=styleSheet['Normal'])
         normal_sp = ParagraphStyle(name='normal_sp',parent=normal,alignment=TA_JUSTIFY,spaceBefore=12)

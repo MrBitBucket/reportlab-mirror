@@ -3,7 +3,7 @@
 """Tests for reportlab.lib.utils
 """
 __version__=''' $Id$ '''
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation, testsFolder
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 setOutDir(__name__)
 import os
 import reportlab
@@ -14,6 +14,7 @@ from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetA
 
 def _rel_open_and_read(fn):
     from reportlab.lib.utils import open_and_read
+    from reportlab.lib.testutils import testsFolder
     cwd = os.getcwd()
     os.chdir(testsFolder)
     try:
@@ -49,6 +50,7 @@ class ImporterTestCase(unittest.TestCase):
 
     def test2(self):
         "try under a well known directory NOT on the path"
+        from reportlab.lib.testutils import testsFolder
         D = os.path.join(testsFolder,'..','tools','pythonpoint')
         fn = os.path.join(D,'stdparser.py')
         if rl_isfile(fn) or rl_isfile(fn+'c') or rl_isfile(fn+'o'):

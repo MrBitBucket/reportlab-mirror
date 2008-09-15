@@ -11,7 +11,7 @@ return the 'story' for each.  The run() function gets the stories, then
 builds a special "document model" in which the frames are added to each page
 and drawn into.
 """
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import string, copy, sys, os
 from reportlab.pdfgen import canvas
@@ -24,7 +24,7 @@ from reportlab.lib import colors
 from reportlab.rl_config import defaultPageSize
 from reportlab.lib.utils import haveImages, _RL_DIR, rl_isfile, open_for_read, fileName2Utf8
 import unittest
-import tests
+from reportlab.lib.testutils import testsFolder
 if haveImages:
     _GIF = os.path.join(testsFolder,'pythonpowered.gif')
     if not rl_isfile(_GIF): _GIF = None

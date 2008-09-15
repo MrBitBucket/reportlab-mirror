@@ -4,7 +4,7 @@
 __version__=''' $Id$ '''
 __doc__='testscript for reportlab.pdfgen'
 #tests and documents new low-level canvas and the pycanvas module to output Python source code.
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import string, os, unittest
 from reportlab.pdfgen import pycanvas   # gmcm 2000/10/13, pdfgen now a package
@@ -637,6 +637,7 @@ cost to performance.""")
 
     c.drawText(t)
     import tests
+    from reportlab.lib.testutils import testsFolder
     gif = os.path.join(testsFolder,'pythonpowered.gif')
     if haveImages and rl_isfile(gif):
         c.drawInlineImage(gif,2*inch, 7*inch)

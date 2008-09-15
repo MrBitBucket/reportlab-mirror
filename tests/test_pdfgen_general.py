@@ -4,7 +4,7 @@
 __doc__='testscript for reportlab.pdfgen'
 __version__=''' $Id$ '''
 #tests and documents new low-level canvas
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import os, string
 import unittest
@@ -666,6 +666,7 @@ cost to performance.""")
     c.drawText(t)
 
     if haveImages:
+        from reportlab.lib.testutils import testsFolder
         gif = os.path.join(testsFolder,'pythonpowered.gif')
         c.drawInlineImage(gif,2*inch, 7*inch)
     else:
@@ -724,6 +725,7 @@ cost to performance.""")
     c.rect(1*inch, 6+14.4*inch, w, h)
     c.rect(3*inch, 6+14.4*inch, w, h)
     if haveImages:
+        from reportlab.lib.testutils import testsFolder
         png = os.path.join(testsFolder,'solid_red_alpha.png')
         c.drawImage(png, 1*inch, 8*inch+14.4, w, h, mask=None)
         c.drawImage(png, 3*inch, 8*inch+14.4, w, h, mask='auto')

@@ -5,7 +5,7 @@ __version__='''$Id$'''
 __doc__="""Tests to do with image handling.
 
 Most of them make use of test\pythonpowereed.gif."""
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation, testsFolder
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 setOutDir(__name__)
 import os,md5
 import unittest
@@ -29,6 +29,7 @@ class ReaderTestCase(unittest.TestCase):
     "Simplest tests to import images, work under Jython or PIL"
 
     def test(self):
+        from reportlab.lib.testutils import testsFolder
         from reportlab.lib.utils import rl_isfile
         imageFileName = os.path.join(testsFolder,'pythonpowered.gif')
         assert rl_isfile(imageFileName), "%s not found!" % imageFileName

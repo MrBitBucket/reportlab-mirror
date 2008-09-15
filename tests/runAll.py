@@ -9,21 +9,39 @@ import os, glob, sys, string, traceback, unittest
 #we need to ensure 'tests' is on the path.  It will be if you
 #run 'setup.py tests', but won't be if you CD into the tests
 #directory and run this directly
-try:
-    from reportlab.lib.testutils import setOutDir,GlobDirectoryWalker, outputfile, printLocation
-except ImportError:
-    if __name__=='__main__':
-        topDir = os.path.dirname(sys.argv[0])
-        if not topDir: topDir = os.getcwd()
-    else:
-        topDir = os.path.dirname(__file__)
-    topDir = os.path.dirname(os.path.abspath(topDir))
-    sys.path.insert(0, topDir)
-    pp=os.environ.get('PYTHONPATH','')
-    pp = pp and os.sep.join(topDir,pp) or topDir
-    os.environ['PYTHONPATH'] = pp
-    from reportlab.lib.testutils import setOutDir,GlobDirectoryWalker, outputfile, printLocation
-setOutDir(__name__)
+if __name__=='__main__':
+    P=[]
+    try:
+        from reportlab.lib.testutils import setOutDir
+    except ImportError:
+        if __name__=='__main__':
+            topDir = os.path.dirname(sys.argv[0])
+            if not topDir: topDir = os.getcwd()
+        else:
+            topDir = os.path.dirname(__file__)
+        topDir = os.path.dirname(os.path.abspath(topDir))
+        if not os.path.isdir(os.path.join(topDir,'reportlab')):
+            topDir=os.path.normpath(os.path.join(topDir,'src','..','reportlab'))
+            assert os.path.isdir(topDir), "Cannot find reportlab"
+        sys.path.insert(0, topDir)
+        P.append(topDir)
+        del topDir
+        from reportlab.lib.testutils import setOutDir
+
+    setOutDir(__name__)
+    from reportlab.lib.testutils import testsFolder as topDir
+    if topDir:
+        topDir = os.path.dirname(topDir)
+        if topDir not in sys.path:
+            sys.path.insert(0,topDir)
+            P.append(topDir)
+    del topDir
+    from reportlab.lib.testutils import GlobDirectoryWalker, outputfile, printLocation
+    pp = os.environ.get('PYTHONPATH','')
+    if pp: P.append(pp)
+    del pp
+    os.environ['PYTHONPATH']=os.pathsep.join(P)
+    del P
 
 def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
     "Build a test suite of all available test files."

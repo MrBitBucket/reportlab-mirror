@@ -1,7 +1,7 @@
 __version__=''' $Id$ '''
 """Tests that all manuals can be built.
 """
-from reportlab.lib.testutils import setOutDir,SecureTestCase, printLocation, testsFolder
+from reportlab.lib.testutils import setOutDir,SecureTestCase, printLocation
 setOutDir(__name__)
 import os, sys, unittest
 
@@ -10,6 +10,7 @@ class ManualTestCase(SecureTestCase):
 
     def test0(self):
         "Test if all manuals buildable from source."
+        from reportlab.lib.testutils import testsFolder
         docsFolder = os.path.join(testsFolder,'..','docs')
         cwd = os.getcwd()
         os.chdir(docsFolder)

@@ -3,7 +3,7 @@
 #see license.txt for license details
 __version__=''' $Id$ '''
 __doc__='Test script for reportlab.tables'
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import os,unittest
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle
@@ -507,6 +507,7 @@ LIST_STYLE = TableStyle(
         lst.append(Spacer(0,6))
 
     lst.append(PageBreak())
+    from reportlab.lib.testutils import testsFolder
     I = Image(os.path.join(os.path.dirname(testsFolder),'tools','pythonpoint','demos','leftlogo.gif'))
     I.drawHeight = 1.25*inch*I.drawHeight / I.drawWidth
     I.drawWidth = 1.25*inch

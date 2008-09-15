@@ -3,8 +3,9 @@
 #see license.txt for license details
 """This tests for things in source files.  Initially, absence of tabs :-)
 """
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, SecureTestCase, GlobDirectoryWalker, printLocation, testsFolder, RL_HOME
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, SecureTestCase, GlobDirectoryWalker, printLocation
 setOutDir(__name__)
+from reportlab.lib.testutils import RL_HOME,testsFolder
 __version__=''' $Id$ '''
 import os, sys, glob, string, re
 from types import ModuleType, ClassType, MethodType, FunctionType

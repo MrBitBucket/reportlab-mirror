@@ -5,7 +5,7 @@ __doc__="""Verfy that if in invariant mode, repeated runs
 make identical file.  This does NOT test across platforms
 or python versions, only a user can do that :-)"""
 __version__='''$Id$'''
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, testsFolder
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 
 import unittest
@@ -15,8 +15,8 @@ filename = outputfile('test_invariant.pdf')
 class InvarTestCase(unittest.TestCase):
     "Simplest test that makes PDF"
     def test(self):
-
         import os
+        from reportlab.lib.testutils import testsFolder
         c = Canvas(filename, invariant=1, pageCompression=0)
         c.setFont('Helvetica-Bold', 36)
         c.drawString(100,700, 'Hello World')
