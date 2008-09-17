@@ -23,9 +23,8 @@ def _chunker(src,dst=[],chunkSize=60):
 #  of images will offer a vast speedup.
 #
 ##########################################################
-
 _mode2cs = {'RGB':'RGB', 'CMYK': 'CMYK', 'L': 'G'}
-
+_mode2bpp = {'RGB': 3, 'CMYK':4, 'L':1}
 def makeA85Image(filename,IMG=None):
     import zlib
     img = ImageReader(filename)
@@ -41,7 +40,7 @@ def makeA85Image(filename,IMG=None):
     append('/W %s /H %s /BPC 8 /CS /%s /F [/A85 /Fl]' % (imgwidth, imgheight,_mode2cs[img.mode]))
     append('ID')
     #use a flate filter and Ascii Base 85
-    assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
+    assert len(raw) == imgwidth * imgheight*_mode2bpp[img.mode], "Wrong amount of data for image"
     compressed = zlib.compress(raw)   #this bit is very fast...
     encoded = _AsciiBase85Encode(compressed) #...sadly this may not be
 
