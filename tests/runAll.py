@@ -94,13 +94,6 @@ def main(pattern='test_*.py'):
     if not cleanOnly:
         testSuite = makeSuite(folder,nonImportable=NI,pattern=pattern+(not haveSRC and 'c' or ''))
         unittest.TextTestRunner().run(testSuite)
-        
-        try:
-            from rlextra.testall import makeSuite as makeExtraSuite
-        except:
-            pass
-        else:
-            unittest.TextTestRunner().run(makeExtraSuite())
 
     if haveSRC: cleanup(folder,patterns=('*.pyc','*.pyo'))
     if not cleanOnly:
