@@ -105,7 +105,7 @@ class PDFImage:
 
         #use a flate filter and Ascii Base 85 to compress
         raw = myimage.tostring()
-        assert(len(raw) == imgwidth * imgheight, "Wrong amount of data for image")
+        assert len(raw) == imgwidth*imgheight*3, "Wrong amount of data for image"
         compressed = zlib.compress(raw)   #this bit is very fast...
         encoded = pdfutils._AsciiBase85Encode(compressed) #...sadly this may not be
         #append in blocks of 60 characters

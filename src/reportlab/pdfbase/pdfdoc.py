@@ -20,6 +20,10 @@ from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
 from reportlab import rl_config
 from reportlab.lib.utils import import_zlib, open_for_read, fp_str, _digester
 from reportlab.pdfbase import pdfmetrics
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 
 from sys import platform
 try:
@@ -150,8 +154,7 @@ class PDFDocument:
             self.invariant = invariant
         self.setCompression(compression)
         # signature for creating PDF ID
-        import md5
-        sig = self.signature = md5.new()
+        sig = self.signature = md5()
         sig.update("a reportlab document")
         if not self.invariant:
             cat = _getTimeStamp()
@@ -2053,7 +2056,7 @@ class PDFImageXObject:
             if not zlib: return
             self.width, self.height = im.getSize()
             raw = im.getRGBData()
-            assert(len(raw) == self.width*self.height, "Wrong amount of data for image")
+            #assert len(raw) == self.width*self.height, "Wrong amount of data for image expected %sx%s=%s got %s" % (self.width,self.height,self.width*self.height,len(raw))
             self.streamContent = pdfutils._AsciiBase85Encode(zlib.compress(raw))
             self.colorSpace= _mode2CS[im.mode]
             self.bitsPerComponent = 8

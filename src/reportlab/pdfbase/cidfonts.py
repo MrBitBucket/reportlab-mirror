@@ -12,8 +12,11 @@ import os
 from types import ListType, TupleType, DictType
 from string import find, split, strip
 import marshal
-import md5
 import time
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 
 import reportlab
 from reportlab.pdfbase import pdfmetrics
@@ -88,7 +91,7 @@ class CIDEncoding(pdfmetrics.Encoding):
                 self.parseCMAPFile(name)
 
     def _hash(self, text):
-        hasher = md5.new()
+        hasher = md5()
         hasher.update(text)
         return hasher.digest()
 

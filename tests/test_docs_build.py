@@ -11,7 +11,11 @@ class ManualTestCase(SecureTestCase):
     def test0(self):
         "Test if all manuals buildable from source."
         from reportlab.lib.testutils import testsFolder
-        docsFolder = os.path.join(testsFolder,'..','docs')
+        try:
+            docsFolder = os.path.join(os.path.dirname(testsFolder),'docs')
+        except:
+            print testsFolder
+            raise
         cwd = os.getcwd()
         os.chdir(docsFolder)
         try:

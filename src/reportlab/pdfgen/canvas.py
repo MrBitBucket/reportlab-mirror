@@ -14,7 +14,10 @@ from string import join, split, strip, atoi, replace, upper, digits
 import tempfile
 from types import *
 from math import sin, cos, tan, pi, ceil
-import md5
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 
 from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
@@ -734,7 +737,7 @@ class Canvas(textobject._PDFColorSetter):
         will error in Distiller but work on printers supporting it.
         """
         #check if we've done this one already...
-        rawName = 'PS' + md5.md5(command).hexdigest()
+        rawName = 'PS' + md5(command).hexdigest()
         regName = self._doc.getXObjectName(rawName)
         psObj = self._doc.idToObject.get(regName, None)
         if not psObj:

@@ -7,7 +7,11 @@ __doc__="""Tests to do with image handling.
 Most of them make use of test\pythonpowereed.gif."""
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 setOutDir(__name__)
-import os,md5
+import os
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
 import unittest
 from reportlab.lib.utils import ImageReader
 
@@ -36,7 +40,7 @@ class ReaderTestCase(unittest.TestCase):
         ir = ImageReader(imageFileName)
         assert ir.getSize() == (110,44)
         pixels = ir.getRGBData()
-        assert md5.md5(pixels).hexdigest() == '02e000bf3ffcefe9fc9660c95d7e27cf'
+        assert md5(pixels).hexdigest() == '02e000bf3ffcefe9fc9660c95d7e27cf'
 
 def makeSuite():
     return makeSuiteForClasses(ReaderTestCase)

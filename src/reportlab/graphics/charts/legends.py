@@ -74,7 +74,7 @@ def _getWidths(i,s, fontName, fontSize, subCols):
         fN = getattr(sc,'fontName',fontName)
         fS = getattr(sc,'fontSize',fontSize)
         m = [stringWidth(x, fN, fS) for x in s.split('\n')]
-        aS(max(subCols[0,i],m and max(m) or 0))
+        aS(max(sc.minWidth,m and max(m) or 0))
     return S
 
 class SubColProperty(PropHolder):
