@@ -600,8 +600,17 @@ class BaseDocTemplate:
         if i:
             if i<n and not getattr(flowables[i],'locChanger',None): i += 1
             K = KeepTogether(flowables[:i])
-            for f in K._content[:-1]:
-                f.__dict__['keepWithNext'] = 0
+            mbe = getattr(self,'_multiBuildEdits',None)
+            if mbe:
+                for f in K._content[:-1]:
+                    if hasattr(f,'keepWithNext'):
+                        mbe((setattr,f,'keepWithNext',f.keepWithNext))
+                    else:
+                        mbe((delattr,f,'keepWithNext')) #must get it from a style
+                    f.__dict__['keepWithNext'] = 0
+            else:
+                for f in K._content[:-1]:
+                    f.__dict__['keepWithNext'] = 0
             del flowables[:i]
             flowables.insert(0,K)
 
@@ -818,6 +827,8 @@ class BaseDocTemplate:
         #better fix for filename is a 'file' problem
         self._doSave = 0
         passes = 0
+        mbe = []
+        self._multiBuildEdits = mbe.append
         while 1:
             passes += 1
             if self._onProgress:
@@ -832,12 +843,6 @@ class BaseDocTemplate:
             self.build(tempStory, filename, canvasmaker)
             #self.notify('debug',None)
 
-            #clean up so multi-build does not go wrong - the frame
-            #packer might have tacked an attribute onto some flowables
-            for elem in story:
-                if hasattr(elem, '_postponed'):
-                    del elem._postponed
-
             for fl in self._indexingFlowables:
                 fl.afterBuild()
 
@@ -850,6 +855,18 @@ class BaseDocTemplate:
             if passes > maxPasses:
                 raise IndexError, "Index entries not resolved after %d passes" % maxPasses
 
+            #clean up so multi-build does not go wrong - the frame
+            #packer might have tacked an attribute onto some flowables
+            for elem in story:
+                if hasattr(elem, '_postponed'):
+                    del elem._postponed
+
+            #work through any edits
+            while mbe:
+                e = mbe.pop(0)
+                e[0](*e[1:])
+
+        del self._multiBuildEdits
         if verbose: print 'saved'
 
     #these are pure virtuals override in derived classes
