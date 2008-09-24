@@ -70,6 +70,7 @@ class MyDocTemplate(BaseDocTemplate):
 
 def _test0(self):
     "This makes one long multi-page paragraph."
+    from reportlab.platypus.flowables import DocAssign, DocExec, DocPara, DocIf, DocWhile
 
     # Build story.
     story = []
@@ -111,6 +112,19 @@ def _test0(self):
                 story.append(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h2))
                 story.append(Paragraph(randomText(theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))
 
+        story.extend([
+                DocAssign('currentFrame','doc.frame.id'),
+                DocAssign('currentPageTemplate','doc.pageTemplate.id'),
+                DocAssign('aW','availableWidth'),
+                DocAssign('aH','availableHeight'),
+                DocAssign('aWH','availableWidth,availableHeight'),
+                DocAssign('i',3,life='forever'),
+                DocIf('i>3',Paragraph('The value of i is larger than 3',bt),Paragraph('The value of i is not larger than 3',bt)),
+                DocIf('i==3',Paragraph('The value of i is equal to 3',bt),Paragraph('The value of i is not equal to 3',bt)),
+                DocIf('i<3',Paragraph('The value of i is less than 3',bt),Paragraph('The value of i is not less than 3',bt)),
+                DocWhile('i',[DocPara('i',format='The value of i is %(__expr__)d',style=bt),DocExec('i-=1')]),
+                DocPara('repr(doc._nameSpace)',escape=True),
+                ])
     story.append(Paragraph('The Index which goes at the back', h1))
     story.append(SimpleIndex())
 
