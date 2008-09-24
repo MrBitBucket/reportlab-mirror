@@ -687,8 +687,9 @@ class BaseDocTemplate:
                         raise LayoutError(ident)
                     # this ought to be cleared when they are finally drawn!
                     f._postponed = 1
-                    if self._multiBuildEdits:
-                        self._multiBuildEdits((delattr,f,'_postponed'))
+                    mbe = getattr(self,'_multiBuildEdits',None)
+                    if mbe:
+                        mbe((delattr,f,'_postponed'))
                     flowables.insert(0,f)           # put the flowable back
                     self.handle_frameEnd()
 
