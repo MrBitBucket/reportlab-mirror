@@ -687,6 +687,8 @@ class BaseDocTemplate:
                         raise LayoutError(ident)
                     # this ought to be cleared when they are finally drawn!
                     f._postponed = 1
+                    if self._multiBuildEdits:
+                        self._multiBuildEdits((delattr,f,'_postponed'))
                     flowables.insert(0,f)           # put the flowable back
                     self.handle_frameEnd()
 
@@ -854,12 +856,6 @@ class BaseDocTemplate:
                 break
             if passes > maxPasses:
                 raise IndexError, "Index entries not resolved after %d passes" % maxPasses
-
-            #clean up so multi-build does not go wrong - the frame
-            #packer might have tacked an attribute onto some flowables
-            for elem in story:
-                if hasattr(elem, '_postponed'):
-                    del elem._postponed
 
             #work through any edits
             while mbe:
