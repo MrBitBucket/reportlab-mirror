@@ -1449,17 +1449,17 @@ class Canvas(textobject._PDFColorSetter):
         if direction in [0,90,180,270]:
             direction_arg = ('Di', '/%d' % direction)
         else:
-            raise PDFError(' directions allowed are 0,90,180,270')
+            raise pdfdoc.PDFError(' directions allowed are 0,90,180,270')
 
         if dimension in ['H', 'V']:
             dimension_arg = ('Dm', '/' + dimension)
         else:
-            raisePDFError('dimension values allowed are H and V')
+            raise pdfdoc.PDFError('dimension values allowed are H and V')
 
         if motion in ['I','O']:
             motion_arg = ('M', '/' + motion)
         else:
-            raisePDFError('motion values allowed are I and O')
+            raise pdfdoc.PDFError('motion values allowed are I and O')
 
         # this says which effects require which argument types from above
         PageTransitionEffects = {
@@ -1474,7 +1474,7 @@ class Canvas(textobject._PDFColorSetter):
         try:
             args = PageTransitionEffects[effectname]
         except KeyError:
-            raise PDFError('Unknown Effect Name "%s"' % effectname)
+            raise pdfdoc.PDFError('Unknown Effect Name "%s"' % effectname)
 
         # now build the dictionary
         transDict = {}
