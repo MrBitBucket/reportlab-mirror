@@ -101,6 +101,7 @@ class inc_lib_dirs:
                 # darwin ports installation directories
                 aDir(L, "/opt/local/lib")
                 aDir(I, "/opt/local/include")
+            aDir(I, "/usr/local/include")
             aDir(L, "/usr/local/lib")
             prefix = sysconfig.get_config_var("prefix")
             if prefix:
