@@ -1569,3 +1569,10 @@ would follow from the assumption that"""
         dumpParagraphFrags(P)
         w,h = P.wrap(6*cm-12, 9.7*72)
         dumpParagraphLines(P)
+
+    if flagged(10):
+        text="""a b c\xc2\xa0d e f"""
+        P=Paragraph(text,ParagraphStyle('aaa',parent=styleSheet['Normal'],align=TA_JUSTIFY))
+        dumpParagraphFrags(P)
+        w,h = P.wrap(6*cm-12, 9.7*72)
+        dumpParagraphLines(P)

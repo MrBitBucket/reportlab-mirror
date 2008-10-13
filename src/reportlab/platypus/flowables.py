@@ -1217,14 +1217,19 @@ class DocPara(DocAssign):
     def add_content(self,*args):
         self._doctemplateAttr('frame').add_generated_content(*args)
 
-    def wrap(self,aW,aH):
+    def get_value(self,aW,aH):
         value = self.funcWrap(aW,aH)
         if self.format:
             NS=self._doctemplateAttr('_nameSpace').copy()
+            NS.update(dict(availableWidth=aW,availableHeight=aH))
             NS['__expr__'] = value
             value = self.format % NS
         else:
             value = str(value)
+        return value
+
+    def wrap(self,aW,aH):
+        value = self.get_value(aW,aH)
         P = self.klass
         if not P:
             from reportlab.platypus.paragraph import Paragraph as P
@@ -1237,6 +1242,21 @@ class DocPara(DocAssign):
             value=escape(value)
         self.add_content(P(value,style=style))
         return 0,0
+
+class DocAssert(DocPara):
+    def __init__(self,cond,format=None):
+        Flowable.__init__(self)
+        self.expr=cond
+        self.format=format
+
+    def funcWrap(self,aW,aH):
+        self._cond = DocPara.funcWrap(self,aW,aH)
+        return self._cond
+
+    def wrap(self,aW,aH):
+        value = self.get_value(aW,aH)
+        if not bool(self._cond):
+            raise AssertionError(value)
 
 class DocIf(DocPara):
     def __init__(self,cond,thenBlock,elseBlock=[]):
