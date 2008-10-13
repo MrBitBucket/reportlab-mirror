@@ -329,12 +329,15 @@ lists.  We discuss this here because you have now seen how
 to handle numbering.  A paragraph may have an optional
 ^bulletText^ argument passed to its constructor; alternatively,
 bullet text may be placed in a $<![CDATA[<bullet>..</bullet>]]>$
-tag at its head.  The text will be drawn on the first line of
+tag at its head.  This text will be drawn on the first line of
 the paragraph, with its x origin determined by the $bulletIndent$
 attribute of the style, and in the font given in the
-$bulletFontName$ attribute.  For genuine bullets, a good
-idea is to select the Times-Roman font in the style, and
-use a character such as $\\xe2\\x80\\xa2)$:""")
+$bulletFontName$ attribute.   The "bullet" may be a single character
+such as (doh!) a bullet, or a fragment of text such as a number in
+some numbering sequence, or even a short title as used in a definition
+list.   Fonts may offer various bullet
+characters but we suggest first trying the Unicode bullet ($&bull;$), which may
+be written as $&amp;bull;$,  $&amp;#x2022;$ or (in utf8) $\\xe2\\x80\\xa2$):""")
 
 t=apply(Table,getAttrs(_bulletAttrMap))
 t.setStyle([
