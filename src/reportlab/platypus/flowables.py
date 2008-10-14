@@ -1257,6 +1257,7 @@ class DocAssert(DocPara):
         value = self.get_value(aW,aH)
         if not bool(self._cond):
             raise AssertionError(value)
+        return 0,0
 
 class DocIf(DocPara):
     def __init__(self,cond,thenBlock,elseBlock=[]):
