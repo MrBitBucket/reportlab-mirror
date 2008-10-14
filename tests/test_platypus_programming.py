@@ -10,10 +10,23 @@ setOutDir(__name__)
 import sys
 import unittest
 class PlatypusProgrammingTestCase(unittest.TestCase):
-    "Make documents with lots of Platypus features"
+    "test platypus programming"
+
+    def test0(self):
+        from reportlab.lib.styles import ParagraphStyle
+        from reportlab.platypus.flowables import DocPara, DocAssert
+        from reportlab.platypus.doctemplate import SimpleDocTemplate
+        def func(val):
+            story = [
+                    DocAssert(val,'this should fail'),
+                    DocPara('repr(doc._nameSpace)',escape=True),
+                    ]
+            doc = SimpleDocTemplate(outputfile('test_doc_programming_asserts.pdf'))
+            doc.build(story)
+        self.assertRaises(AssertionError,func,False)
+        func(True)
 
     def test1(self):
-        #test from Wietse Jacobs
         from reportlab.lib.styles import ParagraphStyle
         from reportlab.platypus import SimpleDocTemplate, Paragraph
         from reportlab.platypus.flowables import DocAssign, DocExec, DocPara, DocIf, DocWhile
