@@ -1164,7 +1164,7 @@ class FrameSplitter(NullDraw):
 class DocAssign(NullDraw):
     '''At wrap time this flowable evaluates var=expr in the doctemplate namespace'''
     _ZEROSIZE=1
-    def __init__(self,var,expr,life='frame'):
+    def __init__(self,var,expr,life='forever'):
         Flowable.__init__(self)
         self.args = var,expr,life
 
@@ -1189,7 +1189,7 @@ class DocAssign(NullDraw):
 
 class DocExec(DocAssign):
     '''at wrap time exec stmt in doc._nameSpace'''
-    def __init__(self,stmt,lifetime='frame'):
+    def __init__(self,stmt,lifetime='forever'):
         Flowable.__init__(self)
         self.args=stmt,lifetime
 
