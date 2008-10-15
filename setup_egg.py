@@ -14,7 +14,7 @@ An Open Source Python library for generating PDFs and graphics.
 
 setup(
     name="reportlab",
-    version = "VERSION{2.2pre}VERSION"[8: - 8],
+    version = "VERSION{2.2}VERSION"[8: - 8],
     license="BSD license (see license.txt for details), Copyright (c) 2000-2008, ReportLab Inc.",
     description="The Reportlab Toolkit",
     long_description=long_description,
@@ -27,9 +27,9 @@ setup(
     url="http://www.reportlab.com/",
     download_url = "http://www.reportlab.com/",
 
-    #requires = [
-    #    "imaging",
-    #    ],
+    install_requires = [
+        "PIL>=1.1.6",
+        ],
 
     package_dir = {
         '': 'src'
