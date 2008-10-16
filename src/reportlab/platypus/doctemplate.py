@@ -261,6 +261,13 @@ class PageTemplate:
         this page."""
         pass
 
+def _addGeneratedContent(flowables,frame):
+    S = getattr(frame,'_generated_content',None)
+    if S:
+        for i,f in enumerate(S):
+            flowables.insert(i,f)
+        del frame._generated_content
+
 class BaseDocTemplate:
     """
     First attempt at defining a document template class.
@@ -621,13 +628,6 @@ class BaseDocTemplate:
         finally:
             if frame: del f._frame
 
-    def _addGeneratedContent(self,flowables,frame):
-        S = getattr(frame,'_generated_content',None)
-        if S:
-            for i,f in enumerate(S):
-                flowables.insert(i,f)
-            del frame._generated_content
-
     def handle_flowable(self,flowables):
         '''try to handle one flowable from the front of list flowables.'''
 
@@ -659,7 +659,7 @@ class BaseDocTemplate:
                 if not isinstance(f,FrameActionFlowable):
                     self._curPageFlowableCount += 1
                     self.afterFlowable(f)
-                self._addGeneratedContent(flowables,frame)
+                _addGeneratedContent(flowables,frame)
             else:
                 if self.allowSplitting:
                     # see if this is a splittable thing
@@ -672,7 +672,7 @@ class BaseDocTemplate:
                         if frame.add(S[0], canv, trySplit=0):
                             self._curPageFlowableCount += 1
                             self.afterFlowable(S[0])
-                            self._addGeneratedContent(flowables,frame)
+                            _addGeneratedContent(flowables,frame)
                         else:
                             ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,self._fIdent(f,60,frame))
                             #leave to keep apart from the raise
