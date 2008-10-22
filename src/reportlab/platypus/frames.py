@@ -181,7 +181,10 @@ class Frame:
                 self._y = y
                 return 1
         finally:
-            del flowable.canv, flowable._frame
+            #sometimes canv/_frame aren't still on the flowable
+            for a in ('canv', '_frame'):
+                if hasattr(flowable,a):
+                    delattr(flowable,a)
 
     add = _add
 
