@@ -362,7 +362,7 @@ def main():
         download_url = "http://www.reportlab.com/",
 
         install_requires = [
-            "PIL>=1.1.3",
+            #"PIL>=1.1.3",
             ],
 
         package_dir = {
