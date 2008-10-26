@@ -146,16 +146,9 @@ def _find_rl_ccode(dn='rl_accel',cn='_rl_accel.c'):
     _ = []
     for x in [
             pjoin('src','rl_addons',dn),
-            pjoin('rl_addons',dn),
-            pjoin('..','rl_addons',dn),
-            pjoin('..','..','rl_addons',dn),
             dn,
-            pjoin('..',dn),
-            pjoin('..','..',dn),
             ] \
             + glob.glob(pjoin(dn+'-*',dn))\
-            + glob.glob(pjoin('..',dn+'-*',dn))\
-            + glob.glob(pjoin('..','..',dn+'-*',dn))\
             :
         fn = pjoin(pkgDir,x,cn)
         if isfile(fn):
@@ -369,7 +362,7 @@ def main():
         download_url = "http://www.reportlab.com/",
 
         install_requires = [
-            "PIL>=1.1.6",
+            "PIL>=1.1.3",
             ],
 
         package_dir = {
@@ -398,7 +391,7 @@ def main():
 
         #data_files = DATA_FILES.items(),
         libraries = LIBRARIES,
-        ext_modules =   EXT_MODULES,
+        #ext_modules =   EXT_MODULES,
     )
 
 if __name__ == "__main__":
