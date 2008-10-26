@@ -194,6 +194,10 @@ reportlab_files= [
         ]
 
 def main():
+    # Skip if the command is clean.
+    cmd = sys.argv[-1]
+    if cmd and cmd == "clean":
+        return
 
     SPECIAL_PACKAGE_DATA = {}
     RL_ACCEL = _find_rl_ccode('rl_accel','_rl_accel.c')
@@ -340,6 +344,12 @@ def main():
                             ]
         infoline('################################################')
 
+    infoline('Attempting to install PIL')
+    ret = os.system("easy_install --find-links http://www.pythonware.com/products/pil/ Imaging")
+    if not ret:
+        infoline('PIL Installation failed. Proceeding ...')
+    infoline('################################################')
+
     #copy some special case files into place so package_data will treat them properly
     PACKAGE_DIR = {'reportlab': pjoin('src','reportlab')}
     for fn,dst in SPECIAL_PACKAGE_DATA.iteritems():
@@ -361,6 +371,10 @@ def main():
         url="http://www.reportlab.com/",
         download_url = "http://www.reportlab.com/",
 
+        # Installing PIL as a dependency is a pain. Here we are
+        # executing the below command directly as part of the setup.
+        # easy_install --find-links http://www.pythonware.com/products/pil/ Imaging
+        # Got the idea from http://www.martin-geber.com/weblog/2007/08/22/problems-installing-easy_install-pil/
         install_requires = [
             #"PIL>=1.1.3",
             ],
