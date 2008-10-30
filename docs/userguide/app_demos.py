@@ -53,7 +53,7 @@ different color spaces and a large selection of the colors which are named
 in the $reportlab.lib.colors$ module.
 """)
 heading2("""Py2pdf""")
-disc("""Dinu Gherman (&lt;gherman@europemail.com&gt;) contributed this useful script
+disc("""Dinu Gherman contributed this useful script
 which uses reportlab to produce nicely colorized PDF documents from Python
 scripts including bookmarks for classes, methods and functions.
 To get a nice version of the main script try""")
