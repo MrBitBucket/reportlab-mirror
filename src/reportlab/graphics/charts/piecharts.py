@@ -27,7 +27,7 @@ from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.attrmap import *
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon, Rect, PolyLine
+from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon, Rect, PolyLine, Line
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.charts.legends import _objStr
@@ -39,13 +39,15 @@ class WedgeLabel(Label):
     def _checkDXY(self,ba):
         pass
     def _getBoxAnchor(self):
-        na = (int((self._pmv%360)/45.)*45)%360
-        if not (na % 90): # we have a right angle case
-            da = (self._pmv - na) % 360
-            if abs(da)>5:
-                na = na + (da>0 and 45 or -45)
-        ba = (getattr(self,'_anti',None) and _ANGLE2RBOXANCHOR or _ANGLE2BOXANCHOR)[na]
-        self._checkDXY(ba)
+        ba = self.boxAnchor
+        if ba in ('autox','autoy'):
+            na = (int((self._pmv%360)/45.)*45)%360
+            if not (na % 90): # we have a right angle case
+                da = (self._pmv - na) % 360
+                if abs(da)>5:
+                    na += (da>0 and 45 or -45)
+            ba = (getattr(self,'_anti',None) and _ANGLE2RBOXANCHOR or _ANGLE2BOXANCHOR)[na]
+            self._checkDXY(ba)
         return ba
 
 class WedgeProperties(PropHolder):
@@ -86,6 +88,7 @@ class WedgeProperties(PropHolder):
         label_leftPadding = AttrMapValue(isNumber,'padding at left of box'),
         label_rightPadding = AttrMapValue(isNumber,'padding at right of box'),
         label_bottomPadding = AttrMapValue(isNumber,'padding at bottom of box'),
+        label_simple_pointer = AttrMapValue(isBoolean,'set to True for simple pointers'),
         label_pointer_strokeColor = AttrMapValue(isColorOrNone,desc='Color of indicator line'),
         label_pointer_strokeWidth = AttrMapValue(isNumber,desc='StrokeWidth of indicator line'),
         label_pointer_elbowLength = AttrMapValue(isNumber,desc='length of final indicator line segment'),
@@ -108,7 +111,7 @@ class WedgeProperties(PropHolder):
         self.label_dx = self.label_dy = self.label_angle = 0
         self.label_text = None
         self.label_topPadding = self.label_leftPadding = self.label_rightPadding = self.label_bottomPadding = 0
-        self.label_boxAnchor = 'c'
+        self.label_boxAnchor = 'autox'
         self.label_boxStrokeColor = None    #boxStroke
         self.label_boxStrokeWidth = 0.5 #boxStrokeWidth
         self.label_boxFillColor = None
@@ -116,6 +119,7 @@ class WedgeProperties(PropHolder):
         self.label_strokeWidth = 0.1
         self.label_leading =    self.label_width = self.label_maxWidth = self.label_height = None
         self.label_textAnchor = 'start'
+        self.label_simple_pointer = 0
         self.label_visible = 1
         self.label_pointer_strokeColor = colors.black
         self.label_pointer_strokeWidth = 0.5
@@ -124,12 +128,13 @@ class WedgeProperties(PropHolder):
         self.label_pointer_piePad = 3
         self.visible = 1
 
-def _addWedgeLabel(self,text,add,angle,labelX,labelY,wedgeStyle,labelClass=WedgeLabel):
+def _addWedgeLabel(self,text,angle,labelX,labelY,wedgeStyle,labelClass=WedgeLabel):
     # now draw a label
     if self.simpleLabels:
         theLabel = String(labelX, labelY, text)
         theLabel.textAnchor = "middle"
         theLabel._pmv = angle
+        theLabel._simple_pointer = 0
     else:
         theLabel = labelClass()
         theLabel._pmv = angle
@@ -157,17 +162,18 @@ def _addWedgeLabel(self,text,add,angle,labelX,labelY,wedgeStyle,labelClass=Wedge
         theLabel.leftPadding = wedgeStyle.label_leftPadding
         theLabel.rightPadding = wedgeStyle.label_rightPadding
         theLabel.bottomPadding = wedgeStyle.label_bottomPadding
+        theLabel._simple_pointer = wedgeStyle.label_simple_pointer
     theLabel.fontSize = wedgeStyle.fontSize
     theLabel.fontName = wedgeStyle.fontName
     theLabel.fillColor = wedgeStyle.fontColor
-    add(theLabel)
+    return theLabel
 
 def _fixLabels(labels,n):
     if labels is None:
         labels = [''] * n
     else:
         i = n-len(labels)
-        if i>0: labels = labels + ['']*i
+        if i>0: labels = list(labels)+['']*i
     return labels
 
 class AbstractPieChart(PlotArea):
@@ -500,8 +506,8 @@ class Pie(AbstractPieChart):
             style = self.slices[i%styleCount]
             if not style.label_visible or not style.visible: continue
             n += 1
-            _addWedgeLabel(self,sn,L_add,180,labelX,labelY,style,labelClass=WedgeLabel)
-            l = L[-1]
+            l=_addWedgeLabel(self,sn,180,labelX,labelY,style,labelClass=WedgeLabel)
+            L_add(l)
             b = l.getBounds()
             w = b[2]-b[0]
             h = b[3]-b[1]
@@ -628,11 +634,8 @@ class Pie(AbstractPieChart):
 
         g = Group()
         g_add = g.add
-        if checkLabelOverlap:
-            L = []
-            L_add = L.append
-        else:
-            L_add = g_add
+        L = []
+        L_add = L.append
 
         for i,(a1,a2) in angles:
             if a2 is None: continue
@@ -673,9 +676,12 @@ class Pie(AbstractPieChart):
                     ry = yradius*labelRadius
                     labelX = cx + rx*cosAA
                     labelY = cy + ry*sinAA
-                    _addWedgeLabel(self,text,L_add,averageAngle,labelX,labelY,wedgeStyle)
+                    l = _addWedgeLabel(self,text,averageAngle,labelX,labelY,wedgeStyle)
+                    L_add(l)
+                    if not plMode and l._simple_pointer:
+                        l._aax = cx+xradius*cosAA
+                        l._aay = cy+yradius*sinAA
                     if checkLabelOverlap:
-                        l = L[-1]
                         l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
                                         'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
                                         'bounds': l.getBounds(),
@@ -698,7 +704,14 @@ class Pie(AbstractPieChart):
 
         if checkLabelOverlap and L:
             fixLabelOverlaps(L)
-            map(g_add,L)
+        map(g_add,L)
+
+        if not plMode:
+            for l in L:
+                if l._simple_pointer:
+                    g_add(Line(l.x,l.y,l._aax,l._aay,
+                        strokeWidth=wedgeStyle.label_pointer_strokeWidth,
+                        strokeColor=wedgeStyle.label_pointer_strokeColor))
 
         return g
 
@@ -849,8 +862,8 @@ class LegendedPie(Pie):
     def _getDrawingDimensions(self):
         tx = self.rightPadding
         if self.drawLegend:
-            tx = tx+self.legend1.x+self.legendNumberOffset #self._legend2.x
-            tx = tx + self._legend2._calculateMaxWidth(self._legend2.colorNamePairs)
+            tx += self.legend1.x+self.legendNumberOffset #self._legend2.x
+            tx += self._legend2._calculateMaxWidth(self._legend2.colorNamePairs)
         ty = self.bottomPadding+self.height+self.topPadding
         return (tx,ty)
 
@@ -921,7 +934,7 @@ class Wedge3dProperties(PropHolder):
         self.label_dx = self.label_dy = self.label_angle = 0
         self.label_text = None
         self.label_topPadding = self.label_leftPadding = self.label_rightPadding = self.label_bottomPadding = 0
-        self.label_boxAnchor = 'c'
+        self.label_boxAnchor = 'autox'
         self.label_boxStrokeColor = None    #boxStroke
         self.label_boxStrokeWidth = 0.5 #boxStrokeWidth
         self.label_boxFillColor = None
@@ -1101,9 +1114,9 @@ class Pie3d(Pie):
                 mid = sl.mid
                 labelX = OX(i,mid,0)
                 labelY = OY(i,mid,0)
-                _addWedgeLabel(self,text,L.append,mid,labelX,labelY,style,labelClass=WedgeLabel3d)
+                l=_addWedgeLabel(self,text,mid,labelX,labelY,style,labelClass=WedgeLabel3d)
+                L.append(l)
                 if checkLabelOverlap:
-                    l = L[-1]
                     l._origdata = { 'x': labelX, 'y':labelY, 'angle': mid,
                                     'rx': self._radiusx, 'ry':self._radiusy, 'cx':CX(i,0), 'cy':CY(i,0),
                                     'bounds': l.getBounds(),

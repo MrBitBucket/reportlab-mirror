@@ -141,7 +141,7 @@ class Doughnut(AbstractPieChart):
             else:
                 tlab = 0
                 for m in n:
-                    tlab = tlab+m
+                    tlab += m
                 i = tlab-len(labels)
                 if i>0:
                     labels = list(labels) + [''] * i
@@ -210,9 +210,9 @@ class Doughnut(AbstractPieChart):
                         labelRadius = sectorStyle.labelRadius
                         labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
                         labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
-                        _addWedgeLabel(self,text,g.add,averageAngle,labelX,labelY,sectorStyle)
-                    i = i + 1
-                sn = sn + 1
+                        g.add(_addWedgeLabel(self,text,averageAngle,labelX,labelY,sectorStyle))
+                    i += 1
+                sn += 1
 
         else:
             i = 0
@@ -271,7 +271,7 @@ class Doughnut(AbstractPieChart):
                     g.add(theLabel)
 
                 startAngle = endAngle
-                i = i + 1
+                i += 1
 
         return g
 
