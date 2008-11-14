@@ -136,7 +136,10 @@ class Flowable:
     def split(self, availWidth, availheight):
         """This will be called by more sophisticated frames when
         wrap fails. Stupid flowables should return []. Clever flowables
-        should split themselves and return a list of flowables"""
+        should split themselves and return a list of flowables.
+        If they decide that nothing useful can be fitted in the
+        available space (e.g. if you have a table and not enough
+        space for the first row), also return []"""
         return []
 
     def getKeepWithNext(self):
