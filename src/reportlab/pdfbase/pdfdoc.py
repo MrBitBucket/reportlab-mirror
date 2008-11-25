@@ -1319,7 +1319,7 @@ class PDFOutlines:
         # adjust currentlevel and stack to match level
         if level>currentlevel:
             if level>currentlevel+1:
-                raise ValueError, "can't jump from outline level %s to level %s, need intermediates" %(currentlevel, level)
+                raise ValueError, "can't jump from outline level %s to level %s, need intermediates (destinationname=%r, title=%r)" %(currentlevel, level, destinationname, title)
             level = currentlevel = currentlevel+1
             stack.append([])
         while level<currentlevel:
