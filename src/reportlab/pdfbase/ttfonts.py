@@ -478,7 +478,7 @@ class TTFontFile(TTFontParser):
                 names[nameId] = N
                 nameCount -= 1
                 if nameCount==0: break
-        psName = names[6]
+        psName = names[6].replace(" ", "-")  #Dinu Gherman's fix for font names with spaces
         if not psName:
             raise TTFError, "Could not find PostScript font name"
         for c in psName:
