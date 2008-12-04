@@ -18,9 +18,46 @@ from reportlab.rl_config import platypus_link_underline
 import re
 
 #on UTF8 branch, split and strip must be unicode-safe!
+#thanks to Dirk Holtwick for helpful discussions/insight
+#on this one
+_wsc_re_split=re.compile('[%s]+'% re.escape(''.join((
+    u'\u0009',  # HORIZONTAL TABULATION
+    u'\u000A',  # LINE FEED
+    u'\u000B',  # VERTICAL TABULATION
+    u'\u000C',  # FORM FEED
+    u'\u000D',  # CARRIAGE RETURN
+    u'\u001C',  # FILE SEPARATOR
+    u'\u001D',  # GROUP SEPARATOR
+    u'\u001E',  # RECORD SEPARATOR
+    u'\u001F',  # UNIT SEPARATOR
+    u'\u0020',  # SPACE
+    u'\u0085',  # NEXT LINE
+    #u'\u00A0', # NO-BREAK SPACE
+    u'\u1680',  # OGHAM SPACE MARK
+    u'\u2000',  # EN QUAD
+    u'\u2001',  # EM QUAD
+    u'\u2002',  # EN SPACE
+    u'\u2003',  # EM SPACE
+    u'\u2004',  # THREE-PER-EM SPACE
+    u'\u2005',  # FOUR-PER-EM SPACE
+    u'\u2006',  # SIX-PER-EM SPACE
+    u'\u2007',  # FIGURE SPACE
+    u'\u2008',  # PUNCTUATION SPACE
+    u'\u2009',  # THIN SPACE
+    u'\u200A',  # HAIR SPACE
+    u'\u200B',  # ZERO WIDTH SPACE
+    u'\u2028',  # LINE SEPARATOR
+    u'\u2029',  # PARAGRAPH SEPARATOR
+    u'\u202F',  # NARROW NO-BREAK SPACE
+    u'\u205F',  # MEDIUM MATHEMATICAL SPACE
+    u'\u3000',  # IDEOGRAPHIC SPACE
+    )))).split
+
 def split(text, delim=None):
     if type(text) is str: text = text.decode('utf8')
     if type(delim) is str: delim = delim.decode('utf8')
+    if delim is None and u'\xa0' in text:
+        return [uword.encode('utf8') for uword in _wsc_re_split(text)]
     return [uword.encode('utf8') for uword in text.split(delim)]
 
 def strip(text):
