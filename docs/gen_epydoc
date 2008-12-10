@@ -1,0 +1,2 @@
+#!/bin/sh
+epydoc --html reportlab --docformat=restructuredtext
