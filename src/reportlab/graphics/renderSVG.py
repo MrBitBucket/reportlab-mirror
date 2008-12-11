@@ -214,7 +214,7 @@ class SVGCanvas:
         return a copy of string s with special characters in postscript strings
         escaped with backslashes.
         Have not handled characters that are converted normally in python strings
-        i.e. \n -> newline
+        i.e. \\n -> newline
         """
 
         str = string.replace(s, chr(0x5C), r'\\' )

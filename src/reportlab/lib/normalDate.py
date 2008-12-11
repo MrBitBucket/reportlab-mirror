@@ -81,22 +81,38 @@ class NormalDate:
     Valid NormalDate ranges include (-9999,1,1) B.C.E. through
     (9999,12,31) C.E./A.D.
 
-    1.0 - No changes, except the version number.  After 3 years of use
-            by various parties I think we can consider it stable.
-    0.8 - added Prof. Stephen Walton's suggestion for a range method
-            - module author resisted the temptation to use lambda <0.5 wink>
-    0.7 - added Dan Winkler's suggestions for __add__, __sub__ methods
-    0.6 - modifications suggested by Kevin Digweed to fix:
-            - dayOfWeek, dayOfWeekAbbrev, clone methods
-            - permit NormalDate to be a better behaved superclass
-    0.5 - minor tweaking
-    0.4 - added methods __cmp__, __hash__
-        - added Epoch variable, scoped to the module
-        - added setDay, setMonth, setYear methods
-    0.3 - minor touch-ups
-    0.2 - fixed bug for certain B.C.E leap years
-        - added Jim Fulton's suggestions for short alias class name =ND
-          and __getstate__, __setstate__ methods
+
+    1.0
+        No changes, except the version number.  After 3 years of use by
+        various parties I think we can consider it stable.
+
+    0.8
+        Added Prof. Stephen Walton's suggestion for a range method
+         - module author resisted the temptation to use lambda <0.5 wink>
+
+    0.7
+        Added Dan Winkler's suggestions for __add__, __sub__ methods
+
+    0.6
+        Modifications suggested by Kevin Digweed to fix:
+         - dayOfWeek, dayOfWeekAbbrev, clone methods
+         - Permit NormalDate to be a better behaved superclass
+
+    0.5
+        Minor tweaking
+
+    0.4
+         - Added methods __cmp__, __hash__
+         - Added Epoch variable, scoped to the module
+         - Added setDay, setMonth, setYear methods
+
+    0.3
+        Minor touch-ups
+
+    0.2
+         - Fixed bug for certain B.C.E leap years
+         - Added Jim Fulton's suggestions for short alias class name =ND
+           and __getstate__, __setstate__ methods
 
     Special thanks:  Roedy Green
     """

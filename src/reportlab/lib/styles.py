@@ -102,20 +102,26 @@ class LineStyle(PropertySet):
         #etc. etc.
 
 class StyleSheet1:
-    """This may or may not be used.  The idea is to
+    """
+    This may or may not be used.  The idea is to:
+    
     1. slightly simplify construction of stylesheets;
+    
     2. enforce rules to validate styles when added
        (e.g. we may choose to disallow having both
        'heading1' and 'Heading1' - actual rules are
        open to discussion);
+       
     3. allow aliases and alternate style lookup
        mechanisms
+       
     4. Have a place to hang style-manipulation
        methods (save, load, maybe support a GUI
        editor)
-       Access is via getitem, so they can be
-       compatible with plain old dictionaries.
-       """
+   
+    Access is via getitem, so they can be
+    compatible with plain old dictionaries.
+    """
     def __init__(self):
         self.byName = {}
         self.byAlias = {}

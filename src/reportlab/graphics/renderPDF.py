@@ -2,9 +2,10 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/renderPDF.py
 # renderPDF - draws Drawings onto a canvas
-"""Usage:
-    import renderpdf
-    renderpdf.draw(drawing, canvas, x, y)
+"""
+Usage:
+- import renderpdf
+- renderpdf.draw(drawing, canvas, x, y)
 Execute the script to see some test drawings.
 changed
 """

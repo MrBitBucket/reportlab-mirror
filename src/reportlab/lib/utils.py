@@ -694,23 +694,27 @@ def getImageData(imageFileName):
 class DebugMemo:
     '''Intended as a simple report back encapsulator
 
-    Typical usages
-    1) To record error data
+    Typical usages:
+        
+    1. To record error data::
+        
         dbg = DebugMemo(fn='dbgmemo.dbg',myVar=value)
         dbg.add(anotherPayload='aaaa',andagain='bbb')
         dbg.dump()
 
-    2) To show the recorded info
+    2. To show the recorded info::
+        
         dbg = DebugMemo(fn='dbgmemo.dbg',mode='r')
         dbg.load()
         dbg.show()
 
-    3) To re-use recorded information
+    3. To re-use recorded information::
+        
         dbg = DebugMemo(fn='dbgmemo.dbg',mode='r')
             dbg.load()
         myTestFunc(dbg.payload('myVar'),dbg.payload('andagain'))
 
-    in addition to the payload variables the dump records many useful bits
+    In addition to the payload variables the dump records many useful bits
     of information which are also printed in the show() method.
     '''
     def __init__(self,fn='rl_dbgmemo.dbg',mode='w',getScript=1,modules=(),capture_traceback=1, stdout=None, **kw):

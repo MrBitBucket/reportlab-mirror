@@ -98,7 +98,8 @@ class Sequencer:
     some counters are reset when their parents.
     It keeps track of a number of
     'counters', which are created on request:
-    Usage:
+    Usage::
+    
         >>> seq = layout.Sequencer()
         >>> seq.next('Bullets')
         1

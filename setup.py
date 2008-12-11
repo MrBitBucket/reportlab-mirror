@@ -174,7 +174,6 @@ def infoline(t):
     INFOLINES.append(t)
 
 reportlab_files= [
-        'extensions/README',
         'fonts/00readme.txt',
         'fonts/bitstream-vera-license.txt',
         'fonts/DarkGarden-copying-gpl.txt',
@@ -367,7 +366,6 @@ def main():
             url="http://www.reportlab.com/",
             packages=[
                     'reportlab',
-                    'reportlab.extensions',
                     'reportlab.graphics.charts',
                     'reportlab.graphics.samples',
                     'reportlab.graphics.widgets',

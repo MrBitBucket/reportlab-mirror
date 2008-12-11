@@ -51,7 +51,7 @@ _postnet_patterns = {
 }
 
 class FIM(Barcode):
-    """"
+    """
     FIM (Facing ID Marks) encode only one letter.
     There are currently four defined:
 
@@ -144,7 +144,7 @@ class FIM(Barcode):
         return self.value
 
 class POSTNET(Barcode):
-    """"
+    """
     POSTNET is used in the US to encode "zip codes" (postal codes) on
     mail. It can encode 5, 9, or 11 digit codes. I've read that it's
     pointless to do 5 digits, since USPS will just have to re-print
