@@ -943,6 +943,12 @@ class Paragraph(Flowable):
             style = deepcopy(style)
             style.firstLineIndent = 0
         P2=self.__class__(None,style,bulletText=None,frags=func(blPara,s,n))
+        #propagate attributes that might be on self; suggestion from Dirk Holtwick
+        for a in ('autoLeading',    #possible attributes that might be directly on self.
+                ):
+            if hasattr(self,a):
+                setattr(P1,a,getattr(self,a))
+                setattr(P2,a,getattr(self,a))
         return [P1,P2]
 
     def draw(self):
