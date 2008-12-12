@@ -3,7 +3,7 @@
 __version__=''' $Id$ '''
 
 #modification of users/robin/ttflist.py.
-"""This provides some general-purpose tools for finding fonts.
+__doc__="""This provides some general-purpose tools for finding fonts.
 
 The FontFinder object can search for font files.  It aims to build
 a catalogue of fonts which our framework can work with.  It may be useful

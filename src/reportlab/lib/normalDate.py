@@ -11,7 +11,7 @@
 # by Jeff Bauer of Rubicon Research and used
 # with his kind permission
 __version__=''' $Id$ '''
-
+__doc__="Jeff Bauer's lightweight date class, extended by us.  Predates Python's datetime module."
 
 
 _bigBangScalar = -4345732  # based on (-9999, 1, 1) BC/BCE minimum

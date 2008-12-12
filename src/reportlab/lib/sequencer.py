@@ -2,8 +2,7 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/sequencer.py
 __version__=''' $Id$ '''
-"""This module defines a single public class, Sequencer, which aids in
-numbering and formatting lists."""
+__doc__="""A Sequencer class counts things. It aids numbering and formatting lists."""
 __all__='''Sequencer getSequencer setSequencer'''.split()
 #
 # roman numbers conversion thanks to

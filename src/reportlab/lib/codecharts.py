@@ -3,7 +3,7 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/codecharts.py
 #$Header $
 __version__=''' $Id '''
-__doc__="""Routines to print code page (character set) drawings.
+__doc__="""Routines to print code page (character set) drawings. Predates unicode.
 
 To be sure we can accurately represent characters in various encodings
 and fonts, we need some routines to display all those characters.

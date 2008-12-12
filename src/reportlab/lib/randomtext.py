@@ -8,7 +8,8 @@ __version__=''' $Id$ '''
 ###############################################################################
 #   generates so-called 'Greek Text' for use in filling documents.
 ###############################################################################
-"""
+__doc__="""Like Lorem Ipsum, but more fun and extensible.
+
 This module exposes a function randomText() which generates paragraphs.
 These can be used when testing out document templates and stylesheets.
 A number of 'themes' are provided - please contribute more!

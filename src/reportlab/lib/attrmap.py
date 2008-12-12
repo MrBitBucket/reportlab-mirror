@@ -2,6 +2,32 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/attrmap.py
 __version__=''' $Id$ '''
+__doc__='''Framework for objects whose assignments are checked. Used by graphics.
+
+We developed reportlab/graphics prior to Python 2 and metaclasses. For the
+graphics, we wanted to be able to declare the attributes of a class, check
+them on assignment, and convert from string arguments.  Examples of
+attrmap-based objects can be found in reportlab/graphics/shapes.  It lets
+us defined structures like the one below, which are seen more modern form in
+Django models and other frameworks.
+
+We'll probably replace this one day soon, hopefully with no impact on client
+code.
+
+class Rect(SolidShape):
+    """Rectangle, possibly with rounded corners."""
+
+    _attrMap = AttrMap(BASE=SolidShape,
+        x = AttrMapValue(isNumber),
+        y = AttrMapValue(isNumber),
+        width = AttrMapValue(isNumber),
+        height = AttrMapValue(isNumber),
+        rx = AttrMapValue(isNumber),
+        ry = AttrMapValue(isNumber),
+        )
+
+
+'''
 from UserDict import UserDict
 from reportlab.lib.validators import isAnything, _SequenceTypes, DerivedValue
 from reportlab import rl_config

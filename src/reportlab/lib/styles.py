@@ -2,7 +2,19 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/styles.py
 __version__=''' $Id$ '''
+__doc__='''Classes for ParagraphStyle and similar things.
 
+
+A style is a collection of attributes, but with some extra features
+to allow 'inheritance' from a parent, and to ensure nobody makes
+changes after construction.
+
+ParagraphStyle shows all the attributes available for formatting
+paragraphs.
+
+getSampleStyleSheet()  returns a stylesheet you can use for initial
+development, with a few basic heading and text styles.
+'''
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
 

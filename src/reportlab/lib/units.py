@@ -3,7 +3,14 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/units.py
 __version__=''' $Id$ '''
+__doc__='''Defines inch, cm, mm etc as multiples of a point
 
+You can now in user-friendly units by doing::
+
+    from reportlab.lib.units import inch
+    r = Rect(0, 0, 3 * inch, 6 * inch)
+
+'''
 inch = 72.0
 cm = inch / 2.54
 mm = cm * 0.1

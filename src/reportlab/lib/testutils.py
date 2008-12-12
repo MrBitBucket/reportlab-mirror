@@ -1,8 +1,14 @@
 #Copyright ReportLab Europe Ltd. 2000-2008
 #see license.txt for license details
-"""Utilities for testing Python packages.
-"""
 __version__='''$Id$'''
+__doc__="""Provides support for the test suite.
+
+The test suite as a whole, and individual tests, need to share
+certain support functions.  We have to put these in here so they
+can always be imported, and so that individual tests need to import
+nothing more than "reportlab.whatever..."
+"""
+
 import sys, os, string, fnmatch, copy, re
 from ConfigParser import ConfigParser
 import unittest

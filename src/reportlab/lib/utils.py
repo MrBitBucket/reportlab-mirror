@@ -2,6 +2,7 @@
 #see license.txt for license details
 # $URI:$
 __version__=''' $Id$ '''
+__doc__='''Gazillions of miscellaneous internal utility functions'''
 
 import string, os, sys, imp, time
 try:

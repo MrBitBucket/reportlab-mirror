@@ -3,7 +3,7 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/enums.py
 __version__=''' $Id$ '''
 __doc__="""
-holder for all reportlab's enumerated types
+Container for constants. Hardly used!
 """
 TA_LEFT = 0
 TA_CENTER = 1

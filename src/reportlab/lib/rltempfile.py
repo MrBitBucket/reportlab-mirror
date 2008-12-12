@@ -2,6 +2,15 @@
 #see license.txt for license details
 # $URI:$
 __version__=''' $Id$ '''
+__doc__='''Helper for the test suite - determines where to write output.
+
+When our test suite runs as source, a script "test_foo.py" will typically
+create "test_foo.pdf" alongside it.  But if you are testing a package of
+compiled code inside a zip archive, this won't work.  This determines
+where to write test suite output, creating a subdirectory of /tmp/ or
+whatever if needed.
+
+'''
 _rl_tempdir=None
 __all__ = ('get_rl_tempdir', 'get_rl_tempdir')
 import os, tempfile
