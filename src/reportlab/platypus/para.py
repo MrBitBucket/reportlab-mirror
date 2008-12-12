@@ -15,16 +15,17 @@ to create hierarchically organized documents.
 This implementation adds the following paragraph-like tags (which
 support the same attributes as paragraphs, for font specification, etc).
 
-- Unnumberred lists (ala html):
+- Unnumberred lists (ala html)::
 
     <ul>
         <li>first one</li>
         <li>second one</li>
     </ul>
 
+
 Also <ul type="disc"> (default) or <ul type="circle">, <ul type="square">.
 
-- Numberred lists (ala html):
+- Numberred lists (ala html)::
 
     <ol>
         <li>first one</li>

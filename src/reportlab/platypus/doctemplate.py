@@ -273,20 +273,21 @@ class BaseDocTemplate:
     First attempt at defining a document template class.
 
     The basic idea is simple.
-    0)  The document has a list of data associated with it
+    
+    1)  The document has a list of data associated with it
         this data should derive from flowables. We'll have
         special classes like PageBreak, FrameBreak to do things
         like forcing a page end etc.
 
-    1)  The document has one or more page templates.
+    2)  The document has one or more page templates.
 
-    2)  Each page template has one or more frames.
+    3)  Each page template has one or more frames.
 
-    3)  The document class provides base methods for handling the
+    4)  The document class provides base methods for handling the
         story events and some reasonable methods for getting the
         story flowables into the frames.
 
-    4)  The document instances can override the base handler routines.
+    5)  The document instances can override the base handler routines.
 
     Most of the methods for this class are not called directly by the user,
     but in some advanced usages they may need to be overridden via subclassing.
@@ -299,28 +300,29 @@ class BaseDocTemplate:
 
     Possible keyword arguments for the initialization:
 
-    pageTemplates: A list of templates.  Must be nonempty.  Names
+    - pageTemplates: A list of templates.  Must be nonempty.  Names
       assigned to the templates are used for referring to them so no two used
       templates should have the same name.  For example you might want one template
       for a title page, one for a section first page, one for a first page of
       a chapter and two more for the interior of a chapter on odd and even pages.
       If this argument is omitted then at least one pageTemplate should be provided
       using the addPageTemplates method before the document is built.
-    pageSize: a 2-tuple or a size constant from reportlab/lib/pagesizes.pu.
-     Used by the SimpleDocTemplate subclass which does NOT accept a list of
-     pageTemplates but makes one for you; ignored when using pageTemplates.
+    - pageSize: a 2-tuple or a size constant from reportlab/lib/pagesizes.pu.
+      Used by the SimpleDocTemplate subclass which does NOT accept a list of
+      pageTemplates but makes one for you; ignored when using pageTemplates.
 
-    showBoundary: if set draw a box around the frame boundaries.
-    leftMargin:
-    rightMargin:
-    topMargin:
-    bottomMargin:  Margin sizes in points (default 1 inch)
-      These margins may be overridden by the pageTemplates.  They are primarily of interest
-      for the SimpleDocumentTemplate subclass.
-    allowSplitting:  If set flowables (eg, paragraphs) may be split across frames or pages
+    - showBoundary: if set draw a box around the frame boundaries.
+    - leftMargin:
+    - rightMargin:
+    - topMargin:
+    - bottomMargin:  Margin sizes in points (default 1 inch).  These margins may be
+      overridden by the pageTemplates.  They are primarily of interest for the
+      SimpleDocumentTemplate subclass.
+    
+    - allowSplitting:  If set flowables (eg, paragraphs) may be split across frames or pages
       (default: 1)
-    title: Internal title for document (does not automatically display on any page)
-    author: Internal author for document (does not automatically display on any page)
+    - title: Internal title for document (does not automatically display on any page)
+    - author: Internal author for document (does not automatically display on any page)
     """
     _initArgs = {   'pagesize':defaultPageSize,
                     'pageTemplates':[],

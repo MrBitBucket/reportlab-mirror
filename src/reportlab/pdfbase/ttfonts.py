@@ -412,27 +412,32 @@ class TTFontFile(TTFontParser):
         self.extractInfo(charInfo)
 
     def extractInfo(self, charInfo=1):
-        """Extract typographic information from the loaded font file.
+        """
+        Extract typographic information from the loaded font file.
 
-        The following attributes will be set:
-            name         - PostScript font name
-            flags        - Font flags
-            ascent       - Typographic ascender in 1/1000ths of a point
-            descent      - Typographic descender in 1/1000ths of a point
-            capHeight    - Cap height in 1/1000ths of a point (0 if not available)
-            bbox         - Glyph bounding box [l,t,r,b] in 1/1000ths of a point
-            _bbox        - Glyph bounding box [l,t,r,b] in unitsPerEm
-            unitsPerEm   - Glyph units per em
-            italicAngle  - Italic angle in degrees ccw
-            stemV        - stem weight in 1/1000ths of a point (approximate)
-        If charInfo is true, the following will also be set:
-            defaultWidth - default glyph width in 1/1000ths of a point
-            charWidths   - dictionary of character widths for every supported
-                           UCS character code
-
+        The following attributes will be set::
+        
+            name         PostScript font name
+            flags        Font flags
+            ascent       Typographic ascender in 1/1000ths of a point
+            descent      Typographic descender in 1/1000ths of a point
+            capHeight    Cap height in 1/1000ths of a point (0 if not available)
+            bbox         Glyph bounding box [l,t,r,b] in 1/1000ths of a point
+            _bbox        Glyph bounding box [l,t,r,b] in unitsPerEm
+            unitsPerEm   Glyph units per em
+            italicAngle  Italic angle in degrees ccw
+            stemV        stem weight in 1/1000ths of a point (approximate)
+        
+        If charInfo is true, the following will also be set::
+        
+            defaultWidth   default glyph width in 1/1000ths of a point
+            charWidths     dictionary of character widths for every supported UCS character
+                           code
+        
         This will only work if the font has a Unicode cmap (platform 3,
         encoding 1, format 4 or platform 0 any encoding format 4).  Setting
-        charInfo to false avoids this requirement.
+        charInfo to false avoids this requirement
+        
         """
         # name - Naming table
         name_offset = self.seek_table("name")

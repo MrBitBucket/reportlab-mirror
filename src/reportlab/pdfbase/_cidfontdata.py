@@ -15,11 +15,12 @@ Each font is described as a big nested dictionary.  This lets us keep
 code out of the module altogether and avoid circular dependencies.
 
 The encoding and font data are grouped by some standard 'language
-prefixes':
-   chs = Chinese Simplified (mainland)
-   cht = Chinese Traditional (Taiwan)
-   kor = Korean
-   jpn = Japanese
+prefixes'::
+
+    chs = Chinese Simplified (mainland)
+    cht = Chinese Traditional (Taiwan)
+    kor = Korean
+    jpn = Japanese
 """
 
 

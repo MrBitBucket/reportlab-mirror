@@ -33,7 +33,7 @@ class Frame:
     After creation a Frame is not usually manipulated directly by the
     applications program -- it is used internally by the platypus modules.
 
-    Here is a diagramatid abstraction for the definitional part of a Frame
+    Here is a diagramatid abstraction for the definitional part of a Frame::
 
                 width                    x2,y2
         +---------------------------------+
@@ -51,8 +51,8 @@ class Frame:
         +---------------------------------+
         (x1,y1) <-- lower left corner
 
-        NOTE!! Frames are stateful objects.  No single frame should be used in
-        two documents at the same time (especially in the presence of multithreading.
+    NOTE!! Frames are stateful objects.  No single frame should be used in
+    two documents at the same time (especially in the presence of multithreading.
     '''
     def __init__(self, x1, y1, width,height, leftPadding=6, bottomPadding=6,
             rightPadding=6, topPadding=6, id=None, showBoundary=0,

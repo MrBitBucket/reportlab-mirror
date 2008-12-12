@@ -56,9 +56,11 @@ class TraceInfo:
 #############################################################
 class Flowable:
     """Abstract base class for things to be drawn.  Key concepts:
+    
     1. It knows its size
     2. It draws in its own coordinate system (this requires the
-        base API to provide a translate() function.
+       base API to provide a translate() function.
+    
     """
     _fixedWidth = 0         #assume wrap results depend on arguments?
     _fixedHeight = 0

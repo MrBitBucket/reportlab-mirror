@@ -797,7 +797,7 @@ class Table(Flowable):
         if a cell is part of a "spanned" range.
         self._spanRanges shows the 'coords' in integers of each
         'cell range', or None if it was clobbered:
-          (col, row) -> (col0, row0, col1, row1)
+        (col, row) -> (col0, row0, col1, row1)
 
         Any cell not in the key is not part of a spanned region
         """
@@ -843,7 +843,7 @@ class Table(Flowable):
         if a cell is part of a "nosplit" range.
         self._nosplitRanges shows the 'coords' in integers of each
         'cell range', or None if it was clobbered:
-          (col, row) -> (col0, row0, col1, row1)
+        (col, row) -> (col0, row0, col1, row1)
 
         Any cell not in the key is not part of a spanned region
         """
@@ -891,7 +891,8 @@ class Table(Flowable):
         Based on self._spanRanges, which is already known,
         and the widths which were given or previously calculated,
         self._spanRects shows the real coords for drawing:
-          (col, row) -> (x, y, width, height)
+            
+            (col, row) -> (x, y, width, height)
 
         for each cell.  Any cell which 'does not exist' as another
         has spanned over it will get a None entry on the right

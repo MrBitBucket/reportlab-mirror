@@ -81,22 +81,25 @@ class XPreformatted(Paragraph):
 
         A) For the simple case of a single formatting input fragment the output is
             A fragment specifier with
-                kind = 0
-                fontName, fontSize, leading, textColor
-                lines=  A list of lines
-                        Each line has two items.
-                        1) unused width in points
-                        2) a list of words
+                - kind = 0
+                - fontName, fontSize, leading, textColor
+                - lines=  A list of lines
+                
+                    Each line has two items:
+                    
+                    1. unused width in points
+                    2. a list of words
 
         B) When there is more than one input formatting fragment the out put is
             A fragment specifier with
-                kind = 1
-                lines=  A list of fragments each having fields
-                            extraspace (needed for justified)
-                            fontSize
-                            words=word list
-                                each word is itself a fragment with
-                                various settings
+                - kind = 1
+                - lines =  A list of fragments each having fields:
+                
+                    - extraspace (needed for justified)
+                    - fontSize
+                    - words=word list
+                    - each word is itself a fragment with
+                    - various settings
 
         This structure can be used to easily draw paragraphs with the various alignments.
         You can supply either a single width or a list of widths; the latter will have its

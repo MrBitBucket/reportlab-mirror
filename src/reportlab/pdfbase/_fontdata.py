@@ -4,13 +4,16 @@
 #$Header $
 __version__=''' $Id$ '''
 __doc__="""
-    database of font related things
-    standardFonts       tuple of the 14 standard string font names
-    standardEncodings   tuple of the known standard font names
-    encodings           a mapping object from standard encoding names (and minor variants)
-                        to the encoding vectors ie the tuple of string glyph names
-    widthsByFontGlyph   fontname x glyphname --> width of glyph
-    widthVectorsByFont  fontName -> vector of widths
+
+        database of font related things::
+        
+            standardFonts       tuple of the 14 standard string font names
+            standardEncodings   tuple of the known standard font names
+            encodings           a mapping object from standard encoding names (and minor variants)
+                                to the encoding vectors ie the tuple of string glyph names
+            widthsByFontGlyph   fontname x glyphname --> width of glyph
+            widthVectorsByFont  fontName -> vector of widths
+        
 """
 import UserDict, os, sys
 

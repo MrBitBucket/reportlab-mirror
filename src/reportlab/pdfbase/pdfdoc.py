@@ -1202,29 +1202,34 @@ class PDFPageLabel(PDFCatalog):
         out or set to None.
 
         * style:
-          - None:                       No numbering, can be used to display the
-                                        prefix only.
-          - PDFPageLabel.ARABIC:        Use arabic numbers: 1, 2, 3, 4...
-          - PDFPageLabel.ROMAN_UPPER:   Use upper case roman numerals: I, II, III...
-          - PDFPageLabel.ROMAN_LOWER:   Use lower case roman numerals: i, ii, iii...
-          - PDFPageLabel.LETTERS_UPPER: Use upper case letters: A, B, C, D...
-          - PDFPageLabel.LETTERS_LOWER: Use lower case letters: a, b, c, d...
+        
+            - None:                       No numbering, can be used to display the prefix only.
+            - PDFPageLabel.ARABIC:        Use arabic numbers: 1, 2, 3, 4...
+            - PDFPageLabel.ROMAN_UPPER:   Use upper case roman numerals: I, II, III...
+            - PDFPageLabel.ROMAN_LOWER:   Use lower case roman numerals: i, ii, iii...
+            - PDFPageLabel.LETTERS_UPPER: Use upper case letters: A, B, C, D...
+            - PDFPageLabel.LETTERS_LOWER: Use lower case letters: a, b, c, d...
+            
         * start:
-         - An integer specifying the starting number for this PDFPageLabel. This
-            can be used when numbering style changes to reset the page number back
-            to one, ie from roman to arabic, or from arabic to appendecies. Can be
-            any positive integer or None. I'm not sure what the effect of
-            specifying None is, probably that page numbering continues with the
-            current sequence, I'd have to check the spec to clarify though.
+        
+            -   An integer specifying the starting number for this PDFPageLabel. This
+                can be used when numbering style changes to reset the page number back
+                to one, ie from roman to arabic, or from arabic to appendecies. Can be
+                any positive integer or None. I'm not sure what the effect of
+                specifying None is, probably that page numbering continues with the
+                current sequence, I'd have to check the spec to clarify though.
+            
         * prefix:
-         - A string which is prefixed to the page numbers. Can be used to display
-            appendecies in the format: A.1, A.2, ..., B.1, B.2, ... where a
-            PDFPageLabel is used to set the properties for the first page of each
-            appendix to restart the page numbering at one and set the prefix to the
-            appropriate letter for current appendix. The prefix can also be used to
-            display text only, if the 'style' is set to None. This can be used to
-            display strings such as 'Front', 'Back', or 'Cover' for the covers on
-            books.
+        
+            -   A string which is prefixed to the page numbers. Can be used to display
+                appendecies in the format: A.1, A.2, ..., B.1, B.2, ... where a
+                PDFPageLabel is used to set the properties for the first page of each
+                appendix to restart the page numbering at one and set the prefix to the
+                appropriate letter for current appendix. The prefix can also be used to
+                display text only, if the 'style' is set to None. This can be used to
+                display strings such as 'Front', 'Back', or 'Cover' for the covers on
+                books.
+            
         """
         if style:
             if style.upper() in self.__convertible__: style = getattr(self,style.upper())
@@ -1277,20 +1282,22 @@ class OutlineEntryObject:
         return PD.format(document)
 
 class PDFOutlines:
-    """takes a recursive list of outline destinations
-       like
-           out = PDFOutline1()
-           out.setNames(canvas, # requires canvas for name resolution
-             "chapter1dest",
-             ("chapter2dest",
-              ["chapter2section1dest",
-               "chapter2section2dest",
-               "chapter2conclusiondest"]
-             ), # end of chapter2 description
-             "chapter3dest",
-             ("chapter4dest", ["c4s1", "c4s2"])
-             )
-       Higher layers may build this structure incrementally. KISS at base level.
+    """
+    takes a recursive list of outline destinations like::
+    
+        out = PDFOutline1()
+        out.setNames(canvas, # requires canvas for name resolution
+        "chapter1dest",
+        ("chapter2dest",
+        ["chapter2section1dest",
+        "chapter2section2dest",
+        "chapter2conclusiondest"]
+        ), # end of chapter2 description
+        "chapter3dest",
+        ("chapter4dest", ["c4s1", "c4s2"])
+        )
+             
+    Higher layers may build this structure incrementally. KISS at base level.
     """
     # first attempt, many possible features missing.
     #no init for now
@@ -1667,16 +1674,22 @@ class PDFDate:
         return format(PDFString(dfmt(*self.date)), doc)
 
 class Destination:
-    """not a pdfobject!  This is a placeholder that can delegates
-       to a pdf object only after it has been defined by the methods
-       below.  EG a Destination can refer to Appendix A before it has been
-       defined, but only if Appendix A is explicitly noted as a destination
-       and resolved before the document is generated...
-       For example the following sequence causes resolution before doc generation.
-          d = Destination()
-          d.fit() # or other format defining method call
-          d.setPage(p)
-       (at present setPageRef is called on generation of the page).
+    """
+    
+    not a pdfobject!  This is a placeholder that can delegates
+    to a pdf object only after it has been defined by the methods
+    below.
+    
+    EG a Destination can refer to Appendix A before it has been
+    defined, but only if Appendix A is explicitly noted as a destination
+    and resolved before the document is generated...
+    
+    For example the following sequence causes resolution before doc generation.
+        d = Destination()
+        d.fit() # or other format defining method call
+        d.setPage(p)
+        (at present setPageRef is called on generation of the page).
+    
     """
     representation = format = page = None
     def __init__(self,name):

@@ -257,8 +257,9 @@ class CIDTypeFace(pdfmetrics.TypeFace):
     def _expandWidths(self, compactWidthArray):
         """Expands Adobe nested list structure to get a dictionary of widths.
 
-        Here is an example of such a structure.
-        (
+        Here is an example of such a structure.::
+        
+            (
             # starting at character ID 1, next n  characters have the widths given.
             1,  (277,305,500,668,668,906,727,305,445,445,508,668,305,379,305,539),
             # all Characters from ID 17 to 26 are 668 em units wide
@@ -271,7 +272,8 @@ class CIDTypeFace(pdfmetrics.TypeFace):
                  449, 246, 449, 668),
             # these must be half width katakana and the like.
             231, 632, 500
-        )
+            )
+        
         """
         data = compactWidthArray[:]
         widths = {}

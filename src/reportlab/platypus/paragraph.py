@@ -76,13 +76,15 @@ class ParaLines(ABag):
     """
 
 class FragLine(ABag):
-    """class FragLine contains a styled line (ie a line with more than one style)
+    """
+    class FragLine contains a styled line (ie a line with more than one style)::
 
-    extraSpace  unused space for justification only
-    wordCount   1+spaces in line for justification purposes
-    words       [ParaFrags] style text lumps to be concatenated together
-    fontSize    maximum fontSize seen on the line; not used at present,
-                but could be used for line spacing.
+        extraSpace  unused space for justification only
+        wordCount   1+spaces in line for justification purposes
+        words       [ParaFrags] style text lumps to be concatenated together
+        fontSize    maximum fontSize seen on the line; not used at present,
+                    but could be used for line spacing.
+                
     """
 
 #our one and only parser
@@ -477,7 +479,7 @@ def splitLines0(frags,widths):
     1)  ExtraSpace
     2)  blankCount
     3)  [textDefns....]
-        each text definition is a (ParaFrag, start, limit) triplet
+    each text definition is a (ParaFrag, start, limit) triplet
     '''
     #initialise the algorithm
     lines   = []
@@ -751,19 +753,19 @@ class Paragraph(Flowable):
         <font name=fontfamily/fontname color=colorname size=float>
         <onDraw name=callable label="a label">
         <link>link text</link>
-            attributes of links
-                size/fontSize=num
-                name/face/fontName=name
-                fg/textColor/color=color
-                backcolor/backColor/bgcolor=color
-                dest/destination/target/href/link=target
+        attributes of links
+        size/fontSize=num
+        name/face/fontName=name
+        fg/textColor/color=color
+        backcolor/backColor/bgcolor=color
+        dest/destination/target/href/link=target
         <a>anchor text</a>
-            attributes of anchors
-                fontSize=num
-                fontName=name
-                fg/textColor/color=color
-                backcolor/backColor/bgcolor=color
-                href=href
+        attributes of anchors
+        fontSize=num
+        fontName=name
+        fg/textColor/color=color
+        backcolor/backColor/bgcolor=color
+        href=href
         <a name="anchorpoint"/>
         <unichar name="unicode character name"/>
         <unichar value="unicode code point"/>
@@ -776,11 +778,11 @@ class Paragraph(Flowable):
         of 4 fonts using reportlab.pdfbase.pdfmetrics.registerFont; then
         use the addMapping function to tell the library that these 4 fonts
         form a family e.g.
-            from reportlab.lib.fonts import addMapping
-            addMapping('Vera', 0, 0, 'Vera')    #normal
-            addMapping('Vera', 0, 1, 'Vera-Italic')    #italic
-            addMapping('Vera', 1, 0, 'Vera-Bold')    #bold
-            addMapping('Vera', 1, 1, 'Vera-BoldItalic')    #italic and bold
+        from reportlab.lib.fonts import addMapping
+        addMapping('Vera', 0, 0, 'Vera')    #normal
+        addMapping('Vera', 0, 1, 'Vera-Italic')    #italic
+        addMapping('Vera', 1, 0, 'Vera-Bold')    #bold
+        addMapping('Vera', 1, 1, 'Vera-BoldItalic')    #italic and bold
 
         It will also be able to handle any MathML specified Greek characters.
     """
@@ -963,20 +965,22 @@ class Paragraph(Flowable):
 
         A) For the simple case of a single formatting input fragment the output is
             A fragment specifier with
-                kind = 0
-                fontName, fontSize, leading, textColor
-                lines=  A list of lines
+                - kind = 0
+                - fontName, fontSize, leading, textColor
+                - lines=  A list of lines
+                        
                         Each line has two items.
-                        1) unused width in points
-                        2) word list
+                        
+                        1. unused width in points
+                        2. word list
 
         B) When there is more than one input formatting fragment the output is
             A fragment specifier with
-                kind = 1
-                lines=  A list of fragments each having fields
-                            extraspace (needed for justified)
-                            fontSize
-                            words=word list
+               - kind = 1
+               - lines=  A list of fragments each having fields
+                            - extraspace (needed for justified)
+                            - fontSize
+                            - words=word list
                                 each word is itself a fragment with
                                 various settings
 

@@ -287,13 +287,17 @@ class Encoding:
             idx = idx + 1
 
     def getDifferences(self, otherEnc):
-        """Return a compact list of the code points differing between two encodings
+        """
+        Return a compact list of the code points differing between two encodings
 
         This is in the Adobe format: list of
            [[b1, name1, name2, name3],
            [b2, name4]]
+           
         where b1...bn is the starting code point, and the glyph names following
-        are assigned consecutive code points."""
+        are assigned consecutive code points.
+        
+        """
 
         ranges = []
         curRange = None
