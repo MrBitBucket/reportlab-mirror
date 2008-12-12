@@ -7,8 +7,7 @@ PDFTextObject is an efficient way to add text to a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
 
 Progress Reports:
-8.83, 2000-01-13, gmcm:
-    created from pdfgen.py
+8.83, 2000-01-13, gmcm: created from pdfgen.py
 """
 
 import string
@@ -24,7 +23,7 @@ class _PDFColorSetter:
     asseumes we have a _code object'''
     def setFillColorCMYK(self, c, m, y, k):
          """set the fill color useing negative color values
-            (cyan, magenta, yellow and darkness value).
+         (cyan, magenta, yellow and darkness value).
          Takes 4 arguments between 0.0 and 1.0"""
          self._fillColorCMYK = (c, m, y, k)
          self._code.append('%s k' % fp_str(c, m, y, k))

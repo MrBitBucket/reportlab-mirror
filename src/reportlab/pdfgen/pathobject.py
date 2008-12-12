@@ -7,8 +7,8 @@ PDFPathObject is an efficient way to draw paths on a Canvas. Do not
 instantiate directly, obtain one from the Canvas instead.
 
 Progress Reports:
-8.83, 2000-01-13, gmcm:
-    created from pdfgen.py
+8.83, 2000-01-13, gmcm: created from pdfgen.py
+
 """
 
 import string
