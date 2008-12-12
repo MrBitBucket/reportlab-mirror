@@ -1,7 +1,8 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfbase/ttfonts.py
-"""TrueType font support
+__version__ = '$Id$'
+__doc__="""TrueType font support
 
 This defines classes to represent TrueType fonts.  They know how to calculate
 their own width and how to write themselves into PDF files.  They support
@@ -18,7 +19,7 @@ contents of those will depend on the actual characters used for printing.
 To support dynamic font subsetting a concept of "dynamic font" was introduced.
 Dynamic Fonts have a _dynamicFont attribute set to 1.
 
-Dynamic fonts have the following additional functions:
+Dynamic fonts have the following additional functions::
 
     def splitString(self, text, doc):
         '''Splits text into a number of chunks, each of which belongs to a
@@ -35,11 +36,11 @@ Dynamic fonts have the following additional functions:
 You must never call PDFDocument.getInternalFontName for dynamic fonts.
 
 If you have a traditional static font, mapping to PDF text output operators
-is simple:
+is simple::
 
    '%s 14 Tf (%s) Tj' % (getInternalFontName(psfontname), text)
 
-If you have a dynamic font, use this instead:
+If you have a dynamic font, use this instead::
 
    for subset, chunk in font.splitString(text, doc):
        '%s 14 Tf (%s) Tj' % (font.getSubsetInternalName(subset, doc), chunk)
@@ -50,8 +51,6 @@ Oh, and that 14 up there is font size.)
 
 Canvas and TextObject have special support for dynamic fonts.
 """
-
-__version__ = '$Id$'
 
 import string
 from types import StringType, UnicodeType

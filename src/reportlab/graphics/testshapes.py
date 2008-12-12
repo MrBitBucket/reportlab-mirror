@@ -5,17 +5,15 @@
 
 # testshapes.py - draws shapes onto a PDF canvas.
 
-"""
-Execute the script to see some test drawings.
+
+__version__ = ''' $Id $ '''
+__doc__='''Execute this script to see some test drawings.
 
 This contains a number of routines to generate test drawings
 for reportlab/graphics.  For now many of them are contrived,
 but we will expand them to try and trip up any parser.
 Feel free to add more.
-"""
-
-__version__ = ''' $Id $ '''
-
+'''
 
 import os, sys
 

@@ -3,13 +3,13 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/doughnut.py
 # doughnut chart
 
-"""Doughnut chart
+__version__=''' $Id$ '''
+__doc__="""Doughnut chart
 
 Produces a circular chart like the doughnut charts produced by Excel.
 Can handle multiple series (which produce concentric 'rings' in the chart).
 
 """
-__version__=''' $Id$ '''
 
 import copy
 from math import sin, cos, pi

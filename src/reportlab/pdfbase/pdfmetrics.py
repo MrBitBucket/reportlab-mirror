@@ -3,8 +3,7 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfbase/pdfmetrics.py
 #$Header $
 __version__=''' $Id$ '''
-__doc__="""
-This provides a database of font metric information and
+__doc__="""This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
 
 There are counterparts to some of these in pdfbase/pdfdoc.py, but

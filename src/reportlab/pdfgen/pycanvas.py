@@ -4,7 +4,7 @@
 #
 # $Id$
 #
-__doc__ = """pycanvas.Canvas : a Canvas class which can also output Python source code.
+__doc__ = """A contributed Canvas class which can also output Python source code to "replay" operations later
 
 pycanvas.Canvas class works exactly like canvas.Canvas, but you can
 call str() on pycanvas.Canvas instances. Doing so will return the

@@ -2,10 +2,13 @@
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/graphics/Csrc/renderPM/renderP.py
 __version__=''' $Id$ '''
-"""
-Usage:
-- from reportlab.graphics import renderPM
-- renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
+__doc__="""Render drawing objects in common bitmap formats
+
+Usage::
+
+    from reportlab.graphics import renderPM
+    renderPM.drawToFile(drawing,filename,fmt='GIF',configPIL={....})
+
 Other functions let you create a PM drawing as string or into a PM buffer.
 Execute the script to see some test drawings."""
 

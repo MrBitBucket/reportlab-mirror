@@ -2,7 +2,9 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/widgets/flags.py
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
-"""This file is a collection of flag graphics as widgets.
+
+__version__=''' $Id$ '''
+__doc__="""This file is a collection of flag graphics as widgets.
 
 All flags are represented at the ratio of 1:2, even where the official ratio for the flag is something else
 (such as 3:5 for the German national flag). The only exceptions are for where this would look _very_ wrong,
@@ -27,7 +29,6 @@ USA, Czech Republic, European Union, Switzerland, Turkey, Brazil
 
 (Brazilian flag contributed by Publio da Costa Melo [publio@planetarium.com.br]).
 """
-__version__=''' $Id$ '''
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *

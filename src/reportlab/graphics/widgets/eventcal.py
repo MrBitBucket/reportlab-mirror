@@ -2,9 +2,10 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/widgets/eventcal.py
 # Event Calendar widget
 # author: Andy Robinson
-"""This file is a
-"""
+
 __version__=''' $Id$ '''
+__doc__="""This file is a
+"""
 
 from reportlab.lib import colors
 from reportlab.lib.validators import *

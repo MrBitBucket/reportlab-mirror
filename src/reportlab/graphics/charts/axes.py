@@ -1,7 +1,8 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/axes.py
-"""Collection of axes for charts.
+__version__=''' $Id$ '''
+__doc__="""Collection of axes for charts.
 
 The current collection comprises axes for charts using cartesian
 coordinate systems. All axes might have tick marks and labels.
@@ -30,7 +31,6 @@ connection can be either at the top or bottom of the former or
 at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
-__version__=''' $Id$ '''
 
 import string
 

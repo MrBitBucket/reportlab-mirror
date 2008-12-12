@@ -2,14 +2,18 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/renderPDF.py
 # renderPDF - draws Drawings onto a canvas
-"""
-Usage:
-- import renderpdf
-- renderpdf.draw(drawing, canvas, x, y)
+
+__version__=''' $Id$ '''
+__doc__="""Render Drawing objects within others PDFs or standalone
+
+Usage::
+    
+    import renderpdf
+    renderpdf.draw(drawing, canvas, x, y)
+
 Execute the script to see some test drawings.
 changed
 """
-__version__=''' $Id$ '''
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas

@@ -3,13 +3,13 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/spider.py
 # spider chart, also known as radar chart
 
-"""Spider Chart
+__version__=''' $Id$ '''
+__doc__="""Spider Chart
 
 Normal use shows variation of 5-10 parameters against some 'norm' or target.
 When there is more than one series, place the series with the largest
 numbers first, as it will be overdrawn by each successive one.
 """
-__version__=''' $Id$ '''
 
 import copy
 from math import sin, cos, pi

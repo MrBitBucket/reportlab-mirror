@@ -2,6 +2,8 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/widgetbase.py
 __version__=''' $Id$ '''
+__doc__='''Base class for user-defined graphical widgets'''
+
 import string
 
 from reportlab.graphics import shapes

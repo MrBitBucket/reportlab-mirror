@@ -2,6 +2,8 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/renderPS.py
 __version__=''' $Id$ '''
+__doc__="""Render drawing objects in Postscript"""
+
 import string, types
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth, unicode2T1 # for font info
 from reportlab.lib.utils import fp_str, getStringIO

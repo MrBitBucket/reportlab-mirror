@@ -1,12 +1,9 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/renderbase.py
-"""
-Superclass for renderers to factor out common functionality and default implementations.
-"""
-
 
 __version__=''' $Id $ '''
+__doc__='''Superclass for renderers to factor out common functionality and default implementations.'''
 
 from reportlab.graphics.shapes import *
 from reportlab.lib.validators import DerivedValue

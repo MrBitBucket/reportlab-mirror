@@ -2,7 +2,8 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/__init__.py
 __version__=''' $Id$ '''
-__doc__=''
+__doc__='''Page Layout and Typography Using Scripts" - higher-level framework for flowing documents'''
+
 from reportlab.platypus.flowables import Flowable, Image, Macro, PageBreak, Preformatted, Spacer, XBox, \
                         CondPageBreak, KeepTogether, TraceInfo, FailOnWrap, FailOnDraw, PTOContainer, \
                         KeepInFrame, ParagraphAndImage, ImageAndFlowables

@@ -1,5 +1,4 @@
-"""
-helper for importing pdf structures into a ReportLab generated document
+__doc__="""helper for importing pdf structures into a ReportLab generated document
 """
 from reportlab.pdfbase.pdfdoc import format
 

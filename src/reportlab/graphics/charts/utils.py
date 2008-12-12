@@ -1,8 +1,9 @@
 #Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/utils.py
-"Utilities used here and there."
+
 __version__=''' $Id$ '''
+__doc__="Utilities used here and there."
 
 from time import mktime, gmtime, strftime
 import string

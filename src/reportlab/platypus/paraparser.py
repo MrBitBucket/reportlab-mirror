@@ -2,6 +2,7 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/paraparser.py
 __version__=''' $Id$ '''
+__doc__='''The parser used to process markup within paragraphs'''
 import string
 import re
 from types import TupleType, UnicodeType, StringType

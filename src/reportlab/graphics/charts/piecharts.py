@@ -6,12 +6,12 @@
 #a wedges collection whic lets you customize the group or every individual
 #wedge.
 
-"""Basic Pie Chart class.
+__version__=''' $Id$ '''
+__doc__="""Basic Pie Chart class.
 
 This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
-__version__=''' $Id$ '''
 
 import copy
 from math import sin, cos, pi

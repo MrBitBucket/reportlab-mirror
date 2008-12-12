@@ -6,14 +6,15 @@ language, nor the widths of the non-normal characters encoded in each
 font.  we just want a dictionary of the character widths in a given
 font which are NOT 1000 ems wide, keyed on Unicode character (not CID).
 
-Running off CMAP files we get the following widths...
->>> font.stringWidth(unicode(','), 10)
-2.5
->>> font.stringWidth(unicode('m'), 10)
-7.7800000000000002
->>> font.stringWidth(u'\u6771\u4EAC', 10)
-20.0
->>> 
+Running off CMAP files we get the following widths...::
+
+    >>> font.stringWidth(unicode(','), 10)
+    2.5
+    >>> font.stringWidth(unicode('m'), 10)
+    7.7800000000000002
+    >>> font.stringWidth(u'\u6771\u4EAC', 10)
+    20.0
+    >>> 
 
 """
 

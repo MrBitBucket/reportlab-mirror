@@ -31,6 +31,7 @@
 #
 
 __version__ = '0.9'
+__doc__='''Popular barcodes available as reusable widgets'''
 
 def getCodes():
     """Returns a dict mapping code names to widgets"""

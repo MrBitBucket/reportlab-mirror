@@ -2,6 +2,7 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/xpreformatted.py
 __version__=''' $Id$ '''
+__doc__='''A 'rich preformatted text' widget allowing internal markup'''
 import string
 from types import StringType, ListType
 from reportlab.lib import PyFontify

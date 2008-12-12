@@ -2,3 +2,5 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/__init__.py
 __version__=''' $Id$ '''
+__doc__='''Framework for reusable object graphics, in PDF or bitmap form'''
+

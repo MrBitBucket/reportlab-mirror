@@ -3,7 +3,9 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/testdrawings.py
 __version__=''' $Id $ '''
-"""This contains a number of routines to generate test drawings
+__doc__="""Defines some standard drawings to use as test cases
+
+This contains a number of routines to generate test drawings
 for reportlab/graphics.  For now they are contrived, but we will expand them
 to try and trip up any parser. Feel free to add more.
 

@@ -4,7 +4,7 @@
 
 __version__=''' $Id$ '''
 
-__doc__="""
+__doc__="""A frame is a container for content on a page.
 """
 
 import logging
