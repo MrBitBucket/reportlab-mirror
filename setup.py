@@ -16,6 +16,7 @@ if not pkgDir:
     pkgDir=os.getcwd()
 elif not os.path.isabs(pkgDir):
     pkgDir=os.path.abspath(pkgDir)
+daily=os.environ.get('RL_EXE_DAILY','')
 
 import distutils
 from distutils.core import setup, Extension
@@ -31,6 +32,7 @@ def package_home(globals_dict):
 package_path = pjoin(package_home(distutils.__dict__), 'site-packages', 'reportlab')
 
 def get_version():
+    if daily: return 'daily'
     #determine Version
     if __name__=='__main__':
         HERE=os.path.dirname(sys.argv[0])
