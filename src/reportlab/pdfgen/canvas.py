@@ -695,7 +695,7 @@ class Canvas(textobject._PDFColorSetter):
            that require the form."""
         self.push_state_stack()
         self.init_graphics_state()
-        if self._code:
+        if self._code or self._formData:
             # save the code that is not in the formf
             self._pushAccumulators()
             #self._codeStack.append(self._code)
