@@ -129,8 +129,7 @@ class Canvas(textobject._PDFColorSetter):
                  pageCompression=None,
                  invariant = None,
                  verbosity=0,
-                 userPass=None,
-                 ownerPass=None):
+                 encrypt=None):
         """Create a canvas of a given size. etc.
 
         You may pass a file-like object to filename as an alternative to
@@ -182,12 +181,14 @@ class Canvas(textobject._PDFColorSetter):
         self._make_preamble()
         self.state_stack = []
 
-        if userPass:
+        if encrypt:
             from reportlab.lib import pdfencrypt
-            encrypt = pdfencrypt.StandardEncryption(userPass, ownerPass)
-            # FIXME: Make this changeable
-            encrypt.setAllPermissions(0)
-            encrypt.canPrint = 1
+            if isinstance(encrypt, basestring):
+                userPass = encrypt.encode('utf-8') if isinstance(encrypt, unicode) else encrypt
+                encrypt = pdfencrypt.StandardEncryption(userPass)
+                encrypt.setAllPermissions(1)
+            elif not isinstance(encrypt, pdfencrypt.StandardEncryption):
+                raise TypeError('Expected string or instance of reportla.lib.pdfencrypt.StandardEncryption as encrypt parameter but got %r' % encrypt)
             self._doc.encrypt = encrypt
 
     def init_graphics_state(self):
