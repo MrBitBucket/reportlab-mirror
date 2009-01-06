@@ -6,9 +6,9 @@ __doc__="""Testing to encrypt a very minimal pdf.
 TODO: Automatiocally test that this pdf is really encrypted.
 """
 
+import unittest
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import unittest
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import pdfencrypt
 
