@@ -181,6 +181,9 @@ class Canvas(textobject._PDFColorSetter):
         self._make_preamble()
         self.state_stack = []
 
+        self.setencrypt(encrypt)
+
+    def setencrypt(self, encrypt):
         if encrypt:
             from reportlab.lib import pdfencrypt
             if isinstance(encrypt, basestring):
@@ -190,6 +193,11 @@ class Canvas(textobject._PDFColorSetter):
             elif not isinstance(encrypt, pdfencrypt.StandardEncryption):
                 raise TypeError('Expected string or instance of reportla.lib.pdfencrypt.StandardEncryption as encrypt parameter but got %r' % encrypt)
             self._doc.encrypt = encrypt
+        else:
+            try:
+                del self._doc.encrypt
+            except AttributeError:
+                pass
 
     def init_graphics_state(self):
         #initial graphics state, never modify any of these in place

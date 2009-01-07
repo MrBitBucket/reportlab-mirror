@@ -340,7 +340,8 @@ class BaseDocTemplate:
                     'pageCompression':None,
                     '_pageBreakQuick':1,
                     'rotation':0,
-                    '_debug':0}
+                    '_debug':0,
+                    'encrypt': None}
     _invalidInitArgs = ()
     _firstPageTemplateIndex = 0
 
@@ -716,6 +717,8 @@ class BaseDocTemplate:
                                 pagesize=self.pagesize,
                                 invariant=self.invariant,
                                 pageCompression=self.pageCompression)
+ 
+        getattr(self.canv,'setencrypt',lambda x: None)(self.encrypt)
 
         self.canv.setAuthor(self.author)
         self.canv.setTitle(self.title)
