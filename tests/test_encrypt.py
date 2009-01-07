@@ -13,34 +13,41 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import pdfencrypt
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph
+from test_pdfencryption import parsedoc
 
 class EncryptTestCase(unittest.TestCase):
 
     def test_canvas(self):
         "Test generating an encrypted pdf by setting a user password on the Canvas."
-        c = Canvas(outputfile('test_encrypt_canvas.pdf'), encrypt='User')
+        fname = outputfile('test_encrypt_canvas.pdf')
+        c = Canvas(fname, encrypt='User')
         c.setAuthor('Anonymous')
         c.setFont('Helvetica-Bold', 36)
         c.drawString(100,700, 'Top secret')
         c.save()
+        parsedoc(fname)
 
     def test_standardencryption(self):
         "Test generating an encrypted pdf by passing a StandardEncryption object to the Canvas."
         encrypt = pdfencrypt.StandardEncryption(userPassword='User', ownerPassword='Owner')
         encrypt.setAllPermissions(0)
         encrypt.canPrint = 1
-        c = Canvas(outputfile('test_encrypt_canvas2.pdf'), encrypt=encrypt)
+        fname = outputfile('test_encrypt_canvas2.pdf')
+        c = Canvas(fname, encrypt=encrypt)
         c.setAuthor('Anonymous')
         c.setFont('Helvetica-Bold', 36)
         c.drawString(100,700, 'Top secret')
         c.save()
+        parsedoc(fname)
 
     def test_doctemplate(self):
         "Test generating an encrypted pdf by setting a user password on the DocTemplate."
-        header = ParagraphStyle(name='Heading', fontSize=14, keepWithNext=1)
+        header = ParagraphStyle(name='Heading', fontSize=36)
         story = [Paragraph("Top secret", header)]
-        doc = SimpleDocTemplate(outputfile('test_encrypt_doctemplate.pdf'), encrypt='User')
+        fname = outputfile('test_encrypt_doctemplate.pdf')
+        doc = SimpleDocTemplate(fname, encrypt='User')
         doc.build(story)
+        parsedoc(fname)
 
 def makeSuite():
     return makeSuiteForClasses(EncryptTestCase)

@@ -23,7 +23,7 @@ def makedoc(fileName, userPass="User", ownerPass="Owner"):
 
     c.save()
 
-def parsedoc(fileName, userPass="User"):
+def parsedoc(fileName):
     """
     Using PDFParseContext object from Pagecatcher module to check for encryption.
     """
