@@ -12,6 +12,7 @@ from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import _className
+from reportlab.lib.geomutils import normalizeTRBL
 from reportlab.lib.textsplit import wordSplit, ALL_CANNOT_START
 from copy import deepcopy
 from reportlab.lib.abag import ABag
@@ -1292,10 +1293,11 @@ class Paragraph(Flowable):
                 canvas.setFillColor(bg)
                 kwds['fill'] = 1
             bp = getattr(style,'borderPadding',0)
-            op(leftIndent-bp,
-                        -bp,
-                        self.width - (leftIndent+style.rightIndent)+2*bp,
-                        self.height+2*bp,
+            tbp, rbp, bbp, lbp = normalizeTRBL(bp)
+            op(leftIndent - lbp,
+                        -bbp,
+                        self.width - (leftIndent+style.rightIndent) + lbp+rbp,
+                        self.height + tbp+bbp,
                         **kwds)
             canvas.restoreState()
 
