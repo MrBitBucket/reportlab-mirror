@@ -31,9 +31,6 @@ bullet("""They can split across pages if needed (see the canSplit attribute).
 You can specify that a number of rows at the top and bottom should be
 repeated after the split (e.g. show the headers again on page 2,3,4...)""")
 
-bullet("""For very wide tables, they can also split 'by column'.  You can choose
-whether tou want to split down-and-across or across-and-down""")
-
 bullet("""They have a simple and powerful notation for specifying shading and
 gridlines which works well with financial or database tables, where you
 don't know the number of rows up front.  You can easily say 'make the last row
@@ -87,10 +84,11 @@ to fit in the current context.  In this case you must decide whether to 'tile'
 down and across, or across and then down.  This parameter is a Boolean indicating that the
 $Table$ should split itself
 by row before attempting to split itself by column when too little space is available in
-the current drawing area and the caller wants the $Table$ to split.""")
+the current drawing area and the caller wants the $Table$ to split.
+Splitting a $Table$ by column is currently not implemented, so setting $splitByRow$ to $False$ will result in a $NotImplementedError$.""")
 
-disc("""The $repeatRows$ and $repeatCols$ arguments specify the number of leading rows and columns
-that should be repeated when the $Table$ is asked to split itself.""")
+disc("""The $repeatRows$ argument specifies the number of leading rows
+that should be repeated when the $Table$ is asked to split itself. The $repeatCols$ argument is currently ignored as a $Table$ cannot be split by column.""")
 heading4('$Table.setStyle(tblStyle)$')
 disc("""
 This method applies a particular instance of class $TableStyle$ (discussed below)
