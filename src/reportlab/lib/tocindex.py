@@ -203,7 +203,7 @@ def getSampleTOCData(depth=3):
 def getSampleStory(depth=3):
     """Makes a story with lots of paragraphs.  Uses the random
     TOC data and makes paragraphs to correspond to each."""
-    from reportlab.platypus.doctemplate import randomText
+    from reportlab.lib.randomtext import randomText
     from random import randint
 
     styles = getSampleStyleSheet()
