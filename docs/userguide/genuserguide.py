@@ -6,6 +6,25 @@ __version__=''' $Id$ '''
 __doc__ = """
 This module contains the script for building the user guide.
 """
+
+def makeTocHeaderStyle(level, delta, epsilon, fontName='Times-Roman'):
+    "Make a header style for different levels."
+
+    assert level >= 0, "Level must be >= 0."
+
+    PS = ParagraphStyle
+    size = 12
+    style = PS(name = 'Heading' + str(level),
+               fontName = fontName,
+               fontSize = size,
+               leading = size*1.2,
+               spaceBefore = size/4.0,
+               spaceAfter = size/8.0,
+               firstLineIndent = -epsilon,
+               leftIndent = level*delta + epsilon)
+
+    return style
+
 def run(pagesize=None, verbose=0, outDir=None):
     import sys,os
     from reportlab.lib.utils import open_and_read
@@ -23,14 +42,16 @@ def run(pagesize=None, verbose=0, outDir=None):
     pdfmetrics.registerFont(TTFont('VeraIt', 'VeraIt.ttf'))
     pdfmetrics.registerFont(TTFont('VeraBI', 'VeraBI.ttf'))
     registerFontFamily('Vera',normal='Vera',bold='VeraBd',italic='VeraIt',boldItalic='VeraBI')
-    from tools.docco.rl_doc_utils import setStory, getStory, RLDocTemplate, defaultPageSize
+    from tools.docco.rl_doc_utils import setStory, getStory, RLDocTemplate, defaultPageSize, H1, H2, H3, H4
     from tools.docco import rl_doc_utils
     exec 'from tools.docco.rl_doc_utils import *' in G, G
     destfn = os.path.join(outDir,'userguide.pdf')
     doc = RLDocTemplate(destfn,pagesize = pagesize or defaultPageSize)
 
+
     #this builds the story
     setStory()
+
     for f in (
         'ch1_intro',
         'ch2_graphics',
@@ -48,7 +69,7 @@ def run(pagesize=None, verbose=0, outDir=None):
 
     story = getStory()
     if verbose: print 'Built story contains %d flowables...' % len(story)
-    doc.build(story)
+    doc.multiBuild(story)
     if verbose: print 'Saved "%s"' % destfn
 
 def makeSuite():

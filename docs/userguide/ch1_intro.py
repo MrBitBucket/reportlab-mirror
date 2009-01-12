@@ -2,11 +2,29 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/docs/userguide/ch1_intro.py
 from tools.docco.rl_doc_utils import *
+from reportlab.platypus.tableofcontents import TableOfContents
 import reportlab
 
 title("ReportLab PDF Library")
 title("User Guide")
 centred('ReportLab Version ' + reportlab.Version)
+
+nextTemplate("TOC")
+
+tableofcontents()
+
+PS = ParagraphStyle
+tocstyles = [
+    PS(fontName='Times-Bold', fontSize=14, name='TOCHeading1', leftIndent=20, firstLineIndent=-20, spaceBefore=5, leading=16),
+    PS(fontSize=12, name='TOCHeading2', leftIndent=40, firstLineIndent=-20, spaceBefore=0, leading=12),
+    PS(fontSize=10, name='TOCHeading3', leftIndent=60, firstLineIndent=-20, spaceBefore=0, leading=12),
+    PS(fontSize=10, name='TOCHeading4', leftIndent=100, firstLineIndent=-20, spaceBefore=0, leading=12),
+]
+
+story = getStory()
+toc = TableOfContents()
+toc.levelStyles = tocstyles
+story.append(toc)
 
 nextTemplate("Normal")
 

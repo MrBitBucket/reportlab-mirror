@@ -32,7 +32,6 @@ import examples
 
 appmode=0
 
-
 from t_parse import Template
 QFcodetemplate = Template("X$X$", "X")
 QFreptemplate = Template("X^X^", "X")
@@ -165,6 +164,11 @@ def title(text):
 
 #AR 3/7/2000 - defining three new levels of headings; code
 #should be swapped over to using them.
+
+def tableofcontents(text='Table of contents'):
+    getStory().append(PageBreak())
+    p = Paragraph(text, H1)
+    getStory().append(p)
 
 def heading1(text):
     """Use this for chapters.  Lessons within a big chapter

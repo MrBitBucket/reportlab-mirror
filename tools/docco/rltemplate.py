@@ -10,7 +10,6 @@ from reportlab.platypus import PageTemplate, \
 from reportlab.lib.units import inch, cm
 from reportlab.rl_config import defaultPageSize
 
-
 class FrontCoverTemplate(PageTemplate):
     def __init__(self, id, pageSize=defaultPageSize):
         self.pageWidth = pageSize[0]
@@ -58,6 +57,27 @@ class OneColumnTemplate(PageTemplate):
         canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
         canvas.restoreState()
 
+class TOCTemplate(PageTemplate):
+    def __init__(self, id, pageSize=defaultPageSize):
+        self.pageWidth = pageSize[0]
+        self.pageHeight = pageSize[1]
+        frame1 = Frame(inch,
+                       inch,
+                       self.pageWidth - 2*inch,
+                       self.pageHeight - 2*inch,
+                       id='normal')
+        PageTemplate.__init__(self, id, [frame1])  # note lack of onPage
+
+    def afterDrawPage(self, canvas, doc):
+        y = self.pageHeight - 50
+        canvas.saveState()
+        canvas.setFont('Times-Roman', 10)
+        canvas.drawString(inch, y+8, doc.title)
+        canvas.drawRightString(self.pageWidth - inch, y+8, 'Table of contents')
+        canvas.line(inch, y, self.pageWidth - inch, y)
+        canvas.drawCentredString(doc.pagesize[0] / 2, 0.75*inch, 'Page %d' % canvas.getPageNumber())
+        canvas.restoreState()
+
 class TwoColumnTemplate(PageTemplate):
     def __init__(self, id, pageSize=defaultPageSize):
         self.pageWidth = pageSize[0]
@@ -89,6 +109,7 @@ class TwoColumnTemplate(PageTemplate):
 class RLDocTemplate(BaseDocTemplate):
     def afterInit(self):
         self.addPageTemplates(FrontCoverTemplate('Cover', self.pagesize))
+        self.addPageTemplates(TOCTemplate('TOC', self.pagesize))
         self.addPageTemplates(OneColumnTemplate('Normal', self.pagesize))
         self.addPageTemplates(TwoColumnTemplate('TwoColumn', self.pagesize))
 
@@ -116,20 +137,23 @@ class RLDocTemplate(BaseDocTemplate):
 ##                print '%d: (something with ABag)' % self.counter
 ##            self.counter = self.counter + 1
 
+            txt = flowable.getPlainText()
             if style == 'Title':
-                self.title = flowable.getPlainText()
+                self.title = txt
             elif style == 'Heading1':
-                self.chapter = flowable.getPlainText()
+                self.chapter = txt 
                 key = 'ch%d' % self.chapterNo
                 self.canv.bookmarkPage(key)
-                self.canv.addOutlineEntry(flowable.getPlainText(),
+                self.canv.addOutlineEntry(txt,
                                             key, 0, 0)
+                self.notify('TOCEntry', (0, txt, self.page))
                 self.chapterNo = self.chapterNo + 1
                 self.sectionNo = 1
             elif style == 'Heading2':
                 self.section = flowable.text
                 key = 'ch%ds%d' % (self.chapterNo, self.sectionNo)
                 self.canv.bookmarkPage(key)
-                self.canv.addOutlineEntry(flowable.getPlainText(),
+                self.canv.addOutlineEntry(txt,
                                              key, 1, 0)
                 self.sectionNo = self.sectionNo + 1
+                self.notify('TOCEntry', (1, txt, self.page))
