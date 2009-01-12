@@ -44,6 +44,7 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable
 from reportlab.platypus.tables import TableStyle, Table
+from reportlab.platypus.flowables import Spacer
 
 
 # Default paragraph styles for tables of contents.
@@ -193,6 +194,8 @@ class TableOfContents(IndexingFlowable):
                                            alignment=enums.TA_RIGHT)
             leftPara = Paragraph(text, leftColStyle)
             rightPara = Paragraph(str(pageNum), rightColStyle)
+            if leftColStyle.spaceBefore:
+                tableData.append([Spacer(1, leftColStyle.spaceBefore), Spacer(0, 0)])
             tableData.append([leftPara, rightPara])
 
         self._table = Table(tableData, colWidths=widths,
