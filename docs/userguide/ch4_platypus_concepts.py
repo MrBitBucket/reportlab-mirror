@@ -326,7 +326,8 @@ eg("""
                     allowSplitting=1,
                     title=None,
                     author=None,
-                    _pageBreakQuick=1)
+                    _pageBreakQuick=1,
+                    encrypt=None)
 """)
 
 disc("""
@@ -342,7 +343,11 @@ not $Frame$ boundaries are drawn which can be useful for debugging purposes. The
 $allowSplitting$ argument determines whether the builtin methods should try to <i>split</i>
 individual $Flowables$ across $Frames$. The $_pageBreakQuick$ argument determines whether
 an attempt to do a page break should try to end all the frames on the page or not, before ending
-the page.
+the page. The encrypt argument determines wether or not and how the document is encrypted.
+By default, the document is not encrypted.
+If $encrypt$ is a string object, it is used as the user password for the pdf.
+If $encrypt$ is an instance of $reportlab.lib.pdfencrypt.StandardEncryption$, this object is
+used to encrypt the pdf. This allows more finegrained control over the encryption settings.
 """)
 
 heading4("User $BaseDocTemplate$ Methods")

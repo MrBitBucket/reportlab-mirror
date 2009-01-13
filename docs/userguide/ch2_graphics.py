@@ -69,7 +69,8 @@ eg("""    def __init__(self,filename,
                  bottomup = 1,
                  pageCompression=0,
                  encoding=rl_config.defaultEncoding,
-                 verbosity=0):
+                 verbosity=0
+                 encrypt=None):
                  """)
 
 disc("""The $filename$ argument controls the
@@ -156,6 +157,12 @@ applications which want to capture PDF from standard output.
 With a value of 1, you will get a confirmation message
 each time a document is generated.  Higher numbers may
 give more output in future.""")
+
+disc("""The $encrypt$ argument determines if and how the document is encrypted.
+By default, the document is not encrypted.
+If $encrypt$ is a string object, it is used as the user password for the pdf.
+If $encrypt$ is an instance of $reportlab.lib.pdfencrypt.StandardEncryption$, this object is
+used to encrypt the pdf. This allows more finegrained control over the encryption settings.""")
 
 todo("to do - all the info functions and other non-drawing stuff")
 
