@@ -224,7 +224,11 @@ def _putFragLine(cur_x, tx, line):
                     func = getattr(tx._canvas,name,None)
                     if not func:
                         raise AttributeError("Missing %s callback attribute '%s'" % (kind,name))
-                    func(tx._canvas,kind,cbDefn.label)
+                    tx._canvas._curr_tx_info=dict(tx=tx,cur_x=cur_x,cur_y=cur_y,leading=leading,xs=tx.XtraState)
+                    try:
+                        func(tx._canvas,kind,cbDefn.label)
+                    finally:
+                        del tx._canvas._curr_tx_info
             if f is words[-1]:
                 if not tx._fontname:
                     tx.setFont(xs.style.fontName,xs.style.fontSize)

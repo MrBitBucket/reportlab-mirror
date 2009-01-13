@@ -181,9 +181,9 @@ class Canvas(textobject._PDFColorSetter):
         self._make_preamble()
         self.state_stack = []
 
-        self.setencrypt(encrypt)
+        self.setEncrypt(encrypt)
 
-    def setencrypt(self, encrypt):
+    def setEncrypt(self, encrypt):
         if encrypt:
             from reportlab.lib import pdfencrypt
             if isinstance(encrypt, basestring):

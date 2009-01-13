@@ -718,7 +718,7 @@ class BaseDocTemplate:
                                 invariant=self.invariant,
                                 pageCompression=self.pageCompression)
  
-        getattr(self.canv,'setencrypt',lambda x: None)(self.encrypt)
+        getattr(self.canv,'setEncrypt',lambda x: None)(self.encrypt)
 
         self.canv.setAuthor(self.author)
         self.canv.setTitle(self.title)
