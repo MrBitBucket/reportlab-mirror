@@ -45,7 +45,7 @@ from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.flowables import Spacer
-
+from reportlab.pdfbase.pdfmetrics import stringWidth
 
 # Default paragraph styles for tables of contents.
 # (This could also be generated automatically or even
@@ -102,6 +102,9 @@ class TableOfContents(IndexingFlowable):
     The data block contains a list of (level, text, pageNumber)
     triplets.  You can supply a paragraph style for each level
     (starting at zero).
+    Set dotsMinLevel to determine from which level on a line of
+    dots should be drawn between the text and the page number.
+    If dotsMinLevel is set to a negative value, no dotted lines are drawn.
     """
 
     def __init__(self):
@@ -113,6 +116,7 @@ class TableOfContents(IndexingFlowable):
                             levelThreeParaStyle,
                             levelFourParaStyle]
         self.tableStyle = defaultTableStyle
+        self.dotsMinLevel = 1
         self._table = None
         self._entries = []
         self._lastEntries = []
@@ -172,9 +176,6 @@ class TableOfContents(IndexingFlowable):
     def wrap(self, availWidth, availHeight):
         "All table properties should be known by now."
 
-        widths = (availWidth - self.rightColumnWidth,
-                  self.rightColumnWidth)
-
         # makes an internal table which does all the work.
         # we draw the LAST RUN's entries!  If there are
         # none, we make some dummy data to keep the table
@@ -184,21 +185,33 @@ class TableOfContents(IndexingFlowable):
         else:
             _tempEntries = self._lastEntries
 
+        def drawTOCEntryEnd(canvas, kind, label):
+            '''Callback to draw dots and page numbers after each entry.'''
+            page, level = [ int(x) for x in label.split(',') ]
+            x, y = canvas._curr_tx_info['cur_x'], canvas._curr_tx_info['cur_y']
+            style = self.levelStyles[level]
+            pagew = stringWidth('  %d' % page, style.fontName, style.fontSize)
+            if self.dotsMinLevel >= 0 and level >= self.dotsMinLevel:
+                dotw = stringWidth(' . ', style.fontName, style.fontSize)
+                dotsn = int((availWidth-x-pagew)/dotw)
+            else:
+                dotsn = dotw = 0
+
+            tx = canvas.beginText(availWidth-pagew-dotsn*dotw, y)
+            tx.setFont(style.fontName, style.fontSize)
+            tx.textLine('%s  %d' % (dotsn * ' . ', page))
+            canvas.drawText(tx)
+        self.canv.drawTOCEntryEnd = drawTOCEntryEnd
+
         tableData = []
         for (level, text, pageNum) in _tempEntries:
-            leftColStyle = self.levelStyles[level]
-            #right col style is right aligned
-            rightColStyle = ParagraphStyle(name='leftColLevel%d' % level,
-                                           parent=leftColStyle,
-                                           leftIndent=0,
-                                           alignment=enums.TA_RIGHT)
-            leftPara = Paragraph(text, leftColStyle)
-            rightPara = Paragraph(str(pageNum), rightColStyle)
-            if leftColStyle.spaceBefore:
-                tableData.append([Spacer(1, leftColStyle.spaceBefore), Spacer(0, 0)])
-            tableData.append([leftPara, rightPara])
+            style = self.levelStyles[level]
+            para = Paragraph('%s<onDraw name="drawTOCEntryEnd" label="%d,%d"/>' % (text, pageNum, level), style)
+            if style.spaceBefore:
+                tableData.append([Spacer(1, style.spaceBefore),])
+            tableData.append([para,])
 
-        self._table = Table(tableData, colWidths=widths,
+        self._table = Table(tableData, colWidths=(availWidth,),
                             style=self.tableStyle)
 
         self.width, self.height = self._table.wrapOn(self.canv,availWidth, availHeight)
