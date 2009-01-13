@@ -35,6 +35,17 @@ for i in range(6,31):
 class StandardEncryption:
     prepared = 0
     def __init__(self, userPassword, ownerPassword=None, canPrint=1, canModify=1, canCopy=1, canAnnotate=1, strength=40):
+        '''
+        This class defines the encryption properties to be used while creating a pdf document.
+        Once initiated, a StandardEncryption object can be applied to a Canvas or a BaseDocTemplate.
+        The userPassword parameter sets the user password on the encrypted pdf.
+        The ownerPassword parameter sets the owner password on the encrypted pdf.
+        The boolean flags canPrint, canModify, canCopy, canAnnotate determine wether a user can
+        perform the corresponding actions on the pdf when only a user password has been supplied.
+        If the user supplies the owner password while opening the pdf, all actions can be performed regardless
+        of the flags.
+        Note that the security provided by these encryption settings (and even more so for the flags) is very weak.
+        '''
         self.ownerPassword = ownerPassword
         self.userPassword = userPassword
         if strength == 40:
