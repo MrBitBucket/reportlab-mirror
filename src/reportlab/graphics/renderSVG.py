@@ -655,7 +655,7 @@ class _SVGRenderer(Renderer):
         if self.verbose: print "### begin _SVGRenderer.drawGroup"
 
         currGroup = self._canvas.startGroup()
-        a, b, c, d, e, f = self._tracker.getCTM()
+        a, b, c, d, e, f = self._tracker.getState()['transform']
         for childNode in group.getContents():
             if isinstance(childNode, UserNode):
                 node2 = childNode.provideNode()
