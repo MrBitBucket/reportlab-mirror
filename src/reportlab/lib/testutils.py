@@ -302,7 +302,7 @@ class ScriptThatMakesFileTest(unittest.TestCase):
 
     def setUp(self):
         self.cwd = os.getcwd()
-        from tests.utils import testsFolder
+        global testsFolder
         scriptDir=self.scriptDir
         if not os.path.isabs(scriptDir):
             scriptDir=os.path.join(testsFolder,scriptDir)
