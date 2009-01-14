@@ -162,14 +162,10 @@ disc("""The $encrypt$ argument determines if and how the document is encrypted.
 By default, the document is not encrypted.
 If $encrypt$ is a string object, it is used as the user password for the pdf.
 If $encrypt$ is an instance of $reportlab.lib.pdfencrypt.StandardEncryption$, this object is
-used to encrypt the pdf. This allows more finegrained control over the encryption settings.""")
+used to encrypt the pdf. This allows more finegrained control over the encryption settings.
+Encryption is covered in more detail in Chapter 4.""")
 
 todo("to do - all the info functions and other non-drawing stuff")
-
-
-
-
-
 todo("""Cover all constructor arguments, and setAuthor etc.""")
 
 heading2("Drawing Operations")

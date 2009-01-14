@@ -275,3 +275,149 @@ document like any other text.
 """)
 
 illust(examples.annotations, "Setting document internal annotations")
+
+heading2("Encryption")
+
+heading3("About encrypting PDF files")
+
+disc("""
+Adobe's PDF standard allows you to do three related things to a PDF file when you encrypt it:
+""")
+bullet("""Apply password protection to it, so a user must supply a valid password before being able to read it,
+""")
+bullet("""Encrypt the contents of the file to make it useless until it is decrypted, and
+""")
+bullet("""Control whether the user can print, copy and paste or modify the document while viewing it.
+""")
+
+disc("""
+The PDF security handler allows two different passwords to be specified for a document:
+""")
+
+bullet("""The 'owner' password (aka the 'security password' or 'master password')
+""")
+
+bullet("""The 'user' password (aka the 'open password')
+""")
+
+disc("""
+When a user supplies either one of these passwords, the PDF file will be opened, decrypted and displayed on
+screen.
+""")
+
+disc("""
+If the owner password is supplied, then the file is opened with full control - you can do anything to it,
+including changing the security settings and passwords, or re-encrypting it with a new password.
+""")
+
+disc("""
+     If the user password was the one that was supplied, you open it up in a more restricted mode. The restrictions were put in
+place when the file was encrypted, and will either allow or deny the user permission to do the following:
+""")
+
+bullet("""
+Modifying the document's contents
+""")
+
+bullet("""
+Copying text and graphics from the document
+""")
+
+bullet("""
+Adding or modifying text annotations and interactive form fields
+""")
+
+bullet("""
+Printing the document
+""")
+
+disc("""
+Note that all password protected PDF files are encrypted, but not all encrypted PDFs are password protected. If
+a document's user password is an empty string, there will be no prompt for the password when the file is
+opened. If you only secure a document with the owner password, there will also not be a prompt for the
+password when you open the file. If the owner and user passwords are set to the same string when encrypting
+the PDF file, the document will always open with the user access privileges. This means that it is possible to
+create a file which, for example, is impossible for anyone to print out, even the person who created it.
+""")
+
+t = Table([
+           ['Owner Password \nset?','User Password \nset?','Result'],
+           ['Y','-','No password required when opening file. \nRestrictions apply to everyone.'],
+           ['-','Y','User password required when opening file. \nRestrictions apply to everyone.'],
+           ['Y','Y','A password required when opening file. \nRestrictions apply only if user password supplied.'],
+          ],[90, 90, 260])
+
+t.setStyle(TableStyle([
+            ('FONT',(0,0),(-1,0),'Times-Bold',10,12),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+
+getStory().append(t)
+
+disc("""
+When a PDF file is encrypted, encryption is applied to all the strings and streams in the file. This prevents
+people who don't have the password from simply removing the password from the PDF file to gain access to it - 
+it renders the file useless unless you actually have the password.
+""")
+disc("""
+PDF's standard encryption methods use the
+MD5 message digest algorithm (as described in RFC 1321, The MD5 Message-Digest Algorithm) and an
+encryption algorithm known as RC4. RC4 is a symmetric stream cipher - the same algorithm is used both for
+encryption and decryption, and the algorithm does not change the length of the data.
+""")
+
+heading3("How To Use Encryption")
+
+disc("""
+     Documents can be encrypted by passing an argument to the canvas object.
+     """)
+
+disc("""
+     If the argument is a string object, it is used as the User password to the PDF.
+     """)
+
+disc("""
+     The argument can also be an instance of the class $reportlab.lib.pdfencrypt.StandardEncryption$,
+     which allows more finegrained control over encryption settings.
+     """)
+
+disc("""
+     The $StandardEncryption$ class takes the following arguments:
+     """)
+
+disc("""
+     The $userPassword$ and $ownerPassword$ parameters set the relevant password on the encrypted PDF.
+     """)
+
+disc("""
+     The boolean flags $canPrint$, $canModify$, $canCopy$, $canAnnotate$ determine wether a user can
+    perform the corresponding actions on the PDF when only a user password has been supplied.
+    """)
+disc("""
+    If the user supplies the owner password while opening the PDF, all actions can be performed regardless
+    of the flags.
+    """)
+
+heading3("Example")
+
+disc("""
+     To create a document named hello.pdf with a user password of 'rptlab' on which printing is not allowed,
+     use the following code:
+     """)
+
+eg("""
+from reportlab.pdfgen import canvas
+from reportlab.lib import pdfencrypt
+
+enc=pdfencrypt.StandardEncryption("rptlab",canPrint=0)
+
+def hello(c):
+    c.drawString(100,100,"Hello World")
+c = canvas.Canvas("hello.pdf",encrypt=enc)
+hello(c)
+c.showPage()
+c.save()
+
+""")
