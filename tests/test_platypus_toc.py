@@ -22,8 +22,6 @@ from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 from reportlab.platypus import tableofcontents
-from reportlab.platypus.tableofcontents import TableOfContents
-from reportlab.platypus.tables import TableStyle, Table
 from reportlab.lib import randomtext
 
 
@@ -153,7 +151,7 @@ class TocTestCase(unittest.TestCase):
         description = '<font color=red>%s</font>' % self.test0.__doc__
         story.append(XPreformatted(description, bt))
 
-        toc = TableOfContents()
+        toc = tableofcontents.TableOfContents()
         toc.levelStyles = tocLevelStyles
         story.append(toc)
 

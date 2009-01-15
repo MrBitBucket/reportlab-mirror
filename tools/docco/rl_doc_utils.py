@@ -165,7 +165,7 @@ def title(text):
 #AR 3/7/2000 - defining three new levels of headings; code
 #should be swapped over to using them.
 
-def tableofcontents(text='Table of contents'):
+def headingTOC(text='Table of contents'):
     getStory().append(PageBreak())
     p = Paragraph(text, H1)
     getStory().append(p)

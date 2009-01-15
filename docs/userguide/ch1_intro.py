@@ -11,20 +11,17 @@ centred('ReportLab Version ' + reportlab.Version)
 
 nextTemplate("TOC")
 
-tableofcontents()
+headingTOC()
 
+toc = TableOfContents()
 PS = ParagraphStyle
-tocstyles = [
+toc.levelStyles = [
     PS(fontName='Times-Bold', fontSize=14, name='TOCHeading1', leftIndent=20, firstLineIndent=-20, spaceBefore=5, leading=16),
     PS(fontSize=12, name='TOCHeading2', leftIndent=40, firstLineIndent=-20, spaceBefore=0, leading=12),
     PS(fontSize=10, name='TOCHeading3', leftIndent=60, firstLineIndent=-20, spaceBefore=0, leading=12),
     PS(fontSize=10, name='TOCHeading4', leftIndent=100, firstLineIndent=-20, spaceBefore=0, leading=12),
 ]
-
-story = getStory()
-toc = TableOfContents()
-toc.levelStyles = tocstyles
-story.append(toc)
+getStory().append(toc)
 
 nextTemplate("Normal")
 
