@@ -64,6 +64,7 @@ come back later and read this!""")
 
 disc("""First of all, we will look at the constructor
 arguments for the canvas:""")
+
 eg("""    def __init__(self,filename,
                  pagesize=(595.27,841.89),
                  bottomup = 1,

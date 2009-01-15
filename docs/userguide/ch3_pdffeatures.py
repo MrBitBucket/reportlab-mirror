@@ -384,8 +384,18 @@ disc("""
      """)
 
 disc("""
-     The $StandardEncryption$ class takes the following arguments:
+     The $StandardEncryption$ constructor takes the following arguments:
      """)
+
+eg("""
+    def __init__(self, userPassword,
+            ownerPassword=None,
+            canPrint=1,
+            canModify=1,
+            canCopy=1,
+            canAnnotate=1,
+            strength=40):
+    """)
 
 disc("""
      The $userPassword$ and $ownerPassword$ parameters set the relevant password on the encrypted PDF.
