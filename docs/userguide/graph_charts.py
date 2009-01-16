@@ -4,18 +4,18 @@ __version__=''' $Id$ '''
 from tools.docco.rl_doc_utils import *
 from reportlab.graphics.shapes import *
 
-heading1("Charts")
+heading2("Charts")
 
 disc("""
 The motivation for much of this is to create a flexible chart
 package.
-This chapter presents a treatment of the ideas behind our charting
+This section presents a treatment of the ideas behind our charting
 model, what the design goals are and what components of the chart
 package already exist.
 """)
 
 
-heading2("Design Goals")
+heading3("Design Goals")
 
 disc("Here are some of the design goals: ")
 
@@ -110,8 +110,8 @@ disc("""<para lindent=+36>(If you want to see the image, it is available on our 
 <font color=blue>http://www.reportlab.com/demos/provencio.pdf</font>)""")
 
 
-##heading2("Key Concepts and Components")
-heading2("Overview")
+##heading3("Key Concepts and Components")
+heading3("Overview")
 
 disc("""A chart or plot is an object which is placed on a drawing; it is not
        itself a drawing. You can thus control where it goes, put several on
@@ -133,7 +133,7 @@ disc("""You can subclass any chart component and use your replacement instead
        properties.""")
 
 
-heading2("Labels")
+heading3("Labels")
 
 disc("""
 A label is a string of text attached to some chart element.
@@ -246,7 +246,7 @@ it generates!
 
 
 
-heading2("Axes")
+heading3("Axes")
 
 disc("""
 We identify two basic kinds of axes - <i>Value</i> and <i>Category</i>
@@ -576,7 +576,7 @@ getStory().append(t)
 caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Axes joining properties""")
 
 
-heading2("Bar Charts")
+heading3("Bar Charts")
 
 disc("""
 This describes our current $VerticalBarChart$ class, which uses the
@@ -815,7 +815,7 @@ Bars labels are automatically displayed for negative values
 ##title, subTitle Not implemented yet. These would be label-like objects whose text could be set directly and which would appear in sensible locations. For now, you can just place extra strings on the drawing.
 
 
-heading2("Line Charts")
+heading3("Line Charts")
 
 disc("""
 We consider "Line Charts" to be essentially the same as
@@ -896,7 +896,7 @@ disc("")
 todo("Add properties table.")
 
 
-heading2("Line Plots")
+heading3("Line Plots")
 
 disc("""
 Below we show a more complex example of a Line Plot that
@@ -978,7 +978,7 @@ todo("Add properties table.")
 
 
 
-heading2("Pie Charts")
+heading3("Pie Charts")
 
 disc("""
 We've already seen a pie chart example above.
@@ -1066,7 +1066,7 @@ todo("Add properties table.")
 ##
 
 
-heading2("Legends")
+heading3("Legends")
 
 disc("""
 Various preliminary legend classes can be found but need a
@@ -1104,7 +1104,7 @@ colors directly?""")
 
 
 
-heading2("Remaining Issues")
+heading3("Remaining Issues")
 
 disc("""
 There are several issues that are <i>almost</i> solved, but for which
@@ -1132,7 +1132,7 @@ and percentile bars as well as the side-by-side variant seen here.
 """)
 
 
-heading2("Outlook")
+heading3("Outlook")
 
 disc("""
 It will take some time to deal with the full range of chart types.

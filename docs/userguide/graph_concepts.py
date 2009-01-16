@@ -3,15 +3,15 @@
 __version__=''' $Id$ '''
 from tools.docco.rl_doc_utils import *
 
-heading1("General Concepts")
+heading2("General Concepts")
 
 disc("""
-In this chapter we will present some of the more fundamental principles of
+In this section we will present some of the more fundamental principles of
 the graphics library, which will show-up later in various places.
 """)
 
 
-heading2("Drawings and Renderers")
+heading3("Drawings and Renderers")
 
 disc("""
 A <i>Drawing</i> is a platform-independent description of a collection of
@@ -80,7 +80,7 @@ GUI window.
 """)
 
 
-heading2("Coordinate System")
+heading3("Coordinate System")
 
 disc("""
 The Y-direction in our X-Y coordinate system points from the
@@ -103,7 +103,7 @@ seems, for Arabs looking at time series charts...).
 """)
 
 
-heading2("Getting Started")
+heading3("Getting Started")
 
 disc("""
 Let's create a simple drawing containing the string "Hello World",
@@ -178,7 +178,7 @@ eg("""
 """)
 
 
-heading2("Attribute Verification")
+heading3("Attribute Verification")
 
 disc("""
 Python is very dynamic and lets us execute statements at run time that
@@ -264,7 +264,7 @@ once in a batch process.
 """)
 
 
-heading2("Property Editing")
+heading3("Property Editing")
 
 disc("""
 A cornerstone of the reportlab/graphics which we will cover below is
@@ -343,7 +343,7 @@ non-primitive objects.
 """)
 
 
-heading2("Naming Children")
+heading3("Naming Children")
 
 disc("""
 You can add objects to the $Drawing$ and $Group$ objects.

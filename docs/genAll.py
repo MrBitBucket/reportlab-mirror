@@ -8,7 +8,6 @@ def _genAll(verbose=1):
     L = [os.path.join(topDir,f) for f in (
             'docs/reference/genreference.py',
             'docs/userguide/genuserguide.py',
-            'docs/graphguide/gengraphguide.py',
             'tools/docco/graphdocpy.py',
             )   
         ]

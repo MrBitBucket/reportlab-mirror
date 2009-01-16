@@ -43,6 +43,11 @@ def run(pagesize=None, verbose=0, outDir=None):
         'ch5_paragraphs',
         'ch6_tables',
         'ch7_custom',
+        'graph_intro',
+        'graph_concepts',
+        'graph_charts',
+        'graph_shapes',
+        'graph_widgets',
         'app_demos',
         ):
         exec open_and_read(f+'.py',mode='t') in G, G

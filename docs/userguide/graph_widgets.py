@@ -5,7 +5,7 @@ from tools.docco.rl_doc_utils import *
 from reportlab.graphics.shapes import *
 from reportlab.graphics.widgets import signsandsymbols
 
-heading1("Widgets")
+heading2("Widgets")
 
 disc("""
 We now describe widgets and how they relate to shapes.
@@ -14,7 +14,7 @@ graphics components.
 """)
 
 
-heading2("Shapes vs. Widgets")
+heading3("Shapes vs. Widgets")
 
 disc("""Up until now, Drawings have been 'pure data'. There is no code in them
        to actually do anything, except assist the programmer in checking and
@@ -57,7 +57,7 @@ disc("""Widgets run contrary to the idea that a drawing is just a bundle of
        widgets to be converted to primitives.""")
 
 
-heading2("Using a Widget")
+heading3("Using a Widget")
 
 disc("""
 Let's imagine a simple new widget.
@@ -176,7 +176,7 @@ d.add(ns)
 """)
 
 
-heading2("Compound Widgets")
+heading3("Compound Widgets")
 
 disc("""Let's imagine a compound widget which draws two faces side by side.
        This is easy to build when you have the Face widget.""")
@@ -208,14 +208,14 @@ disc("""The attributes 'faceOne' and 'faceTwo' are deliberately exposed so you
        but there aren't in this case.""")
 
 
-heading2("Verifying Widgets")
+heading3("Verifying Widgets")
 
 disc("""The widget designer decides the policy on verification, but by default
        they work like shapes - checking every assignment - if the designer
        has provided the checking information.""")
 
 
-heading2("Implementing Widgets")
+heading3("Implementing Widgets")
 
 disc("""We tried to make it as easy to implement widgets as possible. Here's
        the code for a Face widget which does not do any type checking:""")
@@ -281,7 +281,7 @@ disc("""This checking will be performed on every attribute assignment; or, if
        $config.shapeChecking$ is off, whenever you call $myFace.verify()$.""")
 
 
-heading2("Documenting Widgets")
+heading3("Documenting Widgets")
 
 disc("""
 We are working on a generic tool to document any Python package or
@@ -303,7 +303,7 @@ too!
 """)
 
 
-heading2("Widget Design Strategies")
+heading3("Widget Design Strategies")
 
 disc("""We could not come up with a consistent architecture for designing
        widgets, so we are leaving that problem to the authors! If you do not
