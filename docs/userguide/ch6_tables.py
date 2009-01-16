@@ -441,8 +441,18 @@ toc.levelStyles = [
 story.append(toc)
 """)
 
-disc("""Entries to the table of contents can be done either manually by calling the $addEntry$ method on the $TableOfContents$ object
-or automatically by sending a $'TOCEntry'$ notification in the $afterFlowable$ method of the $DocTemplate$ you are using:""")
+disc("""Entries to the table of contents can be done either manually by calling
+the $addEntry$ method on the $TableOfContents$ object or automatically by sending
+a $'TOCEntry'$ notification in the $afterFlowable$ method of the $DocTemplate$
+you are using.
+
+The data to be passed to $notify$ is a list of three or four items countaining
+a level number, the entry text, the page number and an optional destination key
+which the entry should point to.
+This list will usually be created in a document template's method
+like afterFlowable(), making notification calls using the notify()
+method with appropriate data like this:
+""")
 
 eg('''
 def afterFlowable(self, flowable):
@@ -455,11 +465,15 @@ def afterFlowable(self, flowable):
             self.notify('TOCEntry', (0, txt, self.page))
         elif style == 'Heading2':
             # ...
-            self.notify('TOCEntry', (1, txt, self.page))
+            key = 'h2-%s' % self.seq.nextf('heading2')
+            self.canv.bookmarkPage(key)
+            self.notify('TOCEntry', (1, txt, self.page, key))
         # ...
 ''')
 
-disc("""This way, whenever a paragraph of style $'Heading1'$ or $'Heading2'$ is added to the story, it will appear in the table of contents.""")
+disc("""This way, whenever a paragraph of style $'Heading1'$ or $'Heading2'$ is added to the story, it will appear in the table of contents.
+$Heading2$ entries will be clickable because a bookmarked key has been supplied.
+""")
 
 disc("""Finally you need to use the $multiBuild$ method of the DocTemplate because tables of contents need several passes to be generated:""")
 
