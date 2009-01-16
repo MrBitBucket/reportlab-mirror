@@ -52,22 +52,24 @@ class MyDocTemplate(BaseDocTemplate):
 
 
     def afterFlowable(self, flowable):
-        "Registers TOC entries and makes outline entries."
+        "Registers TOC entries."
 
         if flowable.__class__.__name__ == 'Paragraph':
             styleName = flowable.style.name
             if styleName[:7] == 'Heading':
+                key = str(hash(flowable))
+                self.canv.bookmarkPage(key)
+
                 # Register TOC entries.
                 level = int(styleName[7:])
                 text = flowable.getPlainText()
                 pageNum = self.page
-                self.notify('TOCEntry', (level, text, pageNum))
-
-                # Add PDF outline entries (not really needed/tested here).
-                key = str(hash(flowable))
-                c = self.canv
-                c.bookmarkPage(key)
-                c.addOutlineEntry(text, key, level=level, closed=0)
+                # Try calling this with and without a key to test both
+                # Entries of every second level will have links, others won't
+                if level % 2 == 1:
+                    self.notify('TOCEntry', (level, text, pageNum, key))
+                else:
+                    self.notify('TOCEntry', (level, text, pageNum))
 
 
 def makeHeaderStyle(level, fontName='Times-Roman'):
@@ -125,7 +127,8 @@ class TocTestCase(unittest.TestCase):
 
             1. TOC lines are indented in multiples of 1 cm.
             2. Wrapped TOC lines continue with additional 0.5 cm indentation.
-            3. ...
+            3. Only entries of every second level has links
+            ...
         """
 
         maxLevels = 12

@@ -25,6 +25,14 @@ method with appropriate data like this:
     (level, text, pageNum) = ...
     self.notify('TOCEntry', (level, text, pageNum))
 
+Optionally the list can contain four items in which case the last item
+is a destination key which the entry should point to. A bookmark
+with this key needs to be created first like this:
+
+    key = 'ch%s' % self.seq.nextf('chapter')
+    self.canv.bookmarkPage(key)
+    self.notify('TOCEntry', (level, text, pageNum, key))
+
 As the table of contents need at least two passes over the Platypus
 story which is why the moultiBuild0() method must be called.
 
@@ -108,7 +116,6 @@ class TableOfContents(IndexingFlowable):
     """
 
     def __init__(self):
-        self.entries = []
         self.rightColumnWidth = 72
         self.levelStyles = [levelZeroParaStyle,
                             levelOneParaStyle,
@@ -141,15 +148,14 @@ class TableOfContents(IndexingFlowable):
         Here we are interested in 'TOCEntry' events only.
         """
         if kind == 'TOCEntry':
-            (level, text, pageNum) = stuff
-            self.addEntry(level, text, pageNum)
+            self.addEntry(*stuff)
 
 
     def clearEntries(self):
         self._entries = []
 
 
-    def addEntry(self, level, text, pageNum):
+    def addEntry(self, level, text, pageNum, key=None):
         """Adds one entry to the table of contents.
 
         This allows incremental buildup by a doctemplate.
@@ -160,7 +166,7 @@ class TableOfContents(IndexingFlowable):
                "Table of contents must have a style defined " \
                "for paragraph level %d before you add an entry" % level
 
-        self._entries.append((level, text, pageNum))
+        self._entries.append((level, text, pageNum, key))
 
 
     def addEntries(self, listOfEntries):
@@ -169,8 +175,8 @@ class TableOfContents(IndexingFlowable):
         If you knew the titles but not the page numbers, you could
         supply them to get sensible output on the first run."""
 
-        for (level, text, pageNum) in listOfEntries:
-            self.addEntry(level, text, pageNum)
+        for entryargs in listOfEntries:
+            self.addEntry(*entryargs)
 
 
     def wrap(self, availWidth, availHeight):
@@ -181,7 +187,7 @@ class TableOfContents(IndexingFlowable):
         # none, we make some dummy data to keep the table
         # from complaining
         if len(self._lastEntries) == 0:
-            _tempEntries = [(0,'Placeholder for table of contents',0)]
+            _tempEntries = [(0,'Placeholder for table of contents',0,None)]
         else:
             _tempEntries = self._lastEntries
 
@@ -204,8 +210,10 @@ class TableOfContents(IndexingFlowable):
         self.canv.drawTOCEntryEnd = drawTOCEntryEnd
 
         tableData = []
-        for (level, text, pageNum) in _tempEntries:
+        for (level, text, pageNum, key) in _tempEntries:
             style = self.levelStyles[level]
+            if key:
+                text = '<a href="#%s">%s</a>' % (key, text)
             para = Paragraph('%s<onDraw name="drawTOCEntryEnd" label="%d,%d"/>' % (text, pageNum, level), style)
             if style.spaceBefore:
                 tableData.append([Spacer(1, style.spaceBefore),])

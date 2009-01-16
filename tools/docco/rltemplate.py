@@ -8,6 +8,7 @@
 from reportlab.platypus import PageTemplate, \
      BaseDocTemplate, Frame, Paragraph
 from reportlab.lib.units import inch, cm
+from reportlab.lib.sequencer import Sequencer
 from reportlab.rl_config import defaultPageSize
 
 class FrontCoverTemplate(PageTemplate):
@@ -112,48 +113,34 @@ class RLDocTemplate(BaseDocTemplate):
         self.addPageTemplates(TOCTemplate('TOC', self.pagesize))
         self.addPageTemplates(OneColumnTemplate('Normal', self.pagesize))
         self.addPageTemplates(TwoColumnTemplate('TwoColumn', self.pagesize))
+        self.seq = Sequencer()
 
-        #just playing
-        self.title = "(Document Title Goes Here)"
-        self.chapter = "(No chapter yet)"
-        self.chapterNo = 1 #unique keys
-        self.sectionNo = 1 # unique keys
-
-##        # AR hack
-##        self.counter = 1
     def beforeDocument(self):
         self.canv.showOutline()
+        self.title = "(Document Title Goes Here)"
+        self.chapter = "(No chapter yet)"
+        map(self.seq.reset, ('section', 'chapter'))
 
     def afterFlowable(self, flowable):
         """Detect Level 1 and 2 headings, build outline,
         and track chapter title."""
+
         if isinstance(flowable, Paragraph):
             style = flowable.style.name
-
-##            #AR debug text
-##            try:
-##                print '%d: %s...' % (self.counter, flowable.getPlainText()[0:40])
-##            except AttributeError:
-##                print '%d: (something with ABag)' % self.counter
-##            self.counter = self.counter + 1
-
             txt = flowable.getPlainText()
+
             if style == 'Title':
                 self.title = txt
             elif style == 'Heading1':
                 self.chapter = txt 
-                key = 'ch%d' % self.chapterNo
+                key = 'ch%s' % self.seq.nextf('chapter')
                 self.canv.bookmarkPage(key)
-                self.canv.addOutlineEntry(txt,
-                                            key, 0, 0)
-                self.notify('TOCEntry', (0, txt, self.page))
-                self.chapterNo = self.chapterNo + 1
-                self.sectionNo = 1
+                self.canv.addOutlineEntry(txt, key, 0, 0)
+                self.seq.reset("section")
+                self.notify('TOCEntry', (0, txt, self.page, key))
             elif style == 'Heading2':
                 self.section = flowable.text
-                key = 'ch%ds%d' % (self.chapterNo, self.sectionNo)
+                key = 'ch%ss%s' % (self.seq.thisf("chapter"), self.seq.nextf("section"))
                 self.canv.bookmarkPage(key)
-                self.canv.addOutlineEntry(txt,
-                                             key, 1, 0)
-                self.sectionNo = self.sectionNo + 1
-                self.notify('TOCEntry', (1, txt, self.page))
+                self.canv.addOutlineEntry(txt, key, 1, 0)
+                self.notify('TOCEntry', (1, txt, self.page, key))
