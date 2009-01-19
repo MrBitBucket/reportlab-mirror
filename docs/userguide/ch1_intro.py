@@ -139,7 +139,7 @@ Python is also usable as an extension language for applications that need a prog
 
 
 disc("""
-Python is as old as Java and has been growing steadily in popularity for 13 years; since our
+Python is as old as Java and has been growing steadily in popularity for years; since our
 library first came out it has entered the mainstream.  Many ReportLab library users are
 already Python devotees, but if you are not, we feel that the language is an excellent
 choice for document-generation apps because of its expressiveness and ability to get
@@ -167,92 +167,61 @@ for and Bitstream Inc. for the Vera fonts.""")
 
 heading2("Installation and Setup")
 
-disc("""
-Below we provide an abbreviated setup procedure for Python experts and a more
-verbose procedure for people who are new to Python.
-""")
-
-heading3("Installation for experts")
-disc("""First of all, we'll give you the high-speed version for experienced
-Python developers:""")
-list("""Install Python 2.3 or later (2.4 recommended).  ReportLab 2.x uses
-    Python 2.3 features and will use 2.4 going forwards.  We also maintain
-    a 1.x branch which works back to Python 2.1.
-     """)
-list("""If you want to produce compressed PDF files (recommended),
-check that zlib is installed.""")
-list("""If you want to work with bitmap images, install and
-test the Python Imaging Library""")
-list("""Unpack the reportlab package (reportlab.zip
-or reportlab.tgz) into a directory on your path.  (You can also use ^python setup.py install^ if you wish)""")
-list("""Unpack the rl_addons package and build the C extensions with distutils; or grab the
-corresponding .pyd files from our download page. """)
-
-
-list("""$cd$ to ^tests^ and execute $runAll.py$.
-This will create many PDF files. """)
-list("""You may also want to download and run the ^rl_check.py^ on our site, which
-health-checks an installation and reports on any missing options.  """)
-disc(" ")
-disc("""If you have any problems, check the 'Detailed Instructions' section below.""")
-
 heading3("A note on available versions")
-disc("""The $reportlab$ library can be found at $ftp.reportlab.com$ in
-the top-level directory or at http://www.reportlab.com/ftp/.
-Each successive version is stored in both zip
+disc("""The latest version of the ReportLab library can be found at
+^http://www.reportlab.org/downloads.html^.  Older versions can be found at ^http://www.reportlab.com/ftp/^.
+  Each successive version is stored in both zip
 and tgz format, but the contents are identical apart from line endings.
 Versions are numbered:  $ReportLab_1_00.zip$, $ReportLab_1_01.zip$ and so on. The
 latest stable version is also available as just $reportlab.zip$ (or
 $reportlab.tgz$), which is actually a symbolic link to the latest
-numbered version.  Finally, daily snapshots off the trunk are available as
-$current.zip$ (or $current.tgz$).
+numbered version.  Daily snapshots of the trunk are available as
+$current.zip$ or $current.tgz$.
+Finally, from version 2.3 onwards, there is also a Windows installer
+available for Python versions 2.3 - 2.6, named $ReportLab-2.x.win32-py2.x.exe$
 """)
 
 
-heading3("Instructions for novices: Windows")
-
-
-
-disc("""This section assumes you
-don't know much about Python.  We cover all of the steps for three
-common platforms, including how to verify that each one is complete.
-While this may seem like a long list, everything takes 5 minutes if
-you have the binaries at hand.""")
+heading3("Installation on Windows")
 
 
 restartList()
 
-list("""Get and install Python from $http://www.python.org/.$
-Reportlab 2.x works with Python 2.3 upwards but we strongly recommend to use
-the latest stable version of Python (2.4.3 at the time of writing).
-Follow the links to 'Download' and get the latest
-official version.  This will install itself into $C:\Python24$
+list("""First, install Python from $http://www.python.org/.$
+Reportlab 2.x works with Python 2.3 upwards but we recommend to use
+the latest stable version of Python 2.5.  
 After installing, you should be able to run the
-'Python (command line)' option from the Start Menu.""")
-
-list("""If on Windows, we strongly recommend installing the Python Windows
-Extensions, which let you use access all the Windows data sources, and provide
-a very nice IDE.  This can be found at ^http://sourceforge.net/projects/pywin32/^.
-Once this is installed, you can start
-Pythonwin from the Start Menu and get a GUI application.""")
-
-list("""The next step is optional and only necessary if you want to
-include images in your reports; it can also be carried out later.  However
-we always recommend a full installation if time permits.""")
-
-list("""Install the Python Imaging Library ($PIL$) from $http://www.pythonware.com/products/pil/$.
+'Python (command line)' option from the Start Menu.
 """)
 
+list("""We strongly recommend installing the Python Windows
+Extensions, which gives you access to Windows data sources, COM support, WinAPI calls, and the PythonWin IDE.  This
+can be found at ^http://sourceforge.net/projects/pywin32/^.
+Once this is installed, you can start
+Pythonwin from the Start Menu and get a GUI application.
+""")
 
-list("""Now you are ready to install reportlab itself.  Unzip the archive straight into
-your Python directory; it creates a subdirectory named
-$reportlab$.  You should now be able to go to a Python
+list("""Install the Python Imaging Library ($PIL$) from $http://www.pythonware.com/products/pil/$.  This
+step is optional but allows you to include images in your reports.
+""")
+
+list("""Now you are ready to install reportlab itself.  
+The easiest way to do this is to use the .exe installer for Windows, which
+installs both the ReportLab source code and the precompiled DLLs for you.
+""")
+
+list("""
+If, however, you wish to install from source, download and unzip the archive
+from http://www.reportlab.org/downloads.html and copy the $reportlab$ directory
+onto your PythonPath;  You should now be able to go to a Python
 command line interpreter and type $import reportlab$ without getting
-an error message.""")
+an error message.
+""")
 
-list("""Download the zip file of precompiled DLLs for your Python version from
+list("""Next, Download the zip file of precompiled DLLs for your Python version from
 the bottom of the ^http://www.reportlab.org/downloads.html^ downloads page, and unzip
-them into ^C:\Python24\lib\site-packages^ (or its equivalent for other Python versions""")
+them into ^C:\Python2x\lib\site-packages^ (or its equivalent for other Python versions
+""")
 
 list("""Open up a $MS-DOS$ command prompt and CD to
 "$reportlab\\..\\tests$".  Enter "$runAll.py$". You should see lots of dots
@@ -261,130 +230,43 @@ the manuals in ^reportlab/docs^ (including this one). """)
 
 list("""
 Finally, we recommend you download and run the script ^rl_check.py^ from
-^^http://www.reportlab.org/ftp/^. This will health-check all the above
+^http://www.reportlab.org/ftp/^. This will health-check all the above
 steps and warn you if anything is missing or mismatched.""")
 
-heading3("Instructions for Python novices: Unix")
+heading3("Installation instructions for Unix")
+disc("""
+     
+""")
 
 restartList()
-list("""On a large number of Unix and Linux distributions, Python is already installed,
-or is avaialable as a standard package you can install with the relevant package manager.""")
-
-list("""If you want to compile from
-source download the latest
-sources from http://www.python.org (currently the latest source is
-in http://www.python.org/ftp/python/2.4.3/Python-2.4.3.tgz). If you wish to use
-binaries
-get the latest RPM or DEB or whatever package and install (or get your
-super user (system administrator) to do the work).""")
-
-list("""If you are building Python yourself, unpack the sources into a
-temporary directory using a tar command e.g. $tar xzvf Python-2.4.3.tgz$;
-this will create a subdirectory called Python-2.4.3 (or whatever). cd
-into this directory. Then read the file $README$! It contains the
-latest information on how to install Python.""")
-
-list("""If your system has the gzip libz library installed
-check that the zlib extension will be installed by default by editing
-the file Modules/Setup.in and ensuring that (near line 405) the line
-containing zlib zlibmodule.c is uncommented i.e. has no hash '#' character at the
-beginning. You also need to decide if you will be installing in the default location
-(/usr/local/) or in some other place.
-The zlib module is needed if you want compressed PDF and for some images.""")
-
-list("""Invoke the command $./configure --prefix=/usr/local$ this should configure
-the source directory for building. Then you can build the binaries with
-a $make$ command. If your $make$ command is not up to it try building
-with $make MAKE=make$. If all goes well install with $make install$.""")
-
-list("""If all has gone well and python is in the execution search path
-you should now be able to type $python$ and see a <b>Python</b> prompt.""")
+list("""First, install Python.  On a large number of Unix and Linux distributions, Python is already installed,
+or is available as a standard package you can install with the relevant package manager.""")
 
 list("""
-Once you can do that it's time to try and install ReportLab.
-First get the latest reportlab.tgz.
-If ReportLab is to be available to all then the reportlab archive should be unpacked in
-the lib/site-python directory (typically /usr/local/lib/site-python) if necessary by
-a superuser.
-Otherwise unpack in a directory of your choice and arrange for that directory to be on your
-$PYTHONPATH$ variable.
+    You will also need to install the Freetype 2 Font Engine, Python Imaging Library, and the gzip library,
+    along with a C compiler.
 """)
-eg("""
-#put something like this in your
-#shell rcfile
-PYTHONPATH=$HOME/mypythonpackages
-export PYTHONPATH
-""",after=0.1)
+
+list("""You will also need the source code or relevant dev packages for Python and the FreeType 2 Font engine.
+""")
+
+list("""
+Download the latest ReportLab.tgz from the download page on http://www.reportlab.org.
+""")
+
+list("""
+Unpack the archive and follow the instructions in INSTALL.txt.
+""")
 
 list("""You should now be able to run python and execute the python statement
-""",doBullet=0)
-eg("""import reportlab""",after=0.1)
-list("""If you want to use images you should certainly consider
-getting &amp; installing the Python Imaging Library - follow the
-directions from
-$http://www.python.org/sigs/image-sig/index.html$ or get it directly from
-$http://www.pythonware.com/products/pil/$.""")
-
+$import reportlab$ without errors.
+""")
 
 heading3("Instructions for Python novices: Mac")
 disc("""
-This is much, much easier with Mac OS X since Python (usually 2.3) is installed on your
+This is much, much easier with Mac OS X since Python is installed on your
 system as standard.   Just follow the instructions for installing the ReportLab archive
 above.
-""")
-
-
-heading3("Instructions for Jython (Java implementation of Python) users")
-
-disc("""
-A port to Java was done in 2004.  This involved some changes to the framework
-and creating Java equivalents of the C extensions.  At the end of this work
-the entire output of the test suite produced byte-for-byte identical output.
-However, we have not been testng against Jython since, because (a) as far as
-we know no one used it, and (b) Jython has not kept up with Python features
-which we need to use.    We suggest you use ReportLab v1.19 or v1.20 which
-were Python-2.1 compatible.  We'd welcome test reports and/or a volunteer to
-refresh things now that Jython is progressing.""")
-
-disc("""
-The Jython version was tested under Sun's J2SDK 1.3.1. It is known that under
-J2SDK 1.4.0_01 $test_pdfbase_ttfonts.py$ fails horribly with an outOfMemory
-exception, probably caused by a JVM bug.
-""")
-
-
-
-
-restartList()
-
-list("""
-Before installing Jython, make sure you have a supported version of
-Java Virtual Machine installed. For the list of supported JVM's see
-$http://www.jython.org/platform.html$
-""")
-
-list("""
-To install Jython, download the setup package from $www.jython.org$ and
-follow installation instructions.
-""")
-
-list("""
-To set ReportLab toolkit under Jython PATH, edit $JYTHON_HOME/registry$ file
-and include line that tells Jython where to look for packages. To include
-ReportLab toolkit under Jython PATH, directory that contains Reportlab
-should be included: $python.path=REPORTLAB_HOME_PARENT_DIR$
-For example, if your Reportlab toolkit is installed under $C:\code\\reportlab$
-the path line should be: $python.path=C:\\\\code$ (note two backslashes!)
-""")
-
-heading3("Instructions for IronPython (Python for .NET) users")
-
-disc("""
-We haven't tackled this yet officially, but IronPython can apparently
-run much of our code.  We do need to go through the same exercises we did for Jython
-- finding the .NET equivalents of _rl_accel, pyRXP, _renderPM and PIL -
-to get 100% managed code.  Hopefully this will happen soon and we'd be
-delighted to work with anyone on this.
 """)
 
 
