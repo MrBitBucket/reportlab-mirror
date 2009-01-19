@@ -3,7 +3,7 @@
 __version__=''' $Id$ '''
 __doc__="""
 The Canvas object is the primary interface for creating PDF files. See
-doc/userguide.pdf for copious examples.
+doc/reportlab-userguide.pdf for copious examples.
 """
 
 __all__ = ['Canvas']

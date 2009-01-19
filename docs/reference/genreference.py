@@ -14,17 +14,17 @@ def run(verbose=None, outDir=None):
     topDir=os.path.dirname(docsDir)
     sys.path.insert(0,topDir)
     from tools.docco import yaml2pdf
-    yaml2pdf.run('reference.yml','reference.pdf')
-    if verbose: print 'Saved reference.pdf'
+    yaml2pdf.run('reference.yml','reportlab-reference.pdf')
+    if verbose: print 'Saved reportlab-reference.pdf'
     if not outDir: outDir = os.path.join(topDir,'docs')
-    destfn = os.path.join(outDir,'reference.pdf')
-    shutil.copyfile('reference.pdf', destfn)
+    destfn = os.path.join(outDir,'reportlab-reference.pdf')
+    shutil.copyfile('reportlab-reference.pdf', destfn)
     if verbose: print 'copied to %s' % destfn
 
 def makeSuite():
     "standard test harness support - run self as separate process"
     from tests.utils import ScriptThatMakesFileTest
-    return ScriptThatMakesFileTest('../docs/reference', 'genreference.py', 'reference.pdf')
+    return ScriptThatMakesFileTest('../docs/reference', 'genreference.py', 'reportlab-reference.pdf')
 
 
 if __name__=='__main__':

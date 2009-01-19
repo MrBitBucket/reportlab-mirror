@@ -27,7 +27,7 @@ def run(pagesize=None, verbose=0, outDir=None):
     from tools.docco.rl_doc_utils import setStory, getStory, RLDocTemplate, defaultPageSize, H1, H2, H3, H4
     from tools.docco import rl_doc_utils
     exec 'from tools.docco.rl_doc_utils import *' in G, G
-    destfn = os.path.join(outDir,'userguide.pdf')
+    destfn = os.path.join(outDir,'reportlab-userguide.pdf')
     doc = RLDocTemplate(destfn,pagesize = pagesize or defaultPageSize)
 
 
@@ -61,7 +61,7 @@ def run(pagesize=None, verbose=0, outDir=None):
 def makeSuite():
     "standard test harness support - run self as separate process"
     from tests.utils import ScriptThatMakesFileTest
-    return ScriptThatMakesFileTest('../docs/userguide', 'genuserguide.py', 'userguide.pdf')
+    return ScriptThatMakesFileTest('../docs/userguide', 'genuserguide.py', 'reportlab-userguide.pdf')
 
 def main():
     import sys

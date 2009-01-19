@@ -898,7 +898,7 @@ def documentPackage0(pathOrName, builder, opts={}):
 
 
 def makeGraphicsReference(outfilename):
-    "Make graphics_reference.pdf"
+    "Make reportlab-graphics-reference.pdf"
     builder = GraphPdfDocBuilder0()
 
     builder.begin(name='reportlab.graphics', typ='package')
@@ -966,7 +966,7 @@ def main():
         topDir=tools.__path__[0]
         if not os.path.isabs(topDir): topDir=os.path.abspath(topDir)
         topDir=os.path.dirname(topDir)
-        dst = os.path.join(topDir,'docs','graphics_reference.pdf')
+        dst = os.path.join(topDir,'docs','reportlab-graphics-reference.pdf')
         shutil.copyfile('reportlab.graphics.pdf', dst)
         if not isSilent:
             print 'copied to '+dst
