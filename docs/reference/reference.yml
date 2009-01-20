@@ -66,24 +66,38 @@ Each package is documented in turn.
 .pageBreak
 .h1 <i>reportlab.pdfgen</i> subpackage
 
-This package contains three modules, canvas.py, textobject.py
-and pathobject.py, which define three classes of corresponding 
-names.  The only class users should construct directly is
-the Canvas, defined in reportlab.pdfgen.canvas; it provides
-methods to obtain PathObjects and TextObjects.
-
+.h2 <i>reportlab.pdfgen.canvas module</i>
 
 .getClassDoc reportlab.pdfgen.canvas Canvas
 .pageBreak
+
+.h2 <i>reportlab.pdfgen.pathobject module</i>
+
 The method Canvas.beginPath allows users to construct
 a PDFPathObject, which is defined in reportlab/pdfgen/pathobject.py.
 
 .getClassDoc reportlab.pdfgen.pathobject PDFPathObject
 .pageBreak
+
+.h2 <i>reportlab.pdfgen.textobject module</i>
+
 The method Canvas.beginText allows users to construct
 a PDFTextObject, which is defined in reportlab/pdfgen/textobject.py.
 
 .getClassDoc reportlab.pdfgen.textobject PDFTextObject
+.pageBreak
+
+.h2 <i>reportlab.pdfgen.pdfgeom module</i>
+
+.getModuleDoc reportlab.pdfgen.pdfgeom
+
+.h2 <i>reportlab.pdfgen.pdfimages module</i>
+
+.getModuleDoc reportlab.pdfgen.pdfimages
+
+.h2 <i>reportlab.pdfgen.pycanvas module</i>
+
+.getModuleDoc reportlab.pdfgen.pycanvas
 
 .pageBreak
 .h1 <i>reportlab.platypus</i> subpackage
@@ -129,11 +143,21 @@ A simple document processor can be made using derived class,
 .getClassDoc reportlab.platypus.flowables XBox
 .getClassDoc reportlab.platypus.flowables Preformatted
 .getClassDoc reportlab.platypus.flowables Image
+.getClassDoc reportlab.platypus.flowables NullDraw
 .getClassDoc reportlab.platypus.flowables Spacer
+.getClassDoc reportlab.platypus.flowables UseUpSpace
 .getClassDoc reportlab.platypus.flowables PageBreak
+.getClassDoc reportlab.platypus.flowables SlowPageBreak
 .getClassDoc reportlab.platypus.flowables CondPageBreak
 .getClassDoc reportlab.platypus.flowables KeepTogether
 .getClassDoc reportlab.platypus.flowables Macro
+.getClassDoc reportlab.platypus.flowables CallerMacro
+.getClassDoc reportlab.platypus.flowables ParagraphAndImage
+.getClassDoc reportlab.platypus.flowables KeepInFrame
+.getClassDoc reportlab.platypus.flowables ImageAndFlowables
+.getClassDoc reportlab.platypus.flowables AnchorFlowable
+.getClassDoc reportlab.platypus.flowables FrameSplitter
+.getClassDoc reportlab.platypus.tableofcontents TableOfContents
 .getClassDoc reportlab.platypus.xpreformatted XPreformatted
 .getClassDoc reportlab.platypus.xpreformatted PythonPreformatted
 
@@ -162,7 +186,80 @@ applications.
 .h2 <i>reportlab.lib.sequencer</i> module
 .getModuleDoc reportlab.lib.sequencer
 
+.h2 <i>reportlab.lib.abag</i> module
+.getModuleDoc reportlab.lib.abag
 
+.h2 <i>reportlab.lib.attrmap</i> module
+.getModuleDoc reportlab.lib.attrmap
+
+.h2 <i>reportlab.lib.boxstuff</i> module
+.getModuleDoc reportlab.lib.boxstuff
+
+.h2 <i>reportlab.lib.codecharts</i> module
+.getModuleDoc reportlab.lib.codecharts
+
+.h2 <i>reportlab.lib.extformat</i> module
+.getModuleDoc reportlab.lib.extformat
+
+.h2 <i>reportlab.lib.fontfinder</i> module
+.getModuleDoc reportlab.lib.fontfinder
+
+.h2 <i>reportlab.lib.formatters</i> module
+.getModuleDoc reportlab.lib.formatters
+
+.h2 <i>reportlab.lib.geomutils</i> module
+.getModuleDoc reportlab.lib.geomutils
+
+.h2 <i>reportlab.lib.logger</i> module
+.getModuleDoc reportlab.lib.logger
+
+.h2 <i>reportlab.lib.normalDate</i> module
+.getModuleDoc reportlab.lib.normalDate
+
+.h2 <i>reportlab.lib.pdfencrypt</i> module
+.getModuleDoc reportlab.lib.pdfencrypt
+
+.h2 <i>reportlab.lib.PyFontify</i> module
+.getModuleDoc reportlab.lib.PyFontify
+
+.h2 <i>reportlab.lib.randomtext</i> module
+.getModuleDoc reportlab.lib.randomtext
+
+.h2 <i>reportlab.lib.rltempfile</i> module
+.getModuleDoc reportlab.lib.rltempfile
+
+.h2 <i>reportlab.lib.rparsexml</i> module
+.getModuleDoc reportlab.lib.rparsexml
+
+.h2 <i>reportlab.lib.set_ops</i> module
+.getModuleDoc reportlab.lib.set_ops
+
+.h2 <i>reportlab.lib.styles</i> module
+.getModuleDoc reportlab.lib.styles
+
+.h2 <i>reportlab.lib.testutils</i> module
+.getModuleDoc reportlab.lib.testutils
+
+.h2 <i>reportlab.lib.textsplit</i> module
+.getModuleDoc reportlab.lib.textsplit
+
+.h2 <i>reportlab.lib.tocindex</i> module
+.getModuleDoc reportlab.lib.tocindex
+
+.h2 <i>reportlab.lib.units</i> module
+.getModuleDoc reportlab.lib.units
+
+.h2 <i>reportlab.lib.utils</i> module
+.getModuleDoc reportlab.lib.utils
+
+.h2 <i>reportlab.lib.validators</i> module
+.getModuleDoc reportlab.lib.validators
+
+.h2 <i>reportlab.lib.xmllib</i> module
+.getModuleDoc reportlab.lib.xmllib
+
+.h2 <i>reportlab.lib.yaml</i> module
+.getModuleDoc reportlab.lib.yaml
 
 
 .pageBreak
