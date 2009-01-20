@@ -67,19 +67,6 @@ shapes.
 So, be careful, and please report any bugs you find!
 """)
 
-disc("""
-We expect to add both input and output filters for many vector
-graphics formats in future.
-SVG was the most prominent first one to start with for which there
-is now an output filter in the graphics package.
-An SVG input filter will probably become available in Summer 2002
-as an additional module.
-GUIs will be able to obtain screen images from the bitmap output
-filter working with PIL, so a chart could appear in a Tkinter
-GUI window.
-""")
-
-
 heading3("Coordinate System")
 
 disc("""
@@ -106,7 +93,7 @@ seems, for Arabs looking at time series charts...).
 heading3("Getting Started")
 
 disc("""
-Let's create a simple drawing containing the string "Hello World",
+Let's create a simple drawing containing the string "Hello World" and some special characters,
 displayed on top of a coloured rectangle.
 After creating it we will save the drawing to a standalone PDF file.
 """)
@@ -117,8 +104,10 @@ eg("""
 
     d = Drawing(400, 200)
     d.add(Rect(50, 50, 300, 100, fillColor=colors.yellow))
-    d.add(String(150,100, 'Hello World',
-                 fontSize=18, fillColor=colors.red))
+    d.add(String(150,100, 'Hello World', fontSize=18, fillColor=colors.red))
+    d.add(String(180,86, 'Special characters \\
+                 \\xc2\\xa2\\xc2\\xa9\\xc2\\xae\\xc2\\xa3\\xce\\xb1\\xce\\xb2',
+                 fillColor=colors.red))
 
     from reportlab.graphics import renderPDF
     renderPDF.drawToFile(d, 'example1.pdf', 'My First Drawing')
@@ -223,9 +212,9 @@ eg("""
 >>> r.fullColor = colors.green
 Traceback (most recent call last):
   File "<interactive input>", line 1, in ?
-  File "C:\code\users\andy\graphics\shapes.py", line 254, in __setattr__
+  File "C:\\code\\users\\andy\\graphics\\shapes.py", line 254, in __setattr__
     validateSetattr(self,attr,value)    #from reportlab.lib.attrmap
-  File "C:\code\users\andy\lib\attrmap.py", line 74, in validateSetattr
+  File "C:\\code\\users\\andy\\lib\\attrmap.py", line 74, in validateSetattr
     raise AttributeError, "Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__)
 AttributeError: Illegal attribute 'fullColor' in class Rect
 >>>
