@@ -67,6 +67,8 @@ def setOutDir(name):
             testsFolder = os.path.abspath(scriptDir)
         else:
             testsFolder = None
+    if testsFolder:
+        sys.path.insert(0,os.path.dirname(testsFolder))
     return _OUTDIR
 
 def outputfile(fn):
