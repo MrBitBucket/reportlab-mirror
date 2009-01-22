@@ -212,7 +212,7 @@ def getCommentary():
         """, styleSheet['BodyText']))
     #we can use the bullet feature to do a definition list
     story.append(Paragraph("""
-        <para color=green bcolor=red bg=pink>This is a contrived object to give an example of a Flowable -
+        <para color=green bcolor=red bg=pink>This is a <font bgcolor=yellow color=red>contrived</font> object to give an example of a Flowable -
         just a fixed-size box with an X through it and a centred string.</para>""",
             styleSheet['Definition'],
             bulletText='XBox  '  #hack - spot the extra space after

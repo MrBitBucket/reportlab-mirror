@@ -3,7 +3,7 @@
 __version__=''' $Id$ '''
 """Tests performed on all Python source files of the ReportLab distribution.
 """
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker, outputfile, printLocation, RL_HOME
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker, outputfile, printLocation
 setOutDir(__name__)
 import os, sys, string, fnmatch, re
 import unittest
@@ -66,6 +66,7 @@ class AsciiFileTestCase(unittest.TestCase):
 
     def testAscii(self):
         "Test if Python files are pure ASCII ones."
+        from reportlab.lib.testutils import RL_HOME
         allPyFiles = GlobDirectoryWalker(RL_HOME, '*.py')
 
         for path in allPyFiles:
@@ -87,6 +88,7 @@ class FilenameTestCase(unittest.TestCase):
     def testTrailingDigits(self):
         "Test if Python files contain trailing digits."
 
+        from reportlab.lib.testutils import RL_HOME
         allPyFiles = GlobDirectoryWalker(RL_HOME, '*.py')
 
         for path in allPyFiles:
@@ -128,6 +130,7 @@ class FirstLineTestCase(SecureTestCase):
         file = open(path, 'w')
         file.write('No Unix-like first line found in the files below.\n\n')
 
+        from reportlab.lib.testutils import RL_HOME
         paths = self.findSuspiciousModules(RL_HOME, 'reportlab')
         paths.sort()
 

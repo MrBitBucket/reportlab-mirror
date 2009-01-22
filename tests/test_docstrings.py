@@ -9,7 +9,7 @@ and lists them in individual log files.
 Currently, methods with leading and trailing double underscores
 are skipped.
 """
-from reportlab.lib.testutils import setOutDir,SecureTestCase, GlobDirectoryWalker, outputfile, printLocation, RL_HOME
+from reportlab.lib.testutils import setOutDir,SecureTestCase, GlobDirectoryWalker, outputfile, printLocation
 setOutDir(__name__)
 import os, sys, glob, string, re, unittest
 from types import ModuleType, ClassType, MethodType, FunctionType
@@ -101,6 +101,7 @@ class DocstringTestCase(SecureTestCase):
         "Write log file for different kind of documentable objects."
 
         cwd = os.getcwd()
+        from reportlab.lib.testutils import RL_HOME
         objects = getModuleObjects(RL_HOME, 'reportlab', objType)
         objects.sort()
         os.chdir(cwd)

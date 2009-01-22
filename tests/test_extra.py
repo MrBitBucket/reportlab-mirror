@@ -1,7 +1,7 @@
 """This executes tests defined outside the normal test suite.
 See docstring for class ExternalTestCase for more information.
 """
-from reportlab.lib.testutils import setOutDir,SecureTestCase, printLocation, RL_HOME
+from reportlab.lib.testutils import setOutDir,SecureTestCase, printLocation
 setOutDir(__name__)
 import os, string, fnmatch, re, sys, unittest
 EXTRA_FILE = 'extra.txt'
@@ -40,6 +40,7 @@ class ExternalTestCase(SecureTestCase):
 
         # look for a file named 'extra.txt' in test directory,
         # exit if not found
+        from reportlab.lib.testutils import RL_HOME
         extraFilename = os.path.join(RL_HOME, 'test', EXTRA_FILE)
         if not os.path.exists(extraFilename):
             return
