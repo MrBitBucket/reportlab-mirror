@@ -27,7 +27,11 @@ def parsedoc(fileName):
     """
     Using PDFParseContext object from Pagecatcher module to check for encryption.
     """
-    from rlextra.pageCatcher.pageCatcher import PDFParseContext
+    
+    try:
+        from rlextra.pageCatcher.pageCatcher import PDFParseContext
+    except ImportError:
+        return
     pdfContent = open(fileName, 'rb').read()
     p = PDFParseContext(pdfContent, prefix="PageForms")
     p.parse()

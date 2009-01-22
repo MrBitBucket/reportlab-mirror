@@ -11,7 +11,6 @@ import tempfile
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfutils
 from reportlab.platypus.flowables import Flowable
-from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory
 
 #AR debug hooks - leaving in for now
 CLOBBERID = 0  # set a constant Doc ID to allow comparison with other software like iText
@@ -390,6 +389,12 @@ def encryptPdfInMemory(inputPDF,
     This is a high level convenience and does not touch the hard disk in any way.
     If you are encrypting the same file over and over again, it's better to use
     pageCatcher and cache the results."""
+
+    try:
+        from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory
+    except ImportError:
+        raise ImportError('''reportlab.lib.pdfencrypt.encryptPdfInMemory failed because rlextra cannot be imported.
+See http://developer.reportlab.com''')
 
     (bboxInfo, pickledForms) = storeFormsInMemory(inputPDF, all=1, BBoxes=1)
     names = bboxInfo.keys()
