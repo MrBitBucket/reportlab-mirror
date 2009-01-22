@@ -80,8 +80,9 @@ class RlAccelTestCase(unittest.TestCase):
         ts = 'ABCDEF\xce\x91\xce\xb2G'
         utext = 'ABCDEF\xce\x91\xce\xb2G'.decode('utf8')
         fontSize = 12
+        stringWidthU(testCp1252,t1fn,fontSize,enc)      #avoid obscure startup initialization problems
         defns="ttfn t1fn ttf t1f testCp1252 enc senc ts utext fontSize ttf.face ttf.face.charWidths ttf.face.defaultWidth t1f.widths t1f.encName t1f.substitutionFonts _fonts"
-        rcv = getrc(defns)
+        rcv = getrc(defns)  #first count
         def tfunc(ts,fn,fontSize,enc):
             w1 = stringWidthU(ts,fn,fontSize,enc)
             w2 = _py_stringWidth(ts,fn,fontSize,enc)
@@ -92,7 +93,7 @@ class RlAccelTestCase(unittest.TestCase):
         tfunc(ts,ttfn,fontSize,senc)
         tfunc(testCp1252,ttfn,fontSize,enc)
         tfunc(utext,ttfn,fontSize,senc)
-        rcc = checkrc(defns,rcv)
+        rcc = checkrc(defns,rcv)    #second count and compare
         assert not rcc, "rc diffs (%s)" % rcc
 
     def test_instanceStringWidth(self):
