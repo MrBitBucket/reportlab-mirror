@@ -61,7 +61,12 @@ def setOutDir(name):
     if not os.path.isdir(testsFolder):
         testsFolder = os.path.join(os.path.dirname(topDir),'tests')
     if not os.path.isdir(testsFolder):
-        testsFolder = None
+        if name=='__main__':
+            scriptDir=os.path.dirname(sys.argv[0])
+            if not scriptDir: scriptDir=os.getcwd()
+            testsFolder = os.path.abspath(scriptDir)
+        else:
+            testsFolder = None
     return _OUTDIR
 
 def outputfile(fn):
