@@ -1,1 +1,1 @@
-2.2
+The "master version number" lives in src/reportlab/__init__.py.  Sorry!

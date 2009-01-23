@@ -358,7 +358,7 @@ def main():
 
     setup(
         name="reportlab",
-        version = "VERSION{2.2}VERSION"[8: - 8],
+        version = get_version(),
         license="BSD license (see license.txt for details), Copyright (c) 2000-2008, ReportLab Inc.",
         description="The Reportlab Toolkit",
         long_description=long_description,
