@@ -1,12 +1,11 @@
 This is a summary of changes made to the reportlab source code for each release.
 Please refer to subversion backlogs (using the release dates) for more details
 or for releases which we have not provide a higher level changes list for.
-
-e.g. to retrieve the changes made between release 1.19 and release 1.20, type:
+E.g. to retrieve the changes made between release 1.19 and release 1.20, type:
 
   svn log -r {2004-11-25T18:00}:{2004-01-21T18:00}
 
-The contributors list are in no order and apologies to those accidentally not
+The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
 #################################################################################
