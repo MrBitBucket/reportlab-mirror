@@ -37,11 +37,10 @@ shapes.
 disc("""
 The package provides several <i>Renderers</i> which know how to draw a
 drawing into different formats.
-These include PDF (of course), Postscript, and bitmap output.
+These include PDF (renderPDF), Postscript (renderPS), and bitmap output (renderPM).
 The bitmap renderer uses Raph Levien's <i>libart</i> rasterizer
 and Fredrik Lundh's <i>Python Imaging Library</i> (PIL).
-Very recently, an experimental SVG renderer was also added.
-It makes use of Python's standard library XML modules, so you don't
+The SVG renderer makes use of Python's standard library XML modules, so you don't
 need to install the XML-SIG's additional package named PyXML.
 If you have the right extensions installed, you can generate drawings
 in bitmap form for the web as well as vector form for PDF documents,
