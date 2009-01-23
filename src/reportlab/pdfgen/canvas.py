@@ -193,9 +193,10 @@ class Canvas(textobject._PDFColorSetter):
         '''
         if encrypt:
             from reportlab.lib import pdfencrypt
-            if isinstance(encrypt, basestring):
-                userPass = encrypt.encode('utf-8') if isinstance(encrypt, unicode) else encrypt
-                encrypt = pdfencrypt.StandardEncryption(userPass)
+            if isinstance(encrypt, basestring): #encrypt is the password itself
+                if isinstance(encrypt, unicode):
+                    encrypt = encrypt.encode('utf-8')
+                encrypt = pdfencrypt.StandardEncryption(encrypt)    #now it's the encrypt object
                 encrypt.setAllPermissions(1)
             elif not isinstance(encrypt, pdfencrypt.StandardEncryption):
                 raise TypeError('Expected string or instance of reportlab.lib.pdfencrypt.StandardEncryption as encrypt parameter but got %r' % encrypt)
@@ -421,7 +422,7 @@ class Canvas(textobject._PDFColorSetter):
 
     def _startPage(self):
         #now get ready for the next one
-        self._pageNumber = self._pageNumber+1
+        self._pageNumber += 1
         self._restartAccumulators()
         self.init_graphics_state()
         self.state_stack = []
