@@ -10,6 +10,38 @@ The contributors list is in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
 #################################################################################
+#################### future RELEASE 2.3                         #################
+#################################################################################
+
+PDF
+
+  Encryption support (see encrypt parameter on Canvas and BaseDocTemplate constructor)
+
+Platypus
+
+  TableOfContents - Creates clickable tables of contents
+  Variable border padding for paragraphs (using the borderPadding style attribute)
+
+Bug fixes
+
+   Fixed old documentation and installation issues
+   610 - Fixed Image anchoring code to match documentation
+   704 - renderSVG groups problem
+   706 - rl_codecs.py now compatible with WordAxe
+   and others...
+
+Contributors 
+------------
+
+Yoann Roman
+Dinu Gherman
+Dirk Holtwick
+Marcel Tromp
+Henning von Bargen
+Paul Barrass
+Adrian Klaver
+
+#################################################################################
 #################### RELEASE 2.2  at 18:00 GMT  10/Sep/2008     #################
 #################################################################################
 
