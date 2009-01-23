@@ -243,9 +243,6 @@ applications.
 .h2 <i>reportlab.lib.textsplit</i> module
 .getModuleDoc reportlab.lib.textsplit
 
-.h2 <i>reportlab.lib.tocindex</i> module
-.getModuleDoc reportlab.lib.tocindex
-
 .h2 <i>reportlab.lib.units</i> module
 .getModuleDoc reportlab.lib.units
 
