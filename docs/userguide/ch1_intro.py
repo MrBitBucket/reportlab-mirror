@@ -3,11 +3,13 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/docs/userguide/ch1_intro.py
 from tools.docco.rl_doc_utils import *
 from reportlab.platypus.tableofcontents import TableOfContents
+from datetime import datetime
 import reportlab
 
 title("ReportLab PDF Library")
 title("User Guide")
 centred('ReportLab Version ' + reportlab.Version)
+centred(datetime.now().strftime('Document generated on %Y/%m/%d %H:%M:%S %Z'))
 
 nextTemplate("TOC")
 
