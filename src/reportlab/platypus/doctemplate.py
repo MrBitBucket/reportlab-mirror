@@ -35,6 +35,10 @@ from reportlab.platypus.frames import Frame
 from reportlab.rl_config import defaultPageSize, verbose
 import reportlab.lib.sequencer
 from reportlab.pdfgen import canvas
+try:
+    set
+except NameError:
+    from sets import Set as set
 
 from types import *
 import sys

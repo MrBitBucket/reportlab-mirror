@@ -677,13 +677,13 @@ class ImageReader(object):
                 return None
 
 class LazyImageReader(ImageReader): 
-    @property 
     def fp(self): 
         return open_for_read(self.fileName, 'b') 
+    fp=property(fp) 
 
-    @property 
     def _image(self):
         return self._read_image(self.fp)
+    _image=property(_image) 
 
 def getImageData(imageFileName):
     "Get width, height and RGB pixels from image file.  Wraps Java/PIL"
