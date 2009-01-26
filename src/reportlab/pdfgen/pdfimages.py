@@ -14,7 +14,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.lib.utils import fp_str, getStringIO
 from reportlab.lib.utils import import_zlib, haveImages
-from reportlab.lib.boxstuff import aspectRatioFix, anchorAdjustXY
+from reportlab.lib.boxstuff import aspectRatioFix
 
 
 class PDFImage:
@@ -149,7 +149,7 @@ class PDFImage:
         self.width = self.width or imgwidth
         self.height = self.height or imgheight
 
-    def drawInlineImage(self, canvas, preserveAspectRatio=False,anchor='sw'): #, image, x,y, width=None,height=None):
+    def drawInlineImage(self, canvas, preserveAspectRatio=False,anchor='sw'):
         """Draw an Image into the specified rectangle.  If width and
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  This allows a
@@ -158,7 +158,6 @@ class PDFImage:
         height = self.height
         if width<1e-6 or height<1e-6: return False
         x,y,self.width,self.height, scaled = aspectRatioFix(preserveAspectRatio,anchor,self.x,self.y,width,height,self.imgwidth,self.imgheight)
-        x,y = anchorAdjustXY(anchor,x,y,self.width,self.height)
         # this says where and how big to draw it
         if not canvas.bottomup: y = y+height
         canvas._code.append('q %s 0 0 %s cm' % (fp_str(self.width), fp_str(self.height, x, y)))

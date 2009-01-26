@@ -747,12 +747,57 @@ cost to performance.""")
             shutil.copyfile(tjpg,tgif)
             c.drawImage(tgif, 4*inch, 9.25*inch, w, h, mask='auto')
 
-        #preserveAspectRatio test
-        c.drawString(inch, 6.25*inch, 'Both these should have the usual aspect ratio')
+        c.drawString(inch, 9.0*inch, 'Image positioning tests with preserveAspectRatio')
 
-        (w, h) = c.drawImage(gif, inch, 6*inch, width=2*inch, height=2*inch, preserveAspectRatio=True)
-        (w, h) = c.drawInlineImage(gif, inch, 4*inch, width=2*inch, height=2*inch, preserveAspectRatio=True)
+        #preserveAspectRatio test
+        c.drawString(inch, 8.8*inch, 'Both of these should appear within the boxes, vertically centered')
+
+    
+        x, y, w, h = inch, 6.75* inch, 2*inch, 2*inch
+        c.rect(x, y, w, h)
+        (w2, h2) = c.drawImage(gif,  #anchor southwest, drawImage
+                    x, y, width=w, height=h, 
+                    preserveAspectRatio=True, 
+                    anchor='c'
+                    )
                     
+        #now test drawInlineImage across the page            
+        x = 5 * inch
+        c.rect(x, y, w, h)
+        (w2, h2) = c.drawInlineImage(gif,  #anchor southwest, drawInlineImage
+                    x, y, width=w, height=h, 
+                    preserveAspectRatio=True,
+                    anchor='c'
+                    )
+                    
+        c.drawString(inch, 5.75*inch, 
+        'anchored by respective corners - use both a wide and a tall one as tests')
+        x = 0.25 * inch
+        for anchor in ['nw','n','ne','w','c','e','sw','s','se']:
+            x += 0.75*inch
+            c.rect(x, 5*inch, 0.6*inch, 0.6*inch)
+            c.drawImage(
+                    gif, x, 5*inch, 
+                    width=0.6*inch, height=0.6*inch, 
+                    preserveAspectRatio=True,
+                    anchor=anchor
+                    )
+            c.drawString(x, 4.9*inch, anchor)
+
+        x = 0.25 * inch
+        tall_red = os.path.join(testsFolder,'tall_red.png')
+        for anchor in ['nw','n','ne','w','c','e','sw','s','se']:
+            x += 0.75*inch
+            c.rect(x, 4*inch, 0.6*inch, 0.6*inch)
+            c.drawImage(
+                    tall_red, x, 4*inch, 
+                    width=0.6*inch, height=0.6*inch, 
+                    preserveAspectRatio=True,
+                    anchor=anchor
+                    )
+            c.drawString(x, 3.9*inch, anchor)
+
+
 
         c.showPage()
 

@@ -27,7 +27,7 @@ from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.utils import import_zlib, ImageReader, fp_str, _digester
-from reportlab.lib.boxstuff import aspectRatioFix, anchorAdjustXY
+from reportlab.lib.boxstuff import aspectRatioFix
 
 digitPat = re.compile('\d')  #used in decimal alignment
 
@@ -578,63 +578,94 @@ class Canvas(textobject._PDFColorSetter):
         #
         ######################################################
 
-    def drawInlineImage(self, image, x,y, width=None,height=None,preserveAspectRatio=False,anchor='sw'):
-        """Draw an Image into the specified rectangle.  If width and
-        height are omitted, they are calculated from the image size.
-        Also allow file names as well as images.  The size in pixels
-        of the image is returned.
-
-        New post version 2.0:  drawImage can center the image in a box you provide.
-        This saves developers from doing lots of math in their code.  You can
-        define a box with x,y,width and height.   If 'preserveAspectRatio'
-        is set, the image will be scaled up or down as needed in proportion to
-        fit entirely within the box.  Unless the aspect ratio perfectly matches
-        the box, this will leave some space.  So, the boxAnchor property defines
-        how the image should be anchored in the box, using imaginary points of
-        the compass.  'sw' for SouthWest is the default, but 'c' for center
-        will center it in the given box.
+    def drawInlineImage(self, image, x,y, width=None,height=None,
+            preserveAspectRatio=False,anchor='c'):
+        """See drawImage, which should normally be used instead... 
+        
+        drawInlineImage behaves like drawImage, but stores the image content
+        within the graphics stream for the page.  This means that the mask
+        parameter for transparency is not available.  It also means that there 
+        is no saving in file size or time if the same image is reused.  
+        
+        In theory it allows images to be displayed slightly faster; however, 
+        we doubt if the difference is noticeable to any human user these days.
+        Only use this if you have studied the PDF specification and know the
+        implications.
         """
+    
         self._currentPageHasImages = 1
         from pdfimages import PDFImage
         img_obj = PDFImage(image, x,y, width, height)
-        img_obj.drawInlineImage(self,anchor=anchor,preserveAspectRatio=preserveAspectRatio)
+        img_obj.drawInlineImage(self,
+            anchor=anchor,
+            preserveAspectRatio=preserveAspectRatio, 
+            anchor=anchor)
         return (img_obj.width, img_obj.height)
 
-    def drawImage(self, image, x, y, width=None, height=None, mask=None, preserveAspectRatio=False, anchor='sw'):
+    def drawImage(self, image, x, y, width=None, height=None, mask=None, 
+            preserveAspectRatio=False, anchor='c'):
         """Draws the image (ImageReader object or filename) as specified.
 
-        "image" may be an image filename or an ImageReader object.  If width
-        and height are not given, the "natural" width and height in pixels
-        is used at a scale of 1 point to 1 pixel.
 
-        The mask parameter takes 6 numbers and defines the range of
-        RGB values which will be masked out or treated as transparent.
-        For example with [0,2,40,42,136,139], it will mask out any
-        pixels with a Red value from 0-2, Green from 40-42 and
-        Blue from 136-139  (on a scale of 0-255)
+        "image" may be an image filename or an ImageReader object. 
+ 
+        x and y define the lower left corner of the image you wish to
+        draw (or of its bounding box, if using preserveAspectRation below).
+         
+        If width and height are not given, the width and height of the
+        image in pixels is used at a scale of 1 point to 1 pixel.  
+       
+        If width and height are given, the image will be stretched to fill 
+        the given rectangle bounded by (x, y, x+width, y-height).  
+        
+        If you supply negative widths and/or heights, it inverts them and adjusts
+        x and y accordingly.
 
-        The method returns the width and height of the underlying image since
-        this is often useful for layout algorithms.
+        The method returns the width and height of the underlying image, since
+        this is often useful for layout algorithms and saves you work if you have
+        not specified them yourself.
 
-        New post version 2.0:  drawImage can center the image in a box you provide.
-        This saves developers from doing lots of math in their code.  You can
-        define a box with x,y,width and height.   If 'preserveAspectRatio'
-        is set, the image will be scaled up or down as needed in proportion to
-        fit entirely within the box.  Unless the aspect ratio perfectly matches
-        the box, this will leave some space.  So, the boxAnchor property defines
-        how the image should be anchored in the box, using imaginary points of
-        the compass.  'sw' for SouthWest is the default, but 'c' for center
-        will center it in the given box.
+        The mask parameter supports transparent backgrounds. It takes 6 numbers
+        and defines the range of RGB values which will be masked out or treated
+        as transparent.  For example with [0,2,40,42,136,139], it will mask out
+        any pixels with a Red value from 0-2, Green from 40-42 and
+        Blue from 136-139  (on a scale of 0-255).
+
+        New post version 2.0:  drawImage can center an image in a box you
+        provide, while preserving its aspect ratio.  For example, you might
+        have a fixed square box in your design, and a collection of photos
+        which might be landscape or portrait that you want to appear within 
+        the box.  If preserveAspectRatio is true, your image will appear within
+        the box specified.
+
+        
+        If preserveAspectRatio is True, the anchor property can be used to
+        specify how images should fit into the given box.  It should 
+        be set to one of the following values, taken from the points of
+        the compass (plus 'c' for 'centre'):
+
+                nw   n   ne
+                w    c    e
+                sw   s   se
+
+        The default value is 'c' for 'centre'.  Thus, if you want your
+        bitmaps to always be centred and appear at the top of the given box,
+        set anchor='n'.      There are good examples of this in the output
+        of test_pdfgen_general.py
+       
+
 
         Unlike drawInlineImage, this creates 'external images' which
         are only stored once in the PDF file but can be drawn many times.
         If you give it the same filename twice, even at different locations
-        and sizes, it will reuse the first occurrence.  If you use ImageReader
-        objects, it tests whether the image content has changed before deciding
+        and sizes, it will reuse the first occurrence, resulting in a saving
+        in file size and generation time.  If you use ImageReader objects,
+        it tests whether the image content has changed before deciding
         whether to reuse it.
 
         In general you should use drawImage in preference to drawInlineImage
-        unless you have read the PDF Spec and understand the tradeoffs."""
+        unless you have read the PDF Spec and understand the tradeoffs."""        
+       
         self._currentPageHasImages = 1
 
         # first, generate a unique name/signature for the image.  If ANYTHING
@@ -675,7 +706,6 @@ class Canvas(textobject._PDFColorSetter):
 
         # ensure we have a size, as PDF will make it 1x1 pixel otherwise!
         x,y,width,height,scaled = aspectRatioFix(preserveAspectRatio,anchor,x,y,width,height,imgObj.width,imgObj.height)
-        x,y = anchorAdjustXY(anchor,x,y,width,height)
 
         # scale and draw
         self.saveState()
@@ -1252,7 +1282,9 @@ class Canvas(textobject._PDFColorSetter):
         self.drawText(t)
 
     def drawCentredString(self, x, y, text):
-        """Draws a string centred on the x coordinate."""
+        """Draws a string centred on the x coordinate. 
+        
+        We're British, dammit, and proud of our spelling!"""
         width = self.stringWidth(text, self._fontname, self._fontsize)
         t = self.beginText(x - 0.5*width, y)
         t.textLine(text)
