@@ -802,13 +802,7 @@ class Paragraph(Flowable):
         L = [n+"("]
         keys = self.__dict__.keys()
         for k in keys:
-            v = getattr(self, k)
-            rk = repr(k)
-            rv = repr(v)
-            rk = "  "+rk.replace("\n", "\n  ")
-            rv = "    "+rk.replace("\n", "\n    ")
-            L.append(rk)
-            L.append(rv)
+            L.append('%s: %s' % (repr(k).replace("\n", " ").replace("  "," "),repr(getattr(self, k)).replace("\n", " ").replace("  "," ")))
         L.append(") #"+n)
         return '\n'.join(L)
 
