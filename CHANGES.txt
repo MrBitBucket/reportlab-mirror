@@ -20,6 +20,7 @@ Platypus
 
   TableOfContents - Creates clickable tables of contents
   Variable border padding for paragraphs (using the borderPadding style attribute)
+  New programming Flowable, docAssert, used to assert expressions on wrap time.
 
 Bug fixes
 
