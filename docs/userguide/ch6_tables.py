@@ -329,6 +329,73 @@ disc("""In any style command the first row index may be set to one of the specia
 $'splitlast'$ or $'splitfirst'$ to indicate that the style should be used only for the last row of
 a split table, or the first row of a continuation. This allows splitting tables with nicer effects around the split.""")  
 
+heading1("""Programming $Flowables$""")
+
+disc("""The following flowables let you conditionally evaluate and execute expressions and statements at wrap time:""")
+
+heading2("""$DocAssign(self, var, expr, life='forever')$""")
+
+disc("""Assigns a variable of name $var$ to the expression $expr$. E.g.:""")
+
+eg("""
+DocAssign('i',3)
+""")
+                
+heading2("""$DocExec(self, stmt, lifetime='forever')$""")
+
+disc("""Executes the statement $stmt$. E.g.:""")
+
+eg("""
+DocExec('i-=1')
+""")
+
+heading2("""$DocPara(self, expr, format=None, style=None, klass=None, escape=True)$""")
+
+disc("""Creates a paragraph with the value of expr as text.
+If format is specified it should use %(__expr__)s for string interpolation
+of the expression expr (if any). It may also use %(name)s interpolations
+for other variables in the namespace. E.g.:""")
+
+eg("""
+DocPara('i',format='The value of i is %(__expr__)d',style=normal)
+""")
+
+heading2("""$DocAssert(self, cond, format=None)$""")
+
+disc("""Raises an $AssertionError$ containing the $format$ string if $cond$ evaluates as $False$.""")
+
+eg("""
+DocAssert(val, 'val is False')
+""")
+
+heading2("""$DocIf(self, cond, thenBlock, elseBlock=[])$""")
+
+disc("""If $cond$ evaluates as $True$, this flowable is replaced by the $thenBlock$ elsethe $elseBlock$.""")
+
+eg("""
+DocIf('i>3',Paragraph('The value of i is larger than 3',normal),\\
+        Paragraph('The value of i is not larger than 3',normal))
+""")
+
+heading2("""$DocWhile(self, cond, whileBlock)$""")
+
+disc("""Runs the $whileBlock$ while $cond$ evaluates to $True$. E.g.:""")
+
+eg("""
+DocAssign('i',5)
+DocWhile('i',[DocPara('i',format='The value of i is %(__expr__)d',style=normal),DocExec('i-=1')])
+""")
+
+disc("""This example produces a set of paragraphs of the form:""")
+
+eg("""
+The value of i is 5
+The value of i is 4
+The value of i is 3
+The value of i is 2
+The value of i is 1
+""")
+
 heading1("""Other Useful $Flowables$""")
 heading2("""$Preformatted(text, style, bulletText = None, dedent=0)$""")
 disc("""
