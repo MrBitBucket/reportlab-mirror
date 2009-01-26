@@ -111,6 +111,23 @@ parabox(sample,
         'Space before and after and increased leading'
         )
 
+disc("""The attribute $borderPadding$ adjusts the padding between the paragraph and the border of its background.
+This can either be a single value or a tuple containing 2 to 4 values.
+These values are applied the same way as in Cascading Style Sheets (CSS).
+If a single value is given, that value is applied to all four sides.
+If more than one value is given, they are applied in clockwise order to the sides starting at the top.
+If two or three values are given, the missing values are taken from the opposite side(s).
+Note that in the following example the yellow box is drawn by the paragraph itself.""")
+
+parabox(sample,
+        ParagraphStyle('padded',
+                       borderPadding=(7, 2, 20),
+                       borderColor='#000000',
+                       borderWidth=1,
+                       backColor='#FFFF00'),
+        'Variable padding'
+        )
+
 disc("""The $leftIndent$ and $rightIndent$ attributes do exactly
 what you would expect; $firstLineIndent$ is added to the $leftIndent$ of the
 first line. If you want a straight left edge, remember
