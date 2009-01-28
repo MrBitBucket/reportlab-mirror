@@ -597,7 +597,6 @@ class Canvas(textobject._PDFColorSetter):
         from pdfimages import PDFImage
         img_obj = PDFImage(image, x,y, width, height)
         img_obj.drawInlineImage(self,
-            anchor=anchor,
             preserveAspectRatio=preserveAspectRatio, 
             anchor=anchor)
         return (img_obj.width, img_obj.height)
