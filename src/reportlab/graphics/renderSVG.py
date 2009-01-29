@@ -121,6 +121,12 @@ class SVGCanvas:
         self.svg.setAttribute("width", str(size[0]))
         self.svg.setAttribute("height", str(self.height))
 
+        #these suggested by Tim Roberts
+        self.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
+        self.svg.setAttribute("xmlns:link", "http://www.w3.org/1999/xlink")
+        self.svg.setAttribute("version", "1.0")
+        self.svg.setAttribute("baseProfile", "full")
+
         title = self.doc.createElement('title')
         text = self.doc.createTextNode('...')
         title.appendChild(text)
