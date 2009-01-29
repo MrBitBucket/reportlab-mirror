@@ -151,7 +151,7 @@ class CurrentFrameFlowable(LCActionFlowable):
         ActionFlowable.__init__(self,('currentFrame',ix,resume))
 
 class NullActionFlowable(ActionFlowable):
-    def apply(self):
+    def apply(self,doc):
         pass
 
 class _FrameBreak(LCActionFlowable):
