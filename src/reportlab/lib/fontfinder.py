@@ -58,8 +58,12 @@ of non-Python applications.
 Future plans might include using this to auto-register fonts; and making it
 update itself smartly on repeated instantiation.
 """
-import sys, time, os, cPickle, md5, tempfile
+import sys, time, os, cPickle, tempfile
 from xml.sax.saxutils import quoteattr
+try:
+    from hashlib import md5
+except:
+    from md5 import md5
 
 EXTENSIONS = ['.ttf','.ttc','.otf','.pfb','.pfa']
 
@@ -195,7 +199,7 @@ class FontFinder:
     def _getCacheFileName(self):
         """Base this on the directories...same set of directories
         should give same cache"""
-        hash = md5.md5(''.join(self._dirs)).hexdigest()
+        hash = md5(''.join(self._dirs)).hexdigest()
         from reportlab.lib.utils import get_rl_tempfile
         fn = get_rl_tempfile('fonts_%s.dat' % hash)
         return fn

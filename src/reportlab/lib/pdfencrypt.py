@@ -4,12 +4,18 @@ __version__=''' $Id$ '''
 
 """helpers for pdf encryption/decryption"""
 
-import string, sys, md5, os
+import string, sys, os
+try:
+    from hashlib import md5
+except ImportError:
+    from md5 import md5
+
 from reportlab.lib.utils import getStringIO
 import tempfile
 
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfutils
+from reportlab.pdfbase.pdfdoc import PDFObject
 from reportlab.platypus.flowables import Flowable
 
 #AR debug hooks - leaving in for now
@@ -126,7 +132,7 @@ class StandardEncryption:
             raise ValueError, "encryption not prepared!"
         return StandardEncryptionDictionary(O=self.O, U=self.U, P=self.P, revision=self.revision)
 
-class StandardEncryptionDictionary:
+class StandardEncryptionDictionary(PDFObject):
     __RefOnly__ = 1
     def __init__(self, O, U, P, revision):
         self.O, self.U, self.P = O,U,P
@@ -208,7 +214,7 @@ def encryptionkey(password, OwnerKey, Permissions, FileId1, revision=2):
         p = p>>8
         permissionsString = permissionsString + chr(byte % 256)
 
-    hash = md5.md5(password)
+    hash = md5(password)
     hash.update(OwnerKey)
     hash.update(permissionsString)
     hash.update(FileId1)
@@ -219,14 +225,14 @@ def encryptionkey(password, OwnerKey, Permissions, FileId1, revision=2):
         key = md5output[:5]
     elif revision==3:  #revision 3 algorithm - loop 50 times
         for x in range(50):
-            md5output = md5.new(md5output).digest()
+            md5output = md5(md5output).digest()
         key = md5output[:16]
     if DEBUG: print 'encryptionkey(%s,%s,%s,%s,%s)==>%s' % tuple(map(lambda x: hexText(str(x)),(password, OwnerKey, Permissions, FileId1, revision, key)))
     return key
 
 def computeO(userPassword, ownerPassword, revision):
     from reportlab.lib.arciv import ArcIV
-    #print 'digest of hello is %s' % md5.md5('hello').digest()
+    #print 'digest of hello is %s' % md5('hello').digest()
     assert revision in (2,3), 'Unknown algorithm revision %s' % revision
     if ownerPassword in (None, ''):
         ownerPassword = userPassword
@@ -237,12 +243,12 @@ def computeO(userPassword, ownerPassword, revision):
     password = userPassword + PadString
     userPad = password[:32]
 
-    digest = md5.new(ownerPad).digest()
+    digest = md5(ownerPad).digest()
     if revision == 2:
         O = ArcIV(digest[:5]).encode(userPad)
     elif revision == 3:
         for i in range(50):
-            digest = md5.new(digest).digest()
+            digest = md5(digest).digest()
         digest = digest[:16]
         O = userPad
         for i in range(20):
@@ -257,7 +263,7 @@ def computeU(encryptionkey, encodestring=PadString,revision=2,documentId=None):
         result = ArcIV(encryptionkey).encode(encodestring)
     elif revision == 3:
         assert documentId is not None, "Revision 3 algorithm needs the document ID!"
-        h = md5.md5(PadString)
+        h = md5(PadString)
         h.update(documentId)
         tmp = h.digest()
         tmp = ArcIV(encryptionkey).encode(tmp)
@@ -292,7 +298,7 @@ def encodePDF(key, objectNumber, generationNumber, string, revision=2):
     for i in range(2):
         newkey = newkey + chr(n & 0xff)
         n = n>>8
-    md5output = md5.new(newkey).digest()
+    md5output = md5(newkey).digest()
     if revision == 2:
         key = md5output[:10]
     elif revision == 3:
