@@ -15,7 +15,6 @@ import tempfile
 
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfutils
-from reportlab.pdfbase.pdfdoc import PDFObject
 from reportlab.platypus.flowables import Flowable
 
 #AR debug hooks - leaving in for now
@@ -132,7 +131,7 @@ class StandardEncryption:
             raise ValueError, "encryption not prepared!"
         return StandardEncryptionDictionary(O=self.O, U=self.U, P=self.P, revision=self.revision)
 
-class StandardEncryptionDictionary(PDFObject):
+class StandardEncryptionDictionary:
     __RefOnly__ = 1
     def __init__(self, O, U, P, revision):
         self.O, self.U, self.P = O,U,P
