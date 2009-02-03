@@ -133,6 +133,7 @@ class StandardEncryption:
 
 class StandardEncryptionDictionary:
     __RefOnly__ = 1
+    __PDFObject__ = True
     def __init__(self, O, U, P, revision):
         self.O, self.U, self.P = O,U,P
         self.revision = revision
