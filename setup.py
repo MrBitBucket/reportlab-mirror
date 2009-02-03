@@ -105,6 +105,9 @@ class inc_lib_dirs:
                 aDir(I, "/opt/local/include")
             aDir(I, "/usr/local/include")
             aDir(L, "/usr/local/lib")
+            aDir(I, "/usr/include")
+            aDir(L, "/usr/lib")
+            aDir(I, "/usr/include/freetype2")
             prefix = sysconfig.get_config_var("prefix")
             if prefix:
                 aDir(L, pjoin(prefix, "lib"))
