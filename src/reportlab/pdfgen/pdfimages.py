@@ -95,16 +95,15 @@ class PDFImage:
         self.source = 'PIL'
         zlib = import_zlib()
         if not zlib: return
-        myimage = image.convert('RGB')
 
-        # Use the colorspace in the image
+        # Use the colorSpace in the image
         if image.mode == 'CMYK':
             myimage = image
-            colorspace = 'DeviceCMYK'
+            colorSpace = 'DeviceCMYK'
             bpp = 4
         else:
             myimage = image.convert('RGB')
-            colorspace = 'RGB'
+            colorSpace = 'RGB'
             bpp = 3
         imgwidth, imgheight = myimage.size
 
