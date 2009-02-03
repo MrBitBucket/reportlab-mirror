@@ -96,16 +96,26 @@ class PDFImage:
         zlib = import_zlib()
         if not zlib: return
         myimage = image.convert('RGB')
+
+        # Use the colorspace in the image
+        if image.mode == 'CMYK':
+            myimage = image
+            colorspace = 'DeviceCMYK'
+            bpp = 4
+        else:
+            myimage = image.convert('RGB')
+            colorspace = 'RGB'
+            bpp = 3
         imgwidth, imgheight = myimage.size
 
         # this describes what is in the image itself
         # *NB* according to the spec you can only use the short form in inline images
         #imagedata=['BI /Width %d /Height /BitsPerComponent 8 /ColorSpace /%s /Filter [/Filter [ /ASCII85Decode /FlateDecode] ID]' % (imgwidth, imgheight,'RGB')]
-        imagedata=['BI /W %d /H %d /BPC 8 /CS /RGB /F [/A85 /Fl] ID' % (imgwidth, imgheight)]
+        imagedata=['BI /W %d /H %d /BPC 8 /CS /%s /F [/A85 /Fl] ID' % (imgwidth, imgheight,colorSpace)]
 
         #use a flate filter and Ascii Base 85 to compress
         raw = myimage.tostring()
-        assert len(raw) == imgwidth*imgheight*3, "Wrong amount of data for image"
+        assert len(raw) == imgwidth*imgheight*bpp, "Wrong amount of data for image"
         compressed = zlib.compress(raw)   #this bit is very fast...
         encoded = pdfutils._AsciiBase85Encode(compressed) #...sadly this may not be
         #append in blocks of 60 characters
