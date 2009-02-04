@@ -9,7 +9,7 @@ The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
 #################################################################################
-#################### future RELEASE 2.3                         #################
+#################### RELEASE 2.3  at 18:00 GMT  04/Feb/2009     #################
 #################################################################################
 
 PDF
@@ -40,6 +40,8 @@ Marcel Tromp
 Henning von Bargen
 Paul Barrass
 Adrian Klaver
+Hans Brand
+Ian Stevens
 
 #################################################################################
 #################### RELEASE 2.2  at 18:00 GMT  10/Sep/2008     #################
