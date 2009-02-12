@@ -26,6 +26,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
+from reportlab.lib.colors import black
 from reportlab.lib.utils import import_zlib, ImageReader, fp_str, _digester
 from reportlab.lib.boxstuff import aspectRatioFix
 
@@ -151,6 +152,7 @@ class Canvas(textobject._PDFColorSetter):
 
         #this is called each time a page is output if non-null
         self._onPage = None
+        self._cropMarks = None
 
         self._pagesize = pagesize
         self._pageRotation = 0
@@ -396,14 +398,55 @@ class Canvas(textobject._PDFColorSetter):
 
     def showPage(self):
         """Close the current page and possibly start on a new page."""
-
         # ensure a space at the end of the stream - Acrobat does
         # not mind, but Ghostscript dislikes 'Qendstream' even if
         # the length marker finishes after 'Q'
-        self._code.append(' ')
+
+        pageWidth = self._pagesize[0]
+        pageHeight = self._pagesize[1]
+        cM = self._cropMarks
+        code = self._code
+        if cM:
+            mv = min(pageWidth,pageHeight)
+            sf = min(1+1./mv,1.01)
+            bv = (sf-1)*mv*0.5
+            ml = getattr(cM,'markerLength',18)/sf
+            mw = getattr(cM,'markerWidth',0.5)
+            mc = getattr(cM,'markerColor',black)
+            bw = getattr(cM,'borderWidth',18)/sf
+            mlbw = ml+bw
+            cx0 = len(code)
+            self.saveState()
+            self.scale(sf,sf)
+            self.translate(mlbw,mlbw)
+            opw = pageWidth*sf
+            oph = pageHeight*sf
+            pageWidth = 2*mlbw + pageWidth*sf
+            pageHeight = 2*mlbw + pageHeight*sf
+            if ml and mc:
+                self.saveState()
+                self.setStrokeColor(mc)
+                self.setLineWidth(mw)
+                self.lines([
+                    (bv,0-mlbw,bv,ml-mlbw),
+                    (opw-2*bv,0-mlbw,opw-2*bv,ml-mlbw),
+                    (bv,oph+bw,bv,oph+mlbw),
+                    (opw-2*bv,oph+bw,opw-2*bv,oph+mlbw),
+                    (-mlbw,bv,ml-mlbw,bv),
+                    (opw+bw,bv,opw+mlbw,bv),
+                    (-mlbw,oph-2*bv,ml-mlbw,oph-2*bv),
+                    (opw+bw,oph-2*bv,opw+mlbw,oph-2*bv),
+                    ])
+                self.restoreState()
+            C = code[cx0:]
+            del code[cx0:]
+            code[0:0] = C
+            self.restoreState()
+
+        code.append(' ')
         page = pdfdoc.PDFPage()
-        page.pagewidth = self._pagesize[0]
-        page.pageheight = self._pagesize[1]
+        page.pagewidth = pageWidth
+        page.pageheight = pageHeight
         page.Rotate = self._pageRotation
         page.hasImages = self._currentPageHasImages
         page.setPageTransition(self._pageTransition)
@@ -411,7 +454,7 @@ class Canvas(textobject._PDFColorSetter):
         if self._pageDuration is not None:
             page.Dur = self._pageDuration
 
-        strm =  self._psCommandsBeforePage + [self._preamble] + self._code + self._psCommandsAfterPage
+        strm =  self._psCommandsBeforePage + [self._preamble] + code + self._psCommandsAfterPage
         page.setStream(strm)
         self._setXObjects(page)
         self._setAnnotations(page)
