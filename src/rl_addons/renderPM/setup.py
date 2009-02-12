@@ -26,7 +26,7 @@ def pfxJoin(pfx,*N):
 		R.append(os.path.join(pfx,n))
 	return R
 
-FT_LIB='C:/Python/devel/freetype-2.1.5/objs/freetype214.lib'
+FT_LIB='C:/Devel/freetype-2.1.5/objs/freetype214.lib'
 FT_INCLUDE=None
 def check_ft_lib(ft_lib=FT_LIB):
 	if sys.hexversion<0x20000a0: return ''
