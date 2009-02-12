@@ -279,7 +279,7 @@ def main():
         LIBS = []       #assume empty libraries list
 
         if platform=='win32':
-            FT_LIB=config('FREETYPE','lib',r'C:\Python\devel\freetype-2.1.5\objs\freetype214.lib')
+            FT_LIB=config('FREETYPE','lib',r'C:\devel\freetype-2.1.5\objs\freetype214.lib')
             if FT_LIB:
                 FT_INC_DIR=config('FREETYPE','incdir')
                 FT_MACROS = [('RENDERPM_FT',None)]
