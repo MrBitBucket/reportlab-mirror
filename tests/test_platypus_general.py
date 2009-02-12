@@ -552,7 +552,7 @@ def showProgress(pageNo):
 
 
 def run():
-    doc = AndyTemplate(outputfile('test_platypus_general.pdf'))
+    doc = AndyTemplate(outputfile('test_platypus_general.pdf'),subject='test0')
     #doc.setPageCallBack(showProgress)
     commentary = getCommentary()
     examples = getExamples()
