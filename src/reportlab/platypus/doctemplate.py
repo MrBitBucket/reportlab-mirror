@@ -345,7 +345,9 @@ class BaseDocTemplate:
                     '_pageBreakQuick':1,
                     'rotation':0,
                     '_debug':0,
-                    'encrypt': None}
+                    'encrypt': None,
+                    'cropMarks': None,
+                    }
     _invalidInitArgs = ()
     _firstPageTemplateIndex = 0
 
@@ -724,6 +726,7 @@ class BaseDocTemplate:
  
         getattr(self.canv,'setEncrypt',lambda x: None)(self.encrypt)
 
+        self.canv._cropMarks = self.cropMarks
         self.canv.setAuthor(self.author)
         self.canv.setTitle(self.title)
         self.canv.setSubject(self.subject)

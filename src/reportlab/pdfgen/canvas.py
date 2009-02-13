@@ -130,7 +130,8 @@ class Canvas(textobject._PDFColorSetter):
                  pageCompression=None,
                  invariant = None,
                  verbosity=0,
-                 encrypt=None):
+                 encrypt=None,
+                 cropMarks=None):
         """Create a canvas of a given size. etc.
 
         You may pass a file-like object to filename as an alternative to
@@ -138,7 +139,10 @@ class Canvas(textobject._PDFColorSetter):
         For more information about the encrypt parameter refer to the setEncrypt method.
         
         Most of the attributes are private - we will use set/get methods
-        as the preferred interface.  Default page size is A4."""
+        as the preferred interface.  Default page size is A4.
+        cropMarks may be True/False or an object with parameters borderWidth, markColor, markWidth
+        and markLength
+        """
         if pagesize is None: pagesize = rl_config.defaultPageSize
         if invariant is None: invariant = rl_config.invariant
         self._filename = filename
@@ -152,7 +156,7 @@ class Canvas(textobject._PDFColorSetter):
 
         #this is called each time a page is output if non-null
         self._onPage = None
-        self._cropMarks = None
+        self._cropMarks = cropMarks
 
         self._pagesize = pagesize
         self._pageRotation = 0
@@ -407,41 +411,42 @@ class Canvas(textobject._PDFColorSetter):
         cM = self._cropMarks
         code = self._code
         if cM:
-            mv = min(pageWidth,pageHeight)
+            mv = max(1,min(pageWidth,pageHeight))
             sf = min(1+1./mv,1.01)
-            bv = (sf-1)*mv*0.5
-            ml = getattr(cM,'markerLength',18)/sf
-            mw = getattr(cM,'markerWidth',0.5)
-            mc = getattr(cM,'markerColor',black)
-            bw = getattr(cM,'borderWidth',18)/sf
-            mlbw = ml+bw
-            cx0 = len(code)
-            self.saveState()
-            self.scale(sf,sf)
-            self.translate(mlbw,mlbw)
-            opw = pageWidth*sf
-            oph = pageHeight*sf
-            pageWidth = 2*mlbw + pageWidth*sf
-            pageHeight = 2*mlbw + pageHeight*sf
-            if ml and mc:
+            bw = max(0,getattr(cM,'borderWidth',36)/sf)
+            if bw:
+                bv = (sf-1)*mv*0.5
+                ml = min(bw,max(0,getattr(cM,'markLength',18)/sf))
+                mw = getattr(cM,'markWidth',0.5)
+                mc = getattr(cM,'markColor',black)
+                mg = bw-ml
+                cx0 = len(code)
                 self.saveState()
-                self.setStrokeColor(mc)
-                self.setLineWidth(mw)
-                self.lines([
-                    (bv,0-mlbw,bv,ml-mlbw),
-                    (opw-2*bv,0-mlbw,opw-2*bv,ml-mlbw),
-                    (bv,oph+bw,bv,oph+mlbw),
-                    (opw-2*bv,oph+bw,opw-2*bv,oph+mlbw),
-                    (-mlbw,bv,ml-mlbw,bv),
-                    (opw+bw,bv,opw+mlbw,bv),
-                    (-mlbw,oph-2*bv,ml-mlbw,oph-2*bv),
-                    (opw+bw,oph-2*bv,opw+mlbw,oph-2*bv),
-                    ])
+                self.scale(sf,sf)
+                self.translate(bw,bw)
+                opw = pageWidth*sf
+                oph = pageHeight*sf
+                pageWidth = 2*bw + pageWidth*sf
+                pageHeight = 2*bw + pageHeight*sf
+                if ml and mc:
+                    self.saveState()
+                    self.setStrokeColor(mc)
+                    self.setLineWidth(mw)
+                    self.lines([
+                        (bv,0-bw,bv,ml-bw),
+                        (opw-2*bv,0-bw,opw-2*bv,ml-bw),
+                        (bv,oph+mg,bv,oph+bw),
+                        (opw-2*bv,oph+mg,opw-2*bv,oph+bw),
+                        (-bw,bv,ml-bw,bv),
+                        (opw+mg,bv,opw+bw,bv),
+                        (-bw,oph-2*bv,ml-bw,oph-2*bv),
+                        (opw+mg,oph-2*bv,opw+bw,oph-2*bv),
+                        ])
+                    self.restoreState()
+                C = code[cx0:]
+                del code[cx0:]
+                code[0:0] = C
                 self.restoreState()
-            C = code[cx0:]
-            del code[cx0:]
-            code[0:0] = C
-            self.restoreState()
 
         code.append(' ')
         page = pdfdoc.PDFPage()
