@@ -44,16 +44,21 @@ lines after the first are indented by the same constant named
 epsilon.
 """
 
-import string
-
 from reportlab.lib import enums
 from reportlab.lib.units import cm
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable
 from reportlab.platypus.tables import TableStyle, Table
-from reportlab.platypus.flowables import Spacer
+from reportlab.platypus.flowables import Spacer, Flowable
 from reportlab.pdfbase.pdfmetrics import stringWidth
+try:
+    set
+except:
+    class set(list):
+        def add(self,x):
+            if x not in self:
+                list.append(self,x)
 
 # Default paragraph styles for tables of contents.
 # (This could also be generated automatically or even
@@ -150,7 +155,6 @@ class TableOfContents(IndexingFlowable):
         if kind == 'TOCEntry':
             self.addEntry(*stuff)
 
-
     def clearEntries(self):
         self._entries = []
 
@@ -242,7 +246,6 @@ class TableOfContents(IndexingFlowable):
         """
         self._table.drawOn(canvas, x, y, _sW)
 
-
 class SimpleIndex(IndexingFlowable):
     """This creates a very simple index.
 
@@ -281,10 +284,7 @@ class SimpleIndex(IndexingFlowable):
 
     def addEntry(self, text, pageNum):
         """Allows incremental buildup"""
-        if self._entries.has_key(text):
-            self._entries[text].append(str(pageNum))
-        else:
-            self._entries[text] = [pageNum]
+        self._entries.setdefault(text,set([])).add(pageNum)
 
     def split(self, availWidth, availHeight):
         """At this stage we do not care about splitting the entries,
@@ -300,23 +300,27 @@ class SimpleIndex(IndexingFlowable):
         # we draw the LAST RUN's entries!  If there are
         # none, we make some dummy data to keep the table
         # from complaining
-        if len(self._lastEntries) == 0:
-            _tempEntries = [('Placeholder for index',[0,1,2])]
+        if not self._lastEntries:
+            if self._entries:
+                _tempEntries = self._entries.items()
+            else:
+                _tempEntries = [('Placeholder for index',[0,1,2])]
         else:
             _tempEntries = self._lastEntries.items()
-            _tempEntries.sort()
+
+        _tempEntries.sort()
 
         tableData = []
-        for (text, pageNumbers) in _tempEntries:
+        for text, pageNumbers in _tempEntries:
             #right col style is right aligned
-            allText = text + ': ' + string.join(map(str, pageNumbers), ', ')
+            allText = text + ': ' + ', '.join(map(str, pageNumbers))
             para = Paragraph(allText, self.textStyle)
             tableData.append([para])
 
         self._table = Table(tableData, colWidths=[availWidth])
 
         self.width, self.height = self._table.wrapOn(self.canv,availWidth, availHeight)
-        return (self.width, self.height)
+        return self.width, self.height
 
     def drawOn(self, canvas, x, y, _sW=0):
         """Don't do this at home!  The standard calls for implementing
@@ -324,6 +328,17 @@ class SimpleIndex(IndexingFlowable):
         work to the embedded table object.
         """
         self._table.drawOn(canvas, x, y, _sW)
+
+    def draw(self):
+        t = self._table
+        ocanv = getattr(t,'canv',None)
+        if not ocanv:
+            t.canv = self.canv
+        try:
+            t.draw()
+        finally:
+            if not ocanv:
+                del t.canv
 
 class ReferenceText(IndexingFlowable):
     """Fakery to illustrate how a reference would work if we could

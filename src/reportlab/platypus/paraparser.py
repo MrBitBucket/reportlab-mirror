@@ -759,6 +759,8 @@ class ParaParser(xmllib.XMLParser):
         self.handle_data('')
         self._pop()
 
+    end_onDraw=end_seq
+
 
     #---------------------------------------------------------------
     def _push(self,**attr):
