@@ -645,10 +645,6 @@ class PDFDictionary:
     def copy(self):
         return PDFDictionary(self.dict)
 
-    def has_key(self,k):
-        return self.dict.has_key(k)
-
-
 class checkPDFNames:
     def __init__(self,*names):
         self.names = map(PDFName,names)
