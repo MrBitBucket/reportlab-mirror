@@ -106,7 +106,7 @@ def run(verbose=1):
     data = open(fn,'r').readlines()
     for line in data:
         #this just does it the fast way...
-        tx.textLine(line)
+        tx.textLine(line.strip())
         #this forces it to do text metrics, which would be the slow
         #part if we were wrappng paragraphs.
         #canv.textOut(line)

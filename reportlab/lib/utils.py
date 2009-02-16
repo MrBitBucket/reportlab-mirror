@@ -2,8 +2,13 @@
 #see license.txt for license details
 # $URI:$
 __version__=''' $Id$ '''
+__doc__='''Gazillions of miscellaneous internal utility functions'''
 
-import string, os, sys, imp, time, md5
+import string, os, sys, imp, time
+try:
+    from hashlib import md5
+except:
+    from md5 import md5
 from reportlab.lib.logger import warnOnce
 from types import *
 from rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
@@ -21,11 +26,11 @@ if sys.hexversion<0x2030000:
 
 if sys.hexversion >= 0x02000000:
     def _digester(s):
-        return md5.md5(s).hexdigest()
+        return md5(s).hexdigest()
 else:
     # hexdigest not available in 1.5
     def _digester(s):
-        return join(map(lambda x : "%02x" % ord(x), md5.md5(s).digest()), '')
+        return join(map(lambda x : "%02x" % ord(x), md5(s).digest()), '')
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
@@ -342,17 +347,14 @@ else:
     haveImages = Image is not None
     if haveImages: del Image
 
-__StringIO=None
+try:
+    from cStringIO import StringIO as __StringIO
+except ImportError:
+    from StringIO import StringIO as __StringIO
 def getStringIO(buf=None):
     '''unified StringIO instance interface'''
-    global __StringIO
-    if not __StringIO:
-        try:
-            from cStringIO import StringIO
-        except ImportError:
-            from StringIO import StringIO
-        __StringIO = StringIO
     return buf is not None and __StringIO(buf) or __StringIO()
+_StringIOKlass=__StringIO().__class__
 
 class ArgvDictValue:
     '''A type to allow clients of getArgvDict to specify a conversion function'''
@@ -526,14 +528,13 @@ def _isPILImage(im):
     except ImportError:
         return 0
 
-class ImageReader:
+class ImageReader(object):
     "Wraps up either PIL or Java to get data from bitmaps"
+    _cache={}
     def __init__(self, fileName):
         if isinstance(fileName,ImageReader):
             self.__dict__ = fileName.__dict__   #borgize
             return
-        if not haveImages:
-            raise RuntimeError('Imaging Library not available, unable to import bitmaps')
         #start wih lots of null private fields, to be populated by
         #the relevant engine.
         self.fileName = fileName
@@ -551,23 +552,58 @@ class ImageReader:
                 self.fileName = 'PILIMAGE_%d' % id(self)
         else:
             try:
+                from reportlab.rl_config import imageReaderFlags
                 self.fp = open_for_read(fileName,'b')
-                #detect which library we are using and open the image
-                if sys.platform[0:4] == 'java':
-                    from javax.imageio import ImageIO
-                    self._image = ImageIO.read(self.fp)
+                if isinstance(self.fp,_StringIOKlass):  imageReaderFlags=0 #avoid messing with already internal files
+                if imageReaderFlags>0:  #interning
+                    data = self.fp.read()
+                    if imageReaderFlags&2:  #autoclose
+                        try:
+                            self.fp.close()
+                        except:
+                            pass
+                    if imageReaderFlags&4:  #cache the data
+                        if not self._cache:
+                            from rl_config import register_reset
+                            register_reset(self._cache.clear)
+                        data=self._cache.setdefault(md5(data).digest(),data)
+                    self.fp=getStringIO(data)
+                elif imageReaderFlags==-1 and isinstance(fileName,(str,unicode)):
+                    #try Ralf Schmitt's re-opening technique of avoiding too many open files
+                    self.fp.close()
+                    del self.fp #will become a property in the next statement
+                    self.__class__=LazyImageReader
+                if haveImages:
+                    #detect which library we are using and open the image
+                    if not self._image:
+                        self._image = self._read_image(self.fp)
+                    if getattr(self._image,'format',None)=='JPEG': self.jpeg_fh = self._jpeg_fh
                 else:
-                    import PIL.Image
-                    self._image = PIL.Image.open(self.fp)
-                    if self._image=='JPEG': self.jpeg_fh = self._jpeg_fp
+                    from reportlab.pdfbase.pdfutils import readJPEGInfo
+                    try:
+                        self._width,self._height,c=readJPEGInfo(self.fp)
+                    except:
+                        raise RuntimeError('Imaging Library not available, unable to import bitmaps only jpegs')
+                    self.jpeg_fh = self._jpeg_fh
+                    self._data = self.fp.read()
+                    self._dataA=None
+                    self.fp.seek(0)
             except:
                 et,ev,tb = sys.exc_info()
                 if hasattr(ev,'args'):
-                    a = str(ev.args[-1])+(' fileName='+fileName)
+                    a = str(ev.args[-1])+(' fileName=%r'%fileName)
                     ev.args= ev.args[:-1]+(a,)
                     raise et,ev,tb
                 else:
                     raise
+
+    def _read_image(self,fp):
+        if sys.platform[0:4] == 'java':
+            from javax.imageio import ImageIO
+            return ImageIO.read(fp)
+        else:
+            import PIL.Image
+            return PIL.Image.open(fp)
 
     def _jpeg_fh(self):
         fp = self.fp
@@ -640,6 +676,15 @@ class ImageReader:
             else:
                 return None
 
+class LazyImageReader(ImageReader): 
+    def fp(self): 
+        return open_for_read(self.fileName, 'b') 
+    fp=property(fp) 
+
+    def _image(self):
+        return self._read_image(self.fp)
+    _image=property(_image) 
+
 def getImageData(imageFileName):
     "Get width, height and RGB pixels from image file.  Wraps Java/PIL"
     try:
@@ -650,23 +695,27 @@ def getImageData(imageFileName):
 class DebugMemo:
     '''Intended as a simple report back encapsulator
 
-    Typical usages
-    1) To record error data
+    Typical usages:
+        
+    1. To record error data::
+        
         dbg = DebugMemo(fn='dbgmemo.dbg',myVar=value)
         dbg.add(anotherPayload='aaaa',andagain='bbb')
         dbg.dump()
 
-    2) To show the recorded info
+    2. To show the recorded info::
+        
         dbg = DebugMemo(fn='dbgmemo.dbg',mode='r')
         dbg.load()
         dbg.show()
 
-    3) To re-use recorded information
+    3. To re-use recorded information::
+        
         dbg = DebugMemo(fn='dbgmemo.dbg',mode='r')
             dbg.load()
         myTestFunc(dbg.payload('myVar'),dbg.payload('andagain'))
 
-    in addition to the payload variables the dump records many useful bits
+    In addition to the payload variables the dump records many useful bits
     of information which are also printed in the show() method.
     '''
     def __init__(self,fn='rl_dbgmemo.dbg',mode='w',getScript=1,modules=(),capture_traceback=1, stdout=None, **kw):
@@ -929,3 +978,31 @@ def fileName2Utf8(fn):
         except:
             pass
     raise ValueError('cannot convert %r to utf8' % fn)
+
+
+import itertools
+def prev_this_next(items):
+    """
+    Loop over a collection with look-ahead and look-back.
+    
+    From Thomas Guest, 
+    http://wordaligned.org/articles/zippy-triples-served-with-python
+    
+    Seriously useful looping tool (Google "zippy triples")
+    lets you loop a collection and see the previous and next items,
+    which get set to None at the ends.
+    
+    To be used in layout algorithms where one wants a peek at the
+    next item coming down the pipe.
+
+    """
+    
+    extend = itertools.chain([None], items, [None])
+    prev, this, next = itertools.tee(extend, 3)
+    try:
+        this.next()
+        next.next()
+        next.next()
+    except StopIteration:
+        pass
+    return itertools.izip(prev, this, next)
