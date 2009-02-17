@@ -142,7 +142,9 @@ class _Name2StandardEncodingMap(UserDict.UserDict):
         return self.data[y]
 
 encodings = _Name2StandardEncodingMap()
-encodings['WinAnsiEncoding'] = (
+
+def __encodings_WinAnsiEncoding():
+    return (
                 None, None, None, None, None, None, None, None, None, None, None, None,
                 None, None, None, None, None, None, None, None, None, None, None, None,
                 None, None, None, None, None, None, None, None, 'space', 'exclam',
@@ -178,8 +180,11 @@ encodings['WinAnsiEncoding'] = (
                 'iacute', 'icircumflex', 'idieresis', 'eth', 'ntilde', 'ograve', 'oacute',
                 'ocircumflex', 'otilde', 'odieresis', 'divide', 'oslash', 'ugrave', 'uacute',
                 'ucircumflex', 'udieresis', 'yacute', 'thorn', 'ydieresis')
+        
+encodings['WinAnsiEncoding'] = __encodings_WinAnsiEncoding()
 
-encodings['MacRomanEncoding'] = (
+def __encodings_MacRomanEncoding():
+    return (
                  None, None, None, None, None, None, None, None, None, None, None, None,
                  None, None, None, None, None, None, None, None, None, None, None, None,
                  None, None, None, None, None, None, None, None, 'space', 'exclam',
@@ -214,7 +219,12 @@ encodings['MacRomanEncoding'] = (
                  'Oacute', 'Ocircumflex', None, 'Ograve', 'Uacute', 'Ucircumflex',
                  'Ugrave', 'dotlessi', 'circumflex', 'tilde', 'macron', 'breve',
                  'dotaccent', 'ring', 'cedilla', 'hungarumlaut', 'ogonek', 'caron')
-encodings['SymbolEncoding']=(None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
+
+encodings['MacRomanEncoding'] = __encodings_MacRomanEncoding()
+
+
+def __encodings_SymbolEncoding():
+    return (None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
                     None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, 'space',
                     'exclam', 'universal', 'numbersign', 'existential', 'percent', 'ampersand', 'suchthat',
                     'parenleft', 'parenright', 'asteriskmath', 'plus', 'comma', 'minus', 'period', 'slash', 'zero',
@@ -242,7 +252,12 @@ encodings['SymbolEncoding']=(None, None, None, None, None, None, None, None, Non
                     'braceex', None, 'angleright', 'integral', 'integraltp', 'integralex', 'integralbt',
                     'parenrighttp', 'parenrightex', 'parenrightbt', 'bracketrighttp', 'bracketrightex',
                     'bracketrightbt', 'bracerighttp', 'bracerightmid', 'bracerightbt', None)
-encodings['ZapfDingbatsEncoding'] = (   None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
+        
+encodings['SymbolEncoding'] = __encodings_SymbolEncoding()
+
+
+def __encodings_ZapfDingbatsEncoding():
+    return (   None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
                     None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
                     'space', 'a1', 'a2', 'a202', 'a3', 'a4', 'a5', 'a119', 'a118', 'a117', 'a11', 'a12', 'a13', 'a14',
                     'a15', 'a16', 'a105', 'a17', 'a18', 'a19', 'a20', 'a21', 'a22', 'a23', 'a24', 'a25', 'a26', 'a27',
@@ -261,7 +276,12 @@ encodings['ZapfDingbatsEncoding'] = (   None, None, None, None, None, None, None
                     'a167', 'a168', 'a169', 'a170', 'a171', 'a172', 'a173', 'a162', 'a174', 'a175', 'a176', 'a177',
                     'a178', 'a179', 'a193', 'a180', 'a199', 'a181', 'a200', 'a182', None, 'a201', 'a183', 'a184',
                     'a197', 'a185', 'a194', 'a198', 'a186', 'a195', 'a187', 'a188', 'a189', 'a190', 'a191', None)
-encodings['StandardEncoding']=(None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,"space","exclam",
+        
+encodings['ZapfDingbatsEncoding'] = __encodings_ZapfDingbatsEncoding()
+
+
+def __encodings_StandardEncoding():
+    return (None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,"space","exclam",
     "quotedbl","numbersign","dollar","percent","ampersand","quoteright","parenleft","parenright","asterisk","plus",
     "comma","hyphen","period","slash","zero","one","two","three","four","five","six","seven","eight","nine","colon",
     "semicolon","less","equal","greater","question","at","A","B","C","D","E","F","G","H","I","J","K","L","M","N","O",
@@ -275,7 +295,12 @@ encodings['StandardEncoding']=(None,None,None,None,None,None,None,None,None,None
     "cedilla",None,"hungarumlaut","ogonek","caron","emdash",None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,"AE",None,"ordfeminine",
     None,None,None,None,"Lslash","Oslash","OE","ordmasculine",None,None,None,None,None,"ae",None,None,None,"dotlessi",None,None,"lslash","oslash",
     "oe","germandbls",None,None,None,None)
-encodings['PDFDocEncoding']=(None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,
+
+encodings['StandardEncoding'] = __encodings_StandardEncoding()
+
+
+def __encodings_PDFDocEncoding():
+    return (None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,None,
     None,None,None,None,None,"breve","caron","circumflex",
     "dotaccent","hungarumlaut","ogonek","ring","tilde","space","exclam","quotedbl","numbersign","dollar","percent",
     "ampersand","quotesingle","parenleft","parenright","asterisk","plus","comma","hyphen","period","slash","zero",
@@ -296,7 +321,12 @@ encodings['PDFDocEncoding']=(None,None,None,None,None,None,None,None,None,None,N
     "ccedilla","egrave","eacute","ecircumflex","edieresis","igrave","iacute","icircumflex","idieresis","eth","ntilde",
     "ograve","oacute","ocircumflex","otilde","odieresis","divide","oslash","ugrave","uacute","ucircumflex","udieresis",
     "yacute","thorn","ydieresis")
-encodings['MacExpertEncoding'] =  (None, None, None, None, None, None, None, None, None, None, None, None, None, None,
+        
+encodings['PDFDocEncoding'] = __encodings_PDFDocEncoding()
+
+
+def __encodings_MacExpertEncoding():
+    return (None, None, None, None, None, None, None, None, None, None, None, None, None, None,
     None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None, None,
     'space', 'exclamsmall', 'Hungarumlautsmall', 'centoldstyle', 'dollaroldstyle', 'dollarsuperior', 'ampersandsmall',
     'Acutesmall', 'parenleftsuperior', 'parenrightsuperior', 'twodotenleader', 'onedotenleader', 'comma', 'hyphen',
@@ -323,6 +353,9 @@ encodings['MacExpertEncoding'] =  (None, None, None, None, None, None, None, Non
     'ninesuperior', 'zerosuperior', None, 'esuperior', 'rsuperior', 'tsuperior', None, None, 'isuperior', 'ssuperior',
     'dsuperior', None, None, None, None, None, 'lsuperior', 'Ogoneksmall', 'Brevesmall', 'Macronsmall', 'bsuperior',
     'nsuperior', 'msuperior', 'commasuperior', 'periodsuperior', 'Dotaccentsmall', 'Ringsmall', None, None, None, None)
+    
+    encodings['MacExpertEncoding'] = __encodings_MacExpertEncoding()
+    
 ascent_descent = {
     'Courier': (629, -157),
     'Courier-Bold': (626, -142),
@@ -342,7 +375,9 @@ ascent_descent = {
 
 # nuild this up one entry at a time to stay under JPython's 64k limit.
 widthsByFontGlyph = {}
-widthsByFontGlyph['Helvetica'] = {'A': 667,
+
+def __set_widthsByFontGlyph():
+    return {'A': 667,
  'AE': 1000,
  'Aacute': 667,
  'Acircumflex': 667,
@@ -572,7 +607,10 @@ widthsByFontGlyph['Helvetica'] = {'A': 667,
  'zcaron': 500,
  'zero': 556}
 
-widthsByFontGlyph['Helvetica-Bold'] = {'A': 722,
+widthsByFontGlyph['Helvetica'] = __set_widthsByFontGlyph()
+
+def __set_widthsByFontGlyph():
+    return {'A': 722,
  'AE': 1000,
  'Aacute': 722,
  'Acircumflex': 722,
@@ -801,8 +839,11 @@ widthsByFontGlyph['Helvetica-Bold'] = {'A': 722,
  'z': 500,
  'zcaron': 500,
  'zero': 556}
+        
+widthsByFontGlyph['Helvetica-Bold'] = __set_widthsByFontGlyph()
 
-widthsByFontGlyph['Helvetica-Oblique'] = {'A': 667,
+def __widthsByFontGlyph(): 
+    return {'A': 667,
  'AE': 1000,
  'Aacute': 667,
  'Acircumflex': 667,
@@ -1032,9 +1073,11 @@ widthsByFontGlyph['Helvetica-Oblique'] = {'A': 667,
  'zcaron': 500,
  'zero': 556}
 
+widthsByFontGlyph['Helvetica-Oblique'] = __widthsByFontGlyph()
 
 
-widthsByFontGlyph['Helvetica-BoldOblique'] = {'A': 722,
+def __widthsByFontGlyph():
+    return {'A': 722,
  'AE': 1000,
  'Aacute': 722,
  'Acircumflex': 722,
@@ -1263,6 +1306,8 @@ widthsByFontGlyph['Helvetica-BoldOblique'] = {'A': 722,
  'z': 500,
  'zcaron': 500,
  'zero': 556}
+
+widthsByFontGlyph['Helvetica-BoldOblique'] = __widthsByFontGlyph()
 
 # Courier can be expressed more compactly!
 _w = {}
@@ -1273,7 +1318,8 @@ widthsByFontGlyph['Courier-Bold'] = _w
 widthsByFontGlyph['Courier-Oblique'] = _w
 widthsByFontGlyph['Courier-BoldOblique'] = _w
 
-widthsByFontGlyph['Times-Roman'] = {'A': 722,
+def __widthsByFontGlyph():
+    return {'A': 722,
  'AE': 889,
  'Aacute': 722,
  'Acircumflex': 722,
@@ -1503,7 +1549,10 @@ widthsByFontGlyph['Times-Roman'] = {'A': 722,
  'zcaron': 444,
  'zero': 500}
 
-widthsByFontGlyph['Times-Bold'] = {'A': 722,
+widthsByFontGlyph['Times-Roman'] = __widthsByFontGlyph()
+
+def __widthsByFontGlyph():
+    return {'A': 722,
  'AE': 1000,
  'Aacute': 722,
  'Acircumflex': 722,
@@ -1733,7 +1782,10 @@ widthsByFontGlyph['Times-Bold'] = {'A': 722,
  'zcaron': 444,
  'zero': 500}
 
-widthsByFontGlyph['Times-Italic'] = {'A': 611,
+widthsByFontGlyph['Times-Bold'] = __widthsByFontGlyph()
+
+def __widthsByFontGlyph():
+    return {'A': 611,
  'AE': 889,
  'Aacute': 611,
  'Acircumflex': 611,
@@ -1963,7 +2015,10 @@ widthsByFontGlyph['Times-Italic'] = {'A': 611,
  'zcaron': 389,
  'zero': 500}
 
-widthsByFontGlyph['Times-BoldItalic'] = {'A': 667,
+widthsByFontGlyph['Times-Italic'] = __widthsByFontGlyph()
+
+def __widthsByFontGlyph():
+    return {'A': 667,
  'AE': 944,
  'Aacute': 667,
  'Acircumflex': 667,
@@ -2192,8 +2247,11 @@ widthsByFontGlyph['Times-BoldItalic'] = {'A': 667,
  'z': 389,
  'zcaron': 389,
  'zero': 500}
+        
+widthsByFontGlyph['Times-BoldItalic'] = __widthsByFontGlyph()
 
-widthsByFontGlyph['Symbol'] = {'Alpha': 722,
+def __widthsByFontGlyph():
+    return {'Alpha': 722,
  'Beta': 667,
  'Chi': 722,
  'Delta': 612,
@@ -2382,9 +2440,13 @@ widthsByFontGlyph['Symbol'] = {'Alpha': 722,
  'weierstrass': 987,
  'xi': 493,
  'zero': 500,
- 'zeta': 494}
+ 'zeta': 494}        
 
-widthsByFontGlyph['ZapfDingbats'] = {'a1': 974,
+widthsByFontGlyph['Symbol'] = __widthsByFontGlyph()
+
+
+def __widthsByFontGlyph():
+    return {'a1': 974,
  'a10': 692,
  'a100': 668,
  'a101': 732,
@@ -2586,6 +2648,8 @@ widthsByFontGlyph['ZapfDingbats'] = {'a1': 974,
  'a98': 392,
  'a99': 668,
  'space': 278}
+
+widthsByFontGlyph['ZapfDingbats'] = __widthsByFontGlyph()
 
 #preserve the initial values here
 def _reset(
