@@ -5,6 +5,7 @@ __version__=''' $Id$ '''
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
 import string, os, sys, imp, time
+jython = sys.platform[0:4] == 'java'
 try:
     from hashlib import md5
 except:
@@ -204,7 +205,14 @@ except:
     def rl_glob(pattern,glob=glob.glob):
         return glob(pattern)
 del glob, fnmatch
-_isFSSD = _isFSD and os.path.isfile(os.path.splitext(__file__)[0] +'.py')
+
+def _getPyFn(fn):
+    if jython and fn.endswith('$py.class'):
+        fn = fn[:-9]
+    else:
+        fn = os.path.splitext(__file__)[0]
+    return fn+'.py'
+_isFSSD = _isFSD and os.path.isfile(_getPyFn(__file__))
 
 def isFileSystemDistro():
     '''return truth if a file system distribution'''
@@ -329,7 +337,7 @@ def import_zlib():
 # to tell us if either PIL or Java imaging libraries present.
 # define PIL_Image as either None, or an alias for the PIL.Image
 # module, as there are 2 ways to import it
-if sys.platform[0:4] == 'java':
+if jython:
     try:
         import javax.imageio
         import java.awt.image
@@ -598,7 +606,7 @@ class ImageReader(object):
                     raise
 
     def _read_image(self,fp):
-        if sys.platform[0:4] == 'java':
+        if jython:
             from javax.imageio import ImageIO
             return ImageIO.read(fp)
         else:
@@ -615,7 +623,7 @@ class ImageReader(object):
 
     def getSize(self):
         if (self._width is None or self._height is None):
-            if sys.platform[0:4] == 'java':
+            if jython:
                 self._width = self._image.getWidth()
                 self._height = self._image.getHeight()
             else:
@@ -626,7 +634,7 @@ class ImageReader(object):
         "Return byte array of RGB data as string"
         if self._data is None:
             self._dataA = None
-            if sys.platform[0:4] == 'java':
+            if jython:
                 import jarray
                 from java.awt.image import PixelGrabber
                 width, height = self.getSize()
@@ -662,7 +670,7 @@ class ImageReader(object):
         return width, height, self.getRGBData()
 
     def getTransparent(self):
-        if sys.platform[0:4] == 'java':
+        if jython:
             return None
         else:
             if self._image.info.has_key("transparency"):
