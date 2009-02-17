@@ -165,35 +165,33 @@ def getDrawing06():
     """This demonstrates all the basic shapes at once.
 
     There are no groups or references.
-    Each solid shape should have a purple fill.
+    Each solid shape should have a green fill.
     """
 
-    purple = colors.purple
-    purple = colors.green
+    green = colors.green
 
-    D = Drawing(400, 200) #, fillColor=purple)
+    D = Drawing(400, 200) #, fillColor=green)
 
     D.add(Line(10,10, 390,190))
 
-    D.add(Circle(100,100,20, fillColor=purple))
-    D.add(Circle(200,100,40, fillColor=purple))
-    D.add(Circle(300,100,30, fillColor=purple))
+    D.add(Circle(100,100,20, fillColor=green))
+    D.add(Circle(200,100,40, fillColor=green))
+    D.add(Circle(300,100,30, fillColor=green))
 
-    D.add(Wedge(330,100,40, -10,40, fillColor=purple))
+    D.add(Wedge(330,100,40, -10,40, fillColor=green))
 
     D.add(PolyLine([120,10, 130,20, 140,10, 150,20, 160,10,
-                    170,20, 180,10, 190,20, 200,10], fillColor=purple))
+                    170,20, 180,10, 190,20, 200,10], fillColor=green))
 
-    D.add(Polygon([300,20, 350,20, 390,80, 300,75, 330,40], fillColor=purple))
+    D.add(Polygon([300,20, 350,20, 390,80, 300,75, 330,40], fillColor=green))
 
-    D.add(Ellipse(50,150, 40, 20, fillColor=purple))
+    D.add(Ellipse(50,150, 40, 20, fillColor=green))
 
     D.add(Rect(120,150, 60,30,
                strokeWidth=10,
                strokeColor=colors.yellow,
-               fillColor=purple))  #square corners
-
-    D.add(Rect(220, 150, 60, 30, 10, 10, fillColor=purple))  #round corners
+               fillColor=green))  #square corners
+    D.add(Rect(220, 150, 60, 30, 10, 10, fillColor=green))  #round corners
 
     from reportlab.lib.validators import inherit
     D.add(String(10,50, 'Basic Shapes', fillColor=colors.black, fontName=inherit))

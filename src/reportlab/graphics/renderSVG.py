@@ -313,7 +313,7 @@ class SVGCanvas:
         if self._font != font or self._fontSize != fontSize:
             self._font, self._fontSize = (font, fontSize)
             self.style['font-family'] = font
-            self.style['font-size'] = fontSize
+            self.style['font-size'] = '%spx' % fontSize
 
     def _add_link(self, dom_object, link_info) :
         assert isinstance(link_info, dict)
