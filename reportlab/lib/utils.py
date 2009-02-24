@@ -868,6 +868,19 @@ class DebugMemo:
             pprint.pprint(v,self.stdout)
             self._finish(k)
 
+    def _show_extensions(self):
+        for mn in ('_rl_accel','_renderPM','sgmlop','pyRXP','pyRXPU','_imaging','Image'):
+            try:
+                A = [mn].append
+                m = recursiveImport(mn,sys.path[:],1)
+                A(m.__file__)
+                for vn in ('__version__','VERSION','_version','version'):
+                    if hasattr(m,vn):
+                        A('%s=%r' % (vn,getattr(m,vn)))
+            except:
+                A('not found')
+            self._writeln(' '+' '.join(A.__self__))
+
     specials = {'__module_versions': _show_module_versions,
                 '__payload': _show_payload,
                 '__traceback': _show_lines,
@@ -879,7 +892,8 @@ class DebugMemo:
         for k in K:
             if k not in self.specials.keys(): self._writeln('%-15s = %s' % (k,self.store[k]))
         for k in K:
-            if k in self.specials.keys(): apply(self.specials[k],(self,k,self.store[k]))
+            if k in self.specials.keys(): self.specials[k](self,k,self.store[k])
+        self._show_extensions()
 
     def payload(self,name):
         return self.store['__payload'][name]
