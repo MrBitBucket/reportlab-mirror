@@ -356,6 +356,8 @@ else:
     if haveImages: del Image
 
 try:
+    #remove after 2.5b2
+    if jython: raise ImportError('jython cStringIO is bad')
     from cStringIO import StringIO as __StringIO
 except ImportError:
     from StringIO import StringIO as __StringIO

@@ -44,7 +44,7 @@ class ArcIV:
 		'''
 		sbox, i, j = self._sbox, self._i, self._j
 
-		C = type(B) is StringType and map(ord,B) or B[:]
+		C = isinstance(B,(str,unicode)) and map(ord,B) or B[:]
 		n = len(C)
 		p = 0
 		while p<n:

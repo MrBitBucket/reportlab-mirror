@@ -55,7 +55,7 @@ Canvas and TextObject have special support for dynamic fonts.
 import string
 from types import StringType, UnicodeType
 from struct import pack, unpack
-from cStringIO import StringIO
+from reportlab.lib.utils import getStringIO
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 
 class TTFError(pdfdoc.PDFError):
@@ -357,7 +357,8 @@ class TTFontMaker:
 
     def makeStream(self):
         "Finishes the generation and returns the TTF file as a string"
-        stm = StringIO()
+        stm = getStringIO()
+        write = stm.write
 
         numTables = len(self.tables)
         searchRange = 1
@@ -369,7 +370,7 @@ class TTFontMaker:
         rangeShift = numTables * 16 - searchRange
 
         # Header
-        stm.write(pack(">lHHHH", 0x00010000, numTables, searchRange,
+        write(pack(">lHHHH", 0x00010000, numTables, searchRange,
                                  entrySelector, rangeShift))
 
         # Table directory
@@ -380,20 +381,20 @@ class TTFontMaker:
             if tag == 'head':
                 head_start = offset
             checksum = calcChecksum(data)
-            stm.write(tag)
-            stm.write(pack(">LLL", checksum, offset, len(data)))
+            write(tag)
+            write(pack(">LLL", checksum, offset, len(data)))
             paddedLength = (len(data)+3)&~3
             offset = offset + paddedLength
 
         # Table data
         for tag, data in tables:
-            data = data + "\0\0\0"
-            stm.write(data[:len(data)&~3])
+            data += "\0\0\0"
+            write(data[:len(data)&~3])
 
         checksum = calcChecksum(stm.getvalue())
         checksum = add32(0xB1B0AFBAL, -checksum)
         stm.seek(head_start + 8)
-        stm.write(pack('>L', checksum))
+        write(pack('>L', checksum))
 
         return stm.getvalue()
 
