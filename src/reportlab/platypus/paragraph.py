@@ -1118,9 +1118,11 @@ class Paragraph(Flowable):
                         if nText!='' and nText[0]!=' ':
                             g.text += ' ' + nText
 
+                    ni = 0
                     for i in w[2:]:
                         g = i[0].clone()
                         g.text=i[1]
+                        if g.text: ni = 1
                         words.append(g)
                         fontSize = g.fontSize
                         if calcBounds:
@@ -1134,6 +1136,9 @@ class Paragraph(Flowable):
                         maxSize = max(maxSize,fontSize)
                         maxAscent = max(maxAscent,ascent)
                         minDescent = min(minDescent,descent)
+                    if not nText and ni:
+                        #one bit at least of the word was real
+                        n+=1
 
                     currentWidth = newWidth
                 else:  #either it won't fit, or it's a lineBreak tag

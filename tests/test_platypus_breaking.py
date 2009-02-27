@@ -172,7 +172,7 @@ class BreakingTestCase(unittest.TestCase):
         doc = SimpleDocTemplate(outputfile('test_platypus_breaking1.pdf'))
         doc.build(content)
 
-    def test1(self):
+    def test2(self):
         sty = ParagraphStyle(name = 'normal')
         sty.fontName = 'Times-Roman'
         sty.fontSize = 10
@@ -186,6 +186,32 @@ class BreakingTestCase(unittest.TestCase):
         self.assertEqual(len(p.split(20,24)),0) #widows disallowed
         p.allowOrphans = 1
         self.assertEqual(len(p.split(20,16)),2) #orphans allowed
+
+    def test3(self):
+        from reportlab.pdfgen.canvas import Canvas
+
+        aW=307
+        styleSheet = getSampleStyleSheet()
+        bt = styleSheet['BodyText']
+        btj = ParagraphStyle('bodyText1j',parent=bt,alignment=TA_JUSTIFY)
+        p=Paragraph("""<a name='top'/>Subsequent pages test pageBreakBefore, frameBreakBefore and
+                keepTogether attributes.  Generated at 1111. The number in brackets
+                at the end of each paragraph is its position in the story. llllllllllllllllllllllllll 
+                bbbbbbbbbbbbbbbbbbbbbb ccccccccccccccccccccccc ddddddddddddddddddddd eeeeyyy""",btj)
+
+        w,h=p.wrap(aW,1000)
+        canv=Canvas('test_platypus_paragraph_just.pdf',pagesize=(aW,h))
+        i=len(canv._code)
+        p.drawOn(canv,0,0)
+        ParaCode=canv._code[i:]
+        canv.saveState()
+        canv.setLineWidth(0)
+        canv.setStrokeColorRGB(1,0,0)
+        canv.rect(0,0,aW,h)
+        canv.restoreState()
+        canv.showPage()
+        canv.save()
+        assert ParaCode==['q', '1 0 0 1 0 0 cm', 'q', 'BT 1 0 0 1 0 53.17 Tm 10.082 Tw 12 TL /F2 10 Tf 0 0 0 rg (Subsequent pages test pageBreakBefore, frameBreakBefore and) Tj T* 0 Tw .985 Tw (keepTogether attributes. Generated at 1111. The number in brackets at the) Tj T* 0 Tw 3.78 Tw (end of each paragraph is its position in the story. llllllllllllllllllllllllll) Tj T* 0 Tw 92.38 Tw (bbbbbbbbbbbbbbbbbbbbbb ccccccccccccccccccccccc) Tj T* 0 Tw (ddddddddddddddddddddd eeeeyyy) Tj T* ET', 'Q', 'Q']
 
 def makeSuite():
     return makeSuiteForClasses(BreakingTestCase)
