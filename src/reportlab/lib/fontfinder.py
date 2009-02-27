@@ -62,7 +62,7 @@ import sys, time, os, cPickle, tempfile
 from xml.sax.saxutils import quoteattr
 try:
     from hashlib import md5
-except:
+except ImportError:
     from md5 import md5
 
 EXTENSIONS = ['.ttf','.ttc','.otf','.pfb','.pfa']
