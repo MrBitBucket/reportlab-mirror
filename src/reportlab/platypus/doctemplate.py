@@ -48,6 +48,20 @@ logger = logging.getLogger("reportlab.platypus")
 class LayoutError(Exception):
     pass
 
+def _fSizeString(f):
+    w=getattr(f,'width',None)
+    if w is None:
+        w=getattr(f,'_width',None)
+
+    h=getattr(f,'height',None)
+    if h is None:
+        h=getattr(f,'_height',None)
+    if w is not None or h is not None:
+        if w is None: w='???'
+        if h is None: h='???'
+        return '(%s x %s)' % (w,h)
+    return ''
+
 def _doNothing(canvas, doc):
     "Dummy callback for onPage"
     pass
@@ -691,8 +705,9 @@ class BaseDocTemplate:
                         flowables.insert(i,f)   # put split flowables back on the list
                 else:
                     if hasattr(f,'_postponed'):
-                        ident = "Flowable %s too large on page %d in frame '%s' of template '%s'" % \
-                                (self._fIdent(f,60,frame), self.page, self.frame.id, self.pageTemplate.id)
+                        ident = "Flowable %s%s too large on page %d in frame %r%s of template %r" % \
+                                (self._fIdent(f,60,frame),_fSizeString(f),self.page, self.frame.id,
+                                        self.frame._aSpaceString(), self.pageTemplate.id)
                         #leave to keep apart from the raise
                         raise LayoutError(ident)
                     # this ought to be cleared when they are finally drawn!

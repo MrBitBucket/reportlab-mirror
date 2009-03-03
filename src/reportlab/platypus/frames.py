@@ -247,3 +247,6 @@ class Frame:
 
     def add_generated_content(self,*C):
         self.__dict__.setdefault('_generated_content',[]).extend(C)
+
+    def _aSpaceString(self):
+        return '(%s x %s%s)' % (self._getAvailableWidth(),self._aH,self._atTop and '*' or '')
