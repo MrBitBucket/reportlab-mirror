@@ -118,6 +118,62 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         assert t0 == 'foo'
         assert t1 == 'bar'
 
+    def test3(self):
+        from reportlab.lib.units import cm
+        from reportlab.lib import colors
+
+        width=10*cm
+        height=2*cm
+
+        #Create fairly simple drawing object,
+        drawing=Drawing(width, height)
+
+        p=ArcPath(strokeColor=colors.darkgreen,
+                          fillColor=colors.green,
+                          hrefURL="http://en.wikipedia.org/wiki/Vector_path",
+                          hrefTitle="This big letter C is actually a closed vector path.",
+                          strokewidth=0)
+        p.addArc(1*cm, 1*cm, 0.8*cm, 20, 340, moveTo=True)
+        p.addArc(1*cm, 1*cm, 0.9*cm, 20, 340, reverse=True)
+        p.closePath()
+        drawing.add(p)
+
+        drawing.add(Rect(2.25*cm, 0.1*cm, 1.5*cm, 0.8*cm, rx=0.25*cm, ry=0.25*cm,
+
+        hrefURL="http://en.wikipedia.org/wiki/Rounded_rectangle",
+                               hrefTitle="Rounded Rectangle",
+                               strokeColor=colors.red,
+                               fillColor=colors.yellow))
+
+        drawing.add(String(1*cm, 1*cm, "Hello World!",
+                                 hrefURL="http://en.wikipedia.org/wiki/Hello_world",
+                                 hrefTitle="Why 'Hello World'?",
+                                 fillColor=colors.darkgreen))
+        drawing.add(Rect(4.5*cm, 0.5*cm, 5*cm, 1*cm,
+                                hrefURL="http://en.wikipedia.org/wiki/Rectangle",
+                                hrefTitle="Wikipedia page on rectangles",
+                                strokeColor=colors.blue,
+                                fillColor=colors.red))
+        drawing.add(Ellipse(7*cm, 1*cm, 2*cm, 0.95*cm,
+                                  hrefURL="http://en.wikipedia.org/wiki/Ellipse",
+                                  strokeColor=colors.black,
+                                  fillColor=colors.yellow))
+        drawing.add(Circle(7*cm, 1*cm, 0.9*cm,
+                                  hrefURL="http://en.wikipedia.org/wiki/Circle",
+                                 strokeColor=colors.black,
+                                 fillColor=colors.brown))
+        drawing.add(Ellipse(7*cm, 1*cm, 0.5*cm, 0.9*cm,
+                                  hrefTitle="Tooltip with no link?",
+                                  strokeColor=colors.black,
+                                  fillColor=colors.black))
+        drawing.add(Polygon([4.5*cm, 1.25*cm, 5*cm, 0.1*cm, 4*cm, 0.1*cm],
+                                  hrefURL="http://en.wikipedia.org/wiki/Polygon",
+                                  hrefTitle="This triangle is a simple polygon.",
+                                  strokeColor=colors.darkgreen,
+                                  fillColor=colors.green))
+
+        renderSVG.drawToFile(drawing, outputfile("test_renderSVG_simple_test3.svg"))
+
 class RenderSvgAxesTestCase(unittest.TestCase):
     "Testing renderSVG module on Axes widgets."
 

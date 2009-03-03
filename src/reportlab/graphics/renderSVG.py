@@ -233,33 +233,15 @@ class SVGCanvas:
 
         return codeline % data
 
-    def _fillAndStroke(self, code, clip=0):
+    def _fillAndStroke(self, code, clip=0, link_info=None):
         path = transformNode(self.doc, "path",
             d=self.path, style=self._formatStyle(LINE_STYLES))
+        if link_info :
+            path = self._add_link(path, link_info)
         self.currGroup.appendChild(path)
         self.path = ''
 
-        return
 
-        """
-        if self._fillColor or self._strokeColor or clip:
-            self.code.extend(code)
-            if self._fillColor:
-                if self._strokeColor or clip:
-                    self.code.append("gsave")
-                self.setColor(self._fillColor)
-                self.code.append("eofill")
-                if self._strokeColor or clip:
-                    self.code.append("grestore")
-            if self._strokeColor != None:
-                if clip: self.code.append("gsave")
-                self.setColor(self._strokeColor)
-                self.code.append("stroke")
-                if clip: self.code.append("grestore")
-            if clip:
-                self.code.append("clip")
-                self.code.append("newpath")
-        """
     ### styles ###
     def setLineCap(self, v):
         vals = {0:'butt', 1:'round', 2:'square'}
@@ -745,9 +727,13 @@ class _SVGRenderer(Renderer):
         c = self._canvas
         drawFuncs = (c.moveTo, c.lineTo, c.curveTo, c.closePath)
         isClosed = _renderPath(path, drawFuncs)
-        if not isClosed:
+        if isClosed:
+            #Only try and add links to closed paths...
+            link_info = self._get_link_info_dict(path)
+        else :
             c._fillColor = None
-        c._fillAndStroke([], clip=path.isClipPath)
+            link_info = None
+        c._fillAndStroke([], clip=path.isClipPath, link_info=link_info)
 
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the operators
