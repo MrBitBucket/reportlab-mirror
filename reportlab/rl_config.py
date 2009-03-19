@@ -31,6 +31,8 @@ odbc_driver=                'odbc'                  #default odbc driver
 platypus_link_underline=    0                       #paragraph links etc underlined if true
 canvas_basefontname=        'Helvetica'             #this is used to initialize the canvas; if you override to make
                                                     #something else you are responsible for ensuring the font is registered etc etc
+allowShortTableRows=1                               #allows some rows in a table to be short
+imageReaderFlags=0                                  #attempt to convert images into internal memory files to reduce
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -68,6 +70,13 @@ TTFSearchPath = (
                 '%(REPORTLAB_DIR)s/../fonts',   #special
                 '%(REPORTLAB_DIR)s/../../fonts',#special
                 '%(HOME)s/fonts',               #special
+                #mac os X - from
+                #http://developer.apple.com/technotes/tn/tn2024.html
+                '~/Library/Fonts',
+                '/Library/Fonts',
+                '/Network/Library/Fonts',
+                '/System/Library/Fonts',
+                
                 )
 
 # places to look for CMap files - should ideally merge with above
@@ -147,7 +156,9 @@ wrapA85
 fsEncodings
 odbc_driver
 platypus_link_underline
-canvas_basefontname'''.split()
+canvas_basefontname
+allowShortTableRows
+imageReaderFlags'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage
