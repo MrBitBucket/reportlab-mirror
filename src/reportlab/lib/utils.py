@@ -4,7 +4,7 @@
 __version__=''' $Id$ '''
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
-import string, os, sys, imp, time
+import os, sys, imp, time
 try:
     from hashlib import md5
 except:
@@ -131,7 +131,7 @@ if os.name == 'mac':
         try:
             if creatorcode is None or filetype is None and ext is not None:
                 try:
-                    creatorcode, filetype = _KNOWN_MAC_EXT[string.upper(ext)]
+                    creatorcode, filetype = _KNOWN_MAC_EXT[ext.upper()]
                 except:
                     return
             macfs.FSSpec(filename).SetCreatorType(creatorcode,filetype)
@@ -234,6 +234,7 @@ except ImportError:
     _tz_re = re.compile('0+$')
     del re
     def fp_str(*a):
+        '''convert separate arguments (or single sequence arg) into space separated numeric strings'''
         if len(a)==1 and isSeqType(a[0]): a = a[0]
         s = []
         A = s.append
@@ -251,13 +252,13 @@ except ImportError:
                         print i, n
                         raise
                 A((n[0]!='0' or len(n)==1) and n or n[1:])
-        return string.join(s)
+        return ' '.join(s)
 
 #hack test for comma users
 if ',' in fp_str(0.25):
     _FP_STR = fp_str
     def fp_str(*a):
-        return string.replace(apply(_FP_STR,a),',','.')
+        return _FP_STR(*a).replace(',','.')
 
 def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
@@ -307,11 +308,11 @@ def recursiveGetAttr(obj, name):
 def recursiveSetAttr(obj, name, value):
     "Can call down into e.g. object1.object2[4].attr = value"
     #get the thing above last.
-    tokens = string.split(name, '.')
+    tokens = name.split('.')
     if len(tokens) == 1:
         setattr(obj, name, value)
     else:
-        most = string.join(tokens[:-1], '.')
+        most = '.'.join(tokens[:-1])
         last = tokens[-1]
         parent = recursiveGetAttr(obj, most)
         setattr(parent, last, value)
@@ -396,7 +397,7 @@ def getArgvDict(**kw):
         handled = 0
         ke = k+'='
         for a in A:
-            if string.find(a,ke)==0:
+            if a.find(ke)==0:
                 av = a[len(ke):]
                 A.remove(a)
                 R[k] = handleValue(v,av,func)
@@ -420,7 +421,7 @@ def _className(self):
     '''Return a shortened class name'''
     try:
         name = self.__class__.__name__
-        i=string.rfind(name,'.')
+        i=name.rfind('.')
         if i>=0: return name[i+1:]
         return name
     except AttributeError:
@@ -955,10 +956,10 @@ def _simpleSplit(txt,mW,SW):
             O.append(t)
             w = w + ws + lt
         else:
-            L.append(string.join(O,' '))
+            L.append(' '.join(O))
             O = [t]
             w = lt
-    if O!=[]: L.append(string.join(O,' '))
+    if O!=[]: L.append(' '.join(O))
     return L
 
 def simpleSplit(text,fontName,fontSize,maxWidth):
