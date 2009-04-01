@@ -60,21 +60,30 @@ except:
             if x not in self:
                 list.append(self,x)
 
-def drawPageNumbers(canvas, style, pagestr, availWidth, availHeight, drawDots=True):
+def drawPageNumbers(canvas, style, pagestr, availWidth, availHeight, dot=' . '):
     '''
-    Draws pagestr at the end of the current line on the canvas using the given style and avilable space.
-    Fills the gap with dots if drawDots evals to True.
+    Draws pagestr on the canvas using the given style.
+    If dot is None, pagestr is drawn at the current position in the canvas.
+    If dot is a string, pagestr is drawn right-aligned. If the string is not empty,
+    the gap is filled with it.
     '''
     x, y = canvas._curr_tx_info['cur_x'], canvas._curr_tx_info['cur_y']
     pagestrw = stringWidth(pagestr, style.fontName, style.fontSize)
-    if drawDots:
-        dotw = stringWidth(' . ', style.fontName, style.fontSize)
-        dotsn = int((availWidth-x-pagestrw)/dotw)
+    if isinstance(dot, basestring):
+        if dot:
+            dotw = stringWidth(dot, style.fontName, style.fontSize)
+            dotsn = int((availWidth-x-pagestrw)/dotw)
+        else:
+            dotsn = dotw = 0
+        text = '%s%s' % (dotsn * dot, pagestr)
+        newx = availWidth-dotsn*dotw-pagestrw
+    elif dot is None:
+        text = '  ' + pagestr
+        newx = x
     else:
-        dotsn = dotw = 0
-    text = '%s%s' % (dotsn * ' . ', pagestr)
+        raise TypeError('Argument dot should either be None or an instance of basestring.')
 
-    tx = canvas.beginText(availWidth-dotsn*dotw-pagestrw, y)
+    tx = canvas.beginText(newx, y)
     tx.setFont(style.fontName, style.fontSize)
     tx.setFillColor(style.textColor)
     tx.textLine(text)
@@ -189,8 +198,8 @@ class TableOfContents(IndexingFlowable):
             '''Callback to draw dots and page numbers after each entry.'''
             page, level = [ int(x) for x in label.split(',') ]
             style = self.levelStyles[level]
-            drawDots = self.dotsMinLevel >= 0 and level >= self.dotsMinLevel
-            drawPageNumbers(canvas, style, str(page), availWidth, availHeight, drawDots)
+            dot = ' . ' if self.dotsMinLevel >= 0 and level >= self.dotsMinLevel else ''
+            drawPageNumbers(canvas, style, str(page), availWidth, availHeight, dot)
         self.canv.drawTOCEntryEnd = drawTOCEntryEnd
 
         tableData = []
@@ -230,7 +239,7 @@ class SimpleIndex(IndexingFlowable):
 
     Entries have a string key, and appear with a page number on
     the right.  Prototype for more sophisticated multi-level index."""
-    def __init__(self, style=None):
+    def __init__(self, style=None, dot=None):
         #keep stuff in a dictionary while building
         self._entries = {}
         self._lastEntries = {}
@@ -241,6 +250,7 @@ class SimpleIndex(IndexingFlowable):
                                         fontSize=11)
         self.textStyle = style
         self.tableStyle = defaultTableStyle
+        self.dot = dot
 
     def isIndexing(self):
         return 1
@@ -296,7 +306,7 @@ class SimpleIndex(IndexingFlowable):
         def drawIndexEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
             style = self.textStyle
-            drawPageNumbers(canvas, style, label, availWidth, availHeight)
+            drawPageNumbers(canvas, style, label, availWidth, availHeight, self.dot)
         self.canv.drawIndexEntryEnd = drawIndexEntryEnd
 
         tableData = []
