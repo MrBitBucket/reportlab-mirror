@@ -60,6 +60,26 @@ except:
             if x not in self:
                 list.append(self,x)
 
+def drawPageNumbers(canvas, style, pagestr, availWidth, availHeight, drawDots=True):
+    '''
+    Draws pagestr at the end of the current line on the canvas using the given style and avilable space.
+    Fills the gap with dots if drawDots evals to True.
+    '''
+    x, y = canvas._curr_tx_info['cur_x'], canvas._curr_tx_info['cur_y']
+    pagestrw = stringWidth(pagestr, style.fontName, style.fontSize)
+    if drawDots:
+        dotw = stringWidth(' . ', style.fontName, style.fontSize)
+        dotsn = int((availWidth-x-pagestrw)/dotw)
+    else:
+        dotsn = dotw = 0
+    text = '%s%s' % (dotsn * ' . ', pagestr)
+
+    tx = canvas.beginText(availWidth-dotsn*dotw-pagestrw, y)
+    tx.setFont(style.fontName, style.fontSize)
+    tx.setFillColor(style.textColor)
+    tx.textLine(text)
+    canvas.drawText(tx)
+
 # Default paragraph styles for tables of contents.
 # (This could also be generated automatically or even
 # on-demand if it is not known how many levels the
@@ -68,45 +88,22 @@ except:
 delta = 1*cm
 epsilon = 0.5*cm
 
-levelZeroParaStyle = \
-    ParagraphStyle(name='LevelZero',
+defaultLevelStyles = []
+for x, n in enumerate(('Zero', 'One', 'Two', 'Three', 'Four')):
+    s = ParagraphStyle(name='Level' + n,
                    fontName='Times-Roman',
                    fontSize=10,
                    leading=11,
-                   firstLineIndent = -epsilon,
-                   leftIndent = 0*delta + epsilon)
-
-levelOneParaStyle = \
-    ParagraphStyle(name='LevelOne',
-                   parent = levelZeroParaStyle,
-                   leading=11,
-                   firstLineIndent = -epsilon,
-                   leftIndent = 1*delta + epsilon)
-
-levelTwoParaStyle = \
-    ParagraphStyle(name='LevelTwo',
-                   parent = levelOneParaStyle,
-                   leading=11,
-                   firstLineIndent = -epsilon,
-                   leftIndent = 2*delta + epsilon)
-
-levelThreeParaStyle = \
-    ParagraphStyle(name='LevelThree',
-                   parent = levelTwoParaStyle,
-                   leading=11,
-                   firstLineIndent = -epsilon,
-                   leftIndent = 3*delta + epsilon)
-
-levelFourParaStyle = \
-    ParagraphStyle(name='LevelFour',
-                   parent = levelTwoParaStyle,
-                   leading=11,
-                   firstLineIndent = -epsilon,
-                   leftIndent = 4*delta + epsilon)
+                   firstLineIndent = x*delta,
+                   leftIndent = x*delta + epsilon)
+    defaultLevelStyles.append(s)
 
 defaultTableStyle = \
-    TableStyle([('VALIGN', (0,0), (-1,-1), 'TOP')])
-
+    TableStyle([
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('RIGHTPADDING', (0,0), (-1,-1), 0),
+        ('LEFTPADDING', (0,0), (-1,-1), 0),
+    ])
 
 class TableOfContents(IndexingFlowable):
     """This creates a formatted table of contents.
@@ -122,27 +119,20 @@ class TableOfContents(IndexingFlowable):
 
     def __init__(self):
         self.rightColumnWidth = 72
-        self.levelStyles = [levelZeroParaStyle,
-                            levelOneParaStyle,
-                            levelTwoParaStyle,
-                            levelThreeParaStyle,
-                            levelFourParaStyle]
+        self.levelStyles = defaultLevelStyles
         self.tableStyle = defaultTableStyle
         self.dotsMinLevel = 1
         self._table = None
         self._entries = []
         self._lastEntries = []
 
-
     def beforeBuild(self):
         # keep track of the last run
         self._lastEntries = self._entries[:]
         self.clearEntries()
 
-
     def isIndexing(self):
         return 1
-
 
     def isSatisfied(self):
         return (self._entries == self._lastEntries)
@@ -198,19 +188,9 @@ class TableOfContents(IndexingFlowable):
         def drawTOCEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
             page, level = [ int(x) for x in label.split(',') ]
-            x, y = canvas._curr_tx_info['cur_x'], canvas._curr_tx_info['cur_y']
             style = self.levelStyles[level]
-            pagew = stringWidth('  %d' % page, style.fontName, style.fontSize)
-            if self.dotsMinLevel >= 0 and level >= self.dotsMinLevel:
-                dotw = stringWidth(' . ', style.fontName, style.fontSize)
-                dotsn = int((availWidth-x-pagew)/dotw)
-            else:
-                dotsn = dotw = 0
-
-            tx = canvas.beginText(availWidth-pagew-dotsn*dotw, y)
-            tx.setFont(style.fontName, style.fontSize)
-            tx.textLine('%s  %d' % (dotsn * ' . ', page))
-            canvas.drawText(tx)
+            drawDots = self.dotsMinLevel >= 0 and level >= self.dotsMinLevel
+            drawPageNumbers(canvas, style, str(page), availWidth, availHeight, drawDots)
         self.canv.drawTOCEntryEnd = drawTOCEntryEnd
 
         tableData = []
@@ -223,8 +203,7 @@ class TableOfContents(IndexingFlowable):
                 tableData.append([Spacer(1, style.spaceBefore),])
             tableData.append([para,])
 
-        self._table = Table(tableData, colWidths=(availWidth,),
-                            style=self.tableStyle)
+        self._table = Table(tableData, colWidths=(availWidth,), style=self.tableStyle)
 
         self.width, self.height = self._table.wrapOn(self.canv,availWidth, availHeight)
         return (self.width, self.height)
@@ -251,14 +230,18 @@ class SimpleIndex(IndexingFlowable):
 
     Entries have a string key, and appear with a page number on
     the right.  Prototype for more sophisticated multi-level index."""
-    def __init__(self):
+    def __init__(self, style=None):
         #keep stuff in a dictionary while building
         self._entries = {}
         self._lastEntries = {}
         self._table = None
-        self.textStyle = ParagraphStyle(name='index',
+        if style is None:
+            style = ParagraphStyle(name='index',
                                         fontName='Times-Roman',
-                                        fontSize=12)
+                                        fontSize=11)
+        self.textStyle = style
+        self.tableStyle = defaultTableStyle
+
     def isIndexing(self):
         return 1
 
@@ -310,14 +293,20 @@ class SimpleIndex(IndexingFlowable):
 
         _tempEntries.sort()
 
+        def drawIndexEntryEnd(canvas, kind, label):
+            '''Callback to draw dots and page numbers after each entry.'''
+            style = self.textStyle
+            drawPageNumbers(canvas, style, label, availWidth, availHeight)
+        self.canv.drawIndexEntryEnd = drawIndexEntryEnd
+
         tableData = []
         for text, pageNumbers in _tempEntries:
-            #right col style is right aligned
-            allText = text + ': ' + ', '.join(map(str, pageNumbers))
-            para = Paragraph(allText, self.textStyle)
-            tableData.append([para])
-
-        self._table = Table(tableData, colWidths=[availWidth])
+            style = self.textStyle
+            para = Paragraph('%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (text, ', '.join(map(str, pageNumbers))), style)
+            if style.spaceBefore:
+                tableData.append([Spacer(1, style.spaceBefore),])
+            tableData.append([para,])
+        self._table = Table(tableData, colWidths=[availWidth], style=self.tableStyle)
 
         self.width, self.height = self._table.wrapOn(self.canv,availWidth, availHeight)
         return self.width, self.height
