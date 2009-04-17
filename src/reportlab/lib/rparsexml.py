@@ -41,7 +41,7 @@ Top level parse always looks like this::
 
     ("", list, None, None)
 
- contained text of None means <simple_tag\>
+ contained text of None means <simple_tag/>
 
 In order to support stuff like::
 
