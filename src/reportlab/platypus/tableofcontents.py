@@ -239,17 +239,17 @@ class SimpleIndex(IndexingFlowable):
 
     Entries have a string key, and appear with a page number on
     the right.  Prototype for more sophisticated multi-level index."""
-    def __init__(self, style=None, dot=None):
+    def __init__(self, style=None, dot=None, tableStyle=None):
         #keep stuff in a dictionary while building
         self._entries = {}
         self._lastEntries = {}
-        self._table = None
+        self._flowable = None
         if style is None:
             style = ParagraphStyle(name='index',
                                         fontName='Times-Roman',
                                         fontSize=11)
         self.textStyle = style
-        self.tableStyle = defaultTableStyle
+        self.tableStyle = tableStyle or defaultTableStyle
         self.dot = dot
 
     def isIndexing(self):
@@ -285,14 +285,10 @@ class SimpleIndex(IndexingFlowable):
         calling app has a pointer to the original TableOfContents object;
         Platypus just sees tables.
         """
-        return self._table.splitOn(self.canv,availWidth, availHeight)
+        return self._flowable.splitOn(self.canv,availWidth, availHeight)
 
-    def wrap(self, availWidth, availHeight):
-        "All table properties should be known by now."
-        # makes an internal table which does all the work.
-        # we draw the LAST RUN's entries!  If there are
-        # none, we make some dummy data to keep the table
-        # from complaining
+    
+    def _build(self,availWidth,availHeight):
         if not self._lastEntries:
             if self._entries:
                 _tempEntries = self._entries.items()
@@ -316,9 +312,16 @@ class SimpleIndex(IndexingFlowable):
             if style.spaceBefore:
                 tableData.append([Spacer(1, style.spaceBefore),])
             tableData.append([para,])
-        self._table = Table(tableData, colWidths=[availWidth], style=self.tableStyle)
+        self._flowable = Table(tableData, colWidths=[availWidth], style=self.tableStyle)
 
-        self.width, self.height = self._table.wrapOn(self.canv,availWidth, availHeight)
+    def wrap(self, availWidth, availHeight):
+        "All table properties should be known by now."
+        # makes an internal flowable(or table) which does all the work.
+        # we draw the LAST RUN's entries!  If there are
+        # none, we make some dummy data to keep the flowable
+        # from complaining
+        self._build(availWidth,availHeight)
+        self.width, self.height = self._flowable.wrapOn(self.canv,availWidth, availHeight)
         return self.width, self.height
 
     def drawOn(self, canvas, x, y, _sW=0):
@@ -326,10 +329,10 @@ class SimpleIndex(IndexingFlowable):
         draw(); we are hooking this in order to delegate ALL the drawing
         work to the embedded table object.
         """
-        self._table.drawOn(canvas, x, y, _sW)
+        self._flowable.drawOn(canvas, x, y, _sW)
 
     def draw(self):
-        t = self._table
+        t = self._flowable
         ocanv = getattr(t,'canv',None)
         if not ocanv:
             t.canv = self.canv
