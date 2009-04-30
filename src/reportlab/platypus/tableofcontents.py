@@ -289,6 +289,11 @@ class SimpleIndex(IndexingFlowable):
 
     
     def _build(self,availWidth,availHeight):
+        # makes an internal table which does all the work.
+        # we draw the LAST RUN's entries!  If there are
+        # none, we make some dummy data to keep the table
+        # from complaining
+
         if not self._lastEntries:
             if self._entries:
                 _tempEntries = self._entries.items()
@@ -316,10 +321,6 @@ class SimpleIndex(IndexingFlowable):
 
     def wrap(self, availWidth, availHeight):
         "All table properties should be known by now."
-        # makes an internal flowable(or table) which does all the work.
-        # we draw the LAST RUN's entries!  If there are
-        # none, we make some dummy data to keep the flowable
-        # from complaining
         self._build(availWidth,availHeight)
         self.width, self.height = self._flowable.wrapOn(self.canv,availWidth, availHeight)
         return self.width, self.height
@@ -341,6 +342,41 @@ class SimpleIndex(IndexingFlowable):
         finally:
             if not ocanv:
                 del t.canv
+
+class AlphabeticIndex(SimpleIndex):
+    
+    def _build(self,availWidth,availHeight):
+        if not self._lastEntries:
+            if self._entries:
+                _tempEntries = self._entries.items()
+            else:
+                _tempEntries = [('Placeholder for index',[0,1,2])]
+        else:
+            _tempEntries = self._lastEntries.items()
+
+        _tempEntries.sort(cmp=lambda a,b: cmp(a[0].upper(), b[0].upper()))
+
+        def drawIndexEntryEnd(canvas, kind, label):
+            '''Callback to draw dots and page numbers after each entry.'''
+            style, _ = self.textStyle
+            drawPageNumbers(canvas, style, label, availWidth, availHeight, self.dot)
+        self.canv.drawIndexEntryEnd = drawIndexEntryEnd
+
+        tableData = []
+        alpha = ''
+        for text, pageNumbers in _tempEntries:
+            style, alphaStyle = self.textStyle
+            nalpha = text[0].upper()
+            if alpha != nalpha:
+                alpha = nalpha
+                tableData.append([Spacer(1, alphaStyle.spaceBefore),])
+                tableData.append([Paragraph(alpha, alphaStyle),])
+                tableData.append([Spacer(1, alphaStyle.spaceAfter),])
+            para = Paragraph('%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (text, ', '.join(map(str, pageNumbers))), style)
+            if style.spaceBefore:
+                tableData.append([Spacer(1, style.spaceBefore),])
+            tableData.append([para,])
+        self._flowable = Table(tableData, colWidths=[availWidth], style=self.tableStyle)
 
 class ReferenceText(IndexingFlowable):
     """Fakery to illustrate how a reference would work if we could
