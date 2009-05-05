@@ -400,6 +400,14 @@ class Canvas(textobject._PDFColorSetter):
         wins."""
         self._doc._catalog.showFullScreen()
 
+    def _getCmShift(self):
+        cM = self._cropMarks
+        if cM:
+            mv = max(1,min(self._pagesize[0],self._pagesize[1]))
+            sf = min(1+1./mv,1.01)
+            bw = max(0,getattr(cM,'borderWidth',36)/sf)
+            return bw
+
     def showPage(self):
         """Close the current page and possibly start on a new page."""
         # ensure a space at the end of the stream - Acrobat does
@@ -881,6 +889,9 @@ class Canvas(textobject._PDFColorSetter):
             xmin, ymin = min(xs), min(ys)
             xmax, ymax = max(xs), max(ys)
             rect = xmin, ymin, xmax, ymax
+        bw = self._getCmShift()
+        if bw:
+            rect = rect[0]+bw,rect[1]+bw,rect[2]+bw,rect[3]+bw
         return rect
 
     def freeTextAnnotation(self, contents, DA, Rect=None, addtopage=1, name=None, relative=0, **kw):
