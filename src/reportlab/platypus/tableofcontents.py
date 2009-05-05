@@ -78,7 +78,7 @@ def drawPageNumbers(canvas, style, pagestr, availWidth, availHeight, dot=' . '):
         text = '%s%s' % (dotsn * dot, pagestr)
         newx = availWidth-dotsn*dotw-pagestrw
     elif dot is None:
-        text = '  ' + pagestr
+        text = ',  ' + pagestr
         newx = x
     else:
         raise TypeError('Argument dot should either be None or an instance of basestring.')
@@ -233,6 +233,11 @@ class TableOfContents(IndexingFlowable):
         work to the embedded table object.
         """
         self._table.drawOn(canvas, x, y, _sW)
+        
+def makeTuple(x):
+    if hasattr(x, '__iter__'):
+        return tuple(x)
+    return (x,)
 
 class SimpleIndex(IndexingFlowable):
     """This creates a very simple index.
@@ -277,7 +282,7 @@ class SimpleIndex(IndexingFlowable):
 
     def addEntry(self, text, pageNum):
         """Allows incremental buildup"""
-        self._entries.setdefault(text,set([])).add(pageNum)
+        self._entries.setdefault(makeTuple(text),set([])).add(pageNum)
 
     def split(self, availWidth, availHeight):
         """At this stage we do not care about splitting the entries,
@@ -287,36 +292,40 @@ class SimpleIndex(IndexingFlowable):
         """
         return self._flowable.splitOn(self.canv,availWidth, availHeight)
 
-    
-    def _build(self,availWidth,availHeight):
-        # makes an internal table which does all the work.
-        # we draw the LAST RUN's entries!  If there are
-        # none, we make some dummy data to keep the table
-        # from complaining
-
+    def _getlastEntries(self, dummy=[(['Placeholder for index'],[0,1,2])]):
+        '''Return the last run's entries!  If there are none, returns dummy.'''
         if not self._lastEntries:
             if self._entries:
-                _tempEntries = self._entries.items()
-            else:
-                _tempEntries = [('Placeholder for index',[0,1,2])]
-        else:
-            _tempEntries = self._lastEntries.items()
-
-        _tempEntries.sort()
+                return self._entries.items()
+            return dummy
+        return self._lastEntries.items()
+    
+    def _build(self,availWidth,availHeight):
+        _tempEntries = self._getlastEntries()
+        _tempEntries.sort(cmp=lambda a,b: cmp([ x.upper() for x in a[0]], [ x.upper() for x in b[0]]))
 
         def drawIndexEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
-            style = self.textStyle
+            style = self.getLevelStyle(0)
             drawPageNumbers(canvas, style, label, availWidth, availHeight, self.dot)
         self.canv.drawIndexEntryEnd = drawIndexEntryEnd
 
         tableData = []
-        for text, pageNumbers in _tempEntries:
-            style = self.textStyle
-            para = Paragraph('%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (text, ', '.join(map(str, pageNumbers))), style)
-            if style.spaceBefore:
-                tableData.append([Spacer(1, style.spaceBefore),])
-            tableData.append([para,])
+        lastTexts = []
+        for texts, pageNumbers in _tempEntries:
+            texts = list(texts)
+            i, diff = listdiff(lastTexts, texts)
+            if diff:
+                lastTexts = texts
+                texts = texts[i:]
+            texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (texts[-1], ', '.join(map(str, pageNumbers)))
+            for text in texts:
+                style = self.getLevelStyle(i)
+                para = Paragraph(text, style)
+                if style.spaceBefore:
+                    tableData.append([Spacer(1, style.spaceBefore),])
+                tableData.append([para,])
+                i += 1
         self._flowable = Table(tableData, colWidths=[availWidth], style=self.tableStyle)
 
     def wrap(self, availWidth, availHeight):
@@ -343,40 +352,69 @@ class SimpleIndex(IndexingFlowable):
             if not ocanv:
                 del t.canv
 
+    def getLevelStyle(self, n):
+        '''Returns the style for level n, generating and caching styles on demand if not present.'''
+        if not hasattr(self.textStyle, '__iter__'):
+            self.textStyle = [self.textStyle]
+        try:
+            return self.textStyle[n]
+        except IndexError:
+            self.textStyle = list(self.textStyle)
+            prevstyle = self.getLevelStyle(n-1)
+            self.textStyle.append(ParagraphStyle(
+                    name='%s-%d-indented' % (prevstyle.name, n),
+                    parent=prevstyle,
+                    firstLineIndent = prevstyle.firstLineIndent+n*.1*cm,
+                    leftIndent = prevstyle.leftIndent+n*.1*cm))
+            return self.textStyle[n]
+
 class AlphabeticIndex(SimpleIndex):
     
     def _build(self,availWidth,availHeight):
-        if not self._lastEntries:
-            if self._entries:
-                _tempEntries = self._entries.items()
-            else:
-                _tempEntries = [('Placeholder for index',[0,1,2])]
-        else:
-            _tempEntries = self._lastEntries.items()
-
-        _tempEntries.sort(cmp=lambda a,b: cmp(a[0].upper(), b[0].upper()))
+        _tempEntries = self._getlastEntries()
+        _tempEntries.sort(cmp=lambda a,b: cmp([x.upper() for x in a[0]], [x.upper() for x in b[0]]))
 
         def drawIndexEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
-            style, _ = self.textStyle
+            style = self.getLevelStyle(1)
             drawPageNumbers(canvas, style, label, availWidth, availHeight, self.dot)
         self.canv.drawIndexEntryEnd = drawIndexEntryEnd
 
-        tableData = []
         alpha = ''
-        for text, pageNumbers in _tempEntries:
-            style, alphaStyle = self.textStyle
-            nalpha = text[0].upper()
+        tableData = []
+        lastTexts = []
+        for texts, pageNumbers in _tempEntries:
+            texts = list(texts)
+            # Alpha
+            alphaStyle = self.getLevelStyle(0)
+            nalpha = texts[0][0].upper()
             if alpha != nalpha:
                 alpha = nalpha
                 tableData.append([Spacer(1, alphaStyle.spaceBefore),])
                 tableData.append([Paragraph(alpha, alphaStyle),])
                 tableData.append([Spacer(1, alphaStyle.spaceAfter),])
-            para = Paragraph('%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (text, ', '.join(map(str, pageNumbers))), style)
-            if style.spaceBefore:
-                tableData.append([Spacer(1, style.spaceBefore),])
-            tableData.append([para,])
+
+            i, diff = listdiff(lastTexts, texts)
+            if diff:
+                lastTexts = texts
+                texts = texts[i:]
+            texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (texts[-1], ', '.join(map(str, pageNumbers)))
+            for text in texts:
+                style = self.getLevelStyle(i+1)
+                para = Paragraph(text, style)
+                if style.spaceBefore:
+                    tableData.append([Spacer(1, style.spaceBefore),])
+                tableData.append([para,])
+                i += 1
+
         self._flowable = Table(tableData, colWidths=[availWidth], style=self.tableStyle)
+
+def listdiff(l1, l2):
+    m = min(len(l1), len(l2))
+    for i in range(m):
+        if l1[i] != l2[i]:
+            return i, l2[i:]
+    return m, l2[m:]
 
 class ReferenceText(IndexingFlowable):
     """Fakery to illustrate how a reference would work if we could
