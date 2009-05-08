@@ -731,12 +731,12 @@ class PDFStream:
     __PDFObject__ = True
     ### compression stuff not implemented yet
     __RefOnly__ = 1 # must be at top level
-    def __init__(self, dictionary=None, content=None):
+    def __init__(self, dictionary=None, content=None, filters=None):
         if dictionary is None:
             dictionary = PDFDictionary()
         self.dictionary = dictionary
         self.content = content
-        self.filters = None
+        self.filters = filters
     def format(self, document):
         dictionary = self.dictionary
         # copy it for modification
@@ -797,6 +797,7 @@ n 72.00 72.00 432.00 648.00 re B*
 class PDFArray:
     __PDFObject__ = True
     multiline = LongFormat
+    _ZLIST = list(9*' ')+[LINEEND]
     def __init__(self, sequence):
         self.sequence = list(sequence)
     def References(self, document):
@@ -807,19 +808,21 @@ class PDFArray:
         if self.multiline:
             L = IND.join(L)
         else:
-            # break up every 10 elements anyway
-            breakline = LINEEND+" "
-            for i in xrange(10, len(L), 10):
-                L.insert(i,breakline)
-            L = ' '.join(L)
+            n=len(L)
+            if n>10:
+                # break up every 10 elements anyway
+                m,r = divmod(n,10)
+                L = ''.join([l+z for l,z in zip(L,m*self._ZLIST+list(r*' '))])
+                L = L.strip()
+            else:
+                L = ' '.join(L)
         return "[ %s ]" % L
 
-INDIRECTOBFMT = ("%(n)s %(v)s obj%(LINEEND)s"
-                 "%(content)s" "%(LINEEND)s"
-                 "endobj" "%(LINEEND)s")
+class PDFArrayCompact(PDFArray):
+    multiline=False
 
+INDIRECTOBFMT = "%(n)s %(v)s obj%(LINEEND)s%(content)s%(LINEEND)sendobj%(LINEEND)s"
 class PDFIndirectObject:
-    __PDFObject__ = True
     __RefOnly__ = 1
     def __init__(self, name, content):
         self.name = name
@@ -2121,6 +2124,55 @@ class PDFImageXObject:
         if self.mask: dict["Mask"] = PDFArray(self.mask)
         if getattr(self,'smask',None): dict["SMask"] = self.smask
         return S.format(document)
+
+class PDFSeparationCMYKColorSpace:
+    __PDFObject__ = True
+    def __init__(self, cmyk):
+        from reportlab.lib.colors import CMYKColor
+        if not isinstance(cmyk,CMYKColor):
+            raise ValueError('%s needs a CMYKColor argument' % self.__class__.__name__)
+        elif not cmyk.spotName:
+            raise ValueError('%s needs a CMYKColor argument with a spotName' % self.__class__.__name__)
+        self.cmyk = cmyk
+
+    def _makeFuncPS(self):
+        '''create the postscript code for the tint transfer function
+        effectively this is tint*c, tint*y, ... tint*k'''
+        R = [].append
+        for i,v in enumerate(self.cmyk.cmyk()):
+            v=float(v)
+            if i==3:
+                if v==0.0:
+                    R('pop')
+                    R('0.0')
+                else:
+                    R(str(v))
+                    R('mul')
+            else:
+                if v==0:
+                    R('0.0')
+                else:
+                    R('dup')
+                    R(str(v))
+                    R('mul')
+                R('exch')
+        return '{%s}' % (' '.join(R.__self__))
+
+    def format(self, document):
+        return PDFArrayCompact((
+                    PDFName('Separation'),
+                    PDFName(self.cmyk.spotName),
+                    PDFName('DeviceCMYK'),
+                    PDFStream(
+                        dictionary=PDFDictionary(dict(
+                            FunctionType=4,
+                            Domain=PDFArrayCompact((0,1)),
+                            Range=PDFArrayCompact((0,1,0,1,0,1,0,1))
+                            )),
+                        content=self._makeFuncPS(),
+                        filters=None,#[PDFBase85Encode, PDFZCompress],
+                        )
+                    )).format(document)
 
 if __name__=="__main__":
     print "There is no script interpretation for pdfdoc."
