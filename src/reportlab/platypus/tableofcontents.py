@@ -198,7 +198,10 @@ class TableOfContents(IndexingFlowable):
             '''Callback to draw dots and page numbers after each entry.'''
             page, level = [ int(x) for x in label.split(',') ]
             style = self.levelStyles[level]
-            dot = ' . ' if self.dotsMinLevel >= 0 and level >= self.dotsMinLevel else ''
+            if self.dotsMinLevel >= 0 and level >= self.dotsMinLevel:
+                dot = ' . ' 
+            else: 
+                dot = ''
             drawPageNumbers(canvas, style, str(page), availWidth, availHeight, dot)
         self.canv.drawTOCEntryEnd = drawTOCEntryEnd
 
