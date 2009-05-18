@@ -97,15 +97,14 @@ def drawPageNumbers(canvas, style, pagestr, availWidth, availHeight, dot=' . '):
 delta = 1*cm
 epsilon = 0.5*cm
 
-defaultLevelStyles = []
-for x, n in enumerate(('Zero', 'One', 'Two', 'Three', 'Four')):
-    s = ParagraphStyle(name='Level' + n,
-                   fontName='Times-Roman',
-                   fontSize=10,
-                   leading=11,
-                   firstLineIndent = x*delta,
-                   leftIndent = x*delta + epsilon)
-    defaultLevelStyles.append(s)
+defaultLevelStyles = [
+    ParagraphStyle(
+        name='Level 0',
+        fontName='Times-Roman',
+        fontSize=10,
+        leading=11,
+        firstLineIndent = 0,
+        leftIndent = epsilon)]
 
 defaultTableStyle = \
     TableStyle([
@@ -157,6 +156,18 @@ class TableOfContents(IndexingFlowable):
     def clearEntries(self):
         self._entries = []
 
+    def getLevelStyle(self, n):
+        '''Returns the style for level n, generating and caching styles on demand if not present.'''
+        try:
+            return self.levelStyles[n]
+        except IndexError:
+            prevstyle = self.getLevelStyle(n-1)
+            self.levelStyles.append(ParagraphStyle(
+                    name='%s-%d-indented' % (prevstyle.name, n),
+                    parent=prevstyle,
+                    firstLineIndent = prevstyle.firstLineIndent+delta,
+                    leftIndent = prevstyle.leftIndent+delta))
+            return self.levelStyles[n]
 
     def addEntry(self, level, text, pageNum, key=None):
         """Adds one entry to the table of contents.
@@ -165,10 +176,6 @@ class TableOfContents(IndexingFlowable):
         Requires that enough styles are defined."""
 
         assert type(level) == type(1), "Level must be an integer"
-        assert level < len(self.levelStyles), \
-               "Table of contents must have a style defined " \
-               "for paragraph level %d before you add an entry" % level
-
         self._entries.append((level, text, pageNum, key))
 
 
@@ -197,7 +204,7 @@ class TableOfContents(IndexingFlowable):
         def drawTOCEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
             page, level = [ int(x) for x in label.split(',') ]
-            style = self.levelStyles[level]
+            style = self.getLevelStyle(level)
             if self.dotsMinLevel >= 0 and level >= self.dotsMinLevel:
                 dot = ' . ' 
             else: 
@@ -207,7 +214,7 @@ class TableOfContents(IndexingFlowable):
 
         tableData = []
         for (level, text, pageNum, key) in _tempEntries:
-            style = self.levelStyles[level]
+            style = self.getLevelStyle(level)
             if key:
                 text = '<a href="#%s">%s</a>' % (key, text)
             para = Paragraph('%s<onDraw name="drawTOCEntryEnd" label="%d,%d"/>' % (text, pageNum, level), style)
@@ -367,8 +374,8 @@ class SimpleIndex(IndexingFlowable):
             self.textStyle.append(ParagraphStyle(
                     name='%s-%d-indented' % (prevstyle.name, n),
                     parent=prevstyle,
-                    firstLineIndent = prevstyle.firstLineIndent+n*.1*cm,
-                    leftIndent = prevstyle.leftIndent+n*.1*cm))
+                    firstLineIndent = prevstyle.firstLineIndent+.2*cm,
+                    leftIndent = prevstyle.leftIndent+.2*cm))
             return self.textStyle[n]
 
 class AlphabeticIndex(SimpleIndex):
