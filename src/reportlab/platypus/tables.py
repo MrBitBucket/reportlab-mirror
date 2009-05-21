@@ -254,7 +254,7 @@ class Table(Flowable):
             return
 
         # we need a cleanup pass to ensure data is strings - non-unicode and non-null
-        self._cellvalues = self.normalizeData(data)
+        self._cellvalues = data = self.normalizeData(data)
         if not _seqCW: colWidths = ncols*[colWidths]
         elif len(colWidths)!=ncols:
             if rl_config.allowShortTableRows and isinstance(colWidths,list):
