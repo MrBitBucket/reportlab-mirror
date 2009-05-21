@@ -254,7 +254,7 @@ class Table(Flowable):
             return
 
         # we need a cleanup pass to ensure data is strings - non-unicode and non-null
-        self._cellvalues = self.normalizeData(data)
+        self._cellvalues = data = self.normalizeData(data)
         if not _seqCW: colWidths = ncols*[colWidths]
         elif len(colWidths)!=ncols:
             if rl_config.allowShortTableRows and isinstance(colWidths,list):
@@ -323,7 +323,7 @@ class Table(Flowable):
         for row in data:
             outRow = [normCell(cell) for cell in row]
             outData.append(outRow)
-        from pprint import pprint as pp
+        #from pprint import pprint as pp
         #pp(outData)
         return outData
 
