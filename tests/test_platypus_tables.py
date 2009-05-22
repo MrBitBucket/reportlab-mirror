@@ -79,8 +79,8 @@ def run():
     lst.append(Table([['One cell of plain text']], style=tsGrid, colWidths=[200]))
     
     lst.append(Spacer(0,10))
-    lst.append(Paragraph("Now we make a table with just one cell containing a para...note how it sits high.  Also (thanks to Marius G) diacritics sit OUTSIDE the top of the box.", styNormal))
-    lst.append(Table([[Paragraph('One cell containing a paragraph.  &#196;&#201;', styBackground)]], style=tsGrid, colWidths=[200]))
+    lst.append(Paragraph("Now we make a table with just one cell containing a para...note how it sits high.  Also (thanks to Marius G) diacritics and some symbols sit OUTSIDE the top of the box.", styNormal))
+    lst.append(Table([[Paragraph('One cell containing a paragraph.  &#196;&#201;&#8747;', styBackground)]], style=tsGrid, colWidths=[200]))
 
     lst.append(Spacer(0,10))
     lst.append(Paragraph("Paragraphs jumped up post 2.1.  Ideally they should align the same.", styNormal))
