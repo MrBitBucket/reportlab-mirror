@@ -1258,6 +1258,9 @@ class Paragraph(Flowable):
         paragraphs without spaces e.g. Japanese; wrapping
         algorithm will go infinite."""
 
+        #AR 20090522 - do we do paragraphs the wikipedia way or the old way?
+        VERTICAL_POSITION_USING_FONT_METRICS = False
+
         #stash the key facts locally for speed
         canvas = self.canv
         style = self.style
@@ -1326,7 +1329,10 @@ class Paragraph(Flowable):
                 elif self.style.alignment == TA_JUSTIFY:
                     dpl = _justifyDrawParaLine
                 f = blPara
-                cur_y = self.height - getattr(f,'ascent',f.fontSize)    #TODO fix XPreformatted to remove this hack
+                if VERTICAL_POSITION_USING_FONT_METRICS:
+                    cur_y = self.height - getattr(f,'ascent',f.fontSize) 
+                else:
+                    cur_y = self.height - f.fontSize    #getattr(f,'ascent',f.fontSize)    #TODO fix XPreformatted to remove this hack
                 if bulletText:
                     offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
 
@@ -1378,7 +1384,10 @@ class Paragraph(Flowable):
                         dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
             else:
                 f = lines[0]
-                cur_y = self.height - getattr(f,'ascent',f.fontSize)    #TODO fix XPreformatted to remove this hack
+                if VERTICAL_POSITION_USING_FONT_METRICS:
+                    cur_y = self.height - getattr(f,'ascent',f.fontSize) 
+                else:
+                    cur_y = self.height - f.fontSize
                 # default?
                 dpl = _leftDrawParaLineX
                 if bulletText:

@@ -43,14 +43,16 @@ def makeStyles():
 def run():
     doc = SimpleDocTemplate(outputfile('test_platypus_tables.pdf'), pagesize=(8.5*inch, 11*inch), showBoundary=1)
     lst = []
-    
+    from reportlab import Version
     styNormal = styleSheet['Normal']
     styBackground = ParagraphStyle('background', parent=styNormal, backColor=colors.pink)
     styH1 = styleSheet['Heading1']
     lst.append(Paragraph("First, a test of how tables align their content...", styH1))
-    lst.append(Paragraph("""In release 2.3, cells with plain text position their
+    lst.append(Paragraph("""Generated with version %s""" % Version,
+                        styNormal))
+    lst.append(Paragraph("""In release 2.3, cells with plain text positioned their
                          text differently to cells with Paragraphs using the
-                         same font. """,
+                         same font.  Hopefully now they are back on the same baseline""",
                         styNormal))
     ts1 = TableStyle([
                 ('ALIGN', (0,0), (-1,0), 'RIGHT'),
@@ -60,10 +62,10 @@ def run():
                     ])
     t1 = Table([
         ('plain text','plain text','shortpara','plain text', 'long para'),
-        ('Text','more text', Paragraph('Up we go!', styBackground), 'Back to baseline', Paragraph('Short para again', styBackground)),
+        ('Text','more text', Paragraph('Is this para level?', styBackground), 'Back to text', Paragraph('Short para again', styBackground)),
         ('Text',
             'more text',
-            Paragraph('Up we go!', styBackground),
+            Paragraph('Is this level?', styBackground),
             'This is plain\ntext with line breaks\nto compare against\nthe para on right',
             Paragraph('Long paragraph we expect to wrap over several lines accurately', styBackground)),
         
@@ -79,7 +81,7 @@ def run():
     lst.append(Table([['One cell of plain text']], style=tsGrid, colWidths=[200]))
     
     lst.append(Spacer(0,10))
-    lst.append(Paragraph("Now we make a table with just one cell containing a para...note how it sits high.  Also (thanks to Marius G) diacritics and some symbols sit OUTSIDE the top of the box.", styNormal))
+    lst.append(Paragraph("Now we make a table with just one cell containing a para...should be same position.  Note that the overall bounding box is an approximation and lies - it always did.", styNormal))
     lst.append(Table([[Paragraph('One cell containing a paragraph.  &#196;&#201;&#8747;', styBackground)]], style=tsGrid, colWidths=[200]))
 
     lst.append(Spacer(0,10))
