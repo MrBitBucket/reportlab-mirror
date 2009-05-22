@@ -45,6 +45,7 @@ def run():
     lst = []
     
     styNormal = styleSheet['Normal']
+    styBackground = ParagraphStyle('background', parent=styNormal, backColor=colors.pink)
     styH1 = styleSheet['Heading1']
     lst.append(Paragraph("First, a test of how tables align their content...", styH1))
     lst.append(Paragraph("""In release 2.3, cells with plain text position their
@@ -59,8 +60,12 @@ def run():
                     ])
     t1 = Table([
         ('plain text','plain text','shortpara','plain text', 'long para'),
-        ('Text','more text', Paragraph('Up we go!', styNormal), 'Back to baseline', Paragraph('Short para again', styNormal)),
-        ('Text','more text', Paragraph('Up we go!', styNormal), 'This is plain\ntext with line breaks\nto compare against\nthe para on right', Paragraph('Long paragraph we expect to wrap over several lines', styNormal)),
+        ('Text','more text', Paragraph('Up we go!', styBackground), 'Back to baseline', Paragraph('Short para again', styBackground)),
+        ('Text',
+            'more text',
+            Paragraph('Up we go!', styBackground),
+            'This is plain\ntext with line breaks\nto compare against\nthe para on right',
+            Paragraph('Long paragraph we expect to wrap over several lines accurately', styBackground)),
         
         ])
     t1.setStyle(ts1)
@@ -74,8 +79,8 @@ def run():
     lst.append(Table([['One cell of plain text']], style=tsGrid, colWidths=[200]))
     
     lst.append(Spacer(0,10))
-    lst.append(Paragraph("Now we make a table with just one cell containing a para...note how it sits high.", styNormal))
-    lst.append(Table([[Paragraph('One cell containing a paragraph', styNormal)]], style=tsGrid, colWidths=[200]))
+    lst.append(Paragraph("Now we make a table with just one cell containing a para...note how it sits high.  Also (thanks to Marius G) diacritics sit OUTSIDE the top of the box.", styNormal))
+    lst.append(Table([[Paragraph('One cell containing a paragraph.  &#196;&#201;', styBackground)]], style=tsGrid, colWidths=[200]))
 
     lst.append(Spacer(0,10))
     lst.append(Paragraph("Paragraphs jumped up post 2.1.  Ideally they should align the same.", styNormal))
