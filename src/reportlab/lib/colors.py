@@ -51,6 +51,13 @@ class Color:
     def hexval(self):
         return '0x%02x%02x%02x' % self.bitmap_rgb()
 
+    def clone(self,**kwds):
+        '''copy then change values in kwds'''
+        c = self.__class__()
+        c.__dict__ = self.__dict__.copy()
+        c.__dict__.update(kwds)
+        return c
+
 class CMYKColor(Color):
     """This represents colors using the CMYK (cyan, magenta, yellow, black)
     model commonly used in professional printing.  This is implemented
