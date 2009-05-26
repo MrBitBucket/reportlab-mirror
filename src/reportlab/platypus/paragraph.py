@@ -706,24 +706,29 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
         else:
             U.append(cjkU(text,f,encoding))
     lines = []
-    widthUsed = lineStartPos = 0
+    i = widthUsed = lineStartPos = 0
     maxWidth = maxWidths[0]
-    for i, u in enumerate(U):
+    nU = len(U)
+    while i<nU:
+        u = U[i]
+        i += 1
         w = u.width
         widthUsed += w
         lineBreak = hasattr(u.frag,'lineBreak')
         endLine = (widthUsed>maxWidth + _FUZZ and widthUsed>0) or lineBreak
         if endLine:
-            if lineBreak: continue
-            extraSpace = maxWidth - widthUsed + w
-            #This is the most important of the Japanese typography rules.
-            #if next character cannot start a line, wrap it up to this line so it hangs
-            #in the right margin. We won't do two or more though - that's unlikely and
-            #would result in growing ugliness.
-            nextChar = U[i]
-            if nextChar in ALL_CANNOT_START:
-                extraSpace -= w
-                i += 1
+            extraSpace = maxWidth - widthUsed
+            if not lineBreak:
+                extraSpace += w
+                #This is the most important of the Japanese typography rules.
+                #if next character cannot start a line, wrap it up to this line so it hangs
+                #in the right margin. We won't do two or more though - that's unlikely and
+                #would result in growing ugliness.
+                if i<nU:
+                    nextChar = U[i]
+                    if nextChar in ALL_CANNOT_START:
+                        extraSpace -= nextChar.width
+                        i += 1
             lines.append(makeCJKParaLine(U[lineStartPos:i],extraSpace,calcBounds))
             try:
                 maxWidth = maxWidths[len(lines)]
@@ -732,7 +737,7 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
 
             lineStartPos = i
             widthUsed = w
-            i -= 1
+
     #any characters left?
     if widthUsed > 0:
         lines.append(makeCJKParaLine(U[lineStartPos:],maxWidth-widthUsed,calcBounds))
