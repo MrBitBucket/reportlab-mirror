@@ -38,6 +38,7 @@ imageReaderFlags=0                                  #attempt to convert images i
                                                     #if imageReaderFlags&2 then attempt autoclosing of those files
                                                     #if imageReaderFlags&4 then cache data 
                                                     #if imageReaderFlags==-1 then use Ralf Schmitt's re-opening approach
+paraFontSizeHeightOffset=   1                       #if true paragraphs start at height-fontSize
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -163,7 +164,8 @@ odbc_driver
 platypus_link_underline
 canvas_basefontname
 allowShortTableRows
-imageReaderFlags'''.split()
+imageReaderFlags
+paraFontSizeHeightOffset'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage

@@ -17,6 +17,7 @@ from reportlab.lib.textsplit import wordSplit, ALL_CANNOT_START
 from copy import deepcopy
 from reportlab.lib.abag import ABag
 from reportlab.rl_config import platypus_link_underline 
+from reportlab import rl_config
 import re
 
 #on UTF8 branch, split and strip must be unicode-safe!
@@ -1263,9 +1264,6 @@ class Paragraph(Flowable):
         paragraphs without spaces e.g. Japanese; wrapping
         algorithm will go infinite."""
 
-        #AR 20090522 - do we do paragraphs the wikipedia way or the old way?
-        VERTICAL_POSITION_USING_FONT_METRICS = False
-
         #stash the key facts locally for speed
         canvas = self.canv
         style = self.style
@@ -1334,10 +1332,10 @@ class Paragraph(Flowable):
                 elif self.style.alignment == TA_JUSTIFY:
                     dpl = _justifyDrawParaLine
                 f = blPara
-                if VERTICAL_POSITION_USING_FONT_METRICS:
-                    cur_y = self.height - getattr(f,'ascent',f.fontSize) 
+                if rl_config.paraFontSizeHeightOffset:
+                    cur_y = self.height - f.fontSize
                 else:
-                    cur_y = self.height - f.fontSize    #getattr(f,'ascent',f.fontSize)    #TODO fix XPreformatted to remove this hack
+                    cur_y = self.height - getattr(f,'ascent',f.fontSize) 
                 if bulletText:
                     offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
 
@@ -1389,10 +1387,10 @@ class Paragraph(Flowable):
                         dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
             else:
                 f = lines[0]
-                if VERTICAL_POSITION_USING_FONT_METRICS:
-                    cur_y = self.height - getattr(f,'ascent',f.fontSize) 
-                else:
+                if rl_config.paraFontSizeHeightOffset:
                     cur_y = self.height - f.fontSize
+                else:
+                    cur_y = self.height - getattr(f,'ascent',f.fontSize) 
                 # default?
                 dpl = _leftDrawParaLineX
                 if bulletText:
