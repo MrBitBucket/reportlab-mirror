@@ -932,13 +932,18 @@ class PdfgenTestCase(unittest.TestCase):
         c.save()    
 
     def test2(self):
-        c=canvas.Canvas('test_pdfgen_autocropmarks.pdf')
-        c._cropMarks=True
+        c=canvas.Canvas('test_pdfgen_autocropmarks.pdf',cropMarks=True)
         c.saveState()
         c.setStrokeColor((1,0,0))
         c.rect(0,0,c._pagesize[0],c._pagesize[1],stroke=1)
         c.restoreState()
         c.drawString(72,c._pagesize[1]-72,'Auto Crop Marks')
+        c.showPage()
+        c.saveState()
+        c.setStrokeColor((1,0,0))
+        c.rect(0,0,c._pagesize[0],c._pagesize[1],stroke=1)
+        c.restoreState()
+        c.drawString(72,c._pagesize[1]-72,'Auto Crop Marks Another Page')
         c.showPage()
         c.save()
 
