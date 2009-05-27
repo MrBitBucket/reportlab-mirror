@@ -462,14 +462,13 @@ class CondPageBreak(Spacer):
 def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
     '''return max width, required height for a list of flowables F'''
     doct = getattr(canv,'_doctemplate',None)
-    if doct:
+    cframe = getattr(doct,'frame',None)
+    if cframe:
         from reportlab.platypus.doctemplate import _addGeneratedContent
-        doct_frame = doct.frame
+        doct_frame = cframe
         cframe = doct.frame = deepcopy(doct_frame)
         cframe._generated_content = None
         del cframe._generated_content
-    else:
-        cframe = None
     try:
         W = 0
         H = 0
@@ -498,7 +497,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
         if obj is not None: obj._spaceAfter = pS
         return W, H-pS
     finally:
-        if doct:
+        if cframe:
             doct.frame = doct_frame
 
 def _flowableSublist(V):
