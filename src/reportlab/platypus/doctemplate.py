@@ -565,7 +565,7 @@ class BaseDocTemplate:
                         c.append(t)
                         found = 1
                 if not found:
-                    raise ValueError("Cannot find page template called %s" % templateName)
+                    raise ValueError("Cannot find page template called %s" % ptn)
             if not c:
                 raise ValueError("No valid page templates in cycle")
             elif c._restart>len(c):
