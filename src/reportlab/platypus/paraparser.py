@@ -26,6 +26,8 @@ sizeDelta = 2       # amount to reduce font size by for super and sub script
 subFraction = 0.5   # fraction of font size that a sub script should be lowered
 superFraction = 0.5 # fraction of font size that a super script should be raised
 
+DEFAULT_INDEX_NAME='_indexAdd'
+
 
 def _convnum(s, unit=1):
     if s[0] in ['+','-']:
@@ -170,6 +172,10 @@ _imgAttrMap = {
                 'width': ('width',_num),
                 'height':('height',_num),
                 'valign':('valign',_valignpc),
+                }
+_indexAttrMap = {
+                'name': ('name',None),
+                'item': ('item',None),
                 }
 
 def _addAttributeNames(m):
@@ -496,7 +502,8 @@ def _greekConvert(data):
 #       < sub > < /sub > - subscript
 #       <font name=fontfamily/fontname color=colorname size=float>
 #       < bullet > </bullet> - bullet text (at head of para only)
-#       <onDraw name=callable label="a label">
+#       <onDraw name=callable label="a label"/>
+#       <index [name="callablecanvasattribute"] label="a label"/>
 #       <link>link text</link>
 #           attributes of links 
 #               size/fontSize=num
@@ -883,9 +890,25 @@ class ParaParser(xmllib.XMLParser):
         self._push(cbDefn=defn)
         self.handle_data('')
         self._pop()
-
     end_onDraw=end_seq
 
+    def start_index(self,attr):
+        attr=self.getAttributes(attr,_indexAttrMap)
+        defn = ABag()
+        if attr.has_key('item'):
+            defn.label = attr['item']
+        else:
+            self._syntax_error('<index> needs at least an item attribute')
+        if attr.has_key('name'):
+            name = attr['name']
+        else:
+            name = DEFAULT_INDEX_NAME
+        defn.name = name
+        defn.kind='index'
+        self._push(cbDefn=defn)
+        self.handle_data('')
+        self._pop()
+    end_index=end_seq
 
     #---------------------------------------------------------------
     def _push(self,**attr):

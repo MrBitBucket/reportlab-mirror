@@ -763,7 +763,8 @@ class Paragraph(Flowable):
         <super> ... </super> - superscript
         <sub> ... </sub> - subscript
         <font name=fontfamily/fontname color=colorname size=float>
-        <onDraw name=callable label="a label">
+        <onDraw name=callable label="a label"/>
+        <index [name="callablecanvasattribute"] label="a label"/>
         <link>link text</link>
         attributes of links
         size/fontSize=num

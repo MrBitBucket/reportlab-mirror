@@ -65,14 +65,7 @@ except:
         def add(self,x):
             if x not in self:
                 list.append(self,x)
-    
-def _getArgs(*args,**kw):
-    return args, kw
-    
-def _evalArgs(data):
-    if data[0]!='(': data = '(%s)' % data
-    return eval('_getArgs'+data)
-    
+
 def drawPageNumbers(canvas, style, pages, availWidth, availHeight, dot=' . '):
     '''
     Draws pagestr on the canvas using the given style.
@@ -105,7 +98,7 @@ def drawPageNumbers(canvas, style, pages, availWidth, availHeight, dot=' . '):
     tx.setFillColor(style.textColor)
     tx.textLine(text)
     canvas.drawText(tx)
-   
+
     commaw = stringWidth(', ', style.fontName, style.fontSize)
     for p, key in pages:
         if not key:
@@ -231,8 +224,8 @@ class TableOfContents(IndexingFlowable):
             page, level = [ int(x) for x in label.split(',') ]
             style = self.getLevelStyle(level)
             if self.dotsMinLevel >= 0 and level >= self.dotsMinLevel:
-                dot = ' . ' 
-            else: 
+                dot = ' . '
+            else:
                 dot = ''
             drawPageNumbers(canvas, style, [(page, None)], availWidth, availHeight, dot)
         self.canv.drawTOCEntryEnd = drawTOCEntryEnd
@@ -268,7 +261,7 @@ class TableOfContents(IndexingFlowable):
         work to the embedded table object.
         """
         self._table.drawOn(canvas, x, y, _sW)
-        
+
 def makeTuple(x):
     if hasattr(x, '__iter__'):
         return tuple(x)
@@ -285,8 +278,8 @@ class SimpleIndex(IndexingFlowable):
         self._lastEntries = {}
         self._flowable = None
         self.setup(**kwargs)
-        
-    def setup(self, style=None, dot=None, tableStyle=None, headers=True):
+
+    def setup(self, style=None, dot=None, tableStyle=None, headers=True, name=None):
         if style is None:
             style = ParagraphStyle(name='index',
                                         fontName='Times-Roman',
@@ -295,30 +288,30 @@ class SimpleIndex(IndexingFlowable):
         self.tableStyle = tableStyle or defaultTableStyle
         self.dot = dot
         self.headers = headers
-    
+        if name is None:
+            from reportlab.platypus.paraparser import DEFAULT_INDEX_NAME as name
+        self.name = name
+
+    def __call__(self,canv,kind,label):
+        label = unquote(label)
+        try:
+            label = eval(label,{})
+        except (NameError, SyntaxError):
+            label = makeTuple(label)
+        key = 'idx_%s_p_%s' % (','.join(label), canv.getPageNumber())
+
+        info = canv._curr_tx_info
+        canv.bookmarkHorizontal(key, info['cur_x'], info['cur_y'] + info['leading'])
+        self.addEntry(label, canv.getPageNumber(), key)
+
     def getCanvasMaker(self, canvasmaker=canvas.Canvas):
-        def cb(canv,kind,label):
-            label = unquote(label)
-            try:
-                args, kwargs = _evalArgs(label)
-                if kwargs:
-                    raise SyntaxError()
-            except (NameError, SyntaxError):
-                pass
-            else:
-                label = args
-            key = 'idx_%s_p_%s' % (','.join(label), canv.getPageNumber())
-            
-            info = canv._curr_tx_info
-            canv.bookmarkHorizontal(key, info['cur_x'], info['cur_y'] + info['leading'])
-            self.addEntry(label, canv.getPageNumber(), key)
-        
+
         def newcanvasmaker(*args, **kwargs):
             from reportlab.pdfgen import canvas
             c = canvasmaker(*args, **kwargs)
-            c._indexAdd = cb
+            setattr(c,self.name,self)
             return c
-        
+
         return newcanvasmaker
 
     def isIndexing(self):
@@ -363,7 +356,7 @@ class SimpleIndex(IndexingFlowable):
                 return self._entries.items()
             return dummy
         return self._lastEntries.items()
-        
+
     def _build(self,availWidth,availHeight):
         _tempEntries = self._getlastEntries()
         _tempEntries.sort(cmp=lambda a,b: cmp([x.upper() for x in a[0]], [x.upper() for x in b[0]]))
