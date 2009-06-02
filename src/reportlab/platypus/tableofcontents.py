@@ -279,11 +279,14 @@ class SimpleIndex(IndexingFlowable):
 
     Entries have a string key, and appear with a page number on
     the right.  Prototype for more sophisticated multi-level index."""
-    def __init__(self, style=None, dot=None, tableStyle=None):
+    def __init__(self, **kwargs):
         #keep stuff in a dictionary while building
         self._entries = {}
         self._lastEntries = {}
         self._flowable = None
+        self.setup(**kwargs)
+        
+    def setup(self, style=None, dot=None, tableStyle=None, headers=True):
         if style is None:
             style = ParagraphStyle(name='index',
                                         fontName='Times-Roman',
@@ -291,6 +294,7 @@ class SimpleIndex(IndexingFlowable):
         self.textStyle = style
         self.tableStyle = tableStyle or defaultTableStyle
         self.dot = dot
+        self.headers = headers
     
     def getCanvasMaker(self, canvasmaker=canvas.Canvas):
         def cb(canv,kind,label):
@@ -359,34 +363,46 @@ class SimpleIndex(IndexingFlowable):
                 return self._entries.items()
             return dummy
         return self._lastEntries.items()
-    
+        
     def _build(self,availWidth,availHeight):
         _tempEntries = self._getlastEntries()
-        _tempEntries.sort(cmp=lambda a,b: cmp([ x.upper() for x in a[0]], [ x.upper() for x in b[0]]))
+        _tempEntries.sort(cmp=lambda a,b: cmp([x.upper() for x in a[0]], [x.upper() for x in b[0]]))
+        leveloffset = self.headers and 1 or 0
 
         def drawIndexEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
-            style = self.getLevelStyle(0)
+            style = self.getLevelStyle(leveloffset)
             pages = eval(unquote(label))
             drawPageNumbers(canvas, style, pages, availWidth, availHeight, self.dot)
         self.canv.drawIndexEntryEnd = drawIndexEntryEnd
 
+        alpha = ''
         tableData = []
         lastTexts = []
         for texts, pageNumbers in _tempEntries:
             texts = list(texts)
+            if self.headers:
+                alphaStyle = self.getLevelStyle(0)
+                nalpha = texts[0][0].upper()
+                if alpha != nalpha:
+                    alpha = nalpha
+                    tableData.append([Spacer(1, alphaStyle.spaceBefore),])
+                    tableData.append([Paragraph(alpha, alphaStyle),])
+                    tableData.append([Spacer(1, alphaStyle.spaceAfter),])
+
             i, diff = listdiff(lastTexts, texts)
             if diff:
                 lastTexts = texts
                 texts = texts[i:]
             texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label=%s/>' % (texts[-1], quoteattr(repr(list(pageNumbers))))
             for text in texts:
-                style = self.getLevelStyle(i)
+                style = self.getLevelStyle(i+leveloffset)
                 para = Paragraph(text, style)
                 if style.spaceBefore:
                     tableData.append([Spacer(1, style.spaceBefore),])
                 tableData.append([para,])
                 i += 1
+
         self._flowable = Table(tableData, colWidths=[availWidth], style=self.tableStyle)
 
     def wrap(self, availWidth, availHeight):
@@ -429,47 +445,7 @@ class SimpleIndex(IndexingFlowable):
                     leftIndent = prevstyle.leftIndent+.2*cm))
             return self.textStyle[n]
 
-class AlphabeticIndex(SimpleIndex):
-    
-    def _build(self,availWidth,availHeight):
-        _tempEntries = self._getlastEntries()
-        _tempEntries.sort(cmp=lambda a,b: cmp([x.upper() for x in a[0]], [x.upper() for x in b[0]]))
-
-        def drawIndexEntryEnd(canvas, kind, label):
-            '''Callback to draw dots and page numbers after each entry.'''
-            style = self.getLevelStyle(1)
-            pages = eval(unquote(label))
-            drawPageNumbers(canvas, style, pages, availWidth, availHeight, self.dot)
-        self.canv.drawIndexEntryEnd = drawIndexEntryEnd
-
-        alpha = ''
-        tableData = []
-        lastTexts = []
-        for texts, pageNumbers in _tempEntries:
-            texts = list(texts)
-            # Alpha
-            alphaStyle = self.getLevelStyle(0)
-            nalpha = texts[0][0].upper()
-            if alpha != nalpha:
-                alpha = nalpha
-                tableData.append([Spacer(1, alphaStyle.spaceBefore),])
-                tableData.append([Paragraph(alpha, alphaStyle),])
-                tableData.append([Spacer(1, alphaStyle.spaceAfter),])
-
-            i, diff = listdiff(lastTexts, texts)
-            if diff:
-                lastTexts = texts
-                texts = texts[i:]
-            texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label=%s/>' % (texts[-1], quoteattr(repr(list(pageNumbers))))
-            for text in texts:
-                style = self.getLevelStyle(i+1)
-                para = Paragraph(text, style)
-                if style.spaceBefore:
-                    tableData.append([Spacer(1, style.spaceBefore),])
-                tableData.append([para,])
-                i += 1
-
-        self._flowable = Table(tableData, colWidths=[availWidth], style=self.tableStyle)
+AlphabeticIndex =  SimpleIndex
 
 def listdiff(l1, l2):
     m = min(len(l1), len(l2))

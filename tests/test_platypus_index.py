@@ -17,7 +17,7 @@ from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
-from reportlab.platypus.tableofcontents import SimpleIndex, AlphabeticIndex
+from reportlab.platypus.tableofcontents import SimpleIndex
 from reportlab.lib import randomtext
 import re
 from xml.sax.saxutils import quoteattr
@@ -78,8 +78,8 @@ class IndexTestCase(unittest.TestCase):
     def test0(self):
         # Build story.
         
-        for cls in SimpleIndex, AlphabeticIndex:
-            path = outputfile('test_platypus_%s.pdf' % cls.__name__.lower())
+        for headers in False, True:
+            path = outputfile('test_platypus_index%s.pdf' % (headers and '_headers' or ''))
             doc = MyDocTemplate(path)
             story = []
             styleSheet = getSampleStyleSheet()
@@ -87,7 +87,7 @@ class IndexTestCase(unittest.TestCase):
     
             description = '<font color=red>%s</font>' % self.test0.__doc__
             story.append(XPreformatted(description, bt))
-            index = cls(None, ' . ')
+            index = SimpleIndex(dot=' . ', headers=headers)
     
             for i in range(20):
                 words = randomtext.randomText(randomtext.PYTHON, 5).split(' ')
