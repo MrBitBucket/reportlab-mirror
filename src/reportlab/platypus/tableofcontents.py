@@ -52,6 +52,12 @@ from reportlab.platypus.doctemplate import IndexingFlowable
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.flowables import Spacer, Flowable
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfgen import canvas
+from xml.sax.saxutils import escape, quoteattr, unescape
+
+def unquote(txt):
+    return unescape(txt, {"&apos;": "'", "&quot;": '"'})
+
 try:
     set
 except:
@@ -59,14 +65,23 @@ except:
         def add(self,x):
             if x not in self:
                 list.append(self,x)
-
-def drawPageNumbers(canvas, style, pagestr, availWidth, availHeight, dot=' . '):
+    
+def _getArgs(*args,**kw):
+    return args, kw
+    
+def _evalArgs(data):
+    if data[0]!='(': data = '(%s)' % data
+    return eval('_getArgs'+data)
+    
+def drawPageNumbers(canvas, style, pages, availWidth, availHeight, dot=' . '):
     '''
     Draws pagestr on the canvas using the given style.
     If dot is None, pagestr is drawn at the current position in the canvas.
     If dot is a string, pagestr is drawn right-aligned. If the string is not empty,
     the gap is filled with it.
     '''
+    pages.sort(cmp=lambda a,b: cmp(a[0], b[0]))
+    pagestr = ', '.join((str(p) for p, _ in pages))
     x, y = canvas._curr_tx_info['cur_x'], canvas._curr_tx_info['cur_y']
     pagestrw = stringWidth(pagestr, style.fontName, style.fontSize)
     if isinstance(dot, basestring):
@@ -76,10 +91,12 @@ def drawPageNumbers(canvas, style, pagestr, availWidth, availHeight, dot=' . '):
         else:
             dotsn = dotw = 0
         text = '%s%s' % (dotsn * dot, pagestr)
-        newx = availWidth-dotsn*dotw-pagestrw
+        newx = availWidth - dotsn*dotw - pagestrw
+        pagex = availWidth - pagestrw
     elif dot is None:
         text = ',  ' + pagestr
         newx = x
+        pagex = newx
     else:
         raise TypeError('Argument dot should either be None or an instance of basestring.')
 
@@ -88,6 +105,14 @@ def drawPageNumbers(canvas, style, pagestr, availWidth, availHeight, dot=' . '):
     tx.setFillColor(style.textColor)
     tx.textLine(text)
     canvas.drawText(tx)
+   
+    commaw = stringWidth(', ', style.fontName, style.fontSize)
+    for p, key in pages:
+        if not key:
+            continue
+        w = stringWidth(str(p), style.fontName, style.fontSize)
+        canvas.linkRect('', key, (pagex, y, pagex+w, y+style.leading), relative=1)
+        pagex += w + commaw
 
 # Default paragraph styles for tables of contents.
 # (This could also be generated automatically or even
@@ -209,7 +234,7 @@ class TableOfContents(IndexingFlowable):
                 dot = ' . ' 
             else: 
                 dot = ''
-            drawPageNumbers(canvas, style, str(page), availWidth, availHeight, dot)
+            drawPageNumbers(canvas, style, [(page, None)], availWidth, availHeight, dot)
         self.canv.drawTOCEntryEnd = drawTOCEntryEnd
 
         tableData = []
@@ -266,6 +291,31 @@ class SimpleIndex(IndexingFlowable):
         self.textStyle = style
         self.tableStyle = tableStyle or defaultTableStyle
         self.dot = dot
+    
+    def getCanvasMaker(self, canvasmaker=canvas.Canvas):
+        def cb(canv,kind,label):
+            label = unquote(label)
+            try:
+                args, kwargs = _evalArgs(label)
+                if kwargs:
+                    raise SyntaxError()
+            except (NameError, SyntaxError):
+                pass
+            else:
+                label = args
+            key = 'idx_%s_p_%s' % (','.join(label), canv.getPageNumber())
+            
+            info = canv._curr_tx_info
+            canv.bookmarkHorizontal(key, info['cur_x'], info['cur_y'] + info['leading'])
+            self.addEntry(label, canv.getPageNumber(), key)
+        
+        def newcanvasmaker(*args, **kwargs):
+            from reportlab.pdfgen import canvas
+            c = canvasmaker(*args, **kwargs)
+            c._indexAdd = cb
+            return c
+        
+        return newcanvasmaker
 
     def isIndexing(self):
         return 1
@@ -290,9 +340,9 @@ class SimpleIndex(IndexingFlowable):
             (text, pageNum) = stuff
             self.addEntry(text, pageNum)
 
-    def addEntry(self, text, pageNum):
+    def addEntry(self, text, pageNum, key=None):
         """Allows incremental buildup"""
-        self._entries.setdefault(makeTuple(text),set([])).add(pageNum)
+        self._entries.setdefault(makeTuple(text),set([])).add((pageNum, key))
 
     def split(self, availWidth, availHeight):
         """At this stage we do not care about splitting the entries,
@@ -302,7 +352,7 @@ class SimpleIndex(IndexingFlowable):
         """
         return self._flowable.splitOn(self.canv,availWidth, availHeight)
 
-    def _getlastEntries(self, dummy=[(['Placeholder for index'],[0,1,2])]):
+    def _getlastEntries(self, dummy=[(['Placeholder for index'],enumerate((None,)*3))]):
         '''Return the last run's entries!  If there are none, returns dummy.'''
         if not self._lastEntries:
             if self._entries:
@@ -317,7 +367,8 @@ class SimpleIndex(IndexingFlowable):
         def drawIndexEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
             style = self.getLevelStyle(0)
-            drawPageNumbers(canvas, style, label, availWidth, availHeight, self.dot)
+            pages = eval(unquote(label))
+            drawPageNumbers(canvas, style, pages, availWidth, availHeight, self.dot)
         self.canv.drawIndexEntryEnd = drawIndexEntryEnd
 
         tableData = []
@@ -328,7 +379,7 @@ class SimpleIndex(IndexingFlowable):
             if diff:
                 lastTexts = texts
                 texts = texts[i:]
-            texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (texts[-1], ', '.join(map(str, pageNumbers)))
+            texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label=%s/>' % (texts[-1], quoteattr(repr(list(pageNumbers))))
             for text in texts:
                 style = self.getLevelStyle(i)
                 para = Paragraph(text, style)
@@ -387,7 +438,8 @@ class AlphabeticIndex(SimpleIndex):
         def drawIndexEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
             style = self.getLevelStyle(1)
-            drawPageNumbers(canvas, style, label, availWidth, availHeight, self.dot)
+            pages = eval(unquote(label))
+            drawPageNumbers(canvas, style, pages, availWidth, availHeight, self.dot)
         self.canv.drawIndexEntryEnd = drawIndexEntryEnd
 
         alpha = ''
@@ -408,7 +460,7 @@ class AlphabeticIndex(SimpleIndex):
             if diff:
                 lastTexts = texts
                 texts = texts[i:]
-            texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (texts[-1], ', '.join(map(str, pageNumbers)))
+            texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label=%s/>' % (texts[-1], quoteattr(repr(list(pageNumbers))))
             for text in texts:
                 style = self.getLevelStyle(i+1)
                 para = Paragraph(text, style)
