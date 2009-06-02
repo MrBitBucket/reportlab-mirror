@@ -91,7 +91,7 @@ class IndexTestCase(unittest.TestCase):
     
             for i in range(20):
                 words = randomtext.randomText(randomtext.PYTHON, 5).split(' ')
-                txt = ' '.join(((len(w) > 5 and '<onDraw name="_indexAdd" label=%s/>%s' % (quoteattr(repr(w)), w) or w) for w in words))
+                txt = ' '.join([(len(w) > 5 and '<onDraw name="_indexAdd" label=%s/>%s' % (quoteattr(repr(w)), w) or w) for w in words])
                 para = Paragraph(txt, makeBodyStyle())
                 story.append(para)
             story.append(index)

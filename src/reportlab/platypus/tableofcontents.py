@@ -73,8 +73,8 @@ def drawPageNumbers(canvas, style, pages, availWidth, availHeight, dot=' . '):
     If dot is a string, pagestr is drawn right-aligned. If the string is not empty,
     the gap is filled with it.
     '''
-    pages.sort(cmp=lambda a,b: cmp(a[0], b[0]))
-    pagestr = ', '.join((str(p) for p, _ in pages))
+    pages.sort()
+    pagestr = ', '.join([str(p) for p, _ in pages])
     x, y = canvas._curr_tx_info['cur_x'], canvas._curr_tx_info['cur_y']
     pagestrw = stringWidth(pagestr, style.fontName, style.fontSize)
     if isinstance(dot, basestring):
@@ -359,7 +359,7 @@ class SimpleIndex(IndexingFlowable):
 
     def _build(self,availWidth,availHeight):
         _tempEntries = self._getlastEntries()
-        _tempEntries.sort(cmp=lambda a,b: cmp([x.upper() for x in a[0]], [x.upper() for x in b[0]]))
+        _tempEntries.sort(lambda a,b: cmp([x.upper() for x in a[0]], [x.upper() for x in b[0]]))
         leveloffset = self.headers and 1 or 0
 
         def drawIndexEntryEnd(canvas, kind, label):
