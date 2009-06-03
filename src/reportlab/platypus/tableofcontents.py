@@ -295,10 +295,10 @@ class SimpleIndex(IndexingFlowable):
     def __call__(self,canv,kind,label):
         label = unquote(label)
         try:
-            label = eval(label,{})
+            label = eval(label,{'__builtins__':{}})
         except (NameError, SyntaxError):
             label = makeTuple(label)
-        key = 'idx_%s_p_%s' % (','.join(label), canv.getPageNumber())
+        key = 'ix_%s_%s_p_%s' % (self.name,','.join(label), canv.getPageNumber())
 
         info = canv._curr_tx_info
         canv.bookmarkHorizontal(key, info['cur_x'], info['cur_y'] + info['leading'])
