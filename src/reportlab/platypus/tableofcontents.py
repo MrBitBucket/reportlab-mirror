@@ -53,9 +53,11 @@ from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.flowables import Spacer, Flowable
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
-from xml.sax.saxutils import escape, quoteattr, unescape
+from base64 import encodestring, decodestring
+from marshal import dumps, loads
 
 def unquote(txt):
+    from xml.sax.saxutils import unescape
     return unescape(txt, {"&apos;": "'", "&quot;": '"'})
 
 try:
@@ -365,7 +367,7 @@ class SimpleIndex(IndexingFlowable):
         def drawIndexEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
             style = self.getLevelStyle(leveloffset)
-            pages = eval(unquote(label))
+            pages = loads(decodestring(label))
             drawPageNumbers(canvas, style, pages, availWidth, availHeight, self.dot)
         self.canv.drawIndexEntryEnd = drawIndexEntryEnd
 
@@ -387,7 +389,8 @@ class SimpleIndex(IndexingFlowable):
             if diff:
                 lastTexts = texts
                 texts = texts[i:]
-            texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label=%s/>' % (texts[-1], quoteattr(repr(list(pageNumbers))))
+            label = encodestring(dumps(list(pageNumbers)))
+            texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (texts[-1], label)
             for text in texts:
                 style = self.getLevelStyle(i+leveloffset)
                 para = Paragraph(text, style)
