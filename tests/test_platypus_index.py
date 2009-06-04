@@ -9,8 +9,7 @@ import sys, os
 from os.path import join, basename, splitext
 from math import sqrt
 import unittest
-from reportlab.lib.units import inch, cm
-from reportlab.lib.pagesizes import A4
+from reportlab.lib.units import cm
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
@@ -73,9 +72,14 @@ def makeBodyStyle():
     return ParagraphStyle('body', spaceBefore=20)
     
 class IndexTestCase(unittest.TestCase):
-    "Test (Simple|Alphabetic)Index classes (eyeball-test)."
+    "Test SimpleIndex classes (eyeball-test)."
 
     def test0(self):
+        '''
+        Test case for Indexes. This will draw an index %sat the end of the
+        document with dots seperating the indexing terms from the page numbers.
+        The page numbers should be clickable and link to the indexed word.
+        '''
         # Build story.
         
         for headers in False, True:
@@ -85,8 +89,8 @@ class IndexTestCase(unittest.TestCase):
             styleSheet = getSampleStyleSheet()
             bt = styleSheet['BodyText']
     
-            description = '<font color=red>%s</font>' % self.test0.__doc__
-            story.append(XPreformatted(description, bt))
+            description = '<font color=red>%s</font>' % (self.test0.__doc__  % (headers and 'with alphabetic headers ' or ''))
+            story.append(Paragraph(description, bt))
             index = SimpleIndex(dot=' . ', headers=headers)
     
             for i in range(20):
@@ -96,11 +100,10 @@ class IndexTestCase(unittest.TestCase):
                 story.append(para)
             story.append(index)
     
-            doc.multiBuild(story, canvasmaker=index.getCanvasMaker())
+            doc.build(story, canvasmaker=index.getCanvasMaker())
 
 def makeSuite():
     return makeSuiteForClasses(IndexTestCase)
-
 
 #noruntests
 if __name__ == "__main__":
