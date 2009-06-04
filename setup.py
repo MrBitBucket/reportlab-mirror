@@ -16,6 +16,10 @@ if not pkgDir:
     pkgDir=os.getcwd()
 elif not os.path.isabs(pkgDir):
     pkgDir=os.path.abspath(pkgDir)
+try:
+    os.chdir(pkgDir)
+except:
+    print '!!!!! warning could not change directory to %r' % pkgDir
 daily=os.environ.get('RL_EXE_DAILY','')
 
 import distutils
@@ -34,10 +38,12 @@ package_path = pjoin(package_home(distutils.__dict__), 'site-packages', 'reportl
 def get_version():
     if daily: return 'daily'
     #determine Version
-    if __name__=='__main__':
-        HERE=os.path.dirname(sys.argv[0])
-    else:
-        HERE=os.path.dirname(__file__)
+    HERE = pkgDir
+    if os.getcwd()!=HERE:
+        if __name__=='__main__':
+            HERE=os.path.dirname(sys.argv[0])
+        else:
+            HERE=os.path.dirname(__file__)
 
     #first try source
     FN = pjoin(HERE,'src','reportlab','__init__')
