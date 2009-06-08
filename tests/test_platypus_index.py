@@ -10,6 +10,7 @@ from os.path import join, basename, splitext
 from math import sqrt
 import unittest
 from reportlab.lib.units import cm
+from reportlab.lib.utils import commajoin
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
@@ -78,6 +79,7 @@ class IndexTestCase(unittest.TestCase):
         '''
         Test case for Indexes. This will draw an index %sat the end of the
         document with dots seperating the indexing terms from the page numbers.
+        Index terms are grouped by their first 2, and first 3 characters.
         The page numbers should be clickable and link to the indexed word.
         '''
         # Build story.
@@ -95,7 +97,7 @@ class IndexTestCase(unittest.TestCase):
     
             for i in range(20):
                 words = randomtext.randomText(randomtext.PYTHON, 5).split(' ')
-                txt = ' '.join([(len(w) > 5 and '<onDraw name="_indexAdd" label=%s/>%s' % (quoteattr(repr(w)), w) or w) for w in words])
+                txt = ' '.join([(len(w) > 5 and '<index item=%s/>%s' % (quoteattr(commajoin([w[:2], w[:3], w])), w) or w) for w in words])
                 para = Paragraph(txt, makeBodyStyle())
                 story.append(para)
             story.append(index)

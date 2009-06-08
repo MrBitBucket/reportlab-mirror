@@ -1021,3 +1021,49 @@ def prev_this_next(items):
     except StopIteration:
         pass
     return itertools.izip(prev, this, next)
+
+def commasplit(s):
+    '''
+    Splits the string s at every unescaped comma and returns the result as a list.
+    To escape a comma, double it. Individual items are stripped.
+    To avoid the ambiguity of 3 successive commas to denote a comma at the beginning
+    or end of an item, add a space between the item seperator and the escaped comma.
+    
+    >>> commasplit('a,b,c')
+    ['a', 'b', 'c']
+    >>> commasplit('a,, , b , c    ')
+    ['a,', 'b', 'c']
+    >>> commasplit('a, ,,b, c')
+    ['a', ',b', 'c']
+    '''
+    n = len(s)-1
+    s += ' '
+    i = 0
+    r=['']
+    while i<=n:
+        if s[i]==',':
+            if s[i+1]==',':
+                r[-1]+=','
+                i += 1
+            else:
+                r[-1] = r[-1].strip()
+                if i!=n: r.append('')
+        else:
+            r[-1] += s[i]
+        i+=1
+    r[-1] = r[-1].strip()
+    return r
+    
+def commajoin(l):
+    '''
+    Inverse of commasplit, except that whitespace around items is not conserved.
+    Adds more whitespace than needed for simplicity and performance.
+    
+    >>> commasplit(commajoin(['a', 'b', 'c']))
+    ['a', 'b', 'c']
+    >>> commasplit((commajoin(['a,', ' b ', 'c']))
+    ['a,', 'b', 'c']
+    >>> commasplit((commajoin(['a ', ',b', 'c']))
+    ['a', ',b', 'c']    
+    '''
+    return ','.join([ ' ' + i.replace(',', ',,') + ' ' for i in l ])

@@ -46,6 +46,7 @@ epsilon.
 
 from reportlab.lib import enums
 from reportlab.lib.units import cm
+from reportlab.lib.utils import commasplit
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable
@@ -295,16 +296,12 @@ class SimpleIndex(IndexingFlowable):
         self.name = name
 
     def __call__(self,canv,kind,label):
-        label = unquote(label)
-        try:
-            label = eval(label,{'__builtins__':{}})
-        except (NameError, SyntaxError):
-            label = makeTuple(label)
-        key = 'ix_%s_%s_p_%s' % (self.name,','.join(label), canv.getPageNumber())
+        terms = commasplit(label)
+        key = 'ix_%s_%s_p_%s' % (self.name, label, canv.getPageNumber())
 
         info = canv._curr_tx_info
         canv.bookmarkHorizontal(key, info['cur_x'], info['cur_y'] + info['leading'])
-        self.addEntry(label, canv.getPageNumber(), key)
+        self.addEntry(terms, canv.getPageNumber(), key)
 
     def getCanvasMaker(self, canvasmaker=canvas.Canvas):
 
