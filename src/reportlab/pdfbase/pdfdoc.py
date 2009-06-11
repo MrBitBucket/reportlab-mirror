@@ -1977,6 +1977,7 @@ class PDFFormXObject:
             if self.XObjects:
                 #print "XObjects", self.XObjects.dict
                 resources.XObject = self.XObjects
+            self.Resources=resources
         if self.compression:
             self.Contents.filters = [PDFBase85Encode, PDFZCompress]
         sdict = self.Contents.dictionary
@@ -1985,7 +1986,7 @@ class PDFFormXObject:
         sdict["FormType"] = 1
         sdict["BBox"] = self.BBox
         sdict["Matrix"] = self.Matrix
-        sdict["Resources"] = resources
+        sdict["Resources"] = self.Resources
         return self.Contents.format(document)
 
 class PDFPostScriptXObject:
