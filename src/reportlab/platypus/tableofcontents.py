@@ -271,11 +271,15 @@ def makeTuple(x):
     return (x,)
 
 class SimpleIndex(IndexingFlowable):
-    """This creates a very simple index.
+    """Creates multi level indexes.
+    The styling can be cutomized and alphabetic headers turned on and off.
+    """
 
-    Entries have a string key, and appear with a page number on
-    the right.  Prototype for more sophisticated multi-level index."""
     def __init__(self, **kwargs):
+        """
+        Constructor of SimpleIndex.
+        Accepts the same arguments as the setup method.
+        """
         #keep stuff in a dictionary while building
         self._entries = {}
         self._lastEntries = {}
@@ -283,6 +287,23 @@ class SimpleIndex(IndexingFlowable):
         self.setup(**kwargs)
 
     def setup(self, style=None, dot=None, tableStyle=None, headers=True, name=None):
+        """
+        This method makes it possible to change styling and other parameters on an existing object.
+        
+        style is the paragraph style to use for index entries.
+        dot can either be None or a string. If it's None, entries are immediatly followed by their
+            corresponding page numbers. If it's a string, page numbers are aligned on the right side
+            of the document and the gap filled with a repeating sequence of the string.
+        tableStyle is the style used by the table which the index uses to draw itself. Use this to
+            change properties like spacing between elements.
+        headers is a boolean. If it is True, alphabetic headers are displayed in the Index.
+        name makes it possible to use several indexes in one document. If you want this use this
+            parameter to give each index a unique name. You can then index a term by refering to the
+            name of the index which it should appear in:
+            
+                <index item="term" name="myindex" />
+        """
+        
         if style is None:
             style = ParagraphStyle(name='index',
                                         fontName='Times-Roman',

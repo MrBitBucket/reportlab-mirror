@@ -158,6 +158,7 @@ A simple document processor can be made using derived class,
 .getClassDoc reportlab.platypus.flowables AnchorFlowable
 .getClassDoc reportlab.platypus.flowables FrameSplitter
 .getClassDoc reportlab.platypus.tableofcontents TableOfContents
+.getClassDoc reportlab.platypus.tableofcontents SimpleIndex
 .getClassDoc reportlab.platypus.xpreformatted XPreformatted
 .getClassDoc reportlab.platypus.xpreformatted PythonPreformatted
 
