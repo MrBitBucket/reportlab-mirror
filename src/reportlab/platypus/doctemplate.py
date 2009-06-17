@@ -135,9 +135,9 @@ class ActionFlowable(Flowable):
                 raise NotImplementedError, "Can't handle ActionFlowable(%s)" % action
             else:
                 raise
-        except "bogus":
-            t, v, unused = sys.exc_info()
-            raise t, "%s\n   handle_%s args=%s"%(v,action,args)
+        except:
+            t, v, tb = sys.exc_info()
+            raise t, "%s\n   handle_%s args=%s"%(v,action,args), tb
 
     def __call__(self):
         return self
@@ -844,9 +844,9 @@ class BaseDocTemplate:
         self._pageRefs[label] = self.page
 
     def multiBuild(self, story,
-                   filename=None,
-                   canvasmaker=canvas.Canvas,
-                   maxPasses = 10):
+                   maxPasses = 10,
+                   **buildKwds
+                   ):
         """Makes multiple passes until all indexing flowables
         are happy."""
         self._indexingFlowables = []
@@ -871,7 +871,7 @@ class BaseDocTemplate:
 
             # work with a copy of the story, since it is consumed
             tempStory = story[:]
-            self.build(tempStory, filename, canvasmaker)
+            self.build(tempStory, **buildKwds)
             #self.notify('debug',None)
 
             for fl in self._indexingFlowables:
