@@ -14,9 +14,7 @@ These can be constructed from several popular formats.  We also include
 - various conversion and construction functions
 '''
 import string, math
-from types import StringType, ListType, TupleType
 from reportlab.lib.utils import fp_str
-_SeqTypes = (ListType,TupleType)
 
 class Color:
     """This class is used to represent color.  Components red, green, blue
@@ -216,7 +214,7 @@ def HexColor(val, htmlOnly=False):
 
     """ #" for emacs
 
-    if type(val) == StringType:
+    if isinstance(val,basestring):
         b = 10
         if val[:1] == '#':
             val = val[1:]
@@ -541,12 +539,11 @@ def describe(aColor,mode=0):
 def toColor(arg,default=None):
     '''try to map an arbitrary arg to a color instance'''
     if isinstance(arg,Color): return arg
-    tArg = type(arg)
-    if tArg in _SeqTypes:
+    if isinstance(arg,(tuple,list)):
         assert 3<=len(arg)<=4, 'Can only convert 3 and 4 sequences to color'
         assert 0<=min(arg) and max(arg)<=1
         return len(arg)==3 and Color(arg[0],arg[1],arg[2]) or CMYKColor(arg[0],arg[1],arg[2],arg[3])
-    elif tArg == StringType:
+    elif isinstance(arg,basestring):
         C = getAllNamedColors()
         s = string.lower(arg)
         if C.has_key(s): return C[s]
@@ -576,9 +573,9 @@ def setColors(**kw):
     while kw and progress:
         progress = 0
         for k, v in kw.items():
-            if type(v) in (type(()),type([])):
+            if isinstance(v,(tuple,list)):
                 c = map(lambda x,UNDEF=UNDEF: toColor(x,UNDEF),v)
-                if type(v) is type(()): c = tuple(c)
+                if isinstance(v,tuple): c = tuple(c)
                 ok = UNDEF not in c
             else:
                 c = toColor(v,UNDEF)
