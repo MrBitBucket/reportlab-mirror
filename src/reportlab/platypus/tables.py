@@ -361,7 +361,7 @@ class Table(Flowable):
         else:
             vx = '...'
 
-        return "<%s at %d %d rows x %s cols>%s" % (self.__class__.__name__, id(self), nr, nc, vx)
+        return "<%s@0x%8.8X %s rows x %s cols>%s" % (self.__class__.__name__, id(self), nr, nc, vx)
 
     def _listCellGeom(self, V,w,s,W=None,H=None,aH=72000):
         if not V: return 0,0
