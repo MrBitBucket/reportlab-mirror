@@ -31,9 +31,6 @@ except ImportError, errMsg:
         (str(errMsg)!='No module named _renderPM' and "it may be the wrong version or badly installed!" or
                                     "see http://www.reportlab.org/rl_addons.html")
 
-from types import TupleType, ListType
-_SeqTypes = (TupleType,ListType)
-
 def _getImage():
     try:
         from PIL import Image

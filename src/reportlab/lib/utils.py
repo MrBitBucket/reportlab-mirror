@@ -10,15 +10,10 @@ try:
 except:
     from md5 import md5
 from reportlab.lib.logger import warnOnce
-from types import *
 from rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
-SeqTypes = (ListType,TupleType)
-if sys.hexversion<0x2020000:
-    def isSeqType(v):
-        return type(v) in SeqTypes
-else:
-    def isSeqType(v):
-        return isinstance(v,(tuple,list))
+
+def isSeqType(v,_st=(tuple,list)):
+    return isinstance(v,_st)
 
 if sys.hexversion<0x2030000:
     True = 1
@@ -372,19 +367,19 @@ def getArgvDict(**kw):
         if func:
             v = func(av)
         else:
-            t = type(v)
-            if t is StringType:
+            if isinstance(v,basestring):
+                if isinstance(v,unicode): v = v.encode('utf8')
                 v = av
-            elif t is FloatType:
+            elif isinstance(v,float):
                 v = float(av)
-            elif t is IntType:
+            elif isinstance(v,int):
                 v = int(av)
-            elif t is ListType:
+            elif isinstance(v,list):
                 v = list(eval(av))
-            elif t is TupleType:
+            elif isinstance(v,tuple):
                 v = tuple(eval(av))
             else:
-                raise TypeError, "Can't convert string '%s' to %s" % (av,str(t))
+                raise TypeError("Can't convert string %r to %s" % (av,type(v)))
         return v
 
     A = sys.argv[1:]

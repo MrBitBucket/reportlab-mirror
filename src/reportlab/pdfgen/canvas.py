@@ -14,7 +14,6 @@ import sys
 import re
 from string import join, split, strip, atoi, replace, upper, digits
 import tempfile
-from types import *
 from math import sin, cos, tan, pi, ceil
 try:
     from hashlib import md5
@@ -31,9 +30,7 @@ from reportlab.lib.utils import import_zlib, ImageReader, fp_str, _digester
 from reportlab.lib.boxstuff import aspectRatioFix
 
 digitPat = re.compile('\d')  #used in decimal alignment
-
 zlib = import_zlib()
-_SeqTypes=(TupleType,ListType)
 
 # Robert Kern
 # Constants for closing paths.
@@ -380,7 +377,7 @@ class Canvas(textobject._PDFColorSetter):
     def setKeywords(self, keywords):
         """write a list of keywords into the PDF file which shows in document properties.
         Either submit a single string or a list/tuple"""
-        if type(keywords) in (TupleType, ListType):
+        if isinstance(keywords,(list,tuple)):
             keywords = ', '.join(keywords)
         self._doc.setKeywords(keywords)
 
@@ -1474,9 +1471,9 @@ class Canvas(textobject._PDFColorSetter):
 
     def setDash(self, array=[], phase=0):
         """Two notations.  pass two numbers, or an array and phase"""
-        if type(array) == IntType or type(array) == FloatType:
+        if isinstance(array,(int,float)):
             self._code.append('[%s %s] 0 d' % (array, phase))
-        elif type(array) == ListType or type(array) == TupleType:
+        elif isinstance(array,(tuple,list)):
             assert phase >= 0, "phase is a length in user space"
             textarray = ' '.join(map(str, array))
             self._code.append('[%s] %s d' % (textarray, phase))

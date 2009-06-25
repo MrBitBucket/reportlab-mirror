@@ -24,7 +24,6 @@ from reportlab.lib import colors
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase.pdfmetrics import stringWidth
 import operator, string
-from types import TupleType, ListType, StringType, FloatType, IntType
 
 class CellStyle(PropertySet):
     defaults = {
@@ -102,11 +101,8 @@ class TableStyle:
     def getCommands(self):
         return self._cmds
 
-TableStyleType = type(TableStyle())
-_SeqTypes = (TupleType, ListType)
-
 def _rowLen(x):
-    return type(x) not in _SeqTypes and 1 or len(x)
+    return not isinstance(x,(tuple,list)) and 1 or len(x)
 
 def _calc_pc(V,avail):
     '''check list V for percentage or * values
@@ -124,7 +120,7 @@ def _calc_pc(V,avail):
     s = avail
     w = n = 0.
     for v in V:
-        if type(v) is type(""):
+        if isinstance(v,basestring):
             v = v.strip()
             if not v:
                 v = None
@@ -225,12 +221,12 @@ class Table(Flowable):
         self.ident = ident
         self.hAlign = hAlign or 'CENTER'
         self.vAlign = vAlign or 'MIDDLE'
-        if type(data) not in _SeqTypes:
+        if not isinstance(data,(tuple,list)):
             raise ValueError("%s invalid data type" % self.identity())
         self._nrows = nrows = len(data)
         self._cellvalues = []
-        _seqCW = type(colWidths) in _SeqTypes
-        _seqRH = type(rowHeights) in _SeqTypes
+        _seqCW = isinstance(colWidths,(tuple,list))
+        _seqRH = isinstance(rowHeights,(tuple,list))
         if nrows: self._ncols = ncols = max(map(_rowLen,data))
         elif colWidths and _seqCW: ncols = len(colWidths)
         else: ncols = 0
@@ -315,7 +311,7 @@ class Table(Flowable):
         def normCell(stuff):
             if stuff is None:
                 return ''
-            elif type(stuff) == type(u''):
+            elif isinstance(stuff,unicode):
                 return stuff.encode('utf8')
             else:
                 return stuff
@@ -339,9 +335,8 @@ class Table(Flowable):
             for i in xrange(nr):
                 for j in xrange(nc):
                     v = cv[i][j]
-                    t = type(v)
-                    if t in _SeqTypes or isinstance(v,Flowable):
-                        if not t in _SeqTypes: v = (v,)
+                    if isinstance(v,(list,tuple,Flowable)):
+                        if not isinstance(v,(tuple,list)): v = (v,)
                         r = ''
                         for vij in v:
                             r = vij.identity(maxLen)
@@ -352,7 +347,7 @@ class Table(Flowable):
                     else:
                         v = v is None and '' or str(v)
                         ix, jx, vx = i, j, v
-                        b = (vx and t is StringType) and 1 or 0
+                        b = (vx and isinstance(v,basestring)) and 1 or 0
                         if maxLen: vx = vx[:maxLen]
                     if b: break
                 if b: break
@@ -461,15 +456,15 @@ class Table(Flowable):
                 w = max(w,ew)
             return w
         elif isinstance(v,Flowable) and v._fixedWidth:
-            if hasattr(v, 'width') and type(v.width) in (IntType,FloatType): return v.width
-            if hasattr(v, 'drawWidth') and type(v.drawWidth) in (IntType,FloatType): return v.drawWidth
+            if hasattr(v, 'width') and isinstance(v.width,(int,float)): return v.width
+            if hasattr(v, 'drawWidth') and isinstance(v.drawWidth,(int,float)): return v.drawWidth
         # Even if something is fixedWidth, the attribute to check is not
         # necessarily consistent (cf. Image.drawWidth).  Therefore, we'll
         # be extra-careful and fall through to this code if necessary.
         if hasattr(v, 'minWidth'):
             try:
                 w = v.minWidth() # should be all flowables
-                if type(w) in (FloatType,IntType): return w
+                if isinstance(w,(float,int)): return w
             except AttributeError:
                 pass
         v = (v is not None and str(v) or '').split("\n")
@@ -608,7 +603,7 @@ class Table(Flowable):
 
     def _canGetWidth(self, thing):
         "Can we work out the width quickly?"
-        if isinstance(thing,(ListType, TupleType)):
+        if isinstance(thing,(list, tuple)):
             for elem in thing:
                 if not self._canGetWidth(elem):
                     return 0
@@ -644,7 +639,7 @@ class Table(Flowable):
                 percentDefined += 1
                 percentTotal += float(w[:-1])
             else:
-                assert type(w) in (IntType, FloatType)
+                assert isinstance(w,(int,float))
                 totalDefined = totalDefined + w
         if verbose: print 'prelim width calculation.  %d columns, %d undefined width, %0.2f units remain' % (
             self._ncols, numberUndefined, availWidth - totalDefined)
@@ -926,7 +921,7 @@ class Table(Flowable):
                 value.sort()
 
     def setStyle(self, tblstyle):
-        if type(tblstyle) is not TableStyleType:
+        if not isinstance(tblstyle,TableStyle):
             tblstyle = TableStyle(tblstyle)
         for cmd in tblstyle.getCommands():
             self._addCommand(cmd)
@@ -998,7 +993,7 @@ class Table(Flowable):
         ccap, cdash, cjoin = None, None, None
         self.canv.saveState()
         for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
-            if type(sr) is type('') and sr.startswith('split'): continue
+            if isinstance(sr,basestring) and sr.startswith('split'): continue
             if sc < 0: sc = sc + self._ncols
             if ec < 0: ec = ec + self._ncols
             if sr < 0: sr = sr + self._nrows
@@ -1157,7 +1152,7 @@ class Table(Flowable):
         A = []
         # hack up the line commands
         for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
-            if type(sr)is type('') and sr.startswith('split'):
+            if isinstance(sr,basestring) and sr.startswith('split'):
                 A.append((op,(sc,sr), (ec,sr), weight, color, cap, dash, join, count, space))
                 if sr=='splitlast':
                     sr = er = n-1
@@ -1364,9 +1359,8 @@ class Table(Flowable):
 
         just = cellstyle.alignment
         valign = cellstyle.valign
-        n = type(cellval)
-        if n in _SeqTypes or isinstance(cellval,Flowable):
-            if not n in _SeqTypes: cellval = (cellval,)
+        if isinstance(cellval,(tuple,list,Flowable)):
+            if not isinstance(cellval,(tuple,list)): cellval = (cellval,)
             # we assume it's a list of Flowables
             W = []
             H = []

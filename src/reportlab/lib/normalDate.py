@@ -23,12 +23,11 @@ _dayOfWeekName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
 _monthName = ['January', 'February', 'March', 'April', 'May', 'June',
               'July','August','September','October','November','December']
 
-from types import IntType, StringType, ListType, TupleType
 import string, re, time, datetime
 if hasattr(time,'struct_time'):
-    _DateSeqTypes = (ListType,TupleType,time.struct_time)
+    _DateSeqTypes = (list,tuple,time.struct_time)
 else:
-    _DateSeqTypes = (ListType,TupleType)
+    _DateSeqTypes = (list,tuple)
 
 _fmtPat = re.compile('\\{(m{1,5}|yyyy|yy|d{1,4})\\}',re.MULTILINE|re.IGNORECASE)
 _iso_re = re.compile(r'(\d\d\d\d|\d\d)-(\d\d)-(\d\d)')
@@ -131,14 +130,14 @@ class NormalDate:
 
     def add(self, days):
         """add days to date; use negative integers to subtract"""
-        if not type(days) is IntType:
+        if not isinstance(days,int):
             raise NormalDateException( \
                 'add method parameter must be integer type')
         self.normalize(self.scalar() + days)
 
     def __add__(self, days):
         """add integer to normalDate and return a new, calculated value"""
-        if not type(days) is IntType:
+        if not isinstance(days,int):
             raise NormalDateException( \
                 '__add__ parameter must be integer type')
         cloned = self.clone()
@@ -193,13 +192,13 @@ class NormalDate:
         return value may be negative, since calculation is
         self.scalar() - arg
         """
-        if type(normalDate) is _NDType:
+        if isinstance(normalDate,NormalDate):
             return self.scalar() - normalDate.scalar()
         else:
             return self.scalar() - NormalDate(normalDate).scalar()
 
     def equals(self, target):
-        if type(target) is _NDType:
+        if isinstance(target,NormalDate):
             if target is None:
                 return self.normalDate is None
             else:
@@ -303,7 +302,7 @@ class NormalDate:
 
     def _isValidNormalDate(self, normalDate):
         """checks for date validity in [-]yyyymmdd format"""
-        if type(normalDate) is not IntType:
+        if not isinstance(normalDate,int):
             return 0
         if len(repr(normalDate)) > 9:
             return 0
@@ -406,7 +405,7 @@ class NormalDate:
     def range(self, days):
         """Return a range of normalDates as a list.  Parameter
         may be an int or normalDate."""
-        if type(days) is not IntType:
+        if not isinstance(days,int):
             days = days - self  # if not int, assume arg is normalDate type
         r = []
         for i in range(days):
@@ -458,10 +457,9 @@ class NormalDate:
         """
         accepts date as scalar string/integer (yyyymmdd) or tuple
         (year, month, day, ...)"""
-        tn=type(normalDate)
-        if tn is IntType:
+        if isinstance(normalDate,int):
             self.normalDate = normalDate
-        elif tn is StringType:
+        elif isinstance(normalDate,basestring):
             try:
                 self.normalDate = int(normalDate)
             except:
@@ -470,9 +468,9 @@ class NormalDate:
                     self.setNormalDate(m.group(1)+m.group(2)+m.group(3))
                 else:
                     raise NormalDateException("unable to setNormalDate(%s)" % `normalDate`)
-        elif tn in _DateSeqTypes:
+        elif isinstance(normalDate,_DateSeqTypes):
             self.normalDate = int("%04d%02d%02d" % normalDate[:3])
-        elif tn is _NDType:
+        elif isinstance(normalDate,NormalDate):
             self.normalDate = normalDate.normalDate
         elif isinstance(normalDate,(datetime.datetime,datetime.date)):
             self.normalDate = (normalDate.year*100+normalDate.month)*100+normalDate.day
@@ -492,12 +490,12 @@ class NormalDate:
     __setstate__ = setNormalDate
 
     def __sub__(self, v):
-        if type(v) is IntType:
+        if isinstance(v,int):
             return self.__add__(-v)
         return self.scalar() - v.scalar()
 
     def __rsub__(self,v):
-        if type(v) is IntType:
+        if isinstance(v,int):
             return NormalDate(v) - self
         else:
             return v.scalar() - self.scalar()
@@ -529,7 +527,7 @@ def dayOfWeek(y, m, d):
 
 def firstDayOfYear(year):
     """number of days to the first of the year, relative to Jan 1, 1900"""
-    if type(year) is not IntType:
+    if not isinstance(year,int):
         msg = "firstDayOfYear() expected integer, got %s" % type(year)
         raise NormalDateException(msg)
     if year == 0:
@@ -548,11 +546,10 @@ def firstDayOfYear(year):
 
 def FND(d):
     '''convert to ND if required'''
-    return (type(d) is _NDType) and d or ND(d)
+    return isinstance(d,NormalDate) and d or ND(d)
 
 Epoch=bigBang()
 ND=NormalDate
-_NDType = type(Epoch)
 BDEpoch=ND(15821018)
 BDEpochScalar = -115857
 
@@ -562,20 +559,20 @@ class BusinessDate(NormalDate):
     """
     def add(self, days):
         """add days to date; use negative integers to subtract"""
-        if not type(days) is IntType:
-            raise NormalDateException('add method parameter must be integer type')
+        if not isinstance(days,int):
+            raise NormalDateException('add method parameter must be integer')
         self.normalize(self.scalar() + days)
 
     def __add__(self, days):
         """add integer to BusinessDate and return a new, calculated value"""
-        if not type(days) is IntType:
-            raise NormalDateException('__add__ parameter must be integer type')
+        if not isinstance(days,int):
+            raise NormalDateException('__add__ parameter must be integer')
         cloned = self.clone()
         cloned.add(days)
         return cloned
 
     def __sub__(self, v):
-        return type(v) is IntType and self.__add__(-v) or self.scalar() - v.scalar()
+        return isinstance(v,int) and self.__add__(-v) or self.scalar() - v.scalar()
 
     def asNormalDate(self):
         return ND(self.normalDate)
