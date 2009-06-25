@@ -847,21 +847,24 @@ class Paragraph(Flowable):
         self.blPara = blPara
         autoLeading = getattr(self,'autoLeading',getattr(style,'autoLeading',''))
         leading = style.leading
-        if blPara.kind==1 and autoLeading not in ('','off'):
-            height = 0
-            if autoLeading=='max':
-                for l in blPara.lines:
-                    height += max(l.ascent-l.descent,leading)
-            elif autoLeading=='min':
-                for l in blPara.lines:
-                    height += l.ascent - l.descent
+        if blPara.kind==1:
+            if autoLeading not in ('','off'):
+                height = 0
+                if autoLeading=='max':
+                    for l in blPara.lines:
+                        height += max(l.ascent-l.descent,leading)
+                elif autoLeading=='min':
+                    for l in blPara.lines:
+                        height += l.ascent - l.descent
+                else:
+                    raise ValueError('invalid autoLeading value %r' % autoLeading)
             else:
-                raise ValueError('invalid autoLeading value %r' % autoLeading)
+                height = len(blPara.lines) * leading
         else:
             if autoLeading=='max':
-                leading = max(leading,1.2*style.fontSize)
+                leading = max(leading,blPara.ascent-blPara.descent)
             elif autoLeading=='min':
-                leading = 1.2*style.fontSize
+                leading = blPara.ascent-blPara.descent
             height = len(blPara.lines) * leading
         self.height = height
         return self.width, height
@@ -1345,9 +1348,9 @@ class Paragraph(Flowable):
 
                 tx = self.beginText(cur_x, cur_y)
                 if autoLeading=='max':
-                    leading = max(leading,1.2*f.fontSize)
+                    leading = max(leading,blPara.ascent-blPara.descent)
                 elif autoLeading=='min':
-                    leading = 1.2*f.fontSize
+                    leading = blPara.ascent-blPara.descent
 
                 #now the font for the rest of the paragraph
                 tx.setFont(f.fontName, f.fontSize, leading)
