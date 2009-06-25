@@ -16,8 +16,6 @@ from reportlab.lib.colors import Color, CMYKColor, toColor
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfmetrics
 
-_SeqTypes=(TupleType,ListType)
-
 class _PDFColorSetter:
     '''Abstracts the color setting operations; used in Canvas and Textobject
     asseumes we have a _code object'''
@@ -58,7 +56,7 @@ class _PDFColorSetter:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._fillColorRGB = rgb
             self._code.append('%s rg' % fp_str(rgb) )
-        elif type(aColor) in _SeqTypes:
+        elif isinstance(aColor,(tuple,list)):
             l = len(aColor)
             if l==3:
                 self._fillColorRGB = aColor
@@ -67,7 +65,7 @@ class _PDFColorSetter:
                 self.setFillColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
             else:
                 raise ValueError('Unknown color %r' % aColor)
-        elif type(aColor) is StringType:
+        elif isinstance(aColor,basestring):
             self.setFillColor(toColor(aColor))
         else:
             raise ValueError('Unknown color %r' % aColor)
@@ -83,7 +81,7 @@ class _PDFColorSetter:
             rgb = (aColor.red, aColor.green, aColor.blue)
             self._strokeColorRGB = rgb
             self._code.append('%s RG' % fp_str(rgb) )
-        elif type(aColor) in _SeqTypes:
+        elif isinstance(aColor,(tuple,list)):
             l = len(aColor)
             if l==3:
                 self._strokeColorRGB = aColor
@@ -92,7 +90,7 @@ class _PDFColorSetter:
                 self.setStrokeColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
             else:
                 raise ValueError('Unknown color %r' % aColor)
-        elif type(aColor) is StringType:
+        elif isinstance(aColor,basestring):
             self.setStrokeColor(toColor(aColor))
         else:
             raise ValueError('Unknown color %r' % aColor)
@@ -368,13 +366,11 @@ class PDFTextObject(_PDFColorSetter):
         since this may be indented, by default it trims whitespace
         off each line and from the beginning; set trim=0 to preserve
         whitespace."""
-        if type(stuff) == StringType:
+        if isinstance(stuff,basestring):
             lines = string.split(string.strip(stuff), '\n')
             if trim==1:
                 lines = map(string.strip,lines)
-        elif type(stuff) == ListType:
-            lines = stuff
-        elif type(stuff) == TupleType:
+        elif isinstance(stuff,(tuple,list)):
             lines = stuff
         else:
             assert 1==0, "argument to textlines must be string,, list or tuple"
