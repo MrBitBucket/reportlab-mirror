@@ -462,14 +462,13 @@ class CondPageBreak(Spacer):
 def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
     '''return max width, required height for a list of flowables F'''
     doct = getattr(canv,'_doctemplate',None)
-    if doct:
+    cframe = getattr(doct,'frame',None)
+    if cframe:
         from reportlab.platypus.doctemplate import _addGeneratedContent
-        doct_frame = doct.frame
+        doct_frame = cframe
         cframe = doct.frame = deepcopy(doct_frame)
         cframe._generated_content = None
         del cframe._generated_content
-    else:
-        cframe = None
     try:
         W = 0
         H = 0
@@ -498,7 +497,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
         if obj is not None: obj._spaceAfter = pS
         return W, H-pS
     finally:
-        if doct:
+        if cframe:
             doct.frame = doct_frame
 
 def _flowableSublist(V):
@@ -734,7 +733,8 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
         '''we simulate being added to a frame'''
         pS = 0
         if aW is None: aW = self.width
-        aW = scale*(aW+_sW)
+        aW *= scale
+        _sW *= scale
         if content is None:
             content = self._content
         y += self.height*scale
@@ -743,7 +743,7 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
             if (w<_FUZZ or h<_FUZZ) and not getattr(c,'_ZEROSIZE',None): continue
             if c is not content[0]: h += max(c.getSpaceBefore()-pS,0)
             y -= h
-            c.drawOn(canv,x,y,_sW=aW-w)
+            c.drawOn(canv,x,y,_sW=_sW)
             if c is not content[-1]:
                 pS = c.getSpaceAfter()
                 y -= pS
