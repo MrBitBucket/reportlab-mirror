@@ -25,15 +25,13 @@ flow into a document from top to bottom (with column and page breaks controlled 
 higher level components).
 """
 import os
-import string
 from copy import deepcopy, copy
-from types import ListType, TupleType, StringType
-
 from reportlab.lib.colors import red, gray, lightgrey
 from reportlab.lib.utils import fp_str
+from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 from reportlab.pdfbase import pdfutils
-
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace
+
 __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
         'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
         'FailOnWrap','HRFlowable','PTOContainer','KeepInFrame','UseUpSpace',
@@ -89,17 +87,20 @@ class Flowable:
         self.draw()#this is the bit you overload
         del self.canv
 
-    def drawOn(self, canvas, x, y, _sW=0):
-        "Tell it to draw itself on the canvas.  Do not override"
-        if _sW and hasattr(self,'hAlign'):
-            from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
+    def _hAlignAdjust(self,x,sW=0):
+        if sW and hasattr(self,'hAlign'):
             a = self.hAlign
             if a in ('CENTER','CENTRE', TA_CENTER):
-                x = x + 0.5*_sW
+                x += 0.5*sW
             elif a in ('RIGHT',TA_RIGHT):
-                x = x + _sW
+                x += sW
             elif a not in ('LEFT',TA_LEFT):
                 raise ValueError, "Bad hAlign value "+str(a)
+        return x
+
+    def drawOn(self, canvas, x, y, _sW=0):
+        "Tell it to draw itself on the canvas.  Do not override"
+        x = self._hAlignAdjust(x,_sW)
         canvas.saveState()
         canvas.translate(x, y)
         self._drawOn(canvas)
@@ -214,9 +215,9 @@ class XBox(Flowable):
 
 def _trimEmptyLines(lines):
     #don't want the first or last to be empty
-    while len(lines) and string.strip(lines[0]) == '':
+    while len(lines) and lines[0].strip() == '':
         lines = lines[1:]
-    while len(lines) and string.strip(lines[-1]) == '':
+    while len(lines) and lines[-1].strip() == '':
         lines = lines[:-1]
     return lines
 
@@ -227,12 +228,12 @@ def _dedenter(text,dedent=0):
     and it will chop off that many character, otherwise it leaves
     left edge intact.
     '''
-    lines = string.split(text, '\n')
+    lines = text.split('\n')
     if dedent>0:
         templines = _trimEmptyLines(lines)
         lines = []
         for line in templines:
-            line = string.rstrip(line[dedent:])
+            line = line[dedent:].rstrip()
             lines.append(line)
     else:
         lines = _trimEmptyLines(lines)
@@ -258,7 +259,7 @@ class Preformatted(Flowable):
         H = "Preformatted("
         if bT is not None:
             H = "Preformatted(bulletText=%s," % repr(bT)
-        return "%s'''\\ \n%s''')" % (H, string.join(self.lines,'\n'))
+        return "%s'''\\ \n%s''')" % (H, '\n'.join(self.lines))
 
     def wrap(self, availWidth, availHeight):
         self.width = availWidth
@@ -274,8 +275,8 @@ class Preformatted(Flowable):
 
         linesThatFit = int(availHeight * 1.0 / self.style.leading)
 
-        text1 = string.join(self.lines[0:linesThatFit], '\n')
-        text2 = string.join(self.lines[linesThatFit:], '\n')
+        text1 = '\n'.join(self.lines[0:linesThatFit])
+        text2 = '\n'.join(self.lines[linesThatFit:])
         style = self.style
         if style.firstLineIndent != 0:
             style = deepcopy(style)
@@ -401,7 +402,7 @@ class Image(Flowable):
 
     def identity(self,maxLen=None):
         r = Flowable.identity(self,maxLen)
-        if r[-4:]=='>...' and type(self.filename) is StringType:
+        if r[-4:]=='>...' and isinstance(self.filename,basestring):
             r = "%s filename=%s>" % (r[:-4],self.filename)
         return r
 
@@ -502,7 +503,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
 
 def _flowableSublist(V):
     "if it isn't a list or tuple, wrap it in a list"
-    if type(V) not in (ListType, TupleType): V = V is not None and [V] or []
+    if not isinstance(V,(list,tuple)): V = V is not None and [V] or []
     from doctemplate import LCActionFlowable
     assert not [x for x in V if isinstance(x,LCActionFlowable)],'LCActionFlowables not allowed in sublists'
     return V
@@ -532,9 +533,8 @@ class KeepTogether(_ContainerSpace,Flowable):
     def __repr__(self):
         f = self._content
         L = map(repr,f)
-        import string
-        L = "\n"+string.join(L, "\n")
-        L = string.replace(L, "\n", "\n  ")
+        L = "\n"+"\n".join(L)
+        L = L.replace("\n", "\n  ")
         return "KeepTogether(%s,maxHeight=%s) # end KeepTogether" % (L,self._maxHeight)
 
     def wrap(self, aW, aH):
@@ -734,16 +734,16 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
         pS = 0
         if aW is None: aW = self.width
         aW *= scale
-        _sW *= scale
         if content is None:
             content = self._content
+        x = self._hAlignAdjust(x,_sW*scale)
         y += self.height*scale
         for c in content:
             w, h = c.wrapOn(canv,aW,0xfffffff)
             if (w<_FUZZ or h<_FUZZ) and not getattr(c,'_ZEROSIZE',None): continue
             if c is not content[0]: h += max(c.getSpaceBefore()-pS,0)
             y -= h
-            c.drawOn(canv,x,y,_sW=_sW+(aW-w))
+            c.drawOn(canv,x,y,_sW=aW-w)
             if c is not content[-1]:
                 pS = c.getSpaceAfter()
                 y -= pS
@@ -875,7 +875,7 @@ def _qsolve(h,(a,b)):
     return max(1./s1, 1./s2)
 
 class KeepInFrame(_Container,Flowable):
-    def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=1, mode='shrink', name=''):
+    def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=1, mode='shrink', name='',hAlign='LEFT',vAlign='BOTTOM'):
         '''mode describes the action to take when overflowing
             error       raise an error in the normal way
             continue    ignore ie just draw it and report maxWidth, maxHeight
@@ -891,6 +891,8 @@ class KeepInFrame(_Container,Flowable):
         if mergeSpace is None: mergeSpace = overlapAttachedSpace
         self.mergespace = mergeSpace
         self._content = content
+        self.vAlign = vAlign
+        self.hAlign = hAlign
 
     def _getAvailableWidth(self):
         return self.maxWidth - self._leftExtraIndent - self._rightExtraIndent
