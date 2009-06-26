@@ -151,7 +151,7 @@ def _ptoTestCase(self):
     ptoblob('2 PTO (inner split)',[ColorParagraph('pink',text0,bt),PTOContainer([ColorParagraph(black,'Inner Starts',H1),ColorParagraph('yellow',text2,bt),ColorParagraph('black','Inner Ends',H1)],t1,h1),ColorParagraph('magenta',text1,bt)],t0,h0)
     _showDoc('test_platypus_pto.pdf',story)
 
-def _KeepInFrameTestCase(self,mode,offset=12):
+def _KeepInFrameTestCase(self,mode,offset=0):
     story = []
     def fbreak(story=story):
         story.append(FrameBreak())
@@ -160,11 +160,26 @@ def _KeepInFrameTestCase(self,mode,offset=12):
     H1.pageBreakBefore = 0
     H1.keepWithNext = 0
     bt = styleSheet['BodyText']
-    story.append(KeepInFrame(170-offset,284-offset,[Paragraph(text0,bt)],mode=mode))
-    fbreak()
-    story.append(KeepInFrame(170-offset,284-offset,[Paragraph(text0,bt),Paragraph(text1,bt)],mode=mode))
-    fbreak()
-    story.append(KeepInFrame(170-offset,284-offset,[Paragraph(text0,bt),Paragraph(text1,bt),Paragraph(text2,bt)],mode=mode))
+    def subStory(texts):
+        style = [
+            ('VALIGN',(0,0),(-1,-1),'TOP'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, black),
+            ('BOX', (0,0), (-1,-1), 0.25, black),
+            ]
+        return ([Paragraph(t,bt) for t in texts]
+                +[Table([('alignment', a.lower())],style = style,hAlign=a)
+                    for a in ('LEFT','RIGHT','CENTER')])
+    def allModesKIF(just,ifb=True,width=170):
+        if ifb: fbreak()
+        story.append(KeepInFrame(width-offset,284-offset,subStory(texts=(text0,)),mode=mode,hAlign=just))
+        fbreak()
+        story.append(KeepInFrame(width-offset,284-offset,subStory(texts=(text0,text1)),mode=mode,hAlign=just))
+        fbreak()
+        story.append(KeepInFrame(width-offset,284-offset,subStory(texts=(text0,text1,text2)),mode=mode,hAlign=just))
+    allModesKIF('LEFT',False)
+    allModesKIF('LEFT',width=100)
+    allModesKIF('CENTRE',width=100)
+    allModesKIF('RIGHT',width=100)
     _showDoc('test_platypus_KeepInFrame%s.pdf'%mode,story)
 
 class TestCases(unittest.TestCase):
