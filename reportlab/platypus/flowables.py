@@ -34,6 +34,7 @@ from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfutils
 
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace
+from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
         'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
         'FailOnWrap','HRFlowable','PTOContainer','KeepInFrame','UseUpSpace',
@@ -89,17 +90,20 @@ class Flowable:
         self.draw()#this is the bit you overload
         del self.canv
 
-    def drawOn(self, canvas, x, y, _sW=0):
-        "Tell it to draw itself on the canvas.  Do not override"
-        if _sW and hasattr(self,'hAlign'):
-            from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
+    def _hAlignAdjust(self,x,sW=0):
+        if sW and hasattr(self,'hAlign'):
             a = self.hAlign
             if a in ('CENTER','CENTRE', TA_CENTER):
-                x = x + 0.5*_sW
+                x += 0.5*sW
             elif a in ('RIGHT',TA_RIGHT):
-                x = x + _sW
+                x += sW
             elif a not in ('LEFT',TA_LEFT):
                 raise ValueError, "Bad hAlign value "+str(a)
+        return x
+
+    def drawOn(self, canvas, x, y, _sW=0):
+        "Tell it to draw itself on the canvas.  Do not override"
+        x = self._hAlignAdjust(x,_sW)
         canvas.saveState()
         canvas.translate(x, y)
         self._drawOn(canvas)
@@ -734,16 +738,16 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
         pS = 0
         if aW is None: aW = self.width
         aW *= scale
-        _sW *= scale
         if content is None:
             content = self._content
+        x = self._hAlignAdjust(x,_sW*scale)
         y += self.height*scale
         for c in content:
             w, h = c.wrapOn(canv,aW,0xfffffff)
             if (w<_FUZZ or h<_FUZZ) and not getattr(c,'_ZEROSIZE',None): continue
             if c is not content[0]: h += max(c.getSpaceBefore()-pS,0)
             y -= h
-            c.drawOn(canv,x,y,_sW=_sW)
+            c.drawOn(canv,x,y,_sW=aW-w)
             if c is not content[-1]:
                 pS = c.getSpaceAfter()
                 y -= pS
@@ -891,6 +895,8 @@ class KeepInFrame(_Container,Flowable):
         if mergeSpace is None: mergeSpace = overlapAttachedSpace
         self.mergespace = mergeSpace
         self._content = content
+        self.vAlign = vAlign
+        self.hAlign = hAlign
 
     def _getAvailableWidth(self):
         return self.maxWidth - self._leftExtraIndent - self._rightExtraIndent
