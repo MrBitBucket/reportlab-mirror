@@ -733,7 +733,8 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
         '''we simulate being added to a frame'''
         pS = 0
         if aW is None: aW = self.width
-        aW = scale*(aW+_sW)
+        aW *= scale
+        _sW *= scale
         if content is None:
             content = self._content
         y += self.height*scale
@@ -742,7 +743,7 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
             if (w<_FUZZ or h<_FUZZ) and not getattr(c,'_ZEROSIZE',None): continue
             if c is not content[0]: h += max(c.getSpaceBefore()-pS,0)
             y -= h
-            c.drawOn(canv,x,y,_sW=aW-w)
+            c.drawOn(canv,x,y,_sW=_sW+(aW-w))
             if c is not content[-1]:
                 pS = c.getSpaceAfter()
                 y -= pS
