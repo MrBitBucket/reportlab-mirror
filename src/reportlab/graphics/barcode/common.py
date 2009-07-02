@@ -173,7 +173,7 @@ class Barcode(Flowable):
         if anchor=='middle': func = 'drawCentredString'
         elif anchor=='end': func = 'drawRightString'
         else: func = 'drawString'
-        getattr(canv,func)(text,x,y)
+        getattr(canv,func)(x,y,text)
         canv.restoreState()
 
 class MultiWidthBarcode(Barcode):
