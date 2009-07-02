@@ -55,7 +55,12 @@ from reportlab.platypus.flowables import Spacer, Flowable
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 from base64 import encodestring, decodestring
-from marshal import dumps, loads
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+dumps = pickle.dumps
+loads = pickle.loads
 
 def unquote(txt):
     from xml.sax.saxutils import unescape
@@ -286,7 +291,14 @@ class SimpleIndex(IndexingFlowable):
         self._flowable = None
         self.setup(**kwargs)
 
-    def setup(self, style=None, dot=None, tableStyle=None, headers=True, name=None):
+    def getFormatFunc(self,format):
+        try:
+            exec 'from reportlab.lib.sequencer import _format_%s as formatFunc' % format in locals()
+        except ImportError:
+            raise ValueError('Unknown format %r' % format)
+        return formatFunc
+
+    def setup(self, style=None, dot=None, tableStyle=None, headers=True, name=None, format='123', offset=0):
         """
         This method makes it possible to change styling and other parameters on an existing object.
         
@@ -302,6 +314,8 @@ class SimpleIndex(IndexingFlowable):
             name of the index which it should appear in:
             
                 <index item="term" name="myindex" />
+
+        format can be 'I', 'i', '123',  'ABC', 'abc'
         """
         
         if style is None:
@@ -315,14 +329,29 @@ class SimpleIndex(IndexingFlowable):
         if name is None:
             from reportlab.platypus.paraparser import DEFAULT_INDEX_NAME as name
         self.name = name
+        self.formatFunc = self.getFormatFunc(format)
+        self.offset = offset
 
     def __call__(self,canv,kind,label):
-        terms = commasplit(label)
-        key = 'ix_%s_%s_p_%s' % (self.name, label, canv.getPageNumber())
+        try:
+            terms, format, offset = loads(decodestring(label))
+        except:
+            terms = label
+            format = offset = None
+        if format is None:
+            formatFunc = self.formatFunc
+        else:
+            formatFunc = self.getFormatFunc(format)
+        if offset is None:
+            offset = self.offset
+
+        terms = commasplit(terms)
+        pns = formatFunc(canv.getPageNumber()-offset)
+        key = 'ix_%s_%s_p_%s' % (self.name, label, pns)
 
         info = canv._curr_tx_info
         canv.bookmarkHorizontal(key, info['cur_x'], info['cur_y'] + info['leading'])
-        self.addEntry(terms, canv.getPageNumber(), key)
+        self.addEntry(terms, pns, key)
 
     def getCanvasMaker(self, canvasmaker=canvas.Canvas):
 
@@ -407,7 +436,7 @@ class SimpleIndex(IndexingFlowable):
             if diff:
                 lastTexts = texts
                 texts = texts[i:]
-            label = encodestring(dumps(list(pageNumbers)))
+            label = encodestring(dumps(list(pageNumbers))).strip()
             texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (texts[-1], label)
             for text in texts:
                 style = self.getLevelStyle(i+leveloffset)
