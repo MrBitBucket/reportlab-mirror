@@ -919,7 +919,7 @@ class ParaParser(xmllib.XMLParser):
                 offset = int(offset)
             except:
                 raise ValueError('index tag offset is %r not an int' % offset)
-        defn.label = base64.encodestring(cPickle.dumps((label,format,offset))).strip
+        defn.label = base64.encodestring(pickle.dumps((label,format,offset))).strip()
         defn.name = name
         defn.kind='index'
         self._push(cbDefn=defn)
