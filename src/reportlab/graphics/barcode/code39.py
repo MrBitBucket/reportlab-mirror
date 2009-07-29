@@ -54,17 +54,12 @@ _patterns = {
     'W':    ("BSBsbsbsb", 32),      'X': ("bSbsBsbsB", 33),
     'Y':    ("BSbsBsbsb", 34),      'Z': ("bSBsBsbsb", 35),
     '-':    ("bSbsbsBsB", 36),      '.': ("BSbsbsBsb", 37),
-    ' ':    ("bSBsbsBsb", 38),      '*': ("bSbsBsBsb", 39),
-    '$':    ("bSbSbSbsb", 40),      '/': ("bSbSbsbSb", 41),
-    '+':    ("bSbsbSbSb", 42),      '%': ("bsbSbSbSb", 43)
-}
+    ' ':    ("bSBsbsBsb", 38),      '*': ("bSbsBsBsb", None),
+    '$':    ("bSbSbSbsb", 39),      '/': ("bSbSbsbSb", 40),
+    '+':    ("bSbsbSbSb", 41),      '%': ("bsbSbSbSb", 42)
+    }
 
-_valchars = [
-    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A',
-    'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
-    'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W',
-    'X', 'Y', 'Z', '-', '.', ' ', '*', '$', '/', '+', '%'
-]
+_stdchrs = string.digits + string.uppercase + "-. $/+%"
 
 _extended = {
     '\0':   "%U",    '\01':  "$A",    '\02':  "$B",    '\03':  "$C",
@@ -90,19 +85,18 @@ _extended = {
     'w':    "+W",    'x':    "+X",    'y':    "+Y",    'z':    "+Z",
     '{':    "%P",    '|':    "%Q",    '}':    "%R",    '~':    "%S",
     '\177': "%T"
-}
+    }
 
 
-_stdchrs = string.digits + string.uppercase + "-. *$/+%"
 _extchrs = _stdchrs + string.lowercase + \
     "\000\001\002\003\004\005\006\007\010\011\012\013\014\015\016\017" + \
     "\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037" + \
-    "!'#&\"(),:;<=>?@[\\]^_`{|}~\177"
+    "*!'#&\"(),:;<=>?@[\\]^_`{|}~\177"
 
 def _encode39(value, cksum, stop):
     v = sum([_patterns[c][1] for c in value]) % 43
     if cksum:
-        value += _valchars[v]
+        value += _stdchrs[v]
     if stop: value = '*'+value+'*'
     return value
 
@@ -195,7 +189,7 @@ class Standard39(_Code39Base):
     http://www.aimglobal.org/aimstore/
     """
     def validate(self):
-        vval = ""
+        vval = [].append
         self.valid = 1
         for c in self.value:
             if c in string.lowercase:
@@ -203,9 +197,9 @@ class Standard39(_Code39Base):
             if c not in _stdchrs:
                 self.valid = 0
                 continue
-            vval = vval + c
-        self.validated = vval
-        return vval
+            vval(c)
+        self.validated = ''.join(vval.__self__)
+        return self.validated
 
     def encode(self):
         self.encoded = _encode39(self.validated, self.checksum, self.stop)
