@@ -1003,7 +1003,7 @@ class Paragraph(Flowable):
         if not isinstance(width,(tuple,list)): maxWidths = [width]
         else: maxWidths = width
         lines = []
-        lineno = 0
+        self.height = lineno = 0
         style = self.style
 
         #for bullets, work out width and ensure we wrap the right amount onto line one
@@ -1011,7 +1011,6 @@ class Paragraph(Flowable):
 
         maxWidth = maxWidths[0]
 
-        self.height = 0
         autoLeading = getattr(self,'autoLeading',getattr(style,'autoLeading',''))
         calcBounds = autoLeading not in ('','off')
         frags = self.frags
@@ -1222,42 +1221,42 @@ class Paragraph(Flowable):
         if not isinstance(width,(list,tuple)): maxWidths = [width]
         else: maxWidths = width
         style = self.style
+        self.height = 0
 
         #for bullets, work out width and ensure we wrap the right amount onto line one
         _handleBulletWidth(self.bulletText, style, maxWidths)
-        if len(self.frags)>1:
-            autoLeading = getattr(self,'autoLeading',getattr(style,'autoLeading',''))
-            calcBounds = autoLeading not in ('','off')
-            return cjkFragSplit(self.frags, maxWidths, calcBounds)
-            #raise ValueError('CJK Wordwrap can only handle one fragment per paragraph for now. Tried to handle:\ntext:  %s\nfrags: %s' % (self.text, self.frags))
-        elif not len(self.frags):
+        frags = self.frags
+        nFrags = len(frags)
+        if nFrags==1 and not hasattr(frags[0],'cbDefn'):
+            f = frags[0]
+            if hasattr(self,'blPara') and getattr(self,'_splitpara',0):
+                return f.clone(kind=0, lines=self.blPara.lines)
+            #single frag case
+            lines = []
+            lineno = 0
+            if hasattr(f,'text'):
+                text = f.text
+            else:
+                text = ''.join(getattr(f,'words',[]))
+
+            from reportlab.lib.textsplit import wordSplit
+            lines = wordSplit(text, maxWidths[0], f.fontName, f.fontSize)
+            #the paragraph drawing routine assumes multiple frags per line, so we need an
+            #extra list like this
+            #  [space, [text]]
+            #
+            wrappedLines = [(sp, [line]) for (sp, line) in lines]
+            return f.clone(kind=0, lines=wrappedLines, ascent=f.fontSize, descent=-0.2*f.fontSize)
+        elif nFrags<=0:
             return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
                             textColor=style.textColor, lines=[],ascent=style.fontSize,descent=-0.2*style.fontSize)
-        f = self.frags[0]
-        if 1 and hasattr(self,'blPara') and getattr(self,'_splitpara',0):
-            #NB this is an utter hack that awaits the proper information
-            #preserving splitting algorithm
-            return f.clone(kind=0, lines=self.blPara.lines)
-        lines = []
-        lineno = 0
 
-        self.height = 0
-
-        f = self.frags[0]
-
-        if hasattr(f,'text'):
-            text = f.text
-        else:
-            text = ''.join(getattr(f,'words',[]))
-
-        from reportlab.lib.textsplit import wordSplit
-        lines = wordSplit(text, maxWidths[0], f.fontName, f.fontSize)
-        #the paragraph drawing routine assumes multiple frags per line, so we need an
-        #extra list like this
-        #  [space, [text]]
-        #
-        wrappedLines = [(sp, [line]) for (sp, line) in lines]
-        return f.clone(kind=0, lines=wrappedLines, ascent=f.fontSize, descent=-0.2*f.fontSize)
+        #general case nFrags>1 or special
+        if hasattr(self,'blPara') and getattr(self,'_splitpara',0):
+            return self.blPara
+        autoLeading = getattr(self,'autoLeading',getattr(style,'autoLeading',''))
+        calcBounds = autoLeading not in ('','off')
+        return cjkFragSplit(frags, maxWidths, calcBounds)
 
     def beginText(self, x, y):
         return self.canv.beginText(x, y)
