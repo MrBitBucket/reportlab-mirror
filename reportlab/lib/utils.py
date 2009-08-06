@@ -785,8 +785,10 @@ class DebugMemo:
         module_versions = {}
         for n,m in sys.modules.items():
             if n=='reportlab' or n=='rlextra' or n[:10]=='reportlab.' or n[:8]=='rlextra.':
-                v = getattr(m,'__version__',None)
-                if v: module_versions[n] = v
+                v = [getattr(m,x,None) for x in ('__version__','__path__','__file__')]
+                if filter(None,v):
+                    v = [v[0]] + filter(None,v[1:])
+                    module_versions[n] = tuple(v)
         store['__module_versions'] = module_versions
         self.store['__payload'] = {}
         self._add(kw)
@@ -834,10 +836,11 @@ class DebugMemo:
         K = v.keys()
         K.sort()
         for k in K:
-            vk = v[k]
+            vk = vk0 = v[k]
+            if isinstance(vk,tuple): vk0 = vk[0]
             try:
                 m = recursiveImport(k,sys.path[:],1)
-                d = getattr(m,'__version__',None)==vk and 'SAME' or 'DIFFERENT'
+                d = getattr(m,'__version__',None)==vk0 and 'SAME' or 'DIFFERENT'
             except:
                 m = None
                 d = '??????unknown??????'
