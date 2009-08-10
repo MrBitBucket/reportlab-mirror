@@ -721,7 +721,6 @@ class DebugMemo:
     def __init__(self,fn='rl_dbgmemo.dbg',mode='w',getScript=1,modules=(),capture_traceback=1, stdout=None, **kw):
         import time, socket
         self.fn = fn
-        if mode!='w': return
         if not stdout: 
             self.stdout = sys.stdout
         else:
@@ -729,6 +728,7 @@ class DebugMemo:
                 self.stdout = stdout
             else:
                 self.stdout = open(stdout,'w')
+        if mode!='w': return
         self.store = store = {}
         if capture_traceback and sys.exc_info() != (None,None,None):
             import traceback
@@ -737,7 +737,17 @@ class DebugMemo:
             store['__traceback'] = s.getvalue()
         cwd=os.getcwd()
         lcwd = os.listdir(cwd)
+        pcwd = os.path.dirname(cwd)
+        lpcwd = pcwd and os.listdir(pcwd) or '???'
         exed = os.path.abspath(os.path.dirname(sys.argv[0]))
+        project_version='???'
+        md=None
+        try:
+            import marshal
+            md=marshal.loads(__loader__.get_data('meta_data.mar'))
+            project_version=md['project_version']
+        except:
+            pass
         store.update({  'gmt': time.asctime(time.gmtime(time.time())),
                         'platform': sys.platform,
                         'version': sys.version,
@@ -750,6 +760,7 @@ class DebugMemo:
                         'cwd': cwd,
                         'hostname': socket.gethostname(),
                         'lcwd': lcwd,
+                        'lpcwd': lpcwd,
                         'byteorder': sys.byteorder,
                         'maxint': sys.maxint,
                         'maxint': getattr(sys,'maxunicode','????'),
@@ -757,6 +768,9 @@ class DebugMemo:
                         'version_info': getattr(sys,'version_info','????'),
                         'winver': getattr(sys,'winver','????'),
                         'environment': os.environ,
+                        '__loader__': __loader__,
+                        'project_meta_data': md,
+                        'project_version': project_version,
                         })
         for M,A in (
                 (sys,('getwindowsversion','getfilesystemencoding')),
