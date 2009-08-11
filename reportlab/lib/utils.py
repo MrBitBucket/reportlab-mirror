@@ -748,6 +748,9 @@ class DebugMemo:
             project_version=md['project_version']
         except:
             pass
+        env = os.environ
+        K=env.keys()
+        K.sort()
         store.update({  'gmt': time.asctime(time.gmtime(time.time())),
                         'platform': sys.platform,
                         'version': sys.version,
@@ -767,7 +770,7 @@ class DebugMemo:
                         'api_version': getattr(sys,'api_version','????'),
                         'version_info': getattr(sys,'version_info','????'),
                         'winver': getattr(sys,'winver','????'),
-                        'environment': os.environ,
+                        'environment': '\n\t\t\t'.join(['']+['%s=%r' % (k,env[k]) for k in K]),
                         '__loader__': __loader__,
                         'project_meta_data': md,
                         'project_version': project_version,
