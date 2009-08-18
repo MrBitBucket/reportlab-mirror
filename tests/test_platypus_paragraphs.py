@@ -102,7 +102,7 @@ class ParagraphCorners(unittest.TestCase):
         aW,aH=439.275590551,121.88976378
         w,h=p.wrap(aW,aH)
         S=p.split(aW,aH)
-        assert len(S)==3, 'Multi frag CJK splitting failed'
+        assert len(S)==2, 'Multi frag CJK splitting failed'
         w0,h0=S[0].wrap(aW,aH)
         assert h0<=aH,'Multi-frag CJK split[0] has wrong height %s >= available %s' % (H0,aH)
         w1,h1=S[1].wrap(aW,aH)
