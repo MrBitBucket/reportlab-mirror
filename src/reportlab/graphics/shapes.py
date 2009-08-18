@@ -44,10 +44,12 @@ STATE_DEFAULTS = {   # sensible defaults for all
     'strokeMiterLimit' : 'TBA',  # don't know yet so let bomb here
     'strokeDashArray': None,
     'strokeOpacity': 1.0,  #100%
+    'fillOpacity': 1.0,
+    'fillOverprint': False,
+    'strokeOverprint': False,
 
     'fillColor': colors.black,   #...or text will be invisible
     #'fillRule': NON_ZERO_WINDING, - these can be done later
-    #'fillOpacity': 1.0,  #100% - can be done later
 
     'fontSize': 10,
     'fontName': defaultGraphicsFontName,
@@ -798,6 +800,8 @@ class LineShape(Shape):
         strokeLineJoin = AttrMapValue(None),
         strokeMiterLimit = AttrMapValue(isNumber),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
+        strokeOpacity = AttrMapValue(isNumberInRange(0, 1)),
+        strokeOverprint = AttrMapValue(isBoolean),
         )
 
     def __init__(self, kw):
@@ -807,6 +811,8 @@ class LineShape(Shape):
         self.strokeLineJoin = 0
         self.strokeMiterLimit = 0
         self.strokeDashArray = None
+        self.strokeOpacity = 1
+        self.strokeOverprint = False
         self.setProperties(kw)
 
 
@@ -835,10 +841,14 @@ class SolidShape(LineShape):
 
     _attrMap = AttrMap(BASE=LineShape,
         fillColor = AttrMapValue(isColorOrNone),
+        fillOpacity = AttrMapValue(isNumberInRange(0, 1)),
+        fillOverprint = AttrMapValue(isBoolean),
         )
 
     def __init__(self, kw):
         self.fillColor = STATE_DEFAULTS['fillColor']
+        self.fillOpacity = 1
+        self.fillOverprint = False
         # do this at the end so keywords overwrite
         #the above settings
         LineShape.__init__(self, kw)

@@ -74,6 +74,42 @@ def _annFormat(D,color,thickness,dashArray,hradius=0,vradius=0):
 #   BS['S'] = bss
 #   D['BS'] = BS
 
+class   ExtGState:
+    defaults = dict(
+                CA=1,
+                ca=1,
+                OP=False,
+                op=False,
+                )
+
+    def __init__(self):
+        self._d = {}
+        self._c = {}
+
+    def set(self,canv,a,v):
+        d = self.defaults[a]
+        isbool = isinstance(d,bool)
+        if isbool: v=bool(v)
+        if v!=self._d.get(a,d) or (a=='op' and self.getValue('OP')!=d):
+            self._d[a] = v
+            if isbool: v=str(v).lower()
+            t = a,v
+            if t in self._c:
+                name = self._c[t]
+            else:
+                name = 'GS'+str(len(self._c))
+                self._c[t] = name
+            canv._code.append('/%s gs' % name)
+
+    def getValue(self,a):
+        return self._d.get(a,self.defaults[a])
+
+    def getState(self):
+        S = {}
+        for t,name in self._c.iteritems():
+            S[name] = pdfdoc.PDFDictionary(dict((t,)))
+        return S and pdfdoc.PDFDictionary(S) or None
+
 class Canvas(textobject._PDFColorSetter):
     """This class is the programmer's interface to the PDF file format.  Methods
     are (or will be) provided here to do just about everything PDF can do.
@@ -128,7 +164,9 @@ class Canvas(textobject._PDFColorSetter):
                  invariant = None,
                  verbosity=0,
                  encrypt=None,
-                 cropMarks=None):
+                 cropMarks=None,
+                 pdfVersion=None,
+                 ):
         """Create a canvas of a given size. etc.
 
         You may pass a file-like object to filename as an alternative to
@@ -145,8 +183,9 @@ class Canvas(textobject._PDFColorSetter):
         self._filename = filename
 
         self._doc = pdfdoc.PDFDocument(compression=pageCompression,
-                                       invariant=invariant, filename=filename)
-
+                                       invariant=invariant, filename=filename,
+                                       pdfVersion=pdfVersion or pdfdoc.PDF_VERSION_DEFAULT,
+                                       )
 
         #this only controls whether it prints 'saved ...' - 0 disables
         self._verbosity = verbosity
@@ -240,6 +279,7 @@ class Canvas(textobject._PDFColorSetter):
 
         self._fillColorRGB = (0,0,0)
         self._strokeColorRGB = (0,0,0)
+        self._extgstate = ExtGState()
 
     def push_state_stack(self):
         state = {}
@@ -397,6 +437,34 @@ class Canvas(textobject._PDFColorSetter):
         wins."""
         self._doc._catalog.showFullScreen()
 
+    def _setStrokeAlpha(self,v):
+        """
+        Define the transparency/opacity of strokes. 0 is fully
+        transparent, 1 is fully opaque.
+
+        Note that calling this function will cause a version 1.4 PDF
+        to be generated (rather than 1.3).
+        """
+        self._doc.ensureMinPdfVersion('transparency')
+        self._extgstate.set(self,'CA',v)
+
+    def _setFillAlpha(self,v):
+        """
+        Define the transparency/opacity of non-strokes. 0 is fully
+        transparent, 1 is fully opaque.
+
+        Note that calling this function will cause a version 1.4 PDF
+        to be generated (rather than 1.3).
+        """
+        self._doc.ensureMinPdfVersion('transparency')
+        self._extgstate.set(self,'ca',v)
+
+    def _setStrokeOverprint(self,v):
+        self._extgstate.set(self,'OP',v)
+
+    def _setFillOverprint(self,v):
+        self._extgstate.set(self,'op',v)
+
     def _getCmShift(self):
         cM = self._cropMarks
         if cM:
@@ -466,6 +534,8 @@ class Canvas(textobject._PDFColorSetter):
 
         strm =  self._psCommandsBeforePage + [self._preamble] + code + self._psCommandsAfterPage
         page.setStream(strm)
+        self._setColorSpace(page)
+        self._setExtGState(page)
         self._setXObjects(page)
         self._setAnnotations(page)
         self._doc.addPage(page)
@@ -489,6 +559,9 @@ class Canvas(textobject._PDFColorSetter):
 
     def _setAnnotations(self,page):
         page.Annots = self._annotationrefs
+
+    def _setColorSpace(self,obj):
+        obj._colorsUsed = self._colorsUsed
 
     def _setXObjects(self, thing):
         """for pages and forms, define the XObject dictionary for resources, if needed"""
@@ -624,13 +697,11 @@ class Canvas(textobject._PDFColorSetter):
         """Query whether form XObj really exists yet."""
         return self._doc.hasForm(name)
 
-
-        ######################################################
-        #
-        #   Image routines
-        #
-        ######################################################
-
+    ######################################################
+    #
+    #   Image routines
+    #
+    ######################################################
     def drawInlineImage(self, image, x,y, width=None,height=None,
             preserveAspectRatio=False,anchor='c'):
         """See drawImage, which should normally be used instead... 
@@ -657,7 +728,6 @@ class Canvas(textobject._PDFColorSetter):
     def drawImage(self, image, x, y, width=None, height=None, mask=None, 
             preserveAspectRatio=False, anchor='c'):
         """Draws the image (ImageReader object or filename) as specified.
-
 
         "image" may be an image filename or an ImageReader object. 
  
@@ -704,8 +774,6 @@ class Canvas(textobject._PDFColorSetter):
         bitmaps to always be centred and appear at the top of the given box,
         set anchor='n'.      There are good examples of this in the output
         of test_pdfgen_general.py
-       
-
 
         Unlike drawInlineImage, this creates 'external images' which
         are only stored once in the PDF file but can be drawn many times.
@@ -776,7 +844,7 @@ class Canvas(textobject._PDFColorSetter):
             # restore the saved code
             saved = self._codeStack[-1]
             del self._codeStack[-1]
-            (self._code, self._formsinuse, self._annotationrefs, self._formData) = saved
+            self._code, self._formsinuse, self._annotationrefs, self._formData,self._colorsUsed = saved
         else:
             self._code = []    # ready for more...
             self._psCommandsAfterPage = []
@@ -784,16 +852,21 @@ class Canvas(textobject._PDFColorSetter):
             self._formsinuse = []
             self._annotationrefs = []
             self._formData = None
+            self._colorsUsed = []
 
     def _pushAccumulators(self):
         "when you enter a form, save accumulator info not related to the form for page (if any)"
-        saved = (self._code, self._formsinuse, self._annotationrefs, self._formData)
+        saved = (self._code, self._formsinuse, self._annotationrefs, self._formData, self._colorsUsed)
         self._codeStack.append(saved)
         self._code = []    # ready for more...
         self._currentPageHasImages = 1 # for safety...
         self._formsinuse = []
         self._annotationrefs = []
         self._formData = None
+        self._colorsUsed = []
+
+    def _setExtGState(self, obj):
+        obj.ExtGState = self._extgstate.getState()
 
     def beginForm(self, name, lowerx=0, lowery=0, upperx=None, uppery=None):
         """declare the current graphics stream to be a named form.
@@ -828,12 +901,13 @@ class Canvas(textobject._PDFColorSetter):
         form = pdfdoc.PDFFormXObject(lowerx=lowerx, lowery=lowery, upperx=upperx, uppery=uppery)
         form.compression = self._pageCompression
         form.setStreamList([self._preamble] + self._code) # ??? minus preamble (seems to be needed!)
+        self._setColorSpace(form)
+        self._setExtGState(form)
         self._setXObjects(form)
         self._setAnnotations(form)
         self._doc.addForm(name, form)
         self._restartAccumulators()
         self.pop_state_stack()
-
 
     def addPostScriptCommand(self, command, position=1):
         """Embed literal Postscript in the document.
@@ -1056,7 +1130,7 @@ class Canvas(textobject._PDFColorSetter):
     def transform(self, a,b,c,d,e,f):
         """adjoin a mathematical transform to the current graphics state matrix.
            Not recommended for beginners."""
-        #"""How can Python track this?"""
+        #How can Python track this?
         if ENABLE_TRACKING:
             a0,b0,c0,d0,e0,f0 = self._currentMatrix
             self._currentMatrix = (a0*a+c0*b,    b0*a+d0*b,
@@ -1069,14 +1143,6 @@ class Canvas(textobject._PDFColorSetter):
             self._code[-1] = s % fp_str(a0*a+c0*b,b0*a+d0*b,a0*c+c0*d,b0*c+d0*d,a0*e+c0*f+e0,b0*e+d0*f+f0)
         else:
             self._code.append('%s cm' % fp_str(a,b,c,d,e,f))
-        ### debug
-##        (a,b,c,d,e,f) = self.Kolor
-##        self.Kolor = (f,a,b,c,d,e)
-##        self.setStrokeColorRGB(f,a,b)
-##        self.setFillColorRGB(f,a,b)
-##        self.line(-90,-1000,1,1); self.line(1000,-90,-1,1)
-##        self.drawString(0,0,"here")
-##    Kolor = (0, 0.5, 1, 0.25, 0.7, 0.3)
 
     def absolutePosition(self, x, y):
         """return the absolute position of x,y in user space w.r.t. default user space"""

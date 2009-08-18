@@ -13,7 +13,7 @@ These can be constructed from several popular formats.  We also include
 
 - various conversion and construction functions
 '''
-import string, math
+import math
 from reportlab.lib.utils import fp_str
 
 class Color:
@@ -25,7 +25,7 @@ class Color:
         self.red, self.green, self.blue = red,green,blue
 
     def __repr__(self):
-        return "Color(%s)" % string.replace(fp_str(self.red, self.green, self.blue),' ',',')
+        return "Color(%s)" % fp_str(self.red, self.green, self.blue).replace(' ',',')
 
     def __hash__(self):
         return hash( (self.red, self.green, self.blue) )
@@ -99,8 +99,8 @@ class CMYKColor(Color):
             self.red, self.green, self.blue = (r,g,b)
 
     def __repr__(self):
-        return "CMYKColor(%s%s%s%s)" % (
-            string.replace(fp_str(self.cyan, self.magenta, self.yellow, self.black),' ',','),
+        return "%s(%s%s%s%s)" % (self.__class__.__name__,
+            fp_str(self.cyan, self.magenta, self.yellow, self.black).replace(' ',','),
             (self.spotName and (',spotName='+repr(self.spotName)) or ''),
             (self.density!=1 and (',density='+fp_str(self.density)) or ''),
             (self.knockout is not None and (',knockout=%d' % self.knockout) or ''),
@@ -143,12 +143,18 @@ class PCMYKColor(CMYKColor):
         CMYKColor.__init__(self,cyan/100.,magenta/100.,yellow/100.,black/100.,spotName,density/100.,knockout=knockout)
 
     def __repr__(self):
-        return "PCMYKColor(%s%s%s%s)" % (
-            string.replace(fp_str(self.cyan*100, self.magenta*100, self.yellow*100, self.black*100),' ',','),
+        return "%s(%s%s%s%s)" % (self.__class__.__name__,
+            fp_str(self.cyan*100, self.magenta*100, self.yellow*100, self.black*100).replace(' ',','),
             (self.spotName and (',spotName='+repr(self.spotName)) or ''),
             (self.density!=1 and (',density='+fp_str(self.density*100)) or ''),
             (self.knockout is not None and (',knockout=%d' % self.knockout) or ''),
             )
+
+class CMYKColorSep(CMYKColor):
+    '''special case color for making separating pdfs'''
+    def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
+                spotName=None, density=1):
+        CMYKColor.__init__(self,cyan,magenta,yellow,black,spotName,density,knockout=None)
 
 def cmyk2rgb((c,m,y,k),density=1):
     "Convert from a CMYK color tuple to an RGB color tuple"
@@ -222,10 +228,10 @@ def HexColor(val, htmlOnly=False):
         else:
             if htmlOnly:
                 raise ValueError('not a hex string')
-            if string.lower(val[:2]) == '0x':
+            if val[:2].lower() == '0x':
                 b = 16
                 val = val[2:]
-        val = string.atoi(val,b)
+        val = int(val,b)
     return Color(((val>>16)&0xFF)/255.0,((val>>8)&0xFF)/255.0,(val&0xFF)/255.0)
 
 def linearlyInterpolatedColor(c0, c1, x0, x1, x):
@@ -545,7 +551,7 @@ def toColor(arg,default=None):
         return len(arg)==3 and Color(arg[0],arg[1],arg[2]) or CMYKColor(arg[0],arg[1],arg[2],arg[3])
     elif isinstance(arg,basestring):
         C = getAllNamedColors()
-        s = string.lower(arg)
+        s = arg.lower()
         if C.has_key(s): return C[s]
         try:
             return toColor(eval(arg))

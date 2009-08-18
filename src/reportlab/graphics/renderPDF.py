@@ -228,6 +228,14 @@ class _PDFRenderer(Renderer):
                 fontname = delta.get('fontName', self._canvas._fontname)
                 fontsize = delta.get('fontSize', self._canvas._fontsize)
                 self._canvas.setFont(fontname, fontsize)
+            elif key=='fillOpacity':
+                self._canvas.setFillAlpha(value)
+            elif key=='strokeOpacity':
+                self._canvas.setFillAlpha(value)
+            elif key=='fillOverprint':
+                self._canvas.setFillOverprint(value)
+            elif key=='strokeOverprint':
+                self._canvas.setFillOverprint(value)
 
 from reportlab.platypus import Flowable
 class GraphicsFlowable(Flowable):

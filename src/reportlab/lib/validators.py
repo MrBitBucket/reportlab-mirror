@@ -106,6 +106,21 @@ class _isListOfNumbersOrNone(Validator):
         if x is None: return True
         return isListOfNumbers(x)
 
+class isNumberInRange(_isNumber):
+    def __init__(self, min, max):
+        self.min = min
+        self.max = max
+
+    def test(self, x):
+        try:
+            n = self.normalize(x)
+            if self.min <= n <= self.max:
+                return True
+        except ValueError:
+            pass
+        return False
+    
+
 class _isListOfShapes(Validator):
     "ListOfShapes validator class."
     def test(self, x):
