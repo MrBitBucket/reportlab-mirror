@@ -947,6 +947,44 @@ class PdfgenTestCase(unittest.TestCase):
         c.showPage()
         c.save()
 
+    def test3(self):
+        '''some special properties'''
+        palette = [
+                    colors.CMYKColorSep(0.6,0.34,0,0.1,spotName='625C',density=1),
+                    colors.CMYKColorSep(0.13,0.51,0.87,0.48,spotName='464c',density=1),
+                    ]
+        canv = canvas.Canvas(   'test_pdfgen_general_spots.pdf',
+                        pagesize=(346,102),
+                        )
+
+        canv.setFont('Helvetica',20)
+        canv.setLineWidth(1)
+        canv.setStrokeColor(colors.CMYKColor(0,0,0,1))
+        x=10
+        y=10
+        for c in palette:
+            c.density = 1.0
+            canv.setFillColor(c)
+            canv.drawString(x,80,'This is %s' % c.spotName)
+            canv.rect(x,y,50,50,fill=1)
+            canv.setFillColor(c.clone(density=0.5))
+            canv.rect(x+55,y,20,20,fill=1)
+            canv.setFillColor(colors.CMYKColor(0,0,1,0))
+            canv.rect(x+80,y,30,30,fill=1)
+            canv.rect(x+120,y,30,30,fill=1)
+            alpha = c is palette[0] and 1 or 0.5
+            op = c is palette[0] and True or False
+            canv.setFillAlpha(alpha)
+            canv.setFillColor(colors.CMYKColor(1,0,0,0))
+            canv.rect(x+90,y+10,10,10,fill=1)
+            canv.setFillOverprint(op)
+            canv.rect(x+130,y+10,10,10,fill=1)
+            canv.setFillAlpha(1)
+            canv.setFillOverprint(False)
+            x += canv._pagesize[0]*0.5
+        canv.showPage()
+        canv.save()
+
 def makeSuite():
     return makeSuiteForClasses(PdfgenTestCase)
 
