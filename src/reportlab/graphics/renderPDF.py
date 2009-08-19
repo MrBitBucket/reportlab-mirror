@@ -231,11 +231,11 @@ class _PDFRenderer(Renderer):
             elif key=='fillOpacity':
                 self._canvas.setFillAlpha(value)
             elif key=='strokeOpacity':
-                self._canvas.setFillAlpha(value)
+                self._canvas.setStrokeAlpha(value)
             elif key=='fillOverprint':
                 self._canvas.setFillOverprint(value)
             elif key=='strokeOverprint':
-                self._canvas.setFillOverprint(value)
+                self._canvas.setStrokeOverprint(value)
 
 from reportlab.platypus import Flowable
 class GraphicsFlowable(Flowable):
