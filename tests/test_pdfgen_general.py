@@ -957,7 +957,6 @@ class PdfgenTestCase(unittest.TestCase):
                         pagesize=(346,102),
                         )
 
-        canv.setFont('Helvetica',20)
         canv.setLineWidth(1)
         canv.setStrokeColor(colors.CMYKColor(0,0,0,1))
         x=10
@@ -965,7 +964,9 @@ class PdfgenTestCase(unittest.TestCase):
         for c in palette:
             c.density = 1.0
             canv.setFillColor(c)
+            canv.setFont('Helvetica',20)
             canv.drawString(x,80,'This is %s' % c.spotName)
+            canv.setFont('Helvetica',6)
             canv.rect(x,y,50,50,fill=1)
             canv.setFillColor(c.clone(density=0.5))
             canv.rect(x+55,y,20,20,fill=1)
@@ -976,8 +977,12 @@ class PdfgenTestCase(unittest.TestCase):
             op = c is palette[0] and True or False
             canv.setFillAlpha(alpha)
             canv.setFillColor(colors.CMYKColor(1,0,0,0))
+            canv.drawString(x+80+1,y+3,'OP=%d' % int(False))
+            canv.drawString(x+80+1,y+23,'Alpha=%.1f' % alpha)
             canv.rect(x+90,y+10,10,10,fill=1)
             canv.setFillOverprint(op)
+            canv.drawString(x+120+1,y+3,'OP=%d' % int(op))
+            canv.drawString(x+120+1,y+23,'Alpha=%.1f' % alpha)
             canv.rect(x+130,y+10,10,10,fill=1)
             canv.setFillAlpha(1)
             canv.setFillOverprint(False)
