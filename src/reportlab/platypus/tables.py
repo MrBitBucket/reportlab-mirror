@@ -23,7 +23,6 @@ from reportlab.lib.styles import PropertySet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase.pdfmetrics import stringWidth
-import operator, string
 
 class CellStyle(PropertySet):
     defaults = {
@@ -94,10 +93,7 @@ class TableStyle:
     def add(self, *cmd):
         self._cmds.append(cmd)
     def __repr__(self):
-        L = map(repr, self._cmds)
-        import string
-        L = string.join(L, "  \n")
-        return "TableStyle(\n%s\n) # end TableStyle" % L
+        return "TableStyle(\n%s\n) # end TableStyle" % "  \n".join(map(repr, self._cmds))
     def getCommands(self):
         return self._cmds
 
@@ -296,9 +292,9 @@ class Table(Flowable):
         r = getattr(self,'_rowHeights','[unknown]')
         c = getattr(self,'_colWidths','[unknown]')
         cv = getattr(self,'_cellvalues','[unknown]')
-        import pprint, string
+        import pprint
         cv = pprint.pformat(cv)
-        cv = string.replace(cv, "\n", "\n  ")
+        cv = cv.replace("\n", "\n  ")
         return "%s(\n rowHeights=%s,\n colWidths=%s,\n%s\n) # end table" % (self.__class__.__name__,r,c,cv)
 
     def normalizeData(self, data):
@@ -404,15 +400,14 @@ class Table(Flowable):
                 W = W[:]
             else:
                 W0 = W[:]
+            V = self._cellvalues
+            S = self._cellStyles
             while None in W:
                 j = W.index(None) #find first unspecified column
-                f = lambda x,j=j: operator.getitem(x,j)
-                V = map(f,self._cellvalues)  #values for this column
-                S = map(f,self._cellStyles)  #styles for this column
                 w = 0
-                i = 0
-
-                for v, s in map(None, V, S):
+                for i,Vi in enumerate(V):
+                    v = Vi[j]
+                    s = S[i][j]
                     ji = j,i
                     span = spanRanges.get(ji,None)
                     if ji in colSpanCells and not span: #if the current cell is part of a spanned region,
@@ -430,7 +425,6 @@ class Table(Flowable):
                                 spanCons[x] = max(spanCons.get(x,t),t)
                                 t = 0
                     if t>w: w = t   #record a new maximum
-                    i += 1
 
                 W[j] = w
 
@@ -503,7 +497,7 @@ class Table(Flowable):
                 S = self._cellStyles[i] # styles for row i
                 h = 0
                 j = 0
-                for j,(v, s, w) in enumerate(map(None, V, S, W)): # value, style, width (lengths must match)
+                for j,(v, s, w) in enumerate(zip(V, S, W)): # value, style, width (lengths must match)
                     ji = j,i
                     span = spanRanges.get(ji,None)
                     if ji in rowSpanCells and not span:
@@ -539,7 +533,7 @@ class Table(Flowable):
                 # we can stop if we have filled up all available room
                 if longTable:
                     hmax = i
-                    height = reduce(operator.add, H[:i], 0)
+                    height = sum(H[:i])
                     if height > availHeight:
                         break
             if None not in H: hmax = lim
@@ -547,7 +541,7 @@ class Table(Flowable):
             if spanCons:
                 spanFixDim(H0,H,spanCons)
 
-        height = self._height = reduce(operator.add, H[:hmax], 0)
+        height = self._height = sum(H[:hmax])
         self._rowpositions = [height]    # index 0 is actually topline; we skip when processing cells
         for h in H[:hmax]:
             height = height - h
@@ -610,7 +604,7 @@ class Table(Flowable):
             return 1
         elif isinstance(thing, Flowable):
             return thing._fixedWidth  # must loosen this up
-        else: #string, number, None etc.
+        else: #str, number, None etc.
             #anything else gets passed to str(...)
             # so should be sizable
             return 1
@@ -944,7 +938,7 @@ class Table(Flowable):
             cmd = list(cmd)
             if len(cmd)<5: raise ValueError('bad line command '+str(cmd))
 
-            #determine line cap value at position 5. This can be string or numeric.
+            #determine line cap value at position 5. This can be str or numeric.
             if len(cmd)<6:
                 cmd.append(1)
             else:
@@ -954,7 +948,7 @@ class Table(Flowable):
             #dashes at index 6 - this is a dash array:
             if len(cmd)<7: cmd.append(None)
 
-            #join mode at index 7 - can be string or numeric, look up as for caps
+            #join mode at index 7 - can be str or numeric, look up as for caps
             if len(cmd)<8: cmd.append(1)
             else:
                 join = _convert2int(cmd[7], LINEJOINS, 0, 2, 'join', cmd)
@@ -1273,8 +1267,8 @@ class Table(Flowable):
         self._drawBkgrnd()
         if not self._spanCmds:
             # old fashioned case, no spanning, steam on and do each cell
-            for row, rowstyle, rowpos, rowheight in map(None, self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
-                for cellval, cellstyle, colpos, colwidth in map(None, row, rowstyle, self._colpositions[:-1], self._colWidths):
+            for row, rowstyle, rowpos, rowheight in zip(self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
+                for cellval, cellstyle, colpos, colwidth in zip(row, rowstyle, self._colpositions[:-1], self._colWidths):
                     self._drawCell(cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
         else:
             # we have some row or col spans, need a more complex algorithm
@@ -1313,7 +1307,7 @@ class Table(Flowable):
             elif cmd == 'ROWBACKGROUNDS':
                 #Need a list of colors to cycle through.  The arguments
                 #might be already colours, or convertible to colors, or
-                # None, or the string 'None'.
+                # None, or the str 'None'.
                 #It's very common to alternate a pale shade with None.
                 colorCycle = map(colors.toColorOrNone, arg)
                 count = len(colorCycle)
@@ -1372,7 +1366,7 @@ class Table(Flowable):
             else:
                 y = rowpos+(rowheight+cellstyle.bottomPadding-cellstyle.topPadding+h)/2.0
             if cellval: y += cellval[0].getSpaceBefore()
-            for v, w, h in map(None,cellval,W,H):
+            for v, w, h in zip(cellval,W,H):
                 if just=='LEFT': x = colpos+cellstyle.leftPadding
                 elif just=='RIGHT': x = colpos+colwidth-cellstyle.rightPadding - w
                 elif just in ('CENTRE', 'CENTER'):
@@ -1398,7 +1392,7 @@ class Table(Flowable):
                 x = colpos + colwidth - cellstyle.rightPadding
             else:
                 raise ValueError('Invalid justification %s' % just)
-            vals = string.split(str(cellval), "\n")
+            vals = str(cellval).split("\n")
             n = len(vals)
             leading = cellstyle.leading
             fontsize = cellstyle.fontsize
