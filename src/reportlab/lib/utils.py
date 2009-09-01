@@ -717,7 +717,6 @@ class DebugMemo:
     def __init__(self,fn='rl_dbgmemo.dbg',mode='w',getScript=1,modules=(),capture_traceback=1, stdout=None, **kw):
         import time, socket
         self.fn = fn
-        if mode!='w': return
         if not stdout: 
             self.stdout = sys.stdout
         else:
@@ -725,6 +724,7 @@ class DebugMemo:
                 self.stdout = stdout
             else:
                 self.stdout = open(stdout,'w')
+        if mode!='w': return
         self.store = store = {}
         if capture_traceback and sys.exc_info() != (None,None,None):
             import traceback
@@ -733,7 +733,20 @@ class DebugMemo:
             store['__traceback'] = s.getvalue()
         cwd=os.getcwd()
         lcwd = os.listdir(cwd)
+        pcwd = os.path.dirname(cwd)
+        lpcwd = pcwd and os.listdir(pcwd) or '???'
         exed = os.path.abspath(os.path.dirname(sys.argv[0]))
+        project_version='???'
+        md=None
+        try:
+            import marshal
+            md=marshal.loads(__loader__.get_data('meta_data.mar'))
+            project_version=md['project_version']
+        except:
+            pass
+        env = os.environ
+        K=env.keys()
+        K.sort()
         store.update({  'gmt': time.asctime(time.gmtime(time.time())),
                         'platform': sys.platform,
                         'version': sys.version,
@@ -746,13 +759,17 @@ class DebugMemo:
                         'cwd': cwd,
                         'hostname': socket.gethostname(),
                         'lcwd': lcwd,
+                        'lpcwd': lpcwd,
                         'byteorder': sys.byteorder,
                         'maxint': sys.maxint,
                         'maxint': getattr(sys,'maxunicode','????'),
                         'api_version': getattr(sys,'api_version','????'),
                         'version_info': getattr(sys,'version_info','????'),
                         'winver': getattr(sys,'winver','????'),
-                        'environment': os.environ,
+                        'environment': '\n\t\t\t'.join(['']+['%s=%r' % (k,env[k]) for k in K]),
+                        '__loader__': repr(__loader__),
+                        'project_meta_data': md,
+                        'project_version': project_version,
                         })
         for M,A in (
                 (sys,('getwindowsversion','getfilesystemencoding')),
@@ -781,8 +798,10 @@ class DebugMemo:
         module_versions = {}
         for n,m in sys.modules.items():
             if n=='reportlab' or n=='rlextra' or n[:10]=='reportlab.' or n[:8]=='rlextra.':
-                v = getattr(m,'__version__',None)
-                if v: module_versions[n] = v
+                v = [getattr(m,x,None) for x in ('__version__','__path__','__file__')]
+                if filter(None,v):
+                    v = [v[0]] + filter(None,v[1:])
+                    module_versions[n] = tuple(v)
         store['__module_versions'] = module_versions
         self.store['__payload'] = {}
         self._add(kw)
@@ -797,7 +816,19 @@ class DebugMemo:
 
     def _dump(self,f):
         import pickle
-        pickle.dump(self.store,f)
+        try:
+            pos=f.tell()
+            pickle.dump(self.store,f)
+        except:
+            S=self.store.copy()
+            ff=getStringIO()
+            for k,v in S.iteritems():
+                try:
+                    pickle.dump({k:v},ff)
+                except:
+                    S[k] = '<unpicklable object %r>' % v
+            f.seek(pos,0)
+            pickle.dump(S,f)
 
     def dump(self):
         f = open(self.fn,'wb')
@@ -830,10 +861,11 @@ class DebugMemo:
         K = v.keys()
         K.sort()
         for k in K:
-            vk = v[k]
+            vk = vk0 = v[k]
+            if isinstance(vk,tuple): vk0 = vk[0]
             try:
                 m = recursiveImport(k,sys.path[:],1)
-                d = getattr(m,'__version__',None)==vk and 'SAME' or 'DIFFERENT'
+                d = getattr(m,'__version__',None)==vk0 and 'SAME' or 'DIFFERENT'
             except:
                 m = None
                 d = '??????unknown??????'
