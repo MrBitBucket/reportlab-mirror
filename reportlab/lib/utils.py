@@ -771,7 +771,7 @@ class DebugMemo:
                         'version_info': getattr(sys,'version_info','????'),
                         'winver': getattr(sys,'winver','????'),
                         'environment': '\n\t\t\t'.join(['']+['%s=%r' % (k,env[k]) for k in K]),
-                        '__loader__': __loader__,
+                        '__loader__': repr(__loader__),
                         'project_meta_data': md,
                         'project_version': project_version,
                         })
@@ -820,7 +820,19 @@ class DebugMemo:
 
     def _dump(self,f):
         import pickle
-        pickle.dump(self.store,f)
+        try:
+            pos=f.tell()
+            pickle.dump(self.store,f)
+        except:
+            S=self.store.copy()
+            ff=getStringIO()
+            for k,v in S.iteritems():
+                try:
+                    pickle.dump({k:v},ff)
+                except:
+                    S[k] = '<unpicklable object %r>' % v
+            f.seek(pos,0)
+            pickle.dump(S,f)
 
     def dump(self):
         f = open(self.fn,'wb')
