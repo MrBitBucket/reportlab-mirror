@@ -356,12 +356,17 @@ class LinePlot(AbstractLineChart):
         g.add(xA)
         g.add(yA)
         if not self.gridFirst:
-            xA.makeGrid(g,parent=self,dim=yA.getGridDims)
-            yA.makeGrid(g,parent=self,dim=xA.getGridDims)
+            xAdgl = getattr(xA,'drawGridLast',False)
+            yAdgl = getattr(yA,'drawGridLast',False)
+            if not xAdgl: xA.makeGrid(g,parent=self,dim=yA.getGridDims)
+            if not yAdgl: yA.makeGrid(g,parent=self,dim=xA.getGridDims)
         annotations = getattr(self,'annotations',[])
         for a in annotations:
             if getattr(a,'beforeLines',None):
                 g.add(a(self,xA.scale,yA.scale))
+        if not self.gridFirst:
+            if xAdgl: xA.makeGrid(g,parent=self,dim=yA.getGridDims)
+            if yAdgl: yA.makeGrid(g,parent=self,dim=xA.getGridDims)
         g.add(self.makeLines())
         for a in annotations:
             if not getattr(a,'beforeLines',None):

@@ -193,11 +193,15 @@ class BarChart(PlotArea):
         self.calcBarPositions()
         g = Group()
         g.add(self.makeBackground())
-        cA.makeGrid(g,parent=self, dim=vA.getGridDims)
-        vA.makeGrid(g,parent=self, dim=cA.getGridDims)
+        cAdgl = getattr(cA,'drawGridLast',False)
+        vAdgl = getattr(vA,'drawGridLast',False)
+        if not cAdgl: cA.makeGrid(g,parent=self, dim=vA.getGridDims)
+        if not vAdgl: vA.makeGrid(g,parent=self, dim=cA.getGridDims)
         g.add(self.makeBars())
         g.add(cA)
         g.add(vA)
+        if cAdgl: cA.makeGrid(g,parent=self, dim=vA.getGridDims)
+        if vAdgl: vA.makeGrid(g,parent=self, dim=cA.getGridDims)
         for a in getattr(self,'annotations',()): g.add(a(self,cA.scale,vA.scale))
         del self._configureData
         return g
