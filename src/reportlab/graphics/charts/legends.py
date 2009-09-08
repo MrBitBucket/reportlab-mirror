@@ -158,7 +158,7 @@ class Legend(Widget):
         dividerOffsY = AttrMapValue(isNumber, desc="dividerLines Y offset"),
         colEndCallout = AttrMapValue(None, desc="a user callout(self,g, x, xt, y,width, lWidth)"),
         subCols = AttrMapValue(None,desc="subColumn properties"),
-        swatchcallout = AttrMapValue(None, desc="a user swatch callout(self,g,x,y,i,(col,name),swatch)"),
+        swatchCallout = AttrMapValue(None, desc="a user swatch callout(self,g,x,y,i,(col,name),swatch)"),
         )
 
     def __init__(self):
@@ -354,7 +354,7 @@ class Legend(Widget):
 
         lim = columnMaximum - 1
         callout = getattr(self,'callout',None)
-        scallout = getattr(self,'swatchcallout',None)
+        scallout = getattr(self,'swatchCallout',None)
         dividerLines = self.dividerLines
         if dividerLines:
             dividerWidth = self.dividerWidth
