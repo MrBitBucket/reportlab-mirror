@@ -477,7 +477,7 @@ class Legend(Widget):
 
             if c:
                 g.add(c)
-                if scallout: scallout(self,g,thisx,y,i,(col,name),c)
+                if scallout: scallout(self,g,thisx,y0,i,(col,name),c)
 
             map(g.add,S)
             if self.colEndCallout and (i%columnMaximum==lim or i==(n-1)):
