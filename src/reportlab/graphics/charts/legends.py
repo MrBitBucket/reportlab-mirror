@@ -105,6 +105,10 @@ class LegendCallout:
     def __call__(self,legend,g,thisx,y,(col,name)):
         pass
 
+class LegendSwatchCallout(LegendCallout):
+    def __call__(self,legend,g,thisx,y,i,(col,name),swatch):
+        pass
+
 class LegendColEndCallout(LegendCallout):
     def __call__(self,legend, g, x, xt, y, width, lWidth):
         pass
@@ -154,7 +158,8 @@ class Legend(Widget):
         dividerOffsY = AttrMapValue(isNumber, desc="dividerLines Y offset"),
         colEndCallout = AttrMapValue(None, desc="a user callout(self,g, x, xt, y,width, lWidth)"),
         subCols = AttrMapValue(None,desc="subColumn properties"),
-       )
+        swatchcallout = AttrMapValue(None, desc="a user swatch callout(self,g,x,y,i,(col,name),swatch)"),
+        )
 
     def __init__(self):
         # Upper-left reference point.
@@ -349,6 +354,7 @@ class Legend(Widget):
 
         lim = columnMaximum - 1
         callout = getattr(self,'callout',None)
+        scallout = getattr(self,'swatchcallout',None)
         dividerLines = self.dividerLines
         if dividerLines:
             dividerWidth = self.dividerWidth
@@ -451,12 +457,12 @@ class Legend(Widget):
             # Make a 'normal' color swatch...
             if isAuto(col):
                 chart = getattr(col,'chart',getattr(col,'obj',None))
-                g.add(chart.makeSwatchSample(getattr(col,'index',i),x,thisy,dx,dy))
+                c = chart.makeSwatchSample(getattr(col,'index',i),x,thisy,dx,dy)
             elif isinstance(col, colors.Color):
                 if isSymbol(swatchMarker):
-                    g.add(uSymbol2Symbol(swatchMarker,x+dx/2.,thisy+dy/2.,col))
+                    c = uSymbol2Symbol(swatchMarker,x+dx/2.,thisy+dy/2.,col)
                 else:
-                    g.add(self._defaultSwatch(x,thisy,dx,dy,fillColor=col,strokeWidth=strokeWidth,strokeColor=strokeColor))
+                    c = self._defaultSwatch(x,thisy,dx,dy,fillColor=col,strokeWidth=strokeWidth,strokeColor=strokeColor)
             elif col is not None:
                 try:
                     c = copy.deepcopy(col)
@@ -464,9 +470,14 @@ class Legend(Widget):
                     c.y = thisy
                     c.width = dx
                     c.height = dy
-                    g.add(c)
                 except:
-                    pass
+                    c = None
+            else:
+                c = None
+
+            if c:
+                g.add(c)
+                if scallout: scallout(self,g,thisx,y,i,(col,name),c)
 
             map(g.add,S)
             if self.colEndCallout and (i%columnMaximum==lim or i==(n-1)):
