@@ -22,8 +22,8 @@ import string, os
 from types import StringType, ListType, TupleType
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
-from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines
-from reportlab.rl_config import defaultEncoding
+from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines, findInPaths
+from reportlab.rl_config import defaultEncoding, T1SearchPath
 import rl_codecs
 
 rl_codecs.RL_Codecs.register()
@@ -464,7 +464,6 @@ def _pfbCheck(p,d,m,fn):
         raise ValueError, 'Bad pfb file\'%s\' needed %d+%d bytes have only %d!' % (fn,p,l,len(d))
     return p, p+l
 
-
 class EmbeddedType1Face(TypeFace):
     """A Type 1 font other than one of the basic 14.
 
@@ -474,6 +473,8 @@ class EmbeddedType1Face(TypeFace):
         TypeFace.__init__(self, None)
         #None is a hack, name will be supplied by AFM parse lower done
         #in this __init__ method.
+        afmFileName = findInPaths(afmFileName,T1SearchPath)
+        pfbFileName = findInPaths(pfbFileName,T1SearchPath)
         self.afmFileName = os.path.abspath(afmFileName)
         self.pfbFileName = os.path.abspath(pfbFileName)
         self.requiredEncoding = None

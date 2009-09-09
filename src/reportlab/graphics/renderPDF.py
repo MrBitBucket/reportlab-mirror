@@ -158,9 +158,9 @@ class _PDFRenderer(Renderer):
                 font, font_size = S['fontName'], S['fontSize']
                 textLen = stringWidth(text, font, font_size, enc)
                 if text_anchor=='end':
-                    x = x-textLen
+                    x -= textLen
                 elif text_anchor=='middle':
-                    x = x - textLen/2
+                    x -= textLen*0.5
                 else:
                     raise ValueError, 'bad value for textAnchor '+str(text_anchor)
             t = self._canvas.beginText(x,y)
