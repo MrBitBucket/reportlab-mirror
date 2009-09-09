@@ -2036,9 +2036,15 @@ def handleSpecialCharacters(engine, text, program=None):
                     else:
                         fragment = "&"+fragment
                 elif standard.has_key(name):
-                    fragment = standard[name]+fragment[semi+1:]
+                    s = standard[name]
+                    if isinstance(fragment,unicode):
+                        s = s.decode('utf8')
+                    fragment = s+fragment[semi+1:]
                 elif greeks.has_key(name):
-                    fragment = greeks[name]+fragment[semi+1:]
+                    s = greeks[name]
+                    if isinstance(fragment,unicode):
+                        s = s.decode('utf8')
+                    fragment = s+fragment[semi+1:]
                 else:
                     # add back the &
                     fragment = "&"+fragment
