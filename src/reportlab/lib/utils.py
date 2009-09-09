@@ -1094,3 +1094,16 @@ def commajoin(l):
     ['a', ',b', 'c']    
     '''
     return ','.join([ ' ' + i.replace(',', ',,') + ' ' for i in l ])
+
+def findInPaths(fn,paths,isfile=True,fail=False):
+    '''search for relative files in likely places'''
+    exists = isfile and os.path.isfile or os.path.isdir
+    if exists(fn): return fn
+    pjoin = os.path.join
+    if not os.path.isabs(fn):
+        for p in paths:
+            pfn = pjoin(p,fn)
+            if exists(pfn):
+                return pfn
+    if fail: raise ValueError('cannot locate %r with paths=%r' % (fn,paths))
+    return fn
