@@ -230,7 +230,7 @@ class Legend(Widget):
         if not isAuto(colorNamePairs):
             texts = [_getStr(p[1]) for p in colorNamePairs]
         else:
-            chart = colorNamePairs.chart
+            chart = getattr(colorNamePairs,'chart',getattr(colorNamePairs,'obj',None))
             texts = [chart.getSeriesName(i,'series %d' % i) for i in xrange(chart._seriesCount)]
         return texts
 
