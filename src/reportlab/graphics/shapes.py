@@ -673,7 +673,7 @@ class Drawing(Group, Flowable):
         if string.lower(plotMode[1][1:]) in self._saveModes:
             fnroot = plotMode[0]
 
-        plotMode = map(str.lower,formats or getattr(self,'formats',['pdf']))
+        plotMode = [x.lower() for x in (formats or getattr(self,'formats',['pdf']))]
         verbose = (verbose is not None and (verbose,) or (getattr(self,'verbose',verbose),))[0]
         _saved = logger.warnOnce.enabled, logger.infoOnce.enabled
         logger.warnOnce.enabled = logger.infoOnce.enabled = verbose
