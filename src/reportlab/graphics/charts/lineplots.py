@@ -373,6 +373,22 @@ class LinePlot(AbstractLineChart):
                 g.add(a(self,xA.scale,yA.scale))
         return g
 
+    def addCrossHair(self,name,xv,yv,strokeColor=colors.black,strokeWidth=1,beforeLines=True):
+        from reportlab.graphics.shapes import Group, Line
+        annotations = [a for a in getattr(self,'annotations',[]) if getattr(a,'name',None)!=name]
+        def annotation(self,xScale,yScale):
+            x = xScale(xv)
+            y = yScale(yv)
+            g = Group()
+            xA = xScale.im_self #the x axis
+            g.add(Line(xA._x,y,xA._x+xA._length,y,strokeColor=strokeColor,strokeWidth=strokeWidth))
+            yA = yScale.im_self #the y axis
+            g.add(Line(x,yA._y,x,yA._y+yA._length,strokeColor=strokeColor,strokeWidth=strokeWidth))
+            return g
+        annotation.beforeLines = beforeLines
+        annotations.append(annotation)
+        self.annotations = annotations
+
 class LinePlot3D(LinePlot):
     _attrMap = AttrMap(BASE=LinePlot,
         theta_x = AttrMapValue(isNumber, desc='dx/dz'),
