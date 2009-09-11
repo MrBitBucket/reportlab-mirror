@@ -587,7 +587,7 @@ class Drawing(Group, Flowable):
 
     def __init__(self, width=400, height=200, *nodes, **keywords):
         self.background = None
-        apply(Group.__init__,(self,)+nodes,keywords)
+        Group.__init__(self,*nodes,**keywords)
         self.width = width
         self.height = height
         self.hAlign = 'LEFT'
@@ -767,6 +767,19 @@ class Drawing(Group, Flowable):
             return renderPS.drawToString(self, showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
         elif format == 'py':
             return self._renderPy()
+
+    def resized(self,kind='fit',lpad=0,rpad=0,bpad=0,tpad=0):
+        '''return a base class drawing which ensures all the contents fits'''
+        C = self.getContents()
+        oW = self.width
+        oH = self.height
+        drawing = Drawing(oW,oH,*C)
+        xL,yL,xH,yH = drawing.getBounds()
+        if kind=='fit' or (kind=='expand' and (xL<lpad or xH>oW-rpad or yL<bpad or yH>oH-tpad)):
+            drawing.width = nW = xH-xL+lpad+rpad
+            drawing.height = nH = yH-yL+tpad+bpad
+            drawing.transform = (1,0,0,1,lpad-xL,bpad-yL)
+        return drawing
 
 class _DrawingEditorMixin:
     '''This is a mixin to provide functionality for edited drawings'''
