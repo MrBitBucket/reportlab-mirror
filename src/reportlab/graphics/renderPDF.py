@@ -161,6 +161,8 @@ class _PDFRenderer(Renderer):
                     x -= textLen
                 elif text_anchor=='middle':
                     x -= textLen*0.5
+                elif text_anchor=='numeric':
+                    x -= numericXShift(text_anchor,text,textLen,font,font_size,enc)
                 else:
                     raise ValueError, 'bad value for textAnchor '+str(text_anchor)
             t = self._canvas.beginText(x,y)

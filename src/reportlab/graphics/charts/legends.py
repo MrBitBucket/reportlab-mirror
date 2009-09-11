@@ -82,7 +82,7 @@ class SubColProperty(PropHolder):
     _attrMap = AttrMap(
         minWidth = AttrMapValue(isNumber,desc="minimum width for this subcol"),
         rpad = AttrMapValue(isNumber,desc="right padding for this subcol"),
-        align = AttrMapValue(OneOf('left','right','center','centre'),desc='alignment in subCol'),
+        align = AttrMapValue(OneOf('left','right','center','centre','numeric'),desc='alignment in subCol'),
         fontName = AttrMapValue(isString, desc="Font name of the strings"),
         fontSize = AttrMapValue(isNumber, desc="Font size of the strings"),
         leading = AttrMapValue(isNumber, desc="leading for the strings"),
@@ -403,15 +403,6 @@ class Legend(Widget):
                 x2 = x+jOffs[kk+1]
                 sc = subCols[k,i]
                 anchor = sc.align
-                if anchor=='left':
-                    anchor = 'start'
-                    xoffs = x1
-                elif anchor=='right':
-                    anchor = 'end'
-                    xoffs = x2
-                else:
-                    anchor = 'middle'
-                    xoffs = 0.5*(x1+x2)
                 fN = getattr(sc,'fontName',fontName)
                 fS = getattr(sc,'fontSize',fontSize)
                 fC = getattr(sc,'fillColor',fillColor)
@@ -422,6 +413,17 @@ class Legend(Widget):
                     fA = getFont(fontName).face.ascent/1000.
                     if fA==0: fA=0.718
                     fA *= fS
+                if anchor=='left':
+                    anchor = 'start'
+                    xoffs = x1
+                elif anchor=='right':
+                    anchor = 'end'
+                    xoffs = x2
+                elif anchor=='numeric':
+                    xoffs = x2
+                else:
+                    anchor = 'middle'
+                    xoffs = 0.5*(x1+x2)
                 for t in lines:
                     aS(String(xoffs,y,t,fontName=fN,fontSize=fS,fillColor=fC, textAnchor = anchor))
                     y -= fL

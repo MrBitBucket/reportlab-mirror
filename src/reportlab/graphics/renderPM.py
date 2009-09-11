@@ -165,9 +165,11 @@ class _PMRenderer(Renderer):
             if not text_anchor in ['start','inherited']:
                 textLen = stringWidth(text, fontName,fontSize)
                 if text_anchor=='end':
-                    x = x-textLen
+                    x -= textLen
                 elif text_anchor=='middle':
-                    x = x - textLen/2
+                    x -= textLen/2
+                elif text_anchor=='numeric':
+                    x -= numericXShift(text_anchor,text,textLen,fontName,fontSize,stringObj.encoding)
                 else:
                     raise ValueError, 'bad value for textAnchor '+str(text_anchor)
             canv.drawString(x,y,text,_fontInfo=(fontName,fontSize))
@@ -452,6 +454,8 @@ class PMCanvas:
                 x -= textLen
             elif text_anchor=='middle':
                 x -= textLen/2.
+            elif text_anchor=='numeric':
+                x -= numericXShift(text_anchor,text,textLen,self.fontName,self.fontSize)
             self.drawString(x,y,text)
 
     def drawRightString(self, text, x, y):

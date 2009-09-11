@@ -1242,6 +1242,14 @@ class PolyLine(LineShape):
     def getBounds(self):
         return getPointsBounds(self.points)
 
+def numericXShift(tA,text,w,fontName,fontSize,encoding=None):
+    dp = getattr(tA,'_dp','.')
+    i = text.rfind(dp)
+    if i>=0:
+        dpOffs = getattr(tA,'_dpLen',0)
+        w = dpOffs + stringWidth(text[:i],fontName,fontSize,encoding)
+    return w
+
 class String(Shape):
     """Not checked against the spec, just a way to make something work.
     Can be anchored left, middle or end."""
@@ -1254,7 +1262,7 @@ class String(Shape):
         fontName = AttrMapValue(None),
         fontSize = AttrMapValue(isNumber),
         fillColor = AttrMapValue(isColorOrNone),
-        textAnchor = AttrMapValue(isTextAnchor),
+        textAnchor = AttrMapValue(OneOf('start','middle','end','numeric')),
         encoding = AttrMapValue(isString),
         )
     encoding = 'utf8'
@@ -1279,13 +1287,17 @@ class String(Shape):
 
     def getBounds(self):
         # assumes constant drop of 0.2*size to baseline
-        w = stringWidth(self.text,self.fontName,self.fontSize,self.encoding)
-        if self.textAnchor == 'start':
-            x = self.x
-        elif self.textAnchor == 'middle':
-            x = self.x - 0.5*w
-        elif self.textAnchor == 'end':
-            x = self.x - w
+        t = self.text
+        w = stringWidth(t,self.fontName,self.fontSize,self.encoding)
+        tA = self.textAnchor
+        x = self.x
+        if tA!='start':
+            if tA=='middle':
+                x -= 0.5*w
+            elif tA=='end':
+                x -= w
+            elif tA=='numeric':
+                x -= numericXShift(tA,t,w,self.fontName,self.fontSize,self.encoding)
         return (x, self.y - 0.2 * self.fontSize, x+w, self.y + self.fontSize)
 
 class UserNode(_DrawTimeResizeable):

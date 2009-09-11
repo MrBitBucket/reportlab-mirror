@@ -119,7 +119,7 @@ class isNumberInRange(_isNumber):
         except ValueError:
             pass
         return False
-    
+
 
 class _isListOfShapes(Validator):
     "ListOfShapes validator class."
@@ -295,12 +295,21 @@ class DerivedValue:
 class Inherit(DerivedValue):
     def __repr__(self):
         return "inherit"
-    
+
     def getValue(self, renderer, attr):
         return renderer.getStateValue(attr)
-
 inherit = Inherit()
-    
+
+class NumericAlign(str):
+    '''for creating the numeric string value for anchors etc etc
+    dp is the character to align on (the last occurrence will be used)
+    dpLen is the length of characters after the dp
+    '''
+    def __new__(cls,dp='.',dpLen=0):
+        self = str.__new__(cls,'numeric')
+        self._dp=dp
+        self._dpLen = dpLen
+        return self
 
 isAuto = Auto()
 isBoolean = _isBoolean()

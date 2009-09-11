@@ -290,6 +290,8 @@ class PSCanvas:
                 x -= textLen
             elif text_anchor=='middle':
                 x -= textLen/2.
+            elif text_anchor=='numeric':
+                x -= numericXShift(text_anchor,text,textLen,self._font,self._fontSize)
             self.drawString(x,y,text)
 
     def drawRightString(self, text, x, y):
@@ -793,9 +795,11 @@ class _PSRenderer(Renderer):
                 font, fontSize = S['fontName'], S['fontSize']
                 textLen = stringWidth(text, font,fontSize)
                 if text_anchor=='end':
-                    x = x-textLen
+                    x -= textLen
                 elif text_anchor=='middle':
-                    x = x - textLen/2
+                    x -= textLen/2
+                elif text_anchor=='numeric':
+                    x -= numericXShift(text_anchor,text,textLen,font,fontSize)
                 else:
                     raise ValueError, 'bad value for text_anchor '+str(text_anchor)
             self._canvas.drawString(x,y,text)

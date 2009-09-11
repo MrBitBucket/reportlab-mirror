@@ -365,6 +365,8 @@ class SVGCanvas:
                     x -= textLen
                 elif text_anchor=='middle':
                     x -= textLen/2.
+                elif text_anchor=='numeric':
+                    x -= numericXShift(text_anchor,s,textLen,self._font,self._fontSize)
                 else:
                     raise ValueError, 'bad value for text_anchor ' + str(text_anchor)
         self.drawString(x,y,text,angle=angle, link_info=link_info)
@@ -679,13 +681,15 @@ class _SVGRenderer(Renderer):
         if self._canvas._fillColor:
             S = self._tracker.getState()
             text_anchor, x, y, text = S['textAnchor'], stringObj.x, stringObj.y, stringObj.text
-            if not text_anchor in ['start', 'inherited']:
+            if not text_anchor in ('start', 'inherited'):
                 font, fontSize = S['fontName'], S['fontSize']
                 textLen = stringWidth(text, font,fontSize)
                 if text_anchor=='end':
-                    x = x-textLen
+                    x -= textLen
                 elif text_anchor=='middle':
-                    x = x - textLen/2
+                    x -= textLen/2
+                elif text_anchor=='numeric':
+                    x -= numericXShift(text_anchor,text,textLen,font,fontSize)
                 else:
                     raise ValueError, 'bad value for text_anchor ' + str(text_anchor)
             self._canvas.drawString(text,x,y,link_info=self._get_link_info_dict(stringObj))
