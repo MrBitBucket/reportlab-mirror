@@ -776,9 +776,15 @@ class Drawing(Group, Flowable):
         drawing = Drawing(oW,oH,*C)
         xL,yL,xH,yH = drawing.getBounds()
         if kind=='fit' or (kind=='expand' and (xL<lpad or xH>oW-rpad or yL<bpad or yH>oH-tpad)):
-            drawing.width = nW = xH-xL+lpad+rpad
-            drawing.height = nH = yH-yL+tpad+bpad
+            drawing.width = xH-xL+lpad+rpad
+            drawing.height = yH-yL+tpad+bpad
             drawing.transform = (1,0,0,1,lpad-xL,bpad-yL)
+        elif kind=='fitx' or (kind=='expandx' and (xL<lpad or xH>oW-rpad)):
+            drawing.width = xH-xL+lpad+rpad
+            drawing.transform = (1,0,0,1,lpad-xL,0)
+        elif kind=='fity' or (kind=='expandy' and (yL<bpad or yH>oH-tpad)):
+            drawing.height = yH-yL+tpad+bpad
+            drawing.transform = (1,0,0,1,0,bpad-yL)
         return drawing
 
 class _DrawingEditorMixin:
