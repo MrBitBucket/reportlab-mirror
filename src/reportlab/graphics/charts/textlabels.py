@@ -100,7 +100,7 @@ class Label(Widget):
         boxStrokeColor = AttrMapValue(isColorOrNone),
         boxStrokeWidth = AttrMapValue(isNumber),
         boxFillColor = AttrMapValue(isColorOrNone),
-        boxTarget = AttrMapValue(isString),
+        boxTarget = AttrMapValue(OneOf('normal','anti','lo','hi')),
         fillColor = AttrMapValue(isColorOrNone),
         strokeColor = AttrMapValue(isColorOrNone),
         strokeWidth = AttrMapValue(isNumber),

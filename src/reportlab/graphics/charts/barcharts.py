@@ -326,16 +326,29 @@ class BarChart(PlotArea):
     def _labelXY(self,label,x,y,width,height):
         'Compute x, y for a label'
         nudge = label.nudge
-        anti = getattr(label,'boxTarget','normal')=='anti'
+        bt = getattr(label,'boxTarget','normal')
+        anti = bt=='anti'
         if anti: nudge = -nudge
-        if self._flipXY:
-            value = width
-            if anti: value = 0
-            return x + value + (width>=0 and 1 or -1)*nudge, y + 0.5*height
+        pm = value = height
+        if anti: value = 0
+        a = x + 0.5*width
+        nudge = (height>=0 and 1 or -1)*nudge
+        if bt=='hi':
+            if value>=0:
+                b = y + value + nudge
+            else:
+                b = y - nudge
+                pm = -pm
+        elif bt=='lo':
+            if value<=0:
+                b = y + value + nudge
+            else:
+                b = y - nudge
+                pm = -pm
         else:
-            value = height
-            if anti: value = 0
-            return x + 0.5*width, y + value + (height>=0 and 1 or -1)*nudge
+            b = y + value + nudge
+        label._pmv = pm #the plus minus val
+        return a,b,pm
 
     def _addBarLabel(self, g, rowNo, colNo, x, y, width, height):
         text = self._getLabelText(rowNo,colNo)
@@ -354,13 +367,11 @@ class BarChart(PlotArea):
     def _addLabel(self, text, label, g, rowNo, colNo, x, y, width, height):
         if label.visible:
             labelWidth = stringWidth(text, label.fontName, label.fontSize)
-            x0, y0 = self._labelXY(label,x,y,width,height)
             flipXY = self._flipXY
             if flipXY:
-                pm = width
+                y0, x0, pm = self._labelXY(label,y,x,height,width)
             else:
-                pm = height
-            label._pmv = pm #the plus minus val
+                x0, y0, pm = self._labelXY(label,x,y,width,height)
             fixedEnd = getattr(label,'fixedEnd', None)
             if fixedEnd is not None:
                 v = fixedEnd._getValue(self,pm)
