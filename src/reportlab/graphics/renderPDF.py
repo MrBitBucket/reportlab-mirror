@@ -185,6 +185,12 @@ class _PDFRenderer(Renderer):
                         fill=fill,
                         stroke=self._stroke)
 
+    def setStrokeColor(self,c):
+        self._canvas.setStrokeColor(c)
+
+    def setFillColor(self,c):
+        self._canvas.setFillColor(c)
+
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the PDF operators
         needed to set those properties"""
@@ -200,7 +206,7 @@ class _PDFRenderer(Renderer):
                     self._stroke = 0
                 else:
                     self._stroke = 1
-                    self._canvas.setStrokeColor(value)
+                    self.setStrokeColor(value)
             elif key == 'strokeWidth':
                 self._canvas.setLineWidth(value)
             elif key == 'strokeLineCap':  #0,1,2
@@ -222,7 +228,7 @@ class _PDFRenderer(Renderer):
                     self._fill = 0
                 else:
                     self._fill = 1
-                    self._canvas.setFillColor(value)
+                    self.setFillColor(value)
             elif key in ['fontSize', 'fontName']:
                 # both need setting together in PDF
                 # one or both might be in the deltas,
