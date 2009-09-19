@@ -313,6 +313,8 @@ class Group(Shape):
     _attrMap = AttrMap(
         transform = AttrMapValue(isTransform,desc="Coordinate transformation to apply"),
         contents = AttrMapValue(isListOfShapes,desc="Contained drawable elements"),
+        strokeOverprint = AttrMapValue(isBoolean,desc='Trurn on stroke overprinting'),
+        fillOverprint = AttrMapValue(isBoolean,desc='Turn on fill overprinting'),
         )
 
     def __init__(self, *elements, **keywords):
@@ -820,7 +822,7 @@ class LineShape(Shape):
         strokeMiterLimit = AttrMapValue(isNumber),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
         strokeOpacity = AttrMapValue(isNumberInRange(0, 1)),
-        strokeOverprint = AttrMapValue(isBoolean),
+        strokeOverprint = AttrMapValue(isBoolean,desc='Turn on stroke overprinting'),
         )
 
     def __init__(self, kw):
@@ -831,7 +833,6 @@ class LineShape(Shape):
         self.strokeMiterLimit = 0
         self.strokeDashArray = None
         self.strokeOpacity = 1
-        self.strokeOverprint = False
         self.setProperties(kw)
 
 
@@ -861,13 +862,12 @@ class SolidShape(LineShape):
     _attrMap = AttrMap(BASE=LineShape,
         fillColor = AttrMapValue(isColorOrNone),
         fillOpacity = AttrMapValue(isNumberInRange(0, 1)),
-        fillOverprint = AttrMapValue(isBoolean),
+        fillOverprint = AttrMapValue(isBoolean,desc='Turn on fill overprinting'),
         )
 
     def __init__(self, kw):
         self.fillColor = STATE_DEFAULTS['fillColor']
         self.fillOpacity = 1
-        self.fillOverprint = False
         # do this at the end so keywords overwrite
         #the above settings
         LineShape.__init__(self, kw)
