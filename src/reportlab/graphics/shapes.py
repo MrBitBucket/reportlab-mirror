@@ -313,7 +313,7 @@ class Group(Shape):
     _attrMap = AttrMap(
         transform = AttrMapValue(isTransform,desc="Coordinate transformation to apply"),
         contents = AttrMapValue(isListOfShapes,desc="Contained drawable elements"),
-        strokeOverprint = AttrMapValue(isBoolean,desc='Trurn on stroke overprinting'),
+        strokeOverprint = AttrMapValue(isBoolean,desc='Turn on stroke overprinting'),
         fillOverprint = AttrMapValue(isBoolean,desc='Turn on fill overprinting'),
         )
 
