@@ -63,6 +63,9 @@ class WedgeProperties(PropHolder):
         fillColor = AttrMapValue(isColorOrNone),
         strokeColor = AttrMapValue(isColorOrNone),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
+        strokeLineCap = AttrMapValue(OneOf(0,1,2),desc="Line Cap parameter o, 1 or 2"),
+        strokeLineJoin = AttrMapValue(OneOf(0,1,2),desc="Line Join parameter 0, 1 or 2"),
+        strokeMiterLimit = AttrMapValue(isNumber),
         popout = AttrMapValue(isNumber),
         fontName = AttrMapValue(isString),
         fontSize = AttrMapValue(isNumber),
@@ -103,6 +106,9 @@ class WedgeProperties(PropHolder):
         self.fillColor = None
         self.strokeColor = STATE_DEFAULTS["strokeColor"]
         self.strokeDashArray = STATE_DEFAULTS["strokeDashArray"]
+        self.strokeLineJoin = 1
+        self.strokeLineCap = 0
+        self.strokeMiterLimit = 0
         self.popout = 0
         self.fontName = STATE_DEFAULTS["fontName"]
         self.fontSize = STATE_DEFAULTS["fontSize"]
@@ -665,6 +671,10 @@ class Pie(AbstractPieChart):
 
             theWedge.fillColor = wedgeStyle.fillColor
             theWedge.strokeColor = wedgeStyle.strokeColor
+            theWedge.strokeWidth = wedgeStyle.strokeWidth
+            theWedge.strokeLineJoin = wedgeStyle.strokeLineJoin
+            theWedge.strokeLineCap = wedgeStyle.strokeLineCap
+            theWedge.strokeMiterLimit = wedgeStyle.strokeMiterLimit
             theWedge.strokeWidth = wedgeStyle.strokeWidth
             theWedge.strokeDashArray = wedgeStyle.strokeDashArray
 
