@@ -852,7 +852,7 @@ class Canvas(textobject._PDFColorSetter):
             self._formsinuse = []
             self._annotationrefs = []
             self._formData = None
-            self._colorsUsed = []
+            self._colorsUsed = {}
 
     def _pushAccumulators(self):
         "when you enter a form, save accumulator info not related to the form for page (if any)"
@@ -863,7 +863,7 @@ class Canvas(textobject._PDFColorSetter):
         self._formsinuse = []
         self._annotationrefs = []
         self._formData = None
-        self._colorsUsed = []
+        self._colorsUsed = {}
 
     def _setExtGState(self, obj):
         obj.ExtGState = self._extgstate.getState()

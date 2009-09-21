@@ -319,11 +319,12 @@ class PDFDocument:
         return PDFObjectReference(internalname)
 
     def addColor(self,cmyk):
-        name = PDFName(cmyk.spotName)[1:]
+        sname = cmyk.spotName
+        name = PDFName(sname)[1:]
         if name not in self.idToObject:
             sep = PDFSeparationCMYKColor(cmyk).value()  #PDFArray([/Separation /name /DeviceCMYK tint_tf])
             self.Reference(sep,name)
-        return name
+        return name,sname
 
     def setTitle(self, title):
         "embeds in PDF file"
@@ -1103,7 +1104,7 @@ class PDFPage(PDFCatalog):
     hasImages = 0
     compression = 0
     XObjects = None
-    _colorsUsed = []
+    _colorsUsed = {}
     Trans = None
     # transitionstring?
     # xobjects?
@@ -1860,8 +1861,8 @@ class PDFResourceDictionary:
         self.Font = PDFObjectReference(BasicFonts)
 
     def setColorSpace(self,colorsUsed):
-        for c in colorsUsed:
-            self.ColorSpace[c] = PDFObjectReference(c)
+        for c,s in colorsUsed.iteritems():
+            self.ColorSpace[s] = PDFObjectReference(c)
 
     def format(self, document):
         D = {}

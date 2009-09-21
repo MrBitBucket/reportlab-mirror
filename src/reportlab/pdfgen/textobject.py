@@ -22,9 +22,9 @@ class _PDFColorSetter:
 
     def _checkSeparation(self,cmyk):
         if isinstance(cmyk,CMYKColorSep):
-            name = self._doc.addColor(cmyk)
+            name,sname = self._doc.addColor(cmyk)
             if name not in self._colorsUsed:
-                self._colorsUsed.append(name)
+                self._colorsUsed[name] = sname
             return name
 
     def setFillColorCMYK(self, c, m, y, k):
