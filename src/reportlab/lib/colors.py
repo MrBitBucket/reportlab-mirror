@@ -49,12 +49,17 @@ class Color:
     def hexval(self):
         return '0x%02x%02x%02x' % self.bitmap_rgb()
 
+    _cKwds='red green blue'.split()
+    def cKwds(self):
+        for k in self._cKwds:
+            yield k,getattr(self,k)
+    cKwds=property(cKwds)
+
     def clone(self,**kwds):
         '''copy then change values in kwds'''
-        c = self.__class__()
-        c.__dict__ = self.__dict__.copy()
-        c.__dict__.update(kwds)
-        return c
+        D = dict([kv for kv in self.cKwds])
+        D.update(kwds)
+        return self.__class__(**D)
 
 class CMYKColor(Color):
     """This represents colors using the CMYK (cyan, magenta, yellow, black)
@@ -137,6 +142,8 @@ class CMYKColor(Color):
     def _density_str(self):
         return fp_str(self.density)
 
+    _cKwds='cyan magenta yellow black density spotName knockout'.split()
+
 class PCMYKColor(CMYKColor):
     '''100 based CMYKColor with density and a spotName; just like Rimas uses'''
     def __init__(self,cyan,magenta,yellow,black,density=100,spotName=None,knockout=None):
@@ -150,11 +157,28 @@ class PCMYKColor(CMYKColor):
             (self.knockout is not None and (',knockout=%d' % self.knockout) or ''),
             )
 
+    def cKwds(self):
+        K=self._cKwds
+        S=K[:5]
+        for k in self._cKwds:
+            v=getattr(self,k)
+            if k in S: v*=100
+            yield k,v
+    cKwds=property(cKwds)
+
 class CMYKColorSep(CMYKColor):
     '''special case color for making separating pdfs'''
     def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
                 spotName=None, density=1):
         CMYKColor.__init__(self,cyan,magenta,yellow,black,spotName,density,knockout=None)
+    _cKwds='cyan magenta yellow black density spotName'.split()
+
+class PCMYKColorSep(PCMYKColor,CMYKColorSep):
+    '''special case color for making separating pdfs'''
+    def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
+                spotName=None, density=100):
+        PCMYKColor.__init__(self,cyan,magenta,yellow,black,density,spotName,knockout=None)
+    _cKwds='cyan magenta yellow black density spotName'.split()
 
 def cmyk2rgb((c,m,y,k),density=1):
     "Convert from a CMYK color tuple to an RGB color tuple"
