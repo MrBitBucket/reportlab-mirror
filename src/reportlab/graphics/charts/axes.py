@@ -192,6 +192,8 @@ class CategoryAxis(_AxisG):
         style = AttrMapValue(OneOf('parallel','stacked','parallel_3d'),"How common category bars are plotted"),
         labelAxisMode = AttrMapValue(OneOf('high','low','axis'), desc="Like joinAxisMode, but for the axis labels"),
         tickShift = AttrMapValue(isBoolean, desc='Tick shift typically'),
+        loPad = AttrMapValue(isNumber, desc='extra space before start of the axis'),
+        hiPad = AttrMapValue(isNumber, desc='extra space after end of the axis'),
         )
 
     def __init__(self):
@@ -234,16 +236,18 @@ class CategoryAxis(_AxisG):
         #various private things which need to be initialized
         self._labelTextFormat = None
         self.tickShift = 0
+        self.loPad = 0
+        self.hiPad = 0
 
     def setPosition(self, x, y, length):
         # ensure floating point
-        self._x = x
-        self._y = y
-        self._length = length
+        self._x = float(x)
+        self._y = float(y)
+        self._length = float(length)
 
     def configure(self, multiSeries,barWidth=None):
         self._catCount = max(map(len,multiSeries))
-        self._barWidth = barWidth or (self._length/float(self._catCount or 1))
+        self._barWidth = barWidth or ((self._length-self.loPad-self.hiPad)/float(self._catCount or 1))
         self._calcTickmarkPositions()
 
     def _calcTickmarkPositions(self):
@@ -398,7 +402,7 @@ class XCategoryAxis(_XTicks,CategoryAxis):
 
     def scale(self, idx):
         """returns the x position and width in drawing units of the slice"""
-        return (self._x + self._scale(idx)*self._barWidth, self._barWidth)
+        return (self._x + self.loPad + self._scale(idx)*self._barWidth, self._barWidth)
 
     def makeAxis(self):
         g = Group()
@@ -661,9 +665,9 @@ class ValueAxis(_AxisG):
 
     def setPosition(self, x, y, length):
         # ensure floating point
-        self._x = x * 1.0
-        self._y = y * 1.0
-        self._length = length * 1.0
+        self._x = float(x)
+        self._y = float(y)
+        self._length = float(length)
 
     def configure(self, dataSeries):
         """Let the axis configure its scale and range based on the data.
