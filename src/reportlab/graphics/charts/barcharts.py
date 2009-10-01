@@ -4,10 +4,9 @@
 __version__=''' $Id$ '''
 __doc__="""This module defines a variety of Bar Chart components.
 
-The basic flavors are Side-by-side, available in horizontal and
-vertical versions.
+The basic flavors are stacked and side-by-side, available in horizontal and
+vertical versions. 
 
-Stacked and percentile bar charts to follow...
 """
 
 import copy
