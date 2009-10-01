@@ -794,6 +794,56 @@ Bars labels are automatically displayed for negative values
 """)
 
 
+disc("""
+Stacked bars are also supported for vertical bar graphs.
+You enable this layout for your chart by setting the $style$
+attribute to $'stacked'$ on the $categoryAxis$.
+""")
+
+eg("""
+    bc.categoryAxis.style = 'stacked'
+""")
+
+disc("""
+Here is an example of the previous chart values arranged
+in the stacked style.
+""")
+
+
+drawing = Drawing(400, 200)
+
+data = [
+        (13, 5, 20, 22, 37, 45, 19, 4),
+        (14, 6, 21, 23, 38, 46, 20, 5)
+        ]
+
+bc = VerticalBarChart()
+bc.x = 50
+bc.y = 50
+bc.height = 125
+bc.width = 300
+bc.data = data
+bc.strokeColor = colors.black
+
+bc.groupSpacing = 10
+bc.barSpacing = 2.5
+
+bc.valueAxis.valueMin = 0
+bc.valueAxis.valueMax = 100
+bc.valueAxis.valueStep = 20
+
+bc.categoryAxis.labels.boxAnchor = 'ne'
+bc.categoryAxis.labels.dx = 8
+bc.categoryAxis.labels.dy = -2
+bc.categoryAxis.labels.angle = 30
+bc.categoryAxis.categoryNames = ['Jan-99','Feb-99','Mar-99',
+       'Apr-99','May-99','Jun-99','Jul-99','Aug-99']
+bc.categoryAxis.style = 'stacked'
+
+drawing.add(bc)
+draw(drawing, 'Stacking bars on top of each other.')
+
+
 ##Property Value
 ##data This should be a "list of lists of numbers" or "list of tuples of numbers". If you have just one series, write it as
 ##data = [(10,20,30,42),]
@@ -1127,8 +1177,8 @@ be visible itself.
 
 list("""
 Additional chart types - when the current design will have become
-more stable, we expect to add variants of bar charts to deal with stacked
-and percentile bars as well as the side-by-side variant seen here.
+more stable, we expect to add variants of bar charts to deal with
+percentile bars as well as the side-by-side variant seen here.
 """)
 
 
