@@ -73,6 +73,70 @@ def _allInt(values):
             return 0
     return 1
 
+class AxisLineAnnotation:
+    '''Create a grid like line using the given user value to draw the line
+    kwds may contain
+    startOffset offset from the default grid start position
+    endOffset   offset from the default grid end position
+    scaleValue  True/not given --> scale the value
+                otherwise use the absolute value
+    lo          lowest coordinate to draw default 0
+    hi          highest coordinate to draw at default = length
+    drawAtLimit True draw line at appropriate limit if its coordinate exceeds the lo, hi range
+                False ignore if it's outside the range
+    all Line keywords are acceptable
+    '''
+    def __init__(self,v,**kwds):
+        self._v = v
+        self._kwds = kwds
+
+    def __call__(self,axis):
+        kwds = self._kwds.copy()
+        scaleValue = kwds.pop('scaleValue',True)
+        if axis.isYAxis:
+            offs = axis._x
+        else:
+            offs = axis._y
+        s = kwds.pop('start',None)
+        e = kwds.pop('end',None)
+        if s is None or e is None:
+            dim = getattr(getattr(axis,'joinAxis',None),'getGridDims',None)
+            if dim and callable(dim):
+                dim = dim()
+            if dim:
+                if s is None: s = dim[0]
+                if e is None: e = dim[1]
+            else:
+                if s is None: s = 0
+                if e is None: e = 0
+        hi = kwds.pop('hi',axis._length)
+        lo = kwds.pop('lo',0)
+        lo,hi=min(lo,hi),max(lo,hi)
+        drawAtLimit = kwds.pop('drawAtLimit',False)
+        if not scaleValue:
+            oaglp = axis._get_line_pos
+            axis._get_line_pos = lambda x: x
+        try:
+            v = self._v
+            func = axis._getLineFunc(s-offs,e-offs,kwds.pop('parent',None))
+            if not hasattr(axis,'_tickValues'):
+                axis._pseudo_configure()
+            d = axis._get_line_pos(v)
+            if d<lo or d>hi:
+                if not drawAtLimit: return None
+                if d<lo:
+                    d = lo
+                else:
+                    d = hi
+                axis._get_line_pos = lambda x: d
+            L = func(v)
+            for k,v in kwds.iteritems():
+                setattr(L,k,v)
+        finally:
+            if not scaleValue:
+                axis._get_line_pos = oaglp
+        return L
+
 class _AxisG(Widget):
     def _get_line_pos(self,v):
         v = self.scale(v)
@@ -168,6 +232,10 @@ class _AxisG(Widget):
         return acn[0]=='X' or acn[:11]=='NormalDateX'
     isXAxis = property(isXAxis)
 
+    def addAnnotations(self,g):
+        for x in getattr(self,'annotations',[]):
+            g.add(x(self))
+
 # Category axes.
 class CategoryAxis(_AxisG):
     "Abstract category axis, unusable in itself."
@@ -203,6 +271,7 @@ class CategoryAxis(_AxisG):
         tickShift = AttrMapValue(isBoolean, desc='Tick shift typically'),
         loPad = AttrMapValue(isNumber, desc='extra space before start of the axis'),
         hiPad = AttrMapValue(isNumber, desc='extra space after end of the axis'),
+        annotations = AttrMapValue(None,desc='list of annotations'),
         )
 
     def __init__(self):
@@ -281,6 +350,7 @@ class CategoryAxis(_AxisG):
         g.add(self.makeAxis())
         g.add(self.makeTicks())
         g.add(self.makeTickLabels())
+        self.addAnnotations(g)
 
         return g
 
@@ -616,6 +686,7 @@ class ValueAxis(_AxisG):
         origShiftSpecialValue = AttrMapValue(isNumberOrNone, desc='special value for shift'),
         tickAxisMode = AttrMapValue(OneOf('high','low','axis'), desc="Like joinAxisMode, but for the ticks"),
         reverseDirection = AttrMapValue(isBoolean, desc='If true reverse category direction.'),
+        annotations = AttrMapValue(None,desc='list of annotations'),
         )
 
     def __init__(self,**kw):
@@ -1018,6 +1089,7 @@ class ValueAxis(_AxisG):
         g.add(self.makeAxis())
         g.add(self.makeTicks())
         g.add(self.makeTickLabels())
+        self.addAnnotations(g)
 
         return g
 
