@@ -41,7 +41,7 @@ STATE_DEFAULTS = {   # sensible defaults for all
     'strokeWidth': 1,
     'strokeLineCap': 0,
     'strokeLineJoin': 0,
-    'strokeMiterLimit' : 'TBA',  # don't know yet so let bomb here
+    'strokeMiterLimit' : 10,    # don't know yet so let bomb here
     'strokeDashArray': None,
     'strokeOpacity': 1.0,  #100%
     'fillOpacity': 1.0,
@@ -817,9 +817,9 @@ class LineShape(Shape):
     _attrMap = AttrMap(
         strokeColor = AttrMapValue(isColorOrNone),
         strokeWidth = AttrMapValue(isNumber),
-        strokeLineCap = AttrMapValue(None),
-        strokeLineJoin = AttrMapValue(None),
-        strokeMiterLimit = AttrMapValue(isNumber),
+        strokeLineCap = AttrMapValue(OneOf(0,1,2),desc="Line cap 0=butt, 1=round & 2=square"),
+        strokeLineJoin = AttrMapValue(OneOf(0,1,2),desc="Line join 0=miter, 1=round & 2=bevel"),
+        strokeMiterLimit = AttrMapValue(isNumber,desc="miter limit control miter line joins"),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
         strokeOpacity = AttrMapValue(isNumberInRange(0, 1)),
         strokeOverprint = AttrMapValue(isBoolean,desc='Turn on stroke overprinting'),

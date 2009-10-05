@@ -116,7 +116,7 @@ class _AxisG(Widget):
             f = self.isYAxis and self._cyLine or self._cxLine
             return lambda v, s=start, e=end, f=f: f(v,s,e)
 
-    def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray,parent=None):
+    def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray,strokeLineJoin,strokeLineCap,strokeMiterLimit,parent=None):
         func = self._getLineFunc(start,end,parent)
         if not hasattr(self,'_tickValues'):
             self._pseudo_configure()
@@ -125,6 +125,9 @@ class _AxisG(Widget):
                 L.strokeColor = strokeColor
                 L.strokeWidth = strokeWidth
                 L.strokeDashArray = strokeDashArray
+                L.strokeLineJoin = strokeLineJoin
+                L.strokeLineCap = strokeLineCap
+                L.strokeMiterLimit = strokeMiterLimit
                 g.add(L)
 
     def makeGrid(self,g,dim=None,parent=None):
@@ -146,7 +149,7 @@ class _AxisG(Widget):
         if s or e:
             if self.isYAxis: offs = self._x
             else: offs = self._y
-            self._makeLines(g,s-offs,e-offs,c,w,self.gridStrokeDashArray,parent=parent)
+            self._makeLines(g,s-offs,e-offs,c,w,self.gridStrokeDashArray,self.gridStrokeLineJoin,self.gridStrokeLineCap,self.gridStrokeMiterLimit,parent=parent)
 
     def getGridDims(self,start=None,end=None):
         if start is None: start = (self._x,self._y)[self.isYAxis]
@@ -178,9 +181,15 @@ class CategoryAxis(_AxisG):
         strokeWidth = AttrMapValue(isNumber, desc='Width of axis line and ticks.'),
         strokeColor = AttrMapValue(isColorOrNone, desc='Color of axis line and ticks.'),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for axis line.'),
+        strokeLineCap = AttrMapValue(OneOf(0,1,2),desc="Line cap 0=butt, 1=round & 2=square"),
+        strokeLineJoin = AttrMapValue(OneOf(0,1,2),desc="Line join 0=miter, 1=round & 2=bevel"),
+        strokeMiterLimit = AttrMapValue(isNumber,desc="miter limit control miter line joins"),
         gridStrokeWidth = AttrMapValue(isNumber, desc='Width of grid lines.'),
         gridStrokeColor = AttrMapValue(isColorOrNone, desc='Color of grid lines.'),
         gridStrokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for grid lines.'),
+        gridStrokeLineCap = AttrMapValue(OneOf(0,1,2),desc="Grid Line cap 0=butt, 1=round & 2=square"),
+        gridStrokeLineJoin = AttrMapValue(OneOf(0,1,2),desc="Grid Line join 0=miter, 1=round & 2=bevel"),
+        gridStrokeMiterLimit = AttrMapValue(isNumber,desc="Grid miter limit control miter line joins"),
         gridStart = AttrMapValue(isNumberOrNone, desc='Start of grid lines wrt axis origin'),
         gridEnd = AttrMapValue(isNumberOrNone, desc='End of grid lines wrt axis origin'),
         drawGridLast = AttrMapValue(isBoolean, desc='if true draw gridlines after everything else.'),
@@ -217,6 +226,9 @@ class CategoryAxis(_AxisG):
         self.strokeWidth = 1
         self.strokeColor = STATE_DEFAULTS['strokeColor']
         self.strokeDashArray = STATE_DEFAULTS['strokeDashArray']
+        self.gridStrokeLineJoin = self.strokeLineJoin = STATE_DEFAULTS['strokeLineJoin']
+        self.gridStrokeLineCap = self.strokeLineCap = STATE_DEFAULTS['strokeLineCap']
+        self.gridStrokeMiterLimit = self.strokeMiterLimit = STATE_DEFAULTS['strokeMiterLimit']
         self.gridStrokeWidth = 0.25
         self.gridStrokeColor = STATE_DEFAULTS['strokeColor']
         self.gridStrokeDashArray = STATE_DEFAULTS['strokeDashArray']
@@ -294,7 +306,7 @@ class _XTicks:
                         tD = tW*sW
                     elif tD and not tU:
                         tU = tW*sW
-                self._makeLines(g,tU,-tD,self.strokeColor,sW,self.strokeDashArray)
+                self._makeLines(g,tU,-tD,self.strokeColor,sW,self.strokeDashArray,self.strokeLineJoin,self.strokeLineCap,self.strokeMiterLimit)
         return g
 
     def makeTicks(self):
@@ -571,9 +583,15 @@ class ValueAxis(_AxisG):
         strokeWidth = AttrMapValue(isNumber, desc='Width of axis line and ticks.'),
         strokeColor = AttrMapValue(isColorOrNone, desc='Color of axis line and ticks.'),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for axis line.'),
+        strokeLineCap = AttrMapValue(OneOf(0,1,2),desc="Line cap 0=butt, 1=round & 2=square"),
+        strokeLineJoin = AttrMapValue(OneOf(0,1,2),desc="Line join 0=miter, 1=round & 2=bevel"),
+        strokeMiterLimit = AttrMapValue(isNumber,desc="miter limit control miter line joins"),
         gridStrokeWidth = AttrMapValue(isNumber, desc='Width of grid lines.'),
         gridStrokeColor = AttrMapValue(isColorOrNone, desc='Color of grid lines.'),
         gridStrokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for grid lines.'),
+        gridStrokeLineCap = AttrMapValue(OneOf(0,1,2),desc="Grid Line cap 0=butt, 1=round & 2=square"),
+        gridStrokeLineJoin = AttrMapValue(OneOf(0,1,2),desc="Grid Line join 0=miter, 1=round & 2=bevel"),
+        gridStrokeMiterLimit = AttrMapValue(isNumber,desc="Grid miter limit control miter line joins"),
         gridStart = AttrMapValue(isNumberOrNone, desc='Start of grid lines wrt axis origin'),
         gridEnd = AttrMapValue(isNumberOrNone, desc='End of grid lines wrt axis origin'),
         drawGridLast = AttrMapValue(isBoolean, desc='if true draw gridlines after everything else.'),
@@ -623,9 +641,15 @@ class ValueAxis(_AxisG):
                         strokeWidth = 1,
                         strokeColor = STATE_DEFAULTS['strokeColor'],
                         strokeDashArray = STATE_DEFAULTS['strokeDashArray'],
+                        strokeLineJoin =  STATE_DEFAULTS['strokeLineJoin'],
+                        strokeLineCap = STATE_DEFAULTS['strokeLineCap'],
+                        strokeMiterLimit = STATE_DEFAULTS['strokeMiterLimit'],
                         gridStrokeWidth = 0.25,
                         gridStrokeColor = STATE_DEFAULTS['strokeColor'],
                         gridStrokeDashArray = STATE_DEFAULTS['strokeDashArray'],
+                        gridStrokeLineJoin =  STATE_DEFAULTS['strokeLineJoin'],
+                        gridStrokeLineCap = STATE_DEFAULTS['strokeLineCap'],
+                        gridStrokeMiterLimit = STATE_DEFAULTS['strokeMiterLimit'],
                         gridStart = None,
                         gridEnd = None,
                         drawGridLast = False,
