@@ -245,6 +245,7 @@ class Renderer:
 
         try:
             node = _expandUserNode(node,canvas)
+            if not node: return
             if hasattr(node,'_canvas'):
                 ocanvas = 1
             else:
@@ -290,6 +291,7 @@ class Renderer:
         canvas = getattr(self,'_canvas',None)
         for node in group.getContents():
             node = _expandUserNode(node,canvas)
+            if not node: continue
 
             #here is where we do derived values - this seems to get everything. Touch wood.            
             self.fillDerivedValues(node)
