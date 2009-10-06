@@ -269,9 +269,11 @@ class CategoryAxis(_AxisG):
         style = AttrMapValue(OneOf('parallel','stacked','parallel_3d'),"How common category bars are plotted"),
         labelAxisMode = AttrMapValue(OneOf('high','low','axis'), desc="Like joinAxisMode, but for the axis labels"),
         tickShift = AttrMapValue(isBoolean, desc='Tick shift typically'),
-        loPad = AttrMapValue(isNumber, desc='extra space before start of the axis'),
-        hiPad = AttrMapValue(isNumber, desc='extra space after end of the axis'),
+        loPad = AttrMapValue(isNumber, desc='extra inner space before start of the axis'),
+        hiPad = AttrMapValue(isNumber, desc='extra inner space after end of the axis'),
         annotations = AttrMapValue(None,desc='list of annotations'),
+        loLLen = AttrMapValue(isNumber, desc='extra line length before start of the axis'),
+        hiLLen = AttrMapValue(isNumber, desc='extra line length after end of the axis'),
         )
 
     def __init__(self):
@@ -319,6 +321,8 @@ class CategoryAxis(_AxisG):
         self.tickShift = 0
         self.loPad = 0
         self.hiPad = 0
+        self.loLLen = 0
+        self.hiLLen = 0
 
     def setPosition(self, x, y, length):
         # ensure floating point
@@ -491,7 +495,7 @@ class XCategoryAxis(_XTicks,CategoryAxis):
         self._joinToAxis()
         if not self.visibleAxis: return g
 
-        axis = Line(self._x, self._y, self._x + self._length, self._y)
+        axis = Line(self._x-self.loLLen, self._y, self._x + self._length+self.hiLLen, self._y)
         axis.strokeColor = self.strokeColor
         axis.strokeWidth = self.strokeWidth
         axis.strokeDashArray = self.strokeDashArray
@@ -599,7 +603,7 @@ class YCategoryAxis(_YTicks,CategoryAxis):
         self._joinToAxis()
         if not self.visibleAxis: return g
 
-        axis = Line(self._x, self._y, self._x, self._y + self._length)
+        axis = Line(self._x, self._y-self.loLLen, self._x, self._y + self._length+self.hiLLen)
         axis.strokeColor = self.strokeColor
         axis.strokeWidth = self.strokeWidth
         axis.strokeDashArray = self.strokeDashArray
@@ -687,6 +691,8 @@ class ValueAxis(_AxisG):
         tickAxisMode = AttrMapValue(OneOf('high','low','axis'), desc="Like joinAxisMode, but for the ticks"),
         reverseDirection = AttrMapValue(isBoolean, desc='If true reverse category direction.'),
         annotations = AttrMapValue(None,desc='list of annotations'),
+        loLLen = AttrMapValue(isNumber, desc='extra line length before start of the axis'),
+        hiLLen = AttrMapValue(isNumber, desc='extra line length after end of the axis'),
         )
 
     def __init__(self,**kw):
@@ -755,6 +761,8 @@ class ValueAxis(_AxisG):
                         origShiftSpecialValue = None,
                         tickAxisMode = 'axis',
                         reverseDirection=0,
+                        loLLen=0,
+                        hiLLen=0,
                         )
         self.labels.angle = 0
 
@@ -1181,7 +1189,7 @@ class XValueAxis(_XTicks,ValueAxis):
         self._joinToAxis()
         if not self.visibleAxis: return g
 
-        axis = Line(self._x, self._y, self._x + self._length, self._y)
+        axis = Line(self._x-self.loLLen, self._y, self._x + self._length+self.hiLLen, self._y)
         axis.strokeColor = self.strokeColor
         axis.strokeWidth = self.strokeWidth
         axis.strokeDashArray = self.strokeDashArray
@@ -1522,7 +1530,7 @@ class YValueAxis(_YTicks,ValueAxis):
         self._joinToAxis()
         if not self.visibleAxis: return g
 
-        axis = Line(self._x, self._y, self._x, self._y + self._length)
+        axis = Line(self._x, self._y-self.loLLen, self._x, self._y + self._length+self.hiLLen)
         axis.strokeColor = self.strokeColor
         axis.strokeWidth = self.strokeWidth
         axis.strokeDashArray = self.strokeDashArray
