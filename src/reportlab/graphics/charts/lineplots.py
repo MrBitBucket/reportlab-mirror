@@ -364,10 +364,10 @@ class LinePlot(AbstractLineChart):
         for a in annotations:
             if getattr(a,'beforeLines',None):
                 g.add(a(self,xA.scale,yA.scale))
+        g.add(self.makeLines())
         if not self.gridFirst:
             if xAdgl: xA.makeGrid(g,parent=self,dim=yA.getGridDims)
             if yAdgl: yA.makeGrid(g,parent=self,dim=xA.getGridDims)
-        g.add(self.makeLines())
         for a in annotations:
             if not getattr(a,'beforeLines',None):
                 g.add(a(self,xA.scale,yA.scale))

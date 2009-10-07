@@ -373,8 +373,8 @@ class HorizontalLineChart(LineChart):
         if not cAdgl: cA.makeGrid(g,parent=self,dim=vA.getGridDims)
         if not vAdgl: vA.makeGrid(g,parent=self,dim=cA.getGridDims)
         g.add(self.makeLines())
-        if not cAdgl: cA.makeGrid(g,parent=self,dim=vA.getGridDims)
-        if not vAdgl: vA.makeGrid(g,parent=self,dim=cA.getGridDims)
+        if cAdgl: cA.makeGrid(g,parent=self,dim=vA.getGridDims)
+        if vAdgl: vA.makeGrid(g,parent=self,dim=cA.getGridDims)
         for a in getattr(self,'annotations',()): g.add(a(self,cA.scale,vA.scale))
         return g
 
