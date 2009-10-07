@@ -912,6 +912,7 @@ class Wedge3dProperties(PropHolder):
         label_leftPadding = AttrMapValue(isNumber,'padding at left of box'),
         label_maxWidth = AttrMapValue(isNumberOrNone),
         label_rightPadding = AttrMapValue(isNumber,'padding at right of box'),
+        label_simple_pointer = AttrMapValue(isBoolean,'set to True for simple pointers'),
         label_strokeColor = AttrMapValue(isColorOrNone),
         label_strokeWidth = AttrMapValue(isNumber),
         label_text = AttrMapValue(isStringOrNone),
@@ -953,6 +954,7 @@ class Wedge3dProperties(PropHolder):
         self.label_leading =    self.label_width = self.label_maxWidth = self.label_height = None
         self.label_textAnchor = 'start'
         self.label_visible = 1
+        self.label_simple_pointer = 0
 
 class _SL3D:
     def __init__(self,lo,hi):
