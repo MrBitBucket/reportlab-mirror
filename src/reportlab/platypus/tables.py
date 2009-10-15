@@ -1409,6 +1409,9 @@ class Table(Flowable):
             for v in vals:
                 draw(x, y, v)
                 y -= leading
+            onDraw = getattr(cellval,'onDraw',None)
+            if onDraw:
+                onDraw(self.canv,cellval.kind,cellval.label)
 
         if cellstyle.href:
             #external hyperlink
