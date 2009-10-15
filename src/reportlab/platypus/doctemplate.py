@@ -40,6 +40,14 @@ try:
 except NameError:
     from sets import Set as set
 
+from base64 import encodestring, decodestring
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+dumps = pickle.dumps
+loads = pickle.loads
+
 from types import *
 import sys
 import logging
@@ -285,6 +293,78 @@ def _addGeneratedContent(flowables,frame):
         for i,f in enumerate(S):
             flowables.insert(i,f)
         del frame._generated_content
+
+
+class onDrawStr(str):
+    def __new__(cls,value,onDraw,label,kind=None):
+        self = str.__new__(cls,value)
+        self.onDraw = onDraw
+        self.kind = kind
+        self.label = label
+        return self
+
+class PageAccumulator:
+    '''gadget to accumulate information in a page
+    and then allow it to be interrogated at the end
+    of the page'''
+    _count = 0
+    def __init__(self,name=None):
+        if name is None:
+            name = self.__class__.__name__+str(self.__class__._count)
+            self.__class__._count += 1
+        self.name = name
+        self.data = []
+
+    def reset(self):
+        self.data[:] = []
+
+    def add(self,*args):
+        self.data.append(args)
+
+    def onDrawText(self,*args):
+        return '<onDraw name="%s" label="%s" />' % (self.name,encodestring(dumps(args)).strip())
+
+    def __call__(self,canv,kind,label):
+        self.add(*loads(decodestring(label)))
+
+    def attachToPageTemplate(self,pt):
+        if pt.onPage:
+            def onPage(canv,doc,oop=pt.onPage):
+                self.onPage(canv,doc)
+                oop(canv,doc)
+        else:
+            def onPage(canv,doc):
+                self.onPage(canv,doc)
+        pt.onPage = onPage
+        if pt.onPageEnd:
+            def onPageEnd(canv,doc,oop=pt.onPageEnd):
+                self.onPageEnd(canv,doc)
+                oop(canv,doc)
+        else:
+            def onPageEnd(canv,doc):
+                self.onPageEnd(canv,doc)
+        pt.onPageEnd = onPageEnd
+
+    def onPage(self,canv,doc):
+        '''this will be called at the start of the page'''
+        setattr(canv,self.name,self)    #push ourselves onto the canvas
+        self.reset()
+
+    def onPageEnd(self,canv,doc):
+        '''this will be called at the end of a page'''
+        self.pageEndAction(canv,doc)
+        try:
+            delattr(canv,self.name)
+        except:
+            pass
+        self.reset()
+
+    def pageEndAction(self,canv,doc):
+        '''this should be overridden to do something useful'''
+        pass
+
+    def onDrawStr(self,value,*args):
+        return onDrawStr(value,self,encodestring(dumps(args)).strip())
 
 class BaseDocTemplate:
     """
