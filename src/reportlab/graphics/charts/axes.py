@@ -614,7 +614,7 @@ class YCategoryAxis(_YTicks,CategoryAxis):
     def makeTickLabels(self):
         g = Group()
 
-        if not self.visibleTicks: return g
+        if not self.visibleLabels: return g
 
         categoryNames = self.categoryNames
         if categoryNames is not None:
