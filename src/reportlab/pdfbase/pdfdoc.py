@@ -1704,18 +1704,22 @@ class PDFDate:
     def __init__(self, invariant=rl_config.invariant, dateFormatter=None):
         if invariant:
             now = (2000,01,01,00,00,00,0)
+            self.dhh = 0
+            self.dmm = 0
         else:
             import time
             now = tuple(time.localtime(_getTimeStamp())[:6])
+            from time import timezone
+            self.dhh = int(timezone / 3600)
+            self.dmm = (timezone % 3600) % 60
         self.date = now[:6]
         self.dateFormatter = dateFormatter
 
     def format(self, doc):
-        from time import timezone
-        dhh, dmm = timezone // 3600, (timezone % 3600) % 60
         dfmt = self.dateFormatter or (
                 lambda yyyy,mm,dd,hh,m,s:
-                    "D:%04d%02d%02d%02d%02d%02d%+03d'%02d'" % (yyyy,mm,dd,hh,m,s,dhh,dmm))
+                    "D:%04d%02d%02d%02d%02d%02d%+03d'%02d'"
+                        % (yyyy,mm,dd,hh,m,s,self.dhh,self.dmm))
         return format(PDFString(dfmt(*self.date)), doc)
 
 class Destination:

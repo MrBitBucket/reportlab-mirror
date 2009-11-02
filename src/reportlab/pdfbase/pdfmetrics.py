@@ -18,7 +18,7 @@ a registry of Font, TypeFace and Encoding objects.  Ideally these
 would be pre-loaded, but due to a nasty circularity problem we
 trap attempts to access them and do it on first access.
 """
-import string, os
+import string, os, sys
 from types import StringType, ListType, TupleType
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
@@ -223,10 +223,15 @@ def bruteForceSearchForAFM(faceName):
         if not rl_isdir(dirname): continue
         possibles = rl_glob(dirname + os.sep + '*.[aA][fF][mM]')
         for possible in possibles:
-            (topDict, glyphDict) = parseAFMFile(possible)
-            if topDict['FontName'] == faceName:
-                return possible
-    return None
+            try:
+                topDict, glyphDict = parseAFMFile(possible)
+                if topDict['FontName'] == faceName:
+                    return possible
+            except:
+                t,v,b=sys.exc_info()
+                v.args = (' '.join(map(str,v.args))+', while looking for faceName=%r' % faceName,)
+                raise 
+
 
 #for faceName in standardFonts:
 #    registerTypeFace(TypeFace(faceName))
