@@ -1700,7 +1700,7 @@ def _getTimeStamp():
 
 class PDFDate:
     __PDFObject__ = True
-    # gmt offset now suppported
+    # gmt offset now suppported properly
     def __init__(self, invariant=rl_config.invariant, dateFormatter=None):
         if invariant:
             now = (2000,01,01,00,00,00,0)
