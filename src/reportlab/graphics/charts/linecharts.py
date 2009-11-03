@@ -10,7 +10,6 @@ from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfS
                                     isListOfStringsOrNone, SequenceOf, isBoolean, NoneOr, \
                                     isListOfNumbersOrNone, isStringOrNone
 from reportlab.lib.attrmap import *
-from reportlab.lib.formatters import Formatter
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing, Polygon, PolyLine
 from reportlab.graphics.widgets.signsandsymbols import NoEntry
@@ -248,16 +247,14 @@ class HorizontalLineChart(LineChart):
                     labelText = None
             else:
                 labelText = labelFmt % labelValue
-        elif isinstance(labelFmt, Formatter):
-            labelText = labelFmt(labelValue)
         elif callable(labelFmt):
             labelText = labelFmt(labelValue)
         else:
-            msg = "Unknown formatter type %s, expected string or function"
-            raise Exception, msg % labelFmt
+            raise ValueError("Unknown formatter type %s, expected string or function"%labelFmt)
 
         if labelText:
             label = self.lineLabels[(rowNo, colNo)]
+            if not label.visible: return
             # Make sure labels are some distance off the data point.
             if y > 0:
                 label.setOrigin(x, y + self.lineLabelNudge)

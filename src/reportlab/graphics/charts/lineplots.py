@@ -212,16 +212,14 @@ class LinePlot(AbstractLineChart):
                 labelText = self.lineLabelArray[rowNo][colNo]
             else:
                 labelText = labelFmt % labelValue
-        elif isinstance(labelFmt, Formatter):
-            labelText = labelFmt(labelValue)
         elif callable(labelFmt):
             labelText = labelFmt(labelValue)
         else:
-            msg = "Unknown formatter type %s, expected string or function"
-            raise Exception, msg % labelFmt
+            raise ValueError("Unknown formatter type %s, expected string or function"%labelFmt)
 
         if labelText:
             label = self.lineLabels[(rowNo, colNo)]
+            if not label.visible: return
             #hack to make sure labels are outside the bar
             if y > 0:
                 label.setOrigin(x, y + self.lineLabelNudge)
