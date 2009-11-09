@@ -1439,7 +1439,7 @@ class PDFOutlines:
             if Ot is TupleType:
                 return tuple(L)
             return L
-        raise "in outline, destination name must be string: got a %s" % Ot
+        raise TypeError("in outline, destination name must be string: got a %s"%Ot)
 
     def prepare(self, document, canvas):
         """prepare all data structures required for save operation (create related objects)"""

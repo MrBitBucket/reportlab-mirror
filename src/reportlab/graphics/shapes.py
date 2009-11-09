@@ -1056,7 +1056,7 @@ class Image(SolidShape):
         return new
 
     def getBounds(self):
-        return (self.x, self.y, self.x + width, self.y + width)
+        return (self.x, self.y, self.x + self.width, self.y + self.height)
 
 class Circle(SolidShape):
 
