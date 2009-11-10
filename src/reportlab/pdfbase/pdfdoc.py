@@ -1439,6 +1439,7 @@ class PDFOutlines:
             if Ot is TupleType:
                 return tuple(L)
             return L
+        # bug contributed by Benjamin Dumke <reportlab@benjamin-dumke.de>
         raise TypeError("in outline, destination name must be string: got a %s"%Ot)
 
     def prepare(self, document, canvas):
