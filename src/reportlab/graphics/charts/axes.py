@@ -198,9 +198,32 @@ class _AxisG(Widget):
         '''this is only called by a container object'''
         c = self.gridStrokeColor
         w = self.gridStrokeWidth or 0
-        if not(w and c and self.visibleGrid): return
-        s = self.gridStart
-        e = self.gridEnd
+        if w and c and self.visibleGrid:
+            s = self.gridStart
+            e = self.gridEnd
+            if s is None or e is None:
+                if dim and callable(dim):
+                    dim = dim()
+                if dim:
+                    if s is None: s = dim[0]
+                    if e is None: e = dim[1]
+                else:
+                    if s is None: s = 0
+                    if e is None: e = 0
+            if s or e:
+                if self.isYAxis: offs = self._x
+                else: offs = self._y
+                self._makeLines(g,s-offs,e-offs,c,w,self.gridStrokeDashArray,self.gridStrokeLineJoin,self.gridStrokeLineCap,self.gridStrokeMiterLimit,parent=parent)
+        self._makeSubGrid(g,dim,parent)
+
+    def _makeSubGrid(self,g,dim=None,parent=None):
+        '''this is only called by a container object'''
+        if not (getattr(self,'visibleSubGrid',0) and self.subTickNum>0): return
+        c = self.subGridStrokeColor
+        w = self.subGridStrokeWidth or 0
+        if not(w and c): return
+        s = self.subGridStart
+        e = self.subGridEnd
         if s is None or e is None:
             if dim and callable(dim):
                 dim = dim()
@@ -213,7 +236,11 @@ class _AxisG(Widget):
         if s or e:
             if self.isYAxis: offs = self._x
             else: offs = self._y
-            self._makeLines(g,s-offs,e-offs,c,w,self.gridStrokeDashArray,self.gridStrokeLineJoin,self.gridStrokeLineCap,self.gridStrokeMiterLimit,parent=parent)
+            otv = self._calcSubTicks()
+            try:
+                self._makeLines(g,s-offs,e-offs,c,w,self.subGridStrokeDashArray,self.subGridStrokeLineJoin,self.subGridStrokeLineCap,self.subGridStrokeMiterLimit,parent=parent)
+            finally:
+                self._tickValues = otv
 
     def getGridDims(self,start=None,end=None):
         if start is None: start = (self._x,self._y)[self.isYAxis]
@@ -297,6 +324,7 @@ class CategoryAxis(_AxisG):
         self.strokeWidth = 1
         self.strokeColor = STATE_DEFAULTS['strokeColor']
         self.strokeDashArray = STATE_DEFAULTS['strokeDashArray']
+
         self.gridStrokeLineJoin = self.strokeLineJoin = STATE_DEFAULTS['strokeLineJoin']
         self.gridStrokeLineCap = self.strokeLineCap = STATE_DEFAULTS['strokeLineCap']
         self.gridStrokeMiterLimit = self.strokeMiterLimit = STATE_DEFAULTS['strokeMiterLimit']
@@ -304,6 +332,11 @@ class CategoryAxis(_AxisG):
         self.gridStrokeColor = STATE_DEFAULTS['strokeColor']
         self.gridStrokeDashArray = STATE_DEFAULTS['strokeDashArray']
         self.gridStart = self.gridEnd = None
+
+        self.strokeLineJoin = STATE_DEFAULTS['strokeLineJoin']
+        self.strokeLineCap = STATE_DEFAULTS['strokeLineCap']
+        self.strokeMiterLimit = STATE_DEFAULTS['strokeMiterLimit']
+
         self.labels = TypedPropertyCollection(Label)
         # if None, they don't get labels. If provided,
         # you need one name per data point and they are
@@ -369,25 +402,73 @@ def _assertXAxis(axis):
 
 class _XTicks:
     _tickTweaks = 0 #try 0.25-0.5
-    def _drawTicks(self,tU,tD):
-        g = Group()
+
+    def _drawTicksInner(self,tU,tD,g):
+        if tU or tD:
+            sW = self.strokeWidth
+            tW = self._tickTweaks
+            if tW:
+                if tU and not tD:
+                    tD = tW*sW
+                elif tD and not tU:
+                    tU = tW*sW
+            self._makeLines(g,tU,-tD,self.strokeColor,sW,self.strokeDashArray,self.strokeLineJoin,self.strokeLineCap,self.strokeMiterLimit)
+
+    def _drawTicks(self,tU,tD,g=None):
+        g = g or Group()
         if self.visibleTicks:
-            if tU or tD:
-                sW = self.strokeWidth
-                tW = self._tickTweaks
-                if tW:
-                    if tU and not tD:
-                        tD = tW*sW
-                    elif tD and not tU:
-                        tU = tW*sW
-                self._makeLines(g,tU,-tD,self.strokeColor,sW,self.strokeDashArray,self.strokeLineJoin,self.strokeLineCap,self.strokeMiterLimit)
+            self._drawTicksInner(tU,tD,g)
         return g
+
+    def _calcSubTicks(self):
+        if not hasattr(self,'_tickValues'):
+            self._pseudo_configure()
+        otv = self._tickValues
+        if not hasattr(self,'_subTickValues'):
+            OTV = otv[:]
+            T = [].append
+            nst = int(self.subTickNum)
+            i = len(OTV)
+            if i<2:
+                self._subTickValues = []
+            else:
+                if i==2:
+                    dst = OTV[1]-OTV[0]
+                elif i==3:
+                    dst = max(OTV[1]-OTV[0],OTV[2]-OTV[1])
+                else:
+                    i >>= 1
+                    dst = OTV[i+1] - OTV[i]
+                fuzz = dst*1e-8
+                vn = self._valueMin+fuzz
+                vx = self._valueMax-fuzz
+                if OTV[0]>vn: OTV.insert(0,OTV[0]-dst)
+                if OTV[-1]<vx: OTV.append(OTV[-1]+dst)
+                dst /= float(nst+1)
+                for i,x in enumerate(OTV[:-1]):
+                    for j in xrange(nst):
+                        t = x+(j+1)*dst
+                        if t<=vn or t>=vx: continue
+                        T(t)
+                self._subTickValues = T.__self__
+        self._tickValues = self._subTickValues
+        return otv
+
+    def _drawSubTicks(self,tU,tD,g):
+        if getattr(self,'visibleSubTicks',0) and self.subTickNum>0:
+            otv = self._calcSubTicks()
+            try:
+                self._drawTicksInner(tU,tD,g)
+            finally:
+                self._tickValues = otv
 
     def makeTicks(self):
         yold=self._y
         try:
             self._y = self._labelAxisPos(getattr(self,'tickAxisMode','axis'))
-            return self._drawTicks(self.tickUp,self.tickDown)
+            g = self._drawTicks(self.tickUp,self.tickDown)
+            self._drawSubTicks(getattr(self,'subTickHi',0),getattr(self,'subTickLo',0),g)
+            return g
         finally:
             self._y = yold
 
@@ -417,7 +498,9 @@ class _YTicks(_XTicks):
         xold=self._x
         try:
             self._x = self._labelAxisPos(getattr(self,'tickAxisMode','axis'))
-            return self._drawTicks(self.tickRight,self.tickLeft)
+            g = self._drawTicks(self.tickRight,self.tickLeft)
+            self._drawSubTicks(getattr(self,'subTickHi',0),getattr(self,'subTickLo',0),g)
+            return g
         finally:
             self._x = xold
 
@@ -693,6 +776,19 @@ class ValueAxis(_AxisG):
         annotations = AttrMapValue(None,desc='list of annotations'),
         loLLen = AttrMapValue(isNumber, desc='extra line length before start of the axis'),
         hiLLen = AttrMapValue(isNumber, desc='extra line length after end of the axis'),
+        subTickNum = AttrMapValue(isNumber, desc='Number of axis sub ticks, if >0'),
+        subTickLo = AttrMapValue(isNumber, desc='sub tick down or left'),
+        subTickHi = AttrMapValue(isNumber, desc='sub tick up or right'),
+        visibleSubTicks = AttrMapValue(isBoolean, desc='Display axis sub ticks, if true.'),
+        visibleSubGrid = AttrMapValue(isBoolean, desc='Display axis sub grid, if true.'),
+        subGridStrokeWidth = AttrMapValue(isNumber, desc='Width of grid lines.'),
+        subGridStrokeColor = AttrMapValue(isColorOrNone, desc='Color of grid lines.'),
+        subGridStrokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array used for grid lines.'),
+        subGridStrokeLineCap = AttrMapValue(OneOf(0,1,2),desc="Grid Line cap 0=butt, 1=round & 2=square"),
+        subGridStrokeLineJoin = AttrMapValue(OneOf(0,1,2),desc="Grid Line join 0=miter, 1=round & 2=bevel"),
+        subGridStrokeMiterLimit = AttrMapValue(isNumber,desc="Grid miter limit control miter line joins"),
+        subGridStart = AttrMapValue(isNumberOrNone, desc='Start of grid lines wrt axis origin'),
+        subGridEnd = AttrMapValue(isNumberOrNone, desc='End of grid lines wrt axis origin'),
         )
 
     def __init__(self,**kw):
@@ -730,6 +826,19 @@ class ValueAxis(_AxisG):
                         gridStart = None,
                         gridEnd = None,
                         drawGridLast = False,
+                        visibleSubGrid = 0,
+                        visibleSubTicks = 0,
+                        subTickNum = 0,
+                        subTickLo = 0,
+                        subTickHi = 0,
+                        subGridStrokeLineJoin = STATE_DEFAULTS['strokeLineJoin'],
+                        subGridStrokeLineCap = STATE_DEFAULTS['strokeLineCap'],
+                        subGridStrokeMiterLimit = STATE_DEFAULTS['strokeMiterLimit'],
+                        subGridStrokeWidth = 0.25,
+                        subGridStrokeColor = STATE_DEFAULTS['strokeColor'],
+                        subGridStrokeDashArray = STATE_DEFAULTS['strokeDashArray'],
+                        subGridStart = None,
+                        subGridEnd = None,
 
                         labels = TypedPropertyCollection(Label),
 
