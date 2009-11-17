@@ -203,7 +203,6 @@ class Canvas(textobject._PDFColorSetter):
 
         self.setPageCompression(pageCompression)
         self._pageNumber = 1   # keep a count
-        #self3 = []    #where the current page's marking operators accumulate
         # when we create a form we need to save operations not in the form
         self._codeStack = []
         self._restartAccumulators()  # restart all accumulation state (generalized, arw)
@@ -277,8 +276,7 @@ class Canvas(textobject._PDFColorSetter):
         self._lineWidth = 0
         self._mitreLimit = 0
 
-        self._fillColorRGB = (0,0,0)
-        self._strokeColorRGB = (0,0,0)
+        self._fillColorObj = self._strokeColorObj = rl_config.canvas_baseColor or (0,0,0)
         self._extgstate = ExtGState()
 
     def push_state_stack(self):
@@ -297,8 +295,8 @@ class Canvas(textobject._PDFColorSetter):
     STATE_ATTRIBUTES = split("""
      _x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
      _fillMode _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
-     _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorRGB
-     _strokeColorRGB""")
+     _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorObj
+     _strokeColorObj""")
     STATE_RANGE = range(len(STATE_ATTRIBUTES))
 
         #self._addStandardFonts()
@@ -309,6 +307,14 @@ class Canvas(textobject._PDFColorSetter):
             P('1 0 0 1 0 0 cm')
         else:
             P('1 0 0 -1 0 %s cm' % fp_str(self._pagesize[1]))
+        C = self._code
+        n = len(C)
+        if self._fillColorObj != (0,0,0):
+            self.setFillColor(self._fillColorObj)
+        if self._strokeColorObj != (0,0,0):
+            self.setStrokeColor(self._strokeColorObj)
+        P(' '.join(C[n:]))
+        del C[n:]
         font = pdfmetrics.getFont(self._fontname)
         if not font._dynamicFont:
             #set an initial font

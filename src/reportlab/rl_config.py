@@ -39,6 +39,7 @@ imageReaderFlags=0                                  #attempt to convert images i
                                                     #if imageReaderFlags&4 then cache data 
                                                     #if imageReaderFlags==-1 then use Ralf Schmitt's re-opening approach
 paraFontSizeHeightOffset=   1                       #if true paragraphs start at height-fontSize
+canvas_baseColor=           None                    #initialize the canvas fill and stroke colors if this is set
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -165,7 +166,8 @@ platypus_link_underline
 canvas_basefontname
 allowShortTableRows
 imageReaderFlags
-paraFontSizeHeightOffset'''.split()
+paraFontSizeHeightOffset
+canvas_baseColor'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage

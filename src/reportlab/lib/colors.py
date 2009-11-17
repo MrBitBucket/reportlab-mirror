@@ -329,6 +329,18 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
     else:
         raise ValueError, "Can't interpolate: Unknown color class %s!" % cname
 
+def obj_R_G_B(c):
+    '''attempt to convert an object to (red,green,blue)'''
+    if isinstance(c,Color):
+        return c.red,c.green,c.blue
+    elif isinstance(c,(tuple,list)):
+        if len(c)==3:
+            return tuple(c)
+        elif len(c)==4:
+            return toColor(c).rgb()
+        else:
+            raise ValueError('obj_R_G_B(%r) bad argument' % (c))
+
 # special case -- indicates no drawing should be done
 # this is a hangover from PIDDLE - suggest we ditch it since it is not used anywhere
 #transparent = Color(-1, -1, -1)
@@ -653,7 +665,7 @@ def fade(aSpotColor, percentages):
         newYellow = frac * aSpotColor.yellow
         newBlack = frac * aSpotColor.black
         newDensity = frac * aSpotColor.density
-        newSpot = CMYKColor(	newCyan, newMagenta, newYellow, newBlack,
+        newSpot = CMYKColor(    newCyan, newMagenta, newYellow, newBlack,
                             spotName = aSpotColor.spotName,
                             density = newDensity)
         out.append(newSpot)

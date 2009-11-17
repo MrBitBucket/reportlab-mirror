@@ -9,7 +9,6 @@ instantiate directly, obtain one from the Canvas instead.
 Progress Reports:
 8.83, 2000-01-13, gmcm: created from pdfgen.py
 """
-
 import string
 from types import *
 from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor
@@ -31,26 +30,26 @@ class _PDFColorSetter:
          """set the fill color useing negative color values
          (cyan, magenta, yellow and darkness value).
          Takes 4 arguments between 0.0 and 1.0"""
-         self._fillColorCMYK = (c, m, y, k)
+         self._fillColorObj = (c, m, y, k)
          self._code.append('%s k' % fp_str(c, m, y, k))
 
     def setStrokeColorCMYK(self, c, m, y, k):
          """set the stroke color useing negative color values
             (cyan, magenta, yellow and darkness value).
             Takes 4 arguments between 0.0 and 1.0"""
-         self._strokeColorCMYK = (c, m, y, k)
+         self._strokeColorObj = (c, m, y, k)
          self._code.append('%s K' % fp_str(c, m, y, k))
 
     def setFillColorRGB(self, r, g, b):
         """Set the fill color using positive color description
            (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
-        self._fillColorRGB = (r, g, b)
+        self._fillColorObj = (r, g, b)
         self._code.append('%s rg' % fp_str(r,g,b))
 
     def setStrokeColorRGB(self, r, g, b):
         """Set the stroke color using positive color description
            (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
-        self._strokeColorRGB = (r, g, b)
+        self._strokeColorObj = (r, g, b)
         self._code.append('%s RG' % fp_str(r,g,b))
 
     def setFillColor(self, aColor):
@@ -58,7 +57,7 @@ class _PDFColorSetter:
         if isinstance(aColor, CMYKColor):
             d = aColor.density
             c,m,y,k = (d*aColor.cyan, d*aColor.magenta, d*aColor.yellow, d*aColor.black)
-            self._fillColorCMYK = (c, m, y, k)
+            self._fillColorObj = aColor
             name = self._checkSeparation(aColor)
             if name:
                 self._code.append('/%s cs %s scn' % (name,fp_str(d)))
@@ -66,12 +65,12 @@ class _PDFColorSetter:
                 self._code.append('%s k' % fp_str(c, m, y, k))
         elif isinstance(aColor, Color):
             rgb = (aColor.red, aColor.green, aColor.blue)
-            self._fillColorRGB = rgb
+            self._fillColorObj = aColor
             self._code.append('%s rg' % fp_str(rgb) )
         elif isinstance(aColor,(tuple,list)):
             l = len(aColor)
             if l==3:
-                self._fillColorRGB = aColor
+                self._fillColorObj = aColor
                 self._code.append('%s rg' % fp_str(aColor) )
             elif l==4:
                 self.setFillColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
@@ -87,7 +86,7 @@ class _PDFColorSetter:
         if isinstance(aColor, CMYKColor):
             d = aColor.density
             c,m,y,k = (d*aColor.cyan, d*aColor.magenta, d*aColor.yellow, d*aColor.black)
-            self._strokeColorCMYK = (c, m, y, k)
+            self._strokeColorObj = aColor
             name = self._checkSeparation(aColor)
             if name:
                 self._code.append('/%s CS %s SCN' % (name,fp_str(d)))
@@ -95,12 +94,12 @@ class _PDFColorSetter:
                 self._code.append('%s K' % fp_str(c, m, y, k))
         elif isinstance(aColor, Color):
             rgb = (aColor.red, aColor.green, aColor.blue)
-            self._strokeColorRGB = rgb
+            self._strokeColorObj = aColor
             self._code.append('%s RG' % fp_str(rgb) )
         elif isinstance(aColor,(tuple,list)):
             l = len(aColor)
             if l==3:
-                self._strokeColorRGB = aColor
+                self._strokeColorObj = aColor
                 self._code.append('%s RG' % fp_str(aColor) )
             elif l==4:
                 self.setStrokeColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
@@ -113,12 +112,12 @@ class _PDFColorSetter:
 
     def setFillGray(self, gray):
         """Sets the gray level; 0.0=black, 1.0=white"""
-        self._fillColorRGB = (gray, gray, gray)
+        self._fillColorObj = (gray, gray, gray)
         self._code.append('%s g' % fp_str(gray))
 
     def setStrokeGray(self, gray):
         """Sets the gray level; 0.0=black, 1.0=white"""
-        self._strokeColorRGB = (gray, gray, gray)
+        self._strokeColorObj = (gray, gray, gray)
         self._code.append('%s G' % fp_str(gray))
 
     def setStrokeAlpha(self,a):
