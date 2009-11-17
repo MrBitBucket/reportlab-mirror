@@ -1107,3 +1107,27 @@ def findInPaths(fn,paths,isfile=True,fail=False):
                 return pfn
     if fail: raise ValueError('cannot locate %r with paths=%r' % (fn,paths))
     return fn
+
+def annotateException(msg,enc='utf8'):
+    '''add msg to the args of an existing exception'''
+    t,v,b=sys.exc_info()
+    e = -1
+    A = list(v.args)
+    for i,a in enumerate(A):
+        if isinstance(a,basestring):
+            e = i
+            break
+    if e>=0:
+        if isinstance(a,unicode):
+            if not isinstance(msg,unicode):
+                msg=msg.decode(enc)
+        else:
+            if isinstance(msg,unicode):
+                msg=msg.encode(enc)
+            else:
+                msg = str(msg)
+        A[e] += msg
+    else:
+        A.append(msg)
+    v.args = tuple(A)
+    raise t,v,b
