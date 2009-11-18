@@ -29,7 +29,7 @@ try:
 except ImportError, errMsg:
     raise ImportError, "No module named _renderPM\n" + \
         (str(errMsg)!='No module named _renderPM' and "it may be the wrong version or badly installed!" or
-                                    "see http://www.reportlab.org/rl_addons.html")
+                                    "see http://www.reportlab.org/oss/rl-addons/")
 
 def _getImage():
     try:
