@@ -14,7 +14,7 @@
 #
 # License : The ReportLab Toolkit's license (similar to BSD)
 #
-# Author : Jerome Alet - alet@unice.fr
+# Author : Jerome Alet - alet@librelogiciel.com
 #
 
 Installation instructions :
@@ -22,9 +22,9 @@ Installation instructions :
 
   0 - If not installed then install Zope.
 
-  1 - Install reportlab in the Zope/lib/python/Shared directory by unpacking 
+  1 - Install reportlab in the Zope/lib/python/Shared directory by unpacking
       the tarball and putting a reportlabs.pth file in site-packages for the Zope
-      used with Python.  The path value in the reportlabs.pth file must be 
+      used with Python.  The path value in the reportlabs.pth file must be
       relative.  For a typical Zope installation,  the path is "../../python/Shared".
       Remember to restart Zope so the new path is instantiated.
 
@@ -69,5 +69,5 @@ logo
 
   8 - Enjoy !
 
-Send comments or bug reports at : alet@unice.fr
+Send comments or bug reports at : alet@librelogiciel.com
 

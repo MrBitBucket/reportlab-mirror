@@ -8,7 +8,7 @@
 # License : the ReportLab Toolkit's one
 #       see : http://www.reportlab.com
 #
-# Author : Jerome Alet - alet@unice.fr
+# Author : Jerome Alet - alet@librelogiciel.com
 #
 #
 
@@ -73,7 +73,7 @@ class MyPDFDoc :
                 ((width, height), image) = self.logo
                 canvas.drawImage(image, inch, doc.pagesize[1] - inch, width, height)
             canvas.setFont('Times-Roman', 10)
-            canvas.drawCentredString(inch + (doc.pagesize[0] - (1.5 * inch)) / 2, 0.25 * inch, "Contributed by Jerome Alet - alet@unice.fr")
+            canvas.drawCentredString(inch + (doc.pagesize[0] - (1.5 * inch)) / 2, 0.25 * inch, "Contributed by Jerome Alet - alet@librelogiciel.com")
             canvas.restoreState()
 
     def __init__(self, context, filename) :
