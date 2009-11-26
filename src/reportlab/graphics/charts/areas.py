@@ -20,7 +20,7 @@ class PlotArea(Widget):
         strokeColor = AttrMapValue(isColorOrNone, desc='Color of the plot area border.'),
         strokeWidth = AttrMapValue(isNumber, desc='Width plot area border.'),
         fillColor = AttrMapValue(isColorOrNone, desc='Color of the plot area interior.'),
-        background = AttrMapValue(isNoneOrShape, desc='Handle to background object.'),
+        background = AttrMapValue(isNoneOrShape, desc='Handle to background object e.g. Rect(0,0,width,height).'),
         debug = AttrMapValue(isNumber, desc='Used only for debugging.'),
         )
 

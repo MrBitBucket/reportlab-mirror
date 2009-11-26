@@ -311,10 +311,10 @@ class Group(Shape):
     case they are subsequently accessible as properties."""
 
     _attrMap = AttrMap(
-        transform = AttrMapValue(isTransform,desc="Coordinate transformation to apply"),
+        transform = AttrMapValue(isTransform,desc="Coordinate transformation to apply",advancedUsage=1),
         contents = AttrMapValue(isListOfShapes,desc="Contained drawable elements"),
         strokeOverprint = AttrMapValue(isBoolean,desc='Turn on stroke overprinting'),
-        fillOverprint = AttrMapValue(isBoolean,desc='Turn on fill overprinting'),
+        fillOverprint = AttrMapValue(isBoolean,desc='Turn on fill overprinting',advancedUsage=1),
         )
 
     def __init__(self, *elements, **keywords):
@@ -576,7 +576,7 @@ class Drawing(Group, Flowable):
         width = AttrMapValue(isNumber,desc="Drawing width in points."),
         height = AttrMapValue(isNumber,desc="Drawing height in points."),
         canv = AttrMapValue(None),
-        background = AttrMapValue(isValidChildOrNone,desc="Background widget for the drawing"),
+        background = AttrMapValue(isValidChildOrNone,desc="Background widget for the drawing e.g. Rect(0,0,width,height)"),
         hAlign = AttrMapValue(OneOf("LEFT", "RIGHT", "CENTER", "CENTRE"), desc="Horizontal alignment within parent document"),
         vAlign = AttrMapValue(OneOf("TOP", "BOTTOM", "CENTER", "CENTRE"), desc="Vertical alignment within parent document"),
         #AR temporary hack to track back up.
@@ -820,8 +820,8 @@ class LineShape(Shape):
         strokeLineCap = AttrMapValue(OneOf(0,1,2),desc="Line cap 0=butt, 1=round & 2=square"),
         strokeLineJoin = AttrMapValue(OneOf(0,1,2),desc="Line join 0=miter, 1=round & 2=bevel"),
         strokeMiterLimit = AttrMapValue(isNumber,desc="miter limit control miter line joins"),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        strokeOpacity = AttrMapValue(isNumberInRange(0, 1)),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone,desc="a sequence of numbers represents on and off, e.g. (2,1)"),
+        strokeOpacity = AttrMapValue(isNumberInRange(0, 1),desc="The level of transparency of the line, any real number betwen 0 and 1"),
         strokeOverprint = AttrMapValue(isBoolean,desc='Turn on stroke overprinting'),
         )
 
@@ -838,10 +838,10 @@ class LineShape(Shape):
 
 class Line(LineShape):
     _attrMap = AttrMap(BASE=LineShape,
-        x1 = AttrMapValue(isNumber),
-        y1 = AttrMapValue(isNumber),
-        x2 = AttrMapValue(isNumber),
-        y2 = AttrMapValue(isNumber),
+        x1 = AttrMapValue(isNumber,desc=""),
+        y1 = AttrMapValue(isNumber,desc=""),
+        x2 = AttrMapValue(isNumber,desc=""),
+        y2 = AttrMapValue(isNumber,desc=""),
         )
 
     def __init__(self, x1, y1, x2, y2, **kw):
@@ -860,8 +860,8 @@ class SolidShape(LineShape):
     # base for anything with outline and content
 
     _attrMap = AttrMap(BASE=LineShape,
-        fillColor = AttrMapValue(isColorOrNone),
-        fillOpacity = AttrMapValue(isNumberInRange(0, 1)),
+        fillColor = AttrMapValue(isColorOrNone,desc="filling color of the shape, e.g. red"),
+        fillOpacity = AttrMapValue(isNumberInRange(0, 1),desc="the level of transparency of the color, any real number between 0 and 1"),
         fillOverprint = AttrMapValue(isBoolean,desc='Turn on fill overprinting'),
         )
 
@@ -1007,8 +1007,8 @@ class Rect(SolidShape):
     _attrMap = AttrMap(BASE=SolidShape,
         x = AttrMapValue(isNumber),
         y = AttrMapValue(isNumber),
-        width = AttrMapValue(isNumber),
-        height = AttrMapValue(isNumber),
+        width = AttrMapValue(isNumber,desc="width of the object in points"),
+        height = AttrMapValue(isNumber,desc="height of the objects in points"),
         rx = AttrMapValue(isNumber),
         ry = AttrMapValue(isNumber),
         )
@@ -1037,8 +1037,8 @@ class Image(SolidShape):
     _attrMap = AttrMap(BASE=SolidShape,
         x = AttrMapValue(isNumber),
         y = AttrMapValue(isNumber),
-        width = AttrMapValue(isNumberOrNone),
-        height = AttrMapValue(isNumberOrNone),
+        width = AttrMapValue(isNumberOrNone,desc="width of the object in points"),
+        height = AttrMapValue(isNumberOrNone,desc="height of the objects in points"),
         path = AttrMapValue(None),
         )
 
@@ -1062,9 +1062,9 @@ class Image(SolidShape):
 class Circle(SolidShape):
 
     _attrMap = AttrMap(BASE=SolidShape,
-        cx = AttrMapValue(isNumber),
-        cy = AttrMapValue(isNumber),
-        r = AttrMapValue(isNumber),
+        cx = AttrMapValue(isNumber,desc="x of the centre"),
+        cy = AttrMapValue(isNumber,desc="y of the centre"),
+        r = AttrMapValue(isNumber,desc="radius in points"),
         )
 
     def __init__(self, cx, cy, r, **kw):
@@ -1083,10 +1083,10 @@ class Circle(SolidShape):
 
 class Ellipse(SolidShape):
     _attrMap = AttrMap(BASE=SolidShape,
-        cx = AttrMapValue(isNumber),
-        cy = AttrMapValue(isNumber),
-        rx = AttrMapValue(isNumber),
-        ry = AttrMapValue(isNumber),
+        cx = AttrMapValue(isNumber,desc="x of the centre"),
+        cy = AttrMapValue(isNumber,desc="y of the centre"),
+        rx = AttrMapValue(isNumber,desc="x radius"),
+        ry = AttrMapValue(isNumber,desc="y radius"),
         )
 
     def __init__(self, cx, cy, rx, ry, **kw):
@@ -1109,9 +1109,9 @@ class Wedge(SolidShape):
        from start angle to end angle"""
 
     _attrMap = AttrMap(BASE=SolidShape,
-        centerx = AttrMapValue(isNumber),
-        centery = AttrMapValue(isNumber),
-        radius = AttrMapValue(isNumber),
+        centerx = AttrMapValue(isNumber,desc="x of the centre"),
+        centery = AttrMapValue(isNumber,desc="y of the centre"),
+        radius = AttrMapValue(isNumber,desc="radius in points"),
         startangledegrees = AttrMapValue(isNumber),
         endangledegrees = AttrMapValue(isNumber),
         yradius = AttrMapValue(isNumberOrNone),
@@ -1202,7 +1202,7 @@ class Polygon(SolidShape):
     joined back to the start for you."""
 
     _attrMap = AttrMap(BASE=SolidShape,
-        points = AttrMapValue(isListOfNumbers),
+        points = AttrMapValue(isListOfNumbers,desc="list of numbers in the form x1, y1, x2, y2 ... xn, yn"),
         )
 
     def __init__(self, points=[], **kw):
@@ -1224,7 +1224,7 @@ class PolyLine(LineShape):
     Put the numbers in the list, not two-tuples."""
 
     _attrMap = AttrMap(BASE=LineShape,
-        points = AttrMapValue(isListOfNumbers),
+        points = AttrMapValue(isListOfNumbers,desc="list of numbers in the form x1, y1, x2, y2 ... xn, yn"),
         )
 
     def __init__(self, points=[], **kw):
@@ -1263,13 +1263,13 @@ class String(Shape):
 
     # to do.
     _attrMap = AttrMap(
-        x = AttrMapValue(isNumber),
-        y = AttrMapValue(isNumber),
-        text = AttrMapValue(isString),
-        fontName = AttrMapValue(None),
-        fontSize = AttrMapValue(isNumber),
-        fillColor = AttrMapValue(isColorOrNone),
-        textAnchor = AttrMapValue(OneOf('start','middle','end','numeric')),
+        x = AttrMapValue(isNumber,desc="x point of anchoring"),
+        y = AttrMapValue(isNumber,desc="y point of anchoring"),
+        text = AttrMapValue(isString,desc="the text of the string"),
+        fontName = AttrMapValue(None,desc="font name of the text - font is either acrobat standard or registered when using external font."),
+        fontSize = AttrMapValue(isNumber,desc="font size"),
+        fillColor = AttrMapValue(isColorOrNone,desc="color of the font"),
+        textAnchor = AttrMapValue(OneOf('start','middle','end','numeric'),desc="treat (x,y) as one of the options below."),
         encoding = AttrMapValue(isString),
         )
     encoding = 'utf8'
