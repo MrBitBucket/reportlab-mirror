@@ -36,12 +36,12 @@ from reportlab.graphics.widgets.markers import makeMarker, uSymbol2Symbol, isSym
 class StrandProperty(PropHolder):
 
     _attrMap = AttrMap(
-        strokeWidth = AttrMapValue(isNumber),
-        fillColor = AttrMapValue(isColorOrNone),
-        strokeColor = AttrMapValue(isColorOrNone),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        symbol = AttrMapValue(EitherOr((isStringOrNone,isSymbol)), desc='Widget placed at data points.'),
-        symbolSize= AttrMapValue(isNumber, desc='Symbol size.'),
+        strokeWidth = AttrMapValue(isNumber,desc='width'),
+        fillColor = AttrMapValue(isColorOrNone,desc='filling color'),
+        strokeColor = AttrMapValue(isColorOrNone,desc='stroke color'),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone,desc='dashing pattern, e.g. (3,2)'),
+        symbol = AttrMapValue(EitherOr((isStringOrNone,isSymbol)), desc='Widget placed at data points.',advancedUsage=1),
+        symbolSize= AttrMapValue(isNumber, desc='Symbol size.',advancedUsage=1),
         name = AttrMapValue(isStringOrNone, desc='Name of the strand.'),
         )
 
@@ -56,11 +56,11 @@ class StrandProperty(PropHolder):
 
 class SpokeProperty(PropHolder):
     _attrMap = AttrMap(
-        strokeWidth = AttrMapValue(isNumber),
-        fillColor = AttrMapValue(isColorOrNone),
-        strokeColor = AttrMapValue(isColorOrNone),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone),
-        labelRadius = AttrMapValue(isNumber),
+        strokeWidth = AttrMapValue(isNumber,desc='width'),
+        fillColor = AttrMapValue(isColorOrNone,desc='filling color'),
+        strokeColor = AttrMapValue(isColorOrNone,desc='stroke color'),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone,desc='dashing pattern, e.g. (2,1)'),
+        labelRadius = AttrMapValue(isNumber,desc='label radius',advancedUsage=1),
         visible = AttrMapValue(isBoolean,desc="True if the spoke line is to be drawn"),
         )
 
@@ -79,8 +79,8 @@ class SpokeLabel(WedgeLabel):
 
 class StrandLabel(SpokeLabel):
     _attrMap = AttrMap(BASE=SpokeLabel,
-            format = AttrMapValue(EitherOr((isStringOrNone,isCallable)),"Format for the label"),
-            dR = AttrMapValue(isNumberOrNone,"radial shift for label"),
+            format = AttrMapValue(EitherOr((isStringOrNone,isCallable)),desc="Format for the label"),
+            dR = AttrMapValue(isNumberOrNone,desc="radial shift for label"),
             )
     def __init__(self,**kw):
         self.format = ''

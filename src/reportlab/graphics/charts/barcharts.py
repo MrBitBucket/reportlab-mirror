@@ -32,9 +32,9 @@ class BarChartProperties(PropHolder):
         fillColor = AttrMapValue(isColorOrNone, desc='Color of the bar interior area.'),
         strokeWidth = AttrMapValue(isNumber, desc='Width of the bar border.'),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
-        symbol = AttrMapValue(None, desc='A widget to be used instead of a normal bar.'),
+        symbol = AttrMapValue(None, desc='A widget to be used instead of a normal bar.',advancedUsage=1),
         name = AttrMapValue(isString, desc='Text to be associated with a bar (eg seriesname)'),
-        swatchMarker = AttrMapValue(NoneOr(isSymbol), desc="None or makeMarker('Diamond') ..."),
+        swatchMarker = AttrMapValue(NoneOr(isSymbol), desc="None or makeMarker('Diamond') ...",advancedUsage=1),
         )
 
     def __init__(self):
@@ -49,7 +49,7 @@ class BarChart(PlotArea):
     "Abstract base class, unusable by itself."
 
     _attrMap = AttrMap(BASE=PlotArea,
-        useAbsolute = AttrMapValue(isNumber, desc='Flag to use absolute spacing values.'),
+        useAbsolute = AttrMapValue(isNumber, desc='Flag to use absolute spacing values.',advancedUsage=1),
         barWidth = AttrMapValue(isNumber, desc='The width of an individual bar.'),
         groupSpacing = AttrMapValue(isNumber, desc='Width between groups of bars.'),
         barSpacing = AttrMapValue(isNumber, desc='Width between individual bars.'),
@@ -59,10 +59,10 @@ class BarChart(PlotArea):
         data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) numbers.'),
         barLabels = AttrMapValue(None, desc='Handle to the list of bar labels.'),
         barLabelFormat = AttrMapValue(None, desc='Formatting string or function used for bar labels.'),
-        barLabelCallOut = AttrMapValue(None, desc='Callout function(label)\nlabel._callOutInfo = (self,g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0)'),
+        barLabelCallOut = AttrMapValue(None, desc='Callout function(label)\nlabel._callOutInfo = (self,g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0)',advancedUsage=1),
         barLabelArray = AttrMapValue(None, desc='explicit array of bar label values, must match size of data if present.'),
-        reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.'),
-        naLabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for N/A values.'),
+        reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.',advancedUsage=1),
+        naLabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for N/A values.',advancedUsage=1),
         annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.'),
         )
 

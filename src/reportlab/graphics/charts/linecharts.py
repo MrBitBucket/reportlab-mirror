@@ -24,9 +24,9 @@ class LineChartProperties(PropHolder):
         strokeWidth = AttrMapValue(isNumber, desc='Width of a line.'),
         strokeColor = AttrMapValue(isColorOrNone, desc='Color of a line.'),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
-        symbol = AttrMapValue(NoneOr(isSymbol), desc='Widget placed at data points.'),
-        shader = AttrMapValue(None, desc='Shader Class.'),
-        filler = AttrMapValue(None, desc='Filler Class.'),
+        symbol = AttrMapValue(NoneOr(isSymbol), desc='Widget placed at data points.',advancedUsage=1),
+        shader = AttrMapValue(None, desc='Shader Class.',advancedUsage=1),
+        filler = AttrMapValue(None, desc='Filler Class.',advancedUsage=1),
         name = AttrMapValue(isStringOrNone, desc='Name of the line.'),
         )
 
@@ -108,8 +108,8 @@ class HorizontalLineChart(LineChart):
     """
 
     _attrMap = AttrMap(BASE=LineChart,
-        useAbsolute = AttrMapValue(isNumber, desc='Flag to use absolute spacing values.'),
-        lineLabelNudge = AttrMapValue(isNumber, desc='Distance between a data point and its label.'),
+        useAbsolute = AttrMapValue(isNumber, desc='Flag to use absolute spacing values.',advancedUsage=1),
+        lineLabelNudge = AttrMapValue(isNumber, desc='Distance between a data point and its label.',advancedUsage=1),
         lineLabels = AttrMapValue(None, desc='Handle to the list of data point labels.'),
         lineLabelFormat = AttrMapValue(None, desc='Formatting string or function used for data point labels.'),
         lineLabelArray = AttrMapValue(None, desc='explicit array of line label values, must match size of data if present.'),
@@ -120,9 +120,9 @@ class HorizontalLineChart(LineChart):
         categoryAxis = AttrMapValue(None, desc='Handle of the category axis.'),
         categoryNames = AttrMapValue(isListOfStringsOrNone, desc='List of category names.'),
         data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) numbers.'),
-        inFill = AttrMapValue(isBoolean, desc='Whether infilling should be done.'),
-        reversePlotOrder = AttrMapValue(isBoolean, desc='If true reverse plot order.'),
-        annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.'),
+        inFill = AttrMapValue(isBoolean, desc='Whether infilling should be done.',advancedUsage=1),
+        reversePlotOrder = AttrMapValue(isBoolean, desc='If true reverse plot order.',advancedUsage=1),
+        annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.',advancedUsage=1),
         )
 
     def __init__(self):

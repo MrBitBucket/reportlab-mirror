@@ -26,11 +26,11 @@ class LinePlotProperties(PropHolder):
         strokeWidth = AttrMapValue(isNumber, desc='Width of a line.'),
         strokeColor = AttrMapValue(isColorOrNone, desc='Color of a line.'),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
-        symbol = AttrMapValue(None, desc='Widget placed at data points.'),
-        shader = AttrMapValue(None, desc='Shader Class.'),
-        filler = AttrMapValue(None, desc='Filler Class.'),
+        symbol = AttrMapValue(None, desc='Widget placed at data points.',advancedUsage=1),
+        shader = AttrMapValue(None, desc='Shader Class.',advancedUsage=1),
+        filler = AttrMapValue(None, desc='Filler Class.',advancedUsage=1),
         name = AttrMapValue(isStringOrNone, desc='Name of the line.'),
-        inFill = AttrMapValue(isBoolean, desc='If true flood fill to x axis'),
+        inFill = AttrMapValue(isBoolean, desc='If true flood fill to x axis',advancedUsage=1),
         )
 
 class Shader(_SetKeyWordArgs):
@@ -79,8 +79,8 @@ class LinePlot(AbstractLineChart):
     X and Y versions of this class).
     """
     _attrMap = AttrMap(BASE=PlotArea,
-        reversePlotOrder = AttrMapValue(isBoolean, desc='If true reverse plot order.'),
-        lineLabelNudge = AttrMapValue(isNumber, desc='Distance between a data point and its label.'),
+        reversePlotOrder = AttrMapValue(isBoolean, desc='If true reverse plot order.',advancedUsage=1),
+        lineLabelNudge = AttrMapValue(isNumber, desc='Distance between a data point and its label.',advancedUsage=1),
         lineLabels = AttrMapValue(None, desc='Handle to the list of data point labels.'),
         lineLabelFormat = AttrMapValue(None, desc='Formatting string or function used for data point labels.'),
         lineLabelArray = AttrMapValue(None, desc='explicit array of line label values, must match size of data if present.'),
@@ -91,9 +91,9 @@ class LinePlot(AbstractLineChart):
         xValueAxis = AttrMapValue(None, desc='Handle of the x axis.'),
         yValueAxis = AttrMapValue(None, desc='Handle of the y axis.'),
         data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) x/y tuples.'),
-        annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.'),
-        behindAxes = AttrMapValue(isBoolean, desc='If true use separate line group.'),
-        gridFirst = AttrMapValue(isBoolean, desc='If true use draw grids before axes.'),
+        annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.',advancedUsage=1),
+        behindAxes = AttrMapValue(isBoolean, desc='If true use separate line group.',advancedUsage=1),
+        gridFirst = AttrMapValue(isBoolean, desc='If true use draw grids before axes.',advancedUsage=1),
         )
 
     def __init__(self):
@@ -800,7 +800,7 @@ class ScatterPlot(LinePlot):
                     outerBorderOn = AttrMapValue(isBoolean, desc="Is there an outer border (continuation of axes)"),
                     outerBorderColor = AttrMapValue(isColorOrNone, desc="Color of outer border (if any)"),
                     background = AttrMapValue(isColorOrNone, desc="Background color (if any)"),
-                    labelOffset = AttrMapValue(isNumber, desc="Space between label and Axis (or other labels)"),
+                    labelOffset = AttrMapValue(isNumber, desc="Space between label and Axis (or other labels)",advancedUsage=1),
                     axisTickLengths = AttrMapValue(isNumber, desc="Lenth of the ticks on both axes"),
                     axisStrokeWidth = AttrMapValue(isNumber, desc="Stroke width for both axes"),
                     xLabel = AttrMapValue(isString, desc="Label for the whole X-Axis"),
