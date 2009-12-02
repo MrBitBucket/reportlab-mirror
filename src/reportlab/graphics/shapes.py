@@ -1208,7 +1208,7 @@ class Polygon(SolidShape):
     def __init__(self, points=[], **kw):
         SolidShape.__init__(self, kw)
         assert len(points) % 2 == 0, 'Point list must have even number of elements!'
-        self.points = points
+        self.points = points or []
 
     def copy(self):
         new = self.__class__(self.points)
@@ -1229,6 +1229,7 @@ class PolyLine(LineShape):
 
     def __init__(self, points=[], **kw):
         LineShape.__init__(self, kw)
+        points = points or []
         lenPoints = len(points)
         if lenPoints:
             if type(points[0]) in (ListType,TupleType):

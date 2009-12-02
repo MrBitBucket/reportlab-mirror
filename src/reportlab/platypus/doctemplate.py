@@ -245,6 +245,7 @@ class PageTemplate:
     """
     def __init__(self,id=None,frames=[],onPage=_doNothing, onPageEnd=_doNothing,
                  pagesize=None):
+        frames = frames or []
         if type(frames) not in (ListType,TupleType): frames = [frames]
         assert filter(lambda x: not isinstance(x,Frame), frames)==[], "frames argument error"
         self.id = id

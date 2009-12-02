@@ -890,7 +890,7 @@ class KeepInFrame(_Container,Flowable):
         assert maxHeight>=0,  '%s invalid maxHeight value %s' % (self.identity(),maxHeight)
         if mergeSpace is None: mergeSpace = overlapAttachedSpace
         self.mergespace = mergeSpace
-        self._content = content
+        self._content = content or []
         self.vAlign = vAlign
         self.hAlign = hAlign
 
@@ -1144,7 +1144,7 @@ class FrameSplitter(NullDraw):
     _ZEROSIZE=1
     def __init__(self,nextTemplate,nextFrames=[],gap=10,required=72):
         self.nextTemplate=nextTemplate
-        self.nextFrames=nextFrames
+        self.nextFrames=nextFrames or []
         self.gap=gap
         self.required=required
 
@@ -1288,7 +1288,7 @@ class DocIf(DocPara):
     def __init__(self,cond,thenBlock,elseBlock=[]):
         Flowable.__init__(self)
         self.expr = cond
-        self.blocks = elseBlock,thenBlock
+        self.blocks = elseBlock or [],thenBlock
 
     def checkBlock(self,block):
         if not isinstance(block,(list,tuple)):
