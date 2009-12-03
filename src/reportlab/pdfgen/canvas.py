@@ -110,6 +110,13 @@ class   ExtGState:
             S[name] = pdfdoc.PDFDictionary(dict((t,)))
         return S and pdfdoc.PDFDictionary(S) or None
 
+    def pushCopy(self):
+        '''the states must be shared across push/pop, but the values not'''
+        x = self.__class__()
+        x._d = self._d.copy()
+        x._c = self._c
+        return x
+
 class Canvas(textobject._PDFColorSetter):
     """This class is the programmer's interface to the PDF file format.  Methods
     are (or will be) provided here to do just about everything PDF can do.
@@ -285,6 +292,7 @@ class Canvas(textobject._PDFColorSetter):
         for name in self.STATE_ATTRIBUTES:
             state[name] = d[name] #getattr(self, name)
         self.state_stack.append(state)
+        self._extgstate = self._extgstate.pushCopy()
 
     def pop_state_stack(self):
         state = self.state_stack[-1]
@@ -296,7 +304,7 @@ class Canvas(textobject._PDFColorSetter):
      _x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
      _fillMode _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
      _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorObj
-     _strokeColorObj""")
+     _strokeColorObj _extgstate""")
     STATE_RANGE = range(len(STATE_ATTRIBUTES))
 
         #self._addStandardFonts()
