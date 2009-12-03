@@ -1710,7 +1710,7 @@ class AdjYValueAxis(YValueAxis):
 
         self._valueMin = T[0]
         self._valueMax = T[-1]
-        self._tickValues = self.valueSteps = T
+        self._tickValues = T
         if self.labelTextFormat is None:
             self._labelTextFormat = L
         else:
