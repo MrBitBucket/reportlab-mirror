@@ -52,7 +52,7 @@ Canvas and TextObject have special support for dynamic fonts.
 """
 
 import string
-from struct import pack, unpack
+from struct import pack, unpack, error as structError
 from reportlab.lib.utils import getStringIO
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 
@@ -321,7 +321,10 @@ class TTFontParser:
     def read_short(self):
         "Reads a signed short"
         self._pos += 2
-        return unpack('>h',self._ttf_data[self._pos-2:self._pos])[0]
+        try:
+            return unpack('>h',self._ttf_data[self._pos-2:self._pos])[0]
+        except structError, error:
+            raise TTFError, error
 
     def get_ushort(self, pos):
         "Return an unsigned short at given position"
@@ -481,7 +484,17 @@ class TTFontFile(TTFontParser):
                 names[nameId] = N
                 nameCount -= 1
                 if nameCount==0: break
-        psName = names[6].replace(" ", "-")  #Dinu Gherman's fix for font names with spaces
+        if names[6] is not None:
+            psName = names[6].replace(" ", "-")  #Dinu Gherman's fix for font names with spaces
+        elif names[4] is not None:
+            psName = names[4].replace(" ", "-")
+        # Fine, one last try before we bail.
+        elif names[1] is not None:
+            psName = names[1].replace(" ", "-")
+        else:
+            psName = None
+
+        # Don't just assume, check for None since some shoddy fonts cause crashes here...
         if not psName:
             raise TTFError, "Could not find PostScript font name"
         for c in psName:
@@ -735,6 +748,8 @@ class TTFontFile(TTFontParser):
             originalGlyphIdx = glyphMap[n]
             glyphPos = self.glyphPos[originalGlyphIdx]
             glyphLen = self.glyphPos[originalGlyphIdx + 1] - glyphPos
+            n += 1
+            if not glyphLen: continue
             self.seek(start + glyphPos)
             numberOfContours = self.read_short()
             if numberOfContours < 0:
@@ -757,7 +772,6 @@ class TTFontFile(TTFontParser):
                         self.skip(4)
                     elif flags & GF_WE_HAVE_A_TWO_BY_TWO:
                         self.skip(8)
-            n += 1
 
         numGlyphs = n = len(glyphMap)
         while n > 1 and self.hmetrics[n][0] == self.hmetrics[n - 1][0]:
