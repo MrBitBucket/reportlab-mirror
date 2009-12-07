@@ -425,6 +425,13 @@ class _XTicks:
             self._pseudo_configure()
         otv = self._tickValues
         if not hasattr(self,'_subTickValues'):
+            acn = self.__class__.__name__
+            if acn[:11]=='NormalDateX':
+                iFuzz = 0
+                dCnv = int
+            else:
+                iFuzz = 1e-8
+                dCnv = lambda x:x
             OTV = otv[:]
             T = [].append
             nst = int(self.subTickNum)
@@ -439,7 +446,7 @@ class _XTicks:
                 else:
                     i >>= 1
                     dst = OTV[i+1] - OTV[i]
-                fuzz = dst*1e-8
+                fuzz = dst*iFuzz
                 vn = self._valueMin+fuzz
                 vx = self._valueMax-fuzz
                 if OTV[0]>vn: OTV.insert(0,OTV[0]-dst)
@@ -447,7 +454,7 @@ class _XTicks:
                 dst /= float(nst+1)
                 for i,x in enumerate(OTV[:-1]):
                     for j in xrange(nst):
-                        t = x+(j+1)*dst
+                        t = x+dCnv((j+1)*dst)
                         if t<=vn or t>=vx: continue
                         T(t)
                 self._subTickValues = T.__self__
