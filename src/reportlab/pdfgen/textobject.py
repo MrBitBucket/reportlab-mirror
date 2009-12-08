@@ -26,33 +26,41 @@ class _PDFColorSetter:
                 self._colorsUsed[name] = sname
             return name
 
-    def setFillColorCMYK(self, c, m, y, k):
+    def setFillColorCMYK(self, c, m, y, k, alpha=None):
          """set the fill color useing negative color values
          (cyan, magenta, yellow and darkness value).
          Takes 4 arguments between 0.0 and 1.0"""
          self._fillColorObj = (c, m, y, k)
          self._code.append('%s k' % fp_str(c, m, y, k))
+         if alpha is not None:
+             self.setFillAlpha(alpha)
 
-    def setStrokeColorCMYK(self, c, m, y, k):
+    def setStrokeColorCMYK(self, c, m, y, k, alpha=None):
          """set the stroke color useing negative color values
             (cyan, magenta, yellow and darkness value).
             Takes 4 arguments between 0.0 and 1.0"""
          self._strokeColorObj = (c, m, y, k)
          self._code.append('%s K' % fp_str(c, m, y, k))
+         if alpha is not None:
+             self.setStrokeAlpha(alpha)
 
-    def setFillColorRGB(self, r, g, b):
+    def setFillColorRGB(self, r, g, b, alpha=None):
         """Set the fill color using positive color description
            (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
         self._fillColorObj = (r, g, b)
         self._code.append('%s rg' % fp_str(r,g,b))
+        if alpha is not None:
+            self.setFillAlpha(alpha)
 
-    def setStrokeColorRGB(self, r, g, b):
+    def setStrokeColorRGB(self, r, g, b, alpha=None):
         """Set the stroke color using positive color description
            (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
         self._strokeColorObj = (r, g, b)
         self._code.append('%s RG' % fp_str(r,g,b))
+        if alpha is not None:
+            self.setStrokeAlpha(alpha)
 
-    def setFillColor(self, aColor):
+    def setFillColor(self, aColor, alpha=None):
         """Takes a color object, allowing colors to be referred to by name"""
         if isinstance(aColor, CMYKColor):
             d = aColor.density
@@ -80,8 +88,12 @@ class _PDFColorSetter:
             self.setFillColor(toColor(aColor))
         else:
             raise ValueError('Unknown color %r' % aColor)
+        if alpha is not None:
+            self.setFillAlpha(alpha)
+        elif getattr(aColor, 'alpha', None) is not None:
+            self.setFillAlpha(aColor.alpha)
 
-    def setStrokeColor(self, aColor):
+    def setStrokeColor(self, aColor, alpha=None):
         """Takes a color object, allowing colors to be referred to by name"""
         if isinstance(aColor, CMYKColor):
             d = aColor.density
@@ -109,16 +121,24 @@ class _PDFColorSetter:
             self.setStrokeColor(toColor(aColor))
         else:
             raise ValueError('Unknown color %r' % aColor)
+        if alpha is not None:
+            self.setStrokeAlpha(alpha)
+        elif getattr(aColor, 'alpha', None) is not None:
+            self.setStrokeAlpha(aColor.alpha)
 
-    def setFillGray(self, gray):
+    def setFillGray(self, gray, alpha=None):
         """Sets the gray level; 0.0=black, 1.0=white"""
         self._fillColorObj = (gray, gray, gray)
         self._code.append('%s g' % fp_str(gray))
+        if alpha is not None:
+            self.setFillAlpha(alpha)
 
-    def setStrokeGray(self, gray):
+    def setStrokeGray(self, gray, alpha=None):
         """Sets the gray level; 0.0=black, 1.0=white"""
         self._strokeColorObj = (gray, gray, gray)
         self._code.append('%s G' % fp_str(gray))
+        if alpha is not None:
+            self.setFillAlpha(alpha)
 
     def setStrokeAlpha(self,a):
         if not (isinstance(a,(float,int)) and 0<=a<=1):
