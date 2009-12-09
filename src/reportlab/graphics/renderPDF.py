@@ -237,9 +237,11 @@ class _PDFRenderer(Renderer):
                 fontsize = delta.get('fontSize', self._canvas._fontsize)
                 self._canvas.setFont(fontname, fontsize)
             elif key=='fillOpacity':
-                self._canvas.setFillAlpha(value)
+                if value is not None:
+                    self._canvas.setFillAlpha(value)
             elif key=='strokeOpacity':
-                self._canvas.setStrokeAlpha(value)
+                if value is not None:
+                    self._canvas.setStrokeAlpha(value)
             elif key=='fillOverprint':
                 self._canvas.setFillOverprint(value)
             elif key=='strokeOverprint':

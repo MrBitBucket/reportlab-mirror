@@ -15,6 +15,7 @@ from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName,
 from reportlab.lib import logger
 from reportlab.lib import colors
 from reportlab.lib.validators import *
+isOpacity = NoneOr(isNumberInRange(0,1))
 from reportlab.lib.attrmap import *
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -43,8 +44,8 @@ STATE_DEFAULTS = {   # sensible defaults for all
     'strokeLineJoin': 0,
     'strokeMiterLimit' : 10,    # don't know yet so let bomb here
     'strokeDashArray': None,
-    'strokeOpacity': 1.0,  #100%
-    'fillOpacity': 1.0,
+    'strokeOpacity': None, #100%
+    'fillOpacity': None,
     'fillOverprint': False,
     'strokeOverprint': False,
 
@@ -821,7 +822,7 @@ class LineShape(Shape):
         strokeLineJoin = AttrMapValue(OneOf(0,1,2),desc="Line join 0=miter, 1=round & 2=bevel"),
         strokeMiterLimit = AttrMapValue(isNumber,desc="miter limit control miter line joins"),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone,desc="a sequence of numbers represents on and off, e.g. (2,1)"),
-        strokeOpacity = AttrMapValue(isNumberInRange(0, 1),desc="The level of transparency of the line, any real number betwen 0 and 1"),
+        strokeOpacity = AttrMapValue(isOpacity,desc="The level of transparency of the line, any real number betwen 0 and 1"),
         strokeOverprint = AttrMapValue(isBoolean,desc='Turn on stroke overprinting'),
         )
 
@@ -832,7 +833,7 @@ class LineShape(Shape):
         self.strokeLineJoin = 0
         self.strokeMiterLimit = 0
         self.strokeDashArray = None
-        self.strokeOpacity = 1
+        self.strokeOpacity = None
         self.setProperties(kw)
 
 
@@ -855,19 +856,18 @@ class Line(LineShape):
         "Returns bounding rectangle of object as (x1,y1,x2,y2)"
         return (self.x1, self.y1, self.x2, self.y2)
 
-
 class SolidShape(LineShape):
     # base for anything with outline and content
 
     _attrMap = AttrMap(BASE=LineShape,
         fillColor = AttrMapValue(isColorOrNone,desc="filling color of the shape, e.g. red"),
-        fillOpacity = AttrMapValue(isNumberInRange(0, 1),desc="the level of transparency of the color, any real number between 0 and 1"),
+        fillOpacity = AttrMapValue(isOpacity,desc="the level of transparency of the color, any real number between 0 and 1"),
         fillOverprint = AttrMapValue(isBoolean,desc='Turn on fill overprinting'),
         )
 
     def __init__(self, kw):
         self.fillColor = STATE_DEFAULTS['fillColor']
-        self.fillOpacity = 1
+        self.fillOpacity = None
         # do this at the end so keywords overwrite
         #the above settings
         LineShape.__init__(self, kw)
