@@ -20,28 +20,22 @@ class Color:
     """This class is used to represent color.  Components red, green, blue
     are in the range 0 (dark) to 1 (full intensity)."""
 
-    def __init__(self, red=0, green=0, blue=0, alpha=None):
+    def __init__(self, red=0, green=0, blue=0, alpha=1):
         "Initialize with red, green, blue in range [0-1]."
-        self.red, self.green, self.blue, self.alpha = red,green,blue,alpha
+        self.red = red
+        self.green = green
+        self.blue = blue
+        self.alpha = alpha
 
     def __repr__(self):
-        args = [self.red, self.green, self.blue]
-        if self.alpha is not None:
-            args.append(self.alpha)
-        return "Color(%s)" % fp_str(*args).replace(' ',',')
+        return "Color(%s)" % fp_str(*(self.red, self.green, self.blue,self.alpha)).replace(' ',',')
 
     def __hash__(self):
-        return hash( (self.red, self.green, self.blue, self.alpha) )
+        return hash((self.red, self.green, self.blue, self.alpha))
 
     def __cmp__(self,other):
         try:
-            dsum = 4*self.red-4*other.red + 2*self.green-2*other.green + self.blue-other.blue
-            selfalpha = otheralpha = 1
-            if self.alpha is not None:
-                selfalpha = self.alpha
-            if other.alpha is not None:
-                otheralpha = other.alpha
-            dsum += 8*selfalpha-8*otheralpha
+            dsum = 8*(self.alpha-other.alpha)+4*(self.red-other.red) + 2*(self.green-other.green) + self.blue-other.blue
         except:
             return -1
         if dsum > 0: return 1
@@ -54,10 +48,7 @@ class Color:
 
     def rgba(self):
         "Returns a four-tuple of components"
-        alpha = self.alpha
-        if self.alpha is None:
-            alpha = 1
-        return (self.red, self.green, self.blue, alpha)
+        return (self.red, self.green, self.blue, self.alpha)
 
     def bitmap_rgb(self):
         return tuple(map(lambda x: int(x*255)&255, self.rgb()))
@@ -97,7 +88,7 @@ class CMYKColor(Color):
     and renderers may look for these."""
 
     def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
-                spotName=None, density=1, knockout=None, alpha=None):
+                spotName=None, density=1, knockout=None, alpha=1):
         """
         Initialize with four colors in range [0-1]. the optional
         spotName, density & knockout may be of use to specific renderers.
@@ -154,12 +145,7 @@ class CMYKColor(Color):
                 dsum = ((self.red-other.red)*2+(self.green-other.green))*2+(self.blue-other.blue)
             except: # or just return 'not equal' if not a color
                 return -1
-        selfalpha = otheralpha = 1
-        if self.alpha is not None:
-            selfalpha = self.alpha
-        if other.alpha is not None:
-            otheralpha = other.alpha
-        dsum += 2*(selfalpha-otheralpha)
+        dsum += 2*(self.alpha-other.alpha)
         if dsum >= 0:
             return dsum>0
         else:
@@ -171,10 +157,7 @@ class CMYKColor(Color):
 
     def cmyka(self):
         "Returns a tuple of five color components - syntactic sugar"
-        alpha = self.alpha
-        if self.alpha is None:
-            alpha = 1
-        return (self.cyan, self.magenta, self.yellow, self.black, alpha)
+        return (self.cyan, self.magenta, self.yellow, self.black, self.alpha)
 
     def _density_str(self):
         return fp_str(self.density)
@@ -207,14 +190,14 @@ class PCMYKColor(CMYKColor):
 class CMYKColorSep(CMYKColor):
     '''special case color for making separating pdfs'''
     def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
-                spotName=None, density=1,alpha=None):
+                spotName=None, density=1,alpha=1):
         CMYKColor.__init__(self,cyan,magenta,yellow,black,spotName,density,knockout=None,alpha=alpha)
     _cKwds='cyan magenta yellow black density spotName alpha'.split()
 
 class PCMYKColorSep(PCMYKColor,CMYKColorSep):
     '''special case color for making separating pdfs'''
     def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
-                spotName=None, density=100, alpha=None):
+                spotName=None, density=100, alpha=1):
         PCMYKColor.__init__(self,cyan,magenta,yellow,black,density,spotName,knockout=None,alpha=alpha)
     _cKwds='cyan magenta yellow black density spotName alpha'.split()
 
@@ -331,30 +314,16 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
         r = c0.red+x*(c1.red - c0.red)/dx
         g = c0.green+x*(c1.green- c0.green)/dx
         b = c0.blue+x*(c1.blue - c0.blue)/dx
-        if c0.alpha is not None or c1.alpha is not None:
-            c0alpha = c1alpha = 1
-            if c0.alpha is not None:
-                c0alpha = c0.alpha
-            if c1.alpha is not None:
-                c1alpha = c1.alpha
-            a = c0alpha+x*(c1alpha - c0alpha)/dx
-            return Color(r,g,b,alpha=a)
-        return Color(r,g,b)
+        a = c0.alpha+x*(c1.alpha - c0.alpha)/dx
+        return Color(r,g,b,alpha=a)
     elif cname == 'CMYKColor':
         c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
         m = c0.magenta+x*(c1.magenta - c0.magenta)/dx
         y = c0.yellow+x*(c1.yellow - c0.yellow)/dx
         k = c0.black+x*(c1.black - c0.black)/dx
         d = c0.density+x*(c1.density - c0.density)/dx
-        if c0.alpha is not None or c1.alpha is not None:
-            c0alpha = c1alpha = 1
-            if c0.alpha is not None:
-                c0alpha = c0.alpha
-            if c1.alpha is not None:
-                c1alpha = c1.alpha
-            a = c0alpha+x*(c1alpha - c0alpha)/dx
-            return CMYKColor(c,m,y,k, density=d, alpha=a)
-        return CMYKColor(c,m,y,k, density=d)
+        a = c0.alpha+x*(c1.alpha - c0.alpha)/dx
+        return CMYKColor(c,m,y,k, density=d, alpha=a)
     elif cname == 'PCMYKColor':
         if cmykDistance(c0,c1)<1e-8:
             #colors same do density and preserve spotName if any
@@ -391,15 +360,8 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
             y = c0.yellow+x*(c1.yellow - c0.yellow)/dx
             k = c0.black+x*(c1.black - c0.black)/dx
             d = c0.density+x*(c1.density - c0.density)/dx
-            if c0.alpha is not None or c1.alpha is not None:
-                c0alpha = c1alpha = 1
-                if c0.alpha is not None:
-                    c0alpha = c0.alpha
-                if c1.alpha is not None:
-                    c1alpha = c1.alpha
-                a = c0alpha+x*(c1alpha - c0alpha)/dx
-                return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, alpha=a)
-            return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100)
+            a = c0alpha+x*(c1.alpha - c0.alpha)/dx
+            return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, alpha=a)
     else:
         raise ValueError, "Can't interpolate: Unknown color class %s!" % cname
 
