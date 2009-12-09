@@ -215,7 +215,6 @@ def main():
 
     SPECIAL_PACKAGE_DATA = {}
     RL_ACCEL = _find_rl_ccode('rl_accel','_rl_accel.c')
-    LIBS = []
     LIBRARIES=[]
     EXT_MODULES = []
     if not RL_ACCEL:
@@ -236,14 +235,14 @@ def main():
                                 include_dirs=[],
                             define_macros=[],
                             library_dirs=[],
-                            libraries=LIBS, # libraries to link against
+                            libraries=[], # libraries to link against
                             ),
                     Extension( 'sgmlop',
                             [pjoin(RL_ACCEL,'sgmlop.c')],
                             include_dirs=[],
                             define_macros=[],
                             library_dirs=[],
-                            libraries=LIBS, # libraries to link against
+                            libraries=[], # libraries to link against
                             ),
                     Extension( 'pyHnj',
                             [pjoin(RL_ACCEL,'pyHnjmodule.c'),
@@ -252,11 +251,10 @@ def main():
                             include_dirs=[],
                             define_macros=[],
                             library_dirs=[],
-                            libraries=LIBS, # libraries to link against
+                            libraries=[], # libraries to link against
                             ),
                     ]
     RENDERPM = _find_rl_ccode('renderPM','_renderPM.c')
-    LIBS = []
     if not RENDERPM:
         infoline( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
         infoline( '!No rl_accel code found, you can obtain it at     !')
@@ -267,6 +265,7 @@ def main():
         infoline( '#Attempting install of _renderPM')
         infoline( '#extensions from %r'%RENDERPM)
         LIBART_DIR=pjoin(RENDERPM,'libart_lgpl')
+        GT1_DIR=pjoin(RENDERPM,'gt1')
         MACROS=[('ROBIN_DEBUG',None)]
         MACROS=[]
         def libart_version():
@@ -279,10 +278,30 @@ def main():
                     if len(D)==3: break
             return (sys.platform == 'win32' and '\\"%s\\"' or '"%s"') % '.'.join(map(lambda k,D=D: D.get(k,'?'),K))
         LIBART_VERSION = libart_version()
-        SOURCES=[pjoin(RENDERPM,'_renderPM.c')]
-        LIBART_SRCS=glob.glob(pjoin(LIBART_DIR, 'art_*.c'))
-        GT1_DIR=pjoin(RENDERPM,'gt1')
-        LIBS = []       #assume empty libraries list
+        SOURCES=[pjoin(RENDERPM,'_renderPM.c'),
+                    pjoin(LIBART_DIR,'art_vpath_bpath.c'),
+                    pjoin(LIBART_DIR,'art_rgb_pixbuf_affine.c'),
+                    pjoin(LIBART_DIR,'art_rgb_svp.c'),
+                    pjoin(LIBART_DIR,'art_svp.c'),
+                    pjoin(LIBART_DIR,'art_svp_vpath.c'),
+                    pjoin(LIBART_DIR,'art_svp_vpath_stroke.c'),
+                    pjoin(LIBART_DIR,'art_svp_ops.c'),
+                    pjoin(LIBART_DIR,'art_vpath.c'),
+                    pjoin(LIBART_DIR,'art_vpath_dash.c'),
+                    pjoin(LIBART_DIR,'art_affine.c'),
+                    pjoin(LIBART_DIR,'art_rect.c'),
+                    pjoin(LIBART_DIR,'art_rgb_affine.c'),
+                    pjoin(LIBART_DIR,'art_rgb_affine_private.c'),
+                    pjoin(LIBART_DIR,'art_rgb.c'),
+                    pjoin(LIBART_DIR,'art_rgb_rgba_affine.c'),
+                    pjoin(LIBART_DIR,'art_svp_intersect.c'),
+                    pjoin(LIBART_DIR,'art_svp_render_aa.c'),
+                    pjoin(LIBART_DIR,'art_misc.c'),
+                    pjoin(GT1_DIR,'gt1-parset1.c'),
+                    pjoin(GT1_DIR,'gt1-dict.c'),
+                    pjoin(GT1_DIR,'gt1-namecontext.c'),
+                    pjoin(GT1_DIR,'gt1-region.c'),
+                    ]
 
         if platform=='win32':
             FT_LIB=config('FREETYPE','lib',r'C:\devel\freetype-2.1.5\objs\freetype214.lib')
@@ -324,25 +343,6 @@ def main():
         if not FT_LIB:
             infoline('# installing without freetype no ttf, sorry!')
 
-        LIBRARIES+= [
-                    ('_renderPM_libart',
-                    {
-                    'sources':  LIBART_SRCS,
-                    'include_dirs': [RENDERPM,LIBART_DIR,],
-                    'macros': [('LIBART_COMPILATION',None),]+BIGENDIAN('WORDS_BIGENDIAN')+MACROS,
-                    #'extra_compile_args':['/Z7'],
-                    }
-                    ),
-                    ('_renderPM_gt1',
-                    {
-                    'sources':  pfxJoin(GT1_DIR,'gt1-dict.c','gt1-namecontext.c','gt1-parset1.c','gt1-region.c','parseAFM.c'),
-                    'include_dirs': [RENDERPM,GT1_DIR,],
-                    'macros': MACROS,
-                    #'extra_compile_args':['/Z7'],
-                    }
-                    ),
-                    ]
-
         EXT_MODULES +=  [Extension( '_renderPM',
                                         SOURCES,
                                         include_dirs=[RENDERPM,LIBART_DIR,GT1_DIR]+FT_INC_DIR,
@@ -350,7 +350,7 @@ def main():
                                         library_dirs=[]+FT_LIB_DIR,
 
                                         # libraries to link against
-                                        libraries=LIBS+FT_LIB,
+                                        libraries=FT_LIB,
                                         #extra_objects=['gt1.lib','libart.lib',],
                                         #extra_compile_args=['/Z7'],
                                         extra_link_args=[]
@@ -387,9 +387,12 @@ def main():
                     'reportlab.pdfgen',
                     'reportlab.platypus',
                     ],
+            # Ideally we'd have this but PIL via easy_install doesn't seem stable
+            #install_requires=[
+            #        'PIL',
+            #],
             package_dir = PACKAGE_DIR,
             package_data = {'reportlab': reportlab_files},
-            libraries = LIBRARIES,
             ext_modules =   EXT_MODULES,
             )
         print
