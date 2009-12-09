@@ -71,13 +71,19 @@ class _PMRenderer(Renderer):
         s = self._tracker.getState()
         self._canvas.ctm = s['ctm']
         self._canvas.strokeWidth = s['strokeWidth']
-        self._canvas.strokeColor = Color2Hex(s['strokeColor'])
+        alpha = s['strokeOpacity']
+        if alpha is not None:
+            self._canvas.strokeOpacity = alpha
+        self._canvas.setStrokeColor(s['strokeColor'])
         self._canvas.lineCap = s['strokeLineCap']
         self._canvas.lineJoin = s['strokeLineJoin']
         da = s['strokeDashArray']
         da = da and (0,da) or None
         self._canvas.dashArray = da
-        self._canvas.fillColor = Color2Hex(s['fillColor'])
+        alpha = s['fillOpacity']
+        if alpha is not None:
+            self._canvas.fillOpacity = alpha
+        self._canvas.setFillColor(s['fillColor'])
         self._canvas.setFont(s['fontName'], s['fontSize'])
 
     def initState(self,x,y):
@@ -603,9 +609,15 @@ class PMCanvas:
 
     def setFillColor(self,aColor):
         self.fillColor = Color2Hex(aColor)
+        alpha = getattr(aColor,'alpha',None)
+        if alpha is not None:
+            self.fillOpacity = alpha
 
     def setStrokeColor(self,aColor):
         self.strokeColor = Color2Hex(aColor)
+        alpha = getattr(aColor,'alpha',None)
+        if alpha is not None:
+            self.strokeOpacity = alpha
 
     restoreState = saveState
 
