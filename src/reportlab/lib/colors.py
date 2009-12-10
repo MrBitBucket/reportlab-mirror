@@ -166,7 +166,7 @@ class CMYKColor(Color):
 
 class PCMYKColor(CMYKColor):
     '''100 based CMYKColor with density and a spotName; just like Rimas uses'''
-    def __init__(self,cyan,magenta,yellow,black,density=100,spotName=None,knockout=None,alpha=None):
+    def __init__(self,cyan,magenta,yellow,black,density=100,spotName=None,knockout=None,alpha=1):
         CMYKColor.__init__(self,cyan/100.,magenta/100.,yellow/100.,black/100.,spotName,density/100.,knockout=knockout,alpha=alpha)
 
     def __repr__(self):
