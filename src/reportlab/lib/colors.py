@@ -360,7 +360,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
             y = c0.yellow+x*(c1.yellow - c0.yellow)/dx
             k = c0.black+x*(c1.black - c0.black)/dx
             d = c0.density+x*(c1.density - c0.density)/dx
-            a = c0alpha+x*(c1.alpha - c0.alpha)/dx
+            a = c0.alpha+x*(c1.alpha - c0.alpha)/dx
             return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, alpha=a)
     else:
         raise ValueError, "Can't interpolate: Unknown color class %s!" % cname
