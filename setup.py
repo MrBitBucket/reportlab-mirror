@@ -197,7 +197,49 @@ reportlab_files= [
         'fonts/VeraBd.ttf',
         'fonts/VeraBI.ttf',
         'fonts/VeraIt.ttf',
+        'fonts/_abi____.pfb',
+        'fonts/_ab_____.pfb',
+        'fonts/_ai_____.pfb',
+        'fonts/_a______.pfb',
+        'fonts/cobo____.pfb',
+        'fonts/cob_____.pfb',
+        'fonts/com_____.pfb',
+        'fonts/coo_____.pfb',
+        'fonts/_ebi____.pfb',
+        'fonts/_eb_____.pfb',
+        'fonts/_ei_____.pfb',
+        'fonts/_er_____.pfb',
+        'fonts/Sy______.pfb',
+        'fonts/Zd______.pfb',
+        'fonts/Zx______.pfb',
+        'fonts/Zy______.pfb',
         ]
+
+def get_fonts(PACKAGE_DIR, reportlab_files):
+    import sys, os, os.path, urllib2, zipfile, StringIO
+    rl_dir = PACKAGE_DIR['reportlab']
+    if not [x for x in reportlab_files if not os.path.isfile(pjoin(rl_dir,x))]:
+        infoline("Standard T1 font curves already downloaded")
+        return
+    try:
+        infoline("Downloading standard T1 font curves")
+
+        remotehandle = urllib2.urlopen("http://www.reportlab.com/ftp/fonts/pfbfer.zip")
+        zipdata = StringIO.StringIO(remotehandle.read())
+        remotehandle.close()
+        archive = zipfile.ZipFile(zipdata)
+        dst = pjoin(rl_dir, 'fonts')
+
+        for name in archive.namelist():
+            if not name.endswith('/'):
+                outfile = open(os.path.join(dst, name), 'wb')
+                outfile.write(archive.read(name))
+                outfile.close()
+        xitmsg = "Finished download of standard T1 font curves"
+    except:
+        xitmsg = "Failed to download standard T1 font curves"
+    map(reportlab_files.remove,[x for x in reportlab_files if not os.path.isfile(pjoin(rl_dir,x))])
+    infoline(xitmsg)
 
 def main():
     #test to see if we've a special command
@@ -363,7 +405,7 @@ def main():
     for fn,dst in SPECIAL_PACKAGE_DATA.iteritems():
         shutil.copyfile(fn,pjoin(PACKAGE_DIR['reportlab'],dst))
         reportlab_files.append(dst)
-
+    get_fonts(PACKAGE_DIR, reportlab_files)
     try:
         setup(
             name="reportlab",
@@ -402,6 +444,7 @@ def main():
         for dst in SPECIAL_PACKAGE_DATA.itervalues():
             os.remove(pjoin(PACKAGE_DIR['reportlab'],dst))
             reportlab_files.remove(dst)
+
 
 if __name__=='__main__':
     main()
