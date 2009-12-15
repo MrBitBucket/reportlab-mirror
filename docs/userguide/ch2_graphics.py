@@ -616,13 +616,14 @@ screen adds different levels of the red, green, or blue light to make
 any color, where white is formed by turning all three lights on full
 $(1,1,1)$.""")
 
-disc("""The $CMYK$ or subtractive method follows the way a printer
+disc("""
+The $CMYK$ or subtractive method follows the way a printer
 mixes three pigments (cyan, magenta, and yellow) to form colors.
 Because mixing chemicals is more difficult than combining light there
 is a fourth parameter for darkness.  For example a chemical
 combination of the $CMY$ pigments generally never makes a perfect
 black -- instead producing a muddy color -- so, to get black printers
-don't use the $CMY$ pigments but use a direct black ink.  Because
+don not use the $CMY$ pigments but use a direct black ink.  Because
 $CMYK$ maps more directly to the way printer hardware works it may
 be the case that colors specified in $CMYK$ will provide better fidelity
 and better control when printed.
@@ -633,10 +634,18 @@ illust(examples.colors, "Color Models")
 heading2('Painting back to front')
 
 disc("""
-Objects may be painted over other objects to good effect in $pdfgen$.  As
-in painting with oils the object painted last will show up on top.  For
-example, the $spumoni$ function below paints up a base of colors and then
-paints a white text over the base.
+Objects may be painted over other objects to good effect in $pdfgen$.  Generally
+There are two modes of handling objects that overlap in space, the default is to
+top object will hide any part of other objects that falls underneath it. If you
+need transparency you got two choices:
+1. if your document is intended to be printed in professional way and you are 
+working in CMYK colors then you can use overPrint. In overPrinting the colors
+physically mix in the printer and thus a new color is obtained. By default a 
+knockout will be applied and only top object appears.
+2. if your document is intended for screen output and you are using RGB colors 
+then you can use alpha color, alpha value is the transparency value of the color.
+The default alpha value is $1$ (not transparent) and you can use any real value
+in the range 0..1.
 """)
 
 eg(examples.testspumoni)
@@ -670,6 +679,23 @@ and scoops layer over eachother as well.
 """)
 illust(examples.spumoni2, "building up a drawing in layers")
 
+disc("""
+The $overPrint$ function draws two rectangles with overlapped
+corner, the corner colors are mixed. If you can not see the mixed
+colors of the two rectangles on the left in the example below, refer
+to your PDF viewer setting manual of enabling overPrint, some PDF 
+viewers such as $evince$ do not support overPrint, Adobe Acrobat 
+Reader does support overPrint.
+""")
+illust(examples.overPrint, "overPrint example")
+
+disc("""
+The $alpha$ is similar to overprint but works in RGB color space
+this example below demonstrates the alpha funtionality. Refer to our website
+http://www.reportlab.com/snippets/ and look for snippets of overPrint and alpha
+to see the code that generates the graph below.
+""")
+illust(examples.alpha, "alpha example")
 
 heading2('Standard fonts and text objects')
 
