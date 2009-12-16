@@ -27,7 +27,7 @@ test2 = """
 def g(n):
     if n==0: return 1
     else: return n*g(n-1)
-    """
+"""
 
 testhello = """
 def hello(c):
@@ -111,8 +111,8 @@ def mirror(canvas):
     coords(canvas)
 """
 
-testcolors = """
-def colors(canvas):
+testRGBcolors = """
+def colorsRGB(canvas):
     from reportlab.lib import colors
     from reportlab.lib.units import inch
     black = colors.black
@@ -139,19 +139,32 @@ def colors(canvas):
         canvas.drawCentredString(x+dx/2, y+texty, "r%s g%s b%s"%rgb)
         x = x+dx
     y = y + dy; x = 0
+    for gray in (0.0, 0.25, 0.50, 0.75, 1.0):
+        canvas.setFillGray(gray)
+        canvas.rect(x+rdx, y+rdy, w, h, fill=1)
+        canvas.setFillColor(black)
+        canvas.drawCentredString(x+dx/2, y+texty, "gray: %s"%gray)
+        x = x+dx
+"""
+
+testCMYKcolors = """
+def colorsCMYK(canvas):
+    from reportlab.lib.colors import CMYKColor, PCMYKColor
+    from reportlab.lib.units import inch
+    # creates a black CMYK ; CMYKColor use real values
+    black = CMYKColor(0,0,0,1)
+    # creates a cyan CMYK ; PCMYKColor use integer values
+    cyan = PCMYKColor(100,0,0,0)
+    y = x = 0; dy=inch*3/4.0; dx=inch*5.5/5; w=h=dy/2; rdx=(dx-w)/2
+    rdy=h/5.0; texty=h+2*rdy
+    canvas.setFont("Helvetica",10)
+    y = y + dy; x = 0
     for cmyk in [(1,0,0,0), (0,1,0,0), (0,0,1,0), (0,0,0,1), (0,0,0,0)]:
         c,m,y1,k = cmyk
         canvas.setFillColorCMYK(c,m,y1,k)
         canvas.rect(x+rdx, y+rdy, w, h, fill=1)
         canvas.setFillColor(black)
         canvas.drawCentredString(x+dx/2, y+texty, "c%s m%s y%s k%s"%cmyk)
-        x = x+dx
-    y = y + dy; x = 0
-    for gray in (0.0, 0.25, 0.50, 0.75, 1.0):
-        canvas.setFillGray(gray)
-        canvas.rect(x+rdx, y+rdy, w, h, fill=1)
-        canvas.setFillColor(black)
-        canvas.drawCentredString(x+dx/2, y+texty, "gray: %s"%gray)
         x = x+dx
 """
 
@@ -194,6 +207,52 @@ def spumoni2(canvas):
         canvas.setFillColor(color)
         canvas.circle(xcenter, y, radius, fill=1)
         y = y+radius
+"""
+
+testalpha = """
+def alpha(canvas):
+    from reportlab.graphics.shapes import Rect
+    from reportlab.lib.colors import Color, black, blue, red
+    red50transparent = Color( 100, 0, 0, alpha=0.5)
+    c = canvas 
+    c.setFillColor(black)
+    c.setFont('Helvetica', 10)
+    c.drawString(25,180, 'solid')
+    c.setFillColor(blue)
+    c.rect(25,25,100,100, fill=True, stroke=False)
+    c.setFillColor(red)
+    c.rect(100,75,100,100, fill=True, stroke=False)
+    c.setFillColor(black)
+    c.drawString(225,180, 'transparent')
+    c.setFillColor(blue)
+    c.rect(225,25,100,100, fill=True, stroke=False)
+    c.setFillColor(red50transparent)
+    c.rect(300,75,100,100, fill=True, stroke=False)
+"""
+
+testoverprint = """
+def overPrint(canvas):
+    from reportlab.graphics.shapes import Rect
+    from reportlab.lib.colors import PCMYKColor, PCMYKColorSep
+    black = PCMYKColorSep(0, 0, 0, 100, spotName='black',density=100)
+    blue  = PCMYKColorSep(91.0,  43.0,  0.0, 0.0, spotName='PANTONE 285 CV',density=100)
+    red   = PCMYKColorSep( 0.0, 100.0, 91.0, 0.0, spotName='PANTONE 485 CV',density=100)
+    c = canvas  
+    c.setFillColor(black)
+    c.setFont('Helvetica', 10)
+    c.drawString(25,180, 'overprint')
+    c.setFillOverprint(True)
+    c.setFillColor(blue)
+    c.rect(25,25,100,100, fill=True, stroke=False)
+    c.setFillColor(red)
+    c.rect(100,75,100,100, fill=True, stroke=False)
+    c.setFillColor(black)
+    c.drawString(225,180, 'knockout')
+    c.setFillOverprint(False)
+    c.setFillColor(blue)
+    c.rect(225,25,100,100, fill=True, stroke=False)
+    c.setFillColor(red)
+    c.rect(300,75,100,100, fill=True, stroke=False)
 """
 
 testbezier = """

@@ -168,6 +168,7 @@ Eric Johnson,
 Gary Poster, 
 Hans Brand,
 Henning Vonbargen,
+Hosam Aly,
 Ian Stevens,
 Jeff Bauer,
 Jerome Alet,
@@ -178,6 +179,7 @@ Marius Gedminas,
 Max M, 
 Michael Egorov,
 Mike Folwell,
+Moshe Wagner, 
 Paul McNett, 
 PJACock,
 Publio da Costa Melo,  
@@ -196,6 +198,8 @@ and many more.""")
 disc("""Special thanks go to Just van Rossum for his valuable assistance with
 font technicalities.""")
 
+disc("""Moshe Wagner and Hosam Aly deserve a huge thanks for contributing RTL patch.""")
+
 disc("""Marius Gedminas deserves a big hand for contributing the work on TrueType fonts and we
 are glad to include these in the toolkit. Finally we thank Michal Kosmulski for the DarkGarden font
 for and Bitstream Inc. for the Vera fonts.""")
@@ -208,18 +212,16 @@ information on setups and installations. The latest version of the ReportLab lib
 ^http://www.reportlab.org/downloads.html^.  Older versions can be found at ^http://www.reportlab.com/ftp/^.
   Each successive version is stored in both zip
 and tgz format, but the contents are identical apart from line endings.
-Versions are numbered:  $ReportLab_1_00.zip$, $ReportLab_1_01.zip$ and so on. The
-latest stable version is also available as just $reportlab.zip$ (or
-$reportlab.tgz$), which is actually a symbolic link to the latest
-numbered version.  Daily snapshots of the trunk are available as
-$current.zip$ or $current.tgz$.
+Versions are numbered:  $ReportLab_<major_version>_<minor_version>.zip$, 
+$ReportLab_<major_version>_<minor_version>.zip$ and so on. 
+The latest stable version is $reportlab2.4$ (.zip or .tgz$), 
+Daily snapshots of the trunk are available as
+$reportlab-daily-unix.tar.gz$ or $reportlab-daily-win32.zip$.
 Finally, from version 2.3 onwards, there is also a Windows installer
 available for Python versions 2.3 - 2.6, named $ReportLab-2.x.win32-py2.x.exe$
 """)
 
-
 heading3("Installation on Windows")
-
 
 restartList()
 
@@ -321,9 +323,10 @@ bullet("""New objects to put in reports, or useful utilities for the library.
 We have an open standard for report objects, so if you have written a nice
 chart or table class, why not contribute it?""")
 
-bullet("""Demonstrations and Case Studies: If you have produced some nice
-output, send it to us (with or without scripts).  If ReportLab solved a
-problem for you at work, write a little 'case study' and send it in.
+bullet("""Snippets and Case Studies: If you have produced some nice
+output, register online on ^http://www.reportlab.com^ and submit a snippet
+of your output (with or without scripts).  If ReportLab solved a
+problem for you at work, write a little 'case study' and submit it.
 And if your web site uses our tools to make reports, let us link to it.
 We will be happy to display your work (and credit it with your name
 and company) on our site!""")
@@ -416,35 +419,33 @@ styles = getStyleSheet()
 indent0_style = styles['Indent0']
 indent1_style = styles['Indent1']
 
-heading2("What's New in ReportLab 2.4")
-disc("""
-Many new features have been added and numerous bugs have been fixed, a big
-thanks goes to the community for their help in reporting bugs and providing patches. 
-Thanks to everybody who has contributed to the open-source toolkit in the run-up to the 2.4 release, 
-whether by reporting bugs, sending patches, or contributing to the reportlab-users mailing list. 
-Thanks especially to the following people: PJACock, Hans Brand, Ian Stevens, Yoann Roman, 
-Randolph Bentson, Volker Haas, Simon King, Henning Vonbargen, Michael Egorov, Mike Folwell and 
-Roberto Alsina.  
-This page documents what has changed since version 2.3""")
-
-heading3("Goals for the 2.x series")
-disc("""
-The main rationale for 2.0 was an incompatible change at the character level:
+heading2("Goals for the 2.x series")
+disc("""The main rationale for 2.0 was an incompatible change at the character level:
 to properly support Unicode input. Now that it's out we will maintain compatibility
 with 2.0. There are no pressing feature wishlists and new features will be driven,
 as always, by contributions and the demands of projects.""")
 
-
-disc("""
-One area where we do want to make progress from release to release is with documentation
+disc("""One area where we do want to make progress from release to release is with documentation
 and installability. We'll be looking into better support for distutils, setuptools,
 eggs and so on; and into better examples and tools to help people learn what's in the
-(substantial) code base. Our library is now installable with easy_install.""")
+(substantial) code base.""")
 
 disc("""
 Bigger ideas and more substantial rewrites are deferred to Version 3.0, with no particular
 target dates.
 """)
+
+heading2("What's New in ReportLab 2.4")
+disc("""Many new features have been added and numerous bugs have been fixed, a big
+thanks goes to the community for their help in reporting bugs and providing patches. 
+Thanks to everybody who has contributed to the open-source toolkit in the run-up to the 2.4 release, 
+whether by reporting bugs, sending patches, or contributing to the reportlab-users mailing list. 
+Thanks especially to the following people: PJACock, Hans Brand, Ian Stevens, Yoann Roman, Hosam Aly 
+Randolph Bentson, Volker Haas, Simon King, Henning Vonbargen, Michael Egorov, Mike Folwell and 
+Roberto Alsina.  
+This page documents what has changed since version 2.3""")
+
+disc('Reportlab 2.4 is installable with easy_install.')
 
 heading4('PDF')
 
@@ -473,12 +474,4 @@ disc("""    * A new anchoring mode for string 'numeric' that align numerical str
 disc("""    * Drawing has a resized method now to change the size dynamically.""", style=indent0_style)
 
 # Noteworthy bug fixes Section #######################
-heading3("Noteworthy bug fixes")
-disc("""Fixes to TTF splitting (patch from Albertas Agejevas)""")
-disc("""This affected some documents using font subsetting""", style=indent0_style)
-
-disc("""Tables with spans improved splitting""")
-disc("""Splitting of tables across pages did not work correctly when the table had
-row/column spans""", style=indent0_style)
-
-disc("""Fix runtime error affecting keepWithNext""")
+#heading3("Noteworthy bug fixes")
