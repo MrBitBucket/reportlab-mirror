@@ -5,6 +5,8 @@ text, with variations in fonts and colors.   If Pygments is installed,
 calling 'pygments2xpre' will return content suitable for display in
 an XPreformatted object.  If it's not installed, you won't get colours.
 
+For a list of available lexers see http://pygments.org/docs/
+
 """
 __all__ = ('pygments2xpre',)
 
@@ -19,16 +21,18 @@ def _2xpre(s,styles):
         s = s.replace('<span class="%s">' % k,'<font color="%s">' % c)
     return s
 
-def pygments2xpre(s):
+def pygments2xpre(s, language="python"):
     "Return markup suitable for XPreformatted"
     try:
         from pygments import highlight
-        from pygments.lexers import PythonLexer
         from pygments.formatters import HtmlFormatter
     except ImportError:
         return s
 
-    l = PythonLexer()
+    from pygments.lexers import get_lexer_by_name
+
+    l = get_lexer_by_name(language)
+    
     h = HtmlFormatter()
     from StringIO import StringIO
     out = StringIO()
