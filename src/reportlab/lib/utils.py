@@ -341,7 +341,6 @@ else:
         except ImportError:
             Image = None
     haveImages = Image is not None
-    if haveImages: del Image
 
 try:
     from cStringIO import StringIO as __StringIO
@@ -519,8 +518,7 @@ def rl_get_module(name,dir):
 
 def _isPILImage(im):
     try:
-        from PIL.Image import Image
-        return isinstance(im,Image)
+        return isinstance(im,Image.Image)
     except ImportError:
         return 0
 
@@ -598,8 +596,7 @@ class ImageReader(object):
             from javax.imageio import ImageIO
             return ImageIO.read(fp)
         else:
-            import PIL.Image
-            return PIL.Image.open(fp)
+            return Image.open(fp)
 
     def _jpeg_fh(self):
         fp = self.fp
@@ -644,6 +641,7 @@ class ImageReader(object):
                 im = self._image
                 mode = self.mode = im.mode
                 if mode=='RGBA':
+                    if Image.VERSION.startswith('1.1.7'): im.load()
                     self._dataA = ImageReader(im.split()[3])
                     im = im.convert('RGB')
                     self.mode = 'RGB'
