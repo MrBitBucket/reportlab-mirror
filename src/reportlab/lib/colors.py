@@ -166,8 +166,8 @@ class CMYKColor(Color):
 
 class PCMYKColor(CMYKColor):
     '''100 based CMYKColor with density and a spotName; just like Rimas uses'''
-    def __init__(self,cyan,magenta,yellow,black,density=100,spotName=None,knockout=None,alpha=1):
-        CMYKColor.__init__(self,cyan/100.,magenta/100.,yellow/100.,black/100.,spotName,density/100.,knockout=knockout,alpha=alpha)
+    def __init__(self,cyan,magenta,yellow,black,density=100,spotName=None,knockout=None,alpha=100):
+        CMYKColor.__init__(self,cyan/100.,magenta/100.,yellow/100.,black/100.,spotName,density/100.,knockout=knockout,alpha=alpha/100.)
 
     def __repr__(self):
         return "%s(%s%s%s%s%s)" % (self.__class__.__name__,
@@ -175,7 +175,7 @@ class PCMYKColor(CMYKColor):
             (self.spotName and (',spotName='+repr(self.spotName)) or ''),
             (self.density!=1 and (',density='+fp_str(self.density*100)) or ''),
             (self.knockout is not None and (',knockout=%d' % self.knockout) or ''),
-            (self.alpha is not None and (',alpha=%d' % self.alpha) or ''),
+            (self.alpha is not None and (',alpha=%d' % (self.alpha*100)) or ''),
             )
 
     def cKwds(self):
@@ -197,7 +197,7 @@ class CMYKColorSep(CMYKColor):
 class PCMYKColorSep(PCMYKColor,CMYKColorSep):
     '''special case color for making separating pdfs'''
     def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
-                spotName=None, density=100, alpha=1):
+                spotName=None, density=100, alpha=100):
         PCMYKColor.__init__(self,cyan,magenta,yellow,black,density,spotName,knockout=None,alpha=alpha)
     _cKwds='cyan magenta yellow black density spotName alpha'.split()
 
