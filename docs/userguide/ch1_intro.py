@@ -207,17 +207,17 @@ for and Bitstream Inc. for the Vera fonts.""")
 heading2("Installation and Setup")
 
 heading3("A note on available versions")
-disc("""Our website ^http://www.reportlab.com/software/installation/^ will always have an up-to-date
+disc("""Our website ^http://www.reportlab.com/software/installation/^ will always have up-to-date
 information on setups and installations. The latest version of the ReportLab library can be found at
 ^http://www.reportlab.org/downloads.html^.  Older versions can be found at ^http://www.reportlab.com/ftp/^.
   Each successive version is stored in both zip
 and tgz format, but the contents are identical apart from line endings.
 Versions are numbered:  $ReportLab_<major_version>_<minor_version>.zip$, 
 $ReportLab_<major_version>_<minor_version>.zip$ and so on. 
-The latest stable version is $reportlab2.4$ (.zip or .tgz$), 
+The latest stable version is $reportlab2.4$ (.zip or .tgz), 
 Daily snapshots of the trunk are available as
 $reportlab-daily-unix.tar.gz$ or $reportlab-daily-win32.zip$.
-Finally, from version 2.3 onwards, there is also a Windows installer
+  Finally, from version 2.3 onwards, there is also a Windows installer
 available for Python versions 2.3 - 2.6, named $ReportLab-2.x.win32-py2.x.exe$
 """)
 
@@ -443,35 +443,36 @@ whether by reporting bugs, sending patches, or contributing to the reportlab-use
 Thanks especially to the following people: PJACock, Hans Brand, Ian Stevens, Yoann Roman, Hosam Aly 
 Randolph Bentson, Volker Haas, Simon King, Henning Vonbargen, Michael Egorov, Mike Folwell and 
 Roberto Alsina.  
-This page documents what has changed since version 2.3""")
+This page documents what has changed since version 2.3.""")
 
-disc('Reportlab 2.4 is installable with easy_install.')
+disc('Reportlab 2.4 is installable with easy_install. You must have installed a compatible C compiler and the dependencies such as Freetype and PIL.')
 
 heading4('PDF')
+bullet("""Canvas automatic cropmarks.""")
+bullet("""RGB alpha colours - colours can now be transparent with an alpha value.""")
+bullet("""CMYK overPrint - physical colour mix in the printer - similar to RGB alpha but
+ used in professional printing.""")
+bullet("""Colours module has a fade function that returns a list of different shades made
+ up of one base colour.""")
+bullet("""Unicode font file names are now accepted.""")
+bullet("""Lots of improvements and verbosity to error messages and the way they are handled. 
+Font size can now be specified in pixels.""")
 
-disc("""    * canvas auto cropmarks""", style=indent0_style)
-disc("""    * RGB alpha colours - colours can now be transparent with an alpha value.""", style=indent0_style)
-disc("""    * CMYK overPrint - physical colour mix in the printer - similar to RGB alpha but
- used in professional printing.""", style=indent0_style)
-disc("""   * colours module has a fade function that returns a list of different shades made
- up of one base colour.""", style=indent0_style)
-disc("""    * unicode font file names are now accepted""", style=indent0_style)
-disc("""    * lots of improvements and verbosity to error messages and the way they are handled. 
-Font size can now be specified in pixels""", style=indent0_style)
 heading4('Platypus')
-disc("""    * added support for styles h4-h6""", style=indent0_style)
-disc("""    * Improved support for onDraw and SimpleIndex""", style=indent0_style)
-disc("""    * Add support for index tableStyle""", style=indent0_style)
-disc("""    * Added an alphabetic grouping indexing class""", style=indent0_style)
-disc("""    * Added support for multi-level and alphabetical indexes""", style=indent0_style)
-disc("""    * Added support for an unlimited number of TOC levels with default styles""", style=indent0_style)
-disc("""    * Index entries can now be clickable.""", style=indent0_style)
+bullet("""Added support for heading styles h4-h6.""")
+bullet("""Improved support for onDraw and SimpleIndex.""")
+bullet("""Add support for index tableStyle.""")
+bullet("""Added an alphabetic grouping indexing class.""")
+bullet("""Added support for multi-level and alphabetical indexes.""")
+bullet("""Added support for an unlimited number of TOC levels with default styles.""")
+bullet("""Index entries can now be clickable.""")
+
 heading4('Graphics')
-disc("""    * Axes values can be reversible.""", style=indent0_style)
-disc("""    * Labels on the axes can now be drawn above or below the axes (hi or low).""", style=indent0_style)
-disc("""    * A per swatch callout is now allowed in the legend.""", style=indent0_style)
-disc("""    * A new anchoring mode for string 'numeric' that align numerical strings by their decimal place.""", style=indent0_style)
-disc("""    * Drawing has a resized method now to change the size dynamically.""", style=indent0_style)
+bullet("""Chart axes values can be reversible.""")
+bullet("""Labels on chart axes can now be drawn above or below the axes (hi or low).""")
+bullet("""A per swatch callout is now allowed in the legend.""")
+bullet("""A new anchoring mode for string 'numeric' that align numerical strings by their decimal place.""")
+bullet("""Drawing has a resized method now to change the size dynamically.""")
 
 # Noteworthy bug fixes Section #######################
 #heading3("Noteworthy bug fixes")

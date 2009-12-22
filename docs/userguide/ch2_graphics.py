@@ -603,16 +603,17 @@ heading2("Colors")
 disc("""
 There are generally two types of colors used in PDF depending on the media where
 the PDF will be used. The most commonly known screen colors model RGB can be used
-in PDF, however in professional printing another color model CMYK is used which 
-supports far more colors than RGB. More on these color models below
+in PDF, however in professional printing another color model CMYK is mainly used 
+which gives more control over how inks are applied to paper. More on these color
+models below.
 """)
 
 heading3("RGB Colors")
 disc("""
-The $RGB$ or additive color specification follows the way a computer
-screen adds different levels of the red, green, or blue light to make
-any color, where white is formed by turning all three lights on full
-$(1,1,1)$.
+The $RGB$ or additive color representation follows the way a computer
+screen adds different levels of the red, green, and blue light to make
+any color in between, where white is formed by turning all three lights on full
+($1,1,1$).
 """)
 
 disc("""
@@ -634,29 +635,29 @@ need transparency you got two choices:
 """)
 
 disc("""
-1. if your document is intended to be printed in professional way and you are 
+1. If your document is intended to be printed in a professional way and you are 
 working in CMYK color space then you can use overPrint. In overPrinting the colors
 physically mix in the printer and thus a new color is obtained. By default a 
 knockout will be applied and only top object appears. Read the CMYK section
-if this is what you intent.
+if this is what you intend to use.
 """)
 
 disc("""
-2. if your document is intended for screen output and you are using RGB colors 
-then you can use alpha color, alpha value is the transparency value of the color.
-The default alpha value is $1$ (not transparent) and you can use any real value
-in the range 0..1.
+2. If your document is intended for screen output and you are using RGB colors 
+then you can set an alpha value, where alpha is the opacity value of the color.
+The default alpha value is $1$ (fully opaque) and you can use any real number
+value in the range 0-1.
 """)
 
 disc("""
-The $alpha$ is similar to overprint but works in RGB color space
+Alpha transparency ($alpha$) is similar to overprint but works in RGB color space
 this example below demonstrates the alpha funtionality. Refer to our website
 http://www.reportlab.com/snippets/ and look for snippets of overPrint and alpha
 to see the code that generates the graph below.
 """)
 
 eg(examples.testalpha)
-illust(examples.alpha, "alpha example")
+illust(examples.alpha, "Alpha example")
 
 heading3("CMYK Colors")
 disc("""
