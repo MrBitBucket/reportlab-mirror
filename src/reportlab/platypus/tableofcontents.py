@@ -229,13 +229,14 @@ class TableOfContents(IndexingFlowable):
 
         def drawTOCEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
-            page, level = [ int(x) for x in label.split(',') ]
+            label = label.split(',')
+            page, level, key = int(label[0]), int(label[1]), eval(label[2],{})
             style = self.getLevelStyle(level)
             if self.dotsMinLevel >= 0 and level >= self.dotsMinLevel:
                 dot = ' . '
             else:
                 dot = ''
-            drawPageNumbers(canvas, style, [(page, None)], availWidth, availHeight, dot)
+            drawPageNumbers(canvas, style, [(page, key)], availWidth, availHeight, dot)
         self.canv.drawTOCEntryEnd = drawTOCEntryEnd
 
         tableData = []
@@ -243,7 +244,10 @@ class TableOfContents(IndexingFlowable):
             style = self.getLevelStyle(level)
             if key:
                 text = '<a href="#%s">%s</a>' % (key, text)
-            para = Paragraph('%s<onDraw name="drawTOCEntryEnd" label="%d,%d"/>' % (text, pageNum, level), style)
+                keyVal = repr(key).replace(',','\\x2c').replace('"','\\x2c')
+            else:
+                keyVal = None
+            para = Paragraph('%s<onDraw name="drawTOCEntryEnd" label="%d,%d,%s"/>' % (text, pageNum, level, keyVal), style)
             if style.spaceBefore:
                 tableData.append([Spacer(1, style.spaceBefore),])
             tableData.append([para,])
