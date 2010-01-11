@@ -243,22 +243,22 @@ def HexColor(val, htmlOnly=False, alpha=False):
     only the #aabbcc form is allowed.
 
     >>> HexColor('#ffffff')
-    Color(1,1,1)
+    Color(1,1,1,1)
     >>> HexColor('#FFFFFF')
-    Color(1,1,1)
+    Color(1,1,1,1)
     >>> HexColor('0xffffff')
-    Color(1,1,1)
+    Color(1,1,1,1)
     >>> HexColor('16777215')
-    Color(1,1,1)
+    Color(1,1,1,1)
 
     An '0x' or '#' prefix is required for hex (as opposed to decimal):
 
     >>> HexColor('ffffff')
     Traceback (most recent call last):
-    ValueError: invalid literal for int(): ffffff
+    ValueError: invalid literal for int() with base 10: 'ffffff'
 
     >>> HexColor('#FFFFFF', htmlOnly=True)
-    Color(1,1,1)
+    Color(1,1,1,1)
     >>> HexColor('0xffffff', htmlOnly=True)
     Traceback (most recent call last):
     ValueError: not a hex string
