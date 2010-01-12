@@ -614,6 +614,86 @@ def describe(aColor,mode=0):
     else:
         raise ValueError, "Illegal value for mode "+str(mode)
 
+def hue2rgb(m1, m2, h):
+    if h<0: h += 1
+    if h>1: h -= 1
+    if h*6<1: return m1+(m2-m1)*h*6
+    if h*2<1: return m2
+    if h*3<2: return m1+(m2-m1)*(4-6*h)
+    return m1
+
+def hsl2rgb(h, s, l): 
+    if l<=0.5:
+        m2 = l*(s+1)
+    else:
+        m2 = l+s-l*s
+    m1 = l*2-m2
+    return hue2rgb(m1, m2, h+1./3),hue2rgb(m1, m2, h),hue2rgb(m1, m2, h-1./3)
+
+class cssParse:
+    def pcVal(self,v):
+        v = v.strip()
+        try:
+            c=eval(v[:-1])
+            if not isinstance(c,(float,int)): raise ValueError
+            c=min(100,max(0,c))/100.
+        except:
+            raise ValueError('bad percentage argument value %r in css color %r' % (v,self.s))
+        return c
+
+    def rgbVal(self,v):
+        v = v.strip()
+        try:
+            c=eval(v[:])
+            if not isinstance(c,int): raise ValueError
+            return int(min(255,max(0,255)))/255.
+        except:
+            raise ValueError('bad argument value %r in css color %r' % (v,self.s))
+
+    def hueVal(self,v):
+        v = v.strip()
+        try:
+            c=eval(v[:])
+            if not isinstance(c,(int,float)): raise ValueError
+            return ((c%360+360)%360)/360.
+        except:
+            raise ValueError('bad hue argument value %r in css color %r' % (v,self.s))
+
+    def alphaVal(self,v):
+        try:
+            c = eval(v.strip())
+            if not isinstance(c,(int,float)): raise ValueError
+            return min(1,max(0,c))
+        except:
+            raise ValueError('bad alpha argument value %r in css color %r' % (v,self.s))
+
+    def __call__(self,s):
+        s = s.strip()
+        hsl = s.startswith('hsl')
+        if not s.startswith('rgb')  and not hsl: return None
+        self.s = s
+        rgba = s.startswith('rgba') or s.startswith('hsla')
+        n = s[rgba and 4 or 3:].strip()
+        if not n.startswith('(') or not n.endswith(')'):
+            raise ValueError('improperly formatted css color %r' % s)
+        n = n[1:-1].split(',')  #strip parens and split on comma
+        a = len(n)
+        if rgba and a!=4 or not rgba and a!=3:
+            raise ValueError('css color %r has wrong number of components' % s)
+        if rgba:
+            n,a = n[:3],self.alphaVal(n[3])
+        else:
+            a = 1
+
+        if hsl:
+            R,G,B= hsl2rgb(self.hueVal(n[0]),self.pcVal(n[1]),self.pcVal(n[2]))
+        else:
+            R,G,B = map('%' in n[0] and self.pcVal or self.rgbVal,n)
+
+        return Color(R,G,B,a)
+
+cssParse=cssParse()
+
 def toColor(arg,default=None):
     '''try to map an arbitrary arg to a color instance'''
     if isinstance(arg,Color): return arg
@@ -622,6 +702,8 @@ def toColor(arg,default=None):
         assert 0<=min(arg) and max(arg)<=1
         return len(arg)==3 and Color(arg[0],arg[1],arg[2]) or CMYKColor(arg[0],arg[1],arg[2],arg[3])
     elif isinstance(arg,basestring):
+        C = cssParse(arg)
+        if C: return C
         C = getAllNamedColors()
         s = arg.lower()
         if C.has_key(s): return C[s]
