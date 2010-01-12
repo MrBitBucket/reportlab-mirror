@@ -641,12 +641,15 @@ class cssParse:
             raise ValueError('bad percentage argument value %r in css color %r' % (v,self.s))
         return c
 
+    def rgbPcVal(self,v):
+        return int(self.pcVal(v)*255+0.5)/255.
+
     def rgbVal(self,v):
         v = v.strip()
         try:
             c=eval(v[:])
             if not isinstance(c,int): raise ValueError
-            return int(min(255,max(0,255)))/255.
+            return int(min(255,max(0,c)))/255.
         except:
             raise ValueError('bad argument value %r in css color %r' % (v,self.s))
 
@@ -688,14 +691,27 @@ class cssParse:
         if hsl:
             R,G,B= hsl2rgb(self.hueVal(n[0]),self.pcVal(n[1]),self.pcVal(n[2]))
         else:
-            R,G,B = map('%' in n[0] and self.pcVal or self.rgbVal,n)
+            R,G,B = map('%' in n[0] and self.rgbPcVal or self.rgbVal,n)
 
         return Color(R,G,B,a)
 
 cssParse=cssParse()
 
 def toColor(arg,default=None):
-    '''try to map an arbitrary arg to a color instance'''
+    '''try to map an arbitrary arg to a color instance
+    >>> toColor('rgb(128,0,0)')==toColor('rgb(50%,0%,0%)')
+    True
+    >>> toColor('rgb(50%,0%,0%)')!=Color(0.5,0,0,1)
+    True
+    >>> toColor('hsl(0,100%,50%)')==toColor('rgb(255,0,0)')
+    True
+    >>> toColor('hsl(-120,100%,50%)')==toColor('rgb(0,0,255)')
+    True
+    >>> toColor('hsl(120,100%,50%)')==toColor('rgb(0,255,0)')
+    True
+    >>> toColor('rgba(255,0,0,0.5)')==Color(1,0,0,0.5)
+    True
+    '''
     if isinstance(arg,Color): return arg
     if isinstance(arg,(tuple,list)):
         assert 3<=len(arg)<=4, 'Can only convert 3 and 4 sequences to color'
