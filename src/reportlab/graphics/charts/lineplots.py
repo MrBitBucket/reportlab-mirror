@@ -260,7 +260,7 @@ class LinePlot(AbstractLineChart):
         for rowNo in P:
             row = self._positions[rowNo]
             rowStyle = self.lines[rowNo % styleCount]
-            rowColor = rowStyle.strokeColor
+            rowColor = getattr(rowStyle,'strokeColor',None)
             dash = getattr(rowStyle, 'strokeDashArray', None)
 
             if hasattr(rowStyle, 'strokeWidth'):
