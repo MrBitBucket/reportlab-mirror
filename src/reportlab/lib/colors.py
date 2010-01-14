@@ -34,12 +34,20 @@ class Color:
         return hash((self.red, self.green, self.blue, self.alpha))
 
     def __cmp__(self,other):
+        '''simple comparison by component; cmyk != color ever
+        >>> cmp(Color(0,0,0),None)
+        -1
+        >>> cmp(Color(0,0,0),black)
+        0
+        >>> cmp(Color(0,0,0),CMYKColor(0,0,0,1)),Color(0,0,0).rgba()==CMYKColor(0,0,0,1).rgba()
+        (-1, True)
+        '''
+        if isinstance(other,CMYKColor) or not isinstance(other,Color): return -1
         try:
-            dsum = 8*(self.alpha-other.alpha)+4*(self.red-other.red) + 2*(self.green-other.green) + self.blue-other.blue
+            return cmp((self.red, self.green, self.blue, self.alpha),
+                    (other.red, other.green, other.blue, other.alpha))
         except:
             return -1
-        if dsum > 0: return 1
-        if dsum < 0: return -1
         return 0
 
     def rgb(self):
@@ -130,26 +138,25 @@ class CMYKColor(Color):
         return hash( (self.cyan, self.magenta, self.yellow, self.black, self.density, self.spotName, self.alpha) )
 
     def __cmp__(self,other):
-        """Partial ordering of colors according to a notion of distance.
-
-        Comparing across the two color models is of limited use."""
-        # why the try-except?  What can go wrong?
-        if isinstance(other, CMYKColor):
-            dsum = (((( (self.cyan-other.cyan)*2 +
-                        (self.magenta-other.magenta))*2+
-                        (self.yellow-other.yellow))*2+
-                        (self.black-other.black))*2+
-                        (self.density-other.density))*2 + cmp(self.spotName or '',other.spotName or '')
-        else:  # do the RGB comparison
-            try:
-                dsum = ((self.red-other.red)*2+(self.green-other.green))*2+(self.blue-other.blue)
-            except: # or just return 'not equal' if not a color
-                return -1
-        dsum += 2*(self.alpha-other.alpha)
-        if dsum >= 0:
-            return dsum>0
-        else:
+        """obvious way to compare colours
+        Comparing across the two color models is of limited use.
+        >>> cmp(CMYKColor(0,0,0,1),None)
+        -1
+        >>> cmp(CMYKColor(0,0,0,1),_CMYK_black)
+        0
+        >>> cmp(PCMYKColor(0,0,0,100),_CMYK_black)
+        0
+        >>> cmp(CMYKColor(0,0,0,1),Color(0,0,1)),Color(0,0,0).rgba()==CMYKColor(0,0,0,1).rgba()
+        (-1, True)
+        """
+        if not isinstance(other, CMYKColor): return -1
+        try:
+            return cmp(
+                (self.cyan, self.magenta, self.yellow, self.black, self.density, self.alpha, self.spotName),
+                (other.cyan, other.magenta, other.yellow, other.black, other.density, other.alpha, other.spotName))
+        except: # or just return 'not equal' if not a color
             return -1
+        return 0
 
     def cmyk(self):
         "Returns a tuple of four color components - syntactic sugar"
