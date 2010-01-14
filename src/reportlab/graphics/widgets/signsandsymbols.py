@@ -743,29 +743,33 @@ class ArrowOne(_Symbol):
         self.y = 0
         self.size = 100
         self.fillColor = colors.red
+        self.strokeWidth = 0
+        self.strokeColor = None
 
     def draw(self):
         # general widget bits
         s = float(self.size)  # abbreviate as we will use this a lot
         g = shapes.Group()
 
-
-        # arrow specific bits
-        body = shapes.Rect(x=self.x, y=(self.y+(s/2))-(s/6), width=2*(s/3), height=(s/3),
-               fillColor = self.fillColor,
-               strokeColor = None,
-               strokeWidth=0)
-        g.add(body)
-
-        head = shapes.Polygon(points = [self.x+(3*(s/6)), (self.y+(s/2)),
-                                       self.x+(3*(s/6)), self.y+8*(s/10),
-                                       self.x+s, self.y+(s/2),
-                                       self.x+(3*(s/6)), self.y+2*(s/10)],
-               fillColor = self.fillColor,
-               strokeColor = None,
-               strokeWidth=0)
-        g.add(head)
-
+        x = self.x
+        y = self.y
+        s2 = s/2
+        s3 = s/3
+        s5 = s/5
+        g.add(shapes.Polygon(points = [
+                                        x,y+s3,
+                                        x,y+2*s3,
+                                        x+s2,y+2*s3,
+                                        x+s2,y+4*s5,
+                                        x+s,y+s2,
+                                        x+s2,y+s5,
+                                        x+s2,y+s3,
+                                       ],
+                fillColor = self.fillColor,
+                strokeColor = self.strokeColor,
+                strokeWidth = self.strokeWidth,
+                )
+            )
         return g
 
 class ArrowTwo(ArrowOne):
@@ -781,28 +785,36 @@ class ArrowTwo(ArrowOne):
         self.y = 0
         self.size = 100
         self.fillColor = colors.blue
+        self.strokeWidth = 0
+        self.strokeColor = None
 
     def draw(self):
         # general widget bits
         s = float(self.size)  # abbreviate as we will use this a lot
         g = shapes.Group()
 
-
         # arrow specific bits
-        body = shapes.Rect(x=self.x, y=(self.y+(s/2))-(s/24), width=9*(s/10), height=(s/12),
-               fillColor = self.fillColor,
-               strokeColor = None,
-               strokeWidth=0)
-        g.add(body)
+        x = self.x
+        y = self.y
+        s2 = s/2
+        s3 = s/3
+        s5 = s/5
+        s24 = s/24
 
-        head = shapes.Polygon(points = [self.x+(2.5*(s/3)), (self.y+(s/2)),
-                                       self.x+(4*(s/6)), self.y+4*(s/6),
-                                       self.x+s, self.y+(s/2),
-                                       self.x+(4*(s/6)), self.y+2*(s/6)],
-               fillColor = self.fillColor,
-               strokeColor = None,
-               strokeWidth=0)
-        g.add(head)
+        g.add(shapes.Polygon(
+            points = [
+                    x,y+11*s24,
+                    x,y+13*s24,
+                    x+18.75*s24, y+13*s24,
+                    x+2*s3, y+2*s3,
+                    x+s, y+s2,
+                    x+2*s3, y+s3,
+                    x+18.75*s24, y+11*s24,
+                    ],
+            fillColor = self.fillColor,
+            strokeColor = self.strokeColor,
+            strokeWidth = self.strokeWidth)
+            )
 
         return g
 
