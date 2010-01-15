@@ -346,14 +346,21 @@ def main():
                     ]
 
         if platform=='win32':
-            FT_LIB=config('FREETYPE','lib',r'C:\devel\freetype-2.1.5\objs\freetype214.lib')
+            FT_LIB=config('FREETYPE','lib','')
+            if FT_LIB and not os.path.isfile(FT_LIB):
+                infoline('# freetype lib %r not found' % FT_LIB)
+                FT_LIB=[]
             if FT_LIB:
                 FT_INC_DIR=config('FREETYPE','incdir')
                 FT_MACROS = [('RENDERPM_FT',None)]
                 FT_LIB_DIR = [dirname(FT_LIB)]
                 FT_INC_DIR = [FT_INC_DIR or pjoin(dirname(FT_LIB_DIR[0]),'include')]
-                FT_LIB = [os.path.splitext(os.path.basename(FT_LIB))[0]]
-                infoline('# installing with win32 freetype %r' % FT_LIB[0])
+                FT_LIB = [os.path.splitext(os.path.basename(FT_LIB))[0]]                
+                if os.path.isdir(FT_INC_DIR[0]):                   
+                    infoline('# installing with win32 freetype %r' % FT_LIB[0])
+                else:
+                    infoline('# freetype2 include folder %r not found' % FT_INC_DIR[0])
+                    FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
             else:
                 FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
         else:
@@ -384,7 +391,10 @@ def main():
                 FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
         if not FT_LIB:
             infoline('# installing without freetype no ttf, sorry!')
-
+            infoline('# You need to install a static library version of the freetype2 software')
+            infoline('# If you need truetype support in renderPM')
+            infoline('# You may need to edit setup.cfg (win32)')
+            infoline('# or edit this file to access the library if it is installed')
         EXT_MODULES +=  [Extension( '_renderPM',
                                         SOURCES,
                                         include_dirs=[RENDERPM,LIBART_DIR,GT1_DIR]+FT_INC_DIR,
