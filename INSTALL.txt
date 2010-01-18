@@ -6,7 +6,7 @@
 1)	python setup.py tests-preinstall
 
 2)	python setup.py install
-	if you see trailing message saaying installed renderPM with freetype
+	if you see trailing message saying installed renderPM with freetype
 	then things should be OK. If it fails to locate freetype you may see
 	installed renderPm without freetype no ttf; sorry.
 
