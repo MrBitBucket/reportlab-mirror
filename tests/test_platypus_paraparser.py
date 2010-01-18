@@ -110,11 +110,10 @@ class ParaParserTestCase(unittest.TestCase):
         parser = ParaParser()
         parser.caseSensitive = True
         style, frags, bulletTextFrags = ParaParser().parse(txt, self.style)[1]
-        print 'parsed OK, frags=', frags
+        #print 'parsed OK, frags=', frags
         from reportlab.platypus.paragraph import Paragraph
         p = Paragraph(txt, self.style)
-        #self.assertEquals(map(lambda x:x.text, fragList), [u'Hello ',u'',u' World'])
-        #self.assertEquals(fragList[1].lineBreak, True)
+        
 
 
 def makeSuite():
