@@ -420,12 +420,12 @@ def main():
         setup(
             name="reportlab",
             version=get_version(),
-            license="BSD license (see license.txt for details), Copyright (c) 2000-2008, ReportLab Inc.",
+            license="BSD license (see license.txt for details), Copyright (c) 2000-2010, ReportLab Inc.",
             description="The Reportlab Toolkit",
             long_description="""The ReportLab Toolkit. An Open Source Python library for generating PDFs and graphics.""",
 
-            author="Robinson, Watters, Lee, Precedo, Becker and many more...",
-            author_email="info@reportlab.com",
+            author="Andy Robinson, Robin Becker, the ReportLab team and the community",
+            author_email="reportlab-users@lists2.reportlab.com",
             url="http://www.reportlab.com/",
             packages=[
                     'reportlab',
