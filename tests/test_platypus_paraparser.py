@@ -13,21 +13,22 @@ import unittest
 from reportlab.platypus import cleanBlockQuotedText
 from reportlab.platypus.paraparser import ParaParser, ParaFrag
 from reportlab.lib.colors import black
+from reportlab.lib.styles import ParagraphStyle
 
 class ParaParserTestCase(unittest.TestCase):
     """Tests of data structures created by paragraph parser.  Esp. ability
     to accept unicode and preserve it"""
 
     def setUp(self):
-        style=ParaFrag()
-        style.fontName='Times-Roman'
-        style.fontSize = 12
-        style.textColor = black
-        style.bulletFontName = black
-        style.bulletFontName='Times-Roman'
-        style.bulletFontSize=12
-        style.bulletOffsetY=3
-        self.style = style        
+        style=dict() #ParaFrag()
+        style['fontName']='Times-Roman'
+        style['fontSize'] = 12
+        style['textColor'] = black
+        style['bulletFontName'] = black
+        style['bulletFontName']='Times-Roman'
+        style['bulletFontSize']=12
+        style['bulletOffsetY']=3
+        self.style = ParagraphStyle(name='normal', parent=None, **style)    
 
     def testPlain(self):
         txt = "Hello World"
@@ -103,6 +104,18 @@ class ParaParserTestCase(unittest.TestCase):
         fragList = ParaParser().parse(txt, self.style)[1]
         self.assertEquals(map(lambda x:x.text, fragList), [u'Hello ',u'',u' World'])
         self.assertEquals(fragList[1].lineBreak, True)
+
+    def testNakedAmpersands(self):
+        txt = "1 &amp; 2"
+        parser = ParaParser()
+        parser.caseSensitive = True
+        style, frags, bulletTextFrags = ParaParser().parse(txt, self.style)[1]
+        print 'parsed OK, frags=', frags
+        from reportlab.platypus.paragraph import Paragraph
+        p = Paragraph(txt, self.style)
+        #self.assertEquals(map(lambda x:x.text, fragList), [u'Hello ',u'',u' World'])
+        #self.assertEquals(fragList[1].lineBreak, True)
+
 
 def makeSuite():
     return makeSuiteForClasses(ParaParserTestCase)
