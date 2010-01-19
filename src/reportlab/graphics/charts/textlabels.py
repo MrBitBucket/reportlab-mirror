@@ -93,8 +93,8 @@ class Label(Widget):
     _attrMap = AttrMap(
         x = AttrMapValue(isNumber,desc=''),
         y = AttrMapValue(isNumber,desc=''),
-        dx = AttrMapValue(isNumber,desc='width of label'),
-        dy = AttrMapValue(isNumber,desc='height of label'),
+        dx = AttrMapValue(isNumber,desc='delta x - offset'),
+        dy = AttrMapValue(isNumber,desc='delta y - offset'),
         angle = AttrMapValue(isNumber,desc='angle of label: default (0), 90 is vertical, 180 is upside down, etc'),
         boxAnchor = AttrMapValue(isBoxAnchor,desc='anchoring point of the label'),
         boxStrokeColor = AttrMapValue(isColorOrNone,desc='border color of the box'),
