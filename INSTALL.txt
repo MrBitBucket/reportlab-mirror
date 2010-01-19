@@ -1,3 +1,6 @@
+Please see README.txt for installation instructions.
+
+
 0)	All install Python, freetype2 and PIL
 	unixers will need development versions of python and freetype2.
 	Windows edit setup.cfg to add the path to the freetype2 .lib

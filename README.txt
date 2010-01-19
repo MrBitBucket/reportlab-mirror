@@ -14,22 +14,35 @@ BSD license.  See LICENSE.txt for details
 
 Installation
 ============
-This should now (Sep 2008) be distutils-compliant. Installation
-depends which distribution you are using.
+We aim to be compatible with several of the popular installation
+techniques.
+
+You need to have installed Python (versions 2.3 through 2.7),
+and ideally PIL with Freetype support.  
+
 
 
 (1). Subversion or source distributions:
 
 Use
-   python setup.py install
+    python setup.py install
+
+After this has completed you should be able to run
+    python setup.py tests
 
 This assumes you have a C compiler and the necessary
-packages to build Python extensions.  On Ubuntu, you
-will need at least build-essentials and python-devel.
+packages to build Python extensions. If you are installing
+system-wide you will need root permissions e.g.:
+    sudo python setup.py install
+
+On Ubuntu, you will need
+build-essential, libfreetype6-dev, python-dev and python-imaging.
 Most other Linux and xBSD distributions have packages with
 similar names.
+
 On Windows you need the correct version of Visual Studio
 for the Python you are using.
+
 
 (2) Manual installation without C compiler (e.g. Windows):
 
@@ -43,18 +56,27 @@ make PDFs without these but will go slower and lack
 bitmap image generation capabilities.
    http://www.reportlab.org/ftp/win32-dlls/
 
-(3) setuptools / easy-install 
 
-We also have a setuptools-based setup script, setup_egg.py,
-contributed by Dirk Holtwick.  It does not yet build the
-C extensions.  We welcome contributions to improve this
-for future releases.
+(3) easy-install 
+
+As of this version, you should be able to install with 
+"easy_install reportlab".   We do NOT use a setuptools-based
+script, but have modified our distribution to be compatible with easy_install.
+
 
 (4) Binary distributions (e.g. windows .exe)
-We are starting to experiment with these.  At the time of the
-writing (Sep 11 2008), distutils builds self-installing EXEs.
-As and when these get built they will appear at
-http://www.reportlab.org/downloads.
+A binary .exe installer for Windows (built with distutils) is
+available on our website.  
+
+
+(5) Ubuntu and other Debian-based systems
+The latest releases are generally available in the ubuntu repositories
+within 2-3 weeks.
+    sudo apt-get install python-reportlab
+
+Alternatively, if you would rather compile from source
+you will need compilers and other dependencies.
+    sudo apt-get install build-essential libfreetype6-dev python-dev python-imaging
 
 
 Prerequisites / dependencies
