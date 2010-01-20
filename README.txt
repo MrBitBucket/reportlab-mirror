@@ -155,7 +155,7 @@ that directory, and it will create the manuals.
 ==============================
 lib/normalDate.py originally by Jeff Bauer
 
-Many, many contributors have helped out between 2000 and 2009.
+Many, many contributors have helped out between 2000 and 2010.
 we keep a list in the first chapter of the User Guide; if you
 have contributed and are not listed there, please let us know.
 
