@@ -14,7 +14,7 @@ mentioned. If we missed you, please let us know!
 
 PDF
     lots of improvements and verbosity to error messages and the way they are handled.
-	font size can now be specified in pixels
+    font size can now be specified in pixels
     unicode file names are now accepted
 
 Platypus
@@ -38,32 +38,32 @@ Graphics:
     added in support for Overprint/Opacity & Separated colours
 
 Bugs fixes
-	word counting in complex paragraphs has been fixed.
-	SimpleIndex and TableOfContents bugs have been fixed.
-	Fix for position of hyperlinks when crop marks are added.
-	flowables.py: fix special case of doctemplate with no frames
-	PDFFormXObject.format missing Resources bug patch from Scott Meyer
-	KeepInFrame justification bug has been fixed.
-	paragraph.py: fix linebreaking bug thanks to Roberto Alsina
-	fix unicode/str issue bug found by Michael Egorov <michwill@gmail.com>
-	YCategoryAxis makeTickLabels fix contributed by Mike Folwell <mjf@pearson.co.uk>
-	pdfdoc.py: fix ro PDFDate contributed by Robert Alsina
-	and others ..
+    word counting in complex paragraphs has been fixed.
+    SimpleIndex and TableOfContents bugs have been fixed.
+    Fix for position of hyperlinks when crop marks are added.
+    flowables.py: fix special case of doctemplate with no frames
+    PDFFormXObject.format missing Resources bug patch from Scott Meyer
+    KeepInFrame justification bug has been fixed.
+    paragraph.py: fix linebreaking bug thanks to Roberto Alsina
+    fix unicode/str issue bug found by Michael Egorov <michwill@gmail.com>
+    YCategoryAxis makeTickLabels fix contributed by Mike Folwell <mjf@pearson.co.uk>
+    pdfdoc.py: fix ro PDFDate contributed by Robert Alsina
+    and others ..
 
 contributers
 ------------
-	PJACock's (<peter@maubp.freeserve.co.uk>)
-	Hans Brand
-	Ian Stevens
-	Yoann Roman <yroman-reportlab@altalang.com>
-	Randolph Bentson
-	Volker Haas
-	Simon King
-	Henning Vonbargen
-	Michael Egorov <michwill@gmail.com>
-	Mike Folwell <mjf@pearson.co.uk>
-	Robert Alsina
-	and more ...
+    PJACock's (<peter@maubp.freeserve.co.uk>)
+    Hans Brand
+    Ian Stevens
+    Yoann Roman <yroman-reportlab@altalang.com>
+    Randolph Bentson
+    Volker Haas
+    Simon King
+    Henning Vonbargen
+    Michael Egorov <michwill@gmail.com>
+    Mike Folwell <mjf@pearson.co.uk>
+    Robert Alsina
+    and more ...
 #################################################################################
 #################### RELEASE 2.3  at 18:00 GMT  04/Feb/2009     #################
 #################################################################################
