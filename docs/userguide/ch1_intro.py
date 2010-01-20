@@ -121,9 +121,34 @@ system</i>.""")
 bullet("""A 'build system' for complex documents with charts, tables
 and text such as management accounts, statistical reports and
 scientific papers """)
-bullet("""Going from XML to PDF in one step!""")
+bullet("""Going from XML to PDF in one step""")
 
 
+heading2("ReportLab's commercial software")
+disc("""
+The ReportLab library forms the foundation of our commercial solution for
+PDF generation, Report Markup Language (RML).  This is available for evaluation
+on our web site with full documentation.   We believe that RML is the fastest
+and easiest way to develop rich PDF workflows.  You work in a markup language
+at a similar level to HTML, using your favorite templating system to populate
+an RML document; then call our rml2pdf API function to generate a PDF.  It's
+what ReportLab staff use to build all of the solutions you can see on reportlab.com.
+Key differences:
+""")
+bullet("""Fully documented with two manuals, a formal specification (the DTD) and extensive self-documenting tests.  (By contrast, we try to make sure the open source documentation isn't wrong, but we don't always keep up with the code)""")
+bullet("""Work in high-level markup rather than constructing graphs of Python objects """)
+bullet("""Requires no Python expertise - your colleagues may thank you after you've left!'""")
+bullet("""Support for vector graphics and inclusion of other PDF documents""")
+bullet("""Many more useful features expressed with a single tag, which would need a lot
+of coding in the open source package""")
+bullet("""Commercial support is included""")
+
+
+disc("""
+We ask open source developers to consider trying out RML where it is appropriate.
+You can register on our site and try out a copy before buying.
+The costs are reasonable and linked to the volume of the project, and the revenue
+helps us spend more time developing this software.""")
 
 
 heading2("What is Python?")
@@ -198,7 +223,7 @@ and many more.""")
 disc("""Special thanks go to Just van Rossum for his valuable assistance with
 font technicalities.""")
 
-disc("""Moshe Wagner and Hosam Aly deserve a huge thanks for contributing RTL patch.""")
+disc("""Moshe Wagner and Hosam Aly deserve a huge thanks for contributing to the RTL patch, which is not yet on thr trunk.""")
 
 disc("""Marius Gedminas deserves a big hand for contributing the work on TrueType fonts and we
 are glad to include these in the toolkit. Finally we thank Michal Kosmulski for the DarkGarden font
@@ -227,7 +252,7 @@ restartList()
 
 list("""First, install Python from $http://www.python.org/.$
 Reportlab 2.x works with Python 2.3 upwards but we recommend to use
-the latest stable version of Python 2.5.  
+the latest stable version of Python 2.5 or 2.6.  
 After installing, you should be able to run the
 'Python (command line)' option from the Start Menu.
 """)
