@@ -1,4 +1,4 @@
-#copyright ReportLab Inc. 2000-2008
+#copyright ReportLab Inc. 2000-2010
 #see LICENSE.txt for license details
 
 This is the ReportLab PDF Toolkit. It allows rapid creation 
@@ -130,8 +130,8 @@ follow the instructions in 2.1 above...
 
 3. Prerequisites / dependencies
 ===============================
-This works with Python 23, 2.4 and 2.5.
-2.6 is not tested yet but you are welcome to try.
+This works with Python 23, 2.4, 2.5 and 2.6.
+2.7 is not tested yet but you are welcome to try.
 
 There are no absolute prerequisites beyond the Python
 standard library; but the Python Imaging Library (PIL)

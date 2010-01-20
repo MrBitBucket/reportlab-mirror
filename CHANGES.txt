@@ -9,7 +9,7 @@ The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
 #################################################################################
-#################### RELEASE 2.4  at 18:00 GMT  02/Dec/2009     #################
+#################### RELEASE 2.4  at 18:00 GMT  20/Jan/2010     #################
 #################################################################################
 
 PDF
