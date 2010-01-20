@@ -61,7 +61,7 @@ bullet("How do I get everything set up and running?")
 todo("""
 We need your help to make sure this manual is complete and helpful.
 Please send any feedback to our user mailing list,
-which is signposted from <a href="http://www.reportlab.org/">www.reportlab.org</a>.
+which is signposted from <a href="http://www.reportlab.com/">www.reportlab.com</a>.
 """)
 
 heading2("What is the ReportLab PDF Library?")
@@ -234,11 +234,11 @@ heading2("Installation and Setup")
 heading3("A note on available versions")
 disc("""Our website ^http://www.reportlab.com/software/installation/^ will always have up-to-date
 information on setups and installations. The latest version of the ReportLab library can be found at
-^http://www.reportlab.org/downloads.html^.  Older versions can be found at ^http://www.reportlab.com/ftp/^.
+^http://www.reportlab.com/downloads.html^.  Older versions can be found at ^http://www.reportlab.com/ftp/^.
   Each successive version is stored in both zip
 and tgz format, but the contents are identical apart from line endings.
 Versions are numbered:  $ReportLab_<major_version>_<minor_version>.zip$, 
-$ReportLab_<major_version>_<minor_version>.zip$ and so on. 
+$ReportLab_<major_version>_<minor_version>.tgz$ and so on. 
 The latest stable version is $reportlab2.4$ (.zip or .tgz), 
 Daily snapshots of the trunk are available as
 $reportlab-daily-unix.tar.gz$ or $reportlab-daily-win32.zip$.
@@ -275,14 +275,14 @@ installs both the ReportLab source code and the precompiled DLLs for you.
 
 list("""
 If, however, you wish to install from source, download and unzip the archive
-from http://www.reportlab.org/downloads.html and copy the $reportlab$ directory
+from from the downloads page on ^http://www.reportlab.com/^ and copy the $reportlab$ directory
 onto your PythonPath;  You should now be able to go to a Python
 command line interpreter and type $import reportlab$ without getting
 an error message.
 """)
 
 list("""Next, Download the zip file of precompiled DLLs for your Python version from
-the bottom of the ^http://www.reportlab.org/downloads.html^ downloads page, and unzip
+the bottom of the downloads page on ^http://www.reportlab.com/^, and unzip
 them into ^C:\Python2x\lib\site-packages^ (or its equivalent for other Python versions
 """)
 
@@ -293,7 +293,7 @@ the manuals in ^reportlab/docs^ (including this one). """)
 
 list("""
 Finally, we recommend you download and run the script ^rl_check.py^ from
-^http://www.reportlab.org/ftp/^. This will health-check all the above
+^http://www.reportlab.com/ftp/^. This will health-check all the above
 steps and warn you if anything is missing or mismatched.""")
 
 heading3("Installation instructions for Unix")
@@ -314,7 +314,7 @@ list("""You will also need the source code or relevant dev packages for Python a
 """)
 
 list("""
-Download the latest ReportLab.tgz from the download page on http://www.reportlab.org.
+Download the latest ReportLab.tgz from the download page on http://www.reportlab.com.
 """)
 
 list("""
@@ -402,15 +402,15 @@ available on the web:
 """)
 
 
-bullet("""<b>Introductory Material on Python.  </b>
-A list of tutorials on the Python.org web site.
-$http://www.python.org/doc/Intros.html$
+bullet("""<b>Python Documentation.  </b>
+A list of documentation on the Python.org web site.
+$http://www.python.org/doc/$
 """)
 
 
 bullet("""<b>Python Tutorial.  </b>
-The official Python Tutorial by Guido van Rossum (edited by Fred L. Drake, Jr.)
-$http://www.python.org/doc/tut/$
+The official Python Tutorial , originally written by Guido van Rossum himself.
+$http://docs.python.org/tutorial/$
 """)
 
 
