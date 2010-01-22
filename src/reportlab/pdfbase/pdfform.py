@@ -135,6 +135,7 @@ def getForm(canvas):
         return theform
 
 class AcroForm:
+    __PDFObject__ = True
     def __init__(self):
         self.fields = []
     def textField(self, canvas, title, xmin, ymin, xmax, ymax, value="", maxlen=1000000, multiline=0):

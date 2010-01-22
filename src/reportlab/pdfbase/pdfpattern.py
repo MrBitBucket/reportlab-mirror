@@ -5,6 +5,7 @@ from reportlab.pdfbase.pdfdoc import format
 import string
 
 class PDFPattern:
+    __PDFObject__ = True
     __RefOnly__ = 1
     def __init__(self, pattern_sequence, **keywordargs):
         """
