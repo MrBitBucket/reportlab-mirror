@@ -845,6 +845,7 @@ class PDFArrayCompact(PDFArray):
 
 INDIRECTOBFMT = "%(n)s %(v)s obj%(LINEEND)s%(content)s%(CLINEEND)sendobj%(LINEEND)s"
 class PDFIndirectObject:
+    __PDFObject__ = True
     __RefOnly__ = 1
     def __init__(self, name, content):
         self.name = name
