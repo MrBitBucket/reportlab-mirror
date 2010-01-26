@@ -371,6 +371,12 @@ class Image(Flowable):
             self.drawWidth = self.imageWidth*factor
             self.drawHeight = self.imageHeight*factor
 
+    def _restrictSize(self,aW,aH):
+        if self.drawWidth<=aW+_FUZZ and self.drawHeight<=aH+_FUZZ: return
+        factor = min(float(aW)/self.drawWidth,float(aH)/self.drawHeight)
+        self.drawWidth *= factor
+        self.drawHeight *= factor
+
     def __getattr__(self,a):
         if a=='_img':
             from reportlab.lib.utils import ImageReader  #this may raise an error
@@ -1022,7 +1028,9 @@ class ImageAndFlowables(_Container,Flowable):
                 return self.width,self.height
             self._reset()
         self._wrapArgs = availWidth, availHeight
-        wI, hI = self._I.wrap(availWidth,availHeight)
+        I = self._I
+        wI, hI = I.wrap(availWidth,availHeight)
+        I._restrictSize(availWidth,availHeight)
         self._wI = wI
         self._hI = hI
         ilpad = self._ilpad
