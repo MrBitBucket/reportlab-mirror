@@ -372,10 +372,11 @@ class Image(Flowable):
             self.drawHeight = self.imageHeight*factor
 
     def _restrictSize(self,aW,aH):
-        if self.drawWidth<=aW+_FUZZ and self.drawHeight<=aH+_FUZZ: return
-        factor = min(float(aW)/self.drawWidth,float(aH)/self.drawHeight)
-        self.drawWidth *= factor
-        self.drawHeight *= factor
+        if self.drawWidth>aW+_FUZZ or self.drawHeight>aH+_FUZZ:
+            factor = min(float(aW)/self.drawWidth,float(aH)/self.drawHeight)
+            self.drawWidth *= factor
+            self.drawHeight *= factor
+        return self.drawWidth, self.drawHeight
 
     def __getattr__(self,a):
         if a=='_img':
@@ -390,7 +391,7 @@ class Image(Flowable):
 
     def wrap(self, availWidth, availHeight):
         #the caller may decide it does not fit.
-        return (self.drawWidth, self.drawHeight)
+        return self.drawWidth, self.drawHeight
 
     def draw(self):
         lazy = self._lazy
@@ -1029,8 +1030,8 @@ class ImageAndFlowables(_Container,Flowable):
             self._reset()
         self._wrapArgs = availWidth, availHeight
         I = self._I
-        wI, hI = I.wrap(availWidth,availHeight)
-        I._restrictSize(availWidth,availHeight)
+        I.wrap(availWidth,availHeight)
+        wI, hI = I._restrictSize(availWidth,availHeight)
         self._wI = wI
         self._hI = hI
         ilpad = self._ilpad
