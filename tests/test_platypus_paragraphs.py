@@ -228,6 +228,31 @@ providing the ultimate in ease of installation.''',
                     )
                 )
 
+        story.append(PageBreak())
+        story.append(Paragraph('Image larger than the frame',h3))
+        story.append(ImageAndFlowables(
+                        Image(gif,width=6*110,height=6*44),
+                        Paragraph('''The concept of an integrated one box solution for advanced voice and
+data applications began with the introduction of the IMACS. The
+IMACS 200 carries on that tradition with an integrated solution
+optimized for smaller port size applications that the IMACS could not
+economically address. An array of the most popular interfaces and
+features from the IMACS has been bundled into a small 2U chassis
+providing the ultimate in ease of installation.''',
+                        style=ParagraphStyle(
+                                name="base",
+                                fontName="Helvetica",
+                                leading=12,
+                                leftIndent=0,
+                                firstLineIndent=0,
+                                spaceBefore = 9.5,
+                                fontSize=9.5,
+                                )
+                            ),
+                    imageSide='left',
+                    )
+                )
+
         
         doc = MyDocTemplate(outputfile('test_platypus_imageandflowables.pdf'),showBoundary=1)
         doc.multiBuild(story)
