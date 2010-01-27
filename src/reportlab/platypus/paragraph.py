@@ -233,9 +233,7 @@ def _putFragLine(cur_x, tx, line):
             if f is words[-1]:
                 if not tx._fontname:
                     tx.setFont(xs.style.fontName,xs.style.fontSize)
-                    tx._textOut('',1)
-                elif kind in ('img','anchor'):
-                    tx._textOut('',1)
+                tx._textOut('',1)
         else:
             cur_x_s = cur_x + nSpaces*ws
             if (tx._fontname,tx._fontsize)!=(f.fontName,f.fontSize):
@@ -1643,4 +1641,14 @@ would follow from the assumption that"""
         P=Paragraph(text,ParagraphStyle('aaa',parent=styleSheet['Normal'],align=TA_JUSTIFY))
         dumpParagraphFrags(P)
         w,h = P.wrap(6*cm-12, 9.7*72)
+        dumpParagraphLines(P)
+
+    if flagged(11):
+        text="""This page tests out a number of attributes of the <b>paraStyle</b><onDraw name="_indexAdd" label="paraStyle"/> tag.
+This paragraph is in a style we have called "style1". It should be a normal <onDraw name="_indexAdd" label="normal"/> paragraph, set in Courier 12 pt.
+It should be a normal<onDraw name="_indexAdd" label="normal"/> paragraph, set in Courier (not bold).
+It should be a normal<onDraw name="_indexAdd" label="normal"/> paragraph, set in Courier 12 pt."""
+        P=Paragraph(text,style=ParagraphStyle('style1',fontName="Courier",fontSize=10))
+        dumpParagraphFrags(P)
+        w,h = P.wrap(6.27*72-12,10000)
         dumpParagraphLines(P)
