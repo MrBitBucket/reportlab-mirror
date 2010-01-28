@@ -290,9 +290,8 @@ class PageTemplate:
 
 def _addGeneratedContent(flowables,frame):
     S = getattr(frame,'_generated_content',None)
-    if S:
-        for i,f in enumerate(S):
-            flowables.insert(i,f)
+    if S: 
+        flowables[0:0] = S
         del frame._generated_content
 
 
@@ -773,17 +772,16 @@ class BaseDocTemplate:
                     n = 0
                 if n:
                     if not isinstance(S[0],(PageBreak,SlowPageBreak,ActionFlowable)):
-                        if frame.add(S[0], canv, trySplit=0):
-                            self._curPageFlowableCount += 1
-                            self.afterFlowable(S[0])
-                            _addGeneratedContent(flowables,frame)
-                        else:
+                        if not frame.add(S[0], canv, trySplit=0):
                             ident = "Splitting error(n==%d) on page %d in\n%s" % (n,self.page,self._fIdent(f,60,frame))
                             #leave to keep apart from the raise
                             raise LayoutError(ident)
-                        del S[0]
-                    for i,f in enumerate(S):
-                        flowables.insert(i,f)   # put split flowables back on the list
+                        self._curPageFlowableCount += 1
+                        self.afterFlowable(S[0])
+                        flowables[0:0] = S[1:]  # put rest of splitted flowables back on the list
+                        _addGeneratedContent(flowables,frame)
+                    else:
+                        flowables[0:0] = S  # put splitted flowables back on the list
                 else:
                     if hasattr(f,'_postponed'):
                         ident = "Flowable %s%s too large on page %d in frame %r%s of template %r" % \
