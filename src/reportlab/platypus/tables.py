@@ -213,7 +213,7 @@ def spanFixDim(V0,V,spanCons,FUZZ=rl_config._FUZZ):
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None,
-                hAlign=None,vAlign=None):
+                hAlign=None,vAlign=None, normalizedData=0, cellStyles=None):
         self.ident = ident
         self.hAlign = hAlign or 'CENTER'
         self.vAlign = vAlign or 'MIDDLE'
@@ -246,7 +246,10 @@ class Table(Flowable):
             return
 
         # we need a cleanup pass to ensure data is strings - non-unicode and non-null
-        self._cellvalues = data = self.normalizeData(data)
+        if normalizedData:
+            self._cellvalues = data
+        else:
+            self._cellvalues = data = self.normalizeData(data)
         if not _seqCW: colWidths = ncols*[colWidths]
         elif len(colWidths)!=ncols:
             if rl_config.allowShortTableRows and isinstance(colWidths,list):
@@ -269,13 +272,16 @@ class Table(Flowable):
                     raise ValueError("%s expected %d not %d columns in row %d!" % (self.identity(),ncols,n,i))
         self._rowHeights = self._argH = rowHeights
         self._colWidths = self._argW = colWidths
-        cellrows = []
-        for i in xrange(nrows):
-            cellcols = []
-            for j in xrange(ncols):
-                cellcols.append(CellStyle(`(i,j)`))
-            cellrows.append(cellcols)
-        self._cellStyles = cellrows
+        if cellStyles is None:
+            cellrows = []
+            for i in xrange(nrows):
+                cellcols = []
+                for j in xrange(ncols):
+                    cellcols.append(CellStyle(`(i,j)`))
+                cellrows.append(cellcols)
+            self._cellStyles = cellrows
+        else:
+            self._cellStyles = cellStyles
 
         self._bkgrndcmds = []
         self._linecmds = []
@@ -1138,10 +1144,9 @@ class Table(Flowable):
         #R0 = slelf.__class__( data[:n], self._argW, self._argH[:n],
         R0 = self.__class__( data[:n], colWidths=self._colWidths, rowHeights=self._argH[:n],
                 repeatRows=repeatRows, repeatCols=repeatCols,
-                splitByRow=splitByRow)
+                splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[:n])
 
-        #copy the styles and commands
-        R0._cellStyles = self._cellStyles[:n]
+        #copy the commands
 
         A = []
         # hack up the line commands
@@ -1198,8 +1203,8 @@ class Table(Flowable):
             R1 = self.__class__(data[:repeatRows]+data[n:],colWidths=self._colWidths,
                     rowHeights=self._argH[:repeatRows]+self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
-                    splitByRow=splitByRow)
-            R1._cellStyles = self._cellStyles[:repeatRows]+self._cellStyles[n:]
+                    splitByRow=splitByRow, normalizedData=1,
+                    cellStyles=self._cellStyles[:repeatRows]+self._cellStyles[n:])
             R1._cr_1_1(n,repeatRows,A)
             R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
             R1._cr_1_1(n,repeatRows,self._spanCmds)
@@ -1208,8 +1213,7 @@ class Table(Flowable):
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
             R1 = self.__class__(data[n:], colWidths=self._colWidths, rowHeights=self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
-                    splitByRow=splitByRow)
-            R1._cellStyles = self._cellStyles[n:]
+                    splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[n:])
             R1._cr_1_0(n,A)
             R1._cr_1_0(n,self._bkgrndcmds)
             R1._cr_1_0(n,self._spanCmds)
