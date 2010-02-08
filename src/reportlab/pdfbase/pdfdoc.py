@@ -1537,7 +1537,7 @@ def count(tree, closedict=None):
         counts = []
         for e in tree:
             counts.append(count(e, closedict))
-        return reduce(add, counts)
+        return sum(counts)  #used to be: return reduce(add, counts)
     return 1
 
 class PDFInfo:

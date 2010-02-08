@@ -434,8 +434,8 @@ def open_for_read_by_name(name,mode='b'):
         if 'b' not in mode and os.linesep!='\n': s = s.replace(os.linesep,'\n')
         return getStringIO(s)
 
-import urllib
-def open_for_read(name,mode='b', urlopen=urllib.urlopen):
+import urllib2
+def open_for_read(name,mode='b', urlopen=urllib2.urlopen):
     '''attempt to open a file or URL for reading'''
     if hasattr(name,'read'): return name
     try:
@@ -445,7 +445,7 @@ def open_for_read(name,mode='b', urlopen=urllib.urlopen):
             return getStringIO(urlopen(name).read())
         except:
             raise IOError('Cannot open resource "%s"' % name)
-del urllib
+del urllib2
 
 def open_and_read(name,mode='b'):
     return open_for_read(name,mode).read()

@@ -412,7 +412,10 @@ class SimpleIndex(IndexingFlowable):
 
     def _build(self,availWidth,availHeight):
         _tempEntries = self._getlastEntries()
-        _tempEntries.sort(lambda a,b: cmp([x.upper() for x in a[0]], [x.upper() for x in b[0]]))
+        def getkey(seq):
+            return [x.upper() for x in seq[0]]
+        _tempEntries.sort(key=getkey)
+        #was: _tempEntries.sort(lambda a,b: cmp([x.upper() for x in a[0]], [x.upper() for x in b[0]]))
         leveloffset = self.headers and 1 or 0
 
         def drawIndexEntryEnd(canvas, kind, label):
