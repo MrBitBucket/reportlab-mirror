@@ -276,7 +276,7 @@ class Code128(MultiWidthBarcode):
         s = self.validated
         l = ['START_B']
         for c in s:
-            if not setb.has_key(c):
+            if c not in setb:
                 l = l + ['TO_A', c, 'TO_B']
             else:
                 l.append(c)
@@ -288,7 +288,7 @@ class Code128(MultiWidthBarcode):
         if l[1] in tos:
             l[:2] = ['START_' + l[1][-1]]
 
-#        print `l`
+#        print repr(l)
 
         # encode into numbers
         start, set, shset = setmap[l[0]]

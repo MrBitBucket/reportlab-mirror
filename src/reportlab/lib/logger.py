@@ -50,7 +50,7 @@ class WarnOnce:
         self.enabled = 1
 
     def once(self,warning):
-        if not self.uttered.has_key(warning):
+        if warning not in self.uttered:
             if self.enabled: logger.write(self.pfx + warning)
             self.uttered[warning] = 1
 

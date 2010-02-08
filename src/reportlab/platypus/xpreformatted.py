@@ -108,7 +108,7 @@ class XPreformatted(Paragraph):
         different first line indent; a longer list could be created to facilitate custom wraps
         around irregular objects."""
 
-        if type(width) <> ListType: maxWidths = [width]
+        if type(width) != ListType: maxWidths = [width]
         else: maxWidths = width
         lines = []
         lineno = 0
@@ -213,9 +213,7 @@ class PythonPreformatted(XPreformatted):
     def __init__(self, text, style, bulletText = None, dedent=0, frags=None):
         if text:
             text = self.fontify(self.escapeHtml(text))
-        apply(XPreformatted.__init__,
-              (self, text, style),
-              {'bulletText':bulletText, 'dedent':dedent, 'frags':frags})
+        XPreformatted.__init__(self, text, style,bulletText=bulletText,dedent=dedent,frags=frags)
 
     def escapeHtml(self, text):
         s = string.replace(text, '&', '&amp;')

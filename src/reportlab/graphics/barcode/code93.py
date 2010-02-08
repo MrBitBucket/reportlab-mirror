@@ -187,7 +187,7 @@ class Standard93(_Code93Base):
         for c in self.value:
             if c in string.lowercase:
                 c = string.upper(c)
-            if not _patterns.has_key(c):
+            if c not in _patterns:
                 self.valid = 0
                 continue
             vval = vval + c
@@ -213,7 +213,7 @@ class Extended93(_Code93Base):
         self.valid = 1
         a = vval.append
         for c in self.value:
-            if not _patterns.has_key(c) and not _extended.has_key(c):
+            if c not in _patterns and c not in _extended:
                 self.valid = 0
                 continue
             a(c)
@@ -223,9 +223,9 @@ class Extended93(_Code93Base):
     def encode(self):
         self.encoded = ""
         for c in self.validated:
-            if _patterns.has_key(c):
+            if c in _patterns:
                 self.encoded = self.encoded + c
-            elif _extended.has_key(c):
+            elif c in _extended:
                 self.encoded = self.encoded + _extended[c]
             else:
                 raise ValueError

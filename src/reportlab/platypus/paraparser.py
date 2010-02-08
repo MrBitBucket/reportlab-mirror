@@ -189,9 +189,9 @@ def _addAttributeNames(m):
     K = m.keys()
     for k in K:
         n = m[k][0]
-        if not m.has_key(n): m[n] = m[k]
+        if n not in m: m[n] = m[k]
         n = string.lower(n)
-        if not m.has_key(n): m[n] = m[k]
+        if n not in m: m[n] = m[k]
 
 _addAttributeNames(_paraAttrMap)
 _addAttributeNames(_fontAttrMap)
@@ -695,7 +695,7 @@ class ParaParser(xmllib.XMLParser):
         self.handle_data(unichr(n).encode('utf8'))
 
     def handle_entityref(self,name):
-        if greeks.has_key(name):
+        if name in greeks:
             self.handle_data(greeks[name])
         else:
             xmllib.XMLParser.handle_entityref(self,name)
@@ -714,15 +714,15 @@ class ParaParser(xmllib.XMLParser):
         self._pop(greek=1)
 
     def start_unichar(self, attr):
-        if attr.has_key('name'):
-            if attr.has_key('code'):
+        if 'name' in attr:
+            if 'code' in attr:
                 self._syntax_error('<unichar/> invalid with both name and code attributes')
             try:
                 v = unicodedata.lookup(attr['name']).encode('utf8')
             except KeyError:
                 self._syntax_error('<unichar/> invalid name attribute\n"%s"' % name)
                 v = '\0'
-        elif attr.has_key('code'):
+        elif 'code' in attr:
             try:
                 v = unichr(int(eval(attr['code']))).encode('utf8')
             except:
@@ -862,11 +862,11 @@ class ParaParser(xmllib.XMLParser):
     def start_seq(self, attr):
         #if it has a template, use that; otherwise try for id;
         #otherwise take default sequence
-        if attr.has_key('template'):
+        if 'template' in attr:
             templ = attr['template']
             self.handle_data(templ % self._seq)
             return
-        elif attr.has_key('id'):
+        elif 'id' in attr:
             id = attr['id']
         else:
             id = None
@@ -889,10 +889,10 @@ class ParaParser(xmllib.XMLParser):
 
     def start_onDraw(self,attr):
         defn = ABag()
-        if attr.has_key('name'): defn.name = attr['name']
+        if 'name' in attr: defn.name = attr['name']
         else: self._syntax_error('<onDraw> needs at least a name attribute')
 
-        if attr.has_key('label'): defn.label = attr['label']
+        if 'label' in attr: defn.label = attr['label']
         defn.kind='onDraw'
         self._push(cbDefn=defn)
         self.handle_data('')
@@ -902,11 +902,11 @@ class ParaParser(xmllib.XMLParser):
     def start_index(self,attr):
         attr=self.getAttributes(attr,_indexAttrMap)
         defn = ABag()
-        if attr.has_key('item'):
+        if 'item' in attr:
             label = attr['item']
         else:
             self._syntax_error('<index> needs at least an item attribute')
-        if attr.has_key('name'):
+        if 'name' in attr:
             name = attr['name']
         else:
             name = DEFAULT_INDEX_NAME

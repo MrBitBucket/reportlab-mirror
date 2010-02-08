@@ -69,7 +69,7 @@ class BoundsTestCase(unittest.TestCase):
         from reportlab.graphics.widgetbase import Sizer
         siz = Sizer()
         siz.add(vbc, 'vbc')
-        assert siz.getBounds()[0:2] <> (0,0)
+        assert siz.getBounds()[0:2] != (0,0)
 
 
 def makeSuite():

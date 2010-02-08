@@ -251,7 +251,7 @@ class Shape(_SetKeyWordArgs,_DrawTimeResizeable):
         #may need to override this.
         props = {}
         for key, value in self.__dict__.items():
-            if key[0:1] <> '_':
+            if key[0:1] != '_':
                 props[key] = value
         return props
 
@@ -284,8 +284,8 @@ class Shape(_SetKeyWordArgs,_DrawTimeResizeable):
 
         if self._attrMap is not None:
             for key in self.__dict__.keys():
-                if key[0] <> '_':
-                    assert self._attrMap.has_key(key), "Unexpected attribute %s found in %s" % (key, self)
+                if key[0] != '_':
+                    assert key in self._attrMap, "Unexpected attribute %s found in %s" % (key, self)
             for (attr, metavalue) in self._attrMap.items():
                 assert hasattr(self, attr), "Missing attribute %s from %s" % (attr, self)
                 value = getattr(self, attr)
@@ -498,7 +498,7 @@ def _addObjImport(obj,I,n=None):
     c = obj.__class__
     m = getmodule(c).__name__
     n = n or c.__name__
-    if not I.has_key(m):
+    if m not in I:
         I[m] = [n]
     elif n not in I[m]:
         I[m].append(n)
@@ -606,7 +606,7 @@ class Drawing(Group, Flowable):
             s = s + 'from %s import %s\n' % (m,string.replace(str(o)[1:-1],"'",""))
         s = s + '\nclass %s(_DrawingEditorMixin,Drawing):\n' % n
         s = s + '\tdef __init__(self,width=%s,height=%s,*args,**kw):\n' % (self.width,self.height)
-        s = s + '\t\tapply(Drawing.__init__,(self,width,height)+args,kw)\n'
+        s = s + '\t\tDrawing.__init__(self,width,height)+args,**kw)\n'
         s = s + G
         s = s + '\n\nif __name__=="__main__": #NORUNTESTS\n\t%s().save(formats=[\'pdf\'],outDir=\'.\',fnRoot=None)\n' % n
         return s
@@ -639,7 +639,7 @@ class Drawing(Group, Flowable):
         return self._copy(self.__class__(self.width, self.height))
 
     def asGroup(self,*args,**kw):
-        return self._copy(apply(Group,args,kw))
+        return self._copy(Group(*args,**kw))
 
     def save(self, formats=None, verbose=None, fnRoot=None, outDir=None, title='', **kw):
         """Saves copies of self in desired location and formats.
@@ -653,7 +653,7 @@ class Drawing(Group, Flowable):
         if not fnRoot:
             fnRoot = getattr(self,'fileNamePattern',(self.__class__.__name__+'%03d'))
             chartId = getattr(self,'chartId',0)
-            if callable(fnRoot):
+            if hasattr(fnRoot,'__call__'):
                 fnRoot = fnRoot(chartId)
             else:
                 try:
@@ -798,7 +798,7 @@ class _DrawingEditorMixin:
         '''
         ivc = isValidChild(value)
         if name and hasattr(obj,'_attrMap'):
-            if not obj.__dict__.has_key('_attrMap'):
+            if '_attrMap' not in obj.__dict__:
                 obj._attrMap = obj._attrMap.clone()
             if ivc and validate is None: validate = isValidChild
             obj._attrMap[name] = AttrMapValue(validate,desc)
@@ -889,7 +889,7 @@ def _renderPath(path, drawFuncs):
         nArgs = _PATH_OP_ARG_COUNT[op]
         func = drawFuncs[op]
         j = i + nArgs
-        apply(func, points[i:j])
+        func(*points[i:j])
         i = j
         if op == _CLOSEPATH:
             hadClosePath = hadClosePath + 1
@@ -999,7 +999,7 @@ def definePath(pathSegs=[],isClipPath=0, dx=0, dy=0, **kw):
     for d,o in (dx,0), (dy,1):
         for i in xrange(o,len(P),2):
             P[i] = P[i]+d
-    return apply(Path,(P,O,isClipPath),kw)
+    return Path(P,O,isClipPath,**kw)
 
 class Rect(SolidShape):
     """Rectangle, possibly with rounded corners."""

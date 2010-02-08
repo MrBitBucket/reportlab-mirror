@@ -110,7 +110,7 @@ class Template:
        self.markers = markers
        for mark in markers:
            if len(mark)>1:
-              raise ValueError, "Marks must be single characters: "+`mark`
+              raise ValueError, "Marks must be single characters: "+repr(mark)
        # compile the regular expressions if needed
        self.marker_dict = marker_dict = {}
        for (mark, rgex) in marker_to_regex_dict.items():
@@ -174,7 +174,7 @@ class Template:
            # is it a literal indicator?
            if indicator is None:
               if find(str, data, currentindex) != currentindex:
-                 raise ValueError, "literal not found at "+`(currentindex,data)`
+                 raise ValueError, "literal not found at "+repr((currentindex,data))
               currentindex = currentindex + len(data)
            else:
               # anything else is a directive
@@ -192,13 +192,13 @@ class Template:
                        last = find(str, nextdata, currentindex)
                        if last<currentindex:
                           raise ValueError, \
-                           "couldn't terminate wild with lit "+`currentindex`
+                           "couldn't terminate wild with lit "+repr(currentindex)
                     else:
                        # data is a re, search for it
                        last = nextdata.search(str, currentindex)
                        if last<currentindex:
                           raise ValueError, \
-                           "couldn't terminate wild with re "+`currentindex`
+                           "couldn't terminate wild with re "+repr(currentindex)
               elif indicator == single_char:
                  # data is length to eat
                  last = currentindex + data
@@ -206,7 +206,7 @@ class Template:
                  # other directives are always regular expressions
                  last = data.match(str, currentindex) + currentindex
                  if last<currentindex:
-                    raise ValueError, "couldn't match re at "+`currentindex`
+                    raise ValueError, "couldn't match re at "+repr(currentindex)
               #print "accepting", str[currentindex:last]
               result[current_directive_index] = str[currentindex:last]
               current_directive_index = current_directive_index+1

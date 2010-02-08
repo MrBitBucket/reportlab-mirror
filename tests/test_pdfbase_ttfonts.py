@@ -66,7 +66,7 @@ def _simple_subset_generation(fn,npages,alter=0):
             for i in xrange(32):
                 for j in xrange(32):
                     ch = utf8(i * 32 + j+p*alter)
-                    c.drawString(80 + j * 13 + int(j / 16) * 4, 600 - i * 13 - int(i / 8) * 8, ch)
+                    c.drawString(80 + j * 13 + int(j / 16.0) * 4, 600 - i * 13 - int(i / 8.0) * 8, ch)
         c.showPage()
     c.save()
 

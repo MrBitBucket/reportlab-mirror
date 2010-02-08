@@ -170,10 +170,10 @@ class PDFAction :
         """The fake method is called, print it then call the real one."""
         if not self._parent._parent._in :
             self._precomment()
-            self._parent._parent._PyWrite("    %s.%s(%s)" % (self._parent._name, self._action, apply(buildargs, args, kwargs)))
+            self._parent._parent._PyWrite("    %s.%s(%s)" % (self._parent._name, self._action, buildargs(*args, **kwargs)))
             self._postcomment()
         self._parent._parent._in = self._parent._parent._in + 1
-        retcode = apply(getattr(self._parent._object, self._action), args, kwargs)
+        retcode = getattr(self._parent._object, self._action)(*args,**kwargs)
         self._parent._parent._in = self._parent._parent._in - 1
         return retcode
 
@@ -212,8 +212,8 @@ class PDFObject :
         """Real object initialisation is made here, because now we've got the arguments."""
         if not self._initdone :
             self.__class__._number = self.__class__._number + 1
-            methodname = apply(self._postinit, args, kwargs)
-            self._parent._PyWrite("\n    # create PDF%sObject number %i\n    %s = %s.%s(%s)" % (methodname[5:], self.__class__._number, self._name, self._parent._name, methodname, apply(buildargs, args, kwargs)))
+            methodname = self._postinit(*args,**kwargs)
+            self._parent._PyWrite("\n    # create PDF%sObject number %i\n    %s = %s.%s(%s)" % (methodname[5:], self.__class__._number, self._name, self._parent._name, methodname, buildargs(*args,**kwargs)))
             self._initdone = 1
         return self
 
@@ -222,13 +222,13 @@ class Canvas :
     class TextObject(PDFObject) :
         _name = "t"
         def _postinit(self, *args, **kwargs) :
-            self._object = apply(textobject.PDFTextObject, (self._parent, ) + args, kwargs)
+            self._object = textobject.PDFTextObject(self._parent,*args,**kwargs)
             return "beginText"
 
     class PathObject(PDFObject) :
         _name = "p"
         def _postinit(self, *args, **kwargs) :
-            self._object = apply(pathobject.PDFPathObject, args, kwargs)
+            self._object = pathobject.PDFPathObject(*args, **kwargs)
             return "beginPath"
 
     class Action(PDFAction) :
@@ -272,14 +272,14 @@ class Canvas :
         self._pagenumber = 1
         self._formnumber = 0
         self._footerpresent = 0
-        self._object = apply(canvas.Canvas, args, kwargs)
+        self._object = canvas.Canvas(*args,**kwargs)
         self._pyfile = cStringIO.StringIO()
         self._PyWrite(PyHeader)
         try :
             del kwargs["filename"]
         except KeyError :
             pass
-        self._PyWrite("    # create the PDF document\n    %s = Canvas(file, %s)\n\n    # Begins page 1" % (self._name, apply(buildargs, args[1:], kwargs)))
+        self._PyWrite("    # create the PDF document\n    %s = Canvas(file, %s)\n\n    # Begins page 1" % (self._name, buildargs(*args[1:], **kwargs)))
 
     def __nonzero__(self) :
         """This is needed by platypus' tables."""

@@ -38,8 +38,8 @@ class HelloTestCase(unittest.TestCase):
         seq._dingo = 1
         rl_config._reset()
         assert not hasattr(seq,'_dingo')
-        assert not tfd.has_key(' a ') and len(tfd)<ntfd
-        assert not fbn.has_key(' a ') and len(fbn)<nfbn
+        assert ' a ' not in tfd and len(tfd)<ntfd
+        assert ' a ' not in fbn and len(fbn)<nfbn
 
 def makeSuite():
     return makeSuiteForClasses(HelloTestCase)

@@ -77,13 +77,13 @@ def getParagraphs(textBlock):
     for line in lines:
         if len(string.strip(line)) == 0:
             #blank, add it
-            if currentPara <> []:
+            if currentPara != []:
                 paras.append(string.join(currentPara, '\n'))
                 currentPara = []
         else:
             currentPara.append(line)
     #...and the last one
-    if currentPara <> []:
+    if currentPara != []:
         paras.append(string.join(currentPara, '\n'))
 
     return paras
@@ -528,7 +528,7 @@ class AndyTemplate(BaseDocTemplate):
         frame1 = platypus.Frame(inch, 5.6*inch, 6*inch, 5.2*inch,id='F1')
         frame2 = platypus.Frame(inch, inch, 6*inch, 4.5*inch, showBoundary=1,id='F2')
         self.allowSplitting = 0
-        apply(BaseDocTemplate.__init__,(self,filename),kw)
+        BaseDocTemplate.__init__(self,filename,**kw)
         self.addPageTemplates(PageTemplate('normal',[frame1,frame2],framePage))
 
     def fillFrame(self,flowables):

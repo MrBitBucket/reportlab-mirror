@@ -144,7 +144,7 @@ class FontFinder:
             fonts = self._fonts
             for font in fonts:
                 fam = font.familyName
-                if self._fontsByFamily.has_key(fam):
+                if fam in self._fontsByFamily:
                     self._fontsByFamily[fam].append(font)
                 else:
                     self._fontsByFamily[fam] = [font]
@@ -179,7 +179,7 @@ class FontFinder:
         for font in self._fonts:
             OK = True
             for (k, v) in kwds.items():
-                if getattr(font, k, None) <> v:
+                if getattr(font, k, None) != v:
                     OK = False
             if OK:
                 selected.append(font)

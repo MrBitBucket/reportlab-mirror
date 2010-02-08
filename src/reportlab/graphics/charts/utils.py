@@ -166,14 +166,14 @@ def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0, grid=None):
     w = int(w)!=w
 
     if power > 3 or power < -3:
-        format = '%+'+`w+7`+'.0e'
+        format = '%+'+repr(w+7)+'.0e'
     else:
         if power >= 0:
             digits = int(power)+w
-            format = '%' + `digits`+'.0f'
+            format = '%' + repr(digits)+'.0f'
         else:
             digits = w-int(power)
-            format = '%'+`digits+2`+'.'+`digits`+'f'
+            format = '%'+repr(digits+2)+'.'+repr(digits)+'f'
 
     if percent: format=format+'%%'
     T = []

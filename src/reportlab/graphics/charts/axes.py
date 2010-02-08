@@ -101,7 +101,7 @@ class AxisLineAnnotation:
         e = kwds.pop('end',None)
         if s is None or e is None:
             dim = getattr(getattr(axis,'joinAxis',None),'getGridDims',None)
-            if dim and callable(dim):
+            if dim and hasattr(dim,'__call__'):
                 dim = dim()
             if dim:
                 if s is None: s = dim[0]
@@ -202,7 +202,7 @@ class _AxisG(Widget):
             s = self.gridStart
             e = self.gridEnd
             if s is None or e is None:
-                if dim and callable(dim):
+                if dim and hasattr(dim,'__call__'):
                     dim = dim()
                 if dim:
                     if s is None: s = dim[0]
@@ -225,7 +225,7 @@ class _AxisG(Widget):
         s = self.subGridStart
         e = self.subGridEnd
         if s is None or e is None:
-            if dim and callable(dim):
+            if dim and hasattr(dim,'__call__'):
                 dim = dim()
             if dim:
                 if s is None: s = dim[0]
@@ -1187,7 +1187,7 @@ class ValueAxis(_AxisG):
                             txt = f[i]
                         else:
                             txt = ''
-                    elif callable(f):
+                    elif hasattr(f,'__call__'):
                         if isinstance(f,TickLabeller):
                             txt = f(self,t)
                         else:
@@ -1480,10 +1480,10 @@ class NormalDateXValueAxis(XValueAxis):
                 yyyy += 1
 
             #first and last may still be forced in.
-            if self.forceFirstDate and xVals[0] <> ticks[0]:
+            if self.forceFirstDate and xVals[0] != ticks[0]:
                 ticks.insert(0, firstDate)
                 labels.insert(0,formatter(firstDate))
-            if self.forceEndDate and xVals[-1] <> ticks[-1]:
+            if self.forceEndDate and xVals[-1] != ticks[-1]:
                 ticks.append(lastDate)
                 labels.append(formatter(lastDate))
 

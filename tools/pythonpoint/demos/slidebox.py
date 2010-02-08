@@ -5,7 +5,7 @@ from rlextra.graphics.guiedit.datacharts import ODBCDataSource, CSVDataSource, D
 
 class SlideBoxDrawing(_DrawingEditorMixin,DataAwareDrawing):
     def __init__(self,width=400,height=200,*args,**kw):
-        apply(DataAwareDrawing.__init__,(self,width,height)+args,kw)
+        DataAwareDrawing.__init__(self,width,height,*args,**kw)
         self._add(self,SlideBox(),name='SlideBox',validate=None,desc='The main chart')
         self.height          = 40
         self.width           = 168

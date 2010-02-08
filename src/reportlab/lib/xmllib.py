@@ -267,21 +267,21 @@ class SlowXMLParser:
     # Internal -- parse comment, return length or -1 if not terminated
     def parse_comment(self, i):
         rawdata = self.rawdata
-        if rawdata[i:i+4] <> '<!--':
+        if rawdata[i:i+4] != '<!--':
             raise RuntimeError, 'unexpected call to handle_comment'
         res = commentclose.search(rawdata, i+4)
         if not res:
             return -1
         # doubledash search will succeed because it's a subset of commentclose
         if doubledash.search(rawdata, i+4).start(0) < res.start(0):
-            self.syntax_error(self.lineno, "`--' inside comment")
+            self.syntax_error(self.lineno, "'--' inside comment")
         self.handle_comment(rawdata[i+4: res.start(0)])
         return res.end(0)
 
     # Internal -- handle CDATA tag, return lenth or -1 if not terminated
     def parse_cdata(self, i):
         rawdata = self.rawdata
-        if rawdata[i:i+9] <> '<![CDATA[':
+        if rawdata[i:i+9] != '<![CDATA[':
             raise RuntimeError, 'unexpected call to handle_cdata'
         res = cdataclose.search(rawdata, i+9)
         if not res:
@@ -336,7 +336,7 @@ class SlowXMLParser:
                 self.syntax_error(self.lineno,
                                   'unknown attribute %s of element %s' %
                                   (attrname, tag))
-            if attrdict.has_key(attrname):
+            if attrname in attrdict:
                 self.syntax_error(self.lineno, 'attribute specified twice')
             attrdict[attrname] = self.translate_references(attrvalue)
             k = res.end(0)
@@ -441,7 +441,7 @@ class SlowXMLParser:
     # Example -- handle entity reference, no need to override
     def handle_entityref(self, name):
         table = self.entitydefs
-        if table.has_key(name):
+        if name in table:
             self.handle_data(table[name])
         else:
             self.unknown_entityref(name)
@@ -620,7 +620,7 @@ class FastXMLParser:
     # Example -- handle entity reference, no need to override
     def handle_entityref(self, name):
         table = self.entitydefs
-        if table.has_key(name):
+        if name in table:
             self.handle_data(table[name])
         else:
             self.unknown_entityref(name)
@@ -676,30 +676,30 @@ class TestXMLParser(XMLParser):
 
     def handle_data(self, data):
         self.testdata = self.testdata + data
-        if len(`self.testdata`) >= 70:
+        if len(repr(self.testdata)) >= 70:
             self.flush()
 
     def flush(self):
         data = self.testdata
         if data:
             self.testdata = ""
-            print 'data:', `data`
+            print 'data:', repr(data)
 
     def handle_cdata(self, data):
         self.flush()
-        print 'cdata:', `data`
+        print 'cdata:', repr(data)
 
     def handle_proc(self, name, data):
         self.flush()
-        print 'processing:',name,`data`
+        print 'processing:',name,repr(data)
 
     def handle_special(self, data):
         self.flush()
-        print 'special:',`data`
+        print 'special:',repr(data)
 
     def handle_comment(self, data):
         self.flush()
-        r = `data`
+        r = repr(data)
         if len(r) > 68:
             r = r[:32] + '...' + r[-32:]
         print 'comment:', r

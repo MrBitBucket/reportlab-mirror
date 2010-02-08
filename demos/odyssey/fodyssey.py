@@ -142,7 +142,7 @@ def parseOdyssey(fn):
     t4 = time()
     print "Deleting list of lines took %.4f seconds" %(t4-t3)
     for i in xrange(len(E)):
-        apply(E[i][0],E[i][1:])
+        E[i][0](*E[i][1:])
     t5 = time()
     print "Moving into platypus took %.4f seconds" %(t5-t4)
     del E

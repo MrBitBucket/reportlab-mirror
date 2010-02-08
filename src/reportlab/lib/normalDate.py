@@ -166,7 +166,7 @@ class NormalDate:
 
     def dayOfWeek(self):
         """return integer representing day of week, Mon=0, Tue=1, etc."""
-        return apply(dayOfWeek, self.toTuple())
+        return dayOfWeek(*self.toTuple())
 
     def dayOfWeekAbbrev(self):
         """return day of week abbreviation for current date: Mon, Tue, etc."""
@@ -415,7 +415,7 @@ class NormalDate:
     def __repr__(self):
         """print format: [-]yyyymmdd"""
         # Note: When disassembling a NormalDate string, be sure to
-        # count from the right, i.e. epochMonth = int(`Epoch`[-4:-2]),
+        # count from the right, i.e. epochMonth = int(repr(Epoch)[-4:-2]),
         # or the slice won't work for dates B.C.
         if self.normalDate < 0:
             return "%09d" % self.normalDate
@@ -467,7 +467,7 @@ class NormalDate:
                 if m:
                     self.setNormalDate(m.group(1)+m.group(2)+m.group(3))
                 else:
-                    raise NormalDateException("unable to setNormalDate(%s)" % `normalDate`)
+                    raise NormalDateException("unable to setNormalDate(%r)" % normalDate)
         elif isinstance(normalDate,_DateSeqTypes):
             self.normalDate = int("%04d%02d%02d" % normalDate[:3])
         elif isinstance(normalDate,NormalDate):
@@ -475,7 +475,7 @@ class NormalDate:
         elif isinstance(normalDate,(datetime.datetime,datetime.date)):
             self.normalDate = (normalDate.year*100+normalDate.month)*100+normalDate.day
         if not self._isValidNormalDate(self.normalDate):
-            raise NormalDateException("unable to setNormalDate(%s)" % `normalDate`)
+            raise NormalDateException("unable to setNormalDate(%r)" % normalDate)
 
     def setYear(self, year):
         if year == 0:
@@ -581,7 +581,7 @@ class BusinessDate(NormalDate):
         return self.asNormalDate.daysBetweenDates(normalDate)
 
     def _checkDOW(self):
-        if self.dayOfWeek()>4: raise NormalDateException("%s isn't a business day" % `self.normalDate`)
+        if self.dayOfWeek()>4: raise NormalDateException("%r isn't a business day" % self.normalDate)
 
     def normalize(self, i):
         i = int(i)

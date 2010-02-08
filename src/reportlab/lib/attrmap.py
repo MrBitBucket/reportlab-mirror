@@ -41,7 +41,7 @@ class CallableValue:
         self.kw = kw
 
     def __call__(self):
-        return apply(self.func,self.args,self.kw)
+        return self.func(*self.args,**self.kw)
 
 class AttrMapValue:
     '''Simple multi-value holder for attribute maps'''

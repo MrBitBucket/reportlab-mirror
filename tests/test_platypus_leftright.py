@@ -73,7 +73,7 @@ class MyDocTemplate(BaseDocTemplate):
     _invalidInitArgs = ('pageTemplates',)
 
     def __init__(self, filename, **kw):
-        apply(BaseDocTemplate.__init__, (self, filename), kw)
+        BaseDocTemplate.__init__(self, filename, **kw)
         self.addPageTemplates(
             [
              PageTemplate(id='plain',

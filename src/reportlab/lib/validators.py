@@ -182,7 +182,7 @@ class _isValidChildOrNone(_isValidChild):
 
 class _isCallable(Validator):
     def test(self, x):
-        return callable(x)
+        return hasattr(x,'__call__')
 
 class OneOf(Validator):
     """Make validator functions for list of choices.
@@ -272,7 +272,7 @@ class matchesPattern(Validator):
             text = x
         else:
             text = str(x)
-        return (self._pattern.match(text) <> None)
+        return (self._pattern.match(text) != None)
 
 class DerivedValue:
     """This is used for magic values which work themselves out.

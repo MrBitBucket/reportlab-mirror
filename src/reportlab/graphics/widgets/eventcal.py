@@ -104,7 +104,7 @@ class EventCalendar(Widget):
         used = []
         for talk in talkList:
             (title, speaker, trackId, day, hours, duration) = talk
-            assert trackId <> 0, "trackId must be None or 1,2,3... zero not allowed!"
+            assert trackId != 0, "trackId must be None or 1,2,3... zero not allowed!"
             if day == self.day:
                 if (((self.startTime is None) or ((hours + duration) >= self.startTime))
                 and ((self.endTime is None) or (hours <= self.endTime))):

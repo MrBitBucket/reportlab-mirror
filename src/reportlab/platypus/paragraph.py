@@ -922,7 +922,7 @@ class Paragraph(Flowable):
                 l = max(leading,1.2*style.fontSize)
             elif autoLeading=='min':
                 l = 1.2*style.fontSize
-            s = int(availHeight/l)
+            s = int(availHeight/(l*1.0))
             height = s*l
 
         n = len(lines)

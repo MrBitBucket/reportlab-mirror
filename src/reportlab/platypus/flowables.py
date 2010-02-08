@@ -320,7 +320,7 @@ class Image(Flowable):
         fp = hasattr(filename,'read')
         if fp:
             self._file = filename
-            self.filename = `filename`
+            self.filename = repr(filename)
         else:
             self._file = self.filename = filename
         if not fp and os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
@@ -636,7 +636,7 @@ class ParagraphAndImage(Flowable):
         intermediate_widths = later_widths - xpad - wI
         first_line_width = intermediate_widths - style.firstLineIndent
         P.width = 0
-        nIW = int((hI+ypad)/leading)
+        nIW = int((hI+ypad)/(leading*1.0))
         P.blPara = P.breakLines([first_line_width] + nIW*[intermediate_widths]+[later_widths])
         if self._side=='left':
             self._offsets = [wI+xpad]*(1+nIW)+[0]
@@ -864,8 +864,9 @@ def _hmodel(s0,s1,h0,h1):
     b = b21*h0+b22*h1
     return a,b
 
-def _qsolve(h,(a,b)):
+def _qsolve(h,ab):
     '''solve the model v = a/s**2 + b/s for an s which gives us v==h'''
+    a,b = ab
     if abs(a)<=_FUZZ:
         return b/h
     t = 0.5*b/a

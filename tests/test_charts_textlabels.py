@@ -44,7 +44,7 @@ class MyDocTemplate(BaseDocTemplate):
     def __init__(self, filename, **kw):
         frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
         self.allowSplitting = 0
-        apply(BaseDocTemplate.__init__, (self, filename), kw)
+        BaseDocTemplate.__init__(self, filename, **kw)
         template = PageTemplate('normal', [frame1], myMainPageFrame)
         self.addPageTemplates(template)
 
@@ -90,8 +90,8 @@ class LabelTestCase(unittest.TestCase):
 
             # Create drawing.
             d = Drawing(w, h)
-            d.add(Line(0,h/2, w, h/2, strokeColor=colors.gray, strokeWidth=0.5))
-            d.add(Line(w/2,0, w/2, h, strokeColor=colors.gray, strokeWidth=0.5))
+            d.add(Line(0, h*0.5, w, h*0.5, strokeColor=colors.gray, strokeWidth=0.5))
+            d.add(Line(w*0.5 ,0, w*0.5, h, strokeColor=colors.gray, strokeWidth=0.5))
 
             labels = []
             for boxAnchor in boxAnchors:
@@ -136,7 +136,7 @@ canonical points of a box: sw, se, nw, ne, w, e, n, s or c (standing for
 
         w, h = drawWidth, drawHeight = 400, 100
         protoLabel = self._makeProtoLabel()
-        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.setOrigin(drawWidth*0.5, drawHeight*0.5)
         protoLabel.textAnchor = 'start'
         protoLabel.fontName = 'Helvetica'
         protoLabel.fontSize = 10
@@ -153,7 +153,7 @@ canonical points of a box: sw, se, nw, ne, w, e, n, s or c (standing for
 
         w, h = drawWidth, drawHeight = 400, 100
         protoLabel = self._makeProtoLabel()
-        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.setOrigin(drawWidth*0.5, drawHeight*0.5)
         protoLabel.textAnchor = 'start'
         protoLabel.fontName = 'Helvetica'
         protoLabel.fontSize = 18
@@ -170,7 +170,7 @@ canonical points of a box: sw, se, nw, ne, w, e, n, s or c (standing for
 
         w, h = drawWidth, drawHeight = 400, 100
         protoLabel = self._makeProtoLabel()
-        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.setOrigin(drawWidth*0.5, drawHeight*0.5)
         protoLabel.textAnchor = 'start'
         protoLabel.fontName = 'Helvetica'
         protoLabel.fontSize = 18
@@ -193,7 +193,7 @@ textAnchor attribute.""", bt))
 
         w, h = drawWidth, drawHeight = 400, 100
         protoLabel = self._makeProtoLabel()
-        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.setOrigin(drawWidth*0.5, drawHeight*0.5)
         protoLabel.width = 4*cm
         protoLabel.height = 1.5*cm
         protoLabel.textAnchor = 'start'
@@ -212,7 +212,7 @@ textAnchor attribute.""", bt))
 
         w, h = drawWidth, drawHeight = 400, 100
         protoLabel = self._makeProtoLabel()
-        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.setOrigin(drawWidth*0.5, drawHeight*0.5)
         protoLabel.width = 4*cm
         protoLabel.height = 1.5*cm
         protoLabel.textAnchor = 'middle'
@@ -231,7 +231,7 @@ textAnchor attribute.""", bt))
 
         w, h = drawWidth, drawHeight = 400, 100
         protoLabel = self._makeProtoLabel()
-        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.setOrigin(drawWidth*0.5, drawHeight*0.5)
         protoLabel.width = 4*cm
         protoLabel.height = 1.5*cm
         protoLabel.textAnchor = 'end'
@@ -250,7 +250,7 @@ textAnchor attribute.""", bt))
 
         w, h = drawWidth, drawHeight = 400, 100
         protoLabel = self._makeProtoLabel()
-        protoLabel.setOrigin(drawWidth/2, drawHeight/2)
+        protoLabel.setOrigin(drawWidth*0.5, drawHeight*0.5)
         protoLabel.width = 4*cm
         protoLabel.height = 1.5*cm
         protoLabel.textAnchor = 'start'

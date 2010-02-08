@@ -42,7 +42,7 @@ class MyDocTemplate(BaseDocTemplate):
         frame4 = Frame(11.5*cm, 2.5*cm, 6*cm, 10*cm, id='F4')
         self.allowSplitting = 0
         self.showBoundary = 1
-        apply(BaseDocTemplate.__init__, (self, filename), kw)
+        BaseDocTemplate.__init__(self, filename, **kw)
         template = PageTemplate('normal', [frame1, frame2, frame3, frame4], myMainPageFrame)
         self.addPageTemplates(template)
 

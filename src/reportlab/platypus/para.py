@@ -654,10 +654,10 @@ class paragraphEngine:
                         doswap = 0
                         if (nextindicator=="endLineOperation" and thisindicator!="endLineOperation"
                             and thisindicator!="lineOperation"):
-                            doswap = 1 # swap nonend<>end
+                            doswap = 1 # swap nonend!=end
                     elif tnext==FloatType:
                         if thisindicator=="lineOperation":
-                            doswap = 1 # begin <> space
+                            doswap = 1 # begin != space
                 if doswap:
                     #print "swap", line[index],line[nextindex]
                     result[index] = next
@@ -952,7 +952,7 @@ def readColor(text):
         colClass = colors.Color
     elif len(tup) == 4:
         colClass = colors.CMYKColor
-    return apply(colClass, tup)
+    return colClass(*tup)
 
 class StyleAttributeConverters:
     fontSize=[readLength]
@@ -1197,17 +1197,17 @@ def buildContext(stylesheet=None):
     if stylesheet is not None:
         # Copy styles with the same name as aliases
         for (stylenamekey, stylenamevalue) in DEFAULT_ALIASES.items():
-            if stylesheet.has_key(stylenamekey):
+            if stylenamekey in stylesheet:
                 result[stylenamekey] = stylesheet[stylenamekey]
         # Then make aliases
         for (stylenamekey, stylenamevalue) in DEFAULT_ALIASES.items():
-            if stylesheet.has_key(stylenamevalue):
+            if stylenamevalue in stylesheet:
                 result[stylenamekey] = stylesheet[stylenamevalue]
 
     styles = getSampleStyleSheet()
     # Then, fill in defaults if they were not filled yet.
     for (stylenamekey, stylenamevalue) in DEFAULT_ALIASES.items():
-        if not result.has_key(stylenamekey) and styles.has_key(stylenamevalue):
+        if stylenamekey not in result and stylenamevalue in styles:
             result[stylenamekey] = styles[stylenamevalue]
     return result
 
@@ -1648,7 +1648,7 @@ class Para(Flowable):
     def compile_font(self, attdict, content, extra, program):
         #program = self.program
         program.append( ("push",) ) # store current data
-        if attdict.has_key("face"):
+        if "face" in attdict:
             face = attdict["face"]
             from reportlab.lib.fonts import tt2ps
             try:
@@ -1656,10 +1656,10 @@ class Para(Flowable):
             except:
                 font = face # better work!
             program.append( ("face", font ) )
-        if attdict.has_key("color"):
+        if "color" in attdict:
             colorname = attdict["color"]
             program.append( ("color", colorname) )
-        if attdict.has_key("size"):
+        if "size" in attdict:
             #size = float(attdict["size"]) # really should convert int, cm etc here!
             size = attdict["size"]
             program.append( ("size", size) )
@@ -1791,7 +1791,7 @@ class bulletMaker:
         #print tagname, "bulletmaker type is", typ
         self.typ =typ = atts.get("type", typ)
         #print tagname, "bulletmaker type is", typ
-        if not atts.has_key("leftIndent"):
+        if "leftIndent" not in atts:
             # get the style so you can choose an indent length
             thestyle = context[style]
             from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -1816,7 +1816,7 @@ class bulletMaker:
                 elif typ=="square": bl = chr(110)
                 else:
                     raise ValueError, "unordered list type %s not implemented" % repr(typ)
-                if not atts.has_key("bulletFontName"):
+                if "bulletFontName" not in atts:
                     atts["bulletFontName"] = "ZapfDingbats"
             elif tagname=="ol":
                 if 'value' in atts:
@@ -1834,9 +1834,9 @@ class bulletMaker:
                     raise ValueError, "ordered bullet type %s not implemented" % repr(typ)
             else:
                 raise ValueError, "bad tagname "+repr(tagname)
-        if not atts.has_key("bulletText"):
+        if "bulletText" not in atts:
             atts["bulletText"] = bl
-        if not atts.has_key("style"):
+        if "style" not in atts:
             atts["style"] = self.style
 
 class EvalStringObject:
@@ -1882,11 +1882,11 @@ class SeqObject(EvalStringObject):
         attr = self.attdict
         #if it has a template, use that; otherwise try for id;
         #otherwise take default sequence
-        if attr.has_key('template'):
+        if 'template' in attr:
             templ = attr['template']
             op = self.op = templ % globalsequencer
             return op
-        elif attr.has_key('id'):
+        elif 'id' in attr:
             id = attr['id']
         else:
             id = None
@@ -2035,12 +2035,12 @@ def handleSpecialCharacters(engine, text, program=None):
                         fragment = unichr(n).encode('utf8')+fragment[semi+1:]
                     else:
                         fragment = "&"+fragment
-                elif standard.has_key(name):
+                elif name in standard:
                     s = standard[name]
                     if isinstance(fragment,unicode):
                         s = s.decode('utf8')
                     fragment = s+fragment[semi+1:]
-                elif greeks.has_key(name):
+                elif name in greeks:
                     s = greeks[name]
                     if isinstance(fragment,unicode):
                         s = s.decode('utf8')

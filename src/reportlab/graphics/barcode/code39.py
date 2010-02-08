@@ -232,7 +232,7 @@ class Extended39(_Code39Base):
     def encode(self):
         self.encoded = ""
         for c in self.validated:
-            if _extended.has_key(c):
+            if c in _extended:
                 self.encoded = self.encoded + _extended[c]
             elif c in _stdchrs:
                 self.encoded = self.encoded + c

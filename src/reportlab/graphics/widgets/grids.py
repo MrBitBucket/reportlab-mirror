@@ -440,9 +440,11 @@ def rotatedEnclosingRect(P, angle, rect):
     x0, y0 = centroid(P)
     theta = (angle/180.)*pi
     s,c=sin(theta),cos(theta)
-    def parallelAxisDist((x,y),s=s,c=c,x0=x0,y0=y0):
+    def parallelAxisDist(xy,s=s,c=c,x0=x0,y0=y0):
+        x,y = xy
         return (s*(y-y0)+c*(x-x0))
-    def orthogonalAxisDist((x,y),s=s,c=c,x0=x0,y0=y0):
+    def orthogonalAxisDist(xy,s=s,c=c,x0=x0,y0=y0):
+        x,y = xy
         return (c*(y-y0)+s*(x-x0))
     L = map(parallelAxisDist,P)
     L.sort()

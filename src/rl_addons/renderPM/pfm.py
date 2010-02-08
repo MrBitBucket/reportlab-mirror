@@ -60,7 +60,7 @@ class _BUILDER:
 				X.append(S)
 				i = 0
 				S = []
-		return map(lambda x,T=T: apply(T,x),X)
+		return map(lambda x,T=T: T(*x),X)
 
 class KernPair:
 	'''hold info about a possible kerning pair'''

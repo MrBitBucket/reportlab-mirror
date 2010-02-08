@@ -7,7 +7,7 @@ from excelcolors import *
 
 class Bubble(_DrawingEditorMixin,Drawing):
     def __init__(self,width=200,height=150,*args,**kw):
-        apply(Drawing.__init__,(self,width,height)+args,kw)
+        Drawing.__init__(self,width,height,*args,**kw)
         self._add(self,ScatterPlot(),name='chart',validate=None,desc="The main chart")
         self.chart.width      = 115
         self.chart.height     = 80

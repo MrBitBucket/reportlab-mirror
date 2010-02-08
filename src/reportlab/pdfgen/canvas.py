@@ -58,9 +58,9 @@ _instanceEscapePDF = pdfutils._instanceEscapePDF
 
 def _annFormat(D,color,thickness,dashArray,hradius=0,vradius=0):
     from reportlab.pdfbase.pdfdoc import PDFArray, PDFDictionary
-    if color and not D.has_key('C'):
+    if color and 'C' not in D:
         D["C"] = PDFArray([color.red, color.green, color.blue])
-    if not D.has_key('Border'):
+    if 'Border' not in D:
         border = [hradius,vradius,thickness or 0]
         if dashArray:
             border.append(PDFArray(dashArray))

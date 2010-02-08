@@ -70,7 +70,7 @@ Recently added features are:
 - save in combined presentation/handout mode (TODO)
 - add pyRXP support (TODO)
 """
-__version__='''$Id:$'''
+__version__='''$Id$'''
 import os, sys, imp, string, pprint, getopt, glob
 
 from reportlab import rl_config
@@ -489,7 +489,7 @@ class PPSection:
             continue
             name = str(hash(graphic))
             #internalname = canv._doc.hasForm(name)
-            if definedForms.has_key(name):
+            if name in definedForms:
                 internalname = 1
             else:
                 internalname = None
@@ -747,8 +747,8 @@ class PPRectangle:
             r,g,b = checkColor(self.strokeColor)
             canv.setStrokeColorRGB(r,g,b)
         canv.rect(self.x, self.y, self.width, self.height,
-                    stroke=(self.strokeColor<>None),
-                    fill = (self.fillColor<>None)
+                    stroke=(self.strokeColor!=None),
+                    fill = (self.fillColor!=None)
                     )
         canv.restoreState()
 
@@ -775,8 +775,8 @@ class PPRoundRect:
             canv.setStrokeColorRGB(r,g,b)
         canv.roundRect(self.x, self.y, self.width, self.height,
                     self.radius,
-                    stroke=(self.strokeColor<>None),
-                    fill = (self.fillColor<>None)
+                    stroke=(self.strokeColor!=None),
+                    fill = (self.fillColor!=None)
                     )
         canv.restoreState()
 
@@ -821,8 +821,8 @@ class PPEllipse:
             r,g,b = checkColor(self.fillColor)
             canv.setFillColorRGB(r,g,b)
         canv.ellipse(self.x1, self.y1, self.x2, self.y2,
-                    stroke=(self.strokeColor<>None),
-                    fill = (self.fillColor<>None)
+                    stroke=(self.strokeColor!=None),
+                    fill = (self.fillColor!=None)
                      )
         canv.restoreState()
 
@@ -851,8 +851,8 @@ class PPPolygon:
             path.lineTo(x,y)
         path.close()
         canv.drawPath(path,
-                      stroke=(self.strokeColor<>None),
-                      fill=(self.fillColor<>None))
+                      stroke=(self.strokeColor!=None),
+                      fill=(self.fillColor!=None))
         canv.restoreState()
 
 

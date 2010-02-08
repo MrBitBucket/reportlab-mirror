@@ -563,7 +563,7 @@ class MyDocTemplate(BaseDocTemplate):
 
     def __init__(self, filename, **kw):
         self.allowSplitting = 0
-        apply(BaseDocTemplate.__init__, (self, filename), kw)
+        BaseDocTemplate.__init__(self, filename, **kw)
         template = PageTemplate('normal', [Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')])
         self.addPageTemplates(template)
 

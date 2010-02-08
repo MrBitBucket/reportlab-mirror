@@ -102,12 +102,12 @@ class LegendCallout:
         L = find_locals(lambda L: L.get('self',None) is legend and L or None)
         return tuple([getattr(self,a,L[a]) for a in args])
 
-    def __call__(self,legend,g,thisx,y,(col,name)):
-        pass
+    def __call__(self,legend,g,thisx,y,colName):
+        col, name = colName
 
 class LegendSwatchCallout(LegendCallout):
-    def __call__(self,legend,g,thisx,y,i,(col,name),swatch):
-        pass
+    def __call__(self,legend,g,thisx,y,i,colName,swatch):
+        col, name = colName
 
 class LegendColEndCallout(LegendCallout):
     def __call__(self,legend, g, x, xt, y, width, lWidth):
@@ -321,7 +321,7 @@ class Legend(Widget):
             deltay = max(dy,leading)+self.autoYPadding
         ba = self.boxAnchor
         maxWidth = self._calculateMaxBoundaries(colorNamePairs)
-        nCols = int((n+columnMaximum-1)/columnMaximum)
+        nCols = int((n+columnMaximum-1)/(columnMaximum*1.0))
         xW = dx+dxTextSpace+self.autoXPadding
         variColumn = self.variColumn
         if variColumn:
@@ -378,7 +378,7 @@ class Legend(Widget):
             T = _getLines(name)
             S = []
             aS = S.append
-            j = int(i/columnMaximum)
+            j = int(i/(columnMaximum*1.0))
             jOffs = maxWidth[j]
 
             # thisy+dy/2 = y+leading/2

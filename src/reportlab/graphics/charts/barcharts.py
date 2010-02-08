@@ -315,7 +315,7 @@ class BarChart(PlotArea):
             labelText = self.barLabelArray[rowNo][colNo]
         elif type(labelFmt) is str:
             labelText = labelFmt % self.data[rowNo][colNo]
-        elif callable(labelFmt):
+        elif hasattr(labelFmt):
             labelText = labelFmt(self.data[rowNo][colNo])
         else:
             msg = "Unknown formatter type %s, expected string or function" % labelFmt
@@ -433,7 +433,7 @@ class BarChart(PlotArea):
             rowStyle = bars[styleIdx]
             for colNo in range(len(row)):
                 barPos = row[colNo]
-                style = bars.has_key((styleIdx,colNo)) and bars[(styleIdx,colNo)] or rowStyle
+                style = (styleIdx,colNo) in bars and bars[(styleIdx,colNo)] or rowStyle
                 (x, y, width, height) = barPos
                 if None in (width,height):
                     self._addNABarLabel(lg,rowNo,colNo,x,y,width,height)
@@ -1953,7 +1953,7 @@ class SampleH5c4(Drawing):
     "Simple bar chart with absolute spacing."
 
     def __init__(self,width=400,height=200,*args,**kw):
-        apply(Drawing.__init__,(self,width,height)+args,kw)
+        Drawing.__init__(self,width,height,*args,**kw)
         bc = HorizontalBarChart()
         bc.x = 50
         bc.y = 50

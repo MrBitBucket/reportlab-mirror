@@ -277,7 +277,7 @@ class Table(Flowable):
             for i in xrange(nrows):
                 cellcols = []
                 for j in xrange(ncols):
-                    cellcols.append(CellStyle(`(i,j)`))
+                    cellcols.append(CellStyle(repr((i,j))))
                 cellrows.append(cellcols)
             self._cellStyles = cellrows
         else:
@@ -1015,23 +1015,27 @@ class Table(Flowable):
         self.canv.restoreState()
         self._curcolor = None
 
-    def _drawUnknown(self,  (sc, sr), (ec, er), weight, color, count, space):
+    def _drawUnknown(self,  start, end, weight, color, count, space):
         #we are only called from _drawLines which is one level up
         import sys
         op = sys._getframe(1).f_locals['op']
         raise ValueError("Unknown line command '%s'" % op)
 
-    def _drawGrid(self, (sc, sr), (ec, er), weight, color, count, space):
-        self._drawBox( (sc, sr), (ec, er), weight, color, count, space)
-        self._drawInnerGrid( (sc, sr), (ec, er), weight, color, count, space)
+    def _drawGrid(self, start, end, weight, color, count, space):
+        self._drawBox( start, end, weight, color, count, space)
+        self._drawInnerGrid( start, end, weight, color, count, space)
 
-    def _drawBox(self,  (sc, sr), (ec, er), weight, color, count, space):
+    def _drawBox(self,  start, end, weight, color, count, space):
+        sc,sr = start
+        ec,er = end
         self._drawHLines((sc, sr), (ec, sr), weight, color, count, space)
         self._drawHLines((sc, er+1), (ec, er+1), weight, color, count, space)
         self._drawVLines((sc, sr), (sc, er), weight, color, count, space)
         self._drawVLines((ec+1, sr), (ec+1, er), weight, color, count, space)
 
-    def _drawInnerGrid(self, (sc, sr), (ec, er), weight, color, count, space):
+    def _drawInnerGrid(self, start, end, weight, color, count, space):
+        sc,sr = start
+        ec,er = end
         self._drawHLines((sc, sr+1), (ec, er), weight, color, count, space)
         self._drawVLines((sc+1, sr), (ec, er), weight, color, count, space)
 
@@ -1043,7 +1047,9 @@ class Table(Flowable):
             self.canv.setLineWidth(weight)
             self._curweight = weight
 
-    def _drawHLines(self, (sc, sr), (ec, er), weight, color, count, space):
+    def _drawHLines(self, start, end, weight, color, count, space):
+        sc,sr = start
+        ec,er = end
         ecp = self._colpositions[sc:ec+2]
         rp = self._rowpositions[sr:er+1]
         if len(ecp)<=1 or len(rp)<1: return
@@ -1060,10 +1066,14 @@ class Table(Flowable):
             for y in rp:
                 _hLine(lf, scp, ecp, y, hBlocks)
 
-    def _drawHLinesB(self, (sc, sr), (ec, er), weight, color, count, space):
+    def _drawHLinesB(self, start, end, weight, color, count, space):
+        sc,sr = start
+        ec,er = end
         self._drawHLines((sc, sr+1), (ec, er+1), weight, color, count, space)
 
-    def _drawVLines(self, (sc, sr), (ec, er), weight, color, count, space):
+    def _drawVLines(self, start, end, weight, color, count, space):
+        sc,sr = start
+        ec,er = end
         erp = self._rowpositions[sr:er+2]
         cp  = self._colpositions[sc:ec+1]
         if len(erp)<=1 or len(cp)<1: return
@@ -1080,7 +1090,9 @@ class Table(Flowable):
             for x in cp:
                 _hLine(lf, erp, srp, x, vBlocks)
 
-    def _drawVLinesA(self, (sc, sr), (ec, er), weight, color, count, space):
+    def _drawVLinesA(self, start, end, weight, color, count, space):
+        sc,sr = start
+        ec,er = end
         self._drawVLines((sc+1, sr), (ec+1, er), weight, color, count, space)
 
     def wrap(self, availWidth, availHeight):
@@ -1252,7 +1264,7 @@ class Table(Flowable):
         for rh in self._rowHeights:
             if h+rh>availHeight:
                 break
-            if not impossible.has_key(n):
+            if n not in impossible:
                 split_at=n
             h=h+rh
             n=n+1
@@ -1306,7 +1318,7 @@ class Table(Flowable):
             x1 = colpositions[min(ec+1,ncols)]
             y1 = rowpositions[min(er+1,nrows)]
             w, h = x1-x0, y1-y0
-            if callable(arg):
+            if hasattr(arg,'__call__'):
                 arg(self,canv, x0, y0, w, h)
             elif cmd == 'ROWBACKGROUNDS':
                 #Need a list of colors to cycle through.  The arguments
@@ -1346,7 +1358,9 @@ class Table(Flowable):
                     canv.setFillColor(color)
                     canv.rect(x0, y0, w, h, stroke=0,fill=1)
 
-    def _drawCell(self, cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight)):
+    def _drawCell(self, cellval, cellstyle, pos, size):
+        colpos, rowpos = pos
+        colwidth, rowheight = size
         if self._curcellstyle is not cellstyle:
             cur = self._curcellstyle
             if cur is None or cellstyle.color != cur.color:

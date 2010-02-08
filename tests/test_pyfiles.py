@@ -18,9 +18,9 @@ def unique(seq):
         return seq
 
     # Make a sorted copy of the input sequence.
+    cnvt = isinstance(seq,basestring)
     seq2 = seq[:]
-    if type(seq2) == type(''):
-        seq2 = map(None, seq2)
+    if cnvt: seq2 = list(seq2)
     seq2.sort()
 
     # Remove adjacent elements if they are identical.
@@ -32,11 +32,11 @@ def unique(seq):
                 del seq2[i+1]
         except IndexError:
             pass
-        i = i + 1
+        i += 1
 
     # Try to return something of the same type as the input.
-    if type(seq) == type(''):
-        return string.join(seq2, '')
+    if cnvt:
+        return seq[0:0].join(seq2)
     else:
         return seq2
 

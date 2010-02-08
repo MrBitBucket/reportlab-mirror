@@ -838,7 +838,7 @@ class LegendedPie(Pie):
                     pass
                 elif type(lNF) is StringType:
                     ldf = lNF % ldf
-                elif callable(lNF):
+                elif hasattr(lNF,'__call__'):
                     ldf = lNF(ldf)
                 else:
                     p = self.legend_names[f]
@@ -849,7 +849,7 @@ class LegendedPie(Pie):
                         pass
                     elif type(lNF) is StringType:
                         ldf = lNF % ldf
-                    elif callable(lNF):
+                    elif hasattr(lNF,'__call__'):
                         ldf = lNF(ldf)
                     else:
                         msg = "Unknown formatter type %s, expected string or function" % self.legendNumberFormat

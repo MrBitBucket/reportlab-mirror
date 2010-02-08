@@ -71,7 +71,7 @@ def getModuleObjects(folder, rootName, typ, pattern='*.py'):
                 obj = eval(mName + '.' + n)
                 # Handle functions and classes.
                 if typ in (FunctionType, ClassType):
-                    if type(obj) == typ and not lookup.has_key(obj):
+                    if type(obj) == typ and obj not in lookup:
                         if typ == ClassType:
                             if find(obj.__module__, rootName) != 0:
                                 continue
@@ -82,7 +82,7 @@ def getModuleObjects(folder, rootName, typ, pattern='*.py'):
                     if type(obj) == ClassType:
                         for m in dir(obj):
                             a = getattr(obj, m)
-                            if type(a) == typ and not lookup.has_key(a):
+                            if type(a) == typ and a not in lookup:
                                 if find(a.im_class.__module__, rootName) != 0:
                                     continue
                                 cName = obj.__name__

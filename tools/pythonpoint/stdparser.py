@@ -214,20 +214,20 @@ class PPMLParser(xmllib.XMLParser):
 
     def _arg(self,tag,args,name):
         "What's this for???"
-        if args.has_key(name):
+        if name in args:
             v = args[name]
         else:
-            if self.attributes.has_key(tag):
+            if tag in self.attributes:
                 v = self.attributes[tag][name]
             else:
                 v = None
         return v
 
     def ceval(self,tag,args,name):
-        if args.has_key(name):
+        if name in args:
             v = args[name]
         else:
-            if self.attributes.has_key(tag):
+            if tag in self.attributes:
                 v = self.attributes[tag][name]
             else:
                 return None
@@ -256,12 +256,12 @@ class PPMLParser(xmllib.XMLParser):
             self._curString.text = self._curString.text + data
         elif self._curTable:
             self._curTable.rawBlocks.append(data)
-        elif self._curTitle <> None:  # need to allow empty strings,
+        elif self._curTitle != None:  # need to allow empty strings,
             # hence explicitly testing for None
             self._curTitle = self._curTitle + data
-        elif self._curAuthor <> None:
+        elif self._curAuthor != None:
             self._curAuthor = self._curAuthor + data
-        elif self._curSubject <> None:
+        elif self._curSubject != None:
             self._curSubject = self._curSubject + data
 
     def handle_cdata(self, data):
@@ -276,9 +276,9 @@ class PPMLParser(xmllib.XMLParser):
             self._curString.text = self._curString.text + data
         elif self._curTable:
             self._curTable.rawBlocks.append(data)
-        elif self._curAuthor <> None:
+        elif self._curAuthor != None:
             self._curAuthor = self._curAuthor + data
-        elif self._curSubject <> None:
+        elif self._curSubject != None:
             self._curSubject = self._curSubject + data
 
     def start_presentation(self, args):
@@ -359,7 +359,7 @@ class PPMLParser(xmllib.XMLParser):
         s.id = self._arg('slide',args,'id')
         s.title = self._arg('slide',args,'title')
         a = self._arg('slide',args,'effectname')
-        if a <> 'None':
+        if a != 'None':
             s.effectName = a
         s.effectDirection = self.ceval('slide',args,'effectdirection')
         s.effectDimension = self._arg('slide',args,'effectdimension')
@@ -372,7 +372,7 @@ class PPMLParser(xmllib.XMLParser):
         a = self._arg('slide',args,'outlineentry')
         if a == "Hide":
             s.outlineEntry = None
-        elif a <> 'None':
+        elif a != 'None':
             s.outlineEntry = a
         else:
             s.outlineEntry = s.title
@@ -422,7 +422,7 @@ class PPMLParser(xmllib.XMLParser):
     def pack_slide(self, element, args):
         if self.fx:
             effectName = self._arg(element,args,'effectname')
-            if effectName <> 'None':
+            if effectName != 'None':
                 curSlide = copy.deepcopy(self._curSlide)
                 if self._curFrame:
                     curFrame = copy.deepcopy(self._curFrame)
@@ -504,11 +504,11 @@ class PPMLParser(xmllib.XMLParser):
         self._curTable.heights = self.ceval('table',args,'heights')
         #these may contain escapes like tabs - handle with
         #a bit more care.
-        if args.has_key('fieldDelim'):
+        if 'fieldDelim' in args:
             self._curTable.fieldDelim = eval('"' + args['fieldDelim'] + '"')
-        if args.has_key('rowDelim'):
+        if 'rowDelim' in args:
             self._curTable.rowDelim = eval('"' + args['rowDelim'] + '"')
-        if args.has_key('style'):
+        if 'style' in args:
             self._curTable.style = args['style']
 
 
@@ -712,7 +712,7 @@ class PPMLParser(xmllib.XMLParser):
 
         func = getattr(mod, funcname)
         initargs = self.ceval('customshape',args,'initargs')
-        self._curCustomShape = apply(func, initargs)
+        self._curCustomShape = func(*initargs)
 
     def end_customshape(self):
         if self._curSlide:

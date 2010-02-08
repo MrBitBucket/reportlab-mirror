@@ -533,7 +533,7 @@ class TTFontFile(TTFontParser):
 
         # OS/2 - OS/2 and Windows metrics table
         # (needs data from head table)
-        if self.table.has_key("OS/2"):
+        if "OS/2" in self.table:
             self.seek_table("OS/2")
             version = self.read_ushort()
             self.skip(2)
@@ -646,7 +646,7 @@ class TTFontFile(TTFontParser):
         length = self.read_ushort()
         limit = unicode_cmap_offset + length
         self.skip(2)
-        segCount = self.read_ushort() / 2
+        segCount = int(self.read_ushort() / 2.0)
         self.skip(6)
         endCount = map(lambda x, self=self: self.read_ushort(), xrange(segCount))
         self.skip(2)
@@ -673,7 +673,7 @@ class TTFontFile(TTFontParser):
                         if glyph != 0:
                             glyph = (glyph + idDelta[n]) & 0xFFFF
                 charToGlyph[unichar] = glyph
-                if glyphToChar.has_key(glyph):
+                if glyph in glyphToChar:
                     glyphToChar[glyph].append(unichar)
                 else:
                     glyphToChar[glyph] = [unichar]
@@ -693,7 +693,7 @@ class TTFontFile(TTFontParser):
             aw = scale(aw)
             if glyph == 0:
                 self.defaultWidth = aw
-            if glyphToChar.has_key(glyph):
+            if glyph in glyphToChar:
                 for char in glyphToChar[glyph]:
                     self.charWidths[char] = aw
         for glyph in xrange(numberOfHMetrics, numGlyphs):
@@ -701,7 +701,7 @@ class TTFontFile(TTFontParser):
             # so we reuse aw set by the last iteration of the previous loop
             lsb = self.read_ushort()
             self.hmetrics.append((aw, lsb))
-            if glyphToChar.has_key(glyph):
+            if glyph in glyphToChar:
                 for char in glyphToChar[glyph]:
                     self.charWidths[char] = aw
 
@@ -732,11 +732,11 @@ class TTFontFile(TTFontParser):
         glyphSet = {0:0}                # old glyph index -> new glyph index
         codeToGlyph = {}                # unicode -> new glyph index
         for code in subset:
-            if self.charToGlyph.has_key(code):
+            if code in self.charToGlyph:
                 originalGlyphIdx = self.charToGlyph[code]
             else:
                 originalGlyphIdx = 0
-            if not glyphSet.has_key(originalGlyphIdx):
+            if originalGlyphIdx not in glyphSet:
                 glyphSet[originalGlyphIdx] = len(glyphMap)
                 glyphMap.append(originalGlyphIdx)
             codeToGlyph[code] = glyphSet[originalGlyphIdx]
@@ -759,7 +759,7 @@ class TTFontFile(TTFontParser):
                 while flags & GF_MORE_COMPONENTS:
                     flags = self.read_ushort()
                     glyphIdx = self.read_ushort()
-                    if not glyphSet.has_key(glyphIdx):
+                    if glyphIdx not in glyphSet:
                         glyphSet[glyphIdx] = len(glyphMap)
                         glyphMap.append(glyphIdx)
                     if flags & GF_ARG_1_AND_2_ARE_WORDS:
@@ -812,7 +812,7 @@ class TTFontFile(TTFontParser):
                 0,
                 entryCount] + \
                map(codeToGlyph.get, subset)
-        cmap = apply(pack, [">%dH" % len(cmap)] + cmap)
+        cmap = pack(*([">%dH" % len(cmap)] + cmap))
         output.add('cmap', cmap)
 
         # hmtx - Horizontal Metrics
@@ -823,7 +823,7 @@ class TTFontFile(TTFontParser):
             if n < numberOfHMetrics:
                 hmtx.append(int(aw))
             hmtx.append(int(lsb))
-        hmtx = apply(pack, [">%dH" % len(hmtx)] + hmtx)
+        hmtx = pack(*([">%dH" % len(hmtx)] + hmtx))
         output.add('hmtx', hmtx)
 
         # glyf - Glyph data
@@ -872,12 +872,12 @@ class TTFontFile(TTFontParser):
             indexToLocFormat = 1        # long format
             for offset in offsets:
                 loca.append(offset)
-            loca = apply(pack, [">%dL" % len(loca)] + loca)
+            loca = pack(*([">%dL" % len(loca)] + loca))
         else:
             indexToLocFormat = 0        # short format
             for offset in offsets:
                 loca.append(offset >> 1)
-            loca = apply(pack, [">%dH" % len(loca)] + loca)
+            loca = pack(*([">%dH" % len(loca)] + loca))
         output.add('loca', loca)
 
         # head - Font header
@@ -1046,7 +1046,7 @@ class TTFont:
         assignments = state.assignments
         subsets = state.subsets
         for code in map(ord,text):
-            if assignments.has_key(code):
+            if code in assignments:
                 n = assignments[code]
             else:
                 if state.frozen:
@@ -1083,7 +1083,7 @@ class TTFont:
         if subset < 0 or subset >= len(state.subsets):
             raise IndexError, 'Subset %d does not exist in font %s' % (subset, self.fontName)
         if state.internalName is None:
-            state.internalName = state.namePrefix +`(len(doc.fontMapping) + 1)`
+            state.internalName = state.namePrefix +repr(len(doc.fontMapping) + 1)
             doc.fontMapping[self.fontName] = '/' + state.internalName
             doc.delayedFonts.append(self)
         return '/%s+%d' % (state.internalName, subset)

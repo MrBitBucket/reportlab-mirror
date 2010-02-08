@@ -80,7 +80,7 @@ class CIDict(_UserDict):
         except KeyError:
             return dv
 
-    def has_key(self,k):
+    def __contains__(self,k):
         try:
             self[k]
             return True
@@ -293,7 +293,7 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
         sys.path = opath
         msg = "recursiveimport(%s,baseDir=%s) failed" % (modulename,baseDir)
         if baseDir:
-            msg = msg + " under paths '%s'" % `path`
+            msg = msg + " under paths '%s'" % repr(path)
         raise ImportError, msg
 
 def recursiveGetAttr(obj, name):
@@ -492,7 +492,7 @@ def rl_getmtime(pn,os_path_isfile=os.path.isfile,os_path_normpath=os.path.normpa
     return time_mktime((y,m,d,h,m,s,0,0,0))
 
 def rl_get_module(name,dir):
-    if sys.modules.has_key(name):
+    if name in sys.modules:
         om = sys.modules[name]
         del sys.modules[name]
     else:
@@ -659,7 +659,7 @@ class ImageReader(object):
         if sys.platform[0:4] == 'java':
             return None
         else:
-            if self._image.info.has_key("transparency"):
+            if "transparency" in self._image.info:
                 transparency = self._image.info["transparency"] * 3
                 palette = self._image.palette
                 try:

@@ -40,7 +40,7 @@ def run():
         nonStandardWidthsByUnichar = {}
         for (codePoint, cid) in cmap.items():
             width = widthsByCID.get(cid, 1000)
-            if width <> 1000:
+            if width != 1000:
                 nonStandardWidthsByUnichar[unichr(codePoint)] = width
         
 

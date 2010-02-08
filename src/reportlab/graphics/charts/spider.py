@@ -207,7 +207,7 @@ class SpiderChart(PlotArea):
                 text = sty._text
             else:
                 text = fmt % value
-        elif callable(fmt):
+        elif hasattr(fmt,'__call__'):
             text = fmt(value)
         else:
             raise ValueError("Unknown formatter type %s, expected string or function" % fmt)

@@ -190,7 +190,7 @@ def unHexText(hexText):
     assert hexText[-1] == '>', 'bad hex text'
     hexText = hexText[1:-1]
     out = ''
-    for i in range(len(hexText)/2):
+    for i in range(int(len(hexText)/2.0)):
         slice = hexText[i*2: i*2+2]
         char = chr(eval('0x'+slice))
         out = out + char

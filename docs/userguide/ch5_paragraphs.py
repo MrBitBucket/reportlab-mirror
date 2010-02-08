@@ -190,7 +190,7 @@ def getAttrs(A):
     S={}
     for k, v in A.items():
         a = v[0]
-        if not S.has_key(a):
+        if a not in S:
             S[a] = k
         else:
             S[a] = "%s, %s" %(S[a],k)
@@ -204,7 +204,7 @@ def getAttrs(A):
     rows=len(D)*[None]
     return D,cols,rows
 
-t=apply(Table,getAttrs(_paraAttrMap))
+t=Table(*getAttrs(_paraAttrMap))
 t.setStyle(TableStyle([
             ('FONT',(0,0),(-1,1),'Times-Bold',10,12),
             ('FONT',(0,1),(-1,-1),'Courier',8,8),
@@ -356,7 +356,7 @@ list.   Fonts may offer various bullet
 characters but we suggest first trying the Unicode bullet ($&bull;$), which may
 be written as $&amp;bull;$,  $&amp;#x2022;$ or (in utf8) $\\xe2\\x80\\xa2$):""")
 
-t=apply(Table,getAttrs(_bulletAttrMap))
+t=Table(*getAttrs(_bulletAttrMap))
 t.setStyle([
             ('FONT',(0,0),(-1,1),'Times-Bold',10,12),
             ('FONT',(0,1),(-1,-1),'Courier',8,8),

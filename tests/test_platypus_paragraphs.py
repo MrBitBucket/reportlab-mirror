@@ -47,7 +47,7 @@ class MyDocTemplate(BaseDocTemplate):
         frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
         frame2 = Frame(2.5*cm, 2.5*cm, 310, 25*cm, id='F2')
         self.allowSplitting = 0
-        apply(BaseDocTemplate.__init__, (self, filename), kw)
+        BaseDocTemplate.__init__(self, filename, **kw)
         template = PageTemplate('normal', [frame1], myMainPageFrame)
         template1 = PageTemplate('special', [frame2], myMainPageFrame)
         self.addPageTemplates([template,template1])
@@ -274,7 +274,7 @@ class TwoFrameDocTemplate(BaseDocTemplate):
             leftPadding=0, topPadding=0, rightPadding=0, bottomPadding=0,
             showBoundary=True
         )
-        apply(BaseDocTemplate.__init__, (self, filename), kw)
+        BaseDocTemplate.__init__(self, filename, **kw)
         template = PageTemplate('template', [f1, f2])
         self.addPageTemplates(template)
 

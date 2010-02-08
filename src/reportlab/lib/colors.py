@@ -208,8 +208,9 @@ class PCMYKColorSep(PCMYKColor,CMYKColorSep):
         PCMYKColor.__init__(self,cyan,magenta,yellow,black,density,spotName,knockout=None,alpha=alpha)
     _cKwds='cyan magenta yellow black density spotName alpha'.split()
 
-def cmyk2rgb((c,m,y,k),density=1):
+def cmyk2rgb(cmyk,density=1):
     "Convert from a CMYK color tuple to an RGB color tuple"
+    c,m,y,k = cmyk
     # From the Adobe Postscript Ref. Manual 2nd ed.
     r = 1.0 - min(1.0, c + k)
     g = 1.0 - min(1.0, m + k)
@@ -729,7 +730,7 @@ def toColor(arg,default=None):
         if C: return C
         C = getAllNamedColors()
         s = arg.lower()
-        if C.has_key(s): return C[s]
+        if s in C: return C[s]
         try:
             return toColor(eval(arg))
         except:

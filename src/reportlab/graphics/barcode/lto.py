@@ -108,7 +108,7 @@ class VerticalLTOLabel(BaseLTOLabel) :
 
         colored : boolean to determine if blocks have to be colorized.
         """
-        if kwargs.has_key("colored") :
+        if "colored" in kwargs:
             self.colored = kwargs["colored"]
             del kwargs["colored"]
         else :

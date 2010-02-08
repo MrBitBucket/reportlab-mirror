@@ -38,7 +38,7 @@ def getStateDelta(shape):
     the given shape would have on the graphics state"""
     delta = {}
     for (prop, value) in shape.getProperties().items():
-        if STATE_DEFAULTS.has_key(prop):
+        if prop in STATE_DEFAULTS:
             delta[prop] = value
     return delta
 
@@ -62,7 +62,7 @@ class StateTracker:
         if defaults is None:
             defaults = STATE_DEFAULTS.copy()
         #ensure  that if we have a transform, we have a CTM
-        if defaults.has_key('transform'):
+        if 'transform' in defaults:
             defaults['ctm'] = defaults['transform']
         self._combined.append(defaults)
 
@@ -100,7 +100,7 @@ class StateTracker:
         for key, curValue in lastDelta.items():
             #print '   key=%s, value=%s' % (key, curValue)
             prevValue = newState[key]
-            if prevValue <> curValue:
+            if prevValue != curValue:
                 #print '    state popping "%s"="%s"' % (key, curValue)
                 if key == 'transform':
                     reverseDelta[key] = inverse(lastDelta['transform'])

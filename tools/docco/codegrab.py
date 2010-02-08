@@ -38,7 +38,7 @@ def getObjectsDefinedIn(modulename, directory=None):
         #now the full path should be known, if it is in the
         #package
 
-        directory = apply(os.path.join, tuple([packagepath] + words[1:-1]))
+        directory = os.path.join(*([packagepath] + words[1:-1]))
         modulename = words[-1]
         searchpath = [directory]
 
@@ -109,7 +109,7 @@ def getObjectsDefinedIn(modulename, directory=None):
                 items = value.__dict__.items()
                 items.sort()
                 for (key2, value2) in items:
-                    if type(value2) <> types.FunctionType:
+                    if type(value2) != types.FunctionType:
                         continue # not a method
                     elif os.path.splitext(value2.func_code.co_filename)[0] == modulename:
                         continue # defined in base class

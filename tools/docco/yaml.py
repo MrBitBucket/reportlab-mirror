@@ -87,13 +87,12 @@ class Parser:
 
             #is it a parser method?
             if hasattr(self.__class__, cmd):
-                method = eval('self.'+cmd)
                 #this was very bad; any type error in the method was hidden
                 #we have to hack the traceback
                 try:
-                    apply(method, tuple(args))
+                    getattr(self,cmd)(*args)
                 except TypeError, err:
-                    sys.stderr.write("Parser method: apply(%s,%s) %s at line %d\n" % (cmd, tuple(args), err, self._lineNo))
+                    sys.stderr.write("Parser method: %s(*%s) %s at line %d\n" % (cmd, tuple(args), err, self._lineNo))
                     raise
             else:
                 # assume it is a paragraph style -
@@ -153,7 +152,7 @@ class Parser:
         """Documents the entire module at this point by making
         paragraphs and preformatted objects"""
         docco = codegrab.getObjectsDefinedIn(modulename, pathname)
-        if docco.doc <> None:
+        if docco.doc != None:
             self._results.append(('Paragraph', 'DocString', docco.doc))
         if len(docco.functions) > 0:
             for fn in docco.functions:
@@ -192,7 +191,7 @@ class Parser:
         self._results.append(('NextPageTemplate',templateName))
 
 if __name__=='__main__': #NORUNTESTS
-    if len(sys.argv) <> 2:
+    if len(sys.argv) != 2:
         print 'usage: yaml.py source.txt'
     else:
         p = Parser()

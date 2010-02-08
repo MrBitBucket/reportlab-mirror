@@ -39,7 +39,7 @@ def myLaterPages(canvas, doc):
 def go():
     def myCanvasMaker(fn,**kw):
         from reportlab.pdfgen.canvas import Canvas
-        canv = apply(Canvas,(fn,),kw)
+        canv = Canvas(fn,**kw)
         # attach our callback to the canvas
         canv.myOnDrawCB = myOnDrawCB
         return canv
@@ -208,7 +208,7 @@ def parseOdyssey(fn):
     t4 = time()
     print "Deleting list of lines took %.4f seconds" %(t4-t3)
     for i in xrange(len(E)):
-        apply(E[i][0],E[i][1:])
+        E[i][0](*E[i][1:])
     t5 = time()
     print "Moving into platypus took %.4f seconds" %(t5-t4)
     del E

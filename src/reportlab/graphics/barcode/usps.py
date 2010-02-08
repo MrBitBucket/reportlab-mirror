@@ -199,7 +199,7 @@ class POSTNET(Barcode):
             else:
                 raise ValueError, "Invalid character in input"
         check = (10 - check) % 10
-        self.encoded = self.encoded + `check` + 'S'
+        self.encoded = self.encoded + repr(check) + 'S'
         return self.encoded
 
     def decompose(self):

@@ -864,7 +864,7 @@ cost to performance.""")
     ### now do stuff for the outline
     #for x in outlinenametree: print x
     #stop
-    #apply(c.setOutlineNames0, tuple(outlinenametree))
+    #c.setOutlineNames0(*outlinenametree)
     return c
 
 

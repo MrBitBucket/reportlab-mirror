@@ -223,17 +223,17 @@ def uSymbol2Symbol(uSymbol,x,y,color):
 
 class _isSymbol(Validator):
     def test(self,x):
-        return callable(x) or isinstance(x,Marker) or isinstance(x,Flag) \
+        return hasattr(x,'__call__') or isinstance(x,Marker) or isinstance(x,Flag) \
                 or (type(x)==ClassType and issubclass(x,Widget))
 
 isSymbol = _isSymbol()
 
 def makeMarker(name,**kw):
     if Marker._attrMap['kind'].validate(name):
-        m = apply(Marker,(),kw)
+        m = Marker(**kw)
         m.kind = name
     elif name[-5:]=='_Flag' and Flag._attrMap['kind'].validate(name[:-5]):
-        m = apply(Flag,(),kw)
+        m = Flag(**kw)
         m.kind = name[:-5]
         m.size = 10
     else:

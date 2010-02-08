@@ -582,7 +582,7 @@ class _SVGRenderer(Renderer):
 
         if self.verbose: print "### begin _SVGRenderer.drawNode(%r)" % node
 
-        self._canvas.comment('begin node %s'%`node`)
+        self._canvas.comment('begin node %r'%node)
         color = self._canvas._color
         style = self._canvas.style.copy()
         if not (isinstance(node, Path) and node.isClipPath):
@@ -599,12 +599,12 @@ class _SVGRenderer(Renderer):
         rDeltas = self._tracker.pop()
         if not (isinstance(node, Path) and node.isClipPath):
             pass #self._canvas.restoreState()
-        self._canvas.comment('end node %s'%`node`)
+        self._canvas.comment('end node %r'%node)
         self._canvas._color = color
 
         #restore things we might have lost (without actually doing anything).
         for k, v in rDeltas.items():
-            if self._restores.has_key(k):
+            if k in self._restores:
                 setattr(self._canvas,self._restores[k],v)
         self._canvas.style = style
 

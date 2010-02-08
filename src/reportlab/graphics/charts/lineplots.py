@@ -212,7 +212,7 @@ class LinePlot(AbstractLineChart):
                 labelText = self.lineLabelArray[rowNo][colNo]
             else:
                 labelText = labelFmt % labelValue
-        elif callable(labelFmt):
+        elif hasattr(labelFmt,'__call__'):
             labelText = labelFmt(labelValue)
         else:
             raise ValueError("Unknown formatter type %s, expected string or function"%labelFmt)

@@ -452,7 +452,7 @@ class BaseDocTemplate:
         self._lifetimes = {}
 
         for k in self._initArgs.keys():
-            if not kw.has_key(k):
+            if k not in kw:
                 v = self._initArgs[k]
             else:
                 if k in self._invalidInitArgs:

@@ -8,7 +8,7 @@ from reportlab.graphics.charts.textlabels import Label
 
 class ExplodedPie(_DrawingEditorMixin,Drawing):
     def __init__(self,width=200,height=150,*args,**kw):
-        apply(Drawing.__init__,(self,width,height)+args,kw)
+        Drawing.__init__(self,width,height,*args,**kw)
         self._add(self,Pie(),name='chart',validate=None,desc="The main chart")
         self.chart.width      = 100
         self.chart.height     = 100

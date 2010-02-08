@@ -4,4 +4,4 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/__init__.py
 __version__=''' $Id$ '''
 import os
-RL_DEBUG = os.environ.has_key('RL_DEBUG')
+RL_DEBUG = 'RL_DEBUG' in os.environ

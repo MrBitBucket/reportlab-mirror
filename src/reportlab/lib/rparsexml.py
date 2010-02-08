@@ -133,7 +133,7 @@ def skip_prologue(text, cursor):
                 found = 1
                 cursor = find(text, ">", past)
                 if cursor<0:
-                    raise ValueError, "can't close prologue %s" % `e`
+                    raise ValueError, "can't close prologue %r" % e
                 cursor = cursor+1
         if found is None:
             done=1
@@ -150,7 +150,7 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
        return (dictionary, endcharacter)
        special case: comment returns (None, endcharacter)"""
     #from string import strip, split, find
-    #print "parsexml0", `xmltext[startingat: startingat+10]`
+    #print "parsexml0", repr(xmltext[startingat: startingat+10])
     # DEFAULTS
     NameString = NONAME
     ContentList = AttDict = ExtraStuff = None
@@ -163,7 +163,7 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
     #look for interesting starting points
     firstbracket = find(xmltext, "<", cursor)
     afterbracket2char = xmltext[firstbracket+1:firstbracket+3]
-    #print "a", `afterbracket2char`
+    #print "a", repr(afterbracket2char)
     #firstampersand = find(xmltext, "&", cursor)
     #if firstampersand>0 and firstampersand<firstbracket:
     #    raise ValueError, "I don't handle ampersands yet!!!"
@@ -177,7 +177,7 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
                 if entityReplacer: ContentList = entityReplacer(ContentList)
                 return (NameString, AttDict, ContentList, ExtraStuff), len(xmltext)
             else:
-                raise ValueError, "no tags at non-toplevel %s" % `xmltext[cursor:cursor+20]`
+                raise ValueError, "no tags at non-toplevel %s" % repr(xmltext[cursor:cursor+20])
     #D = {}
     L = []
     # look for start tag
@@ -343,7 +343,7 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
                     linenum = len(split(prefix, "\n"))
                     raise ValueError, \
                        "at lines %s...%s close tag name doesn't match %s...%s %s" %(
-                       linenum, endlinenum, `name`, `closename`, repr(xmltext[cursor: cursor+100]))
+                       linenum, endlinenum, repr(name), repr(closename), repr(xmltext[cursor: cursor+100]))
                 remainder = xmltext[cursor:nextopenbracket]
                 if remainder:
                     #if verbose: print "remainder", repr(remainder)
@@ -385,7 +385,7 @@ def pprettyprint(parsedxml):
     attlist = []
     for k in attdict.keys():
         v = attdict[k]
-        attlist.append("%s=%s" % (k, `v`))
+        attlist.append("%s=%s" % (k, repr(v)))
     attributes = join(attlist, " ")
     if not name and attributes:
         raise ValueError, "name missing with attributes???"

@@ -44,7 +44,7 @@ class SourceTester(SecureTestCase):
                 badLines = badLines + 1
                 badChars = badChars + spaces
 
-        if badChars <> 0:
+        if badChars != 0:
             self.output.write("file %s contains %d trailing spaces, or %0.2f%% wastage\n" % (filename, badChars, 100.0*badChars/initSize))
 
     def testFiles(self):
@@ -59,7 +59,7 @@ def zapTrailingWhitespace(dirname):
     assert os.path.isdir(dirname), "Directory not found!"
     print "This will eliminate all trailing spaces in py files under %s." % dirname
     ok = raw_input("Shall I proceed?  type YES > ")
-    if ok <> 'YES':
+    if ok != 'YES':
         print 'aborted by user'
         return
     w = GlobDirectoryWalker(dirname, '*.py')
@@ -75,7 +75,7 @@ def zapTrailingWhitespace(dirname):
             if spaces:
                 badChars = badChars + spaces
 
-        if badChars <> 0:
+        if badChars != 0:
             open(filename, 'w').write(string.join(cleaned, '\n'))
             print "file %s contained %d trailing spaces, FIXED" % (filename, badChars)
     print 'done'

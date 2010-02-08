@@ -101,13 +101,12 @@ class BaseParser:
 
             #is it a parser method?
             if hasattr(self.__class__, cmd):
-                method = eval('self.'+cmd)
                 #this was very bad; any type error in the method was hidden
                 #we have to hack the traceback
                 try:
-                    apply(method, tuple(args))
+                    getattr(self,cmd)(*args)
                 except TypeError, err:
-                    sys.stderr.write("Parser method: apply(%s,%s) %s at line %d\n" % (cmd, tuple(args), err, self._lineNo))
+                    sys.stderr.write("Parser method: %s(*%s) %s at line %d\n" % (cmd, args, err, self._lineNo))
                     raise
             else:
                 # assume it is a paragraph style -
@@ -180,7 +179,7 @@ def parseText(textBlock):
 
 
 if __name__=='__main__': #NORUNTESTS
-    if len(sys.argv) <> 2:
+    if len(sys.argv) != 2:
         results = parseText(__doc__)
     else:
         results = parseFile(sys.argv[1])

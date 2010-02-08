@@ -126,7 +126,7 @@ def _setOpt(name, value, conv=None):
     '''set a module level value from environ/default'''
     from os import environ
     ename = 'RL_'+name
-    if environ.has_key(ename):
+    if ename in environ:
         value = environ[ename]
     if conv: value = conv(value)
     globals()[name] = value

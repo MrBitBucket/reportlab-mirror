@@ -224,7 +224,7 @@ class PDFDocument:
         return self._ID
 
     def SaveToFile(self, filename, canvas):
-        if callable(getattr(filename, "write",None)):
+        if hasattr(getattr(filename, "write",None),'__call__'):
             myfile = 0
             f = filename
             filename = utf8str(getattr(filename,'name',''))
@@ -273,7 +273,7 @@ class PDFDocument:
 
     def getInternalFontName(self, psfontname):
         fm = self.fontMapping
-        if fm.has_key(psfontname):
+        if psfontname in fm:
             return fm[psfontname]
         else:
             try:
@@ -398,7 +398,7 @@ class PDFDocument:
         File = PDFFile(self._pdfVersion) # output collector
         while done is None:
             counter += 1 # do next object...
-            if numbertoid.has_key(counter):
+            if counter in numbertoid:
                 id = numbertoid[counter]
                 #printidToOb
                 obj = idToOb[id]
@@ -444,14 +444,14 @@ class PDFDocument:
     def hasForm(self, name):
         """test for existence of named form"""
         internalname = xObjectName(name)
-        return self.idToObject.has_key(internalname)
+        return internalname in self.idToObject
 
     def getFormBBox(self, name, boxType="MediaBox"):
         """get the declared bounding box of the form as a list.
         If you specify a different PDF box definition (e.g. the
         ArtBox) and it has one, that's what you'll get."""
         internalname = xObjectName(name)
-        if self.idToObject.has_key(internalname):
+        if internalname in self.idToObject:
             theform = self.idToObject[internalname]
             if hasattr(theform,'_extra_pageCatcher_info'):
                 return theform._extra_pageCatcher_info[boxType]
@@ -494,14 +494,14 @@ class PDFDocument:
             if name is not None and name!=intname:
                 raise ValueError, "attempt to reregister object %s with new name %s" % (
                     repr(intname), repr(name))
-            if not idToObject.has_key(intname):
+            if intname not in idToObject:
                 raise ValueError, "object named but not registered"
             return PDFObjectReference(intname)
         # otherwise register the new object
         objectcounter = self.objectcounter = self.objectcounter+1
         if name is None:
             name = "R"+repr(objectcounter)
-        if idToObject.has_key(name):
+        if name in idToObject:
             other = idToObject[name]
             if other!=object:
                 raise ValueError, "redefining named object: "+repr(name)
@@ -643,8 +643,8 @@ class PDFDictionary:
         self.dict[name] = value
     def __getitem__(self, a):
         return self.dict[a]
-    def has_key(self,a):
-        return self.dict.has_key(a)
+    def __contains__(self,a):
+        return a in self.dict
     def Reference(self, name, document):
         self.dict[name] = document.Reference(self.dict[name])
     def format(self, document,IND=LINEEND+' '):
@@ -772,7 +772,7 @@ class PDFStream:
         if filters is None:
             filters = document.defaultStreamFilters
         # only apply filters if they haven't been applied elsewhere
-        if filters is not None and not dictionary.dict.has_key("Filter"):
+        if filters is not None and "Filter" not in dictionary.dict:
             # apply filters in reverse order listed
             rf = list(filters)
             rf.reverse()
@@ -929,7 +929,7 @@ class PDFCrossReferenceSubsection:
         lastentrynumber = firstentrynumber+nentries-1
         for id in idsequence:
             (num, version) = idToNV[id]
-            if taken.has_key(num):
+            if num in taken:
                 raise ValueError, "object number collision %s %s %s" % (num, repr(id), repr(taken[id]))
             if num>lastentrynumber or num<firstentrynumber:
                 raise ValueError, "object number %s not in range %s..%s" % (num, firstentrynumber, lastentrynumber)
@@ -1034,7 +1034,7 @@ class PDFCatalog:
                     D[k] = v
         # force objects to be references where required
         for k in Refs:
-            if D.has_key(k):
+            if k in D:
                 #print"k is", k, "value", D[k]
                 D[k] = document.Reference(D[k])
         dict = PDFDictionary(D)
@@ -1411,7 +1411,7 @@ class PDFOutlines:
         self.setDestinations(desttree)
 
     def setNameList(self, canvas, nametree):
-        "Explicit list so I don't need to do apply(...) in the caller"
+        "Explicit list so I don't need to do in the caller"
         desttree = self.translateNames(canvas, nametree)
         self.setDestinations(desttree)
 
@@ -1425,12 +1425,12 @@ class PDFOutlines:
         if Ot is StringType:
             destination = canvas._bookmarkReference(object)
             title = object
-            if destinationnamestotitles.has_key(object):
+            if object in destinationnamestotitles:
                 title = destinationnamestotitles[object]
             else:
                 destinationnamestotitles[title] = title
             destinationstotitles[destination] = title
-            if closedict.has_key(object):
+            if object in closedict:
                 closedict[destination] = 1 # mark destination closed
             return {object: canvas._bookmarkReference(object)} # name-->ref
         if Ot is ListType or Ot is TupleType:
@@ -1516,7 +1516,7 @@ class PDFOutlines:
                 raise ValueError, "bad outline leaf dictionary, should have one entry "+utf8str(elt)
             eltobj.Title = destinationnamestotitles[Title]
             eltobj.Dest = Dest
-            if te is TupleType and closedict.has_key(Dest):
+            if te is TupleType and Dest in closedict:
                 # closed subsection, count should be negative
                 eltobj.Count = -eltobj.Count
         return (firstref, lastref)
@@ -1530,7 +1530,7 @@ def count(tree, closedict=None):
         # leaf with subsections XXXX should clean up this structural usage
         (leafdict, subsections) = tree
         [(Title, Dest)] = leafdict.items()
-        if closedict and closedict.has_key(Dest):
+        if closedict and Dest in closedict:
             return 1 # closed tree element
     if tt is TupleType or tt is ListType:
         #return reduce(add, map(count, tree))
@@ -1605,7 +1605,7 @@ class Annotation:
             d[name] = val
         d.update(kw)
         for name in self.required:
-            if not d.has_key(name):
+            if name not in d:
                 raise ValueError, "keyword argument %s missing" % name
         d = self.cvtdict(d,escape=escape)
         permitted = self.permitted
@@ -1677,7 +1677,7 @@ class LinkAnnotation(Annotation):
         d["Contents"] = self.Contents
         d["Subtype"] = "/Link"
         d["Dest"] = self.Destination
-        return apply(self.AnnotationDict, (), d)
+        return self.AnnotationDict(**d)
 
 # skipping names tree
 # skipping actions
@@ -1712,7 +1712,7 @@ class PDFDate:
             import time
             now = tuple(time.localtime(_getTimeStamp())[:6])
             from time import timezone
-            self.dhh = int(timezone / 3600)
+            self.dhh = int(timezone / (3600.0))
             self.dmm = (timezone % 3600) % 60
         self.date = now[:6]
         self.dateFormatter = dateFormatter

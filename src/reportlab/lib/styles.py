@@ -32,8 +32,8 @@ class PropertySet:
         if any.  All the work is done in init - styles
         should cost little to use at runtime."""
         # step one - validate the hell out of it
-        assert not self.defaults.has_key('name'), "Class Defaults may not contain a 'name' attribute"
-        assert not self.defaults.has_key('parent'), "Class Defaults may not contain a 'parent' attribute"
+        assert 'name' not in self.defaults, "Class Defaults may not contain a 'name' attribute"
+        assert 'parent' not in self.defaults, "Class Defaults may not contain a 'parent' attribute"
         if parent:
             assert parent.__class__ == self.__class__, "Parent style must have same class as new style"
 
@@ -148,25 +148,20 @@ class StyleSheet1:
             except KeyError:
                 raise KeyError, "Style '%s' not found in stylesheet" % key
 
-    def has_key(self, key):
-        if self.byAlias.has_key(key):
-            return 1
-        elif self.byName.has_key(key):
-            return 1
-        else:
-            return 0
+    def __contains__(self, key):
+        return key in self.byAlias or key in self.byName
 
     def add(self, style, alias=None):
         key = style.name
-        if self.byName.has_key(key):
+        if key in self.byName:
             raise KeyError, "Style '%s' already defined in stylesheet" % key
-        if self.byAlias.has_key(key):
+        if key in self.byAlias:
             raise KeyError, "Style name '%s' is already an alias in stylesheet" % key
 
         if alias:
-            if self.byName.has_key(alias):
+            if alias in self.byName:
                 raise KeyError, "Style '%s' already defined in stylesheet" % alias
-            if self.byAlias.has_key(alias):
+            if alias in self.byAlias:
                 raise KeyError, "Alias name '%s' is already an alias in stylesheet" % alias
         #passed all tests?  OK, add it
         self.byName[key] = style

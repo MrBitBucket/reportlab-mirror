@@ -92,7 +92,7 @@ class MyTemplate(BaseDocTemplate):
     def __init__(self, filename, **kw):
         frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
         self.allowSplitting = 0
-        apply(BaseDocTemplate.__init__, (self, filename), kw)
+        BaseDocTemplate.__init__(self, filename, **kw)
         self.addPageTemplates(PageTemplate('normal', [frame1], mainPageFrame))
 
 
@@ -306,10 +306,10 @@ class ModuleSkeleton0:
         for c in classes:
             for base in c.__bases__:
                 key, modname = base.__name__, base.__module__
-                if modname != name and sys.modules.has_key(modname):
+                if modname != name and modname in sys.modules:
                     module = sys.modules[modname]
                     if hasattr(module, key) and getattr(module, key) is base:
-                        if not cdict.has_key(key):
+                        if key not in cdict:
                             cdict[key] = cdict[base] = modname + '.txt#' + key
 
 ##        doc = getdoc(object) or 'No doc string.'
@@ -350,7 +350,7 @@ class ModuleSkeleton0:
             mdict[key] = mdict[value] = '#' + name + '-' + key
 
         if methods:
-            if not self.classes[name].has_key('methods'):
+            if 'methods' not in self.classes[name]:
                 self.classes[name]['methods'] = {}
             for item in methods:
                 self._inspectMethod(item, functions, classes, mdict, name)
@@ -390,7 +390,7 @@ class ModuleSkeleton0:
                 self.functions[object.__name__] = {'signature':argspec, 'doc':doc}
             else:
                 theMethods = self.classes[clname]['methods']
-                if not theMethods.has_key(object.__name__):
+                if object.__name__ not in theMethods:
                     theMethods[object.__name__] = {}
 
                 theMethod = theMethods[object.__name__]
@@ -433,7 +433,7 @@ class ModuleSkeleton0:
             f.beginClass(k, cDoc, bases)
 
             # This if should move out of this method.
-            if not s.classes[k].has_key('methods'):
+            if 'methods' not in s.classes[k]:
                 s.classes[k]['methods'] = {}
 
             # Methods
@@ -1203,7 +1203,7 @@ def main():
     optsDict = {}
     for k, v in opts:
         optsDict[k] = v
-    hasOpt = optsDict.has_key
+    hasOpt = optsDict.__contains__
 
     # On -h print usage and exit immediately.
     if hasOpt('-h'):
