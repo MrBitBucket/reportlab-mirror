@@ -714,7 +714,7 @@ class Pie(AbstractPieChart):
 
         if checkLabelOverlap and L:
             fixLabelOverlaps(L)
-        map(g_add,L)
+        for l in L: g_add(l)
 
         if not plMode:
             for l in L:
@@ -1139,7 +1139,8 @@ class Pie3d(Pie):
         S.sort(lambda a,b: -cmp(a[0],b[0]))
         if checkLabelOverlap and L:
             fixLabelOverlaps(L)
-        map(g.add,map(lambda x:x[1],S)+T+L)
+        for x in ([s[1] for s in S]+T+L):
+            g.add(x)
         return g
 
     def demo(self):
