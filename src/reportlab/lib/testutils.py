@@ -43,7 +43,7 @@ def setOutDir(name):
             os.makedirs(_OUTDIR)
         except:
             pass
-        map(sys.argv.remove,D)
+        for d in D: sys.argv.remove(d)
     else:
         assert name=='__main__',"setOutDir should only be called in the main script"
         scriptDir=os.path.dirname(sys.argv[0])

@@ -343,7 +343,7 @@ class SpiderChart(PlotArea):
                 STRANDS.append(strand)
             rowIdx += 1
 
-        map(g.add,STRANDAREAS+STRANDS+syms+S+labs)
+        for s in (STRANDAREAS+STRANDS+syms+S+labs): g.add(s)
         return g
 
 def sample1():

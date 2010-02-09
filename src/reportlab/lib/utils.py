@@ -46,9 +46,9 @@ except:
     from UserDict import UserDict as _UserDict
 
 class CIDict(_UserDict):
-    def __init__(self,*a,**kw):
-        map(self.update, a)
-        self.update(kw)
+    def __init__(self,*args,**kwds):
+        for a in args: self.update(a)
+        self.update(kwds)
 
     def update(self,D):
         for k,v in D.items(): self[k] = v

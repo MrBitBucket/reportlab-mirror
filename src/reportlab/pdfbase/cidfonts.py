@@ -510,7 +510,8 @@ def test():
 ##    print 'constructed all encodings in %0.2f seconds' % (finished - started)
 
 if __name__=='__main__':
-    import doctest, cidfonts
+    import doctest
+    import cidfonts
     doctest.testmod(cidfonts)
     #test()
 

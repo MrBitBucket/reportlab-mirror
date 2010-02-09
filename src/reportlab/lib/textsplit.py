@@ -199,5 +199,6 @@ def cjkwrap(text, width, encoding="utf8"):
             ).replace('\0', '').encode(encoding)
 
 if __name__=='__main__':
-    import doctest, textsplit
+    import doctest
+    import textsplit
     doctest.testmod(textsplit)

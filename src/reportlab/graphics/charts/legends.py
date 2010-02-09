@@ -481,7 +481,7 @@ class Legend(Widget):
                 g.add(c)
                 if scallout: scallout(self,g,thisx,y0,i,(col,name),c)
 
-            map(g.add,S)
+            for s in S: g.add(s)
             if self.colEndCallout and (i%columnMaximum==lim or i==(n-1)):
                 if alignment == "left":
                     xt = thisx

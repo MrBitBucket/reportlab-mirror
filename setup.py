@@ -238,7 +238,7 @@ def get_fonts(PACKAGE_DIR, reportlab_files):
         xitmsg = "Finished download of standard T1 font curves"
     except:
         xitmsg = "Failed to download standard T1 font curves"
-    map(reportlab_files.remove,[x for x in reportlab_files if not os.path.isfile(pjoin(rl_dir,x))])
+    reportlab_files = [x for x in reportlab_files if os.path.isfile(pjoin(rl_dir,x))]
     infoline(xitmsg)
 
 def main():

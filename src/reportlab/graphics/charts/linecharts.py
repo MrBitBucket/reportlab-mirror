@@ -503,7 +503,7 @@ class HorizontalLineChart3D(HorizontalLineChart):
 
         F.sort()
         g = Group()
-        map(lambda x,a=g.add: a(x[-1]),F.value())
+        for v in F.value(): g.add(v[-1])
         return g
 
 class VerticalLineChart(LineChart):

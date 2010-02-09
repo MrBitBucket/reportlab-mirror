@@ -35,7 +35,7 @@ class Logger:
     def write(self,text):
         '''write text to all the destinations'''
         if text[-1]!='\n': text=text+'\n'
-        map(lambda fp,t=text: fp.write(t),self._fps)
+        for fp in self._fps: fp.write(text)
 
     def __call__(self,text):
         self.write(text)

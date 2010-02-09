@@ -119,7 +119,8 @@ class RLDocTemplate(BaseDocTemplate):
         self.canv.showOutline()
         self.title = "(Document Title Goes Here)"
         self.chapter = "(No chapter yet)"
-        map(self.seq.reset, ('section', 'chapter'))
+        self.seq.reset('section')
+        self.seq.reset('chapter')
 
     def afterFlowable(self, flowable):
         """Detect Level 1 and 2 headings, build outline,

@@ -528,6 +528,7 @@ class LinePlot3D(LinePlot):
         F.sort()
         g = Group()
         map(lambda x,a=g.add: a(x[-1]),F.value())
+        for v in F.value(): g.add(v[-1])
         return g
 
 _monthlyIndexData = [[(19971202, 100.0),

@@ -506,14 +506,14 @@ See PdfEncryptIntro.pdf for more information.
             print usage
             return
         if len(argv)<2:
-            raise "Must include a filename and one or more arguments!"
+            raise ValueError("Must include a filename and one or more arguments!")
         if argv[0] not in known_modes:
             infile = argv[0]
             argv = argv[1:]
             if not os.path.isfile(infile):
-                raise "Can't open input file '%s'!" % infile
+                raise ValueError("Can't open input file '%s'!" % infile)
         else:
-            raise "First argument must be name of the PDF input file!"
+            raise ValueError("First argument must be name of the PDF input file!")
 
         # meaningful name at this stage
         STRENGTH = 40
