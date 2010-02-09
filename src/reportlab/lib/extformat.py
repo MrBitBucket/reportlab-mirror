@@ -1,7 +1,6 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2010
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/extformat.py
-__version__='''$Id:$'''
+__version__='''$Id$'''
 __doc__='''Apparently not used anywhere, purpose unknown!'''
 from tokenize import tokenprog
 import sys
@@ -52,9 +51,7 @@ def dictformat(_format, L={}, G={}):
 
 def magicformat(format):
 	"""Evaluate and substitute the appropriate parts of the string."""
-	try: 1/0
-	except: frame = sys.exc_traceback.tb_frame
-	while frame.f_globals["__name__"] == __name__: frame = frame.f_back
+	frame = sys._getframe(1)
 	return dictformat(format,frame.f_locals, frame.f_globals)
 
 if __name__=='__main__':
@@ -74,10 +71,15 @@ if __name__=='__main__':
 	percent=79.2
 	class dingo:
 		a=3
-	print magicformat('''
+	print(magicformat('''
 $%%(df(x,dp=3))s --> $%(df(x,dp=3))s
 $%%(df(x,dp=2,ds=',',ts='.'))s --> $%(df(x,dp=2,ds=',',ts='.'))s
 %%(percent).2f%%%% --> %(percent).2f%%
 %%(dingo.a)s --> %(dingo.a)s
 %%(Z['abc'][0])s --> %(Z['abc'][0])s
-''')
+'''))
+	def func0(aa=1):
+		def func1(bb=2):
+			print(magicformat('bb=%(bb)s Z=%(Z)r'))
+		func1('BB')
+	func0('AA')
