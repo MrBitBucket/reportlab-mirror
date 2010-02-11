@@ -670,38 +670,59 @@ class cssParse:
         except:
             raise ValueError('bad hue argument value %r in css color %r' % (v,self.s))
 
-    def alphaVal(self,v):
+    def alphaVal(self,v,c=1,n='alpha'):
         try:
-            c = eval(v.strip())
-            if not isinstance(c,(int,float)): raise ValueError
-            return min(1,max(0,c))
+            a = eval(v.strip())
+            if not isinstance(a,(int,float)): raise ValueError
+            return min(c,max(0,a))
         except:
-            raise ValueError('bad alpha argument value %r in css color %r' % (v,self.s))
+            raise ValueError('bad %s argument value %r in css color %r' % (n,v,self.s))
 
     def __call__(self,s):
         s = s.strip()
         hsl = s.startswith('hsl')
-        if not s.startswith('rgb')  and not hsl: return None
+        rgb = s.startswith('rgb')
+        cmyk = s.startswith('cmyk')
+        c = 1
+        if hsl: n = 3
+        if rgb: n = 3
+        if cmyk:
+            n = 4
+        else:
+            cmyk = s.startswith('pcmyk')
+            if cmyk:
+                n = 5
+                c = 100
+        if not (rgb or hsl or cmyk): return None
         self.s = s
-        rgba = s.startswith('rgba') or s.startswith('hsla')
-        n = s[rgba and 4 or 3:].strip()
+        n = s[n:]
+        ha = n.startswith('a')
+        n = n[(ha and 1 or 0):].strip()
         if not n.startswith('(') or not n.endswith(')'):
-            raise ValueError('improperly formatted css color %r' % s)
+            raise ValueError('improperly formatted css style color %r' % s)
         n = n[1:-1].split(',')  #strip parens and split on comma
         a = len(n)
-        if rgba and a!=4 or not rgba and a!=3:
+        b = cmyk and 4 or 3
+        if ha and a!=(b+1) or not ha and a!=b:
             raise ValueError('css color %r has wrong number of components' % s)
-        if rgba:
-            n,a = n[:3],self.alphaVal(n[3])
+        if ha:
+            n,a = n[:b],self.alphaVal(n[b],c)
         else:
-            a = 1
+            a = c
 
-        if hsl:
-            R,G,B= hsl2rgb(self.hueVal(n[0]),self.pcVal(n[1]),self.pcVal(n[2]))
+        if cmyk:
+            C = self.alphaVal(n[0],c,'cyan')
+            M = self.alphaVal(n[1],c,'magenta')
+            Y = self.alphaVal(n[2],c,'yellow')
+            K = self.alphaVal(n[3],c,'black')
+            return (c>1 and PCMYKColor or CMYKColor)(C,M,Y,K,alpha=a)
         else:
-            R,G,B = map('%' in n[0] and self.rgbPcVal or self.rgbVal,n)
+            if hsl:
+                R,G,B= hsl2rgb(self.hueVal(n[0]),self.pcVal(n[1]),self.pcVal(n[2]))
+            else:
+                R,G,B = map('%' in n[0] and self.rgbPcVal or self.rgbVal,n)
 
-        return Color(R,G,B,a)
+            return Color(R,G,B,a)
 
 cssParse=cssParse()
 
@@ -718,6 +739,14 @@ def toColor(arg,default=None):
     >>> toColor('hsl(120,100%,50%)')==toColor('rgb(0,255,0)')
     True
     >>> toColor('rgba(255,0,0,0.5)')==Color(1,0,0,0.5)
+    True
+    >>> toColor('cmyk(1,0,0,0)')==CMYKColor(1,0,0,0)
+    True
+    >>> toColor('pcmyk(100,0,0,0)')==PCMYKColor(100,0,0,0)
+    True
+    >>> toColor('cmyka(1,0,0,0,0.5)')==CMYKColor(1,0,0,0,alpha=0.5)
+    True
+    >>> toColor('pcmyka(100,0,0,0,0.5)')==PCMYKColor(100,0,0,0,alpha=0.5)
     True
     '''
     if isinstance(arg,Color): return arg
