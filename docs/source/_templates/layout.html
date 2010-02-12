@@ -1,0 +1,10 @@
+{% extends "!layout.html" %}
+{% block rootrellink %}
+    <li><a href="http://www.reportlab.com/">ReportLab Homepage</a> &raquo;</li>
+    {{ super() }}
+{% endblock %}
+
+{% block extrahead %}
+    <link rel="stylesheet" type="text/css" href="http://www.reportlab.com/media/base/base.css"/>
+{% endblock %}
+

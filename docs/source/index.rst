@@ -15,7 +15,10 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-   Library reference <lib.rst>
+   pdfgen package (reportlab.pdfgen) - the basics <pdfgen.rst>
+   Platypus (reportlab.platypus) - long flowing documents <platypus.rst>
+   Graphics and Charts (reportlab.graphics) <graphics.rst>
+   Library and utilities (reportlab.lib) <lib.rst>
     
 
 Actually, that's an exaggeration.  We're just playing with Sphinx at the moment.

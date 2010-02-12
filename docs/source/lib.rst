@@ -1,43 +1,44 @@
-
-
 ===================================
 ReportLab Library Reference
 ===================================
 
 .. rubric:: API main index
 
-This page should shows what we consider to be the PUBLIC API.
-We will document modules, classes and functions which we think
-programmers need to use to generate PDFs.  If it's internal,
-we should leave it out  (or find a way to mark it as private..)
+This page covers modules within reportlab/lib which may be of
+use to developers.  We have tried only to include things
+we intend people to use; a lot of code in /lib/ is used
+by our package itself, and we reserve the right to change it
+if it's not documented here.
 
+Hint:  review tests and user guide and see what is actually imported
 
+Users definitely need:
 
-reportlab.lib.geomutils
+* units
+* colors
+* utils
+
+See what else is commonly imported and used in the test scripts!
+
+If in doubt, include it and put a comment so Andy can review.
+
+units
 -----------------------
 
-.. automodule:: reportlab.lib.geomutils
+.. automodule:: reportlab.lib.units
    :members:
 
-reportlab.lib.colors
+
+colors
 --------------------
 
 .. automodule:: reportlab.lib.colors
    :members:
-   
 
-reportlab.graphics.shapes
--------------------------
 
-.. automodule:: reportlab.graphics.shapes
-   :members:
-   
-reportlab.pdfgen.canvas
--------------------------
+utils
+--------------------
 
-.. automodule:: reportlab.pdfgen.canvas
+.. automodule:: reportlab.lib.utils
    :members:
 
-   
-
-blah
