@@ -315,7 +315,7 @@ class BarChart(PlotArea):
             labelText = self.barLabelArray[rowNo][colNo]
         elif type(labelFmt) is str:
             labelText = labelFmt % self.data[rowNo][colNo]
-        elif hasattr(labelFmt):
+        elif hasattr(labelFmt,'__call__'):
             labelText = labelFmt(self.data[rowNo][colNo])
         else:
             msg = "Unknown formatter type %s, expected string or function" % labelFmt
