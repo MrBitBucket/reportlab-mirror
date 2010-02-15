@@ -117,7 +117,7 @@ class   ExtGState:
         x._c = self._c
         return x
 
-class Canvas(textobject._PDFColorSetter):
+class Canvas(textobject._PDFColorSetter,CanvasStringDrawer):
     """This class is the programmer's interface to the PDF file format.  Methods
     are (or will be) provided here to do just about everything PDF can do.
 
@@ -326,7 +326,8 @@ class Canvas(textobject._PDFColorSetter):
         font = pdfmetrics.getFont(self._fontname)
         if not font._dynamicFont:
             #set an initial font
-            P('BT %s 12 Tf 14.4 TL ET' % self._doc.getInternalFontName(self._fontname))
+            if font.face.builtIn or not getattr(self,'_drawTextAsPath',False):
+                P('BT %s 12 Tf 14.4 TL ET' % self._doc.getInternalFontName(self._fontname))
         self._preamble = ' '.join(P.__self__)
 
     if not _instanceEscapePDF:
@@ -1402,26 +1403,29 @@ class Canvas(textobject._PDFColorSetter):
         # use PDFTextObject for multi-line text.
         ##################################################
 
-    def drawString(self, x, y, text):
+    def drawString(self, x, y, text, mode=None):
         """Draws a string in the current text styles."""
         #we could inline this for speed if needed
         t = self.beginText(x, y)
+        if mode is not None: t.setTextRenderMode(mode)
         t.textLine(text)
         self.drawText(t)
 
-    def drawRightString(self, x, y, text):
+    def drawRightString(self, x, y, text, mode=None):
         """Draws a string right-aligned with the x coordinate"""
         width = self.stringWidth(text, self._fontname, self._fontsize)
         t = self.beginText(x - width, y)
+        if mode is not None: t.setTextRenderMode(mode)
         t.textLine(text)
         self.drawText(t)
 
-    def drawCentredString(self, x, y, text):
+    def drawCentredString(self, x, y, text,mode=None):
         """Draws a string centred on the x coordinate. 
         
         We're British, dammit, and proud of our spelling!"""
         width = self.stringWidth(text, self._fontname, self._fontsize)
         t = self.beginText(x - 0.5*width, y)
+        if mode is not None: t.setTextRenderMode(mode)
         t.textLine(text)
         self.drawText(t)
 
@@ -1513,8 +1517,9 @@ class Canvas(textobject._PDFColorSetter):
         self._leading = leading
         font = pdfmetrics.getFont(self._fontname)
         if not font._dynamicFont:
-            pdffontname = self._doc.getInternalFontName(psfontname)
-            self._code.append('BT %s %s Tf %s TL ET' % (pdffontname, fp_str(size), fp_str(leading)))
+            if font.face.builtIn or not getattr(self,'_drawTextAsPath',False):
+                pdffontname = self._doc.getInternalFontName(psfontname)
+                self._code.append('BT %s %s Tf %s TL ET' % (pdffontname, fp_str(size), fp_str(leading)))
 
     def setFontSize(self, size=None, leading=None):
         '''Sets font size or leading without knowing the font face'''
