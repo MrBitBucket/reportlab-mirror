@@ -40,6 +40,7 @@ imageReaderFlags=0                                  #attempt to convert images i
                                                     #if imageReaderFlags==-1 then use Ralf Schmitt's re-opening approach
 paraFontSizeHeightOffset=   1                       #if true paragraphs start at height-fontSize
 canvas_baseColor=           None                    #initialize the canvas fill and stroke colors if this is set
+ttfAsciiReadable=           1                       #smaller subsets when set to 0
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -167,7 +168,8 @@ canvas_basefontname
 allowShortTableRows
 imageReaderFlags
 paraFontSizeHeightOffset
-canvas_baseColor'''.split()
+canvas_baseColor
+ttfAsciiReadable'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage
