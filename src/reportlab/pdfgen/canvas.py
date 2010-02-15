@@ -117,7 +117,7 @@ class   ExtGState:
         x._c = self._c
         return x
 
-class Canvas(textobject._PDFColorSetter,CanvasStringDrawer):
+class Canvas(textobject._PDFColorSetter):
     """This class is the programmer's interface to the PDF file format.  Methods
     are (or will be) provided here to do just about everything PDF can do.
 
