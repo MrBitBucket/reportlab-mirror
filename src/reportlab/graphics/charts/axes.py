@@ -36,7 +36,8 @@ import string
 
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
-                                        isString, EitherOr, Validator, _SequenceTypes, NoneOr, isInstanceOf
+                                        isString, EitherOr, Validator, _SequenceTypes, NoneOr, isInstanceOf, \
+                                        isNormalDate
 from reportlab.lib.attrmap import *
 from reportlab.lib import normalDate
 from reportlab.graphics.shapes import Drawing, Line, PolyLine, Group, STATE_DEFAULTS, _textBoxLimits, _rotatedBoxLimits
@@ -1383,7 +1384,7 @@ class NormalDateXValueAxis(XValueAxis):
         dayOfWeekName = AttrMapValue(SequenceOf(isString,emptyOK=0,lo=7,hi=7), desc='Weekday names.'),
         monthName = AttrMapValue(SequenceOf(isString,emptyOK=0,lo=12,hi=12), desc='Month names.'),
         dailyFreq = AttrMapValue(isBoolean, desc='True if we are to assume daily data to be ticked at end of month.'),
-        specifiedTickDates = AttrMapValue(NoneOr(SequenceOf(isInstanceOf(normalDate.ND))), desc='Actual tick values to use; no calculations done'),
+        specifiedTickDates = AttrMapValue(NoneOr(SequenceOf(isNormalDate)), desc='Actual tick values to use; no calculations done'),
         )
 
     _valueClass = normalDate.ND
@@ -1452,7 +1453,8 @@ class NormalDateXValueAxis(XValueAxis):
             labels.insert(0,formatter(xVals[i]))
 
         if self.specifiedTickDates:
-            ticks = self.specifiedTickDates[:]
+            VC = self._valueClass
+            ticks = [VC(x) for x in self.specifiedTickDates]
             return ticks,[formatter(d) for d in ticks]
 
         #AR 20060619 - first we try the approach where the user has explicitly
