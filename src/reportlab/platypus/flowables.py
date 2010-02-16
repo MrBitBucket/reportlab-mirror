@@ -387,7 +387,7 @@ class Image(Flowable):
         elif a in ('drawWidth','drawHeight','imageWidth','imageHeight'):
             self._setup_inner()
             return self.__dict__[a]
-        raise AttributeError(a)
+        raise AttributeError("<Image @ 0x%x>.%s" % (id(self),a))
 
     def wrap(self, availWidth, availHeight):
         #the caller may decide it does not fit.
@@ -542,7 +542,7 @@ class KeepTogether(_ContainerSpace,Flowable):
         L = map(repr,f)
         L = "\n"+"\n".join(L)
         L = L.replace("\n", "\n  ")
-        return "KeepTogether(%s,maxHeight=%s) # end KeepTogether" % (L,self._maxHeight)
+        return "%s(%s,maxHeight=%s)" % (self.__class__.__name__,L,self._maxHeight)
 
     def wrap(self, aW, aH):
         dims = []
@@ -568,7 +568,7 @@ class KeepTogether(_ContainerSpace,Flowable):
         return S
 
     def identity(self, maxLen=None):
-        msg = "<KeepTogether at %s%s> containing :%s" % (hex(id(self)),self._frameName(),"\n".join([f.identity() for f in self._content]))
+        msg = "<%s at %s%s> containing :%s" % (self.__class__.__name__,hex(id(self)),self._frameName(),"\n".join([f.identity() for f in self._content]))
         if maxLen:
             return msg[0:maxLen]
         else:
