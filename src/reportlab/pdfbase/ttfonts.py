@@ -55,6 +55,7 @@ import string
 from struct import pack, unpack, error as structError
 from reportlab.lib.utils import getStringIO
 from reportlab.pdfbase import pdfmetrics, pdfdoc
+from reportlab import rl_config
 
 class TTFError(pdfdoc.PDFError):
     "TrueType font exception"
@@ -166,7 +167,6 @@ def TTFOpenFile(fn):
     except IOError:
         import os
         if not os.path.isabs(fn):
-            from reportlab import rl_config
             for D in rl_config.TTFSearchPath:
                 tfn = os.path.join(D,fn)
                 if rl_isfile(tfn):
@@ -974,11 +974,14 @@ class TTFont:
     """
     class State:
         namePrefix = 'F'
-        def __init__(self,asciiReadable=1):
+        def __init__(self,asciiReadable=None):
             self.assignments = {}
             self.nextCode = 0
             self.internalName = None
             self.frozen = 0
+
+            if asciiReadable is None:
+                asciiReadable = rl_config.ttfAsciiReadable
 
             if asciiReadable:
                 # Let's add the first 128 unicodes to the 0th subset, so ' '
