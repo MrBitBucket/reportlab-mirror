@@ -166,6 +166,16 @@ class _isColorOrNone(Validator):
         if x is None: return True
         return isColor(x)
 
+from reportlab.lib.normalDate import NormalDate
+class _isNormalDate(Validator):
+    def test(self,x):
+        if isinstance(x,NormalDate):
+            return True
+        return self.normalizeTest(x)
+
+    def normalize(self,x):
+        return NormalDate(x)
+
 class _isValidChild(Validator):
     "ValidChild validator class."
     def test(self, x):
@@ -343,3 +353,4 @@ isCallable = _isCallable()
 isStringOrCallable=EitherOr((isString,isCallable),'isStringOrCallable')
 isStringOrCallableOrNone=NoneOr(isStringOrCallable,'isStringOrCallableNone')
 isStringOrNone=NoneOr(isString,'isStringOrNone')
+isNormalDate=_isNormalDate()
