@@ -467,7 +467,7 @@ class NormalDate:
                 if m:
                     self.setNormalDate(m.group(1)+m.group(2)+m.group(3))
                 else:
-                    raise NormalDateException("unable to setNormalDate(%r)" % normalDate)
+                    raise NormalDateException("unable to setNormalDate(%s)" % repr(normalDate))
         elif isinstance(normalDate,_DateSeqTypes):
             self.normalDate = int("%04d%02d%02d" % normalDate[:3])
         elif isinstance(normalDate,NormalDate):
@@ -475,7 +475,7 @@ class NormalDate:
         elif isinstance(normalDate,(datetime.datetime,datetime.date)):
             self.normalDate = (normalDate.year*100+normalDate.month)*100+normalDate.day
         if not self._isValidNormalDate(self.normalDate):
-            raise NormalDateException("unable to setNormalDate(%r)" % normalDate)
+            raise NormalDateException("unable to setNormalDate(%s)" % repr(normalDate))
 
     def setYear(self, year):
         if year == 0:
