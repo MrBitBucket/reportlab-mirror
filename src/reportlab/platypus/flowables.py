@@ -373,10 +373,16 @@ class Image(Flowable):
 
     def _restrictSize(self,aW,aH):
         if self.drawWidth>aW+_FUZZ or self.drawHeight>aH+_FUZZ:
+            self._oldDrawSize = self.drawWidth, self.drawHeight
             factor = min(float(aW)/self.drawWidth,float(aH)/self.drawHeight)
             self.drawWidth *= factor
             self.drawHeight *= factor
         return self.drawWidth, self.drawHeight
+
+    def _unRestrictSize(self):
+        dwh = getattr(self,'_oldDrawSize',None)
+        if dwh:
+            self.drawWidth, self.drawHeight = dwh
 
     def __getattr__(self,a):
         if a=='_img':
@@ -1025,12 +1031,13 @@ class ImageAndFlowables(_Container,Flowable):
 
     def wrap(self,availWidth,availHeight):
         canv = self.canv
+        I = self._I
         if hasattr(self,'_wrapArgs'):
-            if self._wrapArgs==(availWidth,availHeight):
+            if self._wrapArgs==(availWidth,availHeight) and getattr(I,'_oldDrawSize',None) is None:
                 return self.width,self.height
             self._reset()
+            I._unRestrictSize()
         self._wrapArgs = availWidth, availHeight
-        I = self._I
         I.wrap(availWidth,availHeight)
         wI, hI = I._restrictSize(availWidth,availHeight)
         self._wI = wI
@@ -1056,8 +1063,10 @@ class ImageAndFlowables(_Container,Flowable):
 
     def split(self,availWidth, availHeight):
         if hasattr(self,'_wrapArgs'):
-            if self._wrapArgs!=(availWidth,availHeight):
+            I = self._I
+            if self._wrapArgs!=(availWidth,availHeight) or getattr(I,'_oldDrawSize',None) is not None:
                 self._reset()
+                I._unRestrictSize()
         W,H=self.wrap(availWidth,availHeight)
         if self._aH>availHeight: return []
         C1 = self._C1
