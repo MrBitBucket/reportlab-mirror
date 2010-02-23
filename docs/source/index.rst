@@ -32,14 +32,4 @@ User Guide will remain in PDF format for now.  However, programmers need
 API refs online, and we want to learn Sphinx (and use rst2pdf) in due
 course.
 
- :ref:`API reference <api>` |
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-
 

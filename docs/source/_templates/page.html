@@ -15,21 +15,17 @@
     </div>
     <div id="content">
         <div id="breadcrumb">
-            <a href='/'>Home</a>  &raquo;  <a href='/software/'>Software products</a>  &raquo;  <a href=''>Documentation</a> 
         </div>
         <div id="divider">
             <div id="nav_bar">
                 <div id="nav_bar_top">
                     {% block sidebar1 %}{{ sidebar() }}{% endblock %}
-                    {% block sidebar2 %}{{ sidebar() }}{% endblock %}
                 </div>
             </div>
-            <div id="main_content_sub_pages">
+            <div id="main_content_sub_pages_wide">
                 {% block relbar1 %}{{ relbar() }}{% endblock %}
                 {{ body }}
                 {% block relbar2 %}{{ relbar() }}{% endblock %}
-            </div>
-            <div id="side_div">
             </div>
         </div>
         <div id="clear"></div>
