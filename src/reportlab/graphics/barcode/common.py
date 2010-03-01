@@ -661,7 +661,7 @@ class Code11(Barcode):
     http://www.cwi.nl/people/dik/english/codes/barcodes.html
     """
 
-    chars = string.digits + '-'
+    chars = '0123456789-'
 
     patterns = {
         '0' : 'bsbsB',        '1' : 'BsbsB',        '2' : 'bSbsB',
@@ -705,7 +705,7 @@ class Code11(Barcode):
         vval = ""
         self.valid = 1
         s = string.strip(self.value)
-        for i in range(0, len(s)):
+        for i in xrange(0, len(s)):
             c = s[i]
             if c not in self.chars:
                 self.Valid = 0
@@ -715,40 +715,33 @@ class Code11(Barcode):
         self.validated = vval
         return vval
 
+    def _addCSD(self,s,m):
+        # compute first checksum
+        i = c = 0
+        v = 1
+        V = self.values
+        while i < len(s):
+            c += v * V[s[-(i+1)]]
+            i += 1
+            v += 1
+            if v==m:
+                v = 1
+        return s+self.chars[c % 11]
+
     def encode(self):
         s = self.validated
 
-        if self.checksum == -1:
-            if len(s) <= 10:
-                self.checksum = 1
-            else:
-                self.checksum = 2
+        tcs = self.checksum
+        if tcs<0:
+            self.checksum = tcs = 1+int(len(s)>10)
 
-        if self.checksum > 0:
-            # compute first checksum
-            i = 0; v = 1; c = 0
-            while i < len(s):
-                c = c + v * string.index(self.chars, s[-(i+1)])
-                i = i + 1; v = v + 1
-                if v > 10:
-                    v = 1
-            s = s + self.chars[c % 11]
-
-        if self.checksum > 1:
-            # compute second checksum
-            i = 0; v = 1; c = 0
-            while i < len(s):
-                c = c + v * string.index(self.chars, s[-(i+1)])
-                i = i + 1; v = v + 1
-                if v > 9:
-                    v = 1
-            s = s + self.chars[c % 10]
+        if tcs > 0: s = self._addCSD(s,11)
+        if tcs > 1: s = self._addCSD(s,10)
 
         self.encoded = self.stop and ('S' + s + 'S') or s
 
     def decompose(self):
-        dval = [self.patterns[c]+'i' for c in self.encoded]
-        self.decomposed = ''.join(dval[:-1])
+        self.decomposed = ''.join([(self.patterns[c]+'i') for c in self.encoded])[:-1]
         return self.decomposed
 
     def _humanText(self):
