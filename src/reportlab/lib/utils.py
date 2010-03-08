@@ -1129,3 +1129,31 @@ def annotateException(msg,enc='utf8'):
         A.append(msg)
     v.args = tuple(A)
     raise t,v,b
+    
+def escapeOnce(data):
+    """Ensure XML output is escaped just once, irrespective of input
+
+    >>> escapeOnce('A & B')
+    'A &amp; B'
+    >>> escapeOnce('C &amp; D')
+    'C &amp; D'
+    >>> escapeOnce('E &amp;amp; F')
+    'E &amp; F'
+
+    """
+    data = data.replace("&", "&amp;")
+
+    #...but if it was already escaped, make sure it
+    # is not done twice....this will turn any tags
+    # back to how they were at the start.
+    data = data.replace("&amp;amp;", "&amp;")
+    data = data.replace("&amp;gt;", "&gt;")
+    data = data.replace("&amp;lt;", "&lt;")
+    data = data.replace("&amp;#", "&#")
+
+    #..and just in case someone had double-escaped it, do it again
+    data = data.replace("&amp;amp;", "&amp;")
+    data = data.replace("&amp;gt;", "&gt;")
+    data = data.replace("&amp;lt;", "&lt;")
+    return data
+    

@@ -46,7 +46,7 @@ epsilon.
 
 from reportlab.lib import enums
 from reportlab.lib.units import cm
-from reportlab.lib.utils import commasplit
+from reportlab.lib.utils import commasplit, escapeOnce
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable
@@ -446,7 +446,6 @@ class SimpleIndex(IndexingFlowable):
         alphaStyle = self.getLevelStyle(0)
         for texts, pageNumbers in _tempEntries:
             texts = list(texts)
-            
             #track when the first character changes; either output some extra
             #space, or the first letter on a row of its own.  We cannot do
             #widow/orphan control, sadly.
@@ -469,6 +468,11 @@ class SimpleIndex(IndexingFlowable):
             label = encodestring(dumps(list(pageNumbers))).strip()
             texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (texts[-1], label)
             for text in texts:
+                #Platypus and RML differ on how parsed XML attributes are escaped.  
+                #e.g. <index item="M&S"/>.  The only place this seems to bite us is in
+                #the index entries so work around it here.
+                text = escapeOnce(text)    
+                
                 style = self.getLevelStyle(i+leveloffset)
                 para = Paragraph(text, style)
                 if style.spaceBefore:

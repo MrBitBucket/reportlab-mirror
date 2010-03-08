@@ -94,12 +94,21 @@ class IndexTestCase(unittest.TestCase):
             description = '<font color=red>%s</font>' % (self.test0.__doc__  % (headers and 'with alphabetic headers ' or ''))
             story.append(Paragraph(description, bt))
             index = SimpleIndex(dot=' . ', headers=headers)
+
     
             for i in range(20):
                 words = randomtext.randomText(randomtext.PYTHON, 5).split(' ')
                 txt = ' '.join([(len(w) > 5 and '<index item=%s/>%s' % (quoteattr(commajoin([w[:2], w[:3], w])), w) or w) for w in words])
                 para = Paragraph(txt, makeBodyStyle())
                 story.append(para)
+
+
+            #test ampersand in index term
+            txt = '\nMarks &amp; Spencer - purveyors of fine groceries, underwear and ampersands - should have their initials displayed however they were input.\n<index item="M&S,groceries"/><index item="M&S,underwear"/><index item="M&amp;S,ampersands"/>'
+            para = Paragraph(txt, makeBodyStyle())
+            story.append(para)
+        
+
             story.append(index)
     
             doc.build(story, canvasmaker=index.getCanvasMaker())
