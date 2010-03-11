@@ -1,11 +1,11 @@
 ===================================
-pdfgen
+package reportlab.pdfgen
 ===================================
 
 .. rubric:: The basics
 
-canvas
------------------------
+module reportlab.pdfgen.canvas
+------------------------------
 
 .. automodule:: reportlab.pdfgen.canvas
    :members:
