@@ -1,16 +1,7 @@
 #!/usr/bin/env python
-import os, sys, string, re
+import os, sys, string, re, ConfigParser
 VERSION = re.search(r'^#\s*define\s+VERSION\s*"([^"]+)"',open('_renderPM.c','r').read(),re.MULTILINE)
 VERSION = VERSION and VERSION.group(1) or 'unknown'
-def libart_version():
-	K = ('LIBART_MAJOR_VERSION','LIBART_MINOR_VERSION','LIBART_MICRO_VERSION')
-	D = {}
-	for l in open('libart_lgpl/configure.in','r').readlines():
-		l = string.split(string.strip(l),'=')
-		if len(l)>1 and string.strip(l[0]) in K:
-			D[string.strip(l[0])] = string.strip(l[1])
-			if len(D)==3: break
-	return (sys.platform == 'win32' and '\\"%s\\"' or '"%s"') % string.join(map(lambda k,D=D: D.get(k,'?'),K),'.')
 
 if sys.hexversion<0x20000a0:
 	import struct
@@ -26,11 +17,29 @@ def pfxJoin(pfx,*N):
 		R.append(os.path.join(pfx,n))
 	return R
 
-FT_LIB='C:/Devel/freetype-2.1.5/objs/freetype214.lib'
-FT_INCLUDE=None
-def check_ft_lib(ft_lib=FT_LIB):
+INFOLINES=[]
+def infoline(t):
+	print t
+	INFOLINES.append(t)
+
+def check_ft_lib(ft_lib):
 	if sys.hexversion<0x20000a0: return ''
 	return os.path.isfile(ft_lib) and ft_lib or ''
+
+class config:
+	def __init__(self):
+		try:
+			self.parser = ConfigParser.RawConfigParser()
+			self.parser.read(pjoin(pkgDir,'setup.cfg'))
+		except:
+			self.parser = None
+
+	def __call__(self,sect,name,default=None):
+		try:
+			return self.parser.get(sect,name)
+		except:
+			return default
+config = config()
 
 def main():
 	cwd = os.getcwd()
@@ -39,34 +48,102 @@ def main():
 	MACROS=[]
 	from glob import glob
 	from distutils.core import setup, Extension
-	pJoin=os.path.join
+	pjoin=os.path.join
 
-	LIBART_VERSION = libart_version()
-	SOURCES=['_renderPM.c']
-	DEVEL_DIR=os.curdir
-	LIBART_DIR=pJoin(DEVEL_DIR,'libart_lgpl')
-	LIBART_SRCS=glob(pJoin(LIBART_DIR, 'art_*.c'))
-	GT1_DIR=pJoin(DEVEL_DIR,'gt1')
+	RENDERPM=os.getcwd()
+	LIBART_DIR=pjoin(RENDERPM,'libart_lgpl')
+	GT1_DIR=pjoin(RENDERPM,'gt1')
+	MACROS=[('ROBIN_DEBUG',None)]
+	MACROS=[]
 	platform = sys.platform
-	LIBS = []		#assume empty libraries list
+	def libart_version():
+		K = ('LIBART_MAJOR_VERSION','LIBART_MINOR_VERSION','LIBART_MICRO_VERSION')
+		D = {}
+		for l in open(pjoin(LIBART_DIR,'configure.in'),'r').readlines():
+			l = l.strip().split('=')
+			if len(l)>1 and l[0].strip() in K:
+				D[l[0].strip()] = l[1].strip()
+				if len(D)==3: break
+		return (platform == 'win32' and '\\"%s\\"' or '"%s"') % '.'.join(map(lambda k,D=D: D.get(k,'?'),K))
+	LIBART_VERSION = libart_version()
+	SOURCES=[pjoin(RENDERPM,'_renderPM.c'),
+				pjoin(LIBART_DIR,'art_vpath_bpath.c'),
+				pjoin(LIBART_DIR,'art_rgb_pixbuf_affine.c'),
+				pjoin(LIBART_DIR,'art_rgb_svp.c'),
+				pjoin(LIBART_DIR,'art_svp.c'),
+				pjoin(LIBART_DIR,'art_svp_vpath.c'),
+				pjoin(LIBART_DIR,'art_svp_vpath_stroke.c'),
+				pjoin(LIBART_DIR,'art_svp_ops.c'),
+				pjoin(LIBART_DIR,'art_vpath.c'),
+				pjoin(LIBART_DIR,'art_vpath_dash.c'),
+				pjoin(LIBART_DIR,'art_affine.c'),
+				pjoin(LIBART_DIR,'art_rect.c'),
+				pjoin(LIBART_DIR,'art_rgb_affine.c'),
+				pjoin(LIBART_DIR,'art_rgb_affine_private.c'),
+				pjoin(LIBART_DIR,'art_rgb.c'),
+				pjoin(LIBART_DIR,'art_rgb_rgba_affine.c'),
+				pjoin(LIBART_DIR,'art_svp_intersect.c'),
+				pjoin(LIBART_DIR,'art_svp_render_aa.c'),
+				pjoin(LIBART_DIR,'art_misc.c'),
+				pjoin(GT1_DIR,'gt1-parset1.c'),
+				pjoin(GT1_DIR,'gt1-dict.c'),
+				pjoin(GT1_DIR,'gt1-namecontext.c'),
+				pjoin(GT1_DIR,'gt1-region.c'),
+				]
 
-	if os.path.isdir('/usr/local/include/freetype2'):
-		FT_LIB = ['freetype']
-		FT_LIB_DIR = ['/usr/local/lib']
-		FT_MACROS = [('RENDERPM_FT',None)]
-		FT_INC_DIR = ['/usr/local/include','/usr/local/include/freetype2']
-	else:
-		ft_lib = check_ft_lib()
-		if ft_lib:
-			FT_LIB = [os.path.splitext(os.path.basename(ft_lib))[0]]
-			FT_LIB_DIR = [os.path.dirname(ft_lib)]
+	if platform=='win32':
+		FT_LIB=os.environ.get('FREETYPE_LIB','')
+		if not FT_LIB: FT_LIB=config('FREETYPE','lib','')
+		if FT_LIB and not os.path.isfile(FT_LIB):
+			infoline('# freetype lib %r not found' % FT_LIB)
+			FT_LIB=[]
+		if FT_LIB:
+			FT_INC_DIR=os.environ.get('FREETYPE_INC','')
+			if not FT_INC_DIR: FT_INC_DIR=config('FREETYPE','incdir')
 			FT_MACROS = [('RENDERPM_FT',None)]
-			FT_INC_DIR = [FT_INCLUDE or os.path.join(os.path.dirname(os.path.dirname(ft_lib)),'include')]
+			FT_LIB_DIR = [dirname(FT_LIB)]
+			FT_INC_DIR = [FT_INC_DIR or pjoin(dirname(FT_LIB_DIR[0]),'include')]
+			FT_LIB_PATH = FT_LIB
+			FT_LIB = [os.path.splitext(os.path.basename(FT_LIB))[0]]				
+			if os.path.isdir(FT_INC_DIR[0]):				   
+				infoline('# installing with freetype %r' % FT_LIB_PATH)
+			else:
+				infoline('# freetype2 include folder %r not found' % FT_INC_DIR[0])
+				FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
 		else:
-			FT_LIB = []
-			FT_LIB_DIR = []
-			FT_MACROS = []
-			FT_INC_DIR = []
+			FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
+	else:
+		FT_LIB_DIR=config('FREETYPE','libdir')
+		FT_INC_DIR=config('FREETYPE','incdir')
+		I,L=inc_lib_dirs()
+		ftv = None
+		for d in I:
+			if isfile(pjoin(d, "ft2build.h")):
+				ftv = 21
+				FT_INC_DIR=[d,pjoin(d, "freetype2")]
+				break
+			d = pjoin(d, "freetype2")
+			if isfile(pjoin(d, "ft2build.h")):
+				ftv = 21
+				FT_INC_DIR=[d]
+				break
+			if isdir(pjoin(d, "freetype")):
+				ftv = 20
+				FT_INC_DIR=[d]
+				break
+		if ftv:
+			FT_LIB=['freetype']
+			FT_LIB_DIR=L
+			FT_MACROS = [('RENDERPM_FT',None)]
+			infoline('# installing with freetype version %d' % ftv)
+		else:
+			FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
+	if not FT_LIB:
+		infoline('# installing without freetype no ttf, sorry!')
+		infoline('# You need to install a static library version of the freetype2 software')
+		infoline('# If you need truetype support in renderPM')
+		infoline('# You may need to edit setup.cfg (win32)')
+		infoline('# or edit this file to access the library if it is installed')
 
 	setup(	name = "_renderPM",
 			version = VERSION,
@@ -75,53 +152,21 @@ def main():
 			author_email = "robin@reportlab.com",
 			url = "http://www.reportlab.com",
 			packages = [],
-			libraries=[('_renderPM_libart',
-						{
-						'sources':	LIBART_SRCS,
-						'include_dirs': [DEVEL_DIR,LIBART_DIR,],
-						'macros': [('LIBART_COMPILATION',None),]+BIGENDIAN('WORDS_BIGENDIAN')+MACROS,
-						#'extra_compile_args':['/Z7'],
-						}
-						),
-						('_renderPM_gt1',
-						{
-						'sources':	pfxJoin(GT1_DIR,'gt1-dict.c','gt1-namecontext.c','gt1-parset1.c','gt1-region.c','parseAFM.c'),
-						'include_dirs': [DEVEL_DIR,GT1_DIR,],
-						'macros': MACROS,
-						#'extra_compile_args':['/Z7'],
-						}
-						),
-						],
-			ext_modules = 	[Extension(	'_renderPM',
+			ext_modules = 	[
+							Extension( '_renderPM',
 										SOURCES,
-										include_dirs=[DEVEL_DIR,LIBART_DIR,GT1_DIR]+FT_INC_DIR,
+										include_dirs=[RENDERPM,LIBART_DIR,GT1_DIR]+FT_INC_DIR,
 										define_macros=FT_MACROS+[('LIBART_COMPILATION',None)]+MACROS+[('LIBART_VERSION',LIBART_VERSION)],
 										library_dirs=[]+FT_LIB_DIR,
 
 										# libraries to link against
-										libraries=LIBS+FT_LIB,
+										libraries=FT_LIB,
 										#extra_objects=['gt1.lib','libart.lib',],
 										#extra_compile_args=['/Z7'],
 										extra_link_args=[]
 										),
 							],
 			)
-
-	if sys.hexversion<0x2030000 and sys.platform=='win32' and ('install' in sys.argv or 'install_ext' in sys.argv):
-		def MovePYDs(*F):
-			for x in sys.argv:
-				if x[:18]=='--install-platlib=': return
-			src = sys.exec_prefix
-			dst = os.path.join(src,'DLLs')
-			if sys.hexversion>=0x20200a0: src = os.path.join(src,'lib','site-packages')
-			for f in F:
-				srcf = os.path.join(src,f)
-				if not os.path.isfile(srcf): continue
-				dstf = os.path.join(dst,f)
-				if os.path.isfile(dstf):
-					os.remove(dstf)
-				os.rename(srcf,dstf)
-		MovePYDs('_renderPM.pyd','_renderPM.pdb')
 
 if __name__=='__main__': #NO RUNTESTS
 	main()
