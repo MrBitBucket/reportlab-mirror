@@ -433,7 +433,8 @@ class _XTicks:
             else:
                 iFuzz = 1e-8
                 dCnv = lambda x:x
-            OTV = otv[:]
+
+            OTV = [tv for tv in otv if getattr(tv,'_doSubTicks',1)]
             T = [].append
             nst = int(self.subTickNum)
             i = len(OTV)
@@ -1167,9 +1168,9 @@ class ValueAxis(_AxisG):
         else:
             sk = []
 
-        i = 0
-        for tick in self._tickValues:
-            if f and labels[i].visible:
+        for i,tick in enumerate(self._tickValues):
+            label = labels[i]
+            if f and label.visible:
                 v = self.scale(tick)
                 if sk:
                     for skv in sk:
@@ -1196,12 +1197,10 @@ class ValueAxis(_AxisG):
                     else:
                         raise ValueError, 'Invalid labelTextFormat %s' % f
                     if post: txt = post % txt
-                    label = labels[i]
                     pos[d] = v
                     label.setOrigin(*pos)
                     label.setText(txt)
                     g.add(label)
-            i += 1
 
         return g
 
@@ -1385,6 +1384,7 @@ class NormalDateXValueAxis(XValueAxis):
         monthName = AttrMapValue(SequenceOf(isString,emptyOK=0,lo=12,hi=12), desc='Month names.'),
         dailyFreq = AttrMapValue(isBoolean, desc='True if we are to assume daily data to be ticked at end of month.'),
         specifiedTickDates = AttrMapValue(NoneOr(SequenceOf(isNormalDate)), desc='Actual tick values to use; no calculations done'),
+        specialTickClear = AttrMapValue(isBoolean, desc='clear rather than delete close ticks when forced first/end dates'),
         )
 
     _valueClass = normalDate.ND
@@ -1403,6 +1403,7 @@ class NormalDateXValueAxis(XValueAxis):
         self.dayOfWeekName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         self.monthName = ['January', 'February', 'March', 'April', 'May', 'June', 'July',
                             'August', 'September', 'October', 'November', 'December']
+        self.specialTickClear = 0
         self.valueSteps = self.specifiedTickDates = None
 
     def _scalar2ND(self, x):
@@ -1432,6 +1433,9 @@ class NormalDateXValueAxis(XValueAxis):
         """
         axisLength = self._length
         formatter = self._dateFormatter
+        if isinstance(formatter,TickLabeller):
+            def formatter(tick):
+                return self._dateFormatter(self,tick)
         labels = self.labels
         fontName, fontSize, leading = labels.fontName, labels.fontSize, labels.leading
         textAnchor, boxAnchor, angle = labels.textAnchor, labels.boxAnchor, labels.angle
@@ -1447,6 +1451,7 @@ class NormalDateXValueAxis(XValueAxis):
         ticks = []
         labels = []
         maximumTicks = self.maximumTicks
+
 
         def addTick(i, xVals=xVals, formatter=formatter, ticks=ticks, labels=labels):
             ticks.insert(0,xVals[i])
@@ -1501,8 +1506,10 @@ class NormalDateXValueAxis(XValueAxis):
                 if self.niceMonth:
                     j = xVals[-1].month() % (d<=12 and d or 12)
                     if j:
-                        if self.forceEndDate: addTick(i)
-                        i = i - j
+                        if self.forceEndDate:
+                            addTick(i)
+                            ticks[0]._doSubTicks=0
+                        i -= j
 
                 #weird first date ie not at end of month
                 try:
@@ -1512,15 +1519,22 @@ class NormalDateXValueAxis(XValueAxis):
 
                 while i>=wfd:
                     addTick(i)
-                    i = i - d
+                    i -= d
 
                 if self.forceFirstDate and ticks[0] != xVals[0]:
                     addTick(0)
+                    ticks[0]._doSubTicks=0
                     if (axisLength/(ticks[-1]-ticks[0]))*(ticks[1]-ticks[0])<=w:
-                        del ticks[1], labels[1]
+                        if self.specialTickClear:
+                            labels[1] = ''
+                        else:
+                            del ticks[1], labels[1]
                 if self.forceEndDate and self.niceMonth and j:
                     if (axisLength/(ticks[-1]-ticks[0]))*(ticks[-1]-ticks[-2])<=w:
-                        del ticks[-2], labels[-2]
+                        if self.specialTickClear:
+                            labels[-2] = ''
+                        else:
+                            del ticks[-2], labels[-2]
                 try:
                     if labels[0] and labels[0]==labels[1]:
                         del ticks[1], labels[1]
