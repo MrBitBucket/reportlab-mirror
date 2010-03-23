@@ -525,10 +525,11 @@ def _isPILImage(im):
 class ImageReader(object):
     "Wraps up either PIL or Java to get data from bitmaps"
     _cache={}
-    def __init__(self, fileName):
+    def __init__(self, fileName,ident=None):
         if isinstance(fileName,ImageReader):
             self.__dict__ = fileName.__dict__   #borgize
             return
+        self._ident = ident
         #start wih lots of null private fields, to be populated by
         #the relevant engine.
         self.fileName = fileName
@@ -583,13 +584,15 @@ class ImageReader(object):
                     self._dataA=None
                     self.fp.seek(0)
             except:
-                et,ev,tb = sys.exc_info()
-                if hasattr(ev,'args'):
-                    a = str(ev.args[-1])+(' fileName=%r'%fileName)
-                    ev.args= ev.args[:-1]+(a,)
-                    raise et,ev,tb
-                else:
-                    raise
+                annotateException('\nfileName=%r identity=%s'%(fileName,self.identity()))
+
+    def identity(self):
+        '''try to return information that will identify the instance'''
+        fn = self.fileName
+        if not isinstance(fn,basestring):
+            fn = getattr(getattr(self,'fp',None),'name',None)
+        ident = self._ident
+        return '[%s@%s%s%s]' % (self.__class__.__name__,hex(id(self)),ident and (' ident=%r' % ident) or '',fn and (' filename=%r' % fn) or '')
 
     def _read_image(self,fp):
         if sys.platform[0:4] == 'java':
@@ -617,39 +620,42 @@ class ImageReader(object):
 
     def getRGBData(self):
         "Return byte array of RGB data as string"
-        if self._data is None:
-            self._dataA = None
-            if sys.platform[0:4] == 'java':
-                import jarray
-                from java.awt.image import PixelGrabber
-                width, height = self.getSize()
-                buffer = jarray.zeros(width*height, 'i')
-                pg = PixelGrabber(self._image, 0,0,width,height,buffer,0,width)
-                pg.grabPixels()
-                # there must be a way to do this with a cast not a byte-level loop,
-                # I just haven't found it yet...
-                pixels = []
-                a = pixels.append
-                for i in range(len(buffer)):
-                    rgb = buffer[i]
-                    a(chr((rgb>>16)&0xff))
-                    a(chr((rgb>>8)&0xff))
-                    a(chr(rgb&0xff))
-                self._data = ''.join(pixels)
-                self.mode = 'RGB'
-            else:
-                im = self._image
-                mode = self.mode = im.mode
-                if mode=='RGBA':
-                    if Image.VERSION.startswith('1.1.7'): im.load()
-                    self._dataA = ImageReader(im.split()[3])
-                    im = im.convert('RGB')
+        try:
+            if self._data is None:
+                self._dataA = None
+                if sys.platform[0:4] == 'java':
+                    import jarray
+                    from java.awt.image import PixelGrabber
+                    width, height = self.getSize()
+                    buffer = jarray.zeros(width*height, 'i')
+                    pg = PixelGrabber(self._image, 0,0,width,height,buffer,0,width)
+                    pg.grabPixels()
+                    # there must be a way to do this with a cast not a byte-level loop,
+                    # I just haven't found it yet...
+                    pixels = []
+                    a = pixels.append
+                    for i in range(len(buffer)):
+                        rgb = buffer[i]
+                        a(chr((rgb>>16)&0xff))
+                        a(chr((rgb>>8)&0xff))
+                        a(chr(rgb&0xff))
+                    self._data = ''.join(pixels)
                     self.mode = 'RGB'
-                elif mode not in ('L','RGB','CMYK'):
-                    im = im.convert('RGB')
-                    self.mode = 'RGB'
-                self._data = im.tostring()
-        return self._data
+                else:
+                    im = self._image
+                    mode = self.mode = im.mode
+                    if mode=='RGBA':
+                        if Image.VERSION.startswith('1.1.7'): im.load()
+                        self._dataA = ImageReader(im.split()[3])
+                        im = im.convert('RGB')
+                        self.mode = 'RGB'
+                    elif mode not in ('L','RGB','CMYK'):
+                        im = im.convert('RGB')
+                        self.mode = 'RGB'
+                    self._data = im.tostring()
+            return self._data
+        except:
+            annotateException('\nidentity=%s'%self.identity())
 
     def getImageData(self):
         width, height = self.getSize()
@@ -1108,7 +1114,9 @@ def findInPaths(fn,paths,isfile=True,fail=False):
 
 def annotateException(msg,enc='utf8'):
     '''add msg to the args of an existing exception'''
+    if not msg: rise
     t,v,b=sys.exc_info()
+    if not hasattr(v,'args'): raise
     e = -1
     A = list(v.args)
     for i,a in enumerate(A):
