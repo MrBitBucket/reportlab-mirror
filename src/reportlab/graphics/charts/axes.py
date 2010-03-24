@@ -1524,13 +1524,13 @@ class NormalDateXValueAxis(XValueAxis):
                 if self.forceFirstDate and ticks[0] != xVals[0]:
                     addTick(0)
                     ticks[0]._doSubTicks=0
-                    if (axisLength/(ticks[-1]-ticks[0]))*(ticks[1]-ticks[0])<=w:
+                    if (axisLength/float(ticks[-1]-ticks[0]))*(ticks[1]-ticks[0])<=W:
                         if self.specialTickClear:
                             labels[1] = ''
                         else:
                             del ticks[1], labels[1]
                 if self.forceEndDate and self.niceMonth and j:
-                    if (axisLength/(ticks[-1]-ticks[0]))*(ticks[-1]-ticks[-2])<=w:
+                    if (axisLength/float(ticks[-1]-ticks[0]))*(ticks[-1]-ticks[-2])<=W:
                         if self.specialTickClear:
                             labels[-2] = ''
                         else:
