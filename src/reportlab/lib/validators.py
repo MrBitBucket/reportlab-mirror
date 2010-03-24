@@ -9,6 +9,7 @@ from types import *
 _SequenceTypes = (ListType,TupleType)
 _NumberTypes = (FloatType,IntType)
 from reportlab.lib import colors
+from reportlab.lib.normalDate import NormalDate as ND
 if sys.hexversion<0x2030000:
     True = 1
     False = 0
@@ -59,6 +60,16 @@ class _isBoolean(Validator):
         if S in ('NO','FALSE',None): return False
         raise ValueError, 'Must be boolean'
 
+class _isNormalDate(Validator):
+    def normalize(self, x):
+        return ND(x)
+    def test(self, x):
+        try:
+            self.normalize(x)
+            return True
+        except Exception, e:
+            return False
+       
 class _isString(Validator):
     def test(self,x):
         return type(x) in (StringType, UnicodeType)
