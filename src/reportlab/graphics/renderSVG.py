@@ -309,8 +309,10 @@ class SVGCanvas:
 
         if self.verbose: print "+++ SVGCanvas.rect"
 
+        x = min(x1,x2)
+        y = min(y1,y2)
         rect = transformNode(self.doc, "rect",
-            x=x1, y=y1, width=x2-x1, height=y2-y1,
+            x=x, y=y, width=max(x1,x2)-x, height=max(y1,y2)-y,
             style=self._formatStyle(LINE_STYLES))
 
         if link_info :
