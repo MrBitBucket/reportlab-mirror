@@ -799,7 +799,7 @@ class _PSRenderer(Renderer):
                 elif text_anchor=='middle':
                     x -= textLen/2
                 elif text_anchor=='numeric':
-                    x -= numericXShift(text_anchor,text,textLen,font,fontSize)
+                    x -= numericXShift(text_anchor,text,textLen,font,fontSize,encoding='winansi')
                 else:
                     raise ValueError, 'bad value for text_anchor '+str(text_anchor)
             self._canvas.drawString(x,y,text)
