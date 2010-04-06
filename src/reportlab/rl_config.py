@@ -9,6 +9,7 @@ shapeChecking =             1
 defaultEncoding =           'WinAnsiEncoding'       # 'WinAnsi' or 'MacRoman'
 defaultGraphicsFontName=    'Times-Roman'               #initializer for STATE_DEFAULTS in shapes.py
 pageCompression =           1                       # default page compression mode
+useA85 =                    1                       #set to 0 to disable Ascii Base 85 stream filters
 defaultPageSize =           'A4'                    #default page size
 defaultImageCaching =       0                       #set to zero to remove those annoying cached images
 ZLIB_WARNINGS =             1
@@ -123,6 +124,7 @@ except:
 _SAVED = {}
 sys_version=None
 
+#this is used to set the options from
 def _setOpt(name, value, conv=None):
     '''set a module level value from environ/default'''
     from os import environ

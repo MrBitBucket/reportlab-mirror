@@ -49,11 +49,34 @@ def makeA85Image(filename,IMG=None):
 
     append('EI')
     return code
+def makeRawImage(filename,IMG=None):
+    import zlib
+    img = ImageReader(filename)
+    if IMG is not None: IMG.append(img)
+
+    imgwidth, imgheight = img.getSize()
+    raw = img.getRGBData()
+
+    code = []
+    append = code.append
+    # this describes what is in the image itself
+    append('BI')
+    append('/W %s /H %s /BPC 8 /CS /%s /F [/Fl]' % (imgwidth, imgheight,_mode2cs[img.mode]))
+    append('ID')
+    #use a flate filter
+    assert len(raw) == imgwidth * imgheight*_mode2bpp[img.mode], "Wrong amount of data for image"
+    compressed = zlib.compress(raw)   #this bit is very fast...
+
+    #append in blocks of 60 characters
+    _chunker(compressed,code)
+
+    append('EI')
+    return code
 
 def cacheImageFile(filename, returnInMemory=0, IMG=None):
     "Processes image as if for encoding, saves to a file with .a85 extension."
 
-    cachedname = os.path.splitext(filename)[0] + '.a85'
+    cachedname = os.path.splitext(filename)[0] + (rl_config.useA85 and '.a85' or '.bin')
     if filename==cachedname:
         if cachedImageExists(filename):
             from reportlab.lib.utils import open_for_read
@@ -61,7 +84,10 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
         else:
             raise IOError, 'No such cached image %s' % filename
     else:
-        code = makeA85Image(filename,IMG)
+        if rl_config.useA85:
+            code = makeA85Image(filename,IMG)
+        else:
+            code = makeRawImage(filename,IMG)
         if returnInMemory: return code
 
         #save it to a file
@@ -100,7 +126,7 @@ def cachedImageExists(filename):
 
     Determines if a cached image exists which has the same name
     and equal or newer date to the given file."""
-    cachedname = os.path.splitext(filename)[0] + '.a85'
+    cachedname = os.path.splitext(filename)[0] + ('.a85' if rl_config.useA85 else '.bin')
     if os.path.isfile(cachedname):
         #see if it is newer
         original_date = os.stat(filename)[8]

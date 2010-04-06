@@ -806,7 +806,8 @@ def teststream(content=None):
         content = teststreamcontent
     content = string.strip(content)
     content = string.replace(content, "\n", LINEEND) + LINEEND
-    S = PDFStream(content = content,filters=[PDFBase85Encode,PDFZCompress])
+    S = PDFStream(content = content,
+                    filters=rl_config.useA85 and [PDFBase85Encode,PDFZCompress] or [PDFZCompress])
     # nothing else needed...
     S.__Comment__ = "test stream"
     return S
@@ -1146,7 +1147,7 @@ class PDFPage(PDFCatalog):
             else:
                 S = PDFStream()
                 if self.compression:
-                    S.filters = [PDFBase85Encode, PDFZCompress]
+                    S.filters = rl_config.useA85 and [PDFBase85Encode, PDFZCompress] or [PDFZCompress]
                 S.content = stream
                 S.__Comment__ = "page stream"
                 self.Contents = S
@@ -2019,7 +2020,7 @@ class PDFFormXObject:
                 resources.XObject = self.XObjects
             self.Resources=resources
         if self.compression:
-            self.Contents.filters = [PDFBase85Encode, PDFZCompress]
+            self.Contents.filters = rl_config.useA85 and [PDFBase85Encode, PDFZCompress] or [PDFZCompress]
         sdict = self.Contents.dictionary
         sdict["Type"] = PDFName("XObject")
         sdict["Subtype"] = PDFName("Form")
@@ -2058,7 +2059,7 @@ class PDFImageXObject:
         self.height = 23
         self.bitsPerComponent = 1
         self.colorSpace = 'DeviceGray'
-        self._filters = 'ASCII85Decode',
+        self._filters = rl_config.useA85 and ('ASCII85Decode',) or ()
         self.streamContent = """
             003B00 002700 002480 0E4940 114920 14B220 3CB650
             75FE88 17FF8C 175F14 1C07E2 3803C4 703182 F8EDFC
@@ -2077,7 +2078,10 @@ class PDFImageXObject:
             ext = string.lower(os.path.splitext(source)[1])
             src = open_for_read(source)
             if not(ext in ('.jpg', '.jpeg') and self.loadImageFromJPEG(src)):
-                self.loadImageFromA85(src)
+                if rl_config.useA85:
+                    self.loadImageFromA85(src)
+                else:
+                    self.loadImageFromRaw(src)
 
     def loadImageFromA85(self,source):
         IMG=[]
@@ -2108,10 +2112,26 @@ class PDFImageXObject:
         else: #maybe should generate an error, is this right for CMYK?
             self.colorSpace = 'DeviceCMYK'
             self._dotrans = 1
-        self.streamContent = pdfutils._AsciiBase85Encode(imageFile.read())
-        self._filters = 'ASCII85Decode','DCTDecode' #'A85','DCT'
+        self.streamContent = imageFile.read()
+        if rl_config.useA85:
+            self.streamContent = pdfutils._AsciiBase85Encode(self.streamContent)
+            self._filters = 'ASCII85Decode','DCTDecode' #'A85','DCT'
+        else:
+            self._filters = 'DCTDecode', #'DCT'
         self.mask = None
         return True
+
+    def loadImageFromRaw(self,source):
+        IMG=[]
+        imagedata = pdfutils.makeRawImage(source,IMG=IMG)
+        words = string.split(imagedata[1])
+        self.width, self.height = map(string.atoi,(words[1],words[3]))
+        self.colorSpace = {'/RGB':'DeviceRGB', '/G':'DeviceGray', '/CMYK':'DeviceCMYK'}[words[7]]
+        self.bitsPerComponent = 8
+        self._filters = 'FlateDecode', #'Fl'
+        if IMG: self._checkTransparency(IMG[0])
+        elif self.mask=='auto': self.mask = None
+        self.streamContent = string.join(imagedata[3:-1],'')
 
     def _checkTransparency(self,im):
         if self.mask=='auto':
@@ -2140,10 +2160,14 @@ class PDFImageXObject:
             self.width, self.height = im.getSize()
             raw = im.getRGBData()
             #assert len(raw) == self.width*self.height, "Wrong amount of data for image expected %sx%s=%s got %s" % (self.width,self.height,self.width*self.height,len(raw))
-            self.streamContent = pdfutils._AsciiBase85Encode(zlib.compress(raw))
+            self.streamContent = zlib.compress(raw)
+            if rl_config.useA85:
+                self.streamContent = pdfutils._AsciiBase85Encode(self.streamContent)
+                self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
+            else:
+                self._filters = 'FlateDecode', #'Fl'
             self.colorSpace= _mode2CS[im.mode]
             self.bitsPerComponent = 8
-            self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
             self._checkTransparency(im)
 
     def format(self, document):

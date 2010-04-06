@@ -10,6 +10,7 @@ import os
 import string
 from types import StringType
 import reportlab
+from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.lib.utils import fp_str, getStringIO
@@ -63,11 +64,12 @@ class PDFImage:
         imageFile.seek(0) #reset file pointer
         imagedata = []
         #imagedata.append('BI /Width %d /Height /BitsPerComponent 8 /ColorSpace /%s /Filter [/Filter [ /ASCII85Decode /DCTDecode] ID' % (info[0], info[1], colorSpace))
-        imagedata.append('BI /W %d /H %d /BPC 8 /CS /%s /F [/A85 /DCT] ID' % (imgwidth, imgheight, colorSpace))
+        imagedata.append('BI /W %d /H %d /BPC 8 /CS /%s /F [%s/DCT] ID' % (imgwidth, imgheight, colorSpace, rl_config.useA85 and '/A85 ' or ''))
         #write in blocks of (??) 60 characters per line to a list
-        compressed = imageFile.read()
-        encoded = pdfutils._AsciiBase85Encode(compressed)
-        pdfutils._chunker(encoded,imagedata)
+        data = imageFile.read()
+        if rl_config.useA85:
+            data = pdfutils._AsciiBase85Encode(data)
+        pdfutils._chunker(data,imagedata)
         imagedata.append('EI')
         return (imagedata, imgwidth, imgheight)
 
@@ -80,7 +82,7 @@ class PDFImage:
             pdfutils.cacheImageFile(image)
 
         #now we have one cached, slurp it in
-        cachedname = os.path.splitext(image)[0] + '.a85'
+        cachedname = os.path.splitext(image)[0] + (rl_config.useA85 and '.a85' or '.bin')
         imagedata = open(cachedname,'rb').readlines()
         #trim off newlines...
         imagedata = map(string.strip, imagedata)
@@ -109,16 +111,16 @@ class PDFImage:
 
         # this describes what is in the image itself
         # *NB* according to the spec you can only use the short form in inline images
-        #imagedata=['BI /Width %d /Height /BitsPerComponent 8 /ColorSpace /%s /Filter [/Filter [ /ASCII85Decode /FlateDecode] ID]' % (imgwidth, imgheight,'RGB')]
-        imagedata=['BI /W %d /H %d /BPC 8 /CS /%s /F [/A85 /Fl] ID' % (imgwidth, imgheight,colorSpace)]
+        imagedata=['BI /W %d /H %d /BPC 8 /CS /%s /F [%s/Fl] ID' % (imgwidth, imgheight,colorSpace, rl_config.useA85 and '/A85 ' or '')]
 
-        #use a flate filter and Ascii Base 85 to compress
+        #use a flate filter and, optionally, Ascii Base 85 to compress
         raw = myimage.tostring()
         assert len(raw) == imgwidth*imgheight*bpp, "Wrong amount of data for image"
-        compressed = zlib.compress(raw)   #this bit is very fast...
-        encoded = pdfutils._AsciiBase85Encode(compressed) #...sadly this may not be
+        data = zlib.compress(raw)    #this bit is very fast...
+        if rl_config.useA85:
+            data = pdfutils._AsciiBase85Encode(data) #...sadly this may not be
         #append in blocks of 60 characters
-        pdfutils._chunker(encoded,imagedata)
+        pdfutils._chunker(data,imagedata)
         imagedata.append('EI')
         return (imagedata, imgwidth, imgheight)
 
