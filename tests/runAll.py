@@ -114,7 +114,7 @@ def mainEx():
         os.close(sys.stderr.fileno())
 
 def runExternally():
-    cmd = sys.executable+' -c"from tests import runAll;runAll.mainEx()"'
+    cmd = '"%s" -c"from tests import runAll;runAll.mainEx()"' % sys.executable
     i,o,e=os.popen3(cmd)
     i.close()
     out = o.read()
