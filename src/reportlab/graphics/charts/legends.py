@@ -89,6 +89,8 @@ class SubColProperty(PropHolder):
         fillColor = AttrMapValue(isColorOrNone, desc="fontColor"),
         underlines = AttrMapValue(EitherOr((NoneOr(isInstanceOf(Line)),SequenceOf(isInstanceOf(Line),emptyOK=0,lo=0,hi=0x7fffffff))), desc="underline definitions"),
         overlines = AttrMapValue(EitherOr((NoneOr(isInstanceOf(Line)),SequenceOf(isInstanceOf(Line),emptyOK=0,lo=0,hi=0x7fffffff))), desc="overline definitions"),
+        dx = AttrMapValue(isNumber, desc="x offset from default position"),
+        dy = AttrMapValue(isNumber, desc="y offset from default position"),
         )
 
 class LegendCallout:
@@ -214,7 +216,7 @@ class Legend(Widget):
     def _init_subCols(self):
         sc = self.subCols = TypedPropertyCollection(SubColProperty)
         sc.rpad = 1
-        sc.minWidth = 0
+        sc.dx = sc.dy = sc.minWidth = 0
         sc.align = 'right'
         sc[0].align = 'left' 
 
@@ -403,6 +405,8 @@ class Legend(Widget):
                 x2 = x+jOffs[kk+1]
                 sc = subCols[k,i]
                 anchor = sc.align
+                scdx = sc.dx
+                scdy = sc.dy
                 fN = getattr(sc,'fontName',fontName)
                 fS = getattr(sc,'fontSize',fontSize)
                 fC = getattr(sc,'fillColor',fillColor)
@@ -425,7 +429,7 @@ class Legend(Widget):
                     anchor = 'middle'
                     xoffs = 0.5*(x1+x2)
                 for t in lines:
-                    aS(String(xoffs,y,t,fontName=fN,fontSize=fS,fillColor=fC, textAnchor = anchor))
+                    aS(String(xoffs+scdx,y+scdy,t,fontName=fN,fontSize=fS,fillColor=fC, textAnchor = anchor))
                     y -= fL
                 yd = min(yd,y)
                 y += fL
