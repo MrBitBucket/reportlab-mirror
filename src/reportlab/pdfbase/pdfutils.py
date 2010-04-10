@@ -175,18 +175,17 @@ except ImportError:
                 and chops off the quotes first."""
                 return repr(s)[1:-1].replace('(','\(').replace(')','\)')
 
-def _normalizeLineEnds(text,desired=LINEEND,unlikely='\000\001\002\003'):
+def _normalizeLineEnds(text,desired=LINEEND,unlikely='\x00\x01\x02\x03'):
     """Normalizes different line end character(s).
 
     Ensures all instances of CR, LF and CRLF end up as
     the specified one."""
     
     return (text
-            .replace('\015\012', unlikely)
-            .replace('\015', unlikely)
-            .replace(text, '\012', unlikely)
-            .replace(text, unlikely, desired))
-
+            .replace('\r\n', unlikely)
+            .replace('\r', unlikely)
+            .replace('\n', unlikely)
+            .replace(unlikely, desired))
 
 def _AsciiHexEncode(input):
     """Encodes input using ASCII-Hex coding.
