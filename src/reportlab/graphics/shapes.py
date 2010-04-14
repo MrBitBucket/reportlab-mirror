@@ -606,7 +606,7 @@ class Drawing(Group, Flowable):
             s = s + 'from %s import %s\n' % (m,string.replace(str(o)[1:-1],"'",""))
         s = s + '\nclass %s(_DrawingEditorMixin,Drawing):\n' % n
         s = s + '\tdef __init__(self,width=%s,height=%s,*args,**kw):\n' % (self.width,self.height)
-        s = s + '\t\tDrawing.__init__(self,width,height)+args,**kw)\n'
+        s = s + '\t\tDrawing.__init__(self,width,height,*args,**kw)\n'
         s = s + G
         s = s + '\n\nif __name__=="__main__": #NORUNTESTS\n\t%s().save(formats=[\'pdf\'],outDir=\'.\',fnRoot=None)\n' % n
         return s
