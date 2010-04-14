@@ -274,7 +274,7 @@ class LinePlot(AbstractLineChart):
             if self.joinedLines:
                 points = []
                 for xy in row:
-                    points = points + [xy[0], xy[1]]
+                    points += [xy[0], xy[1]]
                 if inFill or getattr(rowStyle,'inFill',False):
                     fpoints = [inFillX0,inFillY] + points + [inFillX1,inFillY]
                     filler = getattr(rowStyle, 'filler', None)
