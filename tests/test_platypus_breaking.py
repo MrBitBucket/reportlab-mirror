@@ -213,7 +213,7 @@ class BreakingTestCase(unittest.TestCase):
         canv.save()
         from reportlab import rl_config
         x = rl_config.paraFontSizeHeightOffset and '50' or '53.17'
-        good = ['q', '1 0 0 1 0 0 cm', 'q', 'BT 1 0 0 1 0 '+x+' Tm 10.082 Tw 12 TL /F2 10 Tf 0 0 0 rg (Subsequent pages test pageBreakBefore, frameBreakBefore and) Tj T* 0 Tw .985 Tw (keepTogether attributes. Generated at 1111. The number in brackets at the) Tj T* 0 Tw 3.78 Tw (end of each paragraph is its position in the story. llllllllllllllllllllllllll) Tj T* 0 Tw 92.38 Tw (bbbbbbbbbbbbbbbbbbbbbb ccccccccccccccccccccccc) Tj T* 0 Tw (ddddddddddddddddddddd eeeeyyy) Tj T* ET', 'Q', 'Q']
+        good = ['q', '1 0 0 1 0 0 cm', 'q', 'BT 1 0 0 1 0 '+x+' Tm 3.59 Tw 12 TL /F1 10 Tf 0 0 0 rg (Subsequent pages test pageBreakBefore, frameBreakBefore and) Tj T* 0 Tw .23 Tw (keepTogether attributes. Generated at 1111. The number in brackets) Tj T* 0 Tw .299167 Tw (at the end of each paragraph is its position in the story. llllllllllllllllllllllllll) Tj T* 0 Tw 66.9 Tw (bbbbbbbbbbbbbbbbbbbbbb ccccccccccccccccccccccc) Tj T* 0 Tw (ddddddddddddddddddddd eeeeyyy) Tj T* ET', 'Q', 'Q']
         ok= ParaCode==good
         assert ok, "\nParaCode=%r\nexpected=%r" % (ParaCode,good)
 
