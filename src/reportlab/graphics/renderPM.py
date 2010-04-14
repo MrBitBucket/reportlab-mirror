@@ -688,7 +688,7 @@ def test():
             h = int(drawing.height)
             html.append('<hr><h2>Drawing %s %d</h2>\n<pre>%s</pre>' % (name, i, docstring))
 
-            for k in ['gif','tiff', 'png', 'jpg', 'pct']:
+            for k in ['gif','tiff', 'png', 'jpg', 'pct', 'py', 'svg']:
                 if k in ['gif','png','jpg','pct']:
                     html.append('<p>%s format</p>\n' % string.upper(k))
                 try:
@@ -699,6 +699,8 @@ def test():
                     if k=='pct':
                         from reportlab.lib.colors import white
                         drawToFile(drawing,fullpath,fmt=k,configPIL={'transparent':white})
+                    elif k in ['py','svg']:
+                        drawing.save(formats=['py','svg'],outDir='pmout',fnRoot=fnRoot)
                     else:
                         drawToFile(drawing,fullpath,fmt=k)
                     if k in ['gif','png','jpg']:
