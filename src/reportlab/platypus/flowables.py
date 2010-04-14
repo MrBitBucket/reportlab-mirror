@@ -30,7 +30,7 @@ from reportlab.lib.colors import red, gray, lightgrey
 from reportlab.lib.utils import fp_str
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 from reportlab.pdfbase import pdfutils
-from reportlab.rl_config import _FUZZ, overlapAttachedSpace
+from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions
 
 __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
         'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
@@ -744,6 +744,7 @@ def cdeepcopy(obj):
 class _Container(_ContainerSpace):  #Abstract some common container like behaviour
     def drawOn(self, canv, x, y, _sW=0, scale=1.0, content=None, aW=None):
         '''we simulate being added to a frame'''
+        from doctemplate import ActionFlowable
         pS = 0
         if aW is None: aW = self.width
         aW *= scale
@@ -752,6 +753,9 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
         x = self._hAlignAdjust(x,_sW*scale)
         y += self.height*scale
         for c in content:
+            if not ignoreContainerActions and isinstance(c,ActionFlowable):
+                c.apply(self.canv._doctemplate)
+                continue
             w, h = c.wrapOn(canv,aW,0xfffffff)
             if (w<_FUZZ or h<_FUZZ) and not getattr(c,'_ZEROSIZE',None): continue
             if c is not content[0]: h += max(c.getSpaceBefore()-pS,0)

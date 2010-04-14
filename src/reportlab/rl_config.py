@@ -33,6 +33,9 @@ odbc_driver=                'odbc'                  #default odbc driver
 platypus_link_underline=    0                       #paragraph links etc underlined if true
 canvas_basefontname=        'Helvetica'             #this is used to initialize the canvas; if you override to make
                                                     #something else you are responsible for ensuring the font is registered etc etc
+                                                    #this will be used everywhere and the font family connections will be made
+                                                    #if the bold/italic/bold italic fonts are also registered and defined as a family.
+
 allowShortTableRows=1                               #allows some rows in a table to be short
 imageReaderFlags=0                                  #attempt to convert images into internal memory files to reduce
                                                     #the number of open files (see lib.utils.ImageReader)
@@ -41,6 +44,7 @@ imageReaderFlags=0                                  #attempt to convert images i
                                                     #if imageReaderFlags==-1 then use Ralf Schmitt's re-opening approach
 paraFontSizeHeightOffset=   1                       #if true paragraphs start at height-fontSize
 canvas_baseColor=           None                    #initialize the canvas fill and stroke colors if this is set
+ignoreContainerActions=     1                       #if true then action flowables in flowable _Containers will be ignored
 ttfAsciiReadable=           1                       #smaller subsets when set to 0
 
 # places to look for T1Font information
@@ -171,6 +175,7 @@ allowShortTableRows
 imageReaderFlags
 paraFontSizeHeightOffset
 canvas_baseColor
+ignoreContainerActions
 ttfAsciiReadable'''.split()
     import os, sys
     global sys_version, _unset_
