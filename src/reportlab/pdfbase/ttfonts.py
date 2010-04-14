@@ -999,7 +999,7 @@ class TTFont:
     _multiByte = 1      # We want our own stringwidth
     _dynamicFont = 1    # We want dynamic subsetting
 
-    def __init__(self, name, filename, validate=0, subfontIndex=0,asciiReadable=1):
+    def __init__(self, name, filename, validate=0, subfontIndex=0,asciiReadable=None):
         """Loads a TrueType font from filename.
 
         If validate is set to a false values, skips checksum validation.  This
@@ -1010,6 +1010,8 @@ class TTFont:
         self.encoding = TTEncoding()
         from weakref import WeakKeyDictionary
         self.state = WeakKeyDictionary()
+        if asciiReadable is None:
+            asciiReadable = rl_config.ttfAsciiReadable
         self._asciiReadable = asciiReadable
 
     def _py_stringWidth(self, text, size, encoding='utf-8'):

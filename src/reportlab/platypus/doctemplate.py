@@ -1144,7 +1144,7 @@ def progressCB(typ, value):
     print 'PROGRESS MONITOR:  %-10s   %d' % (typ, value)
 
 if __name__ == '__main__':
-
+    from reportlab.lib.styles import _baseFontName, _baseFontNameB
     def myFirstPage(canvas, doc):
         from reportlab.lib.colors import red
         PAGE_HEIGHT = canvas._pagesize[1]
@@ -1152,9 +1152,9 @@ if __name__ == '__main__':
         canvas.setStrokeColor(red)
         canvas.setLineWidth(5)
         canvas.line(66,72,66,PAGE_HEIGHT-72)
-        canvas.setFont('Times-Bold',24)
+        canvas.setFont(_baseFontNameB,24)
         canvas.drawString(108, PAGE_HEIGHT-108, "TABLE OF CONTENTS DEMO")
-        canvas.setFont('Times-Roman',12)
+        canvas.setFont(_baseFontName,12)
         canvas.drawString(4 * inch, 0.75 * inch, "First Page")
         canvas.restoreState()
 
@@ -1165,7 +1165,7 @@ if __name__ == '__main__':
         canvas.setStrokeColor(red)
         canvas.setLineWidth(5)
         canvas.line(66,72,66,PAGE_HEIGHT-72)
-        canvas.setFont('Times-Roman',12)
+        canvas.setFont(_baseFontName,12)
         canvas.drawString(4 * inch, 0.75 * inch, "Page %d" % doc.page)
         canvas.restoreState()
 

@@ -19,14 +19,14 @@ tables and table styles.
 """
 from reportlab.platypus.flowables import Flowable, Preformatted
 from reportlab import rl_config
-from reportlab.lib.styles import PropertySet, ParagraphStyle
+from reportlab.lib.styles import PropertySet, ParagraphStyle, _baseFontName
 from reportlab.lib import colors
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
 class CellStyle(PropertySet):
     defaults = {
-        'fontname':'Times-Roman',
+        'fontname':_baseFontName,
         'fontsize':10,
         'leading':12,
         'leftPadding':6,
@@ -47,7 +47,7 @@ LINEJOINS={None: None, 'miter':0, 'mitre':0, 'round':1,'bevel':2}
 
 # experimental replacement
 class CellStyle1(PropertySet):
-    fontname = "Times-Roman"
+    fontname = _baseFontName
     fontsize = 10
     leading = 12
     leftPadding = 6

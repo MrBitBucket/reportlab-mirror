@@ -127,9 +127,10 @@ class StateTracker:
 def testStateTracker():
     print 'Testing state tracker'
     defaults = {'fillColor':None, 'strokeColor':None,'fontName':None, 'transform':[1,0,0,1,0,0]}
+    from reportlab.graphics.shapes import _baseGFontName
     deltas = [
         {'fillColor':'red'},
-        {'fillColor':'green', 'strokeColor':'blue','fontName':'Times-Roman'},
+        {'fillColor':'green', 'strokeColor':'blue','fontName':_baseGFontName},
         {'transform':[0.5,0,0,0.5,0,0]},
         {'transform':[0.5,0,0,0.5,2,3]},
         {'strokeColor':'red'}

@@ -11,7 +11,7 @@ from types import FloatType, IntType, ListType, TupleType, StringType, InstanceT
 from pprint import pprint
 
 from reportlab.platypus import Flowable
-from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName, _unset_
+from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName as _baseGFontName, _unset_
 from reportlab.lib import logger
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -19,6 +19,10 @@ isOpacity = NoneOr(isNumberInRange(0,1))
 from reportlab.lib.attrmap import *
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.lib.fonts import tt2ps
+_baseGFontNameB = tt2ps(_baseGFontName,1,0)
+_baseGFontNameI = tt2ps(_baseGFontName,0,1)
+_baseGFontNameBI = tt2ps(_baseGFontName,1,1)
 
 class NotImplementedError(Exception):
     pass
@@ -53,7 +57,7 @@ STATE_DEFAULTS = {   # sensible defaults for all
     #'fillRule': NON_ZERO_WINDING, - these can be done later
 
     'fontSize': 10,
-    'fontName': defaultGraphicsFontName,
+    'fontName': _baseGFontName,
     'textAnchor':  'start' # can be start, middle, end, inherited
     }
 

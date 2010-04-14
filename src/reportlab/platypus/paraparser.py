@@ -1094,6 +1094,7 @@ class ParaParser(xmllib.XMLParser):
 
 if __name__=='__main__':
     from reportlab.platypus import cleanBlockQuotedText
+    from reportlab.lib.styles import _baseFontName
     _parser=ParaParser()
     def check_text(text,p=_parser):
         print '##########'
@@ -1111,11 +1112,11 @@ if __name__=='__main__':
                 else: print
 
     style=ParaFrag()
-    style.fontName='Times-Roman'
+    style.fontName=_baseFontName
     style.fontSize = 12
     style.textColor = black
     style.bulletFontName = black
-    style.bulletFontName='Times-Roman'
+    style.bulletFontName=_baseFontName
     style.bulletFontSize=12
 
     text='''
@@ -1133,7 +1134,7 @@ if __name__=='__main__':
     '''
     check_text(text)
     check_text('<para> </para>')
-    check_text('<para font="times-bold" size=24 leading=28.8 spaceAfter=72>ReportLab -- Reporting for the Internet Age</para>')
+    check_text('<para font="%s" size=24 leading=28.8 spaceAfter=72>ReportLab -- Reporting for the Internet Age</para>'%_baseFontName)
     check_text('''
     <font color=red>&tau;</font>Tell me, O muse, of that ingenious hero who travelled far and wide
     after he had sacked the famous town of Troy. Many cities did he visit,

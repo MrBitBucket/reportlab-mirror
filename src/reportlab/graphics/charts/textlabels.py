@@ -13,6 +13,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
 from reportlab.graphics.shapes import _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, definePath
 from reportlab.graphics.widgetbase import Widget, PropHolder
+from reportlab.graphics.shapes import _baseGFontName
 
 _gs = None
 _A2BA=  {
@@ -55,7 +56,7 @@ def _processGlyph(G, truncate=1, pathReverse=0):
         P.extend(g[1:])
     return R
 
-def _text2PathDescription(text, x=0, y=0, fontName='Times-Roman', fontSize=1000,
+def _text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
                             anchor='start', truncate=1, pathReverse=0):
     global _gs
     if not _gs:
@@ -74,7 +75,7 @@ def _text2PathDescription(text, x=0, y=0, fontName='Times-Roman', fontSize=1000,
         P.extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
     return P
 
-def _text2Path(text, x=0, y=0, fontName='Times-Roman', fontSize=1000,
+def _text2Path(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
                 anchor='start', truncate=1, pathReverse=0):
     return definePath(_text2PathDescription(text,x=x,y=y,fontName=fontName,
                     fontSize=fontSize,anchor=anchor,truncate=truncate,pathReverse=pathReverse))

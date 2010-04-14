@@ -58,13 +58,12 @@ ALSO the following additional internal paragraph markup tags are supported
   (define document destination inside paragraph, color is optional)</setLink>
 
 """
-
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.utils import fp_str
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib import colors
-
 from types import StringType, UnicodeType, InstanceType, TupleType, ListType, FloatType
+from reportlab.lib.styles import _baseFontName
 
 # SET THIS TO CAUSE A VIEWING BUG WITH ACROREAD 3 (for at least one input)
 # CAUSEERROR = 0
@@ -971,7 +970,7 @@ class StyleAttributeConverters:
 class SimpleStyle:
     "simplified paragraph style without all the fancy stuff"
     name = "basic"
-    fontName='Times-Roman'
+    fontName=_baseFontName
     fontSize=10
     leading=12
     leftIndent=0
@@ -980,7 +979,7 @@ class SimpleStyle:
     alignment=TA_LEFT
     spaceBefore=0
     spaceAfter=0
-    bulletFontName='Times-Roman'
+    bulletFontName=_baseFontName
     bulletFontSize=10
     bulletIndent=0
     textColor=black
@@ -2304,7 +2303,7 @@ test_program = [
                     ('rightIndent', 200),
                     ('bullet', 'very long bullet', 50, 'Courier', 14),
                     ('align', TA_CENTER),
-                    ('face', "Times-Roman"),
+                    ('face', _baseFontName),
                     ('size', 12),
                     ('leading', 14),
                     ] + splitspace("This is the first segment of the first paragraph.") + [
@@ -2314,7 +2313,7 @@ test_program = [
                     ('nextLine', 0),
                     ('align', TA_LEFT),
                     ('bullet', 'Bullet', 10, 'Courier', 8),
-                    ('face', "Times-Roman"),
+                    ('face', _baseFontName),
                     ('size', 12),
                     ('leading', 14),
                     ] + splitspace("This is the SECOND!!! segment of the first paragraph. This is the first segment of the first paragraph. This is the first segment of the first paragraph. This is the first segment of the first paragraph. This is the first segment of the first paragraph. ") + [

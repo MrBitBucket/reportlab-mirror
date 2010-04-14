@@ -4,7 +4,6 @@
 __version__=''' $Id$ '''
 __doc__='''Classes for ParagraphStyle and similar things.
 
-
 A style is a collection of attributes, but with some extra features
 to allow 'inheritance' from a parent, and to ensure nobody makes
 changes after construction.
@@ -15,8 +14,20 @@ paragraphs.
 getSampleStyleSheet()  returns a stylesheet you can use for initial
 development, with a few basic heading and text styles.
 '''
+__all__=(
+        'PropertySet',
+        'ParagraphStyle',
+        'LineStyle',
+        'StyleSheet1',
+        'getSampleStyleSheet',
+        )
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
+from reportlab.lib.fonts import tt2ps
+from reportlab.rl_config import canvas_basefontname as _baseFontName
+_baseFontNameB = tt2ps(_baseFontName,1,0)
+_baseFontNameI = tt2ps(_baseFontName,0,1)
+_baseFontNameBI = tt2ps(_baseFontName,1,1)
 
 ###########################################################
 # This class provides an 'instance inheritance'
@@ -51,7 +62,6 @@ class PropertySet:
         for (key, value) in kw.items():
              self.__dict__[key] = value
 
-
     def __repr__(self):
         return "<%s '%s'>" % (self.__class__.__name__, self.name)
 
@@ -63,7 +73,6 @@ class PropertySet:
             for (key, value) in self.parent.__dict__.items():
                 if (key not in ['name','parent']):
                     self.__dict__[key] = value
-
 
     def listAttrs(self, indent=''):
         print indent + 'name =', self.name
@@ -78,7 +87,7 @@ class PropertySet:
 
 class ParagraphStyle(PropertySet):
     defaults = {
-        'fontName':'Times-Roman',
+        'fontName':_baseFontName,
         'fontSize':10,
         'leading':12,
         'leftIndent':0,
@@ -87,7 +96,7 @@ class ParagraphStyle(PropertySet):
         'alignment':TA_LEFT,
         'spaceBefore':0,
         'spaceAfter':0,
-        'bulletFontName':'Times-Roman',
+        'bulletFontName':_baseFontName,
         'bulletFontSize':10,
         'bulletIndent':0,
         'textColor': black,
@@ -138,7 +147,6 @@ class StyleSheet1:
         self.byName = {}
         self.byAlias = {}
 
-
     def __getitem__(self, key):
         try:
             return self.byAlias[key]
@@ -146,7 +154,7 @@ class StyleSheet1:
             try:
                 return self.byName[key]
             except KeyError:
-                raise KeyError, "Style '%s' not found in stylesheet" % key
+                raise KeyError("Style '%s' not found in stylesheet" % key)
 
     def __contains__(self, key):
         return key in self.byAlias or key in self.byName
@@ -154,15 +162,15 @@ class StyleSheet1:
     def add(self, style, alias=None):
         key = style.name
         if key in self.byName:
-            raise KeyError, "Style '%s' already defined in stylesheet" % key
+            raise KeyError("Style '%s' already defined in stylesheet" % key)
         if key in self.byAlias:
-            raise KeyError, "Style name '%s' is already an alias in stylesheet" % key
+            raise KeyError("Style name '%s' is already an alias in stylesheet" % key)
 
         if alias:
             if alias in self.byName:
-                raise KeyError, "Style '%s' already defined in stylesheet" % alias
+                raise KeyError("Style '%s' already defined in stylesheet" % alias)
             if alias in self.byAlias:
-                raise KeyError, "Alias name '%s' is already an alias in stylesheet" % alias
+                raise KeyError("Alias name '%s' is already an alias in stylesheet" % alias)
         #passed all tests?  OK, add it
         self.byName[key] = style
         if alias:
@@ -180,12 +188,9 @@ class StyleSheet1:
             style.listAttrs('    ')
             print
 
-
-
-
 def testStyles():
     pNormal = ParagraphStyle('Normal',None)
-    pNormal.fontName = 'Times-Roman'
+    pNormal.fontName = _baseFontName
     pNormal.fontSize = 12
     pNormal.leading = 14.4
 
@@ -201,7 +206,7 @@ def getSampleStyleSheet():
     stylesheet = StyleSheet1()
 
     stylesheet.add(ParagraphStyle(name='Normal',
-                                  fontName='Times-Roman',
+                                  fontName=_baseFontName,
                                   fontSize=10,
                                   leading=12)
                    )
@@ -212,12 +217,12 @@ def getSampleStyleSheet():
                    )
     stylesheet.add(ParagraphStyle(name='Italic',
                                   parent=stylesheet['BodyText'],
-                                  fontName = 'Times-Italic')
+                                  fontName = _baseFontNameI)
                    )
 
     stylesheet.add(ParagraphStyle(name='Heading1',
                                   parent=stylesheet['Normal'],
-                                  fontName = 'Times-Bold',
+                                  fontName = _baseFontNameB,
                                   fontSize=18,
                                   leading=22,
                                   spaceAfter=6),
@@ -225,7 +230,7 @@ def getSampleStyleSheet():
 
     stylesheet.add(ParagraphStyle(name='Title',
                                   parent=stylesheet['Normal'],
-                                  fontName = 'Times-Bold',
+                                  fontName = _baseFontNameB,
                                   fontSize=18,
                                   leading=22,
                                   alignment=TA_CENTER,
@@ -234,7 +239,7 @@ def getSampleStyleSheet():
 
     stylesheet.add(ParagraphStyle(name='Heading2',
                                   parent=stylesheet['Normal'],
-                                  fontName = 'Times-Bold',
+                                  fontName = _baseFontNameB,
                                   fontSize=14,
                                   leading=18,
                                   spaceBefore=12,
@@ -243,7 +248,7 @@ def getSampleStyleSheet():
 
     stylesheet.add(ParagraphStyle(name='Heading3',
                                   parent=stylesheet['Normal'],
-                                  fontName = 'Times-BoldItalic',
+                                  fontName = _baseFontNameBI,
                                   fontSize=12,
                                   leading=14,
                                   spaceBefore=12,
@@ -252,7 +257,7 @@ def getSampleStyleSheet():
 
     stylesheet.add(ParagraphStyle(name='Heading4',
                                   parent=stylesheet['Normal'],
-                                  fontName = 'Times-BoldItalic',
+                                  fontName = _baseFontNameBI,
                                   fontSize=10,
                                   leading=12,
                                   spaceBefore=10,
@@ -261,7 +266,7 @@ def getSampleStyleSheet():
 
     stylesheet.add(ParagraphStyle(name='Heading5',
                                   parent=stylesheet['Normal'],
-                                  fontName = 'Times-Bold',
+                                  fontName = _baseFontNameB,
                                   fontSize=9,
                                   leading=10.8,
                                   spaceBefore=8,
@@ -270,7 +275,7 @@ def getSampleStyleSheet():
 
     stylesheet.add(ParagraphStyle(name='Heading6',
                                   parent=stylesheet['Normal'],
-                                  fontName = 'Times-Bold',
+                                  fontName = _baseFontNameB,
                                   fontSize=7,
                                   leading=8.4,
                                   spaceBefore=6,
@@ -289,7 +294,7 @@ def getSampleStyleSheet():
                                   leftIndent=36,
                                   bulletIndent=0,
                                   spaceBefore=6,
-                                  bulletFontName='Times-BoldItalic'),
+                                  bulletFontName=_baseFontNameBI),
                    alias='df')
 
     stylesheet.add(ParagraphStyle(name='Code',
@@ -299,6 +304,5 @@ def getSampleStyleSheet():
                                   leading=8.8,
                                   firstLineIndent=0,
                                   leftIndent=36))
-
 
     return stylesheet

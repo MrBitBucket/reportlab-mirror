@@ -1788,6 +1788,7 @@ def sample0b():
 
 def sample1():
     "Sample drawing containing two unconnected axes."
+    from reportlab.graphics.shapes import _baseGFontNameB
     drawing = Drawing(400, 200)
     data = [(10, 20, 30, 42)]
     xAxis = XCategoryAxis()
@@ -1797,7 +1798,7 @@ def sample1():
     xAxis.labels.boxAnchor = 'n'
     xAxis.labels[3].dy = -15
     xAxis.labels[3].angle = 30
-    xAxis.labels[3].fontName = 'Times-Bold'
+    xAxis.labels[3].fontName = _baseGFontNameB
     yAxis = YValueAxis()
     yAxis.setPosition(50, 50, 125)
     yAxis.configure(data)

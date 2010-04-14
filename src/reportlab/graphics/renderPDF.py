@@ -306,8 +306,9 @@ def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1):
 #
 #########################################################
 def test():
+    from reportlab.graphics.shapes import _baseGFontName, _baseGFontNameBI
     c = Canvas('renderPDF.pdf')
-    c.setFont('Times-Roman', 36)
+    c.setFont(_baseGFontName, 36)
     c.drawString(80, 750, 'Graphics Test')
 
     # print all drawings and their doc strings from the test
@@ -323,7 +324,7 @@ def test():
             drawings.append((drawing, docstring))
 
     #print in a loop, with their doc strings
-    c.setFont('Times-Roman', 12)
+    c.setFont(_baseGFontName, 12)
     y = 740
     i = 1
     for (drawing, docstring) in drawings:
@@ -333,9 +334,9 @@ def test():
             y = 740
         # draw a title
         y = y - 30
-        c.setFont('Times-BoldItalic',12)
+        c.setFont(_baseGFontNameBI,12)
         c.drawString(80, y, 'Drawing %d' % i)
-        c.setFont('Times-Roman',12)
+        c.setFont(_baseGFontName,12)
         y = y - 14
         textObj = c.beginText(80, y)
         textObj.textLines(docstring)

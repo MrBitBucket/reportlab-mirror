@@ -17,12 +17,13 @@ from reportlab.lib.units import inch
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER
 from reportlab.lib.validators import isColor
 from reportlab.lib.colors import toColor
+from reportlab.lib.styles import _baseFontName, _baseFontNameI
 
-captionStyle = ParagraphStyle('Caption', fontName='Times-Italic', fontSize=10, alignment=TA_CENTER)
+captionStyle = ParagraphStyle('Caption', fontName=_baseFontNameI, fontSize=10, alignment=TA_CENTER)
 
 class Figure(Flowable):
     def __init__(self, width, height, caption="",
-                 captionFont="Times-Italic", captionSize=12,
+                 captionFont=_baseFontNameI, captionSize=12,
                  background=None,
                  captionTextColor=toColor('black'),
                  captionBackColor=None,
@@ -46,7 +47,6 @@ class Figure(Flowable):
         self.border = border
         self.spaceBefore = spaceBefore
         self.spaceAfter = spaceAfter
-
         self._getCaptionPara()  #Larry Meyn's fix - otherwise they all get the number of the last chapter.
 
     def _getCaptionPara(self):
@@ -247,7 +247,6 @@ class DrawingFigure(FlexFigure):
         self.canv.scale(self._scaleFactor, self._scaleFactor)
         self.drawing.drawOn(self.canv, 0, 0)
 
-
 try:
     from rlextra.pageCatcher.pageCatcher import restoreForms, storeForms, storeFormsInMemory, restoreFormsInMemory
     _hasPageCatcher = 1
@@ -268,7 +267,6 @@ if _hasPageCatcher:
             dirname, filename = os.path.split(pdfFileName)
             root, ext = os.path.splitext(filename)
             return '%s_page%d' % (root, pageNo)
-
 
         def needsProcessing(self, pdfFileName, pageNo):
             "returns 1 if no forms or form is older"
@@ -365,7 +363,7 @@ def demo1(canvas):
                     5*inch,     # height
                     showBoundary = 1  # helps us see what's going on
                     )
-    bodyStyle = ParagraphStyle('Body', fontName='Times-Roman', fontSize=24, leading=28, spaceBefore=6)
+    bodyStyle = ParagraphStyle('Body', fontName=_baseFontName, fontSize=24, leading=28, spaceBefore=6)
     para1 = Paragraph('Spam spam spam spam. ' * 5, bodyStyle)
     para2 = Paragraph('Eggs eggs eggs. ' * 5, bodyStyle)
     mydata = [para1, para2]

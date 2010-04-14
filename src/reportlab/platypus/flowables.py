@@ -29,6 +29,7 @@ from copy import deepcopy, copy
 from reportlab.lib.colors import red, gray, lightgrey
 from reportlab.lib.utils import fp_str
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
+from reportlab.lib.styles import _baseFontName
 from reportlab.pdfbase import pdfutils
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions
 
@@ -210,7 +211,7 @@ class XBox(Flowable):
         self.canv.line(0, self.height, self.width, 0)
 
         #centre the text
-        self.canv.setFont('Times-Roman',12)
+        self.canv.setFont(_baseFontName,12)
         self.canv.drawCentredString(0.5*self.width, 0.5*self.height, self.text)
 
 def _trimEmptyLines(lines):

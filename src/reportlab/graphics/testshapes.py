@@ -26,15 +26,47 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.renderPDF import _PDFRenderer
 import unittest
 
-_FONTS = ['Times-Roman','Courier','Times-BoldItalic',]
+_FONTS = ['Times-Roman','Vera','Times-BoldItalic',]
+
+def _setup():
+    from reportlab.pdfbase import pdfmetrics, ttfonts
+    pdfmetrics.registerFont(ttfonts.TTFont("Vera", "Vera.ttf"))
+    pdfmetrics.registerFont(ttfonts.TTFont("VeraBd", "VeraBd.ttf"))
+    pdfmetrics.registerFont(ttfonts.TTFont("VeraIt", "VeraIt.ttf"))
+    pdfmetrics.registerFont(ttfonts.TTFont("VeraBI", "VeraBI.ttf"))
+    F = ['Times-Roman','Courier','Helvetica','Vera', 'VeraBd', 'VeraIt', 'VeraBI']
+    if sys.platform=='win32':
+        for name, ttf in [
+            ('Adventurer Light SF','Advlit.ttf'),('ArialMS','ARIAL.TTF'),
+            ('Arial Unicode MS', 'ARIALUNI.TTF'),
+            ('Book Antiqua','BKANT.TTF'),
+            ('Century Gothic','GOTHIC.TTF'),
+            ('Comic Sans MS', 'COMIC.TTF'),
+            ('Elementary Heavy SF Bold','Vwagh.ttf'),
+            ('Firenze SF','flot.ttf'),
+            ('Garamond','GARA.TTF'),
+            ('Jagger','Rols.ttf'),
+            ('Monotype Corsiva','MTCORSVA.TTF'),
+            ('Seabird SF','seag.ttf'),
+            ('Tahoma','TAHOMA.TTF'),
+            ('VerdanaMS','VERDANA.TTF'),
+            ]:
+            for D in ('c:\WINNT','c:\Windows'):
+                fn = os.path.join(D,'Fonts',ttf)
+                if os.path.isfile(fn):
+                    try:
+                        f = ttfonts.TTFont(name, fn)
+                        pdfmetrics.registerFont(f)
+                        F.append(name)
+                    except:
+                        pass
+_setup()
 
 #########################################################
 #
 #   Collections of shape drawings.
 #
 #########################################################
-
-
 def getFailedDrawing(funcName):
     """Generate a drawing in case something goes really wrong.
 
@@ -391,39 +423,6 @@ def getDrawing12():
 
 def getDrawing13():
     'Test Various TTF Fonts'
-    from reportlab.pdfbase import pdfmetrics, ttfonts
-    pdfmetrics.registerFont(ttfonts.TTFont("Vera", "Vera.ttf"))
-    pdfmetrics.registerFont(ttfonts.TTFont("VeraBd", "VeraBd.ttf"))
-    pdfmetrics.registerFont(ttfonts.TTFont("VeraIt", "VeraIt.ttf"))
-    pdfmetrics.registerFont(ttfonts.TTFont("VeraBI", "VeraBI.ttf"))
-    _FONTS[1]='Vera'
-    _FONTS[1]='VeraBI'
-    F = ['Times-Roman','Courier','Helvetica','Vera', 'VeraBd', 'VeraIt', 'VeraBI']
-    if sys.platform=='win32':
-        for name, ttf in [
-            ('Adventurer Light SF','Advlit.ttf'),('ArialMS','ARIAL.TTF'),
-            ('Arial Unicode MS', 'ARIALUNI.TTF'),
-            ('Book Antiqua','BKANT.TTF'),
-            ('Century Gothic','GOTHIC.TTF'),
-            ('Comic Sans MS', 'COMIC.TTF'),
-            ('Elementary Heavy SF Bold','Vwagh.ttf'),
-            ('Firenze SF','flot.ttf'),
-            ('Garamond','GARA.TTF'),
-            ('Jagger','Rols.ttf'),
-            ('Monotype Corsiva','MTCORSVA.TTF'),
-            ('Seabird SF','seag.ttf'),
-            ('Tahoma','TAHOMA.TTF'),
-            ('VerdanaMS','VERDANA.TTF'),
-            ]:
-            for D in ('c:\WINNT','c:\Windows'):
-                fn = os.path.join(D,'Fonts',ttf)
-                if os.path.isfile(fn):
-                    try:
-                        f = ttfonts.TTFont(name, fn)
-                        pdfmetrics.registerFont(f)
-                        F.append(name)
-                    except:
-                        pass
 
     def drawit(F,w=400,h=200,fontSize=12,slack=2,gap=5):
         D = Drawing(w,h)

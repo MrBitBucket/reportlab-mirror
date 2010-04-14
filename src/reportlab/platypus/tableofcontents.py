@@ -47,7 +47,7 @@ epsilon.
 from reportlab.lib import enums
 from reportlab.lib.units import cm
 from reportlab.lib.utils import commasplit, escapeOnce
-from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle, _baseFontName
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable
 from reportlab.platypus.tables import TableStyle, Table
@@ -140,7 +140,7 @@ epsilon = 0.5*cm
 defaultLevelStyles = [
     ParagraphStyle(
         name='Level 0',
-        fontName='Times-Roman',
+        fontName=_baseFontName,
         fontSize=10,
         leading=11,
         firstLineIndent = 0,
@@ -339,7 +339,7 @@ class SimpleIndex(IndexingFlowable):
         
         if style is None:
             style = ParagraphStyle(name='index',
-                                        fontName='Times-Roman',
+                                        fontName=_baseFontName,
                                         fontSize=11)
         self.textStyle = style
         self.tableStyle = tableStyle or defaultTableStyle
