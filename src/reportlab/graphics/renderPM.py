@@ -678,41 +678,53 @@ def test():
     </html>
     """
     html = [htmlTop]
+    names = {}
+    argv = sys.argv[1:]
+    E = [a for a in argv if a.startswith('--ext=')]
+    if not E:
+        E = ['gif','tiff', 'png', 'jpg', 'pct', 'py', 'svg']
+    else:
+        for a in E:
+            argv.remove(a)
+        E = (','.join([a[6:] for a in E])).split(',')
 
-    i = 0
     #print in a loop, with their doc strings
     for (drawing, docstring, name) in getAllTestDrawings(doTTF=hasattr(_renderPM,'ft_get_face')):
-        fnRoot = 'renderPM%d' % i
-        if 1 or i==10:
-            w = int(drawing.width)
-            h = int(drawing.height)
-            html.append('<hr><h2>Drawing %s %d</h2>\n<pre>%s</pre>' % (name, i, docstring))
+        i = names[name] = names.setdefault(name,0)+1
+        if i>1: name += '.%02d' % (i-1)
+        if argv and name not in argv: continue
+        fnRoot = name
+        w = int(drawing.width)
+        h = int(drawing.height)
+        html.append('<hr><h2>Drawing %s</h2>\n<pre>%s</pre>' % (name, docstring))
 
-            for k in ['gif','tiff', 'png', 'jpg', 'pct', 'py', 'svg']:
-                if k in ['gif','png','jpg','pct']:
-                    html.append('<p>%s format</p>\n' % string.upper(k))
-                try:
-                    filename = '%s.%s' % (fnRoot, ext(k))
-                    fullpath = os.path.join('pmout', filename)
-                    if os.path.isfile(fullpath):
-                        os.remove(fullpath)
-                    if k=='pct':
-                        from reportlab.lib.colors import white
-                        drawToFile(drawing,fullpath,fmt=k,configPIL={'transparent':white})
-                    elif k in ['py','svg']:
-                        drawing.save(formats=['py','svg'],outDir='pmout',fnRoot=fnRoot)
-                    else:
-                        drawToFile(drawing,fullpath,fmt=k)
-                    if k in ['gif','png','jpg']:
-                        html.append('<img src="%s" border="1"><br>\n' % filename)
-                    print 'wrote',fullpath
-                except AttributeError:
-                    print 'Problem drawing %s file'%k
-                    raise
+        for k in E:
+            if k in ['gif','png','jpg','pct']:
+                html.append('<p>%s format</p>\n' % string.upper(k))
+            try:
+                filename = '%s.%s' % (fnRoot, ext(k))
+                fullpath = os.path.join('pmout', filename)
+                if os.path.isfile(fullpath):
+                    os.remove(fullpath)
+                if k=='pct':
+                    from reportlab.lib.colors import white
+                    drawToFile(drawing,fullpath,fmt=k,configPIL={'transparent':white})
+                elif k in ['py','svg']:
+                    drawing.save(formats=['py','svg'],outDir='pmout',fnRoot=fnRoot)
+                else:
+                    drawToFile(drawing,fullpath,fmt=k)
+                if k in ['gif','png','jpg']:
+                    html.append('<img src="%s" border="1"><br>\n' % filename)
+                elif k=='py':
+                    html.append('<a href="%s">python source</a><br>\n' % filename)
+                elif k=='svg':
+                    html.append('<a href="%s">SVG</a><br>\n' % filename)
+                print 'wrote',fullpath
+            except AttributeError:
+                print 'Problem drawing %s file'%k
+                raise
         if os.environ.get('RL_NOEPSPREVIEW','0')=='1': drawing.__dict__['preview'] = 0
         drawing.save(formats=['eps','pdf'],outDir='pmout',fnRoot=fnRoot)
-        i = i + 1
-        #if i==10: break
     html.append(htmlBottom)
     htmlFileName = os.path.join('pmout', 'index.html')
     open(htmlFileName, 'w').writelines(html)
