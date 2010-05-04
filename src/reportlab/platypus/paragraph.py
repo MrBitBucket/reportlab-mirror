@@ -128,14 +128,20 @@ def _rightDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,-m)
     return m
 
+def _nbspCount(w):
+    if isinstance(w,str):
+        return w.count('\xc2\xa0')
+    else:
+        return w.count(u'\xa0')
+
 def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,offset)
     text  = join(words)
-    if last:
+    if last or extraspace<=1e-8:
         #last one, left align
         tx._textOut(text,1)
     else:
-        nSpaces = len(words)-1
+        nSpaces = len(words)+sum([_nbspCount(w) for w in words])-1
         if nSpaces:
             tx.setWordSpace(extraspace / float(nSpaces))
             tx._textOut(text,1)
@@ -289,7 +295,7 @@ def _putFragLine(cur_x, tx, line):
                     xs.linkColor = xs.textColor
             txtlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
             cur_x += txtlen
-            nSpaces += text.count(' ')
+            nSpaces += text.count(' ')+_nbspCount(text)
     cur_x_s = cur_x+(nSpaces-1)*ws
     if xs.underline:
         xs.underlines.append( (xs.underline_x, cur_x_s, xs.underlineColor) )
@@ -320,13 +326,16 @@ def _rightDrawParaLineX( tx, offset, line, last=0):
 def _justifyDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
     extraSpace = line.extraSpace
-    nSpaces = line.wordCount - 1
-    if last or not nSpaces or abs(extraSpace)<=1e-8 or line.lineBreak:
-        _putFragLine(offset, tx, line)  #no space modification
-    else:
+    simple = last or abs(extraSpace)<=1e-8 or line.lineBreak
+    if not simple:
+        nSpaces = line.wordCount+sum([_nbspCount(w.text) for w in line.words if not hasattr(w,'cbDefn')])-1
+        simple = not nSpaces
+    if not simple:
         tx.setWordSpace(extraSpace / float(nSpaces))
         _putFragLine(offset, tx, line)
         tx.setWordSpace(0)
+    else:
+        _putFragLine(offset, tx, line)  #no space modification
     setXPos(tx,-offset)
 
 try:
