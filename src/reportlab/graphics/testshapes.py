@@ -225,8 +225,7 @@ def getDrawing06():
                fillColor=green))  #square corners
     D.add(Rect(220, 150, 60, 30, 10, 10, fillColor=green))  #round corners
 
-    from reportlab.lib.validators import inherit
-    D.add(String(10,50, 'Basic Shapes', fillColor=colors.black, fontName=inherit))
+    D.add(String(10,50, 'Basic Shapes', fillColor=colors.black, fontName='Helvetica'))
 
     return D
 
