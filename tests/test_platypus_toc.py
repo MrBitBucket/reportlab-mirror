@@ -12,6 +12,7 @@ setOutDir(__name__)
 import sys, os
 from os.path import join, basename, splitext
 from math import sqrt
+import random
 import unittest
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
@@ -21,7 +22,7 @@ from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
-from reportlab.platypus import tableofcontents
+from reportlab.platypus import tableofcontents, PageBreak
 from reportlab.lib import randomtext
 
 
@@ -169,6 +170,111 @@ class TocTestCase(unittest.TestCase):
         path = outputfile('test_platypus_toc.pdf')
         doc = MyDocTemplate(path)
         doc.multiBuild(story)
+
+
+
+    def test1(self):
+        """This shows a table which would take more than one page,
+        and need multiple passes to render.  But we preload it
+        with the right headings to make it go faster.  We used
+        a simple 100-chapter document with one level.
+        """
+
+        chapters = 30   #goes over one page
+        
+        headerStyle = makeHeaderStyle(0)
+        d, e = tableofcontents.delta, tableofcontents.epsilon
+        tocLevelStyle = makeTocHeaderStyle(0, d, e)
+
+        # Build most of the story; we'll re-use it to 
+        # make documents with different numbers of passes.
+
+        story = []
+        styleSheet = getSampleStyleSheet()
+        bt = styleSheet['BodyText']
+
+        description = '<font color=red>%s</font>' % self.test1.__doc__
+        story.append(XPreformatted(description, bt))
+
+        for i in range(chapters):
+            story.append(PageBreak())
+            story.append(Paragraph('This is chapter %d' % (i+1),
+                                   headerStyle))
+            #now put some lengthy body stuff in.  
+            for paras in range(random.randint(1,3)):
+                txt = randomtext.randomText(randomtext.PYTHON, 5)
+                para = Paragraph(txt, makeBodyStyle())
+                story.append(para)
+
+
+        #try 1: empty TOC, 3 passes
+
+        toc = tableofcontents.TableOfContents()
+        toc.levelStyles = [tocLevelStyle]   #only need one
+        story1 = [toc] + story
+
+
+        path = outputfile('test_platypus_toc_preload.pdf')
+        doc = MyDocTemplate(path)
+        passes = doc.multiBuild(story1)
+        self.assertEquals(passes, 3)
+
+        #try 2: now preload the TOC with the entries
+
+        toc = tableofcontents.TableOfContents()
+        toc.levelStyles = [tocLevelStyle]   #only need one
+        tocEntries = []
+        for i in range(chapters):
+            #add tuple of (level, text, pageNum, key)
+            #with an initial guess of pageNum=0
+            tocEntries.append((0, 'This is chapter %d' % (i+1), 0, None))
+        toc.addEntries(tocEntries)
+
+        story2 = [toc] + story
+
+
+        path = outputfile('test_platypus_toc_preload.pdf')
+        doc = MyDocTemplate(path)
+        passes = doc.multiBuild(story2)
+        self.assertEquals(passes, 2)
+
+
+
+        #try 3: preload again but try to be really smart and work out
+        #in advance what page everything starts on.  We cannot
+        #use a random story for this.
+
+
+        toc3 = tableofcontents.TableOfContents()
+        toc3.levelStyles = [tocLevelStyle]   #only need one
+        tocEntries = []
+        for i in range(chapters):
+            #add tuple of (level, text, pageNum, key)
+            #with an initial guess of pageNum= 3
+            tocEntries.append((0, 'This is chapter %d' % i, 2+i, None))
+        toc3.addEntries(tocEntries)
+
+        story3 = [toc3] 
+        for i in range(chapters):
+            story3.append(PageBreak())
+            story3.append(Paragraph('This is chapter %d' % (i+1),
+                                   headerStyle))
+            txt = """
+                The paragraphs in this are not at all random, because
+                we need to be absolutely, totally certain they will fit 
+                on one page.  Each chapter will be one page long.
+            """
+            para = Paragraph(txt, makeBodyStyle())
+            story3.append(para)
+
+
+        path = outputfile('test_platypus_toc_preload.pdf')
+        doc = MyDocTemplate(path)
+        passes = doc.multiBuild(story3)
+
+        # I can't get one pass yet'
+        #self.assertEquals(passes, 1)
+
 
 
 def makeSuite():

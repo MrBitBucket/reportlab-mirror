@@ -927,7 +927,9 @@ class BaseDocTemplate:
                    **buildKwds
                    ):
         """Makes multiple passes until all indexing flowables
-        are happy."""
+        are happy.
+        
+        Returns number of passes"""
         self._indexingFlowables = []
         #scan the story and keep a copy
         for thing in story:
@@ -972,7 +974,8 @@ class BaseDocTemplate:
 
         del self._multiBuildEdits
         if verbose: print 'saved'
-
+        return passes
+        
     #these are pure virtuals override in derived classes
     #NB these get called at suitable places by the base class
     #so if you derive and override the handle_xxx methods
