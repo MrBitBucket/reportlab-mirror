@@ -95,6 +95,7 @@ class CMYKColor(Color):
     Extra attributes may be attached to the class to support specific ink models,
     and renderers may look for these."""
 
+    _scale = 1.0
     def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
                 spotName=None, density=1, knockout=None, alpha=1):
         """
@@ -134,6 +135,13 @@ class CMYKColor(Color):
             (self.alpha is not None and (',alpha=%d' % self.alpha) or ''),
             )
 
+    def fader(self,n, reverse=False):
+        '''return n colors based on density fade'''
+        dd = self._scale/(n-1)
+        L = [self.clone(density=i*dd) for i in xrange(n)]
+        if reverse: L.reverse()
+        return L
+
     def __hash__(self):
         return hash( (self.cyan, self.magenta, self.yellow, self.black, self.density, self.spotName, self.alpha) )
 
@@ -168,11 +176,11 @@ class CMYKColor(Color):
 
     def _density_str(self):
         return fp_str(self.density)
-
-    _cKwds='cyan magenta yellow black density spotName knockout alpha'.split()
+    _cKwds='cyan magenta yellow black density alpha spotName knockout'.split()
 
 class PCMYKColor(CMYKColor):
     '''100 based CMYKColor with density and a spotName; just like Rimas uses'''
+    _scale = 100.
     def __init__(self,cyan,magenta,yellow,black,density=100,spotName=None,knockout=None,alpha=100):
         CMYKColor.__init__(self,cyan/100.,magenta/100.,yellow/100.,black/100.,spotName,density/100.,knockout=knockout,alpha=alpha/100.)
 
@@ -182,12 +190,12 @@ class PCMYKColor(CMYKColor):
             (self.spotName and (',spotName='+repr(self.spotName)) or ''),
             (self.density!=1 and (',density='+fp_str(self.density*100)) or ''),
             (self.knockout is not None and (',knockout=%d' % self.knockout) or ''),
-            (self.alpha is not None and (',alpha=%d' % (self.alpha*100)) or ''),
+            (self.alpha is not None and (',alpha=%s' % (fp_str(self.alpha*100))) or ''),
             )
 
     def cKwds(self):
         K=self._cKwds
-        S=K[:5]
+        S=K[:6]
         for k in self._cKwds:
             v=getattr(self,k)
             if k in S: v*=100
@@ -196,17 +204,19 @@ class PCMYKColor(CMYKColor):
 
 class CMYKColorSep(CMYKColor):
     '''special case color for making separating pdfs'''
+    _scale = 1.
     def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
                 spotName=None, density=1,alpha=1):
         CMYKColor.__init__(self,cyan,magenta,yellow,black,spotName,density,knockout=None,alpha=alpha)
-    _cKwds='cyan magenta yellow black density spotName alpha'.split()
+    _cKwds='cyan magenta yellow black density alpha spotName'.split()
 
 class PCMYKColorSep(PCMYKColor,CMYKColorSep):
     '''special case color for making separating pdfs'''
+    _scale = 100.
     def __init__(self, cyan=0, magenta=0, yellow=0, black=0,
                 spotName=None, density=100, alpha=100):
         PCMYKColor.__init__(self,cyan,magenta,yellow,black,density,spotName,knockout=None,alpha=alpha)
-    _cKwds='cyan magenta yellow black density spotName alpha'.split()
+    _cKwds='cyan magenta yellow black density alpha spotName'.split()
 
 def cmyk2rgb(cmyk,density=1):
     "Convert from a CMYK color tuple to an RGB color tuple"
