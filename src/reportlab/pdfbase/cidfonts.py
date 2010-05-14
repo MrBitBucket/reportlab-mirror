@@ -380,10 +380,10 @@ class UnicodeCIDFont(CIDFont):
     'UniJIS-UCS2-H'
     >>> #This is how PDF data gets encoded.
     >>> print heisei.formatForPdf('hello')
-    \\377\\376h\\000e\\000l\\000l\\000o\\000
+    \\000h\\000e\\000l\\000l\\000o
     >>> tokyo = u'\u6771\u4AEC'
     >>> print heisei.formatForPdf(tokyo)
-    \\377\\376qg\\354J
+    gqJ\\354
 
     """
 

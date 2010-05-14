@@ -8,6 +8,7 @@ font which are NOT 1000 ems wide, keyed on Unicode character (not CID).
 
 Running off CMAP files we get the following widths...::
 
+    >>> font = UnicodeCIDFont('HeiseiMin-W3')
     >>> font.stringWidth(unicode(','), 10)
     2.5
     >>> font.stringWidth(unicode('m'), 10)
