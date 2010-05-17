@@ -773,6 +773,7 @@ class ValueAxis(_AxisG):
         valueStep = AttrMapValue(isNumberOrNone, desc='Step size used between ticks.'),
         valueSteps = AttrMapValue(isListOfNumbersOrNone, desc='List of step sizes used between ticks.'),
         avoidBoundFrac = AttrMapValue(EitherOr((isNumberOrNone,SequenceOf(isNumber,emptyOK=0,lo=2,hi=2))), desc='Fraction of interval to allow above and below.'),
+        abf_ignore_zero = AttrMapValue(EitherOr((NoneOr(isBoolean),SequenceOf(isBoolean,emptyOK=0,lo=2,hi=2))), desc='Set to True to make the avoidBoundFrac calculations treat zero as non-special'),
         rangeRound=AttrMapValue(OneOf('none','both','ceiling','floor'),'How to round the axis limits'),
         zrangePref = AttrMapValue(isNumberOrNone, desc='Zero range axis limit preference.'),
         style = AttrMapValue(OneOf('normal','stacked','parallel_3d'),"How values are plotted!"),
@@ -870,6 +871,7 @@ class ValueAxis(_AxisG):
                         valueMax = None,
                         valueStep = None,
                         avoidBoundFrac = None,
+                        abf_ignore_zero = False,
                         rangeRound = 'none',
                         zrangePref = 0,
                         style = 'normal',
@@ -978,6 +980,8 @@ class ValueAxis(_AxisG):
             if oMin is None: valueMin = self._cValueMin = _findMin(dataSeries,self._dataIndex,0,special=special)
             if oMax is None: valueMax = self._cValueMax = _findMax(dataSeries,self._dataIndex,0,special=special)
 
+        cMin = valueMin
+        cMax = valueMax
         forceZero = self.forceZero
         if forceZero:
             if forceZero=='near':
@@ -991,6 +995,9 @@ class ValueAxis(_AxisG):
         do_abf = abf and do_rr
         if not isinstance(abf,_SequenceTypes):
             abf = abf, abf
+        abfiz = getattr(self,'abf_ignore_zero', False)
+        if not isinstance(abfiz,_SequenceTypes):
+            abfiz = abfiz, abfiz
         do_rr = rangeRound is not 'none' and do_rr
         if do_rr:
             rrn = rangeRound in ['both','floor']
@@ -998,10 +1005,9 @@ class ValueAxis(_AxisG):
         else:
             rrn = rrx = 0
 
+
         go = do_rr or do_abf
         cache = {}
-        cMin = valueMin
-        cMax = valueMax
         iter = 0
         while go and iter<=10:
             iter += 1
@@ -1013,13 +1019,13 @@ class ValueAxis(_AxisG):
                 if rrn: v = T[0]
                 else: v = valueMin
                 u = cMin-i0
-                if abs(v)>fuzz and v>=u+fuzz:
+                if (abfiz[0] or abs(v)>fuzz) and v>=u+fuzz:
                     valueMin = u
                     go = 1
                 if rrx: v = T[-1]
                 else: v = valueMax
                 u = cMax+i1
-                if abs(v)>fuzz and v<=u-fuzz:
+                if (abfiz[1] or abs(v)>fuzz) and v<=u-fuzz:
                     valueMax = u
                     go = 1
 
