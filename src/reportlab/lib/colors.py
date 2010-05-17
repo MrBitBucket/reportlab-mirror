@@ -135,10 +135,12 @@ class CMYKColor(Color):
             (self.alpha is not None and (',alpha=%d' % self.alpha) or ''),
             )
 
-    def fader(self,n, reverse=False):
-        '''return n colors based on density fade'''
-        dd = self._scale/(n-1)
-        L = [self.clone(density=i*dd) for i in xrange(n)]
+    def fader(self, n, reverse=False):
+        '''return n colors based on density fade
+        *NB* note this dosen't reach density zero'''
+        scale = self._scale
+        dd = scale/float(n)
+        L = [self.clone(density=scale - i*dd) for i in xrange(n)]
         if reverse: L.reverse()
         return L
 
