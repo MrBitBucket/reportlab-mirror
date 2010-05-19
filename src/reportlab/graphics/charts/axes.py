@@ -264,6 +264,16 @@ class _AxisG(Widget):
         for x in getattr(self,'annotations',[]):
             g.add(x(self))
 
+class CALabel(Label):
+    _attrMap = AttrMap(BASE=Label,
+        labelPosFrac = AttrMapValue(isNumber, desc='where in the category range [0,1] the labels should be anchored'),
+        )
+    def __init__(self,**kw):
+        Label.__init__(self,**kw)
+        self._setKeywords(
+                labelPosFrac = 0.5,
+                )
+
 # Category axes.
 class CategoryAxis(_AxisG):
     "Abstract category axis, unusable in itself."
@@ -338,7 +348,7 @@ class CategoryAxis(_AxisG):
         self.strokeLineCap = STATE_DEFAULTS['strokeLineCap']
         self.strokeMiterLimit = STATE_DEFAULTS['strokeMiterLimit']
 
-        self.labels = TypedPropertyCollection(Label)
+        self.labels = TypedPropertyCollection(CALabel)
         # if None, they don't get labels. If provided,
         # you need one name per data point and they are
         # used for label text.
@@ -613,8 +623,9 @@ class XCategoryAxis(_XTicks,CategoryAxis):
                 if reverseDirection: ic = catCount-i-1
                 else: ic = i
                 if ic>=n: continue
-                x = _x + (i+0.5) * barWidth
                 label = self.labels[i]
+                lpf = label.labelPosFrac
+                x = _x + (i+lpf) * barWidth
                 label.setOrigin(x, _y)
                 label.setText(categoryNames[ic] or '')
                 g.add(label)
@@ -717,12 +728,14 @@ class YCategoryAxis(_YTicks,CategoryAxis):
             labels = self.labels
             _x = self._labelAxisPos()
             _y = self._y
+
             for i in xrange(catCount):
                 if reverseDirection: ic = catCount-i-1
                 else: ic = i
                 if ic>=n: continue
-                y = _y + (i+0.5) * barWidth
                 label = labels[i]
+                lpf = label.labelPosFrac
+                y = _y + (i+lpf) * barWidth
                 label.setOrigin(_x, y)
                 label.setText(categoryNames[ic] or '')
                 g.add(label)

@@ -14,7 +14,7 @@ import copy
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isString,\
             isListOfStrings, SequenceOf, isBoolean, isNoneOrShape, isStringOrNone,\
-            NoneOr, isListOfNumbersOrNone, EitherOr
+            NoneOr, isListOfNumbersOrNone, EitherOr, OneOf
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.formatters import Formatter
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
@@ -64,6 +64,8 @@ class BarChart(PlotArea):
         reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.',advancedUsage=1),
         naLabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for N/A values.',advancedUsage=1),
         annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.'),
+        labelBarWidth = AttrMapValue(isNumber, desc='width to leave for a category label to go between categories.'),
+        labelBarOrder = AttrMapValue(OneOf('first','last','auto'), desc='where any label bar should appear first/last'),
         )
 
     def makeSwatchSample(self, rowNo, x, y, width, height):
@@ -224,9 +226,14 @@ class BarChart(PlotArea):
         data = self.data
         seriesCount = self._seriesCount = len(data)
         self._rowLength = rowLength = max(map(len,data))
-        groupSpacing, barSpacing, barWidth = self.groupSpacing, self.barSpacing, self.barWidth
-        style = self.categoryAxis.style
-        wG = groupSpacing
+        wG = self.groupSpacing
+        barSpacing = self.barSpacing
+        barWidth = self.barWidth
+        lbw = getattr(self,'labelBarWidth',0)
+        lbo = getattr(self,'labelBarOrder','auto')
+        if lbo=='auto': lbo = flipXY and 'last' or 'first'
+        lbo = lbo=='first'
+        style = cA.style
         if style=='parallel':
             wB = seriesCount*barWidth
             wS = (seriesCount-1)*barSpacing
@@ -247,31 +254,32 @@ class BarChart(PlotArea):
         else:
             useAbsolute = 0
 
-        availWidth = float(cScale(0)[1])
+        aW0 = float(cScale(0)[1])
+        aW = aW0 - lbw
 
         if useAbsolute==0: #case 0 all are free
-            self._normFactor = fB = fG = fS = availWidth/groupWidth
+            self._normFactor = fB = fG = fS = aW/groupWidth
         elif useAbsolute==7:    #all fixed
             fB = fG = fS = 1.0
             _cscale = cA._scale
         elif useAbsolute==1: #case 1 barWidth is fixed
             fB = 1.0
-            fG = fS = (availWidth-wB)/(wG+wS)
+            fG = fS = (aW-wB)/(wG+wS)
         elif useAbsolute==2: #groupspacing is fixed
             fG=1.0
-            fB = fS = (availWidth-wG)/(wB+wS)
+            fB = fS = (aW-wG)/(wB+wS)
         elif useAbsolute==3: #groupspacing & barwidth are fixed
             fB = fG = 1.0
-            fS = (availWidth-wG-wB)/wS
+            fS = (aW-wG-wB)/wS
         elif useAbsolute==4: #barspacing is fixed
             fS=1.0
-            fG = fB = (availWidth-wS)/(wG+wB)
+            fG = fB = (aW-wS)/(wG+wB)
         elif useAbsolute==5: #barspacing & barWidth are fixed
             fS = fB = 1.0
-            fG = (availWidth-wB-wS)/wG
+            fG = (aW-wB-wS)/wG
         elif useAbsolute==6: #barspacing & groupspacing are fixed
             fS = fG = 1
-            fB = (availWidth-wS-wG)/wB
+            fB = (aW-wS-wG)/wB
         self._normFactorB = fB
         self._normFactorG = fG
         self._normFactorS = fS
@@ -288,22 +296,32 @@ class BarChart(PlotArea):
             baseLine = vScale(vM)
         self._baseLine = baseLine
 
-        COLUMNS = range(max(map(len,data)))
+        nC = max(map(len,data))
 
         width = barWidth*fB
-        wfG = wG*fG
+        offs = 0.5*wG*fG
         bGap = bGapB*fB+bGapS*fS
+
+        if lbw:
+            if lbo: #the lable bar comes first
+                lbpf = (offs+lbw/6.0)/aW0
+                offs += lbw
+            else:
+                lbpf = (offs+wB*fB+wS*fS+lbw/6.0)/aW0
+            cA.labels.labelPosFrac = lbpf
+
         self._barPositions = []
         reversePlotOrder = self.reversePlotOrder
-        for rowNo in range(seriesCount):
+        for rowNo in xrange(seriesCount):
             barRow = []
             if reversePlotOrder:
                 xVal = seriesCount-1 - rowNo
             else:
                 xVal = rowNo
-            xVal = 0.5*wfG+xVal*bGap
-            for colNo in COLUMNS:
-                datum = data[rowNo][colNo]
+            xVal = offs + xVal*bGap
+            row = data[rowNo]
+            for colNo in xrange(nC):
+                datum = row[colNo]
 
                 # Ufff...
                 if useAbsolute==7:
