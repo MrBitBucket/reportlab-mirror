@@ -14,7 +14,7 @@ import copy
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isString,\
             isListOfStrings, SequenceOf, isBoolean, isNoneOrShape, isStringOrNone,\
-            NoneOr, isListOfNumbersOrNone
+            NoneOr, isListOfNumbersOrNone, EitherOr
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.formatters import Formatter
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
@@ -49,7 +49,7 @@ class BarChart(PlotArea):
     "Abstract base class, unusable by itself."
 
     _attrMap = AttrMap(BASE=PlotArea,
-        useAbsolute = AttrMapValue(isNumber, desc='Flag to use absolute spacing values.',advancedUsage=1),
+        useAbsolute = AttrMapValue(EitherOr((isBoolean,EitherOr((isString,isNumber)))), desc='Flag to use absolute spacing values; use string of gsb for finer control.',advancedUsage=1),
         barWidth = AttrMapValue(isNumber, desc='The width of an individual bar.'),
         groupSpacing = AttrMapValue(isNumber, desc='Width between groups of bars.'),
         barSpacing = AttrMapValue(isNumber, desc='Width between individual bars.'),
@@ -226,29 +226,55 @@ class BarChart(PlotArea):
         self._rowLength = rowLength = max(map(len,data))
         groupSpacing, barSpacing, barWidth = self.groupSpacing, self.barSpacing, self.barWidth
         style = self.categoryAxis.style
+        wG = groupSpacing
         if style=='parallel':
-            groupWidth = groupSpacing+(seriesCount*barWidth)+(seriesCount-1)*barSpacing
-            bGap = barWidth+barSpacing
+            wB = seriesCount*barWidth
+            wS = (seriesCount-1)*barSpacing
+            bGapB = barWidth
+            bGapS = barSpacing
         else:
             accum = rowLength*[0]
-            groupWidth = groupSpacing+barWidth
-            bGap = 0
-        self._groupWidth = groupWidth
+            wB = barWidth
+            wS = bGapB = bGapS = 0
+        self._groupWidth = groupWidth = wG+wB+wS
         useAbsolute = self.useAbsolute
 
         if useAbsolute:
-            # bar dimensions are absolute
-            normFactor = 1.0
+            if not isinstance(useAbsolute,str):
+                useAbsolute = 7 #all three are fixed
+            else:
+                useAbsolute = 0 + 1*('b' in useAbsolute)+2*('g' in useAbsolute)+4*('s' in useAbsolute)
         else:
-            # bar dimensions are normalized to fit.  How wide
-            # notionally is one group of bars?
-            availWidth = cScale(0)[1]
-            normFactor = availWidth/float(groupWidth)
-            if self.debug:
-                print '%d series, %d points per series' % (seriesCount, self._rowLength)
-                print 'width = %d group + (%d bars * %d barWidth) + (%d gaps * %d interBar) = %d total' % (
-                    groupSpacing, seriesCount, barWidth,
-                    seriesCount-1, barSpacing, groupWidth)
+            useAbsolute = 0
+
+        availWidth = float(cScale(0)[1])
+
+        if useAbsolute==0: #case 0 all are free
+            self._normFactor = fB = fG = fS = availWidth/groupWidth
+        elif useAbsolute==7:    #all fixed
+            fB = fG = fS = 1.0
+            _cscale = cA._scale
+        elif useAbsolute==1: #case 1 barWidth is fixed
+            fB = 1.0
+            fG = fS = (availWidth-wB)/(wG+wS)
+        elif useAbsolute==2: #groupspacing is fixed
+            fG=1.0
+            fB = fS = (availWidth-wG)/(wB+wS)
+        elif useAbsolute==3: #groupspacing & barwidth are fixed
+            fB = fG = 1.0
+            fS = (availWidth-wG-wB)/wS
+        elif useAbsolute==4: #barspacing is fixed
+            fS=1.0
+            fG = fB = (availWidth-wS)/(wG+wB)
+        elif useAbsolute==5: #barspacing & barWidth are fixed
+            fS = fB = 1.0
+            fG = (availWidth-wB-wS)/wG
+        elif useAbsolute==6: #barspacing & groupspacing are fixed
+            fS = fG = 1
+            fB = (availWidth-wS-wG)/wB
+        self._normFactorB = fB
+        self._normFactorG = fG
+        self._normFactorS = fS
 
         # 'Baseline' correction...
         vA = self.valueAxis
@@ -263,11 +289,8 @@ class BarChart(PlotArea):
         self._baseLine = baseLine
 
         COLUMNS = range(max(map(len,data)))
-        if useAbsolute:
-            _cScale = cA._scale
 
-        self._normFactor = normFactor
-        width = self.barWidth*normFactor
+        width = self.barWidth*fB
         self._barPositions = []
         reversePlotOrder = self.reversePlotOrder
         for rowNo in range(seriesCount):
@@ -276,16 +299,16 @@ class BarChart(PlotArea):
                 xVal = seriesCount-1 - rowNo
             else:
                 xVal = rowNo
-            xVal = 0.5*groupSpacing+xVal*bGap
+            xVal = 0.5*groupSpacing*fG+xVal*(bGapB*fB+bGapS*fS)
             for colNo in COLUMNS:
                 datum = data[rowNo][colNo]
 
                 # Ufff...
-                if useAbsolute:
-                    x = groupWidth*_cScale(colNo) + xVal + org
+                if useAbsolute==7:
+                    x = groupWidth*_cscale(colNo) + xVal + org
                 else:
-                    (g, gW) = cScale(colNo)
-                    x = g + normFactor*xVal
+                    (g, _) = cScale(colNo)
+                    x = g + xVal
 
                 if datum is None:
                     height = None
