@@ -290,7 +290,9 @@ class BarChart(PlotArea):
 
         COLUMNS = range(max(map(len,data)))
 
-        width = self.barWidth*fB
+        width = barWidth*fB
+        wfG = wG*fG
+        bGap = bGapB*fB+bGapS*fS
         self._barPositions = []
         reversePlotOrder = self.reversePlotOrder
         for rowNo in range(seriesCount):
@@ -299,7 +301,7 @@ class BarChart(PlotArea):
                 xVal = seriesCount-1 - rowNo
             else:
                 xVal = rowNo
-            xVal = 0.5*groupSpacing*fG+xVal*(bGapB*fB+bGapS*fS)
+            xVal = 0.5*wfG+xVal*bGap
             for colNo in COLUMNS:
                 datum = data[rowNo][colNo]
 
@@ -325,7 +327,7 @@ class BarChart(PlotArea):
                     if -1e-8<height<=1e-8:
                         height = 1e-8
                         if datum<-1e-8: height = -1e-8
-                barRow.append(flipXY and (y,x,height,width) or (x, y, width, height))
+                barRow.append(flipXY and (y,x,height,width) or (x,y,width,height))
 
             self._barPositions.append(barRow)
 
