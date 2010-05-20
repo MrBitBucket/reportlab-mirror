@@ -64,8 +64,8 @@ class BarChart(PlotArea):
         reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.',advancedUsage=1),
         naLabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for N/A values.',advancedUsage=1),
         annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.'),
-        labelBarWidth = AttrMapValue(isNumber, desc='width to leave for a category label to go between categories.'),
-        labelBarOrder = AttrMapValue(OneOf('first','last','auto'), desc='where any label bar should appear first/last'),
+        categoryLabelBarSize = AttrMapValue(isNumber, desc='width to leave for a category label to go between categories.'),
+        categoryLabelBarOrder = AttrMapValue(OneOf('first','last','auto'), desc='where any label bar should appear first/last'),
         )
 
     def makeSwatchSample(self, rowNo, x, y, width, height):
@@ -229,10 +229,10 @@ class BarChart(PlotArea):
         wG = self.groupSpacing
         barSpacing = self.barSpacing
         barWidth = self.barWidth
-        lbw = getattr(self,'labelBarWidth',0)
-        lbo = getattr(self,'labelBarOrder','auto')
-        if lbo=='auto': lbo = flipXY and 'last' or 'first'
-        lbo = lbo=='first'
+        clbs = getattr(self,'categoryLabelBarSize',0)
+        clbo = getattr(self,'categoryLabelBarOrder','auto')
+        if clbo=='auto': clbo = flipXY and 'last' or 'first'
+        clbo = clbo=='first'
         style = cA.style
         if style=='parallel':
             wB = seriesCount*barWidth
@@ -255,7 +255,7 @@ class BarChart(PlotArea):
             useAbsolute = 0
 
         aW0 = float(cScale(0)[1])
-        aW = aW0 - lbw
+        aW = aW0 - clbs
 
         if useAbsolute==0: #case 0 all are free
             self._normFactor = fB = fG = fS = aW/groupWidth
@@ -302,12 +302,12 @@ class BarChart(PlotArea):
         offs = 0.5*wG*fG
         bGap = bGapB*fB+bGapS*fS
 
-        if lbw:
-            if lbo: #the lable bar comes first
-                lbpf = (offs+lbw/6.0)/aW0
-                offs += lbw
+        if clbs:
+            if clbo: #the lable bar comes first
+                lbpf = (offs+clbs/6.0)/aW0
+                offs += clbs
             else:
-                lbpf = (offs+wB*fB+wS*fS+lbw/6.0)/aW0
+                lbpf = (offs+wB*fB+wS*fS+clbs/6.0)/aW0
             cA.labels.labelPosFrac = lbpf
 
         self._barPositions = []
