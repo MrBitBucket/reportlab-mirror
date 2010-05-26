@@ -1254,8 +1254,8 @@ class PolyLine(LineShape):
     def getBounds(self):
         return getPointsBounds(self.points)
 
-def numericXShift(tA,text,w,fontName,fontSize,encoding=None):
-    dp = getattr(tA,'_dp','.')
+def numericXShift(tA,text,w,fontName,fontSize,encoding=None,pivotCharacter='.'):
+    dp = getattr(tA,'_dp',pivotCharacter)
     i = text.rfind(dp)
     if i>=0:
         dpOffs = getattr(tA,'_dpLen',0)
