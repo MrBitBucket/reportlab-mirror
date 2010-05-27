@@ -66,6 +66,7 @@ class BarChart(PlotArea):
         annotations = AttrMapValue(None, desc='list of callables, will be called with self, xscale, yscale.'),
         categoryLabelBarSize = AttrMapValue(isNumber, desc='width to leave for a category label to go between categories.'),
         categoryLabelBarOrder = AttrMapValue(OneOf('first','last','auto'), desc='where any label bar should appear first/last'),
+        barRecord = AttrMapValue(None, desc='callable(bar,label=labelText,value=value,**kwds) to record bar information', advancedUsage=1),
         )
 
     def makeSwatchSample(self, rowNo, x, y, width, height):
@@ -469,6 +470,7 @@ class BarChart(PlotArea):
     def _makeBars(self,g,lg):
         lenData = len(self.data)
         bars = self.bars
+        br = getattr(self,'barRecord',None)
         for rowNo in range(lenData):
             row = self._barPositions[rowNo]
             styleCount = len(bars)
@@ -498,6 +500,7 @@ class BarChart(PlotArea):
                     g.add(symbol)
                 elif abs(width)>1e-7 and abs(height)>=1e-7 and (style.fillColor is not None or style.strokeColor is not None):
                     self._makeBar(g,x,y,width,height,rowNo,style)
+                    if br: br(g.contents[-1],label=self._getLabelText(rowNo,colNo),value=self.data[rowNo][colNo],rowNo=rowNo,colNo=colNo)
 
                 self._addBarLabel(lg,rowNo,colNo,x,y,width,height)
 

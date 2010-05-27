@@ -4,10 +4,7 @@
 
 __version__=''' $Id$ '''
 __doc__="Utilities used here and there."
-
 from time import mktime, gmtime, strftime
-import string
-
 
 ### Dinu's stuff used in some line plots (likely to vansih).
 
@@ -15,7 +12,7 @@ def mkTimeTuple(timeString):
     "Convert a 'dd/mm/yyyy' formatted string to a tuple for use in the time module."
 
     list = [0] * 9
-    dd, mm, yyyy = map(int, string.split(timeString, '/'))
+    dd, mm, yyyy = map(int, timeString.split('/'))
     list[:3] = [yyyy, mm, dd]
 
     return tuple(list)
@@ -225,3 +222,44 @@ def maverage(data,n=6):
 
 def pairMaverage(data,n=6):
     return [(x[0],s) for x,s in zip(data, maverage([x[1] for x in data],n))]
+
+import weakref
+from reportlab.graphics.shapes import transformPoint, inverse
+class DrawTimeCollector:
+    '''
+    generic mechanism for collecting information about nodes at the time they are about to be drawn
+    '''
+    def __init__(self):
+        self._nodes = weakref.WeakKeyDictionary()
+        self.clear()
+
+    def clear(self):
+        self._info = []
+        self._info_append = self._info.append
+
+    def record(self,func,node,*args,**kwds):
+        self._nodes[node] = (func,args,kwds)
+        node.__dict__['_drawTimeCallback'] = self
+
+    def __call__(self,node,canvas,renderer):
+        func = self._nodes.get(node,None)
+        if func:
+            func, args, kwds = func
+            i = func(node,canvas,renderer, *args, **kwds)
+            if i is not None: self._info_append(i)
+
+    @staticmethod
+    def rectDrawTimeCallback(node,canvas,renderer,**kwds):
+        A = getattr(canvas,'ctm',None)
+        if not A: return
+        x1 = node.x
+        y1 = node.y
+        x2 = x1 + node.width
+        y2 = y1 + node.height
+
+        iA = inverse(A)
+        x1,y1 = transformPoint(iA,(x1,y1))
+        x2,y2 = transformPoint(iA,(x2,y2))
+        D = kwds.copy()
+        D['rect']=(x1,y1,x2,y2)
+        return D

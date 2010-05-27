@@ -254,6 +254,9 @@ class Renderer:
                 ocanvas = None
 
             self.fillDerivedValues(node)
+            dtcb = getattr(node,'_drawTimeCallback',None)
+            if dtcb:
+                dtcb(node,canvas=canvas,renderer=self)
             #draw the object, or recurse
             if isinstance(node, Line):
                 self.drawLine(node)
