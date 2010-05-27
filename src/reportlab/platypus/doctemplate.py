@@ -1031,7 +1031,8 @@ class BaseDocTemplate:
         except:
             exc = sys.exc_info()[1]
             args = list(exc.args)
-            args[-1] += '\ndocExec %s lifetime=%r failed!' % (stmt,lifetime)
+            msg = '\ndocExec %s lifetime=%r failed!' % (stmt,lifetime)
+            args.append(msg)
             exc.args = tuple(args)
             for k in NS.iterkeys():
                 if k not in K0:
