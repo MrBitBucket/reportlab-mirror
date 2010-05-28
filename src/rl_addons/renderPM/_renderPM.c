@@ -13,7 +13,7 @@
 #endif
 
 
-#define VERSION "1.06"
+#define VERSION "1.07"
 #define MODULE "_renderPM"
 static PyObject *moduleError;
 static PyObject *_version;
@@ -916,6 +916,15 @@ static PyObject* _fmtPathElement(ArtBpath *p, char* name, int n)
 	return P;
 }
 
+static PyObject* _fmtVPathElement(ArtVpath *p, char* name, int n)
+{
+	PyObject	*P = PyTuple_New(n+1);
+	PyTuple_SET_ITEM(P, 0, PyString_FromString(name));
+	PyTuple_SET_ITEM(P, 1, PyFloat_FromDouble(p->x));
+	PyTuple_SET_ITEM(P, 2, PyFloat_FromDouble(p->y));
+	return P;
+}
+
 static PyObject* _get_gstatePath(int n, ArtBpath* path)
 {
 	PyObject	*P = PyTuple_New(n);
@@ -940,6 +949,38 @@ static PyObject* _get_gstatePath(int n, ArtBpath* path)
 			}
 		PyTuple_SET_ITEM(P, i, e);
 		}
+	return P;
+}
+
+static PyObject* _get_gstateVPath(gstateObject *self)
+{
+	PyObject	*e, *P;
+	ArtVpath	*vpath, *v;
+	int			i;
+
+	gstate_pathEnd(self);
+	v = vpath = art_bez_path_to_vec(self->path, 0.25);
+	while(v->code!=ART_END) v++;
+	P = PyTuple_New(v-vpath);
+	i = 0;
+	v =vpath;
+	while(v->code!=ART_END){
+		switch(v->code){
+			case ART_MOVETO_OPEN:
+				e = _fmtVPathElement(v,"moveTo",2);
+				break;
+			case ART_MOVETO:
+				e = _fmtVPathElement(v,"moveToClosed",2);
+				break;
+			case ART_LINETO:
+				e = _fmtVPathElement(v,"lineTo",2);
+				break;
+			}
+		PyTuple_SET_ITEM(P, i, e);
+		v++;
+		i++;
+		}
+	art_free(vpath);
 	return P;
 }
 
@@ -1381,6 +1422,7 @@ static PyObject* gstate_getattr(gstateObject *self, char *name)
 	else if(!strcmp(name,"height")) return PyInt_FromLong(self->pixBuf->height);
 	else if(!strcmp(name,"depth")) return PyInt_FromLong(self->pixBuf->nchan);
 	else if(!strcmp(name,"path")) return _get_gstatePath(self->pathLen,self->path);
+	else if(!strcmp(name,"vpath")) return _get_gstateVPath(self);
 	else if(!strcmp(name,"pathLen")) return PyInt_FromLong(self->pathLen);
 	else if(!strcmp(name,"fontSize")) return PyFloat_FromDouble(self->fontSize);
 	else if(!strcmp(name,"fontName")) return _get_gstateFontName(self);
