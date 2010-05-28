@@ -415,6 +415,13 @@ def _fixPointerLabels(n,L,x,y,width,height,side=None):
         mul = -1
     return G, mlr[0], mlr[1], mel
 
+class AngleData(float):
+    '''use this to carry the data along with the angle'''
+    def __new__(cls,angle,data):
+        self = float.__new__(cls,angle)
+        self._data = data
+        return self
+
 class Pie(AbstractPieChart):
     _attrMap = AttrMap(BASE=AbstractPieChart,
         data = AttrMapValue(isListOfNumbers, desc='list of numbers defining wedge sizes; need not sum to 1'),
@@ -430,6 +437,7 @@ class Pie(AbstractPieChart):
         orderMode = AttrMapValue(OneOf('fixed','alternate'),advancedUsage=1),
         xradius = AttrMapValue(isNumberOrNone, desc="X direction Radius"),
         yradius = AttrMapValue(isNumberOrNone, desc="Y direction Radius"),
+        wedgeRecord = AttrMapValue(None, desc="callable(wedge,*args,**kwds)",advancedUsage=1),
         )
     other_threshold=None
 
@@ -566,19 +574,21 @@ class Pie(AbstractPieChart):
         if self.sameRadii: xradius=yradius=min(xradius,yradius)
         return PL(centerx,centery,xradius,yradius,G,lu,ru)
 
-    def normalizeData(self):
+    def normalizeData(self,keepData=False):
         data = map(abs,self.data)
         s = self._sum = float(sum(data))
-        if s>1e-8:
-            f = 360./s
-            return [f*x for x in data]
+        if s<=1e-8: s = 0
+        f = 360./s
+        if keepData:
+            return [AngleData(f*x,x) for x in data]
         else:
-            return [0]*len(data)
+            return [f*x for x in data]
 
     def makeAngles(self):
+        wr = getattr(self,'wedgeRecord',None)
         startAngle = self.startAngle % 360
         whichWay = self.direction == "clockwise" and -1 or 1
-        D = [a for a in enumerate(self.normalizeData())]
+        D = [a for a in enumerate(self.normalizeData(keepData=wr))]
         if self.orderMode=='alternate':
             W = [a for a in D if abs(a[1])>=1e-5]
             W.sort(_arcCF)
@@ -605,6 +615,8 @@ class Pie(AbstractPieChart):
                     aa = startAngle,endAngle
             else:
                 aa = startAngle, None
+            if wr:
+                aa = (AngleData(aa[0],angle._data),aa[1])
             startAngle = endAngle
             a((i,aa))
         return A
@@ -613,6 +625,7 @@ class Pie(AbstractPieChart):
         angles = self.makeAngles()
         n = len(angles)
         labels = _fixLabels(self.labels,n)
+        wr = getattr(self,'wedgeRecord',None)
 
         self._seriesCount = n
         styleCount = len(self.slices)
@@ -679,6 +692,8 @@ class Pie(AbstractPieChart):
             theWedge.strokeDashArray = wedgeStyle.strokeDashArray
 
             g_add(theWedge)
+            if wr:
+                wr(theWedge,value=a1._data,label=text)
             if wedgeStyle.label_visible:
                 if text:
                     labelRadius = wedgeStyle.labelRadius

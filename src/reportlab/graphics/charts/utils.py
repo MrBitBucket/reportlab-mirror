@@ -224,14 +224,16 @@ def pairMaverage(data,n=6):
     return [(x[0],s) for x,s in zip(data, maverage([x[1] for x in data],n))]
 
 import weakref
-from reportlab.graphics.shapes import transformPoint, inverse
-class DrawTimeCollector:
+from reportlab.graphics.shapes import transformPoint, transformPoints, inverse, Ellipse
+from reportlab.lib.utils import flatten
+class DrawTimeCollector(object):
     '''
     generic mechanism for collecting information about nodes at the time they are about to be drawn
     '''
     def __init__(self):
         self._nodes = weakref.WeakKeyDictionary()
         self.clear()
+        self._pmcanv = None
 
     def clear(self):
         self._info = []
@@ -257,9 +259,40 @@ class DrawTimeCollector:
         x2 = x1 + node.width
         y2 = y1 + node.height
 
-        iA = inverse(A)
-        x1,y1 = transformPoint(iA,(x1,y1))
-        x2,y2 = transformPoint(iA,(x2,y2))
         D = kwds.copy()
-        D['rect']=(x1,y1,x2,y2)
+        D['rect']=DrawTimeCollector.transformAndFlatten(A,((x1,y1),(x2,y2)))
+        return D
+
+    @staticmethod
+    def transformAndFlatten(A,p):
+        ''' transform an flatten a list of points
+        A   transformation matrix
+        p   points [(x0,y0),....(xk,yk).....]
+        '''
+        if tuple(A)!=(1,0,0,1,0,0):
+            iA = inverse(A)
+            p = transformPoints(iA,p)
+        return tuple(flatten(p))
+
+    @property
+    def pmcanv(self):
+        if not self._pmcanv:
+            import renderPM
+            self._pmcanv = renderPM.PMCanvas(1,1)
+        return self._pmcanv
+
+    def wedgeDrawTimeCallback(self,node,canvas,renderer,**kwds):
+        A = getattr(canvas,'ctm',None)
+        if not A: return
+        if isinstance(node,Ellipse):
+            c = self.pmcanv
+            c.ellipse(node.cx, node.cy, node.rx,node.ry)
+            p = c.vpath
+            p = [(x[1],x[2]) for x in p]
+        else:
+            p = node.asPolygon().points
+            p = [(p[i],p[i+1]) for i in xrange(0,len(p),2)]
+
+        D = kwds.copy()
+        D['poly'] = self.transformAndFlatten(A,p)
         return D
