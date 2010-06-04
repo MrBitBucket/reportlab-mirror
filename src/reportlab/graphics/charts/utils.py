@@ -230,10 +230,11 @@ class DrawTimeCollector(object):
     '''
     generic mechanism for collecting information about nodes at the time they are about to be drawn
     '''
-    def __init__(self):
+    def __init__(self,formats=['gif']):
         self._nodes = weakref.WeakKeyDictionary()
         self.clear()
         self._pmcanv = None
+        self._fmts = formats
 
     def clear(self):
         self._info = []
@@ -296,3 +297,16 @@ class DrawTimeCollector(object):
         D = kwds.copy()
         D['poly'] = self.transformAndFlatten(A,p)
         return D
+
+    def save(self,fnroot):
+        '''
+        save the current information known to this collector
+        fnroot is the root name of a resource to name the saved info
+        override this to get the right semantics for your collector
+        '''
+        import pprint
+        f=open(fnroot+'.default-collector.out','w')
+        try:
+            pprint.pprint(self._info,f)
+        finally:
+            f.close()

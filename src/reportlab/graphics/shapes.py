@@ -700,8 +700,16 @@ class Drawing(Group, Flowable):
                 from reportlab.graphics import renderPM
                 filename = '%s.%s' % (fnroot,bmFmt)
                 if verbose: print "generating %s file %s" % (bmFmt,filename)
+                dtc = getattr(self,'_drawTimeCollector',None)
+                if dtc:
+                    dtcfmts = getattr(dtc,'fmts',[bmFmt])
+                    if bmFmt in dtcfmts:
+                        dtc.clear()
+                    else:
+                        dtc = None
                 renderPM.drawToFile(self, filename,fmt=bmFmt,showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPM_',**kw))
                 ext = ext + '/.' + bmFmt
+                if dtc: dtc.save(fnroot)
 
         if 'eps' in plotMode:
             try:
