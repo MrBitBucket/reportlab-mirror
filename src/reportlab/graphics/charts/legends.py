@@ -162,6 +162,8 @@ class Legend(Widget):
         colEndCallout = AttrMapValue(None, desc="a user callout(self,g, x, xt, y,width, lWidth)",advancedUsage=1),
         subCols = AttrMapValue(None,desc="subColumn properties"),
         swatchCallout = AttrMapValue(None, desc="a user swatch callout(self,g,x,y,i,(col,name),swatch)",advancedUsage=1),
+        swdx = AttrMapValue(isNumber, desc="x position adjustment for the swatch"),
+        swdy = AttrMapValue(isNumber, desc="y position adjustment for the swatch"),
         )
 
     def __init__(self):
@@ -181,6 +183,9 @@ class Legend(Widget):
         # Size of swatch rectangle.
         self.dx = 10
         self.dy = 10
+
+        self.swdx = 0
+        self.swdy = 0
 
         # Distance between swatch rectangle and text.
         self.dxTextSpace = 10
@@ -462,19 +467,22 @@ class Legend(Widget):
                         strokeColor=dividerColor, strokeWidth=dividerWidth, strokeDashArray=dividerDashArray))
 
             # Make a 'normal' color swatch...
+            swatchX = x + getattr(self,'swdx',0)
+            swatchY = thisy + getattr(self,'swdy',0)
+
             if isAuto(col):
                 chart = getattr(col,'chart',getattr(col,'obj',None))
-                c = chart.makeSwatchSample(getattr(col,'index',i),x,thisy,dx,dy)
+                c = chart.makeSwatchSample(getattr(col,'index',i),swatchX,swatchY,dx,dy)
             elif isinstance(col, colors.Color):
                 if isSymbol(swatchMarker):
-                    c = uSymbol2Symbol(swatchMarker,x+dx/2.,thisy+dy/2.,col)
+                    c = uSymbol2Symbol(swatchMarker,swatchX+dx/2.,swatchY+dy/2.,col)
                 else:
-                    c = self._defaultSwatch(x,thisy,dx,dy,fillColor=col,strokeWidth=strokeWidth,strokeColor=strokeColor)
+                    c = self._defaultSwatch(swatchX,swatchY,dx,dy,fillColor=col,strokeWidth=strokeWidth,strokeColor=strokeColor)
             elif col is not None:
                 try:
                     c = copy.deepcopy(col)
-                    c.x = x
-                    c.y = thisy
+                    c.x = swatchX
+                    c.y = swatchY
                     c.width = dx
                     c.height = dy
                 except:
