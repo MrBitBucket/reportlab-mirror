@@ -235,6 +235,7 @@ class DrawTimeCollector(object):
         self.clear()
         self._pmcanv = None
         self._fmts = formats
+        self._disabled = False
 
     def clear(self):
         self._info = []

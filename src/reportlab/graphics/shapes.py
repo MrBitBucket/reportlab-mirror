@@ -703,7 +703,7 @@ class Drawing(Group, Flowable):
                 dtc = getattr(self,'_drawTimeCollector',None)
                 if dtc:
                     dtcfmts = getattr(dtc,'fmts',[bmFmt])
-                    if bmFmt in dtcfmts:
+                    if bmFmt in dtcfmts and not getattr(dtc,'_disabled',0):
                         dtc.clear()
                     else:
                         dtc = None
