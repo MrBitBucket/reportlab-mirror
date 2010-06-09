@@ -623,7 +623,11 @@ class XCategoryAxis(_XTicks,CategoryAxis):
                 if reverseDirection: ic = catCount-i-1
                 else: ic = i
                 if ic>=n: continue
-                label = self.labels[i]
+                label=i-catCount
+                if label in self.labels:
+                    label = self.labels[label]
+                else:
+                    label = self.labels[i]
                 lpf = label.labelPosFrac
                 x = _x + (i+lpf) * barWidth
                 label.setOrigin(x, _y)
@@ -733,7 +737,11 @@ class YCategoryAxis(_YTicks,CategoryAxis):
                 if reverseDirection: ic = catCount-i-1
                 else: ic = i
                 if ic>=n: continue
-                label = labels[i]
+                label=i-catCount
+                if label in self.labels:
+                    label = self.labels[label]
+                else:
+                    label = self.labels[i]
                 lpf = label.labelPosFrac
                 y = _y + (i+lpf) * barWidth
                 label.setOrigin(_x, y)
@@ -1187,8 +1195,13 @@ class ValueAxis(_AxisG):
         else:
             sk = []
 
+        nticks = len(self._tickValues)
         for i,tick in enumerate(self._tickValues):
-            label = labels[i]
+            label = i-nticks
+            if label in labels:
+                label = labels[label]
+            else:
+                label = labels[i]
             if f and label.visible:
                 v = self.scale(tick)
                 if sk:
