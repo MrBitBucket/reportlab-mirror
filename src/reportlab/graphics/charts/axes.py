@@ -794,6 +794,7 @@ class ValueAxis(_AxisG):
         valueStep = AttrMapValue(isNumberOrNone, desc='Step size used between ticks.'),
         valueSteps = AttrMapValue(isListOfNumbersOrNone, desc='List of step sizes used between ticks.'),
         avoidBoundFrac = AttrMapValue(EitherOr((isNumberOrNone,SequenceOf(isNumber,emptyOK=0,lo=2,hi=2))), desc='Fraction of interval to allow above and below.'),
+        avoidBoundSpace = AttrMapValue(EitherOr((isNumberOrNone,SequenceOf(isNumber,emptyOK=0,lo=2,hi=2))), desc='Space to allow above and below.'),
         abf_ignore_zero = AttrMapValue(EitherOr((NoneOr(isBoolean),SequenceOf(isBoolean,emptyOK=0,lo=2,hi=2))), desc='Set to True to make the avoidBoundFrac calculations treat zero as non-special'),
         rangeRound=AttrMapValue(OneOf('none','both','ceiling','floor'),'How to round the axis limits'),
         zrangePref = AttrMapValue(isNumberOrNone, desc='Zero range axis limit preference.'),
@@ -892,6 +893,7 @@ class ValueAxis(_AxisG):
                         valueMax = None,
                         valueStep = None,
                         avoidBoundFrac = None,
+                        avoidBoundSpace = None,
                         abf_ignore_zero = False,
                         rangeRound = 'none',
                         zrangePref = 0,
@@ -1026,17 +1028,30 @@ class ValueAxis(_AxisG):
         else:
             rrn = rrx = 0
 
+        abS = self.avoidBoundSpace
+        do_abs = abS
+        if do_abs:
+            if not isinstance(abS,_SequenceTypes):
+                abS = abS, abS
+        aL = float(self._length)
 
-        go = do_rr or do_abf
+        go = do_rr or do_abf or do_abs
         cache = {}
         iter = 0
         while go and iter<=10:
             iter += 1
             go = 0
-            if do_abf:
+            if do_abf or do_abs:
                 valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax, cache)
-                i0 = valueStep*abf[0]
-                i1 = valueStep*abf[1]
+                if do_abf:
+                    i0 = valueStep*abf[0]
+                    i1 = valueStep*abf[1]
+                else:
+                    i0 = i1 = 0
+                if do_abs:
+                    sf = (valueMax-valueMin)/aL
+                    i0 = max(i0,abS[0]*sf)
+                    i1 = max(i1,abS[1]*sf)
                 if rrn: v = T[0]
                 else: v = valueMin
                 u = cMin-i0
