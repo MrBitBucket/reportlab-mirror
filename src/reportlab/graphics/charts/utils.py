@@ -234,8 +234,8 @@ class DrawTimeCollector(object):
         self._nodes = weakref.WeakKeyDictionary()
         self.clear()
         self._pmcanv = None
-        self._fmts = formats
-        self._disabled = False
+        self.formats = formats
+        self.disabled = False
 
     def clear(self):
         self._info = []

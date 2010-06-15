@@ -702,8 +702,8 @@ class Drawing(Group, Flowable):
                 if verbose: print "generating %s file %s" % (bmFmt,filename)
                 dtc = getattr(self,'_drawTimeCollector',None)
                 if dtc:
-                    dtcfmts = getattr(dtc,'fmts',[bmFmt])
-                    if bmFmt in dtcfmts and not getattr(dtc,'_disabled',0):
+                    dtcfmts = getattr(dtc,'formats',[bmFmt])
+                    if bmFmt in dtcfmts and not getattr(dtc,'disabled',0):
                         dtc.clear()
                     else:
                         dtc = None
