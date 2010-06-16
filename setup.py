@@ -346,14 +346,14 @@ def main():
                     ]
 
         if platform=='win32':
-            FT_LIB=os.environ.get('FREETYPE_LIB','')
+            FT_LIB=os.environ.get('FT_LIB','')
             if not FT_LIB: FT_LIB=config('FREETYPE','lib','')
             if FT_LIB and not os.path.isfile(FT_LIB):
                 infoline('# freetype lib %r not found' % FT_LIB)
                 FT_LIB=[]
             if FT_LIB:
-                FT_INC_DIR=os.environ.get('FREETYPE_INC','')
-                if not FT_INC_DIR: FT_INC_DIR=config('FREETYPE','incdir')
+                FT_INC_DIR=os.environ.get('FT_INC','')
+                if not FT_INC_DIR: FT_INC_DIR=config('FREETYPE','inc')
                 FT_MACROS = [('RENDERPM_FT',None)]
                 FT_LIB_DIR = [dirname(FT_LIB)]
                 FT_INC_DIR = [FT_INC_DIR or pjoin(dirname(FT_LIB_DIR[0]),'include')]
@@ -367,8 +367,8 @@ def main():
             else:
                 FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
         else:
-            FT_LIB_DIR=config('FREETYPE','libdir')
-            FT_INC_DIR=config('FREETYPE','incdir')
+            FT_LIB_DIR=config('FREETYPE','lib')
+            FT_INC_DIR=config('FREETYPE','inc')
             I,L=inc_lib_dirs()
             ftv = None
             for d in I:
