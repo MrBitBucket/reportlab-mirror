@@ -6,7 +6,7 @@ platform = sys.platform
 pjoin = os.path.join
 abspath = os.path.abspath
 isfile = os.path.isfile
-isdir = os.path.isfile
+isdir = os.path.isdir
 dirname = os.path.dirname
 if __name__=='__main__':
     pkgDir=dirname(sys.argv[0])
@@ -359,7 +359,7 @@ def main():
                 FT_INC_DIR = [FT_INC_DIR or pjoin(dirname(FT_LIB_DIR[0]),'include')]
                 FT_LIB_PATH = FT_LIB
                 FT_LIB = [os.path.splitext(os.path.basename(FT_LIB))[0]]                
-                if os.path.isdir(FT_INC_DIR[0]):                   
+                if isdir(FT_INC_DIR[0]):                   
                     infoline('# installing with freetype %r' % FT_LIB_PATH)
                 else:
                     infoline('# freetype2 include folder %r not found' % FT_INC_DIR[0])
