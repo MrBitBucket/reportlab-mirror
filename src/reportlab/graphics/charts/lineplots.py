@@ -353,19 +353,21 @@ class LinePlot(AbstractLineChart):
             yA.makeGrid(g,parent=self,dim=xA.getGridDims)
         g.add(xA)
         g.add(yA)
+        xAex = xA.visibleAxis and (xA._y,) or ()
+        yAex = yA.visibleAxis and (xA._x,) or ()
         if not self.gridFirst:
             xAdgl = getattr(xA,'drawGridLast',False)
             yAdgl = getattr(yA,'drawGridLast',False)
-            if not xAdgl: xA.makeGrid(g,parent=self,dim=yA.getGridDims)
-            if not yAdgl: yA.makeGrid(g,parent=self,dim=xA.getGridDims)
+            if not xAdgl: xA.makeGrid(g,parent=self,dim=yA.getGridDims,exclude=yAex)
+            if not yAdgl: yA.makeGrid(g,parent=self,dim=xA.getGridDims,exclude=xAex)
         annotations = getattr(self,'annotations',[])
         for a in annotations:
             if getattr(a,'beforeLines',None):
                 g.add(a(self,xA.scale,yA.scale))
         g.add(self.makeLines())
         if not self.gridFirst:
-            if xAdgl: xA.makeGrid(g,parent=self,dim=yA.getGridDims)
-            if yAdgl: yA.makeGrid(g,parent=self,dim=xA.getGridDims)
+            if xAdgl: xA.makeGrid(g,parent=self,dim=yA.getGridDims,exclude=yAex)
+            if yAdgl: yA.makeGrid(g,parent=self,dim=xA.getGridDims,exclude=xAex)
         for a in annotations:
             if not getattr(a,'beforeLines',None):
                 g.add(a(self,xA.scale,yA.scale))

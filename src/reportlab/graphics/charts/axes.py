@@ -181,12 +181,17 @@ class _AxisG(Widget):
             f = self.isYAxis and self._cyLine or self._cxLine
             return lambda v, s=start, e=end, f=f: f(v,s,e)
 
-    def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray,strokeLineJoin,strokeLineCap,strokeMiterLimit,parent=None):
+    def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray,strokeLineJoin,strokeLineCap,strokeMiterLimit,parent=None,exclude=[]):
         func = self._getLineFunc(start,end,parent)
         if not hasattr(self,'_tickValues'):
             self._pseudo_configure()
+        if exclude:
+            exf = self.isYAxis and (lambda l: l.y1 in exclude) or (lambda l: l.x1 in exclude)
+        else:
+            exf = None
         for t in self._tickValues:
                 L = func(t)
+                if exf and exf(L): continue
                 L.strokeColor = strokeColor
                 L.strokeWidth = strokeWidth
                 L.strokeDashArray = strokeDashArray
@@ -195,7 +200,7 @@ class _AxisG(Widget):
                 L.strokeMiterLimit = strokeMiterLimit
                 g.add(L)
 
-    def makeGrid(self,g,dim=None,parent=None):
+    def makeGrid(self,g,dim=None,parent=None,exclude=[]):
         '''this is only called by a container object'''
         c = self.gridStrokeColor
         w = self.gridStrokeWidth or 0
@@ -214,10 +219,10 @@ class _AxisG(Widget):
             if s or e:
                 if self.isYAxis: offs = self._x
                 else: offs = self._y
-                self._makeLines(g,s-offs,e-offs,c,w,self.gridStrokeDashArray,self.gridStrokeLineJoin,self.gridStrokeLineCap,self.gridStrokeMiterLimit,parent=parent)
-        self._makeSubGrid(g,dim,parent)
+                self._makeLines(g,s-offs,e-offs,c,w,self.gridStrokeDashArray,self.gridStrokeLineJoin,self.gridStrokeLineCap,self.gridStrokeMiterLimit,parent=parent,exclude=exclude)
+        self._makeSubGrid(g,dim,parent,exclude=[])
 
-    def _makeSubGrid(self,g,dim=None,parent=None):
+    def _makeSubGrid(self,g,dim=None,parent=None,exclude=[]):
         '''this is only called by a container object'''
         if not (getattr(self,'visibleSubGrid',0) and self.subTickNum>0): return
         c = self.subGridStrokeColor
@@ -239,7 +244,7 @@ class _AxisG(Widget):
             else: offs = self._y
             otv = self._calcSubTicks()
             try:
-                self._makeLines(g,s-offs,e-offs,c,w,self.subGridStrokeDashArray,self.subGridStrokeLineJoin,self.subGridStrokeLineCap,self.subGridStrokeMiterLimit,parent=parent)
+                self._makeLines(g,s-offs,e-offs,c,w,self.subGridStrokeDashArray,self.subGridStrokeLineJoin,self.subGridStrokeLineCap,self.subGridStrokeMiterLimit,parent=parent,exclude=exclude)
             finally:
                 self._tickValues = otv
 
