@@ -49,7 +49,7 @@ class BarChart(PlotArea):
     "Abstract base class, unusable by itself."
 
     _attrMap = AttrMap(BASE=PlotArea,
-        useAbsolute = AttrMapValue(EitherOr((isBoolean,EitherOr((isString,isNumber)))), desc='Flag to use absolute spacing values; use string of gsb for finer control.',advancedUsage=1),
+        useAbsolute = AttrMapValue(EitherOr((isBoolean,EitherOr((isString,isNumber)))), desc='Flag to use absolute spacing values; use string of gsb for finer control\n(g=groupSpacing,s=barSpacing,b=barWidth). ',advancedUsage=1),
         barWidth = AttrMapValue(isNumber, desc='The width of an individual bar.'),
         groupSpacing = AttrMapValue(isNumber, desc='Width between groups of bars.'),
         barSpacing = AttrMapValue(isNumber, desc='Width between individual bars.'),
