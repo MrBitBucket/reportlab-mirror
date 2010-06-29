@@ -68,6 +68,9 @@ class ParagraphTestCase(unittest.TestCase):
             Paragraph("This is a normal paragraph. "
                       + randomText(), styNormal))
         story.append(
+            Paragraph("There follows a paragraph with only \"&lt;br/&gt\"", styNormal))
+        story.append(Paragraph("<br/>", styNormal))
+        story.append(
             Paragraph("This has 12 points space before and after, set in the style. "
                       + randomText(), stySpaced))
         story.append(
