@@ -657,11 +657,13 @@ class Drawing(Group, Flowable):
         if not fnRoot:
             fnRoot = getattr(self,'fileNamePattern',(self.__class__.__name__+'%03d'))
             chartId = getattr(self,'chartId',0)
+            if hasattr(chartId,'__call__'):
+                chartId = chartId(self)
             if hasattr(fnRoot,'__call__'):
                 fnRoot = fnRoot(chartId)
             else:
                 try:
-                    fnRoot = fnRoot % getattr(self,'chartId',0)
+                    fnRoot = fnRoot % chartId
                 except TypeError, err:
                     #the exact error message changed from 2.2 to 2.3 so we need to
                     #check a substring
