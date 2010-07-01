@@ -265,9 +265,47 @@ class _AxisG(Widget):
         return acn[0]=='X' or acn[:11]=='NormalDateX'
     isXAxis = property(isXAxis)
 
-    def addAnnotations(self,g):
-        for x in getattr(self,'annotations',[]):
+    def addAnnotations(self,g,A=None):
+        if A is None: getattr(self,'annotations',[])
+        for x in A:
             g.add(x(self))
+
+    def _splitAnnotations(self):
+        A = getattr(self,'annotations',[])[:]
+        D = {}
+        for v in ('early','beforeAxis','afterAxis','beforeTicks',
+                'afterTicks','beforeTickLabels',
+                'afterTickLabels','late'):
+            R = [].append
+            P = [].append
+            for a in A:
+                if getattr(a,v,0):
+                    R(a)
+                else:
+                    P(a)
+            D[v] = R.__self__
+            A[:] = P.__self__
+        D['late'] += A
+        return D
+
+    def draw(self):
+        g = Group()
+        A = self._splitAnnotations()
+        self.addAnnotations(g,A['early'])
+
+        if self.visible:
+            self.addAnnotations(g,A['beforeAxis'])
+            g.add(self.makeAxis())
+            self.addAnnotations(g,A['afterAxis'])
+            self.addAnnotations(g,A['beforeTicks'])
+            g.add(self.makeTicks())
+            self.addAnnotations(g,A['afterTicks'])
+            self.addAnnotations(g,A['beforeTickLabels'])
+            g.add(self.makeTickLabels())
+            self.addAnnotations(g,A['afterTickLabels'])
+
+        self.addAnnotations(g,A['late'])
+        return g
 
 class CALabel(Label):
     _attrMap = AttrMap(BASE=Label,
@@ -393,19 +431,6 @@ class CategoryAxis(_AxisG):
                 self._tickValues = range(-1,n)
             else:
                 self._tickValues = range(n+1)
-
-    def draw(self):
-        g = Group()
-
-        if not self.visible:
-            return g
-
-        g.add(self.makeAxis())
-        g.add(self.makeTicks())
-        g.add(self.makeTickLabels())
-        self.addAnnotations(g)
-
-        return g
 
     def _scale(self,idx):
         if self.reverseDirection: idx = self._catCount-idx-1
@@ -1253,19 +1278,6 @@ class ValueAxis(_AxisG):
                     label.setOrigin(*pos)
                     label.setText(txt)
                     g.add(label)
-
-        return g
-
-    def draw(self):
-        g = Group()
-
-        if not self.visible:
-            return g
-
-        g.add(self.makeAxis())
-        g.add(self.makeTicks())
-        g.add(self.makeTickLabels())
-        self.addAnnotations(g)
 
         return g
 
