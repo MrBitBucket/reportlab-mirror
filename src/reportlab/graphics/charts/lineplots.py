@@ -351,10 +351,10 @@ class LinePlot(AbstractLineChart):
         if self.gridFirst:
             xA.makeGrid(g,parent=self,dim=yA.getGridDims)
             yA.makeGrid(g,parent=self,dim=xA.getGridDims)
-        g.add(xA)
-        g.add(yA)
+        g.add(xA.draw())
+        g.add(yA.draw())
         xAex = xA.visibleAxis and (xA._y,) or ()
-        yAex = yA.visibleAxis and (xA._x,) or ()
+        yAex = yA.visibleAxis and (yA._x,) or ()
         if not self.gridFirst:
             xAdgl = getattr(xA,'drawGridLast',False)
             yAdgl = getattr(yA,'drawGridLast',False)
