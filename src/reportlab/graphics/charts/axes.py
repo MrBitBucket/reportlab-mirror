@@ -851,6 +851,7 @@ class ValueAxis(_AxisG):
         subGridStrokeMiterLimit = AttrMapValue(isNumber,desc="Grid miter limit control miter line joins"),
         subGridStart = AttrMapValue(isNumberOrNone, desc='Start of grid lines wrt axis origin'),
         subGridEnd = AttrMapValue(isNumberOrNone, desc='End of grid lines wrt axis origin'),
+        keepTickLabelsInside = AttrMapValue(isBoolean, desc='Ensure tick labels do not project beyond bounds of axis if true'),
         )
 
     def __init__(self,**kw):
@@ -901,8 +902,8 @@ class ValueAxis(_AxisG):
                         subGridStrokeDashArray = STATE_DEFAULTS['strokeDashArray'],
                         subGridStart = None,
                         subGridEnd = None,
-
                         labels = TypedPropertyCollection(Label),
+                        keepTickLabelsInside = 0,
 
                         # how close can the ticks be?
                         minimumTickSpacing = 10,
@@ -1277,6 +1278,36 @@ class ValueAxis(_AxisG):
                     pos[d] = v
                     label.setOrigin(*pos)
                     label.setText(txt)
+                    
+                    #AR 2010-07-05
+                    #special property to ensure a label doesn't project beyond the end of an x-axis
+                    #used by fund manager who likes to keep it all in one tidy grid.
+                    if self.keepTickLabelsInside: 
+                        if isinstance(self, XValueAxis):  #not done yet for y axes
+                            if label == labels[0]:  #first one
+                                x0, y0, x1, y1 = label.getBounds()
+                                #print 'first label "%s" at %0.0f, %0.0f: bounds %s' % (txt, pos[0], pos[1], 
+                                #    map(int, label.getBounds()) )
+                                if x0 < self._x:
+                                    #print 'protruding first label "%s" at %0.0f, %0.0f:\n    bounds %s' % (txt, pos[0], pos[1],                                     map(int, label.getBounds()) )
+                                    #print '    axis from %0.0f to %0.0f' % (self._x, self._length + self._x)
+                                    nudge = x0 - self._x
+                                    #print '    nudge it forwards %0.0f points' % nudge
+                                    label.setOrigin(pos[0] + nudge, pos[1])
+                                
+                                    #set alignment to nw
+                                    label.boxAnchor = 'nw'
+                            if label == labels[-1]:  #first one
+                                x0, y0, x1, y1 = label.getBounds()
+                                if x1 > (self._x + self._length):
+                                    #print 'protruding last label "%s" at %0.0f, %0.0f:\n    bounds %s' % (txt, pos[0], pos[1],                                     map(int, label.getBounds()) )
+                                    #print '    axis from %0.0f to %0.0f' % (self._x, self._length + self._x)
+                                    nudge = x1 - self._x - self._length
+                                    #print '    nudge it backwards %0.0f points' % nudge
+                                    label.setOrigin(pos[0] - nudge, pos[1])
+                                    
+                                    
+                        
                     g.add(label)
 
         return g
