@@ -177,6 +177,14 @@ class ScaleWidget(Widget):
 
 _ItemWrapper={}
 
+class CloneMixin:
+    def clone(self,**kwds):
+        n = self.__class__()
+        n.__dict__.clear()
+        n.__dict__.update(self.__dict__)
+        if kwds: n.__dict__.update(kwds)
+        return n
+
 class TypedPropertyCollection(PropHolder):
     """A container with properties for objects of the same kind.
 
@@ -206,7 +214,7 @@ class TypedPropertyCollection(PropHolder):
         self.__dict__['_children'] = {}
 
     def wKlassFactory(self,Klass):
-        class WKlass(Klass):
+        class WKlass(Klass,CloneMixin):
             def __getattr__(self,name):
                 try:
                     return self.__class__.__bases__[0].__getattr__(self,name)
