@@ -652,6 +652,12 @@ class Drawing(Group, Flowable):
         the extra keywords can be of the form
         _renderPM_dpi=96 (which passes dpi=96 to renderPM)
         """
+        genFmt = kw.pop('seqNumber','')
+        if isinstance(genFmt,int):
+            genFmt = '%4d: ' % genFmt
+        else:
+            genFmt = ''
+        genFmt += 'generating %s file %s'
         from reportlab import rl_config
         ext = ''
         if not fnRoot:
@@ -689,7 +695,7 @@ class Drawing(Group, Flowable):
         if 'pdf' in plotMode:
             from reportlab.graphics import renderPDF
             filename = fnroot+'.pdf'
-            if verbose: print "generating PDF file %s" % filename
+            if verbose: print genFmt % ('PDF',filename)
             renderPDF.drawToFile(self, filename, title, showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPDF_',**kw))
             ext = ext +  '/.pdf'
             if sys.platform=='mac':
@@ -701,7 +707,7 @@ class Drawing(Group, Flowable):
             if bmFmt in plotMode:
                 from reportlab.graphics import renderPM
                 filename = '%s.%s' % (fnroot,bmFmt)
-                if verbose: print "generating %s file %s" % (bmFmt,filename)
+                if verbose: print genFmt % (bmFmt,filename)
                 dtc = getattr(self,'_drawTimeCollector',None)
                 if dtc:
                     dtcfmts = getattr(dtc,'formats',[bmFmt])
@@ -719,7 +725,7 @@ class Drawing(Group, Flowable):
             except ImportError:
                 from reportlab.graphics import renderPS
             filename = fnroot+'.eps'
-            if verbose: print "generating EPS file %s" % filename
+            if verbose: print genFmt % ('EPS',filename)
             renderPS.drawToFile(self,
                                 filename,
                                 title = fnroot,
@@ -734,7 +740,7 @@ class Drawing(Group, Flowable):
         if 'svg' in plotMode:
             from reportlab.graphics import renderSVG
             filename = fnroot+'.svg'
-            if verbose: print "generating EPS file %s" % filename
+            if verbose: print genFmt % ('SVG',filename)
             renderSVG.drawToFile(self,
                                 filename,
                                 showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderSVG_',**kw))
@@ -743,13 +749,13 @@ class Drawing(Group, Flowable):
         if 'ps' in plotMode:
             from reportlab.graphics import renderPS
             filename = fnroot+'.ps'
-            if verbose: print "generating EPS file %s" % filename
+            if verbose: print genFmt % ('EPS',filename)
             renderPS.drawToFile(self, filename, showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPS_',**kw))
             ext = ext +  '/.ps'
 
         if 'py' in plotMode:
             filename = fnroot+'.py'
-            if verbose: print "generating py file %s" % filename
+            if verbose: print genFmt % ('py',filename)
             open(filename,'w').write(self._renderPy())
             ext = ext +  '/.py'
 
