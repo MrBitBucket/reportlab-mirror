@@ -1,6 +1,5 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2010
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/axes.py
 __version__=''' $Id$ '''
 __doc__="""Collection of axes for charts.
 
@@ -32,8 +31,6 @@ at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
 
-import string
-
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
                                         isString, EitherOr, Validator, _SequenceTypes, NoneOr, isInstanceOf, \
@@ -44,6 +41,8 @@ from reportlab.graphics.shapes import Drawing, Line, PolyLine, Group, STATE_DEFA
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.utils import nextRoundNumber
+import copy
+
 
 # Helpers.
 def _findMinMaxValue(V, x, default, func, special=None):
@@ -1284,15 +1283,16 @@ class ValueAxis(_AxisG):
                     if self.keepTickLabelsInside: 
                         if isinstance(self, XValueAxis):  #not done yet for y axes
                             a_x = self._x
-                            
                             if not i:  #first one
                                 x0, y0, x1, y1 = label.getBounds()
                                 if x0 < a_x:
+                                    label = copy.copy(label)
                                     label.dx += a_x - x0
                             if i==nticks1:  #final one
                                 a_x1 = a_x +self._length
                                 x0, y0, x1, y1 = label.getBounds()
                                 if x1 > a_x1:
+                                    label = copy.copy(label)
                                     label.dx -= x1-a_x1
                     g.add(label)
 
@@ -1520,7 +1520,7 @@ class NormalDateXValueAxis(XValueAxis):
         labels = self.labels
         fontName, fontSize, leading = labels.fontName, labels.fontSize, labels.leading
         textAnchor, boxAnchor, angle = labels.textAnchor, labels.boxAnchor, labels.angle
-        RBL = _textBoxLimits(string.split(formatter(xVals[0]),'\n'),fontName,
+        RBL = _textBoxLimits(formatter(xVals[0]).split('\n'),fontName,
                     fontSize,leading or 1.2*fontSize,textAnchor,boxAnchor)
         RBL = _rotatedBoxLimits(RBL[0],RBL[1],RBL[2],RBL[3], angle)
         xLabelW = RBL[1]-RBL[0]
