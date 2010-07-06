@@ -1286,13 +1286,17 @@ class ValueAxis(_AxisG):
                             if not i:  #first one
                                 x0, y0, x1, y1 = label.getBounds()
                                 if x0 < a_x:
-                                    label = copy.copy(label)
+                                    label, olabel = label.__class__(),label
+                                    label.__dict__.clear()
+                                    label.__dict__.update(olabel.__dict__)
                                     label.dx += a_x - x0
                             if i==nticks1:  #final one
                                 a_x1 = a_x +self._length
                                 x0, y0, x1, y1 = label.getBounds()
                                 if x1 > a_x1:
-                                    label = copy.copy(label)
+                                    label, olabel = label.__class__(),label
+                                    label.__dict__.clear()
+                                    label.__dict__.update(olabel.__dict__)
                                     label.dx -= x1-a_x1
                     g.add(label)
 
