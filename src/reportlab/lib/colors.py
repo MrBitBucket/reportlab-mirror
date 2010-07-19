@@ -316,7 +316,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
     """
 
     if c0.__class__ != c1.__class__:
-        raise ValueError, "Color classes must be the same for interpolation!"
+        raise ValueError("Color classes must be the same for interpolation!\nGot %r and %r'"%(c0,c1))
     if x1<x0:
         x0,x1,c0,c1 = x1,x0,c1,c0 # normalized so x1>x0
     if x<x0-1e-8 or x>x1+1e-8: # fudge factor for numerical problems

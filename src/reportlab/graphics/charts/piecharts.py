@@ -1113,17 +1113,16 @@ class Pie3d(Pie):
             #connect to top
             if lo < a0 < hi: angle0 = a0
             if lo < a1 < hi: angle1 = a1
-            if 1:
-                p = ArcPath(strokeColor=strokeColor, fillColor=fillColor,strokeWidth=strokeWidth,strokeLineJoin=1)
-                p.addArc(cx1,cy1,radiusx,angle0,angle1,yradius=radiusy,moveTo=1)
-                p.lineTo(OX(i,angle1,0),OY(i,angle1,0))
-                p.addArc(cx0,cy0,radiusx,angle0,angle1,yradius=radiusy,reverse=1)
-                p.closePath()
-                if angle0<=_3dva and angle1>=_3dva:
-                    rd = 0
-                else:
-                    rd = min(rad_dist(angle0),rad_dist(angle1))
-                S.append((rd,p))
+            p = ArcPath(strokeColor=strokeColor, fillColor=fillColor,strokeWidth=strokeWidth,strokeLineJoin=1)
+            p.addArc(cx1,cy1,radiusx,angle0,angle1,yradius=radiusy,moveTo=1)
+            p.lineTo(OX(i,angle1,0),OY(i,angle1,0))
+            p.addArc(cx0,cy0,radiusx,angle0,angle1,yradius=radiusy,reverse=1)
+            p.closePath()
+            if angle0<=_3dva and angle1>=_3dva:
+                rd = 0
+            else:
+                rd = min(rad_dist(angle0),rad_dist(angle1))
+            S.append((rd,p))
             _fillSide(S,i,lo,strokeColor,strokeWidth,fillColor)
             _fillSide(S,i,hi,strokeColor,strokeWidth,fillColor)
 
