@@ -337,13 +337,43 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
         a = c0.alpha+x*(c1.alpha - c0.alpha)/dx
         return Color(r,g,b,alpha=a)
     elif cname == 'CMYKColor':
-        c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
-        m = c0.magenta+x*(c1.magenta - c0.magenta)/dx
-        y = c0.yellow+x*(c1.yellow - c0.yellow)/dx
-        k = c0.black+x*(c1.black - c0.black)/dx
-        d = c0.density+x*(c1.density - c0.density)/dx
-        a = c0.alpha+x*(c1.alpha - c0.alpha)/dx
-        return CMYKColor(c,m,y,k, density=d, alpha=a)
+        if cmykDistance(c0,c1)<1e-8:
+            #colors same do density and preserve spotName if any
+            assert c0.spotName == c1.spotName, "Identical cmyk, but different spotName"
+            c = c0.cyan
+            m = c0.magenta
+            y = c0.yellow
+            k = c0.black
+            d = c0.density+x*(c1.density - c0.density)/dx
+            a = c0.alpha+x*(c1.alpha - c0.alpha)/dx
+            return CMYKColor(c,m,y,k, density=d, spotName=c0.spotName, alpha=a)
+        elif cmykDistance(c0,_CMYK_white)<1e-8:
+            #special c0 is white
+            c = c1.cyan
+            m = c1.magenta
+            y = c1.yellow
+            k = c1.black
+            d = x*c1.density/dx
+            a = x*c1.alpha/dx
+            return CMYKColor(c,m,y,k, density=d, spotName=c1.spotName, alpha=a)
+        elif cmykDistance(c1,_CMYK_white)<1e-8:
+            #special c1 is white
+            c = c0.cyan
+            m = c0.magenta
+            y = c0.yellow
+            k = c0.black
+            d = x*c0.density/dx
+            d = c0.density*(1-x/dx)
+            a = c0.alpha*(1-x/dx)
+            return PCMYKColor(c,m,y,k, density=d, spotName=c0.spotName, alpha=a)
+        else:
+            c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
+            m = c0.magenta+x*(c1.magenta - c0.magenta)/dx
+            y = c0.yellow+x*(c1.yellow - c0.yellow)/dx
+            k = c0.black+x*(c1.black - c0.black)/dx
+            d = c0.density+x*(c1.density - c0.density)/dx
+            a = c0.alpha+x*(c1.alpha - c0.alpha)/dx
+            return CMYKColor(c,m,y,k, density=d, alpha=a)
     elif cname == 'PCMYKColor':
         if cmykDistance(c0,c1)<1e-8:
             #colors same do density and preserve spotName if any
@@ -353,8 +383,9 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
             y = c0.yellow
             k = c0.black
             d = c0.density+x*(c1.density - c0.density)/dx
+            a = c0.alpha+x*(c1.alpha - c0.alpha)/dx
             return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100,
-                              spotName=c0.spotName, alpha=c0.alpha)
+                              spotName=c0.spotName, alpha=100*a)
         elif cmykDistance(c0,_CMYK_white)<1e-8:
             #special c0 is white
             c = c1.cyan
@@ -362,8 +393,9 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
             y = c1.yellow
             k = c1.black
             d = x*c1.density/dx
+            a = x*c1.alpha/dx
             return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100,
-                              spotName=c1.spotName, alpha=c1.alpha)
+                              spotName=c1.spotName, alpha=a*100)
         elif cmykDistance(c1,_CMYK_white)<1e-8:
             #special c1 is white
             c = c0.cyan
@@ -372,8 +404,9 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
             k = c0.black
             d = x*c0.density/dx
             d = c0.density*(1-x/dx)
+            a = c0.alpha*(1-x/dx)
             return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100,
-                              spotName=c0.spotName, alpha=c0.alpha)
+                              spotName=c0.spotName, alpha=a*100)
         else:
             c = c0.cyan+x*(c1.cyan - c0.cyan)/dx
             m = c0.magenta+x*(c1.magenta - c0.magenta)/dx
@@ -381,7 +414,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
             k = c0.black+x*(c1.black - c0.black)/dx
             d = c0.density+x*(c1.density - c0.density)/dx
             a = c0.alpha+x*(c1.alpha - c0.alpha)/dx
-            return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, alpha=a)
+            return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, alpha=a*100)
     else:
         raise ValueError, "Can't interpolate: Unknown color class %s!" % cname
 
@@ -819,6 +852,12 @@ def setColors(**kw):
 def Whiter(c,f):
     '''given a color combine with white as c*f w*(1-f) 0<=f<=1'''
     c = toColor(c)
+    if isinstance(c,CMYKColorSep):
+        c = c.clone()
+        if isinstance(c,PCMYKColorSep):
+            c.__class__ = PCMYKColor
+        else:
+            c.__class__ = CMYKColor
     if isinstance(c,PCMYKColor):
         w = _PCMYK_white
     elif isinstance(c,CMYKColor): w = _CMYK_white
@@ -828,6 +867,12 @@ def Whiter(c,f):
 def Blacker(c,f):
     '''given a color combine with black as c*f+b*(1-f) 0<=f<=1'''
     c = toColor(c)
+    if isinstance(c,CMYKColorSep):
+        c = c.clone()
+        if isinstance(c,PCMYKColorSep):
+            c.__class__ = PCMYKColor
+        else:
+            c.__class__ = CMYKColor
     if isinstance(c,PCMYKColor):
         b = _PCMYK_black
     elif isinstance(c,CMYKColor): b = _CMYK_black
