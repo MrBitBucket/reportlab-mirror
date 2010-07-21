@@ -150,7 +150,7 @@ def find_good_grid(lower,upper,n=(4,5,6,7,8,9), grid=None):
     return t, hi, grid
 
 
-def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0, grid=None):
+def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0, grid=None, labelVOffset=0):
     '''
     return tick positions and labels for range lower<=x<=upper
     n=number of intervals to try (can be a list or sequence)
@@ -180,12 +180,12 @@ def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0, grid=None):
         for i in xrange(n):
             v = t+grid*i
             T.append(v)
-            labels.append(format % v)
+            labels.append(format % (v+labelVOffset))
         return T, labels
     else:
         for i in xrange(n):
             v = t+grid*i
-            T.append((v, format % v))
+            T.append((v, format % (v+labelVOffset)))
         return T
 
 def findNones(data):

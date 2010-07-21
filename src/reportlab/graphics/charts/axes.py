@@ -1759,7 +1759,8 @@ class AdjYValueAxis(YValueAxis):
         leftAxisPercent = AttrMapValue(isBoolean, desc='When true add percent sign to label values.'),
         leftAxisOrigShiftIPC = AttrMapValue(isNumber, desc='Lowest label shift interval ratio.'),
         leftAxisOrigShiftMin = AttrMapValue(isNumber, desc='Minimum amount to shift.'),
-        leftAxisSkipLL0 = AttrMapValue(EitherOr((isBoolean,isListOfNumbers)), desc='Skip/Keep lowest tick label when true/false.\nOr skiplist')
+        leftAxisSkipLL0 = AttrMapValue(EitherOr((isBoolean,isListOfNumbers)), desc='Skip/Keep lowest tick label when true/false.\nOr skiplist'),
+        labelVOffset = AttrMapValue(isNumber, desc='add this to the labels'),
         )
 
     def __init__(self,**kw):
@@ -1768,7 +1769,7 @@ class AdjYValueAxis(YValueAxis):
         self.leftAxisPercent = 1
         self.leftAxisOrigShiftIPC = 0.15
         self.leftAxisOrigShiftMin = 12
-        self.leftAxisSkipLL0 = 0
+        self.leftAxisSkipLL0 = self.labelVOffset = 0
         self.valueSteps = None
 
     def _rangeAdjust(self):
@@ -1795,7 +1796,7 @@ class AdjYValueAxis(YValueAxis):
                     y1 = 0
             self._valueMin, self._valueMax = y1, y2
 
-        T, L = ticks(self._valueMin, self._valueMax, split=1, n=n, percent=self.leftAxisPercent,grid=valueStep)
+        T, L = ticks(self._valueMin, self._valueMax, split=1, n=n, percent=self.leftAxisPercent,grid=valueStep, labelVOffset=self.labelVOffset)
         abf = self.avoidBoundFrac
         if abf:
             i1 = (T[1]-T[0])
@@ -1808,7 +1809,7 @@ class AdjYValueAxis(YValueAxis):
             _x = getattr(self,'_cValueMax',T[-1])
             if _n - T[0] < i0: self._valueMin = self._valueMin - i0
             if T[-1]-_x < i1: self._valueMax = self._valueMax + i1
-            T, L = ticks(self._valueMin, self._valueMax, split=1, n=n, percent=self.leftAxisPercent,grid=valueStep)
+            T, L = ticks(self._valueMin, self._valueMax, split=1, n=n, percent=self.leftAxisPercent,grid=valueStep, labelVOffset=self.labelVOffset)
 
         self._valueMin = T[0]
         self._valueMax = T[-1]
