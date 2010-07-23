@@ -137,6 +137,24 @@ class AxisLineAnnotation:
                 axis._get_line_pos = oaglp
         return L
 
+class TickLU:
+    '''lookup special cases for tick values'''
+    def __init__(self,*T,**kwds):
+        self.accuracy = kwds.pop('accuracy',1e-8)
+        self.T = T
+    def __contains__(self,t):
+        accuracy = self.accuracy
+        for x,v in self.T:
+            if abs(x-t)<accuracy:
+                return True
+        return False
+    def __getitem__(self,t):
+        accuracy = self.accuracy
+        for x,v in self.T:
+            if abs(x-t)<self.accuracy:
+                return v
+        raise IndexError('cannot locate index %r' % t)
+
 class _AxisG(Widget):
     def _get_line_pos(self,v):
         v = self.scale(v)
@@ -180,7 +198,7 @@ class _AxisG(Widget):
             f = self.isYAxis and self._cyLine or self._cxLine
             return lambda v, s=start, e=end, f=f: f(v,s,e)
 
-    def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray,strokeLineJoin,strokeLineCap,strokeMiterLimit,parent=None,exclude=[]):
+    def _makeLines(self,g,start,end,strokeColor,strokeWidth,strokeDashArray,strokeLineJoin,strokeLineCap,strokeMiterLimit,parent=None,exclude=[],specials={}):
         func = self._getLineFunc(start,end,parent)
         if not hasattr(self,'_tickValues'):
             self._pseudo_configure()
@@ -197,6 +215,9 @@ class _AxisG(Widget):
                 L.strokeLineJoin = strokeLineJoin
                 L.strokeLineCap = strokeLineCap
                 L.strokeMiterLimit = strokeMiterLimit
+                if t in specials:
+                    for a,v in specials[t].iteritems():
+                        setattr(L,a,v)
                 g.add(L)
 
     def makeGrid(self,g,dim=None,parent=None,exclude=[]):
@@ -218,7 +239,7 @@ class _AxisG(Widget):
             if s or e:
                 if self.isYAxis: offs = self._x
                 else: offs = self._y
-                self._makeLines(g,s-offs,e-offs,c,w,self.gridStrokeDashArray,self.gridStrokeLineJoin,self.gridStrokeLineCap,self.gridStrokeMiterLimit,parent=parent,exclude=exclude)
+                self._makeLines(g,s-offs,e-offs,c,w,self.gridStrokeDashArray,self.gridStrokeLineJoin,self.gridStrokeLineCap,self.gridStrokeMiterLimit,parent=parent,exclude=exclude,specials=getattr(self,'_gridSpecials',{}))
         self._makeSubGrid(g,dim,parent,exclude=[])
 
     def _makeSubGrid(self,g,dim=None,parent=None,exclude=[]):
