@@ -31,6 +31,7 @@ from reportlab.lib.utils import fp_str
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 from reportlab.lib.styles import _baseFontName
 from reportlab.pdfbase import pdfutils
+from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions
 
 __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
@@ -266,6 +267,12 @@ class Preformatted(Flowable):
         self.width = availWidth
         self.height = self.style.leading*len(self.lines)
         return (self.width, self.height)
+
+    def minWidth(self):
+        style = self.style
+        fontSize = style.fontSize
+        fontName = style.fontName
+        return max([stringWidth(line,fontName,fontSize) for line in self.lines])
 
     def split(self, availWidth, availHeight):
         #returns two Preformatted objects
