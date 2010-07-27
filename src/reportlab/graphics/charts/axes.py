@@ -1536,10 +1536,12 @@ class NormalDateXValueAxis(XValueAxis):
         if isinstance(formatter,TickLabeller):
             def formatter(tick):
                 return self._dateFormatter(self,tick)
+        firstDate = xVals[0]
+        endDate = xVals[-1]
         labels = self.labels
         fontName, fontSize, leading = labels.fontName, labels.fontSize, labels.leading
         textAnchor, boxAnchor, angle = labels.textAnchor, labels.boxAnchor, labels.angle
-        RBL = _textBoxLimits(formatter(xVals[0]).split('\n'),fontName,
+        RBL = _textBoxLimits(formatter(firstDate).split('\n'),fontName,
                     fontSize,leading or 1.2*fontSize,textAnchor,boxAnchor)
         RBL = _rotatedBoxLimits(RBL[0],RBL[1],RBL[2],RBL[3], angle)
         xLabelW = RBL[1]-RBL[0]
@@ -1552,15 +1554,25 @@ class NormalDateXValueAxis(XValueAxis):
         labels = []
         maximumTicks = self.maximumTicks
 
+        if self.specifiedTickDates:
+            VC = self._valueClass
+            ticks = [VC(x) for x in self.specifiedTickDates]
+            labels = [formatter(d) for d in ticks]
+            if self.forceFirstDate and firstDate==ticks[0] and (axisLength/float(ticks[-1]-ticks[0]))*(ticks[1]-ticks[0])<=W:
+                if self.specialTickClear:
+                    labels[1] = ''
+                else:
+                    del ticks[1], labels[1]
+            if self.forceEndDate and endDate==ticks[-1] and (axisLength/float(ticks[-1]-ticks[0]))*(ticks[-1]-ticks[-2])<=W:
+                if self.specialTickClear:
+                    labels[-2] = ''
+                else:
+                    del ticks[-2], labels[-2]
+            return ticks, labels
 
         def addTick(i, xVals=xVals, formatter=formatter, ticks=ticks, labels=labels):
             ticks.insert(0,xVals[i])
             labels.insert(0,formatter(xVals[i]))
-
-        if self.specifiedTickDates:
-            VC = self._valueClass
-            ticks = [VC(x) for x in self.specifiedTickDates]
-            return ticks,[formatter(d) for d in ticks]
 
         #AR 20060619 - first we try the approach where the user has explicitly
         #specified the days of year to be ticked.  Other explicit routes may
@@ -1568,11 +1580,9 @@ class NormalDateXValueAxis(XValueAxis):
         if self.forceDatesEachYear:
             forcedPartialDates = map(parseDayAndMonth, self.forceDatesEachYear)
             #generate the list of dates in the range.
-            firstDate = xVals[0]
-            lastDate = xVals[-1]
-            #print 'dates range from %s to %s' % (firstDate, lastDate)
+            #print 'dates range from %s to %s' % (firstDate, endDate)
             firstYear = firstDate.year()
-            lastYear = lastDate.year()
+            lastYear = endDate.year()
             ticks = []
             labels = []
             yyyy = firstYear
@@ -1581,18 +1591,28 @@ class NormalDateXValueAxis(XValueAxis):
             while yyyy <= lastYear:
                 for (dd, mm) in forcedPartialDates:
                     theDate = normalDate.ND((yyyy, mm, dd))
-                    if theDate >= firstDate and theDate <= lastDate:
+                    if theDate >= firstDate and theDate <= endDate:
                         ticks.append(theDate)
                         labels.append(formatter(theDate))
                 yyyy += 1
 
             #first and last may still be forced in.
-            if self.forceFirstDate and xVals[0] != ticks[0]:
+            if self.forceFirstDate and firstDate!=ticks[0]:
                 ticks.insert(0, firstDate)
                 labels.insert(0,formatter(firstDate))
-            if self.forceEndDate and xVals[-1] != ticks[-1]:
-                ticks.append(lastDate)
-                labels.append(formatter(lastDate))
+                if (axisLength/float(ticks[-1]-ticks[0]))*(ticks[1]-ticks[0])<=W:
+                    if self.specialTickClear:
+                        labels[1] = ''
+                    else:
+                        del ticks[1], labels[1]
+            if self.forceEndDate and endDate!=ticks[-1]:
+                ticks.append(endDate)
+                labels.append(formatter(endDate))
+                if (axisLength/float(ticks[-1]-ticks[0]))*(ticks[-1]-ticks[-2])<=W:
+                    if self.specialTickClear:
+                        labels[-2] = ''
+                    else:
+                        del ticks[-2], labels[-2]
 
             #print 'xVals found on forced dates =', ticks
             return ticks, labels
@@ -1604,7 +1624,7 @@ class NormalDateXValueAxis(XValueAxis):
             if k<=maximumTicks and k*W <= axisLength:
                 i = n-1
                 if self.niceMonth:
-                    j = xVals[-1].month() % (d<=12 and d or 12)
+                    j = endDate.month() % (d<=12 and d or 12)
                     if j:
                         if self.forceEndDate:
                             addTick(i)
@@ -1613,7 +1633,7 @@ class NormalDateXValueAxis(XValueAxis):
 
                 #weird first date ie not at end of month
                 try:
-                    wfd = xVals[0].month() == xVals[1].month()
+                    wfd = firstDate.month() == xVals[1].month()
                 except:
                     wfd = 0
 
@@ -1621,7 +1641,7 @@ class NormalDateXValueAxis(XValueAxis):
                     addTick(i)
                     i -= d
 
-                if self.forceFirstDate and ticks[0] != xVals[0]:
+                if self.forceFirstDate and ticks[0]!=firstDate:
                     addTick(0)
                     ticks[0]._doSubTicks=0
                     if (axisLength/float(ticks[-1]-ticks[0]))*(ticks[1]-ticks[0])<=W:
