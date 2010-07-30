@@ -246,6 +246,8 @@ class _PDFRenderer(Renderer):
                 self._canvas.setFillOverprint(value)
             elif key=='strokeOverprint':
                 self._canvas.setStrokeOverprint(value)
+            elif key=='overprintMask':
+                self._canvas.setOverprintMask(value)
 
 from reportlab.platypus import Flowable
 class GraphicsFlowable(Flowable):

@@ -156,6 +156,9 @@ class _PDFColorSetter:
     def setFillOverprint(self,a):
         getattr(self,'_setFillOverprint',lambda x: None)(a)
 
+    def setOverprintMask(self,a):
+        getattr(self,'_setOverprintMask',lambda x: None)(a)
+
 class PDFTextObject(_PDFColorSetter):
     """PDF logically separates text and graphics drawing; text
     operations need to be bracketed between BT (Begin text) and

@@ -484,6 +484,9 @@ class Canvas(textobject._PDFColorSetter):
     def _setFillOverprint(self,v):
         self._extgstate.set(self,'op',v)
 
+    def _setOverprintMask(self,v):
+        self._extgstate.set(self,'OPM',v and 1 or 0)
+
     def _getCmShift(self):
         cM = self._cropMarks
         if cM:

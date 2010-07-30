@@ -52,6 +52,7 @@ STATE_DEFAULTS = {   # sensible defaults for all
     'fillOpacity': None,
     'fillOverprint': False,
     'strokeOverprint': False,
+    'overprintMask': 0,
 
     'fillColor': colors.black,   #...or text will be invisible
     #'fillRule': NON_ZERO_WINDING, - these can be done later
@@ -320,6 +321,7 @@ class Group(Shape):
         contents = AttrMapValue(isListOfShapes,desc="Contained drawable elements"),
         strokeOverprint = AttrMapValue(isBoolean,desc='Turn on stroke overprinting'),
         fillOverprint = AttrMapValue(isBoolean,desc='Turn on fill overprinting',advancedUsage=1),
+        overprintMask = AttrMapValue(isBoolean,desc='overprinting for ordinary CMYK',advancedUsage=1),
         )
 
     def __init__(self, *elements, **keywords):
@@ -844,6 +846,7 @@ class LineShape(Shape):
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone,desc="a sequence of numbers represents on and off, e.g. (2,1)"),
         strokeOpacity = AttrMapValue(isOpacity,desc="The level of transparency of the line, any real number betwen 0 and 1"),
         strokeOverprint = AttrMapValue(isBoolean,desc='Turn on stroke overprinting'),
+        overprintMask = AttrMapValue(isBoolean,desc='overprinting for ordinary CMYK',advancedUsage=1),
         )
 
     def __init__(self, kw):
@@ -883,6 +886,7 @@ class SolidShape(LineShape):
         fillColor = AttrMapValue(isColorOrNone,desc="filling color of the shape, e.g. red"),
         fillOpacity = AttrMapValue(isOpacity,desc="the level of transparency of the color, any real number between 0 and 1"),
         fillOverprint = AttrMapValue(isBoolean,desc='Turn on fill overprinting'),
+        overprintMask = AttrMapValue(isBoolean,desc='overprinting for ordinary CMYK',advancedUsage=1),
         )
 
     def __init__(self, kw):
