@@ -80,6 +80,7 @@ class   ExtGState:
                 ca=1,
                 OP=False,
                 op=False,
+                OPM=0,
                 )
 
     def __init__(self):
