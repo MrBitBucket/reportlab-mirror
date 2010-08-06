@@ -1007,7 +1007,7 @@ class KeepInFrame(_Container,Flowable):
 class ImageAndFlowables(_Container,Flowable):
     '''combine a list of flowables and an Image'''
     def __init__(self,I,F,imageLeftPadding=0,imageRightPadding=3,imageTopPadding=0,imageBottomPadding=3,
-                    imageSide='right'):
+                    imageSide='right', imageHref=None):
         self._content = _flowableSublist(F)
         self._I = I
         self._irpad = imageRightPadding
@@ -1015,6 +1015,7 @@ class ImageAndFlowables(_Container,Flowable):
         self._ibpad = imageBottomPadding
         self._itpad = imageTopPadding
         self._side = imageSide
+        self.imageHref = imageHref
 
     def deepcopy(self):
         c = copy(self)  #shallow
@@ -1105,6 +1106,10 @@ class ImageAndFlowables(_Container,Flowable):
             Ix = x + self.width-self._wI-self._irpad
             Fx = x
         self._I.drawOn(canv,Ix,y+self.height-self._itpad-self._hI)
+
+        if self.imageHref:
+            canv.linkURL(self.imageHref, (Ix, y+self.height-self._itpad-self._hI, Ix + self._wI, y+self.height), relative=1)
+
         if self._C0:
             _Container.drawOn(self, canv, Fx, y, content=self._C0, aW=self._iW)
         if self._C1:
