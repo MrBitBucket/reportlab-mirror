@@ -64,38 +64,6 @@ class RlAccelTestCase(unittest.TestCase):
         from _rl_accel import calcChecksum
         assert calcChecksum('test')==1952805748
 
-    def testStringWidth(self):
-        from _rl_accel import stringWidthU
-        from reportlab.pdfbase.pdfmetrics import _py_stringWidth, getFont, registerFont, _fonts 
-        from reportlab.pdfbase.ttfonts import TTFont
-        ttfn = 'Vera'
-        t1fn = 'Times-Roman'
-        registerFont(TTFont(ttfn, "Vera.ttf"))
-        ttf = getFont(ttfn)
-        t1f = getFont(t1fn)
-        testCp1252 = 'copyright %s trademark %s registered %s ReportLab! Ol%s!' % (chr(169), chr(153),chr(174), chr(0xe9))
-        enc='cp1252'
-        senc = 'utf8'
-        intern(senc)
-        ts = 'ABCDEF\xce\x91\xce\xb2G'
-        utext = 'ABCDEF\xce\x91\xce\xb2G'.decode('utf8')
-        fontSize = 12
-        stringWidthU(testCp1252,t1fn,fontSize,enc)      #avoid obscure startup initialization problems
-        defns="ttfn t1fn ttf t1f testCp1252 enc senc ts utext fontSize ttf.face ttf.face.charWidths ttf.face.defaultWidth t1f.widths t1f.encName t1f.substitutionFonts _fonts"
-        rcv = getrc(defns)  #first count
-        def tfunc(ts,fn,fontSize,enc):
-            w1 = stringWidthU(ts,fn,fontSize,enc)
-            w2 = _py_stringWidth(ts,fn,fontSize,enc)
-            assert abs(w1-w2)<1e-10,"stringWidthU(%r,%r,%s,%r)-->%r != _py_stringWidth(...)-->%r" % (ts,fn,fontSize,enc,w1,w2)
-        tfunc(testCp1252,t1fn,fontSize,enc)
-        tfunc(ts,t1fn,fontSize,senc)
-        tfunc(utext,t1fn,fontSize,senc)
-        tfunc(ts,ttfn,fontSize,senc)
-        tfunc(testCp1252,ttfn,fontSize,enc)
-        tfunc(utext,ttfn,fontSize,senc)
-        rcc = checkrc(defns,rcv)    #second count and compare
-        assert not rcc, "rc diffs (%s)" % rcc
-
     def test_instanceStringWidth(self):
         from reportlab.pdfbase.pdfmetrics import registerFont, getFont, _fonts, unicode2T1
         from reportlab.pdfbase.ttfonts import TTFont
@@ -144,13 +112,6 @@ class RlAccelTestCase(unittest.TestCase):
         tfunc(t1f,utext)
         rcc = checkrc(defns,rcv)
         assert not rcc, "rc diffs (%s)" % rcc
-
-    def test_getFont(self):
-        from reportlab.pdfbase.pdfmetrics import _py_getFont, getFont
-        from _rl_accel import getFontU
-        assert getFontU is getFont
-        t1fn = 'Times-Roman'
-        assert _py_getFont(t1fn) is getFontU(t1fn)
 
     def test_sameFrag(self):
         from _rl_accel import _sameFrag
