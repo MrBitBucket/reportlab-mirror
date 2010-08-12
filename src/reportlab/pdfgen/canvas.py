@@ -98,7 +98,7 @@ class   ExtGState:
             if t in self._c:
                 name = self._c[t]
             else:
-                name = 'GS'+str(len(self._c))
+                name = 'gRLs'+str(len(self._c))
                 self._c[t] = name
             canv._code.append('/%s gs' % name)
 
