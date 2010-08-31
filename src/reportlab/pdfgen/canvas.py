@@ -491,7 +491,7 @@ class Canvas(textobject._PDFColorSetter):
         cM = self._cropMarks
         if cM:
             mv = max(1,min(self._pagesize[0],self._pagesize[1]))
-            sf = min(1+1./mv,1.01)
+            sf = min(1+1./mv,getattr(cM,'bleedSF',1))
             bw = max(0,getattr(cM,'borderWidth',36)/sf)
             return bw
 
@@ -507,7 +507,7 @@ class Canvas(textobject._PDFColorSetter):
         code = self._code
         if cM:
             mv = max(1,min(pageWidth,pageHeight))
-            sf = min(1+1./mv,1.01)
+            sf = min(1+1./mv,getattr(cM,'bleedSF',1))
             bw = max(0,getattr(cM,'borderWidth',36)/sf)
             if bw:
                 bv = (sf-1)*mv*0.5
@@ -523,6 +523,7 @@ class Canvas(textobject._PDFColorSetter):
                 oph = pageHeight*sf
                 pageWidth = 2*bw + pageWidth*sf
                 pageHeight = 2*bw + pageHeight*sf
+                cx1 = len(code)
                 if ml and mc:
                     self.saveState()
                     self.setStrokeColor(mc)
@@ -538,8 +539,8 @@ class Canvas(textobject._PDFColorSetter):
                         (opw+mg,oph-2*bv,opw+bw,oph-2*bv),
                         ])
                     self.restoreState()
-                C = code[cx0:]
-                del code[cx0:]
+                C = code[cx0:cx1]
+                del code[cx0:cx1]
                 code[0:0] = C
                 self.restoreState()
 
