@@ -490,9 +490,10 @@ class Canvas(textobject._PDFColorSetter):
     def _getCmShift(self):
         cM = self._cropMarks
         if cM:
-            mv = max(1,min(self._pagesize[0],self._pagesize[1]))
-            sf = min(1+1./mv,getattr(cM,'bleedSF',1))
-            bw = max(0,getattr(cM,'borderWidth',36)/sf)
+            bleedW = max(0,getattr(cM,'bleedWidth',0))
+            bw = max(0,getattr(cM,'borderWidth',36))
+            if bleedW:
+                bw -= bleedW
             return bw
 
     def showPage(self):
@@ -506,43 +507,52 @@ class Canvas(textobject._PDFColorSetter):
         cM = self._cropMarks
         code = self._code
         if cM:
-            mv = max(1,min(pageWidth,pageHeight))
-            sf = min(1+1./mv,getattr(cM,'bleedSF',1))
-            bw = max(0,getattr(cM,'borderWidth',36)/sf)
+            bw = max(0,getattr(cM,'borderWidth',36))
             if bw:
-                bv = (sf-1)*mv*0.5
-                ml = min(bw,max(0,getattr(cM,'markLength',18)/sf))
+                markLast = getattr(cM,'markLast',1)
+                ml = min(bw,max(0,getattr(cM,'markLength',18)))
                 mw = getattr(cM,'markWidth',0.5)
                 mc = getattr(cM,'markColor',black)
-                mg = bw-ml
+                mg = 2*bw-ml
                 cx0 = len(code)
-                self.saveState()
-                self.scale(sf,sf)
-                self.translate(bw,bw)
-                opw = pageWidth*sf
-                oph = pageHeight*sf
-                pageWidth = 2*bw + pageWidth*sf
-                pageHeight = 2*bw + pageHeight*sf
-                cx1 = len(code)
                 if ml and mc:
                     self.saveState()
                     self.setStrokeColor(mc)
                     self.setLineWidth(mw)
                     self.lines([
-                        (bv,0-bw,bv,ml-bw),
-                        (opw-2*bv,0-bw,opw-2*bv,ml-bw),
-                        (bv,oph+mg,bv,oph+bw),
-                        (opw-2*bv,oph+mg,opw-2*bv,oph+bw),
-                        (-bw,bv,ml-bw,bv),
-                        (opw+mg,bv,opw+bw,bv),
-                        (-bw,oph-2*bv,ml-bw,oph-2*bv),
-                        (opw+mg,oph-2*bv,opw+bw,oph-2*bv),
+                        (bw,0,bw,ml),
+                        (pageWidth+bw,0,pageWidth+bw,ml),
+                        (bw,pageHeight+mg,bw,pageHeight+2*bw),
+                        (pageWidth+bw,pageHeight+mg,pageWidth+bw,pageHeight+2*bw),
+                        (0,bw,ml,bw),
+                        (pageWidth+mg,bw,pageWidth+2*bw,bw),
+                        (0,pageHeight+bw,ml,pageHeight+bw),
+                        (pageWidth+mg,pageHeight+bw,pageWidth+2*bw,pageHeight+bw),
                         ])
                     self.restoreState()
-                C = code[cx0:cx1]
-                del code[cx0:cx1]
+                    if markLast:
+                        #if the marks are to be drawn after the content
+                        #save the code we just drew for later use
+                        L = code[cx0:]
+                        del code[cx0:]
+                        cx0 = len(code)
+
+                bleedW = max(0,getattr(cM,'bleedWidth',0))
+                self.saveState()
+                self.translate(bw-bleedW,bw-bleedW)
+                if bleedW:
+                    #scale everything
+                    self.scale(1+(2.0*bleedW)/pageWidth,1+(2.0*bleedW)/pageHeight)
+
+                #move our translation/expansion code to the beginning
+                C = code[cx0:]
+                del code[cx0:]
                 code[0:0] = C
                 self.restoreState()
+                if markLast:
+                    code.extend(L)
+                pageWidth = 2*bw + pageWidth
+                pageHeight = 2*bw + pageHeight
 
         code.append(' ')
         page = pdfdoc.PDFPage()
