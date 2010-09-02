@@ -471,15 +471,14 @@ class BarChart(PlotArea):
         lenData = len(self.data)
         bars = self.bars
         br = getattr(self,'barRecord',None)
-        for rowNo in range(lenData):
+        for rowNo in xrange(lenData):
             row = self._barPositions[rowNo]
             styleCount = len(bars)
             styleIdx = rowNo % styleCount
             rowStyle = bars[styleIdx]
             for colNo in range(len(row)):
-                barPos = row[colNo]
                 style = (styleIdx,colNo) in bars and bars[(styleIdx,colNo)] or rowStyle
-                (x, y, width, height) = barPos
+                (x, y, width, height) = row[colNo]
                 if None in (width,height):
                     self._addNABarLabel(lg,rowNo,colNo,x,y,width,height)
                     continue
@@ -503,6 +502,88 @@ class BarChart(PlotArea):
                     if br: br(g.contents[-1],label=self._getLabelText(rowNo,colNo),value=self.data[rowNo][colNo],rowNo=rowNo,colNo=colNo)
 
                 self._addBarLabel(lg,rowNo,colNo,x,y,width,height)
+
+    def _computeLabelPosition(self, text, label, rowNo, colNo, x, y, width, height):
+        if label.visible:
+            labelWidth = stringWidth(text, label.fontName, label.fontSize)
+            flipXY = self._flipXY
+            if flipXY:
+                y0, x0, pm = self._labelXY(label,y,x,height,width)
+            else:
+                x0, y0, pm = self._labelXY(label,x,y,width,height)
+            fixedEnd = getattr(label,'fixedEnd', None)
+            if fixedEnd is not None:
+                v = fixedEnd._getValue(self,pm)
+                x00, y00 = x0, y0
+                if flipXY:
+                    x0 = v
+                else:
+                    y0 = v
+            else:
+                if flipXY:
+                    x00 = x0
+                    y00 = y+height/2.0
+                else:
+                    x00 = x+width/2.0
+                    y00 = y0
+            fixedStart = getattr(label,'fixedStart', None)
+            if fixedStart is not None:
+                v = fixedStart._getValue(self,pm)
+                if flipXY:
+                    x00 = v
+                else:
+                    y00 = v
+
+            if pm<0:
+                if flipXY:
+                    dx = -2*label.dx
+                    dy = 0
+                else:
+                    dy = -2*label.dy
+                    dx = 0
+            else:
+                dy = dx = 0
+            label.setOrigin(x0+dx, y0+dy)
+            label.setText(text)
+            return pm,label.getBounds()
+
+    def _computeSimpleBarLabelPositions(self):
+        cA, vA = self.categoryAxis, self.valueAxis
+        if vA: ovAjA, vA.joinAxis = vA.joinAxis, cA
+        if cA: ocAjA, cA.joinAxis = cA.joinAxis, vA
+        if self._flipXY:
+            cA.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
+        else:
+            cA.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
+        cA.configure(self._configureData)
+        self.calcBarPositions()
+
+        lenData = len(self.data)
+        bars = self.bars
+        R = [].append
+        for rowNo in xrange(lenData):
+            row = self._barPositions[rowNo]
+            C = [].append
+            for colNo in range(len(row)):
+                x, y, width, height = row[colNo]
+                if None in (width,height):
+                    na = self.naLabel
+                    if na and na.text:
+                        na = copy.copy(na)
+                        v = self.valueAxis._valueMax<=0 and -1e-8 or 1e-8
+                        if width is None: width = v
+                        if height is None: height = v
+                        C(self._computeLabelPosition(na.text, na, rowNo, colNo, x, y, width, height))
+                    else:
+                        C(None)
+                else:
+                    text = self._getLabelText(rowNo,colNo)
+                    if text:
+                        C(self._computeLabelPosition(text, self.barLabels[(rowNo, colNo)], rowNo, colNo, x, y, width, height))
+                    else:
+                        C(None)
+            R(C.__self__)
+        return R.__self__
 
     def makeBars(self):
         g = Group()
