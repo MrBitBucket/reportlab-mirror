@@ -548,6 +548,7 @@ class BarChart(PlotArea):
             return pm,label.getBounds()
 
     def _computeSimpleBarLabelPositions(self):
+        """Information function, can be called by charts which want to mess with labels"""
         cA, vA = self.categoryAxis, self.valueAxis
         if vA: ovAjA, vA.joinAxis = vA.joinAxis, cA
         if cA: ocAjA, cA.joinAxis = cA.joinAxis, vA
