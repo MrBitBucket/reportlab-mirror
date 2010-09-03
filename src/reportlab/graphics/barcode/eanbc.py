@@ -179,7 +179,8 @@ class Ean13BarcodeWidget(PlotArea):
             }
     fontSize = 8        #millimeters
     fontName = 'Helvetica'
-    textColor = barFillColor = barStrokeColor = colors.black
+    textColor = barFillColor = colors.black
+    barStrokeColor = None
     barStrokeWidth = 0
     x = 0
     y = 0
@@ -243,6 +244,7 @@ class Ean13BarcodeWidget(PlotArea):
         fontSize = self.fontSize
         barFillColor = self.barFillColor
         barStrokeWidth = self.barStrokeWidth
+        barStrokeColor = self.barStrokeColor
 
         fth = fontSize*1.2
         b = ''.join(b)
@@ -255,7 +257,7 @@ class Ean13BarcodeWidget(PlotArea):
                 if lrect and lrect.y==yh:
                     lrect.width += barWidth
                 else:
-                    lrect = Rect(x,yh,barWidth,barHeight-dh,fillColor=barFillColor,strokeWidth=barStrokeWidth,strokeColor=barFillColor)
+                    lrect = Rect(x,yh,barWidth,barHeight-dh,fillColor=barFillColor,strokeWidth=barStrokeWidth,strokeColor=barStrokeColor)
                     gAdd(lrect)
             else:
                 lrect = None
