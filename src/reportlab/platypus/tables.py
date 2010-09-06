@@ -206,7 +206,7 @@ def spanFixDim(V0,V,spanCons,FUZZ=rl_config._FUZZ):
         v -= t
         v /= float(len(X))
         for x in X:
-            M[x] = max(M.get(x,v),v)
+            M[x] = M.get(x,0)+v
     for x,v in M.iteritems():
         V[x] += v
 
