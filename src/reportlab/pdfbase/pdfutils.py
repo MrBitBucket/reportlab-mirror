@@ -126,7 +126,7 @@ def cachedImageExists(filename):
 
     Determines if a cached image exists which has the same name
     and equal or newer date to the given file."""
-    cachedname = os.path.splitext(filename)[0] + ('.a85' if rl_config.useA85 else '.bin')
+    cachedname = os.path.splitext(filename)[0] + (rl_config.useA85 and '.a85' or 'bin')
     if os.path.isfile(cachedname):
         #see if it is newer
         original_date = os.stat(filename)[8]
