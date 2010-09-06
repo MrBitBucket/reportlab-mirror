@@ -43,6 +43,7 @@ def getCodes():
 
     #newer codes will typically get their own module
     from eanbc import Ean13BarcodeWidget, Ean8BarcodeWidget
+    from qr import QrCodeWidget
 
 
     #the module exports a dictionary of names to widgets, to make it easy for
@@ -63,6 +64,7 @@ def getCodes():
                 BarcodeUSPS_4State,
                 Ean13BarcodeWidget,
                 Ean8BarcodeWidget,
+                QrCodeWidget,
                 ):
         codeName = widget.codeName
         codes[codeName] = widget

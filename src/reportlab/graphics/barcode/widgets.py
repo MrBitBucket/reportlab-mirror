@@ -54,7 +54,8 @@ class _BarcodeWidget(PlotArea):
         gap = AttrMapValue(isNumberOrNone, desc='Width of inter character gaps.'),
         )
 
-    barStrokeColor = barFillColor = textColor = black
+    textColor = barFillColor = black
+    barStrokeColor = None
     barStrokeWidth = 0
     _BCC = None
     def __init__(self,BCC=None,_value='',**kw):
