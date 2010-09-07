@@ -122,6 +122,8 @@ class LineStyle(PropertySet):
         canvas.setLineWidth(1)
         #etc. etc.
 
+_stylesheet1_undefined = object()
+
 class StyleSheet1:
     """
     This may or may not be used.  The idea is to:
@@ -143,6 +145,7 @@ class StyleSheet1:
     Access is via getitem, so they can be
     compatible with plain old dictionaries.
     """
+
     def __init__(self):
         self.byName = {}
         self.byAlias = {}
@@ -156,8 +159,18 @@ class StyleSheet1:
             except KeyError:
                 raise KeyError("Style '%s' not found in stylesheet" % key)
 
+    def get(self,key,default=_stylesheet1_undefined):
+        try:
+            return self[key]
+        except KeyError:
+            if default!=_stylesheet1_undefined: return default
+            raise
+
     def __contains__(self, key):
         return key in self.byAlias or key in self.byName
+
+    def has_key(self,key):
+        return key in self
 
     def add(self, style, alias=None):
         key = style.name
