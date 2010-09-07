@@ -474,6 +474,11 @@ phonemic and <u>morphological</u> <strike>analysis</strike>.'''
                 ):
             a(Paragraph(fmt % dict(valign=valign,testsFolder=testsFolder),p_style))
             a(XPreformatted(fmt % dict(valign=valign,testsFolder=testsFolder),p_style))
+        a(Paragraph('H=10%% <img src="%(testsFolder)s/../docs/images/testimg.gif" width="0.57in" height="10%%" />'%dict(testsFolder=testsFolder), normal))
+        a(Paragraph('H=50%% <img src="%(testsFolder)s/../docs/images/testimg.gif" width="0.57in" height="50%%" />'%dict(testsFolder=testsFolder), normal))
+        a(Paragraph('H=100%% <img src="%(testsFolder)s/../docs/images/testimg.gif" width="0.57in" height="100%%" />'%dict(testsFolder=testsFolder), normal))
+        a(Paragraph('H=100%% W=10%% <img src="%(testsFolder)s/../docs/images/testimg.gif" width="10%%" height="100%%" />'%dict(testsFolder=testsFolder), normal))
+        a(Paragraph('H=100%% W=50%% <img src="%(testsFolder)s/../docs/images/testimg.gif" width="50%%" height="100%%" />'%dict(testsFolder=testsFolder), normal))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_autoleading.pdf'))
         doc.build(story)
 
