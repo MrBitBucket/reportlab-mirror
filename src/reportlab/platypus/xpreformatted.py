@@ -7,7 +7,7 @@ import string
 from types import StringType, ListType
 from reportlab.lib import PyFontify
 from paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, \
-     ParaLines, _getFragWords, stringWidth, _sameFrag, getAscentDescent, imgVRange
+     ParaLines, _getFragWords, stringWidth, _sameFrag, getAscentDescent, imgVRange, imgNormV
 from flowables import _dedenter
 
 def _getFragLines(frags):
@@ -50,7 +50,7 @@ def _countSpaces(text):
 ##      s = s + 1
 ##      i = j + 1
 
-def _getFragWord(frags):
+def _getFragWord(frags,maxWidth):
     ''' given a fragment list return a list of lists
         [size, spaces, (f00,w00), ..., (f0n,w0n)]
         each pair f,w represents a style and some string
@@ -61,6 +61,11 @@ def _getFragWord(frags):
     for f in frags:
         text = f.text[:]
         W.append((f,text))
+        cb = getattr(f,'cbDefn',None)
+        if cb:
+            _w = getattr(cb,'width',0)
+            if hasattr(_w,'normalizedValue'):
+                _w._normalizer = maxWidth
         n = n + stringWidth(text, f.fontName, f.fontSize)
 
         #s = s + _countSpaces(text)
@@ -160,7 +165,7 @@ class XPreformatted(Paragraph):
                             lines=[])
         else:
             for L in _getFragLines(frags):
-                currentWidth, n, w = _getFragWord(L)
+                currentWidth, n, w = _getFragWord(L,maxWidth)
                 f = w[0][0]
                 maxSize = f.fontSize
                 maxAscent, minDescent = getAscentDescent(f.fontName,maxSize)
@@ -175,7 +180,7 @@ class XPreformatted(Paragraph):
                     if calcBounds:
                         cbDefn = getattr(f,'cbDefn',None)
                         if getattr(cbDefn,'width',0):
-                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
+                            descent,ascent = imgVRange(imgNormV(cbDefn.height,fontSize),cbDefn.valign,fontSize)
                         else:
                             ascent, descent = getAscentDescent(fontName,fontSize)
                     else:
@@ -264,7 +269,7 @@ if __name__=='__main__':    #NORUNTESTS
         l = 0
         for L in _getFragLines(frags):
             n=0
-            for W in _getFragWords(L):
+            for W in _getFragWords(L,360):
                 print "frag%d.%d: size=%d" % (l, n, W[0]),
                 n = n + 1
                 for w in W[1:]:

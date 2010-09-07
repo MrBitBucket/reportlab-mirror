@@ -34,8 +34,8 @@ superFraction = 0.5 # fraction of font size that a super script should be raised
 DEFAULT_INDEX_NAME='_indexAdd'
 
 
-def _convnum(s, unit=1):
-    if s[0] in ['+','-']:
+def _convnum(s, unit=1, allowRelative=True):
+    if s[0] in ('+','-') and allowRelative:
         try:
             return ('relative',int(s)*unit)
         except ValueError:
@@ -46,36 +46,43 @@ def _convnum(s, unit=1):
         except ValueError:
             return float(s)*unit
 
-def _num(s, unit=1):
+def _num(s, unit=1, allowRelative=True):
     """Convert a string like '10cm' to an int or float (in points).
        The default unit is point, but optionally you can use other
        default units like mm.
     """
-    if s[-2:]=='cm':
+    if s.endswith('cm'):
         unit=cm
         s = s[:-2]
-    if s[-2:]=='in':
+    if s.endswith('in'):
         unit=inch
         s = s[:-2]
-    if s[-2:]=='pt':
+    if s.endswith('pt'):
         unit=1
         s = s[:-2]
-    if s[-1:]=='i':
+    if s.endswith('i'):
         unit=inch
         s = s[:-1]
-    if s[-2:]=='mm':
+    if s.endswith('mm'):
         unit=mm
         s = s[:-2]
-    if s[-4:]=='pica':
+    if s.endswith('pica'):
         unit=pica
         s = s[:-4]
-    return _convnum(s,unit)
+    return _convnum(s,unit,allowRelative)
+
+def _numpct(s,unit=1,allowRelative=False):
+    if s.endswith('%'):
+        return _PCT(_convnum(s[:-1],allowRelative=allowRelative))
+    else:
+        return _num(s,unit,allowRelative)
 
 class _PCT:
     def __init__(self,v):
         self._value = v*0.01
 
     def normalizedValue(self,normalizer):
+        normalizer = normalizer or getattr(self,'_normalizer')
         return normalizer*self._value
 
 def _valignpc(s):
@@ -174,8 +181,8 @@ _anchorAttrMap = {'fontSize': ('fontSize', _num),
                 }
 _imgAttrMap = {
                 'src': ('src', None),
-                'width': ('width',_num),
-                'height':('height',_num),
+                'width': ('width',_numpct),
+                'height':('height',_numpct),
                 'valign':('valign',_valignpc),
                 }
 _indexAttrMap = {

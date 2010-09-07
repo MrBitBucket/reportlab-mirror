@@ -171,6 +171,12 @@ def imgVRange(h,va,fontSize):
         iyo = va
     return iyo,iyo+h
 
+def imgNormV(v,nv):
+    if hasattr(v,'normalizedValue'):
+        return v.normalizedValue(nv)
+    else:
+        return v
+
 _56=5./6
 _16=1./6
 def _putFragLine(cur_x, tx, line):
@@ -212,11 +218,11 @@ def _putFragLine(cur_x, tx, line):
             kind = cbDefn.kind
             if kind=='img':
                 #draw image cbDefn,cur_y,cur_x
-                w = cbDefn.width
-                h = cbDefn.height
                 txfs = tx._fontsize
                 if txfs is None:
                     txfs = xs.style.fontSize
+                w = imgNormV(cbDefn.width,None)
+                h = imgNormV(cbDefn.height,txfs)
                 iy0,iy1 = imgVRange(h,cbDefn.valign,txfs)
                 cur_x_s = cur_x + nSpaces*ws
                 tx._canvas.drawImage(cbDefn.image,cur_x_s,cur_y+iy0,w,h,mask='auto')
@@ -353,7 +359,7 @@ except ImportError:
                 if getattr(f,a,None)!=getattr(g,a,None): return 0
             return 1
 
-def _getFragWords(frags):
+def _getFragWords(frags,maxWidth=None):
     ''' given a Parafrag list return a list of fragwords
         [[size, (f00,w00), ..., (f0n,w0n)],....,[size, (fm0,wm0), ..., (f0n,wmn)]]
         each pair f,w represents a style and some string
@@ -396,8 +402,12 @@ def _getFragWords(frags):
                 W = []
                 n = 0
         elif hasattr(f,'cbDefn'):
-            w = getattr(f.cbDefn,'width',0)
+            cb = f.cbDefn
+            w = getattr(cb,'width',0)
             if w:
+                if hasattr(w,'normalizedValue'):
+                    w._normalizer = maxWidth
+                    w = w.normalizedValue(maxWidth)
                 if W!=[]:
                     W.insert(0,n)
                     R.append(W)
@@ -680,7 +690,7 @@ def makeCJKParaLine(U,extraSpace,calcBounds):
         if calcBounds:
             cbDefn = getattr(f,'cbDefn',None)
             if getattr(cbDefn,'width',0):
-                descent, ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
+                descent, ascent = imgVRange(imgNormV(cbDefn.height,fontSize),cbDefn.valign,fontSize)
             else:
                 ascent, descent = getAscentDescent(f.fontName,fontSize)
         else:
@@ -721,6 +731,9 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
         u = U[i]
         i += 1
         w = u.width
+        if hasattr(w,'normalizedWidth'):
+            w._normalizer = maxWidth
+            w = w.normalizedWidth(w)
         widthUsed += w
         lineBreak = hasattr(u.frag,'lineBreak')
         endLine = (widthUsed>maxWidth + _FUZZ and widthUsed>0) or lineBreak
@@ -1068,7 +1081,7 @@ class Paragraph(Flowable):
                 return self.blPara
             n = 0
             words = []
-            for w in _getFragWords(frags):
+            for w in _getFragWords(frags,maxWidth):
                 f=w[-1][0]
                 fontName = f.fontName
                 fontSize = f.fontSize
@@ -1098,7 +1111,7 @@ class Paragraph(Flowable):
                     if calcBounds:
                         cbDefn = getattr(f,'cbDefn',None)
                         if getattr(cbDefn,'width',0):
-                            descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
+                            descent,ascent = imgVRange(imgNormV(cbDefn.height,fontSize),cbDefn.valign,fontSize)
                         else:
                             ascent, descent = getAscentDescent(f.fontName,fontSize)
                     else:
@@ -1144,7 +1157,7 @@ class Paragraph(Flowable):
                         if calcBounds:
                             cbDefn = getattr(g,'cbDefn',None)
                             if getattr(cbDefn,'width',0):
-                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
+                                descent,ascent = imgVRange(imgNormV(cbDefn.height,fontSize),cbDefn.valign,fontSize)
                             else:
                                 ascent, descent = getAscentDescent(g.fontName,fontSize)
                         else:
@@ -1187,7 +1200,7 @@ class Paragraph(Flowable):
                     if calcBounds:
                         cbDefn = getattr(g,'cbDefn',None)
                         if getattr(cbDefn,'width',0):
-                            minDescent,maxAscent = imgVRange(cbDefn.height,cbDefn.valign,maxSize)
+                            minDescent,maxAscent = imgVRange(imgNormV(cbDefn.height,fontSize),cbDefn.valign,maxSize)
                         else:
                             maxAscent, minDescent = getAscentDescent(g.fontName,maxSize)
                     else:
@@ -1203,7 +1216,7 @@ class Paragraph(Flowable):
                         if calcBounds:
                             cbDefn = getattr(g,'cbDefn',None)
                             if getattr(cbDefn,'width',0):
-                                descent,ascent = imgVRange(cbDefn.height,cbDefn.valign,fontSize)
+                                descent,ascent = imgVRange(imgNormV(cbDefn.height,fontSize),cbDefn.valign,fontSize)
                             else:
                                 ascent, descent = getAscentDescent(g.fontName,fontSize)
                         else:
@@ -1513,7 +1526,7 @@ if __name__=='__main__':    #NORUNTESTS
 
         l = 0
         cum = 0
-        for W in _getFragWords(frags):
+        for W in _getFragWords(frags,360):
             cum += W[0]
             print "fragword%d: cum=%3d size=%d" % (l, cum, W[0]),
             for w in W[1:]:
