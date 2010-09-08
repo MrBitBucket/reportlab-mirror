@@ -731,9 +731,9 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
         u = U[i]
         i += 1
         w = u.width
-        if hasattr(w,'normalizedWidth'):
+        if hasattr(w,'normalizedValue'):
             w._normalizer = maxWidth
-            w = w.normalizedWidth(w)
+            w = w.normalizedValue(None)
         widthUsed += w
         lineBreak = hasattr(u.frag,'lineBreak')
         endLine = (widthUsed>maxWidth + _FUZZ and widthUsed>0) or lineBreak
