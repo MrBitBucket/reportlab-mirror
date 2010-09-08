@@ -31,90 +31,40 @@ class JapaneseFontTests(unittest.TestCase):
 
     def test0(self):
         "A basic document drawing some strings"
-
-##        # if they do not have the Japanese font files, go away quietly
-##        try:
-##            from reportlab.pdfbase.cidfonts import CIDFont, findCMapFile, UnicodeCIDFont
-##            findCMapFile('90ms-RKSJ-H')
-##            findCMapFile('90msp-RKSJ-H')
-##            findCMapFile('UniJIS-UCS2-H')
-##            findCMapFile('EUC-H')
-##        except:
-##            #don't have the font pack.  return silently
-##            return
-##
-##        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-H'))
-##        pdfmetrics.registerFont(CIDFont('HeiseiKakuGo-W5','90ms-RKSJ-H'))
-
         c = Canvas(outputfile('test_multibyte_jpn.pdf'))
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Japanese Font Support')
 
         c.setStrokeColor(colors.red)
 
-##        # the two typefaces
-##        c.setFont('HeiseiMin-W3-90ms-RKSJ-H', 16)
-##        # this says "This is HeiseiMincho" in shift-JIS.  Not all our readers
-##        # have a Japanese PC, so I escaped it. On a Japanese-capable
-##        # system, print the string to see Kanji
-##        message1 = '\202\261\202\352\202\315\225\275\220\254\226\276\222\251\202\305\202\267\201B'
-##        c.drawString(100, 675, message1)
-##        wid = pdfmetrics.stringWidth(message1, 'HeiseiMin-W3-90ms-RKSJ-H', 16)
-##        c.rect(100,675,wid,16,stroke=1,fill=0)
-##
-##        c.setFont('HeiseiKakuGo-W5-90ms-RKSJ-H', 16)
-##        # this says "This is HeiseiKakugo" in shift-JIS
-##        message2 = '\202\261\202\352\202\315\225\275\220\254\212p\203S\203V\203b\203N\202\305\202\267\201B'
-##        c.drawString(100, 650, message2)
-##        wid = pdfmetrics.stringWidth(message2, 'HeiseiKakuGo-W5-90ms-RKSJ-H', 16)
-##        c.rect(100,650,wid,16,stroke=1,fill=0)
-##
-##
-##
-##        self.hDraw(c, '\223\214\213\236 says Tokyo in Shift-JIS', 'HeiseiMin-W3-90ms-RKSJ-H', 100, 600)
-##
-##
-##        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90msp-RKSJ-H'))
-##        self.hDraw(c, '\223\214\213\236, but in proportional Shift-JIS.', 'HeiseiMin-W3-90msp-RKSJ-H', 100, 575)
-##
-##        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','EUC-H'))
-##        self.hDraw(c, '\xC5\xEC\xB5\xFE says Tokyo in EUC', 'HeiseiMin-W3-EUC-H', 100, 550)
-##
-##        #this is super-slow until we do encoding caching.
-##        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','UniJIS-UCS2-H'))
-##
-##        def asciiToUCS2(text):
-##            s = ''
-##            for ch in text:
-##                s = s + chr(0) + ch
-##            return s
-##        msg = '\x67\x71\x4E\xAC' + asciiToUCS2(' says Tokyo in UTF16')
-##        self.hDraw(c, msg,'HeiseiMin-W3-UniJIS-UCS2-H', 100, 525)
 
         #unicode font automatically supplies the encoding
         pdfmetrics.registerFont(UnicodeCIDFont('HeiseiMin-W3'))
 
         
         msg = u'\u6771\u4EAC : Unicode font, unicode input'
-        self.hDraw(c, msg, 'HeiseiMin-W3', 100, 500)
+        self.hDraw(c, msg, 'HeiseiMin-W3', 100, 600)
 
         msg = u'\u6771\u4EAC : Unicode font, utf8 input'.encode('utf8')
-        self.hDraw(c, msg, 'HeiseiMin-W3', 100, 475)
+        self.hDraw(c, msg, 'HeiseiMin-W3', 100, 575)
 
 
-##        # now try verticals
-##        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-V'))
-##        c.setFont('HeiseiMin-W3-90ms-RKSJ-V', 16)
-##        c.drawString(400, 650, '\223\214\213\236 vertical Shift-JIS')
-##        height = c.stringWidth('\223\214\213\236 vertical Shift-JIS', 'HeiseiMin-W3-90ms-RKSJ-V', 16)
-##        c.rect(400-8,650,16,-height)
-##
-##        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','EUC-V'))
-##        c.setFont('HeiseiMin-W3-EUC-V', 16)
-##        c.drawString(425, 650, '\xC5\xEC\xB5\xFE vertical EUC')
-##        height = c.stringWidth('\xC5\xEC\xB5\xFE vertical EUC', 'HeiseiMin-W3-EUC-V', 16)
-##        c.rect(425-8,650,16,-height)
-##
+
+
+        # now try verticals - this is broken, not sure how to make it
+        # work in post Unicode world.
+        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','90ms-RKSJ-V'))
+        c.setFont('HeiseiMin-W3-90ms-RKSJ-V', 16)
+        c.drawString(450, 650, '\223\214\213\236 vertical Shift-JIS')
+        height = c.stringWidth('\223\214\213\236 vertical Shift-JIS', 'HeiseiMin-W3-90ms-RKSJ-V', 16)
+        c.rect(450-8,650,16,-height)
+
+        pdfmetrics.registerFont(CIDFont('HeiseiMin-W3','EUC-V'))
+        c.setFont('HeiseiMin-W3-EUC-V', 16)
+        c.drawString(475, 650, '\xC5\xEC\xB5\xFE vertical EUC')
+        height = c.stringWidth('\xC5\xEC\xB5\xFE vertical EUC', 'HeiseiMin-W3-EUC-V', 16)
+        c.rect(475-8,650,16,-height)
+
 
 
         from reportlab.platypus.paragraph import Paragraph
@@ -169,8 +119,14 @@ class JapaneseFontTests(unittest.TestCase):
                 msmincho = TTFont('MS Mincho','msmincho.ttf',asciiReadable=0)
                 fn = 'file=msmincho.ttf'
             except:
-                msmincho = None
+                #Ubuntu - works on Lucid Lynx if xpdf-japanese installed
+                try:
+                    msmincho = TTFont('MS Mincho','ttf-japanese-mincho.ttf')
+                    fn = 'file=msmincho.ttf'
+                except:
+                    msmincho = None
         if msmincho is None:
+            c.setFont('Helvetica', 12)
             c.drawString(100,600, 'Cannot find msmincho.ttf or msmincho.ttc')
         else:
             pdfmetrics.registerFont(msmincho)

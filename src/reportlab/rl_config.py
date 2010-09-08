@@ -79,6 +79,7 @@ TTFSearchPath = (
                 'c:/winnt/fonts',
                 'c:/windows/fonts',
                 '/usr/lib/X11/fonts/TrueType/',
+                '/usr/share/fonts/truetype',
                 '%(REPORTLAB_DIR)s/fonts',      #special
                 '%(REPORTLAB_DIR)s/../fonts',   #special
                 '%(REPORTLAB_DIR)s/../../fonts',#special
