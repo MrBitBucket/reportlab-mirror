@@ -536,6 +536,8 @@ def _greekConvert(data):
 #       <unichar name="unicode character name"/>
 #       <unichar value="unicode code point"/>
 #       <img src="path" width="1in" height="1in" valign="bottom"/>
+#               width="w%" --> fontSize*w/100   idea from Roberto Alsina
+#               height="h%" --> linewidth*h/100 <ralsina@netmanagers.com.ar>
 #       <greek> - </greek>
 #
 #       The whole may be surrounded by <para> </para> tags
