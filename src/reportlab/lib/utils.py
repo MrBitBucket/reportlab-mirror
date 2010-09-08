@@ -1132,8 +1132,8 @@ def annotateException(msg,enc='utf8'):
                 msg=msg.encode(enc)
             else:
                 msg = str(msg)
-        if isinstance(v,IOError) and hasattr(v,'strerror'):
-            v.strerror = msg+'\n'+v.strerror
+        if isinstance(v,IOError) and getattr(v,'strerror',None):
+            v.strerror = msg+'\n'+str(v.strerror)
         else:
             A[e] += msg
     else:
