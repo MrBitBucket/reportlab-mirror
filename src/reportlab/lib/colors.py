@@ -771,51 +771,63 @@ class cssParse:
 
 cssParse=cssParse()
 
-def toColor(arg,default=None):
-    '''try to map an arbitrary arg to a color instance
-    >>> toColor('rgb(128,0,0)')==toColor('rgb(50%,0%,0%)')
-    True
-    >>> toColor('rgb(50%,0%,0%)')!=Color(0.5,0,0,1)
-    True
-    >>> toColor('hsl(0,100%,50%)')==toColor('rgb(255,0,0)')
-    True
-    >>> toColor('hsl(-120,100%,50%)')==toColor('rgb(0,0,255)')
-    True
-    >>> toColor('hsl(120,100%,50%)')==toColor('rgb(0,255,0)')
-    True
-    >>> toColor('rgba(255,0,0,0.5)')==Color(1,0,0,0.5)
-    True
-    >>> toColor('cmyk(1,0,0,0)')==CMYKColor(1,0,0,0)
-    True
-    >>> toColor('pcmyk(100,0,0,0)')==PCMYKColor(100,0,0,0)
-    True
-    >>> toColor('cmyka(1,0,0,0,0.5)')==CMYKColor(1,0,0,0,alpha=0.5)
-    True
-    >>> toColor('pcmyka(100,0,0,0,0.5)')==PCMYKColor(100,0,0,0,alpha=0.5)
-    True
-    '''
-    if isinstance(arg,Color): return arg
-    if isinstance(arg,(tuple,list)):
-        assert 3<=len(arg)<=4, 'Can only convert 3 and 4 sequences to color'
-        assert 0<=min(arg) and max(arg)<=1
-        return len(arg)==3 and Color(arg[0],arg[1],arg[2]) or CMYKColor(arg[0],arg[1],arg[2],arg[3])
-    elif isinstance(arg,basestring):
-        C = cssParse(arg)
-        if C: return C
-        C = getAllNamedColors()
-        s = arg.lower()
-        if s in C: return C[s]
-        try:
-            return toColor(eval(arg))
-        except:
-            pass
+class toColor:
 
-    try:
-        return HexColor(arg)
-    except:
-        if default is None:
-            raise ValueError('Invalid color value %r' % arg)
-        return default
+    def __init__(self):
+        self.extraColorsNS = {} #used for overriding/adding to existing color names
+                                #make case insensitive if that's your wish
+
+    def setExtraColorsNameSpace(self,NS):
+        self.extraColorsNS = NS
+
+    def __call__(self,arg,default=None):
+        '''try to map an arbitrary arg to a color instance
+        >>> toColor('rgb(128,0,0)')==toColor('rgb(50%,0%,0%)')
+        True
+        >>> toColor('rgb(50%,0%,0%)')!=Color(0.5,0,0,1)
+        True
+        >>> toColor('hsl(0,100%,50%)')==toColor('rgb(255,0,0)')
+        True
+        >>> toColor('hsl(-120,100%,50%)')==toColor('rgb(0,0,255)')
+        True
+        >>> toColor('hsl(120,100%,50%)')==toColor('rgb(0,255,0)')
+        True
+        >>> toColor('rgba(255,0,0,0.5)')==Color(1,0,0,0.5)
+        True
+        >>> toColor('cmyk(1,0,0,0)')==CMYKColor(1,0,0,0)
+        True
+        >>> toColor('pcmyk(100,0,0,0)')==PCMYKColor(100,0,0,0)
+        True
+        >>> toColor('cmyka(1,0,0,0,0.5)')==CMYKColor(1,0,0,0,alpha=0.5)
+        True
+        >>> toColor('pcmyka(100,0,0,0,0.5)')==PCMYKColor(100,0,0,0,alpha=0.5)
+        True
+        '''
+        if isinstance(arg,Color): return arg
+        if isinstance(arg,(tuple,list)):
+            assert 3<=len(arg)<=4, 'Can only convert 3 and 4 sequences to color'
+            assert 0<=min(arg) and max(arg)<=1
+            return len(arg)==3 and Color(arg[0],arg[1],arg[2]) or CMYKColor(arg[0],arg[1],arg[2],arg[3])
+        elif isinstance(arg,basestring):
+            C = cssParse(arg)
+            if C: return C
+            if arg in self.extraColorsNS: return self.extraColorsNS[arg]
+            C = getAllNamedColors()
+            s = arg.lower()
+            if s in C: return C[s]
+            try:
+                return toColor(eval(arg))
+            except:
+                pass
+
+        try:
+            return HexColor(arg)
+        except:
+            if default is None:
+                raise ValueError('Invalid color value %r' % arg)
+            return default
+
+toColor = toColor()
 
 def toColorOrNone(arg,default=None):
     '''as above but allows None as a legal value'''
