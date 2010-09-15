@@ -34,9 +34,9 @@ class CellStyle(PropertySet):
         'topPadding':3,
         'bottomPadding':3,
         'firstLineIndent':0,
-        'color':colors.black,
+        'color':'black',
         'alignment': 'LEFT',
-        'background': (1,1,1),
+        'background': 'white',
         'valign': 'BOTTOM',
         'href': None,
         'destination':None,
@@ -55,9 +55,9 @@ class CellStyle1(PropertySet):
     topPadding = 3
     bottomPadding = 3
     firstLineIndent = 0
-    color = colors.black
+    color = 'black'
     alignment = 'LEFT'
-    background = (1,1,1)
+    background = 'white'
     valign = "BOTTOM"
     href = None
     destination = None
@@ -293,6 +293,7 @@ class Table(Flowable):
 
         if style:
             self.setStyle(style)
+
     def __repr__(self):
         "incomplete, but better than nothing"
         r = getattr(self,'_rowHeights','[unknown]')
