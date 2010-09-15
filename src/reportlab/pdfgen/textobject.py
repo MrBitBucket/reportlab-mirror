@@ -11,14 +11,13 @@ Progress Reports:
 """
 import string
 from types import *
-from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor
+from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor, black, white, _CMYK_black, _CMYK_white
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase import pdfmetrics
 
 class _PDFColorSetter:
     '''Abstracts the color setting operations; used in Canvas and Textobject
     asseumes we have a _code object'''
-
     def _checkSeparation(self,cmyk):
         if isinstance(cmyk,CMYKColorSep):
             name,sname = self._doc.addColor(cmyk)
@@ -26,42 +25,74 @@ class _PDFColorSetter:
                 self._colorsUsed[name] = sname
             return name
 
+    def _enforceSEP(c):
+        tc = toColor(c)
+        if not isinstance(tc,CMYKColorSep):
+            raise ValueError('Non separating color %r' % c)
+        return c
+    _enforceSEP = staticmethod(_enforceSEP)
+
+    def _enforceCMYK(c):
+        tc = toColor(c)
+        if not isinstance(tc,CMYKColor):
+            if tc==black:
+                c = _CMYK_black
+            elif tc==white:
+                c = _CMYK_white
+            else:
+                if isinstance(tc,Color) and tc.red==tc.blue==tc.green: #ahahahah it's grey
+                    c = _CMYK_black.clone(density=1-tc.red)
+                else:
+                    raise ValueError('Non CMYK color %r' % c)
+        return c
+    _enforceCMYK = staticmethod(_enforceCMYK)
+
+    def _enforceRGB(c):
+        tc = toColor(c)
+        if not isinstance(tc,Color):
+            if tc==_CMYK_black:
+                c = black
+            elif tc==_CMYK_white:
+                c = white
+            else:
+                if isinstance(tc,CMYKColor) and tc.cyan==tc.magenta==tc.yellow==0: #ahahahah it's grey
+                    c = black.clone()
+                    c.red = c.green = c.blue = 1-tc.black
+                else:
+                    raise ValueError('Non RGB color %r' % c)
+        return c
+    _enforceRGB = staticmethod(_enforceRGB)
+
+    #if this is set to a callable(color) --> color it can be used to check color setting
+    #see eg _enforceCMYK/_enforceRGB
+    _enforceColorSpace = None
+
     def setFillColorCMYK(self, c, m, y, k, alpha=None):
          """set the fill color useing negative color values
          (cyan, magenta, yellow and darkness value).
          Takes 4 arguments between 0.0 and 1.0"""
-         self._fillColorObj = (c, m, y, k)
-         self._code.append('%s k' % fp_str(c, m, y, k))
-         if alpha is not None:
-             self.setFillAlpha(alpha)
+         self.setFillColor((c,m,y,k),alpha=alpha)
 
     def setStrokeColorCMYK(self, c, m, y, k, alpha=None):
          """set the stroke color useing negative color values
             (cyan, magenta, yellow and darkness value).
             Takes 4 arguments between 0.0 and 1.0"""
-         self._strokeColorObj = (c, m, y, k)
-         self._code.append('%s K' % fp_str(c, m, y, k))
-         if alpha is not None:
-             self.setStrokeAlpha(alpha)
+         self.setStrokeColor((c,m,y,k),alpha=alpha)
 
     def setFillColorRGB(self, r, g, b, alpha=None):
         """Set the fill color using positive color description
            (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
-        self._fillColorObj = (r, g, b)
-        self._code.append('%s rg' % fp_str(r,g,b))
-        if alpha is not None:
-            self.setFillAlpha(alpha)
+        self.setFillColor((r,g,b),alpha=alpha)
 
     def setStrokeColorRGB(self, r, g, b, alpha=None):
         """Set the stroke color using positive color description
            (Red,Green,Blue).  Takes 3 arguments between 0.0 and 1.0"""
-        self._strokeColorObj = (r, g, b)
-        self._code.append('%s RG' % fp_str(r,g,b))
-        if alpha is not None:
-            self.setStrokeAlpha(alpha)
+        self.setStrokeColor((r,g,b),alpha=alpha)
 
     def setFillColor(self, aColor, alpha=None):
         """Takes a color object, allowing colors to be referred to by name"""
+        if self._enforceColorSpace:
+            aColor = self._enforceColorSpace(aColor)
         if isinstance(aColor, CMYKColor):
             d = aColor.density
             c,m,y,k = (d*aColor.cyan, d*aColor.magenta, d*aColor.yellow, d*aColor.black)
@@ -81,7 +112,8 @@ class _PDFColorSetter:
                 self._fillColorObj = aColor
                 self._code.append('%s rg' % fp_str(aColor) )
             elif l==4:
-                self.setFillColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
+                self._fillColorObj = aColor
+                self._code.append('%s k' % fp_str(aColor))
             else:
                 raise ValueError('Unknown color %r' % aColor)
         elif isinstance(aColor,basestring):
@@ -95,6 +127,8 @@ class _PDFColorSetter:
 
     def setStrokeColor(self, aColor, alpha=None):
         """Takes a color object, allowing colors to be referred to by name"""
+        if self._enforceColorSpace:
+            aColor = self._enforceColorSpace(aColor)
         if isinstance(aColor, CMYKColor):
             d = aColor.density
             c,m,y,k = (d*aColor.cyan, d*aColor.magenta, d*aColor.yellow, d*aColor.black)
@@ -114,7 +148,8 @@ class _PDFColorSetter:
                 self._strokeColorObj = aColor
                 self._code.append('%s RG' % fp_str(aColor) )
             elif l==4:
-                self.setStrokeColorCMYK(aColor[0], aColor[1], aColor[2], aColor[3])
+                self._fillColorObj = aColor
+                self._code.append('%s K' % fp_str(aColor))
             else:
                 raise ValueError('Unknown color %r' % aColor)
         elif isinstance(aColor,basestring):
@@ -178,6 +213,7 @@ class PDFTextObject(_PDFColorSetter):
         self._leading = self._canvas._leading
         self._doc = self._canvas._doc
         self._colorsUsed = self._canvas._colorsUsed
+        self._enforceColorSpace = getattr(canvas,'_enforceColorSpace',None)
         font = pdfmetrics.getFont(self._fontname)
         self._curSubset = -1
         self.setTextOrigin(x, y)

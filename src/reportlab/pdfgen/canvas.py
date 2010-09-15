@@ -177,6 +177,7 @@ class Canvas(textobject._PDFColorSetter):
                  encrypt=None,
                  cropMarks=None,
                  pdfVersion=None,
+                 enforceColorSpace=None,
                  ):
         """Create a canvas of a given size. etc.
 
@@ -188,6 +189,9 @@ class Canvas(textobject._PDFColorSetter):
         as the preferred interface.  Default page size is A4.
         cropMarks may be True/False or an object with parameters borderWidth, markColor, markWidth
         and markLength
+    
+        if enforceColorSpace is in ('cmyk', 'rgb') then one of the standard _PDFColorSetter callables
+        will be used to enforce appropriate color settings. If it is a callable then that will be used.
         """
         if pagesize is None: pagesize = rl_config.defaultPageSize
         if invariant is None: invariant = rl_config.invariant
@@ -197,6 +201,19 @@ class Canvas(textobject._PDFColorSetter):
                                        invariant=invariant, filename=filename,
                                        pdfVersion=pdfVersion or pdfdoc.PDF_VERSION_DEFAULT,
                                        )
+
+
+        if enforceColorSpace is not None:
+            if enforceColorSpace=='cmyk':
+                self._enforceColorSpace = self._enforceCMYK
+            elif enforceColorSpace=='rgb':
+                self._enforceColorSpace = self._enforceRGB
+            elif enforceColorSpace=='sep':
+                self._enforceColorSpace = self._enforceSEP
+            elif callable(enforceColorSpace):
+                self._enforceColorSpace = enforceColorSpace
+            else:
+                raise ValueError('Invalid value for Canvas argument enforceColorSpace=%r' % enforceColorSpace)
 
         #this only controls whether it prints 'saved ...' - 0 disables
         self._verbosity = verbosity

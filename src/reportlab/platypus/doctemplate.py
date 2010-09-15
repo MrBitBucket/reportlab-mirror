@@ -441,6 +441,7 @@ class BaseDocTemplate:
                     '_debug':0,
                     'encrypt': None,
                     'cropMarks': None,
+                    'enforceColorSpace': None,
                     }
     _invalidInitArgs = ()
     _firstPageTemplateIndex = 0
@@ -817,7 +818,9 @@ class BaseDocTemplate:
         self.canv = canvasmaker(filename or self.filename,
                                 pagesize=self.pagesize,
                                 invariant=self.invariant,
-                                pageCompression=self.pageCompression)
+                                pageCompression=self.pageCompression,
+                                enforceColorSpace=self.enforceColorSpace,
+                                )
  
         getattr(self.canv,'setEncrypt',lambda x: None)(self.encrypt)
 

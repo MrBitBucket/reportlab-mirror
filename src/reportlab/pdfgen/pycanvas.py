@@ -273,6 +273,7 @@ class Canvas :
         self._formnumber = 0
         self._footerpresent = 0
         self._object = canvas.Canvas(*args,**kwargs)
+        self._enforceColorSpace = self._object._enforceColorSpace
         self._pyfile = cStringIO.StringIO()
         self._PyWrite(PyHeader)
         try :
