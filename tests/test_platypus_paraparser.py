@@ -36,19 +36,19 @@ class ParaParserTestCase(unittest.TestCase):
         assert type(stuff) is TupleType
         assert len(stuff) == 3
         assert  stuff[1][0].text == 'Hello World'
-        
+
     def testBold(self):
         txt = "Hello <b>Bold</b> World"
         fragList = ParaParser().parse(txt, self.style)[1]
         self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','Bold',' World'])
         self.assertEquals(fragList[1].fontName, 'Times-Bold')
-        
+
     def testStrong(self):
         txt = "Hello <strong>Strong</strong> World"
         fragList = ParaParser().parse(txt, self.style)[1]
         self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','Strong',' World'])
         self.assertEquals(fragList[1].fontName, 'Times-Bold')
-        
+
     def testItalic(self):
         txt = "Hello <i>Italic</i> World"
         fragList = ParaParser().parse(txt, self.style)[1]
@@ -60,7 +60,7 @@ class ParaParserTestCase(unittest.TestCase):
         fragList = ParaParser().parse(txt, self.style)[1]
         self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','Em',' World'])
         self.assertEquals(fragList[1].fontName, 'Times-Italic')
-        
+
     def testEntity(self):
         "Numeric entities should be unescaped by parser"
         txt = "Hello &#169; copyright"
@@ -113,12 +113,9 @@ class ParaParserTestCase(unittest.TestCase):
         #print 'parsed OK, frags=', frags
         from reportlab.platypus.paragraph import Paragraph
         p = Paragraph(txt, self.style)
-        
-
 
 def makeSuite():
     return makeSuiteForClasses(ParaParserTestCase)
-
 
 #noruntests
 if __name__ == "__main__":
