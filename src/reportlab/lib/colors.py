@@ -30,10 +30,6 @@ class Color:
     def __repr__(self):
         return "Color(%s)" % fp_str(*(self.red, self.green, self.blue,self.alpha)).replace(' ',',')
 
-    def __str__(self):
-        n = _color2name(self)
-        return n and ('%r ie %s' % (self,n)) or repr(self)
-
     def __hash__(self):
         return hash((self.red, self.green, self.blue, self.alpha))
 
@@ -86,12 +82,17 @@ class Color:
         D.update(kwds)
         return self.__class__(**D)
 
-def _color2name(c,D={}):
-    if not D:
-        for n,v in getAllNamedColors().iteritems():
-            D[(v.red,v.green,v.blue)] = n
-    t = c.red,c.green,c.blue
-    return t in D and D[t] or None
+    def _lookupName(self,D={}):
+        if not D:
+            for n,v in getAllNamedColors().iteritems():
+                if not isinstance(v,CMYKColor):
+                    t = v.red,v.green,v.blue
+                    if t in D:
+                        n = n+'/'+D[t]
+                    D[t] = n
+        t = self.red,self.green,self.blue
+        return t in D and D[t] or None
+
 
 class CMYKColor(Color):
     """This represents colors using the CMYK (cyan, magenta, yellow, black)
@@ -190,6 +191,17 @@ class CMYKColor(Color):
     def _density_str(self):
         return fp_str(self.density)
     _cKwds='cyan magenta yellow black density alpha spotName knockout'.split()
+
+    def _lookupName(self,D={}):
+        if not D:
+            for n,v in getAllNamedColors().iteritems():
+                if isinstance(v,CMYKColor):
+                    t = v.cyan,v.magenta,v.yellow,v.black
+                    if t in D:
+                        n = n+'/'+D[t]
+                    D[t] = n
+        t = self.cyan,self.magenta,self.yellow,self.black
+        return t in D and D[t] or None
 
 class PCMYKColor(CMYKColor):
     '''100 based CMYKColor with density and a spotName; just like Rimas uses'''
@@ -922,11 +934,19 @@ def fade(aSpotColor, percentages):
         out.append(newSpot)
     return out
 
+def _enforceError(kind,c,tc):
+    if isinstance(tc,Color):
+        xtra = tc._lookupName()
+        xtra = xtra and '(%s)'%xtra or ''
+    else:
+        xtra = ''
+    raise ValueError('Non %s color %r%s' % (kind,c,xtra))
+
 def _enforceSEP(c):
     '''pure separating colors only, this makes black a problem'''
     tc = toColor(c)
     if not isinstance(tc,CMYKColorSep):
-        raise ValueError('Non separating color %s' % c)
+        _enforceError('separating',c,tc)
     return tc
 
 def _enforceSEP_BLACK(c):
@@ -936,7 +956,7 @@ def _enforceSEP_BLACK(c):
         if isinstance(tc,Color) and tc.red==tc.blue==tc.green: #ahahahah it's a grey
             tc = _CMYK_black.clone(density=1-tc.red)
         elif not (isinstance(tc,CMYKColor) and tc.cyan==tc.magenta==tc.yellow==0): #ie some shade of grey
-            raise ValueError('Non separating color %s' % c)
+            _enforceError('separating or black',c,tc)
     return tc
 
 def _enforceSEP_CMYK(c):
@@ -946,7 +966,7 @@ def _enforceSEP_CMYK(c):
         if isinstance(tc,Color) and tc.red==tc.blue==tc.green: #ahahahah it's a grey
             tc = _CMYK_black.clone(density=1-tc.red)
         elif not isinstance(tc,CMYKColor):
-            raise ValueError('Non separating color %s' % c)
+            _enforceError('separating or CMYK',c,tc)
     return tc
 
 def _enforceCMYK(c):
@@ -956,7 +976,7 @@ def _enforceCMYK(c):
         if isinstance(tc,Color) and tc.red==tc.blue==tc.green: #ahahahah it's a grey
             tc = _CMYK_black.clone(black=1-tc.red,alpha=tc.alpha)
         else:
-            raise ValueError('Non CMYK color %s' % c)
+            _enforceError('CMYK',c,tc)
     elif isinstance(tc,CMYKColorSep):
         tc = tc.clone()
         tc.__class__ = CMYKColor
@@ -964,12 +984,12 @@ def _enforceCMYK(c):
 
 def _enforceRGB(c):
     tc = toColor(c)
-    if not isinstance(tc,Color):
-        if isinstance(tc,CMYKColor) and tc.cyan==tc.magenta==tc.yellow==0: #ahahahah it's grey
-            tc = black.clone(alpha=tc.alpha)
-            tc.red = tc.green = tc.blue = 1-tc.black*tc.density
+    if isinstance(tc,CMYKColor):
+        if tc.cyan==tc.magenta==tc.yellow==0: #ahahahah it's grey
+            v = 1-tc.black*tc.density
+            tc = Color(v,v,v,alpha=tc.alpha)
         else:
-            raise ValueError('Non RGB color %s' % c)
+            _enforceError('RGB',c,tc)
     return tc
 
 def _chooseEnforceColorSpace(enforceColorSpace):
