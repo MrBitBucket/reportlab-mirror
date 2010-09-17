@@ -25,44 +25,6 @@ class _PDFColorSetter:
                 self._colorsUsed[name] = sname
             return name
 
-    def _enforceSEP(c):
-        tc = toColor(c)
-        if not isinstance(tc,CMYKColorSep):
-            raise ValueError('Non separating color %r' % c)
-        return c
-    _enforceSEP = staticmethod(_enforceSEP)
-
-    def _enforceCMYK(c):
-        tc = toColor(c)
-        if not isinstance(tc,CMYKColor):
-            if tc==black:
-                c = _CMYK_black
-            elif tc==white:
-                c = _CMYK_white
-            else:
-                if isinstance(tc,Color) and tc.red==tc.blue==tc.green: #ahahahah it's grey
-                    c = _CMYK_black.clone(density=1-tc.red)
-                else:
-                    raise ValueError('Non CMYK color %r' % c)
-        return c
-    _enforceCMYK = staticmethod(_enforceCMYK)
-
-    def _enforceRGB(c):
-        tc = toColor(c)
-        if not isinstance(tc,Color):
-            if tc==_CMYK_black:
-                c = black
-            elif tc==_CMYK_white:
-                c = white
-            else:
-                if isinstance(tc,CMYKColor) and tc.cyan==tc.magenta==tc.yellow==0: #ahahahah it's grey
-                    c = black.clone()
-                    c.red = c.green = c.blue = 1-tc.black
-                else:
-                    raise ValueError('Non RGB color %r' % c)
-        return c
-    _enforceRGB = staticmethod(_enforceRGB)
-
     #if this is set to a callable(color) --> color it can be used to check color setting
     #see eg _enforceCMYK/_enforceRGB
     _enforceColorSpace = None

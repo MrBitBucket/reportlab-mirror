@@ -30,6 +30,10 @@ class Color:
     def __repr__(self):
         return "Color(%s)" % fp_str(*(self.red, self.green, self.blue,self.alpha)).replace(' ',',')
 
+    def __str__(self):
+        n = _color2name(self)
+        return n and ('%r ie %s' % (self,n)) or repr(self)
+
     def __hash__(self):
         return hash((self.red, self.green, self.blue, self.alpha))
 
@@ -82,6 +86,13 @@ class Color:
         D.update(kwds)
         return self.__class__(**D)
 
+def _color2name(c,D={}):
+    if not D:
+        for n,v in getAllNamedColors().iteritems():
+            D[(v.red,v.green,v.blue)] = n
+    t = c.red,c.green,c.blue
+    return t in D and D[t] or None
+
 class CMYKColor(Color):
     """This represents colors using the CMYK (cyan, magenta, yellow, black)
     model commonly used in professional printing.  This is implemented
@@ -132,7 +143,7 @@ class CMYKColor(Color):
             (self.spotName and (',spotName='+repr(self.spotName)) or ''),
             (self.density!=1 and (',density='+fp_str(self.density)) or ''),
             (self.knockout is not None and (',knockout=%d' % self.knockout) or ''),
-            (self.alpha is not None and (',alpha=%d' % self.alpha) or ''),
+            (self.alpha is not None and (',alpha=%s' % self.alpha) or ''),
             )
 
     def fader(self, n, reverse=False):
@@ -911,6 +922,72 @@ def fade(aSpotColor, percentages):
         out.append(newSpot)
     return out
 
+def _enforceSEP(c):
+    '''pure separating colors only, this makes black a problem'''
+    tc = toColor(c)
+    if not isinstance(tc,CMYKColorSep):
+        raise ValueError('Non separating color %s' % c)
+    return tc
+
+def _enforceSEP_BLACK(c):
+    '''separating + blacks only'''
+    tc = toColor(c)
+    if not isinstance(tc,CMYKColorSep):
+        if isinstance(tc,Color) and tc.red==tc.blue==tc.green: #ahahahah it's a grey
+            tc = _CMYK_black.clone(density=1-tc.red)
+        elif not (isinstance(tc,CMYKColor) and tc.cyan==tc.magenta==tc.yellow==0): #ie some shade of grey
+            raise ValueError('Non separating color %s' % c)
+    return tc
+
+def _enforceSEP_CMYK(c):
+    '''separating or cmyk only'''
+    tc = toColor(c)
+    if not isinstance(tc,CMYKColorSep):
+        if isinstance(tc,Color) and tc.red==tc.blue==tc.green: #ahahahah it's a grey
+            tc = _CMYK_black.clone(density=1-tc.red)
+        elif not isinstance(tc,CMYKColor):
+            raise ValueError('Non separating color %s' % c)
+    return tc
+
+def _enforceCMYK(c):
+    '''cmyk outputs only (rgb greys converted)'''
+    tc = toColor(c)
+    if not isinstance(tc,CMYKColor):
+        if isinstance(tc,Color) and tc.red==tc.blue==tc.green: #ahahahah it's a grey
+            tc = _CMYK_black.clone(black=1-tc.red,alpha=tc.alpha)
+        else:
+            raise ValueError('Non CMYK color %s' % c)
+    elif isinstance(tc,CMYKColorSep):
+        tc = tc.clone()
+        tc.__class__ = CMYKColor
+    return tc
+
+def _enforceRGB(c):
+    tc = toColor(c)
+    if not isinstance(tc,Color):
+        if isinstance(tc,CMYKColor) and tc.cyan==tc.magenta==tc.yellow==0: #ahahahah it's grey
+            tc = black.clone(alpha=tc.alpha)
+            tc.red = tc.green = tc.blue = 1-tc.black*tc.density
+        else:
+            raise ValueError('Non RGB color %s' % c)
+    return tc
+
+def _chooseEnforceColorSpace(enforceColorSpace):
+    if enforceColorSpace is not None and not callable(enforceColorSpace):
+        if isinstance(enforceColorSpace,basestring): enforceColorSpace=enforceColorSpace.upper()
+        if enforceColorSpace=='CMYK':
+            enforceColorSpace = _enforceCMYK
+        elif enforceColorSpace=='RGB':
+            enforceColorSpace = _enforceRGB
+        elif enforceColorSpace=='SEP':
+            enforceColorSpace = _enforceSEP
+        elif enforceColorSpace=='SEP_BLACK':
+            enforceColorSpace = _enforceSEP_BLACK
+        elif enforceColorSpace=='SEP_CMYK':
+            enforceColorSpace = _enforceSEP_CMYK
+        else:
+            raise ValueError('Invalid value for Canvas argument enforceColorSpace=%r' % enforceColorSpace)
+    return enforceColorSpace
 
 if __name__ == "__main__":
     import doctest
