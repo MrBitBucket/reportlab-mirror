@@ -685,6 +685,14 @@ by cyan/magenta/yellow/darkness (subtractive, $CMYK$), heading3("RGB Colors")
 eg(examples.testCMYKcolors)
 illust(examples.colorsCMYK, "CMYK Color Models")
 
+heading2("Color space checking")
+disc("""The $enforceColorSpace$ argument of canvas is used to check colors
+used in document. It accepts these values: CMYK, RGB, SEP, SEP_BLACK,
+SEP_CMYK. Exception is raised if used colors are not convertible
+e.g. rgb and cmyk (more information in test_pdfgen_general). This
+approach doesn't check external images included in document.
+""")
+
 heading2("Color Overprinting")
 
 disc("""
