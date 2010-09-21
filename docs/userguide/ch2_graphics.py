@@ -674,41 +674,41 @@ and better control when printed.
 """)
 
 disc("""
-There is two ways of representing CMYK Color, each color can be represented by a 
-real value value range between 0 and 1, or integer value between 0 and 100. Depending
+There are two ways of representing CMYK Color: each color can be represented either
+by a real value between 0 and 1, or integer value between 0 and 100. Depending
 on your preference you can either use CMYKColor (for real values) or PCMYKColor ( for 
-integer values). 0 means no ink so printing on white papers gives you white, 1 (or 100
-if you use PCMYKColor) is maximum amount of ink. e.g. CMYKColor(0,0,0,1) is black,
-CMYKColor(0,0,0,0) is noInk, CMYKColor(0.5,0,0,0) means half amount cyan color.
-by cyan/magenta/yellow/darkness (subtractive, $CMYK$), heading3("RGB Colors")
+integer values). 0 means 'no ink', so printing on white papers gives you white. 1 (or 100
+if you use PCMYKColor) means 'the maximum amount of ink'. e.g. CMYKColor(0,0,0,1) is black,
+CMYKColor(0,0,0,0) means 'no ink', and CMYKColor(0.5,0,0,0) means 50 percent cyan color.
 """)
 eg(examples.testCMYKcolors)
 illust(examples.colorsCMYK, "CMYK Color Models")
 
 heading2("Color space checking")
-disc("""The $enforceColorSpace$ argument of canvas is used to check colors
-used in document. It accepts these values: CMYK, RGB, SEP, SEP_BLACK,
-SEP_CMYK. Exception is raised if used colors are not convertible
-e.g. rgb and cmyk (more information in test_pdfgen_general). This
-approach doesn't check external images included in document.
+disc("""The $enforceColorSpace$ argument of the canvas is used to enforce the consistency
+of the colour model used in a document. It accepts these values: CMYK, RGB, SEP, SEP_BLACK,
+SEP_CMYK. 'SEP' refers to named color separations such as Pantone spot colors - these can
+be mixed with CMYK or RGB according to the parameter used.  The default is 'MIXED' which
+allows you to use colors from any color space.  An exception is raised if any colors used
+are not convertible to the specified model, e.g. rgb and cmyk (more information in
+test_pdfgen_general). This approach doesn't check external images included in document.
 """)
 
 heading2("Color Overprinting")
 
 disc("""
-When two CMYK colored objects overlap in printing, just like in RGB model, either
-the two objects shows up and knockouts the one underneath it, or the colors of the
-two objects mixed in the overlapped area. This is something controllable and can be 
-set using the property $overPrint$.
+When two CMYK colored objects overlap in printing, then either the object 'on top'
+will knock out the color of the the one underneath it, or the colors of the two
+objects will mix in the overlapped area.
+This behaviour can be set using the property $overPrint$.
 """)
 
 disc("""
-The $overPrint$ function draws two rectangles with overlapped
-corner, the corner colors are mixed. If you can not see the mixed
-colors of the two rectangles on the left in the example below, refer
-to your PDF viewer setting manual of enabling overPrint, some PDF 
-viewers such as $evince$ do not support overPrint, Adobe Acrobat 
-Reader does support overPrint.
+The $overPrint$ function will cause ovelapping areas of color to mix. In the example
+below, the colors of the rectangles on the left should appear mixed where they overlap
+- If you can't see this effect then you may need to enable the 'overprint preview'
+option in your PDF viewing software.  Some PDF viewers such as $evince$ do not
+support overPrint; however Adobe Acrobat Reader does support it.
 """)
 illust(examples.overPrint, "overPrint example")
 
