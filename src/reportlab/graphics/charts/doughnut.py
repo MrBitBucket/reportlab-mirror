@@ -157,24 +157,25 @@ class Doughnut(AbstractPieChart):
             whichWay = -1
 
         g  = Group()
-        sn = 0
 
         startAngle = self.startAngle #% 360
         styleCount = len(self.slices)
         if type(self.data[0]) in (ListType, TupleType):
             #multi-series doughnut
             iradius = (self.height/5.0)/len(self.data)
-            for series in normData:
-                i = 0
-                for angle in series:
+            for sn,series in enumerate(normData):
+                for i,angle in enumerate(series):
                     endAngle = (startAngle + (angle * whichWay)) #% 360
-                    if abs(startAngle-endAngle)>=1e-5:
-                        if startAngle < endAngle:
-                            a1 = startAngle
-                            a2 = endAngle
-                        else:
-                            a1 = endAngle
-                            a2 = startAngle
+                    if abs(startAngle-endAngle)<1e-5:
+                        startAngle = endAngle
+                        continue
+                    if startAngle < endAngle:
+                        a1 = startAngle
+                        a2 = endAngle
+                    else:
+                        a1 = endAngle
+                        a2 = startAngle
+                    startAngle = endAngle
 
                     #if we didn't use %stylecount here we'd end up with the later sectors
                     #all having the default style
@@ -201,7 +202,6 @@ class Doughnut(AbstractPieChart):
                     theSector.strokeDashArray = sectorStyle.strokeDashArray
 
                     g.add(theSector)
-                    startAngle = endAngle
 
                     text = self.getSeriesName(i,'')
                     if text:
@@ -211,22 +211,22 @@ class Doughnut(AbstractPieChart):
                         labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
                         labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
                         g.add(_addWedgeLabel(self,text,averageAngle,labelX,labelY,sectorStyle))
-                    i += 1
-                sn += 1
 
         else:
-            i = 0
             #single series doughnut
             iradius = self.height/5.0
-            for angle in normData:
+            for i,angle in enumerate(normData):
                 endAngle = (startAngle + (angle * whichWay)) #% 360
-                if abs(startAngle-endAngle)>=1e-5:
-                    if startAngle < endAngle:
-                        a1 = startAngle
-                        a2 = endAngle
-                    else:
-                        a1 = endAngle
-                        a2 = startAngle
+                if abs(startAngle-endAngle)<1e-5:
+                    startAngle = endAngle
+                    continue
+                if startAngle < endAngle:
+                    a1 = startAngle
+                    a2 = endAngle
+                else:
+                    a1 = endAngle
+                    a2 = startAngle
+                startAngle = endAngle
 
                 #if we didn't use %stylecount here we'd end up with the later sectors
                 #all having the default style
@@ -270,8 +270,6 @@ class Doughnut(AbstractPieChart):
 
                     g.add(theLabel)
 
-                startAngle = endAngle
-                i += 1
 
         return g
 
