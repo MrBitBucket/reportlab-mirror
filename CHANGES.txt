@@ -8,6 +8,64 @@ E.g. to retrieve the changes made between release 1.19 and release 1.20, type:
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+
+#################################################################################
+#################### RELEASE 2.5  at 18:00 GMT  29/Sep/2010     #################
+#################################################################################
+
+Many new features have been added and numerous bugs have been fixed.
+
+Thanks to everybody who has contributed to the open-source toolkit in
+the run-up to the 2.5 release, whether by reporting bugs, sending patches,
+or contributing to the reportlab-users mailing list.
+Major contributors are credited in the user documentation.
+
+   * Support for colour separated PDF output and other optimisations and
+     features for high-quality printing, including enforcement of colour
+     models for CMYK, RGB, and "spot colours"
+   * Long table optimisations are now turned on by default.  Previously,
+     documents with very long tables spanning many pages could take a long
+     time to create because we considered the whole table to work out row
+     and column sizes.  A patch was submitted some time ago to fix this
+     controlled by a flag in the rl_config file, but this was set 'off'
+     for compatibility.  Users are often not aware of this and we haven't
+     found any real-world cases where the new layout technique works badly,
+     so we are turning this behaviour on.
+   * New support for QR barcodes - [try our demo!](https://www.reportlab.com/demos/qr/)
+
+###PDF
+   * Colour separation and other enhancements for high-end print
+   * Python 2.7 support
+
+###Charts
+   * reportlab.graphics.charts.axes
+       * ValueAxis
+           * avoidBoundSpace - Space to allow above and below
+           * abf_ignore_zero - Set to True to make the avoidBoundFrac calculations treat zero as non-special
+           * keepTickLabelsInside - Ensure tick labels do not project beyond bounds of axis if true
+       * NormalDateXValueAxis
+           * specialTickClear - clear rather than delete close ticks when forced first/end dates
+       * AdjYValueAxis
+           * labelVOffset - add this to the labels
+   * reportlab.graphics.charts.barcharts
+       * BarChart
+           * categoryLabelBarSize - width to leave for a category label to go between categories
+           * categoryLabelBarOrder - where any label bar should appear first/last
+           * barRecord (advanced) - callable(bar,label=labelText,value=value,**kwds) to record bar information
+   * reportlab.graphics.charts.legends
+       * SubColProperty
+           * dx - x offset from default position
+           * dy - y offset from default position
+       * Legend
+           * swdx - x position adjustment for the swatch
+           * swdy - y position adjustment for the swatch
+   * reportlab.graphics.charts.piecharts
+       * Pie
+           * wedgeRecord (advanced) - callable(wedge,*args,**kwds)
+
+   * reportlab.graphics.charts.utils
+       * DrawTimeCollector - generic mechanism for collecting information about nodes at the time they are about to be drawn
+
 #################################################################################
 #################### RELEASE 2.4  at 18:00 GMT  20/Jan/2010     #################
 #################################################################################
