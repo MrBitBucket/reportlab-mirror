@@ -24,7 +24,7 @@ eps_ttf_embed=              1                       #set to False to disable
 eps_ttf_embed_uid=          0                       #set to 1 to enable
 overlapAttachedSpace=       1                       #if set non false then adajacent flowable space after
                                                     #and space before are merged (max space is used).
-longTableOptimize =         0                       #default don't use Henning von Bargen's long table optimizations
+longTableOptimize =         1                       #default don't use Henning von Bargen's long table optimizations
 autoConvertEncoding  =      0                       #convert internally as needed (experimental)
 _FUZZ=                      1e-6                    #fuzz for layout arithmetic
 wrapA85=                    0                       #set to 1 to get old wrapped line behaviour
@@ -45,7 +45,7 @@ imageReaderFlags=0                                  #attempt to convert images i
 paraFontSizeHeightOffset=   1                       #if true paragraphs start at height-fontSize
 canvas_baseColor=           None                    #initialize the canvas fill and stroke colors if this is set
 ignoreContainerActions=     1                       #if true then action flowables in flowable _Containers will be ignored
-ttfAsciiReadable=           1                       #smaller subsets when set to 0
+ttfAsciiReadable=           0                       #smaller subsets when set to 0
 
 # places to look for T1Font information
 T1SearchPath =  (
