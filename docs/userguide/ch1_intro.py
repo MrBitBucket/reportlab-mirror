@@ -238,18 +238,18 @@ for and Bitstream Inc. for the Vera fonts.""")
 heading2("Installation and Setup")
 
 heading3("A note on available versions")
-disc("""Our website ^http://www.reportlab.com/software/installation/^ will always have up-to-date
+disc("""Our website ^http://www.reportlab.com/^ will always have up-to-date
 information on setups and installations. The latest version of the ReportLab library can be found at
-^http://www.reportlab.com/downloads.html^.  Older versions can be found at ^http://www.reportlab.com/ftp/^.
+^http://www.reportlab.com/software/opensource/rl-toolkit/download/^.  Older versions can be found at ^http://www.reportlab.com/ftp/^.
   Each successive version is stored in both zip
 and tgz format, but the contents are identical apart from line endings.
 Versions are numbered:  $ReportLab_<major_version>_<minor_version>.zip$, 
 $ReportLab_<major_version>_<minor_version>.tgz$ and so on. 
-The latest stable version is $reportlab2.4$ (.zip or .tgz), 
+The latest stable version is $reportlab2.5$ (.zip or .tgz), 
 Daily snapshots of the trunk are available as
 $reportlab-daily-unix.tar.gz$ or $reportlab-daily-win32.zip$.
-  Finally, from version 2.3 onwards, there is also a Windows installer
-available for Python versions 2.3 - 2.6, named $ReportLab-2.x.win32-py2.x.exe$
+  Finally, from version 2.4 onwards, there is also a Windows installer
+available for Python versions 2.4 - 2.7, named $ReportLab-2.x.win32-py2.x.exe$
 """)
 
 heading3("Installation on Windows")
@@ -257,7 +257,7 @@ heading3("Installation on Windows")
 restartList()
 
 list("""First, install Python from $http://www.python.org/.$
-Reportlab 2.x works with Python 2.3 upwards but we recommend to use
+Reportlab 2.x works with Python 2.4 upwards but we recommend to use
 the latest stable version of Python 2.5 or 2.6.  
 After installing, you should be able to run the
 'Python (command line)' option from the Start Menu.
