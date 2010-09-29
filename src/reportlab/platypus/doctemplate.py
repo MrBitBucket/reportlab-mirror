@@ -433,6 +433,7 @@ class BaseDocTemplate:
                     'title':None,
                     'author':None,
                     'subject':None,
+                    'creator':None,
                     'keywords':[],
                     'invariant':None,
                     'pageCompression':None,
@@ -828,6 +829,7 @@ class BaseDocTemplate:
         self.canv.setAuthor(self.author)
         self.canv.setTitle(self.title)
         self.canv.setSubject(self.subject)
+        self.canv.setCreator(self.creator)
         self.canv.setKeywords(self.keywords)
 
         if self._onPage:

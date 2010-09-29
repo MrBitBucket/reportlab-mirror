@@ -440,6 +440,12 @@ class Canvas(textobject._PDFColorSetter):
            in the document itself."""
         self._doc.setSubject(subject)
 
+    def setCreator(self, creator):
+        """write a creator into the PDF file that won't automatically display
+           in the document itself. This should be used to name the original app
+           which is passing data into ReportLab, if you wish to name it."""
+        self._doc.setCreator(creator)
+
     def setKeywords(self, keywords):
         """write a list of keywords into the PDF file which shows in document properties.
         Either submit a single string or a list/tuple"""

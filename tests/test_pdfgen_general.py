@@ -872,6 +872,8 @@ def run(filename):
     c = makeDocument(filename)
     c.setAuthor(u'R\xfcp\xe9rt B\xe8\xe4r')
     c.setTitle('R\xc3\xbcp\xc3\xa9rt B\xc3\xa8\xc3\xa4r\'s Book')
+    c.setCreator(u'Some Creator')
+    c.setSubject(u'Some Subject')
     c.save()
     c = makeDocument(filename)
     import os

@@ -350,6 +350,15 @@ class PDFDocument:
         else:
             self.info.subject = subject
 
+    def setCreator(self, creator):
+        "embeds in PDF file"
+
+        #allow resetting to clear it
+        if creator is None:
+            self.info.creator = '(unspecified)'
+        else:
+            self.info.creator = creator
+
     def setKeywords(self, keywords):
         "embeds a string containing keywords in PDF file"
 
@@ -1546,7 +1555,8 @@ class PDFInfo:
     File | Document Info in Acrobat Reader.  If this is wrong, you get
     Postscript errors while printing, even though it does not print."""
     __PDFObject__ = True
-    producer = "ReportLab http://www.reportlab.com"
+    producer = "ReportLab PDF Library - www.reportlab.com"
+    creator = "ReportLab PDF Library - www.reportlab.com"
     title = "untitled"
     author = "anonymous"
     subject = "unspecified"
@@ -1567,6 +1577,7 @@ class PDFInfo:
         D["Author"] = PDFString(self.author)
         D["CreationDate"] = PDFDate(invariant=self.invariant,dateFormatter=self._dateFormatter)
         D["Producer"] = PDFString(self.producer)
+        D["Creator"] = PDFString(self.creator)
         D["Subject"] = PDFString(self.subject)
         D["Keywords"] = PDFString(self.keywords)
 
