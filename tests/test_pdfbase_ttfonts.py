@@ -17,6 +17,7 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       parse_utf8, makeToUnicodeCMap, \
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, add32
+from reportlab import rl_config
 
 def utf8(code):
     "Convert a given UCS character index into UTF-8"
@@ -315,36 +316,46 @@ class TTFontTestCase(NearTestCase):
 
     def testParallelConstruction(self):
         "Test that TTFont can be used for different documents at the same time"
-        doc1 = PDFDocument()
-        doc2 = PDFDocument()
-        font = TTFont("Vera", "Vera.ttf")
-        self.assertEquals(font.splitString(u'hello ', doc1), [(0, 'hello ')])
-        self.assertEquals(font.splitString(u'hello ', doc2), [(0, 'hello ')])
-        self.assertEquals(font.splitString(u'\u0410\u0411'.encode('UTF-8'), doc1), [(0, '\x80\x81')])
-        self.assertEquals(font.splitString(u'\u0412'.encode('UTF-8'), doc2), [(0, '\x80')])
-        font.addObjects(doc1)
-        self.assertEquals(font.splitString(u'\u0413'.encode('UTF-8'), doc2), [(0, '\x81')])
-        font.addObjects(doc2)
+        ttfAsciiReadable = rl_config.ttfAsciiReadable
+        try:
+            rl_config.ttfAsciiReadable = 1
+            doc1 = PDFDocument()
+            doc2 = PDFDocument()
+            font = TTFont("Vera", "Vera.ttf")
+            self.assertEquals(font.splitString(u'hello ', doc1), [(0, 'hello ')])
+            self.assertEquals(font.splitString(u'hello ', doc2), [(0, 'hello ')])
+            self.assertEquals(font.splitString(u'\u0410\u0411'.encode('UTF-8'), doc1), [(0, '\x80\x81')])
+            self.assertEquals(font.splitString(u'\u0412'.encode('UTF-8'), doc2), [(0, '\x80')])
+            font.addObjects(doc1)
+            self.assertEquals(font.splitString(u'\u0413'.encode('UTF-8'), doc2), [(0, '\x81')])
+            font.addObjects(doc2)
+        finally:
+            rl_config.ttfAsciiReadable = ttfAsciiReadable
 
     def testAddObjects(self):
         "Test TTFont.addObjects"
         # Actually generate some subsets
-        doc = PDFDocument()
-        font = TTFont("Vera", "Vera.ttf")
-        font.splitString('a', doc)            # create some subset
-        internalName = font.getSubsetInternalName(0, doc)[1:]
-        font.addObjects(doc)
-        pdfFont = doc.idToObject[internalName]
-        self.assertEquals(doc.idToObject['BasicFonts'].dict[internalName], pdfFont)
-        self.assertEquals(pdfFont.Name, internalName)
-        self.assertEquals(pdfFont.BaseFont, "AAAAAA+BitstreamVeraSans-Roman")
-        self.assertEquals(pdfFont.FirstChar, 0)
-        self.assertEquals(pdfFont.LastChar, 127)
-        self.assertEquals(len(pdfFont.Widths.sequence), 128)
-        toUnicode = doc.idToObject[pdfFont.ToUnicode.name]
-        self.assert_(toUnicode.content != "")
-        fontDescriptor = doc.idToObject[pdfFont.FontDescriptor.name]
-        self.assertEquals(fontDescriptor.dict['Type'], '/FontDescriptor')
+        ttfAsciiReadable = rl_config.ttfAsciiReadable
+        try:
+            rl_config.ttfAsciiReadable = 1
+            doc = PDFDocument()
+            font = TTFont("Vera", "Vera.ttf")
+            font.splitString('a', doc)            # create some subset
+            internalName = font.getSubsetInternalName(0, doc)[1:]
+            font.addObjects(doc)
+            pdfFont = doc.idToObject[internalName]
+            self.assertEquals(doc.idToObject['BasicFonts'].dict[internalName], pdfFont)
+            self.assertEquals(pdfFont.Name, internalName)
+            self.assertEquals(pdfFont.BaseFont, "AAAAAA+BitstreamVeraSans-Roman")
+            self.assertEquals(pdfFont.FirstChar, 0)
+            self.assertEquals(pdfFont.LastChar, 127)
+            self.assertEquals(len(pdfFont.Widths.sequence), 128)
+            toUnicode = doc.idToObject[pdfFont.ToUnicode.name]
+            self.assert_(toUnicode.content != "")
+            fontDescriptor = doc.idToObject[pdfFont.FontDescriptor.name]
+            self.assertEquals(fontDescriptor.dict['Type'], '/FontDescriptor')
+        finally:
+            rl_config.ttfAsciiReadable = ttfAsciiReadable
 
     def testMakeToUnicodeCMap(self):
         "Test makeToUnicodeCMap"
