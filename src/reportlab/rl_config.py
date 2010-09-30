@@ -45,7 +45,7 @@ imageReaderFlags=0                                  #attempt to convert images i
 paraFontSizeHeightOffset=   1                       #if true paragraphs start at height-fontSize
 canvas_baseColor=           None                    #initialize the canvas fill and stroke colors if this is set
 ignoreContainerActions=     1                       #if true then action flowables in flowable _Containers will be ignored
-ttfAsciiReadable=           0                       #smaller subsets when set to 0
+ttfAsciiReadable=           1                       #smaller subsets when set to 0
 
 # places to look for T1Font information
 T1SearchPath =  (
