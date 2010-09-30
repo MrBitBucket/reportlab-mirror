@@ -711,6 +711,7 @@ class ViewerPreferencesPDFDictionary(CheckedPDFDictionary):
                 HideWindowUI=checkPDFBoolean,
                 FitWindow=checkPDFBoolean,
                 CenterWindow=checkPDFBoolean,
+                DisplayDocTitle=checkPDFBoolean,    #contributed by mark Erbaugh
                 NonFullScreenPageMode=checkPDFNames(*'UseNone UseOutlines UseThumbs UseOC'.split()),
                 Direction=checkPDFNames(*'L2R R2L'.split()),
                 ViewArea=checkPDFNames(*'MediaBox CropBox BleedBox TrimBox ArtBox'.split()),
