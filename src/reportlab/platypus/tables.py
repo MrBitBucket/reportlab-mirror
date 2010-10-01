@@ -195,13 +195,16 @@ def _endswith(obj,s):
     except:
         return 0
 
-def spanFixDim(V0,V,spanCons,FUZZ=rl_config._FUZZ):
+def spanFixDim(V0,V,spanCons,lim=None,FUZZ=rl_config._FUZZ):
     #assign required space to variable rows equally to existing calculated values
     M = {}
+    if not lim: lim = len(V0)   #in longtables the row calcs may be truncated
     for (x0,x1),v in spanCons.iteritems():
-        t = sum([V[x]+M.get(x,0) for x in xrange(x0,x1+1)])
+        if x0>=lim: continue
+        x1 += 1
+        t = sum([V[x]+M.get(x,0) for x in xrange(x0,x1)])
         if t>=v-FUZZ: continue      #already good enough
-        X = [x for x in xrange(x0,x1+1) if V0[x] is None]   #variable candidates
+        X = [x for x in xrange(x0,x1) if V0[x] is None] #variable candidates
         if not X: continue          #something wrong here mate
         v -= t
         v /= float(len(X))
@@ -227,6 +230,7 @@ class Table(Flowable):
         elif colWidths and _seqCW: ncols = len(colWidths)
         else: ncols = 0
         if not emptyTableAction: emptyTableAction = rl_config.emptyTableAction
+        self._longTableOptimize = getattr(self,'_longTableOptimize',rl_config.longTableOptimize)
         if not (nrows and ncols):
             if emptyTableAction=='error':
                 raise ValueError("%s must have at least a row and column" % self.identity())
@@ -478,7 +482,7 @@ class Table(Flowable):
         if not W: W = _calc_pc(self._argW,availWidth)   #widths array
 
         hmax = lim = len(H)
-        longTable = getattr(self,'_longTableOptimize',rl_config.longTableOptimize)
+        longTable = self._longTableOptimize
 
         if None in H:
             canv = getattr(self,'canv',None)
@@ -546,12 +550,12 @@ class Table(Flowable):
             if None not in H: hmax = lim
 
             if spanCons:
-                spanFixDim(H0,H,spanCons)
+                spanFixDim(H0,H,spanCons,lim=hmax)
 
         height = self._height = sum(H[:hmax])
         self._rowpositions = [height]    # index 0 is actually topline; we skip when processing cells
         for h in H[:hmax]:
-            height = height - h
+            height -= h
             self._rowpositions.append(height)
         assert abs(height)<1e-8, 'Internal height error'
         self._hmax = hmax
@@ -893,18 +897,23 @@ class Table(Flowable):
         for each cell.  Any cell which 'does not exist' as another
         has spanned over it will get a None entry on the right
         """
-        if getattr(self,'_spanRects',None): return
+        spanRects = getattr(self,'_spanRects',{})
+        hmax = getattr(self,'_hmax',None)
+        longTable = self._longTableOptimize
+        if spanRects and (longTable and hmax==self._hmax_spanRects or not longTable):
+            return
         colpositions = self._colpositions
         rowpositions = self._rowpositions
-        self._spanRects = spanRects = {}
-        self._vBlocks = vBlocks = {}
-        self._hBlocks = hBlocks = {}
-        for (coord, value) in self._spanRanges.items():
+        vBlocks = {}
+        hBlocks = {}
+        rlim = len(rowpositions)-1
+        for (coord, value) in self._spanRanges.iteritems():
             if value is None:
                 spanRects[coord] = None
             else:
-                col,row = coord
                 col0, row0, col1, row1 = value
+                if row1>=rlim: continue
+                col,row = coord
                 if col1-col0>0:
                     for _ in xrange(col0+1,col1+1):
                         vBlocks.setdefault(colpositions[_],[]).append((rowpositions[row1+1],rowpositions[row0]))
@@ -920,6 +929,10 @@ class Table(Flowable):
         for _ in hBlocks, vBlocks:
             for value in _.values():
                 value.sort()
+        self._spanRects = spanRects
+        self._vBlocks = vBlocks
+        self._hBlocks = hBlocks
+        self._hmax_spanRects = hmax
 
     def setStyle(self, tblstyle):
         if not isinstance(tblstyle,TableStyle):
