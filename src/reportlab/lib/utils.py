@@ -519,7 +519,7 @@ def rl_get_module(name,dir):
 def _isPILImage(im):
     try:
         return isinstance(im,Image.Image)
-    except ImportError:
+    except AttributeError:
         return 0
 
 class ImageReader(object):
@@ -578,7 +578,7 @@ class ImageReader(object):
                     try:
                         self._width,self._height,c=readJPEGInfo(self.fp)
                     except:
-                        raise RuntimeError('Imaging Library not available, unable to import bitmaps only jpegs')
+                        annotateException('\nImaging Library not available, unable to import bitmaps only jpegs\nfileName=%r identity=%s'%(fileName,self.identity()))
                     self.jpeg_fh = self._jpeg_fh
                     self._data = self.fp.read()
                     self._dataA=None
