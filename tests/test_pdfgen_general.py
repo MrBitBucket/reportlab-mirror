@@ -1013,7 +1013,32 @@ class PdfgenTestCase(unittest.TestCase):
         trySomeColors(rgb+cmykb,'rgb')
         self.assertRaises(ValueError,trySomeColors,cmyk+rgb+seps,'cmyk')
         trySomeColors(cmyk+['black']+seps,'cmyk')   #OK because black & seps are convertible
-        
+
+    def test5(self):
+        from reportlab.lib.pagesizes import A4,LETTER
+        canv = canvas.Canvas(outputfile('test_pdfgen_general_page_sizes.pdf'),
+                        pagesize=A4,
+                        )
+        canv.setFont('Helvetica',10)
+        S = A4
+        canv.drawString(0,S[1]-10,'Top Left=(%s,%s) Page Size=%s x %s' % (0,S[1],S[0],S[1]))
+        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % (0.5*S[0],0.5*S[1],S[0],S[1]))
+        canv.drawRightString(S[0],2,'Bottom Right=(%s,%s) Page Size=%s x %s' % (S[0],0,S[0],S[1]))
+        canv.showPage()
+        S = LETTER
+        canv.setPageSize(S)
+        canv.drawString(0,S[1]-10,'Top Left=(%s,%s) Page Size=%s x %s' % (0,S[1],S[0],S[1]))
+        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % (0.5*S[0],0.5*S[1],S[0],S[1]))
+        canv.drawRightString(S[0],2,'Bottom Right=(%s,%s) Page Size=%s x %s' % (S[0],0,S[0],S[1]))
+        canv.showPage()
+        S = A4
+        canv.setPageSize(S)
+        canv.setPageRotation(180)
+        canv.drawString(0,S[1]-10,'Top Left=(%s,%s) Page Size=%s x %s' % (0,S[1],S[0],S[1]))
+        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % (0.5*S[0],0.5*S[1],S[0],S[1]))
+        canv.drawRightString(S[0],2,'Bottom Right=(%s,%s) Page Size=%s x %s' % (S[0],0,S[0],S[1]))
+        canv.showPage()
+        canv.save()
 
 def trySomeColors(C,enforceColorSpace=None):
     from StringIO import StringIO
