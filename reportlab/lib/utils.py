@@ -4,21 +4,16 @@
 __version__=''' $Id$ '''
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
-import string, os, sys, imp, time
+import os, sys, imp, time
 try:
     from hashlib import md5
 except:
     from md5 import md5
 from reportlab.lib.logger import warnOnce
-from types import *
 from rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
-SeqTypes = (ListType,TupleType)
-if sys.hexversion<0x2020000:
-    def isSeqType(v):
-        return type(v) in SeqTypes
-else:
-    def isSeqType(v):
-        return isinstance(v,(tuple,list))
+
+def isSeqType(v,_st=(tuple,list)):
+    return isinstance(v,_st)
 
 if sys.hexversion<0x2030000:
     True = 1
@@ -51,9 +46,9 @@ except:
     from UserDict import UserDict as _UserDict
 
 class CIDict(_UserDict):
-    def __init__(self,*a,**kw):
-        map(self.update, a)
-        self.update(kw)
+    def __init__(self,*args,**kwds):
+        for a in args: self.update(a)
+        self.update(kwds)
 
     def update(self,D):
         for k,v in D.items(): self[k] = v
@@ -85,7 +80,7 @@ class CIDict(_UserDict):
         except KeyError:
             return dv
 
-    def has_key(self,k):
+    def __contains__(self,k):
         try:
             self[k]
             return True
@@ -131,7 +126,7 @@ if os.name == 'mac':
         try:
             if creatorcode is None or filetype is None and ext is not None:
                 try:
-                    creatorcode, filetype = _KNOWN_MAC_EXT[string.upper(ext)]
+                    creatorcode, filetype = _KNOWN_MAC_EXT[ext.upper()]
                 except:
                     return
             macfs.FSSpec(filename).SetCreatorType(creatorcode,filetype)
@@ -234,6 +229,7 @@ except ImportError:
     _tz_re = re.compile('0+$')
     del re
     def fp_str(*a):
+        '''convert separate arguments (or single sequence arg) into space separated numeric strings'''
         if len(a)==1 and isSeqType(a[0]): a = a[0]
         s = []
         A = s.append
@@ -251,13 +247,13 @@ except ImportError:
                         print i, n
                         raise
                 A((n[0]!='0' or len(n)==1) and n or n[1:])
-        return string.join(s)
+        return ' '.join(s)
 
 #hack test for comma users
 if ',' in fp_str(0.25):
     _FP_STR = fp_str
     def fp_str(*a):
-        return string.replace(apply(_FP_STR,a),',','.')
+        return _FP_STR(*a).replace(',','.')
 
 def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
@@ -297,7 +293,7 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
         sys.path = opath
         msg = "recursiveimport(%s,baseDir=%s) failed" % (modulename,baseDir)
         if baseDir:
-            msg = msg + " under paths '%s'" % `path`
+            msg = msg + " under paths '%s'" % repr(path)
         raise ImportError, msg
 
 def recursiveGetAttr(obj, name):
@@ -307,11 +303,11 @@ def recursiveGetAttr(obj, name):
 def recursiveSetAttr(obj, name, value):
     "Can call down into e.g. object1.object2[4].attr = value"
     #get the thing above last.
-    tokens = string.split(name, '.')
+    tokens = name.split('.')
     if len(tokens) == 1:
         setattr(obj, name, value)
     else:
-        most = string.join(tokens[:-1], '.')
+        most = '.'.join(tokens[:-1])
         last = tokens[-1]
         parent = recursiveGetAttr(obj, most)
         setattr(parent, last, value)
@@ -345,7 +341,6 @@ else:
         except ImportError:
             Image = None
     haveImages = Image is not None
-    if haveImages: del Image
 
 try:
     from cStringIO import StringIO as __StringIO
@@ -371,19 +366,19 @@ def getArgvDict(**kw):
         if func:
             v = func(av)
         else:
-            t = type(v)
-            if t is StringType:
+            if isinstance(v,basestring):
+                if isinstance(v,unicode): v = v.encode('utf8')
                 v = av
-            elif t is FloatType:
+            elif isinstance(v,float):
                 v = float(av)
-            elif t is IntType:
+            elif isinstance(v,int):
                 v = int(av)
-            elif t is ListType:
+            elif isinstance(v,list):
                 v = list(eval(av))
-            elif t is TupleType:
+            elif isinstance(v,tuple):
                 v = tuple(eval(av))
             else:
-                raise TypeError, "Can't convert string '%s' to %s" % (av,str(t))
+                raise TypeError("Can't convert string %r to %s" % (av,type(v)))
         return v
 
     A = sys.argv[1:]
@@ -396,7 +391,7 @@ def getArgvDict(**kw):
         handled = 0
         ke = k+'='
         for a in A:
-            if string.find(a,ke)==0:
+            if a.find(ke)==0:
                 av = a[len(ke):]
                 A.remove(a)
                 R[k] = handleValue(v,av,func)
@@ -420,7 +415,7 @@ def _className(self):
     '''Return a shortened class name'''
     try:
         name = self.__class__.__name__
-        i=string.rfind(name,'.')
+        i=name.rfind('.')
         if i>=0: return name[i+1:]
         return name
     except AttributeError:
@@ -439,8 +434,8 @@ def open_for_read_by_name(name,mode='b'):
         if 'b' not in mode and os.linesep!='\n': s = s.replace(os.linesep,'\n')
         return getStringIO(s)
 
-import urllib
-def open_for_read(name,mode='b', urlopen=urllib.urlopen):
+import urllib2
+def open_for_read(name,mode='b', urlopen=urllib2.urlopen):
     '''attempt to open a file or URL for reading'''
     if hasattr(name,'read'): return name
     try:
@@ -450,7 +445,7 @@ def open_for_read(name,mode='b', urlopen=urllib.urlopen):
             return getStringIO(urlopen(name).read())
         except:
             raise IOError('Cannot open resource "%s"' % name)
-del urllib
+del urllib2
 
 def open_and_read(name,mode='b'):
     return open_for_read(name,mode).read()
@@ -497,7 +492,7 @@ def rl_getmtime(pn,os_path_isfile=os.path.isfile,os_path_normpath=os.path.normpa
     return time_mktime((y,m,d,h,m,s,0,0,0))
 
 def rl_get_module(name,dir):
-    if sys.modules.has_key(name):
+    if name in sys.modules:
         om = sys.modules[name]
         del sys.modules[name]
     else:
@@ -523,18 +518,18 @@ def rl_get_module(name,dir):
 
 def _isPILImage(im):
     try:
-        from PIL.Image import Image
-        return isinstance(im,Image)
-    except ImportError:
+        return isinstance(im,Image.Image)
+    except AttributeError:
         return 0
 
 class ImageReader(object):
     "Wraps up either PIL or Java to get data from bitmaps"
     _cache={}
-    def __init__(self, fileName):
+    def __init__(self, fileName,ident=None):
         if isinstance(fileName,ImageReader):
             self.__dict__ = fileName.__dict__   #borgize
             return
+        self._ident = ident
         #start wih lots of null private fields, to be populated by
         #the relevant engine.
         self.fileName = fileName
@@ -583,27 +578,28 @@ class ImageReader(object):
                     try:
                         self._width,self._height,c=readJPEGInfo(self.fp)
                     except:
-                        raise RuntimeError('Imaging Library not available, unable to import bitmaps only jpegs')
+                        annotateException('\nImaging Library not available, unable to import bitmaps only jpegs\nfileName=%r identity=%s'%(fileName,self.identity()))
                     self.jpeg_fh = self._jpeg_fh
                     self._data = self.fp.read()
                     self._dataA=None
                     self.fp.seek(0)
             except:
-                et,ev,tb = sys.exc_info()
-                if hasattr(ev,'args'):
-                    a = str(ev.args[-1])+(' fileName=%r'%fileName)
-                    ev.args= ev.args[:-1]+(a,)
-                    raise et,ev,tb
-                else:
-                    raise
+                annotateException('\nfileName=%r identity=%s'%(fileName,self.identity()))
+
+    def identity(self):
+        '''try to return information that will identify the instance'''
+        fn = self.fileName
+        if not isinstance(fn,basestring):
+            fn = getattr(getattr(self,'fp',None),'name',None)
+        ident = self._ident
+        return '[%s@%s%s%s]' % (self.__class__.__name__,hex(id(self)),ident and (' ident=%r' % ident) or '',fn and (' filename=%r' % fn) or '')
 
     def _read_image(self,fp):
         if sys.platform[0:4] == 'java':
             from javax.imageio import ImageIO
             return ImageIO.read(fp)
         else:
-            import PIL.Image
-            return PIL.Image.open(fp)
+            return Image.open(fp)
 
     def _jpeg_fh(self):
         fp = self.fp
@@ -624,38 +620,42 @@ class ImageReader(object):
 
     def getRGBData(self):
         "Return byte array of RGB data as string"
-        if self._data is None:
-            self._dataA = None
-            if sys.platform[0:4] == 'java':
-                import jarray
-                from java.awt.image import PixelGrabber
-                width, height = self.getSize()
-                buffer = jarray.zeros(width*height, 'i')
-                pg = PixelGrabber(self._image, 0,0,width,height,buffer,0,width)
-                pg.grabPixels()
-                # there must be a way to do this with a cast not a byte-level loop,
-                # I just haven't found it yet...
-                pixels = []
-                a = pixels.append
-                for i in range(len(buffer)):
-                    rgb = buffer[i]
-                    a(chr((rgb>>16)&0xff))
-                    a(chr((rgb>>8)&0xff))
-                    a(chr(rgb&0xff))
-                self._data = ''.join(pixels)
-                self.mode = 'RGB'
-            else:
-                im = self._image
-                mode = self.mode = im.mode
-                if mode=='RGBA':
-                    self._dataA = ImageReader(im.split()[3])
-                    im = im.convert('RGB')
+        try:
+            if self._data is None:
+                self._dataA = None
+                if sys.platform[0:4] == 'java':
+                    import jarray
+                    from java.awt.image import PixelGrabber
+                    width, height = self.getSize()
+                    buffer = jarray.zeros(width*height, 'i')
+                    pg = PixelGrabber(self._image, 0,0,width,height,buffer,0,width)
+                    pg.grabPixels()
+                    # there must be a way to do this with a cast not a byte-level loop,
+                    # I just haven't found it yet...
+                    pixels = []
+                    a = pixels.append
+                    for i in range(len(buffer)):
+                        rgb = buffer[i]
+                        a(chr((rgb>>16)&0xff))
+                        a(chr((rgb>>8)&0xff))
+                        a(chr(rgb&0xff))
+                    self._data = ''.join(pixels)
                     self.mode = 'RGB'
-                elif mode not in ('L','RGB','CMYK'):
-                    im = im.convert('RGB')
-                    self.mode = 'RGB'
-                self._data = im.tostring()
-        return self._data
+                else:
+                    im = self._image
+                    mode = self.mode = im.mode
+                    if mode=='RGBA':
+                        if Image.VERSION.startswith('1.1.7'): im.load()
+                        self._dataA = ImageReader(im.split()[3])
+                        im = im.convert('RGB')
+                        self.mode = 'RGB'
+                    elif mode not in ('L','RGB','CMYK'):
+                        im = im.convert('RGB')
+                        self.mode = 'RGB'
+                    self._data = im.tostring()
+            return self._data
+        except:
+            annotateException('\nidentity=%s'%self.identity())
 
     def getImageData(self):
         width, height = self.getSize()
@@ -665,7 +665,7 @@ class ImageReader(object):
         if sys.platform[0:4] == 'java':
             return None
         else:
-            if self._image.info.has_key("transparency"):
+            if "transparency" in self._image.info:
                 transparency = self._image.info["transparency"] * 3
                 palette = self._image.palette
                 try:
@@ -677,13 +677,13 @@ class ImageReader(object):
                 return None
 
 class LazyImageReader(ImageReader): 
-    @property 
     def fp(self): 
         return open_for_read(self.fileName, 'b') 
+    fp=property(fp) 
 
-    @property 
     def _image(self):
         return self._read_image(self.fp)
+    _image=property(_image) 
 
 def getImageData(imageFileName):
     "Get width, height and RGB pixels from image file.  Wraps Java/PIL"
@@ -987,10 +987,10 @@ def _simpleSplit(txt,mW,SW):
             O.append(t)
             w = w + ws + lt
         else:
-            L.append(string.join(O,' '))
+            L.append(' '.join(O))
             O = [t]
             w = lt
-    if O!=[]: L.append(string.join(O,' '))
+    if O!=[]: L.append(' '.join(O))
     return L
 
 def simpleSplit(text,fontName,fontSize,maxWidth):
@@ -1052,3 +1052,119 @@ def prev_this_next(items):
     except StopIteration:
         pass
     return itertools.izip(prev, this, next)
+
+def commasplit(s):
+    '''
+    Splits the string s at every unescaped comma and returns the result as a list.
+    To escape a comma, double it. Individual items are stripped.
+    To avoid the ambiguity of 3 successive commas to denote a comma at the beginning
+    or end of an item, add a space between the item seperator and the escaped comma.
+    
+    >>> commasplit('a,b,c')
+    ['a', 'b', 'c']
+    >>> commasplit('a,, , b , c    ')
+    ['a,', 'b', 'c']
+    >>> commasplit('a, ,,b, c')
+    ['a', ',b', 'c']
+    '''
+    n = len(s)-1
+    s += ' '
+    i = 0
+    r=['']
+    while i<=n:
+        if s[i]==',':
+            if s[i+1]==',':
+                r[-1]+=','
+                i += 1
+            else:
+                r[-1] = r[-1].strip()
+                if i!=n: r.append('')
+        else:
+            r[-1] += s[i]
+        i+=1
+    r[-1] = r[-1].strip()
+    return r
+    
+def commajoin(l):
+    '''
+    Inverse of commasplit, except that whitespace around items is not conserved.
+    Adds more whitespace than needed for simplicity and performance.
+    
+    >>> commasplit(commajoin(['a', 'b', 'c']))
+    ['a', 'b', 'c']
+    >>> commasplit((commajoin(['a,', ' b ', 'c']))
+    ['a,', 'b', 'c']
+    >>> commasplit((commajoin(['a ', ',b', 'c']))
+    ['a', ',b', 'c']    
+    '''
+    return ','.join([ ' ' + i.replace(',', ',,') + ' ' for i in l ])
+
+def findInPaths(fn,paths,isfile=True,fail=False):
+    '''search for relative files in likely places'''
+    exists = isfile and os.path.isfile or os.path.isdir
+    if exists(fn): return fn
+    pjoin = os.path.join
+    if not os.path.isabs(fn):
+        for p in paths:
+            pfn = pjoin(p,fn)
+            if exists(pfn):
+                return pfn
+    if fail: raise ValueError('cannot locate %r with paths=%r' % (fn,paths))
+    return fn
+
+def annotateException(msg,enc='utf8'):
+    '''add msg to the args of an existing exception'''
+    if not msg: rise
+    t,v,b=sys.exc_info()
+    if not hasattr(v,'args'): raise
+    e = -1
+    A = list(v.args)
+    for i,a in enumerate(A):
+        if isinstance(a,basestring):
+            e = i
+            break
+    if e>=0:
+        if isinstance(a,unicode):
+            if not isinstance(msg,unicode):
+                msg=msg.decode(enc)
+        else:
+            if isinstance(msg,unicode):
+                msg=msg.encode(enc)
+            else:
+                msg = str(msg)
+        if isinstance(v,IOError) and getattr(v,'strerror',None):
+            v.strerror = msg+'\n'+str(v.strerror)
+        else:
+            A[e] += msg
+    else:
+        A.append(msg)
+    v.args = tuple(A)
+    raise t,v,b
+    
+def escapeOnce(data):
+    """Ensure XML output is escaped just once, irrespective of input
+
+    >>> escapeOnce('A & B')
+    'A &amp; B'
+    >>> escapeOnce('C &amp; D')
+    'C &amp; D'
+    >>> escapeOnce('E &amp;amp; F')
+    'E &amp; F'
+
+    """
+    data = data.replace("&", "&amp;")
+
+    #...but if it was already escaped, make sure it
+    # is not done twice....this will turn any tags
+    # back to how they were at the start.
+    data = data.replace("&amp;amp;", "&amp;")
+    data = data.replace("&amp;gt;", "&gt;")
+    data = data.replace("&amp;lt;", "&lt;")
+    data = data.replace("&amp;#", "&#")
+
+    #..and just in case someone had double-escaped it, do it again
+    data = data.replace("&amp;amp;", "&amp;")
+    data = data.replace("&amp;gt;", "&gt;")
+    data = data.replace("&amp;lt;", "&lt;")
+    return data
+    
