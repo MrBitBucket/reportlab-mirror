@@ -2008,7 +2008,7 @@ class PDFFormXObject:
             self.Annots = None
         else:
             #these must be transferred to the page when the form is used
-            raise ValueError, "annotations not reimplemented yet"
+            raise ValueError("annotations don't work in PDFFormXObjects yet")
         if not self.Contents:
             stream = self.stream
             if not stream:
