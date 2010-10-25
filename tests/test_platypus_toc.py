@@ -17,9 +17,10 @@ import unittest
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
+from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus.flowables import Flowable, Spacer
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 from reportlab.platypus import tableofcontents, PageBreak
@@ -275,7 +276,72 @@ class TocTestCase(unittest.TestCase):
         # I can't get one pass yet'
         #self.assertEquals(passes, 1)
 
+    def test2(self):
+        chapters = 20   #so we know we use only one page
+        from reportlab.lib.colors import pink
 
+        #TOC and this HParagraph class just handle the collection
+        TOC = []
+        fontSize = 14
+        leading = fontSize*1.2
+        descent = 0.2*fontSize
+        x = 2.5*cm          #these come from the frame size
+        y = (25+2.5)*cm - leading
+        x1 = (15+2.5)*cm
+
+        class HParagraph(Paragraph):
+            def __init__(self,key,text,*args,**kwds):
+                self._label = text
+                self._key = key
+                Paragraph.__init__(self,text,*args,**kwds)
+
+            def draw(self):
+                Paragraph.draw(self)
+                TOC.append((self._label,self.canv.getPageNumber(),self._key))
+                self.canv.bookmarkHorizontal('TOC_%s' % self._key,0,+20)
+
+        class UseForm(Flowable):
+            _ZEROSIZE = 1
+            def __init__(self,formName):
+                self._formName = formName
+                self.width = self.height = 0
+
+            def draw(self):
+                self.canv.doForm(self._formName)
+                for i in xrange(chapters):
+                    yb = y - i*leading      #baseline
+                    self.canv.linkRect('','TOC_%s' % i,(x,yb-descent,x1,yb+fontSize),thickness=0.5,color=pink,relative=0)
+
+            def drawOn(self,canvas,x,y,_sW=0):
+                Flowable.drawOn(self,canvas,0,0,canvas._pagesize[0])
+
+        class MakeForm(UseForm):
+            def draw(self):
+                canv = self.canv
+                canv.saveState()
+                canv.beginForm(self._formName)
+                canv.setFont("Helvetica",fontSize)
+                for i,(text,pageNumber,key) in enumerate(TOC):
+                    yb = y - i*leading      #baseline
+                    canv.drawString(x,yb,text)
+                    canv.drawRightString(x1,y-i*leading,str(pageNumber))
+                canv.endForm()
+                canv.restoreState()
+
+        headerStyle = makeHeaderStyle(0)
+        S = [Spacer(0,180),UseForm('TOC')]
+        RT = 'STARTUP COMPUTERS BLAH BUZZWORD STARTREK PRINTING PYTHON CHOMSKY'.split()
+        for i in range(chapters):
+            S.append(PageBreak())
+            S.append(HParagraph(i,'This is chapter %d' % (i+1), headerStyle))
+            txt = randomtext.randomText(RT[i*13 % len(RT)], 15)
+            para = Paragraph(txt, makeBodyStyle())
+            S.append(para)
+
+        S.append(MakeForm('TOC'))
+
+        doc = MyDocTemplate(outputfile('test_platypus_toc_simple.pdf'))
+        doc.build(S)
 
 def makeSuite():
     return makeSuiteForClasses(TocTestCase)
