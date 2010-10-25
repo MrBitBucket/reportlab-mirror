@@ -1038,6 +1038,13 @@ class PdfgenTestCase(unittest.TestCase):
         canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % (0.5*S[0],0.5*S[1],S[0],S[1]))
         canv.drawRightString(S[0],2,'Bottom Right=(%s,%s) Page Size=%s x %s' % (S[0],0,S[0],S[1]))
         canv.showPage()
+        S = A4[1],A4[0]
+        canv.setPageSize(S)
+        canv.setPageRotation(0)
+        canv.drawString(0,S[1]-30,'Top Left=(%s,%s) Page Size=%s x %s' % (0,S[1],S[0],S[1]))
+        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % (0.5*S[0],0.5*S[1],S[0],S[1]))
+        canv.drawRightString(S[0],32,'Bottom Right=(%s,%s) Page Size=%s x %s' % (S[0],0,S[0],S[1]))
+        canv.showPage()
         canv.save()
 
 def trySomeColors(C,enforceColorSpace=None):
