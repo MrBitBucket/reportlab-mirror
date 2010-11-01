@@ -67,7 +67,7 @@ class BarChart(PlotArea):
         categoryLabelBarSize = AttrMapValue(isNumber, desc='width to leave for a category label to go between categories.'),
         categoryLabelBarOrder = AttrMapValue(OneOf('first','last','auto'), desc='where any label bar should appear first/last'),
         barRecord = AttrMapValue(None, desc='callable(bar,label=labelText,value=value,**kwds) to record bar information', advancedUsage=1),
-        zIndexOverrides = AttrMapValue(isStringOrNone, desc=''', separated list of key=value (int/float) for zIndex ordering. Defaults are
+        zIndexOverrides = AttrMapValue(isStringOrNone, desc='''None (the default ie use old z ordering scheme) or a ',' separated list of key=value (int/float) for new zIndex ordering. If used defaults are
     background=0,
     categoryAxis=1,
     valueAxis=2,
