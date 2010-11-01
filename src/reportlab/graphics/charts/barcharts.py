@@ -49,7 +49,7 @@ class BarChart(PlotArea):
     "Abstract base class, unusable by itself."
 
     _attrMap = AttrMap(BASE=PlotArea,
-        useAbsolute = AttrMapValue(EitherOr((isBoolean,EitherOr((isString,isNumber)))), desc='Flag to use absolute spacing values; use string of gsb for finer control\n(g=groupSpacing,s=barSpacing,b=barWidth). ',advancedUsage=1),
+        useAbsolute = AttrMapValue(EitherOr((isBoolean,EitherOr((isString,isNumber)))), desc='Flag to use absolute spacing values; use string of gsb for finer control\n(g=groupSpacing,s=barSpacing,b=barWidth).',advancedUsage=1),
         barWidth = AttrMapValue(isNumber, desc='The width of an individual bar.'),
         groupSpacing = AttrMapValue(isNumber, desc='Width between groups of bars.'),
         barSpacing = AttrMapValue(isNumber, desc='Width between individual bars.'),
@@ -67,6 +67,15 @@ class BarChart(PlotArea):
         categoryLabelBarSize = AttrMapValue(isNumber, desc='width to leave for a category label to go between categories.'),
         categoryLabelBarOrder = AttrMapValue(OneOf('first','last','auto'), desc='where any label bar should appear first/last'),
         barRecord = AttrMapValue(None, desc='callable(bar,label=labelText,value=value,**kwds) to record bar information', advancedUsage=1),
+        zIndexOverrides = AttrMapValue(isStringOrNone, desc=''', separated list of key=value (int/float) for zIndex ordering. Defaults are
+    background=0,
+    categoryAxis=1,
+    valueAxis=2,
+    bars=3,
+    barLabels=4,
+    categoryAxisGrid=5,
+    valueAxisGrid=6,
+    annotations=7''')
         )
 
     def makeSwatchSample(self, rowNo, x, y, width, height):
@@ -145,6 +154,7 @@ class BarChart(PlotArea):
         self.bars[1].fillColor = colors.green
         self.bars[2].fillColor = colors.blue
         self.naLabel = None #NA_Label()
+        self.zIndexOverrides = None
 
 
     def demo(self):
@@ -194,17 +204,68 @@ class BarChart(PlotArea):
         cA.configure(self._configureData)
         self.calcBarPositions()
         g = Group()
-        g.add(self.makeBackground())
-        cAdgl = getattr(cA,'drawGridLast',False)
-        vAdgl = getattr(vA,'drawGridLast',False)
-        if not cAdgl: cA.makeGrid(g,parent=self, dim=vA.getGridDims)
-        if not vAdgl: vA.makeGrid(g,parent=self, dim=cA.getGridDims)
-        g.add(self.makeBars())
-        g.add(cA)
-        g.add(vA)
-        if cAdgl: cA.makeGrid(g,parent=self, dim=vA.getGridDims)
-        if vAdgl: vA.makeGrid(g,parent=self, dim=cA.getGridDims)
-        for a in getattr(self,'annotations',()): g.add(a(self,cA.scale,vA.scale))
+
+        zIndex = getattr(self,'zIndexOverrides',None)
+        if not zIndex:
+            g.add(self.makeBackground())
+            cAdgl = getattr(cA,'drawGridLast',False)
+            vAdgl = getattr(vA,'drawGridLast',False)
+            if not cAdgl: cA.makeGrid(g,parent=self, dim=vA.getGridDims)
+            if not vAdgl: vA.makeGrid(g,parent=self, dim=cA.getGridDims)
+            g.add(self.makeBars())
+            g.add(cA)
+            g.add(vA)
+            if cAdgl: cA.makeGrid(g,parent=self, dim=vA.getGridDims)
+            if vAdgl: vA.makeGrid(g,parent=self, dim=cA.getGridDims)
+            for a in getattr(self,'annotations',()): g.add(a(self,cA.scale,vA.scale))
+        else:
+            Z=dict(
+                background=0,
+                categoryAxis=1,
+                valueAxis=2,
+                bars=3,
+                barLabels=4,
+                categoryAxisGrid=5,
+                valueAxisGrid=6,
+                annotations=7,
+                )
+            for z in zIndex.strip().split(','):
+                z = z.strip()
+                if not z: continue
+                try:
+                    k,v=z.split('=')
+                except:
+                    raise ValueError('Badly formatted zIndex clause %r in %r\nallowed variables are\n%s' % (z,zIndex,'\n'.join(['%s=%r'% (k,Z[k]) for k in sorted(Z.keys())])))
+                if k not in Z:
+                    raise ValueError('Unknown zIndex variable %r in %r\nallowed variables are\n%s' % (k,Z,'\n'.join(['%s=%r'% (k,Z[k]) for k in sorted(Z.keys())])))
+                try:
+                    v = eval(v,{})  #only constants allowed
+                    assert isinstance(v,(float,int))
+                except:
+                    raise ValueError('Bad zIndex value %r in clause %r of zIndex\nallowed variables are\n%s' % (v,z,zIndex,'\n'.join(['%s=%r'% (k,Z[k]) for k in sorted(Z.keys())])))
+                Z[k] = v
+            Z = [(v,k) for k,v in Z.iteritems()]
+            Z.sort()
+            b = self.makeBars()
+            bl = b.contents.pop(-1)
+            for v,k in Z:
+                if k=='background':
+                    g.add(self.makeBackground())
+                elif k=='categoryAxis':
+                    g.add(cA)
+                elif k=='categoryAxisGrid':
+                    cA.makeGrid(g,parent=self, dim=vA.getGridDims)
+                elif k=='valueAxis':
+                    g.add(vA)
+                elif k=='valueAxisGrid':
+                    vA.makeGrid(g,parent=self, dim=cA.getGridDims)
+                elif k=='bars':
+                    g.add(b)
+                elif k=='barLabels':
+                    g.add(bl)
+                elif k=='annotations':
+                    for a in getattr(self,'annotations',()): g.add(a(self,cA.scale,vA.scale))
+
         del self._configureData
         return g
 
