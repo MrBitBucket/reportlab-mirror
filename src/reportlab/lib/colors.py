@@ -70,6 +70,14 @@ class Color:
     def hexvala(self):
         return '0x%02x%02x%02x%02x' % self.bitmap_rgba()
 
+    def int_rgb(self):
+        v = self.bitmap_rgb()
+        return v[0]<<16|v[1]<<8|v[2]
+
+    def int_rgba(self):
+        v = self.bitmap_rgba()
+        return int((v[0]<<24|v[1]<<16|v[2]<<8|v[3])&0xffffff)
+
     _cKwds='red green blue alpha'.split()
     def cKwds(self):
         for k in self._cKwds:
