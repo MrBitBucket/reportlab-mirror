@@ -35,6 +35,10 @@ from textlabels import Label
 
 _ANGLE2BOXANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw', -45: 'nw'}
 _ANGLE2RBOXANCHOR={0:'e', 45:'ne', 90:'n', 135:'nw', 180:'w', 225:'sw', 270:'s', 315: 'se', -45: 'se'}
+
+_ANGLELO    = 1e-7
+_ANGLEHI    = 360.0 - _ANGLELO
+
 class WedgeLabel(Label):
     def _checkDXY(self,ba):
         pass
@@ -608,7 +612,7 @@ class Pie(AbstractPieChart):
         a = A.append
         for i, angle in D:
             endAngle = (startAngle + (angle * whichWay))
-            if abs(angle)>=1e-5:
+            if abs(angle)>=_ANGLELO:
                 if startAngle >= endAngle:
                     aa = endAngle,startAngle
                 else:
@@ -662,6 +666,7 @@ class Pie(AbstractPieChart):
             #all having the default style
             wedgeStyle = self.slices[i%styleCount]
             if not wedgeStyle.visible: continue
+            aa = abs(a2-a1)
 
             # is it a popout?
             cx, cy = centerx, centery
@@ -672,15 +677,15 @@ class Pie(AbstractPieChart):
                 aveAngleRadians = averageAngle/_180_pi
                 cosAA = cos(aveAngleRadians)
                 sinAA = sin(aveAngleRadians)
-                if popout:
+                if popout and aa<_ANGLEHI:
                     # pop out the wedge
                     cx = centerx + popout*cosAA
                     cy = centery + popout*sinAA
 
-            if n > 1:
-                theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
-            elif n==1:
+            if aa>=_ANGLEHI:
                 theWedge = Ellipse(cx, cy, xradius, yradius)
+            else:
+                theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
 
             theWedge.fillColor = wedgeStyle.fillColor
             theWedge.strokeColor = wedgeStyle.strokeColor
@@ -979,6 +984,7 @@ class _SL3D:
         self.lo = lo
         self.hi = hi
         self.mid = (lo+hi)*0.5
+        self.not360 = abs(hi-lo) < _ANGLEHI
 
     def __str__(self):
         return '_SL3D(%.2f,%.2f)' % (self.lo,self.hi)
@@ -995,7 +1001,7 @@ class Pie3d(Pie):
     angle_3d = 180
 
     def _popout(self,i):
-        return self.slices[i].popout or 0
+        return self._sl3d[i].not360 and self.slices[i].popout or 0
 
     def CX(self, i,d ):
         return self._cx+(d and self._xdepth_3d or 0)+self._popout(i)*cos(_2rad(self._sl3d[i].mid))
@@ -1045,8 +1051,9 @@ class Pie3d(Pie):
         _3d_angle = self.angle_3d
         _3dva = self._3dva = _360(_3d_angle+90)
         a0 = _2rad(_3dva)
-        self._xdepth_3d = cos(a0)*self.depth_3d
-        self._ydepth_3d = sin(a0)*self.depth_3d
+        depth_3d = self.depth_3d
+        self._xdepth_3d = cos(a0)*depth_3d
+        self._ydepth_3d = sin(a0)*depth_3d
         self._cx = self.x+self.width/2.0
         self._cy = self.y+(self.height - self._ydepth_3d)/2.0
         radiusx = radiusy = self._cx-self.x
@@ -1098,7 +1105,8 @@ class Pie3d(Pie):
             sl = _sl3d[i]
             lo = angle0 = sl.lo
             hi = angle1 = sl.hi
-            if abs(hi-lo)<=1e-7: continue
+            aa = abs(hi-lo)
+            if aa<_ANGLELO: continue
             fillColor = _getShaded(style.fillColor,style.fillColorShaded,style.shading)
             strokeColor = _getShaded(style.strokeColor,style.strokeColorShaded,style.shading) or fillColor
             strokeWidth = style.strokeWidth
@@ -1106,31 +1114,39 @@ class Pie3d(Pie):
             cy0 = CY(i,0)
             cx1 = CX(i,1)
             cy1 = CY(i,1)
-            #background shaded pie bottom
-            g.add(Wedge(cx1,cy1,radiusx, lo, hi,yradius=radiusy,
-                            strokeColor=strokeColor,strokeWidth=strokeWidth,fillColor=fillColor,
-                            strokeLineJoin=1))
-            #connect to top
-            if lo < a0 < hi: angle0 = a0
-            if lo < a1 < hi: angle1 = a1
-            p = ArcPath(strokeColor=strokeColor, fillColor=fillColor,strokeWidth=strokeWidth,strokeLineJoin=1)
-            p.addArc(cx1,cy1,radiusx,angle0,angle1,yradius=radiusy,moveTo=1)
-            p.lineTo(OX(i,angle1,0),OY(i,angle1,0))
-            p.addArc(cx0,cy0,radiusx,angle0,angle1,yradius=radiusy,reverse=1)
-            p.closePath()
-            if angle0<=_3dva and angle1>=_3dva:
-                rd = 0
-            else:
-                rd = min(rad_dist(angle0),rad_dist(angle1))
-            S.append((rd,p))
-            _fillSide(S,i,lo,strokeColor,strokeWidth,fillColor)
-            _fillSide(S,i,hi,strokeColor,strokeWidth,fillColor)
+            if depth_3d:
+                #background shaded pie bottom
+                g.add(Wedge(cx1,cy1,radiusx, lo, hi,yradius=radiusy,
+                                strokeColor=strokeColor,strokeWidth=strokeWidth,fillColor=fillColor,
+                                strokeLineJoin=1))
+                #connect to top
+                if lo < a0 < hi: angle0 = a0
+                if lo < a1 < hi: angle1 = a1
+                p = ArcPath(strokeColor=strokeColor, fillColor=fillColor,strokeWidth=strokeWidth,strokeLineJoin=1)
+                p.addArc(cx1,cy1,radiusx,angle0,angle1,yradius=radiusy,moveTo=1)
+                p.lineTo(OX(i,angle1,0),OY(i,angle1,0))
+                p.addArc(cx0,cy0,radiusx,angle0,angle1,yradius=radiusy,reverse=1)
+                p.closePath()
+                if angle0<=_3dva and angle1>=_3dva:
+                    rd = 0
+                else:
+                    rd = min(rad_dist(angle0),rad_dist(angle1))
+                S.append((rd,p))
+                _fillSide(S,i,lo,strokeColor,strokeWidth,fillColor)
+                _fillSide(S,i,hi,strokeColor,strokeWidth,fillColor)
 
             #bright shaded top
             fillColor = style.fillColor
             strokeColor = style.strokeColor or fillColor
             T.append(Wedge(cx0,cy0,radiusx,lo,hi,yradius=radiusy,
                             strokeColor=strokeColor,strokeWidth=strokeWidth,fillColor=fillColor,strokeLineJoin=1))
+            if aa>=_ANGLELARGE:
+                theWedge = Ellipse(cx0, cy0, radiusx, radiusy,
+                            strokeColor=strokeColor,strokeWidth=strokeWidth,fillColor=fillColor,strokeLineJoin=1)
+            else:
+                theWedge = Wedge(cx0,cy0,radiusx,lo,hi,yradius=radiusy,
+                            strokeColor=strokeColor,strokeWidth=strokeWidth,fillColor=fillColor,strokeLineJoin=1)
+            T.append(theWedge)
 
             text = labels[i]
             if style.label_visible and text:
