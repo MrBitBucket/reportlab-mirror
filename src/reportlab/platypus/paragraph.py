@@ -299,6 +299,18 @@ def _putFragLine(cur_x, tx, line):
                     xs.link = f.link
                     xs.link_x = cur_x_s
                     xs.linkColor = xs.textColor
+            bg = getattr(f,'backColor',None)
+            if bg and not xs.backColor:
+                xs.backColor = bg
+                xs.backColor_x = cur_x_s
+            elif xs.backColor:
+                if not bg:
+                    xs.backColors.append( (xs.backColor_x, cur_x_s, xs.backColor) )
+                    xs.backColor = None
+                elif f.backColor!=xs.backColor or xs.textColor!=xs.backColor:
+                    xs.backColors.append( (xs.backColor_x, cur_x_s, xs.backColor) )
+                    xs.backColor = bg
+                    xs.backColor_x = cur_x_s
             txtlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
             cur_x += txtlen
             nSpaces += text.count(' ')+_nbspCount(text)
@@ -309,6 +321,8 @@ def _putFragLine(cur_x, tx, line):
         xs.strikes.append( (xs.strike_x, cur_x_s, xs.strikeColor) )
     if xs.link:
         xs.links.append( (xs.link_x, cur_x_s, xs.link,xs.linkColor) )
+    if xs.backColor:
+        xs.backColors.append( (xs.backColor_x, cur_x_s, xs.backColor) )
     if tx._x0!=x0:
         setXPos(tx,x0-tx._x0)
 
@@ -355,7 +369,7 @@ except ImportError:
             'returns 1 if two ParaFrags map out the same'
             if (hasattr(f,'cbDefn') or hasattr(g,'cbDefn')
                     or hasattr(f,'lineBreak') or hasattr(g,'lineBreak')): return 0
-            for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline', 'strike', 'link'):
+            for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline', 'strike', 'link', "backColor"):
                 if getattr(f,a,None)!=getattr(g,a,None): return 0
             return 1
 
@@ -625,6 +639,13 @@ def _do_post_text(tx):
     xs.links = []
     xs.link=None
     xs.linkColor=None
+
+    for x1,x2,c in xs.backColors:
+        tx._canvas.setFillColor(c)
+        tx._canvas.rect(x1,y,x2-x1,yl-y,stroke=0,fill=1)
+
+    xs.backColors=[]
+    xs.backColor=None
     xs.cur_y -= leading
 
 def textTransformFrags(frags,style):
@@ -1436,6 +1457,7 @@ class Paragraph(Flowable):
                 tx = self.beginText(cur_x, cur_y)
                 xs = tx.XtraState=ABag()
                 xs.textColor=None
+                xs.backColor=None
                 xs.rise=0
                 xs.underline=0
                 xs.underlines=[]
@@ -1443,6 +1465,7 @@ class Paragraph(Flowable):
                 xs.strike=0
                 xs.strikes=[]
                 xs.strikeColor=None
+                xs.backColors=[]
                 xs.links=[]
                 xs.link=None
                 xs.leading = style.leading
