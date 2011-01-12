@@ -346,4 +346,12 @@ def randomText(theme=STARTUP, sentences=5):
     return output
 
 if __name__=='__main__':
-    print chomsky(5)
+    import sys
+    argv = sys.argv[1:]
+    if argv:
+        theme = argv.pop(0)
+        if argv:
+            sentences = int(argv.pop(0))
+        print randomText(theme,sentences)
+    else:
+        print chomsky(5)
