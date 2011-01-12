@@ -18,6 +18,7 @@ __all__=(
         'PropertySet',
         'ParagraphStyle',
         'LineStyle',
+        'ListStyle',
         'StyleSheet1',
         'getSampleStyleSheet',
         )
@@ -57,7 +58,9 @@ class PropertySet:
         # very strict that only keys in class defaults are
         # allowed, so they cannot inherit
         self.refresh()
+        self._setKwds(**kw)
 
+    def _setKwds(self,**kw):
         #step three - copy keywords if any
         for (key, value) in kw.items():
              self.__dict__[key] = value
@@ -84,6 +87,13 @@ class PropertySet:
         for key in keylist:
             value = self.__dict__.get(key, None)
             print indent + '%s = %s' % (key, value)
+
+    def clone(self, name, parent=None, **kwds):
+        r = self.__class__(name,parent)
+        r.__dict__ = self.__dict__.copy()
+        r.parent = parent is None and self or parent
+        r._setKwds(**kwds)
+        return r
 
 class ParagraphStyle(PropertySet):
     defaults = {
@@ -121,6 +131,21 @@ class LineStyle(PropertySet):
         the lines."""
         canvas.setLineWidth(1)
         #etc. etc.
+
+class ListStyle(PropertySet):
+    defaults = dict(
+                leftIndent=18,
+                rightIndent=0,
+                bulletAlign='left',
+                bulletType='1',
+                bulletColor='black',
+                bulletFontName='Helvetica',
+                bulletFontSize=12,
+                bulletOffsetY=0,
+                bulletDedent='auto',
+                bulletDir='ltr',
+                bulletFormat=None,
+                )
 
 _stylesheet1_undefined = object()
 

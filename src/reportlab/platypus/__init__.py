@@ -6,7 +6,7 @@ __doc__='''Page Layout and Typography Using Scripts" - higher-level framework fo
 
 from reportlab.platypus.flowables import Flowable, Image, Macro, PageBreak, Preformatted, Spacer, XBox, \
                         CondPageBreak, KeepTogether, TraceInfo, FailOnWrap, FailOnDraw, PTOContainer, \
-                        KeepInFrame, ParagraphAndImage, ImageAndFlowables
+                        KeepInFrame, ParagraphAndImage, ImageAndFlowables, ListFlowable, ListItem
 from reportlab.platypus.paragraph import Paragraph, cleanBlockQuotedText, ParaLines
 from reportlab.platypus.paraparser import ParaFrag
 from reportlab.platypus.tables import Table, TableStyle, CellStyle, LongTable

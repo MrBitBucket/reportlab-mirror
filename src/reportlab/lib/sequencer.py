@@ -46,6 +46,14 @@ def _format_abc(num):
     n = (num -1) % 26
     return chr(n+97)
 
+_type2formatter = {
+        'I':_format_I,
+        'i':_format_i,
+        '1':_format_123,
+        'A':_format_ABC,
+        'a':_format_abc,
+        }
+
 class _Counter:
     """Private class used by Sequencer.  Each counter
     knows its format, and the IDs of anything it
