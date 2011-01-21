@@ -1237,7 +1237,7 @@ def _bulletFormat(value,type='1',format=None):
         s = _bulletNames.get(value,value)
     else:
         s = _type2formatter[type](int(value))
-    
+
     if format:
         if isinstance(format,basestring):
             s = format % s
@@ -1287,15 +1287,17 @@ class BulletDrawer:
         bulletAlign = self._bulletAlign
         value = _bulletFormat(value,self._bulletType,self._bulletFormat)
 
-        if bulletAlign.startswith('numeric'):
-            pc = bulletAlign[7:].strip() or '.'
-            canv.drawAlignedString(x,y,value,pc)
+        if bulletAlign=='left':
+            canv.drawString(x,y,value)
         elif bulletAlign=='right':
             canv.drawRightString(x,y,value)
-        elif bulletAlign=='middle':
+        elif bulletAlign in ('center','centre'):
             canv.drawCentredString(x,y,value)
+        elif bulletAlign.startswith('numeric') or bulletAlign.startswith('decimal'):
+            pc = bulletAlign[7:].strip() or '.'
+            canv.drawAlignedString(x,y,value,pc)
         else:
-            canv.drawString(x,y,value)
+            raise ValueError('Invalid bulletAlign: %r' % bulletAlign)
         canv.restoreState()
 
 def _computeBulletWidth(b,value):
@@ -1441,7 +1443,7 @@ class ListFlowable(Flowable):
         for k in ('spaceBefore','spaceAfter'):
             v = kwds.get(k,getattr(style,k,None))
             if v is not None:
-                setattr(self,kwds.get(k,getattr(style,k,v)))
+                setattr(self,k,kwds.get(k,getattr(style,k,v)))
 
     def wrap(self,aW,aH):
         return aW,0x7fffffff    #force a split
