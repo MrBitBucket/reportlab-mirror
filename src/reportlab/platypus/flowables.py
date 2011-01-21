@@ -1443,7 +1443,7 @@ class ListFlowable(Flowable):
         for k in ('spaceBefore','spaceAfter'):
             v = kwds.get(k,getattr(style,k,None))
             if v is not None:
-                setattr(self,k,kwds.get(k,getattr(style,k,v)))
+                setattr(self,k,v)
 
     def wrap(self,aW,aH):
         return aW,0x7fffffff    #force a split
@@ -1558,9 +1558,16 @@ class ListFlowable(Flowable):
 
         S = []
         aS = S.append
+        i=0
         for d,f in self._flowablesIter():
+            fparams = {}
+            if not i:
+                i += 1
+                spaceBefore = getattr(self,'spaceBefore',None)
+                if spaceBefore is not None:
+                    fparams['spaceBefore'] = spaceBefore
             if d:
-                aS(self._makeLIIndenter(f,bullet=self._makeBullet(value)))
+                aS(self._makeLIIndenter(f,bullet=self._makeBullet(value),params=fparams))
                 if inc: value += inc
             elif isinstance(f,LIIndenter):
                 b = f._bullet
@@ -1570,10 +1577,13 @@ class ListFlowable(Flowable):
                     value = int(b.value)
                 else:
                     f._bullet = self._makeBullet(value,params=getattr(f,'params',None))
+                if fparams:
+                    f.__dict__['spaceBefore'] = max(f.__dict__.get('spaceBefore',0),spaceBefore)
                 aS(f)
                 if inc: value += inc
             elif isinstance(f,_LIParams):
-                z = self._makeLIIndenter(f.flowable,bullet=None,params=f.params)
+                fparams.update(f.params)
+                z = self._makeLIIndenter(f.flowable,bullet=None,params=fparams)
                 if f.first:
                     if f.value is not None:
                         value = f.value
@@ -1582,7 +1592,12 @@ class ListFlowable(Flowable):
                     if inc: value += inc
                 aS(z)
             else:
-                aS(self._makeLIIndenter(f,bullet=None))
+                aS(self._makeLIIndenter(f,bullet=None,params=fparams))
+
+        spaceAfter = getattr(self,'spaceAfter',None)
+        if spaceAfter is not None:
+            f=S[-1]
+            f.__dict__['spaceAfter'] = max(f.__dict__.get('spaceAfter',0),spaceAfter)
         return S
 
 class DocAssign(NullDraw):
