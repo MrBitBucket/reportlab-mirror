@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/docs/userguide/ch6_tables.py
 from tools.docco.rl_doc_utils import *
-from reportlab.platypus import Image
+from reportlab.platypus import Image,ListFlowable, ListItem
 import reportlab
 
 heading1("Tables and TableStyles")
@@ -655,3 +655,61 @@ eg("""
 disc("""
 This indexes the terms "comma (,)", "," and "...".
 """)
+
+heading2("""$ListFlowable(),ListItem()$""")
+disc("""
+Use these classes to make ordered and unordered lists.  Lists can be nested.
+""")
+
+disc("""
+$ListFlowable()$ will create an ordered list, which can contain any flowable.  The class has a number of parameters to change font, colour, size, style and position of list numbers, or of bullets in unordered lists.  The type of numbering can also be set to use lower or upper case letters ('A,B,C' etc.) or Roman numerals (capitals or lowercase) using the bulletType property.  To change the list to an unordered type, set bulletType='bullet'.
+""")
+
+disc("""
+Items within a $ListFlowable()$ list can be changed from their default appearance by wrapping them in a $ListItem()$ class and setting its properties.
+""")
+
+disc("""
+The following will create an ordered list, and set the third item to an unordered sublist.
+""")
+
+eg("""
+OL = ListFlowable(
+[
+Paragraph("Item no.1", style),
+ListItem(Paragraph("Item no. 2", style),bulletColor="green",value=7),
+ListFlowable([
+            Paragraph("sublist item 1", style),
+            ListItem(Paragraph('sublist item 2', style),bulletColor='red',value='square')
+            ],
+            bulletType='bullet',
+            start='square',
+            ),
+Paragraph("Item no.4", style),
+],
+bulletType='i'
+)
+""")
+
+EmbeddedCode("""
+from reportlab.platypus import ListFlowable, ListItem
+from reportlab.lib.styles import getSampleStyleSheet
+styles = getSampleStyleSheet()
+style = styles["Normal"]
+t = ListFlowable(
+[
+Paragraph("Item no.1", style),
+ListItem(Paragraph("Item no. 2", style),bulletColor="green",value=7),
+ListFlowable(
+                [
+                Paragraph("sublist item 1", style),
+                ListItem(Paragraph('sublist item 2', style),bulletColor='red',value='square')
+                ],
+                bulletType='bullet',
+                start='square',
+                ),
+Paragraph("Item no.4", style),
+],
+bulletType='i'
+)
+             """)
