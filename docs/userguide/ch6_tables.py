@@ -673,24 +673,6 @@ disc("""
 The following will create an ordered list, and set the third item to an unordered sublist.
 """)
 
-eg("""
-OL = ListFlowable(
-[
-Paragraph("Item no.1", style),
-ListItem(Paragraph("Item no. 2", style),bulletColor="green",value=7),
-ListFlowable([
-            Paragraph("sublist item 1", style),
-            ListItem(Paragraph('sublist item 2', style),bulletColor='red',value='square')
-            ],
-            bulletType='bullet',
-            start='square',
-            ),
-Paragraph("Item no.4", style),
-],
-bulletType='i'
-)
-""")
-
 EmbeddedCode("""
 from reportlab.platypus import ListFlowable, ListItem
 from reportlab.lib.styles import getSampleStyleSheet
