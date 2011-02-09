@@ -1140,7 +1140,7 @@ class Pie3d(Pie):
             strokeColor = style.strokeColor or fillColor
             T.append(Wedge(cx0,cy0,radiusx,lo,hi,yradius=radiusy,
                             strokeColor=strokeColor,strokeWidth=strokeWidth,fillColor=fillColor,strokeLineJoin=1))
-            if aa>=_ANGLELARGE:
+            if aa>=_ANGLEHI:
                 theWedge = Ellipse(cx0, cy0, radiusx, radiusy,
                             strokeColor=strokeColor,strokeWidth=strokeWidth,fillColor=fillColor,strokeLineJoin=1)
             else:
