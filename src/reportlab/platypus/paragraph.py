@@ -761,16 +761,16 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
         if endLine:
             extraSpace = maxWidth - widthUsed
             if not lineBreak:
-                extraSpace += w
                 #This is the most important of the Japanese typography rules.
                 #if next character cannot start a line, wrap it up to this line so it hangs
                 #in the right margin. We won't do two or more though - that's unlikely and
                 #would result in growing ugliness.
-                if i<nU:
-                    nextChar = U[i]
-                    if nextChar in ALL_CANNOT_START:
-                        extraSpace -= nextChar.width
-                        i += 1
+                #otherwise we need to push the character back
+                #and increase the extra space
+                #bug fix contributed by Alexander Vasilenko <alexs.vasilenko@gmail.com>
+                if u not in ALL_CANNOT_START:
+                    i -= 1
+                    extraSpace += w
             lines.append(makeCJKParaLine(U[lineStartPos:i],extraSpace,calcBounds))
             try:
                 maxWidth = maxWidths[len(lines)]
@@ -778,7 +778,7 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
                 maxWidth = maxWidths[-1]  # use the last one
 
             lineStartPos = i
-            widthUsed = w
+            widthUsed = 0
 
     #any characters left?
     if widthUsed > 0:
@@ -1167,7 +1167,7 @@ class Paragraph(Flowable):
                         words.append(g)
                         g.text = nText
                     else:
-                        if nText!='' and nText[0]!=' ':
+                        if nText and nText[0]!=' ':
                             g.text += ' ' + nText
 
                     ni = 0
