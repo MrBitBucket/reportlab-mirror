@@ -107,6 +107,40 @@ class ParagraphCorners(unittest.TestCase):
         assert h0<=aH,'Multi-frag CJK split[0] has wrong height %s >= available %s' % (H0,aH)
         w1,h1=S[1].wrap(aW,aH)
         assert h0+h1==h, 'Multi-frag-CJK split[0].height(%s)+split[1].height(%s) don\'t add to original %s' % (h0,h1,h)
+
+    def test3(self):
+        '''compare CJK splitting in some edge cases'''
+        from reportlab.pdfgen.canvas import Canvas
+        from reportlab.platypus.paragraph import Paragraph
+        from reportlab.lib.styles import ParagraphStyle
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.lib.enums import TA_LEFT
+        sty = ParagraphStyle('A')
+        sty.fontSize = 15
+        sty.leading = sty.fontSize*1.2
+        sty.fontName = 'Courier'
+        sty.alignment = TA_LEFT
+        sty.wordWrap = 'CJK'
+        p0=Paragraph('ABCDEFGHIJKL]N',sty)
+        p1=Paragraph('AB<font color="red">C</font>DEFGHIJKL]N',sty)
+        canv = Canvas('test_platypus_paragraph_cjk3.pdf')
+        ix = len(canv._code)
+        aW = pdfmetrics.stringWidth('ABCD','Courier',15)
+        w,h=p0.wrap(aW,1000000)
+        y = canv._pagesize[1]-72-h
+        p0.drawOn(canv,72,y)
+        w,h=p1.wrap(aW,1000000)
+        y -= h+10
+        p1.drawOn(canv,72,y)
+        w,h=p0.wrap(aW*0.25-2,1000000)
+        y -= h+10
+        p0.drawOn(canv,72,y)
+        w,h=p1.wrap(aW/4.-2,1000000)
+        y -= h+10
+        p1.drawOn(canv,72,y)
+        assert canv._code[ix:]==['q', '1 0 0 1 72 697.8898 cm', 'q', '0 0 0 rg', 'BT 1 0 0 1 0 57 Tm /F2 15 Tf 18 TL (ABCD) Tj T* (EFGH) Tj T* (IJKL]) Tj T* (N) Tj T* ET', 'Q', 'Q', 'q', '1 0 0 1 72 615.8898 cm', 'q', 'BT 1 0 0 1 0 57 Tm 18 TL /F2 15 Tf 0 0 0 rg (AB) Tj 1 0 0 rg (C) Tj 0 0 0 rg (D) Tj T* (EFGH) Tj T* (IJKL]) Tj T* (N) Tj T* ET', 'Q', 'Q', 'q', '1 0 0 1 72 353.8898 cm', 'q', '0 0 0 rg', 'BT 1 0 0 1 0 237 Tm /F2 15 Tf 18 TL (A) Tj T* (B) Tj T* (C) Tj T* (D) Tj T* (E) Tj T* (F) Tj T* (G) Tj T* (H) Tj T* (I) Tj T* (J) Tj T* (K) Tj T* (L) Tj T* (]) Tj T* (N) Tj T* ET', 'Q', 'Q', 'q', '1 0 0 1 72 91.88976 cm', 'q', 'BT 1 0 0 1 0 237 Tm 18 TL /F2 15 Tf 0 0 0 rg (A) Tj T* (B) Tj T* 1 0 0 rg (C) Tj T* 0 0 0 rg (D) Tj T* (E) Tj T* (F) Tj T* (G) Tj T* (H) Tj T* (I) Tj T* (J) Tj T* (K) Tj T* (L) Tj T* (]) Tj T* (N) Tj T* ET', 'Q', 'Q']
+        canv.showPage()
+        canv.save()
         
 class ParagraphSplitTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."

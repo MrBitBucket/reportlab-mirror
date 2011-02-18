@@ -761,14 +761,16 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
         if endLine:
             extraSpace = maxWidth - widthUsed
             if not lineBreak:
-                #This is the most important of the Japanese typography rules.
-                #if next character cannot start a line, wrap it up to this line so it hangs
+                #we are pushing this character back, but
+                #the most important of the Japanese typography rules
+                #if this character cannot start a line, wrap it up to this line so it hangs
                 #in the right margin. We won't do two or more though - that's unlikely and
                 #would result in growing ugliness.
-                #otherwise we need to push the character back
                 #and increase the extra space
                 #bug fix contributed by Alexander Vasilenko <alexs.vasilenko@gmail.com>
-                if u not in ALL_CANNOT_START:
+                if u not in ALL_CANNOT_START and i>lineStartPos+1:
+                    #otherwise we need to push the character back
+                    #the i>lineStart+1 condition ensures progress
                     i -= 1
                     extraSpace += w
             lines.append(makeCJKParaLine(U[lineStartPos:i],extraSpace,calcBounds))
@@ -1257,12 +1259,11 @@ class Paragraph(Flowable):
 
         return lines
 
-    def breakLinesCJK(self, width):
+    def breakLinesCJK(self, maxWidths):
         """Initially, the dumbest possible wrapping algorithm.
         Cannot handle font variations."""
 
-        if not isinstance(width,(list,tuple)): maxWidths = [width]
-        else: maxWidths = width
+        if not isinstance(maxWidths,(list,tuple)): maxWidths = [maxWidths]
         style = self.style
         self.height = 0
 
@@ -1283,7 +1284,7 @@ class Paragraph(Flowable):
                 text = ''.join(getattr(f,'words',[]))
 
             from reportlab.lib.textsplit import wordSplit
-            lines = wordSplit(text, maxWidths[0], f.fontName, f.fontSize)
+            lines = wordSplit(text, maxWidths, f.fontName, f.fontSize)
             #the paragraph drawing routine assumes multiple frags per line, so we need an
             #extra list like this
             #  [space, [text]]
