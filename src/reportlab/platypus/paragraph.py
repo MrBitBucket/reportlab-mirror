@@ -23,7 +23,7 @@ import re
 #on UTF8 branch, split and strip must be unicode-safe!
 #thanks to Dirk Holtwick for helpful discussions/insight
 #on this one
-_wsc_re_split=re.compile('[%s]+'% re.escape(''.join((
+_wsc = ''.join((
     u'\u0009',  # HORIZONTAL TABULATION
     u'\u000A',  # LINE FEED
     u'\u000B',  # VERTICAL TABULATION
@@ -54,7 +54,8 @@ _wsc_re_split=re.compile('[%s]+'% re.escape(''.join((
     u'\u202F',  # NARROW NO-BREAK SPACE
     u'\u205F',  # MEDIUM MATHEMATICAL SPACE
     u'\u3000',  # IDEOGRAPHIC SPACE
-    )))).split
+    ))
+_wsc_re_split=re.compile('[%s]+'% re.escape(_wsc)).split
 
 def split(text, delim=None):
     if type(text) is str: text = text.decode('utf8')
@@ -65,7 +66,7 @@ def split(text, delim=None):
 
 def strip(text):
     if type(text) is str: text = text.decode('utf8')
-    return text.strip().encode('utf8')
+    return text.strip(_wsc).encode('utf8')
 
 class ParaLines(ABag):
     """
@@ -1065,7 +1066,18 @@ class Paragraph(Flowable):
             fontSize = f.fontSize
             fontName = f.fontName
             ascent, descent = getAscentDescent(fontName,fontSize)
-            words = hasattr(f,'text') and split(f.text, ' ') or f.words
+            if hasattr(f,'text'):
+                text = strip(f.text)
+                if not text:
+                    return f.clone(kind=0, lines=[],ascent=ascent,descent=descent,fontSize=fontSize)
+                else:
+                    words = split(text)
+            else:
+                words = f.words
+                for w in words:
+                    if strip(w): break
+                else:
+                    return f.clone(kind=0, lines=[],ascent=ascent,descent=descent,fontSize=fontSize)
             spaceWidth = stringWidth(' ', fontName, fontSize, self.encoding)
             cLine = []
             currentWidth = -spaceWidth   # hack to get around extra space for word 1
