@@ -78,7 +78,13 @@ class _PMRenderer(Renderer):
         self._canvas.lineCap = s['strokeLineCap']
         self._canvas.lineJoin = s['strokeLineJoin']
         da = s['strokeDashArray']
-        da = da and (0,da) or None
+        if not da:
+            da = None
+        else:
+            if not isinstance(da,(list,tuple)):
+                da = da,
+            if len(da)!=2 or not isinstance(da[1],(list,tuple)):
+                da = 0, da  #assume phase of 0
         self._canvas.dashArray = da
         alpha = s['fillOpacity']
         if alpha is not None:

@@ -217,7 +217,12 @@ class _PDFRenderer(Renderer):
 #                self._canvas.setDash(array=value)
             elif key == 'strokeDashArray':
                 if value:
-                    self._canvas.setDash(value)
+                    if isinstance(value,(list,tuple)) and len(value)==2 and isinstance(value[1],(tuple,list)):
+                        phase = value[0]
+                        value = value[1]
+                    else:
+                        phase = 0
+                    self._canvas.setDash(value,phase)
                 else:
                     self._canvas.setDash()
             elif key == 'fillColor':
