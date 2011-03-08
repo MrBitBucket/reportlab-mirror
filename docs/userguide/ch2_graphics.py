@@ -1227,28 +1227,27 @@ illust(examples.hand2, "the finished hand, filled")
 heading2("Further Reading: The ReportLab Graphics Library")
 
 disc("""
-So far the graphics we have seen was created on a fairly low level.
+So far the graphics we have seen were created on a fairly low level.
 It should be noted, though, that there is another way of creating
-much more sophisticated graphics using the emerging dedicated
+much more sophisticated graphics using the dedicated
 high-level <i>ReportLab Graphics Library</i>.
 """)
 
 disc("""
 It can be used to produce high-quality, platform-independant,
 reusable graphics for different output formats (vector and bitmap)
-like PDF, EPS and soon others like SVG.
+like PDF, EPS, SVG, JPG and PNG.
 """)
 
 disc("""
-A thorough description of its philsophy and features is beyond the
-scope of this general user guide and the reader is recommended to
-continue with the <i>"ReportLab Graphics Guide"</i>.
-There she will find information about the existing components and
+A more thorough description of its philsophy and features is
+now covered in Chapter 11 of this document, <i>Graphics</i>, which 
+contains information about the existing components and
 how to create customized ones.
 """)
 
 disc("""
-Also, the graphics guide contains a presentation of an emerging
+Chapter 11 also contains details of the ReportLab 
 charting package and its components (labels, axes, legends and
 different types of charts like bar, line and pie charts) that
 builds directly on the graphics library.
