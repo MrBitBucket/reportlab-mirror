@@ -221,6 +221,13 @@ leadins=[
     "Let us continue to suppose that",
     "Notice, incidentally, that",
     "A majority  of informed linguistic specialists agree that",
+    "There is also a different approach to the [unification] problem,",
+    "This approach divorces the cognitive sciences from a biological setting,",
+    "The approach relies on the \"Turing Test,\" devised by mathematician Alan Turing,",
+    "Adopting this approach,",
+    "There is no fact, no meaningful question to be answered,",
+    "Another superficial similarity is the interest in simulation of behavior,",
+    "A lot of sophistication has been developed about the utilization of machines for complex purposes,",
     ]
  
 subjects = [
