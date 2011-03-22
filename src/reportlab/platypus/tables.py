@@ -34,9 +34,9 @@ class CellStyle(PropertySet):
         'topPadding':3,
         'bottomPadding':3,
         'firstLineIndent':0,
-        'color':'black',
+        'color':colors.black,
         'alignment': 'LEFT',
-        'background': 'white',
+        'background': colors.white,
         'valign': 'BOTTOM',
         'href': None,
         'destination':None,
@@ -55,9 +55,9 @@ class CellStyle1(PropertySet):
     topPadding = 3
     bottomPadding = 3
     firstLineIndent = 0
-    color = 'black'
+    color = colors.black
     alignment = 'LEFT'
-    background = 'white'
+    background = colors.white
     valign = "BOTTOM"
     href = None
     destination = None

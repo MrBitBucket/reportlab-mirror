@@ -138,7 +138,7 @@ class ListStyle(PropertySet):
                 rightIndent=0,
                 bulletAlign='left',
                 bulletType='1',
-                bulletColor='black',
+                bulletColor=black,
                 bulletFontName='Helvetica',
                 bulletFontSize=12,
                 bulletOffsetY=0,

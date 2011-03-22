@@ -113,15 +113,16 @@ for (k, v) in _eanNumberSystems:
     else:
         manufacturerCodes[int(k)] = v
 
-class isEan13String(Validator):
-    def test(self,x):
-        return type(x) is str and len(x)<=12 and len([c for c in x if c in "0123456789"])==12
-isEan13String = isEan13String()
+def nDigits(n):
+    class _ndigits(Validator):
+        def test(self,x):
+            return type(x) is str and len(x)<=n and len([c for c in x if c in "0123456789"])==n
+    return _ndigits()
 
 class Ean13BarcodeWidget(PlotArea):
     codeName = "EAN13"
     _attrMap = AttrMap(BASE=PlotArea,
-        value = AttrMapValue(isEan13String, desc='the number'),
+        value = AttrMapValue(nDigits(12), desc='the number'),
         fontName = AttrMapValue(isString, desc='fontName'),
         fontSize = AttrMapValue(isNumber, desc='font size'),
         x = AttrMapValue(isNumber, desc='x-coord'),
@@ -295,15 +296,10 @@ class Ean13BarcodeWidget(PlotArea):
         return chr(z+((10-(iSum%10))%10))
     _checkdigit=classmethod(_checkdigit)
 
-class isEan8String(Validator):
-    def test(self,x):
-        return type(x) is str and len(x)<=7 and len([c for c in x if c in "0123456789"])==7
-isEan8String = isEan8String()
-
 class Ean8BarcodeWidget(Ean13BarcodeWidget):
     codeName = "EAN8"
     _attrMap = AttrMap(BASE=Ean13BarcodeWidget,
-        value = AttrMapValue(isEan8String, desc='the number'),
+        value = AttrMapValue(nDigits(7), desc='the number'),
         )
     _start_right = 4    #for ean-13 left = [0:7] right=[7:13]
     _nbars = 85
@@ -339,3 +335,14 @@ class Ean8BarcodeWidget(Ean13BarcodeWidget):
         x = (59.5-9+self._lquiet)*barWidth
         c = s[4:]
         gAdd(String(x,y,c,fontName=fontName,fontSize=fontSize,fillColor=textColor,textAnchor='middle'))
+
+class UPCA(Ean13BarcodeWidget):
+    codeName = "UPCA"
+    _attrMap = AttrMap(BASE=Ean13BarcodeWidget,
+        value = AttrMapValue(nDigits(11), desc='the number'),
+        )
+    _start_right = 6
+    _digits = 11
+    _0csw = 3
+    _1csw = 1
+    _nbars = 1+7*11+2*3+5

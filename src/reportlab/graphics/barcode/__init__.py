@@ -42,7 +42,7 @@ def getCodes():
                         BarcodePOSTNET, BarcodeUSPS_4State
 
     #newer codes will typically get their own module
-    from eanbc import Ean13BarcodeWidget, Ean8BarcodeWidget
+    from eanbc import Ean13BarcodeWidget, Ean8BarcodeWidget, UPCA
     from qr import QrCodeWidget
 
 
@@ -64,6 +64,7 @@ def getCodes():
                 BarcodeUSPS_4State,
                 Ean13BarcodeWidget,
                 Ean8BarcodeWidget,
+                UPCA,
                 QrCodeWidget,
                 ):
         codeName = widget.codeName

@@ -253,9 +253,9 @@ class SVGCanvas:
     def setDash(self, array=[], phase=0):
         """Two notations. Pass two numbers, or an array and phase."""
 
-        if type(array) in (types.IntType, types.FloatType):
+        if isinstance(array,(float,int)):
             self.style['stroke-dasharray'] = ', '.join(map(str, ([array, phase])))
-        elif type(array) in (types.ListType, types.TupleType) and len(array) > 0:
+        elif isinstance(array,(tuple,list)) and len(array) > 0:
             assert phase >= 0, "phase is a length in user space"
             self.style['stroke-dasharray'] = ', '.join(map(str, (array+[phase])))
 
@@ -754,7 +754,12 @@ class _SVGRenderer(Renderer):
                 self._canvas.setLineJoin(value)
             elif key == 'strokeDashArray':
                 if value:
-                    self._canvas.setDash(value)
+                    if isinstance(value,(list,tuple)) and len(value)==2 and isinstance(value[1],(tuple,list)):
+                        phase = value[0]
+                        value = value[1]
+                    else:
+                        phase = 0
+                    self._canvas.setDash(value,phase)
                 else:
                     self._canvas.setDash()
             elif key == 'fillColor':

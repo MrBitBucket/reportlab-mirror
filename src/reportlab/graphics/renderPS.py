@@ -186,9 +186,9 @@ class PSCanvas:
         """Two notations.  pass two numbers, or an array and phase"""
         # copied and modified from reportlab.canvas
         psoperation = "setdash"
-        if type(array) == types.IntType or type(array) == types.FloatType:
+        if isinstance(array,(float,int)):
             self.code_append('[%s %s] 0 %s' % (array, phase, psoperation))
-        elif type(array) == types.ListType or type(array) == types.TupleType:
+        elif isinstance(array,(tuple,list)):
             assert phase >= 0, "phase is a length in user space"
             textarray = string.join(map(str, array))
             self.code_append('[%s] %s %s' % (textarray, phase, psoperation))
@@ -833,7 +833,12 @@ class _PSRenderer(Renderer):
                 self._canvas.setLineJoin(value)
             elif key == 'strokeDashArray':
                 if value:
-                    self._canvas.setDash(value)
+                    if isinstance(value,(list,tuple)) and len(value)==2 and isinstance(value[1],(tuple,list)):
+                        phase = value[0]
+                        value = value[1]
+                    else:
+                        phase = 0
+                    self._canvas.setDash(value,phase)
                 else:
                     self._canvas.setDash()
 ##          elif key == 'stroke_opacity':
