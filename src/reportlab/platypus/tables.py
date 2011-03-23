@@ -24,29 +24,10 @@ from reportlab.lib import colors
 from reportlab.lib.utils import fp_str
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
-class CellStyle(PropertySet):
-    defaults = {
-        'fontname':_baseFontName,
-        'fontsize':10,
-        'leading':12,
-        'leftPadding':6,
-        'rightPadding':6,
-        'topPadding':3,
-        'bottomPadding':3,
-        'firstLineIndent':0,
-        'color':colors.black,
-        'alignment': 'LEFT',
-        'background': colors.white,
-        'valign': 'BOTTOM',
-        'href': None,
-        'destination':None,
-        }
-
 LINECAPS={None: None, 'butt':0,'round':1,'projecting':2,'squared':2}
 LINEJOINS={None: None, 'miter':0, 'mitre':0, 'round':1,'bevel':2}
 
-# experimental replacement
-class CellStyle1(PropertySet):
+class CellStyle(PropertySet):
     fontname = _baseFontName
     fontsize = 10
     leading = 12
@@ -55,9 +36,9 @@ class CellStyle1(PropertySet):
     topPadding = 3
     bottomPadding = 3
     firstLineIndent = 0
-    color = colors.black
+    color = 'black'
     alignment = 'LEFT'
-    background = colors.white
+    background = 'white'
     valign = "BOTTOM"
     href = None
     destination = None
@@ -67,11 +48,10 @@ class CellStyle1(PropertySet):
             parent.copy(self)
     def copy(self, result=None):
         if result is None:
-            result = CellStyle1()
+            result = CellStyle()
         for name in dir(self):
             setattr(result, name, getattr(self, name))
         return result
-CellStyle = CellStyle1
 
 class TableStyle:
     def __init__(self, cmds=None, parent=None, **kw):
