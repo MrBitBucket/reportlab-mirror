@@ -47,7 +47,7 @@ class PropertySet:
         assert 'name' not in self.defaults, "Class Defaults may not contain a 'name' attribute"
         assert 'parent' not in self.defaults, "Class Defaults may not contain a 'parent' attribute"
         if parent:
-            assert parent.__class__ == self.__class__, "Parent style must have same class as new style"
+            assert parent.__class__ == self.__class__, "Parent style %s must have same class as new style %s" % (parent.__class__.__name__,self.__class__.__name__)
 
         #step two
         self.name = name
