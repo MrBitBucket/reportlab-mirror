@@ -537,7 +537,7 @@ class Table(Flowable):
         for h in H[:hmax]:
             height -= h
             self._rowpositions.append(height)
-        assert abs(height)<1e-8, 'Internal height error'
+        assert abs(height)<1e-8, '!!!!!%s\ninternal height error height=%r hmax=%d Sum(H[:%d])=%r\nH=%r\nrowPositions=%r' % (self.identity(),height,hmax,hmax,self._height,H[:hmax],self._rowpositions)
         self._hmax = hmax
 
     def _calc(self, availWidth, availHeight):
