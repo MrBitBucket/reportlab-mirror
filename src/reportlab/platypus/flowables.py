@@ -1412,6 +1412,7 @@ class _LIParams:
         self.first= first
 
 class ListFlowable(Flowable):
+    __split_only__ = 1
     def __init__(self,
                     flowables,  #the initial flowables
                     start=1,

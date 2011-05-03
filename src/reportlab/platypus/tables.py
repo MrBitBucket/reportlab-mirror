@@ -345,6 +345,15 @@ class Table(Flowable):
 
         return "<%s@0x%8.8X %s rows x %s cols>%s" % (self.__class__.__name__, id(self), nr, nc, vx)
 
+    def _cellListIter(self,C,aW,aH):
+        canv = getattr(self,'canv',None)
+        for c in C:
+            if getattr(c,'__split_only__',None):
+                for d in c.splitOn(canv,aW,aH):
+                    yield d
+            else:
+                yield c
+
     def _listCellGeom(self, V,w,s,W=None,H=None,aH=72000):
         if not V: return 0,0
         aW = w - s.leftPadding - s.rightPadding
@@ -496,6 +505,7 @@ class Table(Flowable):
                     else:
                         if isinstance(v,(tuple,list,Flowable)):
                             if isinstance(v,Flowable): v = (v,)
+                            v = V[j] = list(self._cellListIter(v,None,None))
                             if w is None and not self._canGetWidth(v):
                                 raise ValueError("Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30)))
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
