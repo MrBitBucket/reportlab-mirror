@@ -1387,7 +1387,7 @@ class ListItem:
 
         if style:
             if not isinstance(style,ListStyle):
-                raise ValueError('%s style argument not a ListStyle' % self.__class__.__name__)
+                raise ValueError('%s style argument (%r) not a ListStyle' % (self.__class__.__name__,style))
             self._style = style
 
         for k in ListStyle.defaults:
