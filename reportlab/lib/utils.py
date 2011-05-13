@@ -902,16 +902,16 @@ class DebugMemo:
 
     def _show_extensions(self):
         for mn in ('_rl_accel','_renderPM','sgmlop','pyRXP','pyRXPU','_imaging','Image'):
-            try:
-                A = [mn].append
-                m = recursiveImport(mn,sys.path[:],1)
-                A(m.__file__)
-                for vn in ('__version__','VERSION','_version','version'):
-                    if hasattr(m,vn):
-                        A('%s=%r' % (vn,getattr(m,vn)))
-            except:
-                A('not found')
-            self._writeln(' '+' '.join(A.__self__))
+                try:
+                    A = [mn].append
+                    exec 'import %s as m' % mn
+                    A(m.__file__)
+                    for vn in ('__version__','VERSION','_version','version'):
+                        if hasattr(m,vn):
+                            A('%s=%r' % (vn,getattr(m,vn)))
+                except:
+                    A('%s not found' % mn)
+                self._writeln(' '+' '.join(A.__self__))
 
     specials = {'__module_versions': _show_module_versions,
                 '__payload': _show_payload,
