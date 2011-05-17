@@ -213,7 +213,10 @@ class LinePlot(AbstractLineChart):
             else:
                 labelText = labelFmt % labelValue
         elif hasattr(labelFmt,'__call__'):
-            labelText = labelFmt(labelValue)
+            if not hasattr(labelFmt,'__labelFmtEX__'):
+                labelText = labelFmt(labelValue)
+            else:
+                labelText = labelFmt(self,rowNo,colNo,x,y)
         else:
             raise ValueError("Unknown formatter type %s, expected string or function"%labelFmt)
 
@@ -298,10 +301,18 @@ class LinePlot(AbstractLineChart):
                 uSymbol = None
 
             if uSymbol:
-                j = -1
                 if bubblePlot: drow = self.data[rowNo]
-                for xy in row:
-                    j += 1
+                for j,xy in enumerate(row):
+                    symbol = uSymbol2Symbol(uSymbol,xy[0],xy[1],rowColor)
+                    if symbol:
+                        if bubblePlot:
+                            symbol.size = bubbleR*(drow[j][2]/bubbleMax)**0.5
+                        g.add(symbol)
+            else:
+                if bubblePlot: drow = self.data[rowNo]
+                for j,xy in enumerate(row):
+                    usymbol = getattr(self.lines[rowNo,j],'symbol',None)
+                    if not usymbol: continue
                     symbol = uSymbol2Symbol(uSymbol,xy[0],xy[1],rowColor)
                     if symbol:
                         if bubblePlot:
