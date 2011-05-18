@@ -901,7 +901,7 @@ class DebugMemo:
             self._finish(k)
 
     def _show_extensions(self):
-        for mn in ('_rl_accel','_renderPM','sgmlop','pyRXP','pyRXPU','_imaging','Image'):
+        for mn in ('_rl_accel','_renderPM','sgmlop','pyRXP','pyRXPU'):
                 try:
                     A = [mn].append
                     exec 'import %s as m' % mn
