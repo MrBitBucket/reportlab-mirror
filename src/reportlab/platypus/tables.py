@@ -505,7 +505,7 @@ class Table(Flowable):
                     else:
                         if isinstance(v,(tuple,list,Flowable)):
                             if isinstance(v,Flowable): v = (v,)
-                            v = V[j] = list(self._cellListIter(v,None,None))
+                            v = V[j] = list(self._cellListIter(v,w,None))
                             if w is None and not self._canGetWidth(v):
                                 raise ValueError("Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30)))
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
