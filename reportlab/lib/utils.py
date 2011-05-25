@@ -1004,6 +1004,54 @@ def simpleSplit(text,fontName,fontSize,maxWidth):
         lines = L
     return lines
 
+class StringChunker:
+    '''simple class to allow usage of bisect algo to determine the place to split a string'''
+    from bisect import bisect_left
+    def __init__(self,s,fontName,fontSize):
+        from reportlab.pdfbase.pdfmetrics import stringWidth
+        self._s = s
+        self._sw = lambda x:stringWidth(x,fontName,fontSize)
+
+    #these two methods allow instances to be passed to bisect_left
+    def __getitem__(self,i):
+        return self._sw(self._s[:i])
+
+    def __len__(self):
+        return len(self._s)
+
+    def splitAt(self,w):
+        '''find the index i to make _sw(_s[:i]) <= w <= _sw(_s[:i+1])'''
+        return self.bisect_left(self,w)
+
+    def chunkize(self,maxWidth):
+        sw = self._sw
+        R = [].append
+        olds = self._s
+        try:
+            while sw(self._s)>=maxWidth:
+                i = max(1,self.splitAt(maxWidth)-1)
+                R(self._s[:i])
+                self._s = self._s[i:]
+            if self._s: R(self._s)
+        finally:
+            self._s = olds
+        return R.__self__
+
+    def splitLongWords(self,maxWidth,jChars=' '):
+        sw = self._sw
+        R = [].append
+        olds = self._s
+        try:
+            for w in self._s.split():
+                if sw(w)>maxWidth:
+                    self._s = w
+                    R(jChars.join(self.chunkize(maxWidth)))
+                else:
+                    R(w)
+        finally:
+            self._s = olds
+        return ' '.join(R.__self__)
+
 def escapeTextOnce(text):
     "Escapes once only"
     from xml.sax.saxutils import escape
