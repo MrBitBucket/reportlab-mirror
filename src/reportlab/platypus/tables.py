@@ -21,7 +21,7 @@ from reportlab.platypus.flowables import Flowable, Preformatted
 from reportlab import rl_config
 from reportlab.lib.styles import PropertySet, ParagraphStyle, _baseFontName
 from reportlab.lib import colors
-from reportlab.lib.utils import fp_str
+from reportlab.lib.utils import fp_str, annotateException, IdentStr
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
 LINECAPS={None: None, 'butt':0,'round':1,'projecting':2,'squared':2}
@@ -429,7 +429,10 @@ class Table(Flowable):
                 W[j] = w
 
             if spanCons:
-                spanFixDim(W0,W,spanCons)
+                try:
+                    spanFixDim(W0,W,spanCons)
+                except:
+                    annotateException('\nspanning problem in %s\nW0=%r W=%r\nspanCons=%r' % (self.identity(),W0,W,spanCons))
 
         self._colWidths = W
         width = 0
@@ -536,11 +539,18 @@ class Table(Flowable):
                     hmax = i
                     height = sum(H[:i])
                     if height > availHeight:
-                        break
+                        #we can terminate if all spans are complete in H[:i]
+                        if spanCons:
+                            msr = max([x[1] for x in spanCons.keys()])  #RS=[endrowspan,.....]
+                            if hmax>=msr:
+                                break
             if None not in H: hmax = lim
 
             if spanCons:
-                spanFixDim(H0,H,spanCons,lim=hmax)
+                try:
+                    spanFixDim(H0,H,spanCons,lim=hmax)
+                except:
+                    annotateException('\nspanning problem in %s hmax=%s lim=%s avail=%s x %s\nH0=%r H=%r\nspanCons=%r' % (self.identity(),hmax,lim,availWidth,availHeight,H0,H,spanCons))
 
         height = self._height = sum(H[:hmax])
         self._rowpositions = [height]    # index 0 is actually topline; we skip when processing cells
@@ -1157,10 +1167,12 @@ class Table(Flowable):
         data = self._cellvalues
 
         #we're going to split into two superRows
-        #R0 = slelf.__class__( data[:n], self._argW, self._argH[:n],
+        ident = self.ident
+        if ident: ident = IdentStr(ident)
         R0 = self.__class__( data[:n], colWidths=self._colWidths, rowHeights=self._argH[:n],
                 repeatRows=repeatRows, repeatCols=repeatCols,
-                splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[:n])
+                splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[:n],
+                ident=ident)
 
         #copy the commands
 
@@ -1214,13 +1226,16 @@ class Table(Flowable):
         R0._cr_0(n,self._spanCmds)
         R0._cr_0(n,self._nosplitCmds)
 
+        if ident: ident = IdentStr(ident)
         if repeatRows:
             #R1 = slelf.__class__(data[:repeatRows]+data[n:],self._argW,
             R1 = self.__class__(data[:repeatRows]+data[n:],colWidths=self._colWidths,
                     rowHeights=self._argH[:repeatRows]+self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow, normalizedData=1,
-                    cellStyles=self._cellStyles[:repeatRows]+self._cellStyles[n:])
+                    cellStyles=self._cellStyles[:repeatRows]+self._cellStyles[n:],
+                    ident=ident,
+                    )
             R1._cr_1_1(n,repeatRows,A)
             R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
             R1._cr_1_1(n,repeatRows,self._spanCmds)
@@ -1229,7 +1244,9 @@ class Table(Flowable):
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
             R1 = self.__class__(data[n:], colWidths=self._colWidths, rowHeights=self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
-                    splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[n:])
+                    splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[n:],
+                    ident=ident,
+                    )
             R1._cr_1_0(n,A)
             R1._cr_1_0(n,self._bkgrndcmds)
             R1._cr_1_0(n,self._spanCmds)
