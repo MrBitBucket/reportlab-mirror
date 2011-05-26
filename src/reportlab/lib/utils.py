@@ -1167,4 +1167,17 @@ def escapeOnce(data):
     data = data.replace("&amp;gt;", "&gt;")
     data = data.replace("&amp;lt;", "&lt;")
     return data
-    
+
+class IdentStr(str):
+    '''useful for identifying things that get split'''
+    def __new__(cls,value):
+        if isinstance(value,IdentStr):
+            inc = value.__inc
+            value = value[:-(2+len(str(inc)))]
+            inc += 1
+        else:
+            inc = 0
+        value += '[%d]' % inc
+        self = str.__new__(cls,value)
+        self.__inc = inc
+        return self
