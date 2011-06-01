@@ -549,6 +549,8 @@ class BaseDocTemplate:
             hang a page begin
         '''
         self._removeVars(('page','frame'))
+        self._leftExtraIndent = self.frame._leftExtraIndent
+        self._rightExtraIndent = self.frame._rightExtraIndent
         #detect infinite loops...
         if self._curPageFlowableCount == 0:
             self._emptyPages += 1
