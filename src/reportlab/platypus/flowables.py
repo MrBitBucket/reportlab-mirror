@@ -1025,9 +1025,9 @@ class ImageAndFlowables(_Container,Flowable):
         return c
 
     def getSpaceAfter(self):
-        if hasattr(self,'_C1'):
+        if getattr(self,'_C1',None):
             C = self._C1
-        elif hasattr(self,'_C0'):
+        elif getattr(self,'_C0',None):
             C = self._C0
         else:
             C = self._content
@@ -1064,7 +1064,7 @@ class ImageAndFlowables(_Container,Flowable):
         aH = itpad + hI + ibpad
         W,H0,self._C0,self._C1 = self._findSplit(canv,self._iW,aH)
         if W>self._iW+_FUZZ:
-            self._C0 = None
+            self._C0 = []
             self._C1 = self._content
         aH = self._aH = max(aH,H0)
         self.width = availWidth
@@ -1085,19 +1085,23 @@ class ImageAndFlowables(_Container,Flowable):
         if self._aH>availHeight: return []
         C1 = self._C1
         if C1:
-            c0 = C1[0]
-            S = c0.split(availWidth,availHeight-self._aH)
+            S = C1[0].split(availWidth,availHeight-self._aH)
             if not S:
-                self._C1 = []
-                self.height = self._aH
+                _C1 = []
             else:
-                self._C1 = [S[0]]
-                self.height = self._aH + S[0].height
+                _C1 = [S[0]]
                 C1 = S[1:]+C1[1:]
         else:
-            self._C1 = []
-            self.height = self._aH
-        return [self]+C1
+            _C1 = []
+        return [ImageAndFlowables(
+                    self._I,
+                    self._C0+_C1,
+                    imageLeftPadding=self._ilpad,
+                    imageRightPadding=self._irpad,
+                    imageTopPadding=self._itpad,
+                    imageBottomPadding=self._ibpad,
+                    imageSide=self._side, imageHref=self.imageHref)
+                    ]+C1
 
     def drawOn(self, canv, x, y, _sW=0):
         if self._side=='left':
