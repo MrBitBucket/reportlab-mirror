@@ -22,7 +22,10 @@ from reportlab import rl_config
 from reportlab.lib.styles import PropertySet, ParagraphStyle, _baseFontName
 from reportlab.lib import colors
 from reportlab.lib.utils import fp_str, annotateException, IdentStr
+from reportlab.lib.abag import ABag as CellFrame
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.platypus.doctemplate import Indenter
+from reportlab.platypus.flowables import LIIndenter
 
 LINECAPS={None: None, 'butt':0,'round':1,'projecting':2,'squared':2}
 LINEJOINS={None: None, 'miter':0, 'mitre':0, 'round':1,'bevel':2}
@@ -193,6 +196,9 @@ def spanFixDim(V0,V,spanCons,lim=None,FUZZ=rl_config._FUZZ):
     for x,v in M.iteritems():
         V[x] += v
 
+class _ExpandedCellTuple(tuple):
+    pass
+
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None,
@@ -354,6 +360,25 @@ class Table(Flowable):
             else:
                 yield c
 
+    def _cellListProcess(self,C,aW,aH):
+        if not isinstance(C,_ExpandedCellTuple):
+            frame = None
+            R = [].append
+            for c in self._cellListIter(C,aW,aH):
+                if isinstance(c,Indenter):
+                    if not frame:
+                        frame = CellFrame(_leftExtraIndent=0,_rightExtraIndent=0)
+                    c.frameAction(frame)
+                    if frame._leftExtraIndent<1e-8 and frame._rightExtraIndent<1e-8:
+                        frame = None
+                    continue
+                if frame:
+                    R(LIIndenter(c,leftIndent=frame._leftExtraIndent,rightIndent=frame._rightExtraIndent))
+                else:
+                    R(c)
+            C = _ExpandedCellTuple(R.__self__)
+        return C
+
     def _listCellGeom(self, V,w,s,W=None,H=None,aH=72000):
         if not V: return 0,0
         aW = w - s.leftPadding - s.rightPadding
@@ -508,7 +533,7 @@ class Table(Flowable):
                     else:
                         if isinstance(v,(tuple,list,Flowable)):
                             if isinstance(v,Flowable): v = (v,)
-                            v = V[j] = list(self._cellListIter(v,w,None))
+                            v = V[j] = self._cellListProcess(v,w,None)
                             if w is None and not self._canGetWidth(v):
                                 raise ValueError("Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30)))
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
