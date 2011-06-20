@@ -1415,8 +1415,7 @@ class _LIParams:
         self.value = value
         self.first= first
 
-class ListFlowable(Flowable):
-    __split_only__ = 1
+class ListFlowable(_Container,Flowable):
     def __init__(self,
                     flowables,  #the initial flowables
                     start=1,
@@ -1451,8 +1450,18 @@ class ListFlowable(Flowable):
             if v is not None:
                 setattr(self,k,v)
 
+        self._content = self._getContent()
+        del self._flowables
+        self._dims = None
+
     def wrap(self,aW,aH):
-        return aW,0x7fffffff    #force a split
+        if self._dims!=aW:
+            self.width, self.height = _listWrapOn(self._content,aW,self.canv)
+            self._dims = aW
+        return self.width,self.height
+
+    def split(self,aW,aH):
+        return self._content
 
     def _flowablesIter(self):
         for f in self._flowables:
@@ -1519,7 +1528,7 @@ class ListFlowable(Flowable):
                     bulletFormat=getp('bulletFormat'),
                     )
 
-    def split(self,aW,aH):
+    def _getContent(self):
         value = self._start
         bt = self._bulletType
         inc = int(bt in '1aAiI')
