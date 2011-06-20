@@ -57,6 +57,7 @@ class LayoutError(Exception):
     pass
 
 def _fSizeString(f):
+    #used to get size during error messages
     w=getattr(f,'width',None)
     if w is None:
         w=getattr(f,'_width',None)
@@ -64,10 +65,15 @@ def _fSizeString(f):
     h=getattr(f,'height',None)
     if h is None:
         h=getattr(f,'_height',None)
+    #tables in particular may have some nasty large culprit
+    if hasattr(f, '_culprit'):
+        c = ', %s, ' % f._culprit()
+    else:
+        c = ''
     if w is not None or h is not None:
         if w is None: w='???'
         if h is None: h='???'
-        return '(%s x %s)' % (w,h)
+        return '(%s x %s)%s' % (w,h,c)
     return ''
 
 def _doNothing(canvas, doc):

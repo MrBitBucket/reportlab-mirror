@@ -323,6 +323,7 @@ class Table(Flowable):
         nr = getattr(self,'_nrows','unknown')
         nc = getattr(self,'_ncols','unknown')
         cv = getattr(self,'_cellvalues',None)
+        rh = getattr(self, '_rowHeights', None)
         if cv and 'unknown' not in (nr,nc):
             b = 0
             for i in xrange(nr):
@@ -344,12 +345,16 @@ class Table(Flowable):
                         if maxLen: vx = vx[:maxLen]
                     if b: break
                 if b: break
+        if rh:  #find tallest row, it's of great interest'
+            tallest = '(tallest row %d)' % int(max(rh))
+        else:
+            tallest = ''
         if vx:
             vx = ' with cell(%d,%d) containing\n%s' % (ix,jx,repr(vx))
         else:
             vx = '...'
 
-        return "<%s@0x%8.8X %s rows x %s cols>%s" % (self.__class__.__name__, id(self), nr, nc, vx)
+        return "<%s@0x%8.8X %s rows x %s cols%s>%s" % (self.__class__.__name__, id(self), nr, nc, tallest, vx)
 
     def _cellListIter(self,C,aW,aH):
         canv = getattr(self,'canv',None)
@@ -617,6 +622,23 @@ class Table(Flowable):
         if self._spanCmds:
             #now work out the actual rect for each spanned cell from the underlying grid
             self._calcSpanRects()
+
+    def _culprit(self):
+        """Return a string describing the tallest element.
+        
+        Usually this is what causes tables to fail to split.  Currently
+        tables are the only items to have a '_culprit' method. Doctemplate
+        checks for it.
+        """
+        rh = self._rowHeights
+        tallest = max(rh)
+        rowNum = rh.index(tallest)
+        #rowNum of limited interest as usually it's a split one
+        #and we see row #1.  Text might be a nice addition.
+        
+        return 'tallest cell %0.1f points' % tallest
+        
+        
 
     def _hasVariWidthElements(self, upToRow=None):
         """Check for flowables in table cells and warn up front.
@@ -1136,7 +1158,6 @@ class Table(Flowable):
 
     def wrap(self, availWidth, availHeight):
         self._calc(availWidth, availHeight)
-        #nice and easy, since they are predetermined size
         self.availWidth = availWidth
         return (self._width, self._height)
 
