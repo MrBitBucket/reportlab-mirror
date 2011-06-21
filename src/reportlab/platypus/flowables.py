@@ -1309,8 +1309,56 @@ def _computeBulletWidth(b,value):
     value = _bulletFormat(value,b._bulletType,b._bulletFormat)
     return stringWidth(value,b._bulletFontName,b._bulletFontSize)
 
-class LIIndenter(Flowable):
-    _LIIndenterAttrs = '_flowable _bullet _leftIndent _rightIndent width height spaceBefore spaceAfter'.split()
+class DDIndenter(Flowable):
+    _IndenterAttrs = '_flowable _leftIndent _rightIndent width height'.split()
+    def __init__(self,flowable,leftIndent=0,rightIndent=0):
+        self._flowable = flowable
+        self._leftIndent = leftIndent
+        self._rightIndent = rightIndent
+        self.width = None
+        self.height = None
+
+    def split(self, aW, aH):
+        S = self._flowable.split(aW-self._leftIndent-self._rightIndent, aH)
+        return [
+                DDIndenter(s,
+                        leftIndent=self._leftIndent,
+                        rightIndent=self._rightIndent,
+                        ) for s in S
+                ]
+
+    def drawOn(self, canv, x, y, _sW=0):
+        self._flowable.drawOn(canv,x+self._leftIndent,y,max(0,_sW-self._leftIndent-self._rightIndent))
+
+    def wrap(self, aW, aH):
+        w,h = self._flowable.wrap(aW-self._leftIndent-self._rightIndent, aH)
+        self.width = w+self._leftIndent+self._rightIndent
+        self.height = h
+        return self.width,h
+
+    def __getattr__(self,a):
+        if a in self._IndenterAttrs:
+            try:
+                return self.__dict__[a]
+            except KeyError:
+                if a not in ('spaceBefore','spaceAfter'):
+                    raise
+        return getattr(self._flowable,a)
+
+    def __setattr__(self,a,v):
+        if a in self._IndenterAttrs:
+            self.__dict__[a] = v
+        else:
+            setattr(self._flowable,a,v)
+
+    def __delattr__(self,a):
+        if a in self._IndenterAttrs:
+            del self.__dict__[a]
+        else:
+            delattr(self._flowable,a)
+
+class LIIndenter(DDIndenter):
+    _IndenterAttrs = '_flowable _bullet _leftIndent _rightIndent width height spaceBefore spaceAfter'.split()
     def __init__(self,flowable,leftIndent=0,rightIndent=0,bullet=None, spaceBefore=None, spaceAfter=None):
         self._flowable = flowable
         self._bullet = bullet
@@ -1322,12 +1370,6 @@ class LIIndenter(Flowable):
             self.spaceBefore = spaceBefore
         if spaceAfter is not None:
             self.spaceAfter = spaceAfter
-
-    def wrap(self, aW, aH):
-        w,h = self._flowable.wrap(aW-self._leftIndent-self._rightIndent, aH)
-        self.width = w+self._leftIndent+self._rightIndent
-        self.height = h
-        return self.width,h
 
     def split(self, aW, aH):
         S = self._flowable.split(aW-self._leftIndent-self._rightIndent, aH)
@@ -1344,26 +1386,6 @@ class LIIndenter(Flowable):
             self._bullet.drawOn(self,canv,x,y,0)
         self._flowable.drawOn(canv,x+self._leftIndent,y,max(0,_sW-self._leftIndent-self._rightIndent))
 
-    def __getattr__(self,a):
-        if a in self._LIIndenterAttrs:
-            try:
-                return self.__dict__[a]
-            except KeyError:
-                if a not in ('spaceBefore','spaceAfter'):
-                    raise
-        return getattr(self._flowable,a)
-
-    def __setattr__(self,a,v):
-        if a in self._LIIndenterAttrs:
-            self.__dict__[a] = v
-        else:
-            setattr(self._flowable,a,v)
-
-    def __delattr__(self,a):
-        if a in self._LIIndenterAttrs:
-            del self.__dict__[a]
-        else:
-            delattr(self._flowable,a)
 
 from reportlab.lib.styles import ListStyle
 class ListItem:
