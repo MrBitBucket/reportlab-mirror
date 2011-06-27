@@ -33,6 +33,7 @@ def _getFragLines(frags):
     return lines
 
 def _split_blPara(blPara,start,stop):
+    print '_split_blPara', blPara.kind
     f = blPara.clone()
     for a in ('lines', 'text'):
         if hasattr(f,a): delattr(f,a)
@@ -199,6 +200,8 @@ class XPreformatted(Paragraph):
             return ParaLines(kind=1, lines=lines)
 
         return lines
+
+    breakLinesCJK = breakLines  #TODO fixme fixme fixme
 
     # we need this her to get the right splitter
     def _get_split_blParaFunc(self):
