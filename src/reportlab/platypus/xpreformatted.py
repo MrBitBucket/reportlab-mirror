@@ -33,7 +33,6 @@ def _getFragLines(frags):
     return lines
 
 def _split_blPara(blPara,start,stop):
-    print '_split_blPara', blPara.kind
     f = blPara.clone()
     for a in ('lines', 'text'):
         if hasattr(f,a): delattr(f,a)
