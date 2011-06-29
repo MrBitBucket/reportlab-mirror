@@ -1357,6 +1357,9 @@ class DDIndenter(Flowable):
         else:
             delattr(self._flowable,a)
 
+    def identity(self,maxLen=None):
+        return '%s containing %s' % (self.__class__.__name__,self._flowable.identity(maxLen))
+
 class LIIndenter(DDIndenter):
     _IndenterAttrs = '_flowable _bullet _leftIndent _rightIndent width height spaceBefore spaceAfter'.split()
     def __init__(self,flowable,leftIndent=0,rightIndent=0,bullet=None, spaceBefore=None, spaceAfter=None):
