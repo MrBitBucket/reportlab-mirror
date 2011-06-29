@@ -781,7 +781,7 @@ class BaseDocTemplate:
                 else:
                     n = 0
                 if n:
-                    if not isinstance(S[0],(PageBreak,SlowPageBreak,ActionFlowable,LIIndenter)):
+                    if not isinstance(S[0],(PageBreak,SlowPageBreak,ActionFlowable,DDIndenter)):
                         if not frame.add(S[0], canv, trySplit=0):
                             ident = "Splitting error(n==%d) on page %d in\n%s\nS[0]=%s" % (n,self.page,self._fIdent(f,60,frame),self._fIdent(S[0],60,frame))
                             #leave to keep apart from the raise

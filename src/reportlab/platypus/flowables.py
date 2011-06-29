@@ -37,7 +37,7 @@ from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActi
 __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
         'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
         'FailOnWrap','HRFlowable','PTOContainer','KeepInFrame','UseUpSpace',
-        'ListFlowable','ListItem','LIIndenter',
+        'ListFlowable','ListItem','DDIndenter','LIIndenter',
         'DocAssign', 'DocExec', 'DocAssert', 'DocPara', 'DocIf', 'DocWhile',
         )
 class TraceInfo:
