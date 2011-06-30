@@ -494,7 +494,13 @@ class Table(Flowable):
                 if isinstance(w,(float,int)): return w
             except AttributeError:
                 pass
-        v = (v is not None and str(v) or '').split("\n")
+        if v is None: 
+            return 0
+        else:
+            try:
+                v = str(v).split("\n")
+            except:
+                return 0
         fontName = s.fontname
         fontSize = s.fontsize
         return max([stringWidth(x,fontName,fontSize) for x in v])
@@ -707,13 +713,18 @@ class Table(Flowable):
             w = W[colNo]
             if w is None or w=='*' or _endswith(w,'%'):
                 siz = 1
-                current = final = None
+                final = 0
                 for rowNo in xrange(self._nrows):
                     value = self._cellvalues[rowNo][colNo]
                     style = self._cellStyles[rowNo][colNo]
-                    new = elementWidth(value,style)+style.leftPadding+style.rightPadding
-                    final = max(current, new)
-                    current = new
+                    pad = style.leftPadding+style.rightPadding
+                    new = elementWidth(value,style)
+                    if new:
+                        new += pad
+                    else:
+                        new = pad
+                    new += style.leftPadding+style.rightPadding
+                    final = max(final, new)
                     siz = siz and self._canGetWidth(value) # irrelevant now?
                 if siz:
                     sizeable.append(colNo)
