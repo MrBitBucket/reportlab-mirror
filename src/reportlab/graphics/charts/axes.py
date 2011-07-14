@@ -95,8 +95,10 @@ class AxisLineAnnotation:
         scaleValue = kwds.pop('scaleValue',True)
         if axis.isYAxis:
             offs = axis._x
+            d0 = axis._y
         else:
             offs = axis._y
+            d0 = axis._x
         s = kwds.pop('start',None)
         e = kwds.pop('end',None)
         if s is None or e is None:
@@ -109,12 +111,12 @@ class AxisLineAnnotation:
             else:
                 if s is None: s = 0
                 if e is None: e = 0
-        hi = kwds.pop('hi',axis._length)
-        lo = kwds.pop('lo',0)
+        hi = kwds.pop('hi',axis._length)+d0
+        lo = kwds.pop('lo',0)+d0
         lo,hi=min(lo,hi),max(lo,hi)
         drawAtLimit = kwds.pop('drawAtLimit',False)
+        oaglp = axis._get_line_pos
         if not scaleValue:
-            oaglp = axis._get_line_pos
             axis._get_line_pos = lambda x: x
         try:
             v = self._v
@@ -133,8 +135,7 @@ class AxisLineAnnotation:
             for k,v in kwds.iteritems():
                 setattr(L,k,v)
         finally:
-            if not scaleValue:
-                axis._get_line_pos = oaglp
+            axis._get_line_pos = oaglp
         return L
 
 class TickLU:
