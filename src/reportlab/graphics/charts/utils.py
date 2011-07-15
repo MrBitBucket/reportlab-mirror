@@ -5,6 +5,7 @@
 __version__=''' $Id$ '''
 __doc__="Utilities used here and there."
 from time import mktime, gmtime, strftime
+import math
 
 ### Dinu's stuff used in some line plots (likely to vansih).
 
@@ -311,3 +312,34 @@ class DrawTimeCollector(object):
             pprint.pprint(self._info,f)
         finally:
             f.close()
+
+def xyDist( (x0,y0),(x1,y1) ):
+    '''return distance between two points'''
+    return math.sqrt((x1-x0)**2+(y1-y0)**2)
+
+def lineSegmentIntersect(
+                (x00,y00),(x01,y01),
+                (x10,y10),(x11,y11)
+                ):
+    p = x00,y00
+    r = x01-x00,y01-y00
+
+    
+    q = x10,y10
+    s = x11-x10,y11-y10
+
+    rs = float(r[0]*s[1]-r[1]*s[0])
+    qp = q[0]-p[0],q[1]-p[1]
+
+    qpr = qp[0]*r[1]-qp[1]*r[0]
+    qps = qp[0]*s[1]-qp[1]*s[0]
+
+    if abs(rs)<1e-8:
+        if abs(qpr)<1e-8: return 'collinear'
+        return None
+
+    t = qps/rs
+    u = qpr/rs
+
+    if 0<=t<=1 and 0<=u<=1:
+        return p[0]+t*r[0], p[1]+t*r[1]
