@@ -424,7 +424,13 @@ def colorRange(c0, c1, n):
 
 def centroid(P):
     '''compute average point of a set of points'''
-    return reduce(lambda x,y, fn=float(len(P)): (x[0]+y[0]/fn,x[1]+y[1]/fn),P,(0,0))
+    cx = 0
+    cy = 0
+    for x,y in P:
+        cx+=x
+        cy+=y
+    n = float(len(P))
+    return cx/n, cy/n
 
 def rotatedEnclosingRect(P, angle, rect):
     '''
@@ -485,10 +491,17 @@ class ShadedPolygon(Widget,LineShape):
         path.isClipPath = 1
         g = Group()
         g.add(path)
-        rect = ShadedRect(strokeWidth=0,strokeColor=None)
+        angle = self.angle
+        orientation = 'vertical'
+        if angle==180:
+            angle = 0
+        elif angle in (90,270):
+            orientation ='horizontal'
+            angle = 0
+        rect = ShadedRect(strokeWidth=0,strokeColor=None,orientation=orientation)
         for k in 'fillColorStart', 'fillColorEnd', 'numShades', 'cylinderMode':
             setattr(rect,k,getattr(self,k))
-        g.add(rotatedEnclosingRect(P, self.angle, rect))
+        g.add(rotatedEnclosingRect(P, angle, rect))
         g.add(EmptyClipPath)
         path = path.copy()
         path.isClipPath = 0
