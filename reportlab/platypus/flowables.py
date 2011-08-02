@@ -551,10 +551,9 @@ class _ContainerSpace:  #Abstract some common container like behaviour
         return 0
 
 class KeepTogether(_ContainerSpace,Flowable):
-    def __init__(self,flowables,maxHeight=None,checkAtTop=True):
+    def __init__(self,flowables,maxHeight=None):
         self._content = _flowableSublist(flowables)
         self._maxHeight = maxHeight
-        self._checkAtTop = checkAtTop
 
     def __repr__(self):
         f = self._content
