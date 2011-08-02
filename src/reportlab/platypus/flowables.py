@@ -437,8 +437,11 @@ class Spacer(NullDraw):
        a gap between objects."""
     _fixedWidth = 1
     _fixedHeight = 1
-    def __init__(self, width, height):
+    def __init__(self, width, height, isGlue=False):
         self.width = width
+        if isGlue:
+            self.height = 1e-4
+            self.spacebefore = height
         self.height = height
 
     def __repr__(self):
@@ -570,15 +573,17 @@ class KeepTogether(_ContainerSpace,Flowable):
     def split(self, aW, aH):
         if getattr(self,'_wrapInfo',None)!=(aW,aH): self.wrap(aW,aH)
         S = self._content[:]
+        atTop = getattr(self,'_frame',None)
+        if atTop: atTop = getattr(atTop,'_atTop',None)
         C0 = self._H>aH and (not self._maxHeight or aH>self._maxHeight)
-        C1 = self._H0>aH
+        C1 = (self._H0>aH) or C0 and atTop
         if C0 or C1:
-            if C0:
-                from doctemplate import FrameBreak
-                A = FrameBreak
-            else:
+            if C1:
                 from doctemplate import NullActionFlowable
                 A = NullActionFlowable
+            else:
+                from doctemplate import FrameBreak
+                A = FrameBreak
             S.insert(0,A())
         return S
 
@@ -1025,9 +1030,9 @@ class ImageAndFlowables(_Container,Flowable):
         return c
 
     def getSpaceAfter(self):
-        if getattr(self,'_C1',None):
+        if hasattr(self,'_C1'):
             C = self._C1
-        elif getattr(self,'_C0',None):
+        elif hasattr(self,'_C0'):
             C = self._C0
         else:
             C = self._content
