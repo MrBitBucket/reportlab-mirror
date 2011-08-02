@@ -197,9 +197,15 @@ class Frame:
             s = flowable.getSpaceBefore()
             if self._oASpace:
                 s = max(s-self._prevASpace,0)
-        flowable.canv = canv    #some flowables might need this
-        r = flowable.split(self._aW, y-p-s)
-        del flowable.canv
+        flowable._frame = self                  #some flowables might need these
+        flowable.canv = canv        
+        try:
+            r = flowable.split(self._aW, y-p-s)
+        finally:
+            #sometimes canv/_frame aren't still on the flowable
+            for a in ('canv', '_frame'):
+                if hasattr(flowable,a):
+                    delattr(flowable,a)
         return r
 
     def drawBoundary(self,canv):
