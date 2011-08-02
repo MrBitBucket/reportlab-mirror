@@ -37,7 +37,7 @@ from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActi
 __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
         'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
         'FailOnWrap','HRFlowable','PTOContainer','KeepInFrame','UseUpSpace',
-        'ListFlowable','ListItem','LIIndenter',
+        'ListFlowable','ListItem','DDIndenter','LIIndenter',
         'DocAssign', 'DocExec', 'DocAssert', 'DocPara', 'DocIf', 'DocWhile',
         )
 class TraceInfo:
@@ -437,8 +437,11 @@ class Spacer(NullDraw):
        a gap between objects."""
     _fixedWidth = 1
     _fixedHeight = 1
-    def __init__(self, width, height):
+    def __init__(self, width, height, isGlue=False):
         self.width = width
+        if isGlue:
+            self.height = 1e-4
+            self.spacebefore = height
         self.height = height
 
     def __repr__(self):
@@ -548,9 +551,10 @@ class _ContainerSpace:  #Abstract some common container like behaviour
         return 0
 
 class KeepTogether(_ContainerSpace,Flowable):
-    def __init__(self,flowables,maxHeight=None):
+    def __init__(self,flowables,maxHeight=None,checkAtTop=True):
         self._content = _flowableSublist(flowables)
         self._maxHeight = maxHeight
+        self._checkAtTop = checkAtTop
 
     def __repr__(self):
         f = self._content
@@ -570,15 +574,17 @@ class KeepTogether(_ContainerSpace,Flowable):
     def split(self, aW, aH):
         if getattr(self,'_wrapInfo',None)!=(aW,aH): self.wrap(aW,aH)
         S = self._content[:]
+        atTop = getattr(self,'_frame',None)
+        if atTop: atTop = getattr(atTop,'_atTop',None)
         C0 = self._H>aH and (not self._maxHeight or aH>self._maxHeight)
-        C1 = self._H0>aH
+        C1 = (self._H0>aH) or C0 and atTop
         if C0 or C1:
-            if C0:
-                from doctemplate import FrameBreak
-                A = FrameBreak
-            else:
+            if C1:
                 from doctemplate import NullActionFlowable
                 A = NullActionFlowable
+            else:
+                from doctemplate import FrameBreak
+                A = FrameBreak
             S.insert(0,A())
         return S
 
@@ -1064,7 +1070,7 @@ class ImageAndFlowables(_Container,Flowable):
         aH = itpad + hI + ibpad
         W,H0,self._C0,self._C1 = self._findSplit(canv,self._iW,aH)
         if W>self._iW+_FUZZ:
-            self._C0 = None
+            self._C0 = []
             self._C1 = self._content
         aH = self._aH = max(aH,H0)
         self.width = availWidth
@@ -1085,19 +1091,23 @@ class ImageAndFlowables(_Container,Flowable):
         if self._aH>availHeight: return []
         C1 = self._C1
         if C1:
-            c0 = C1[0]
-            S = c0.split(availWidth,availHeight-self._aH)
+            S = C1[0].split(availWidth,availHeight-self._aH)
             if not S:
-                self._C1 = []
-                self.height = self._aH
+                _C1 = []
             else:
-                self._C1 = [S[0]]
-                self.height = self._aH + S[0].height
+                _C1 = [S[0]]
                 C1 = S[1:]+C1[1:]
         else:
-            self._C1 = []
-            self.height = self._aH
-        return [self]+C1
+            _C1 = []
+        return [ImageAndFlowables(
+                    self._I,
+                    self._C0+_C1,
+                    imageLeftPadding=self._ilpad,
+                    imageRightPadding=self._irpad,
+                    imageTopPadding=self._itpad,
+                    imageBottomPadding=self._ibpad,
+                    imageSide=self._side, imageHref=self.imageHref)
+                    ]+C1
 
     def drawOn(self, canv, x, y, _sW=0):
         if self._side=='left':
@@ -1305,8 +1315,59 @@ def _computeBulletWidth(b,value):
     value = _bulletFormat(value,b._bulletType,b._bulletFormat)
     return stringWidth(value,b._bulletFontName,b._bulletFontSize)
 
-class LIIndenter(Flowable):
-    _LIIndenterAttrs = '_flowable _bullet _leftIndent _rightIndent width height spaceBefore spaceAfter'.split()
+class DDIndenter(Flowable):
+    _IndenterAttrs = '_flowable _leftIndent _rightIndent width height'.split()
+    def __init__(self,flowable,leftIndent=0,rightIndent=0):
+        self._flowable = flowable
+        self._leftIndent = leftIndent
+        self._rightIndent = rightIndent
+        self.width = None
+        self.height = None
+
+    def split(self, aW, aH):
+        S = self._flowable.split(aW-self._leftIndent-self._rightIndent, aH)
+        return [
+                DDIndenter(s,
+                        leftIndent=self._leftIndent,
+                        rightIndent=self._rightIndent,
+                        ) for s in S
+                ]
+
+    def drawOn(self, canv, x, y, _sW=0):
+        self._flowable.drawOn(canv,x+self._leftIndent,y,max(0,_sW-self._leftIndent-self._rightIndent))
+
+    def wrap(self, aW, aH):
+        w,h = self._flowable.wrap(aW-self._leftIndent-self._rightIndent, aH)
+        self.width = w+self._leftIndent+self._rightIndent
+        self.height = h
+        return self.width,h
+
+    def __getattr__(self,a):
+        if a in self._IndenterAttrs:
+            try:
+                return self.__dict__[a]
+            except KeyError:
+                if a not in ('spaceBefore','spaceAfter'):
+                    raise
+        return getattr(self._flowable,a)
+
+    def __setattr__(self,a,v):
+        if a in self._IndenterAttrs:
+            self.__dict__[a] = v
+        else:
+            setattr(self._flowable,a,v)
+
+    def __delattr__(self,a):
+        if a in self._IndenterAttrs:
+            del self.__dict__[a]
+        else:
+            delattr(self._flowable,a)
+
+    def identity(self,maxLen=None):
+        return '%s containing %s' % (self.__class__.__name__,self._flowable.identity(maxLen))
+
+class LIIndenter(DDIndenter):
+    _IndenterAttrs = '_flowable _bullet _leftIndent _rightIndent width height spaceBefore spaceAfter'.split()
     def __init__(self,flowable,leftIndent=0,rightIndent=0,bullet=None, spaceBefore=None, spaceAfter=None):
         self._flowable = flowable
         self._bullet = bullet
@@ -1318,12 +1379,6 @@ class LIIndenter(Flowable):
             self.spaceBefore = spaceBefore
         if spaceAfter is not None:
             self.spaceAfter = spaceAfter
-
-    def wrap(self, aW, aH):
-        w,h = self._flowable.wrap(aW-self._leftIndent-self._rightIndent, aH)
-        self.width = w+self._leftIndent+self._rightIndent
-        self.height = h
-        return self.width,h
 
     def split(self, aW, aH):
         S = self._flowable.split(aW-self._leftIndent-self._rightIndent, aH)
@@ -1340,26 +1395,6 @@ class LIIndenter(Flowable):
             self._bullet.drawOn(self,canv,x,y,0)
         self._flowable.drawOn(canv,x+self._leftIndent,y,max(0,_sW-self._leftIndent-self._rightIndent))
 
-    def __getattr__(self,a):
-        if a in self._LIIndenterAttrs:
-            try:
-                return self.__dict__[a]
-            except KeyError:
-                if a not in ('spaceBefore','spaceAfter'):
-                    raise
-        return getattr(self._flowable,a)
-
-    def __setattr__(self,a,v):
-        if a in self._LIIndenterAttrs:
-            self.__dict__[a] = v
-        else:
-            setattr(self._flowable,a,v)
-
-    def __delattr__(self,a):
-        if a in self._LIIndenterAttrs:
-            del self.__dict__[a]
-        else:
-            delattr(self._flowable,a)
 
 from reportlab.lib.styles import ListStyle
 class ListItem:
@@ -1387,7 +1422,7 @@ class ListItem:
 
         if style:
             if not isinstance(style,ListStyle):
-                raise ValueError('%s style argument not a ListStyle' % self.__class__.__name__)
+                raise ValueError('%s style argument (%r) not a ListStyle' % (self.__class__.__name__,style))
             self._style = style
 
         for k in ListStyle.defaults:
@@ -1411,7 +1446,7 @@ class _LIParams:
         self.value = value
         self.first= first
 
-class ListFlowable(Flowable):
+class ListFlowable(_Container,Flowable):
     def __init__(self,
                     flowables,  #the initial flowables
                     start=1,
@@ -1446,8 +1481,18 @@ class ListFlowable(Flowable):
             if v is not None:
                 setattr(self,k,v)
 
+        self._content = self._getContent()
+        del self._flowables
+        self._dims = None
+
     def wrap(self,aW,aH):
-        return aW,0x7fffffff    #force a split
+        if self._dims!=aW:
+            self.width, self.height = _listWrapOn(self._content,aW,self.canv)
+            self._dims = aW
+        return self.width,self.height
+
+    def split(self,aW,aH):
+        return self._content
 
     def _flowablesIter(self):
         for f in self._flowables:
@@ -1514,7 +1559,7 @@ class ListFlowable(Flowable):
                     bulletFormat=getp('bulletFormat'),
                     )
 
-    def split(self,aW,aH):
+    def _getContent(self):
         value = self._start
         bt = self._bulletType
         inc = int(bt in '1aAiI')

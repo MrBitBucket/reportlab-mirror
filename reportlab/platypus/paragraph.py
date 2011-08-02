@@ -16,7 +16,7 @@ from reportlab.lib.geomutils import normalizeTRBL
 from reportlab.lib.textsplit import wordSplit, ALL_CANNOT_START
 from copy import deepcopy
 from reportlab.lib.abag import ABag
-from reportlab.rl_config import platypus_link_underline 
+from reportlab.rl_config import platypus_link_underline
 from reportlab import rl_config
 import re
 
@@ -88,7 +88,6 @@ class FragLine(ABag):
         words       [ParaFrags] style text lumps to be concatenated together
         fontSize    maximum fontSize seen on the line; not used at present,
                     but could be used for line spacing.
-                
     """
 
 #our one and only parser
@@ -662,7 +661,7 @@ def textTransformFrags(frags,style):
         elif tt=='none':
             return
         else:
-            raise ValueError('ParaStyle.textTransform value %r is invalid' % style.textTransform) 
+            raise ValueError('ParaStyle.textTransform value %r is invalid' % style.textTransform)
         n = len(frags)
         if n==1:
             #single fragment the easy case
@@ -1024,9 +1023,9 @@ class Paragraph(Flowable):
                 - kind = 0
                 - fontName, fontSize, leading, textColor
                 - lines=  A list of lines
-                        
+
                         Each line has two items.
-                        
+
                         1. unused width in points
                         2. word list
 
@@ -1394,7 +1393,7 @@ class Paragraph(Flowable):
                 if rl_config.paraFontSizeHeightOffset:
                     cur_y = self.height - f.fontSize
                 else:
-                    cur_y = self.height - getattr(f,'ascent',f.fontSize) 
+                    cur_y = self.height - getattr(f,'ascent',f.fontSize)
                 if bulletText:
                     offset = _drawBullet(canvas,offset,cur_y,bulletText,style)
 
@@ -1449,7 +1448,7 @@ class Paragraph(Flowable):
                 if rl_config.paraFontSizeHeightOffset:
                     cur_y = self.height - f.fontSize
                 else:
-                    cur_y = self.height - getattr(f,'ascent',f.fontSize) 
+                    cur_y = self.height - getattr(f,'ascent',f.fontSize)
                 # default?
                 dpl = _leftDrawParaLineX
                 if bulletText:
