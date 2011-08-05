@@ -6,7 +6,7 @@ __version__=''' $Id$ '''
 __doc__='''Core of the graphics library - defines Drawing and Shapes'''
 
 import string, os, sys
-from math import pi, cos, sin, tan
+from math import pi, cos, sin, tan, sqrt
 from types import FloatType, IntType, ListType, TupleType, StringType, InstanceType
 from pprint import pprint
 
@@ -209,6 +209,59 @@ def getRectsBounds(rectList):
         if y2 > yMax:
             yMax = y2
     return (xMin, yMin, xMax, yMax)
+
+def _getBezierExtrema(y0,y1,y2,y3):
+    '''
+    this is used to find if a curveTo path operator has extrema in its range
+    The curveTo operator is defined by the points y0, y1, y2, y3
+
+        B(t):=(1-t)^3*y0+3*(1-t)^2*t*y1+3*(1-t)*t^2*y2+t^3*y3
+            :=t^3*(y3-3*y2+3*y1-y0)+t^2*(3*y2-6*y1+3*y0)+t*(3*y1-3*y0)+y0
+    and is a cubic bezier curve.
+
+    The differential is a quadratic
+        t^2*(3*y3-9*y2+9*y1-3*y0)+t*(6*y2-12*y1+6*y0)+3*y1-3*y0
+
+    The extrema must be at real roots, r, of the above which lie in 0<=r<=1
+
+    The quadratic coefficients are
+        a=3*y3-9*y2+9*y1-3*y0 b=6*y2-12*y1+6*y0 c=3*y1-3*y0
+    or
+        a=y3-3*y2+3*y1-y0 b=2*y2-4*y1+2*y0 c=y1-y0  (remove common factor of 3)
+    or
+        a=y3-3*(y2-y1)-y0 b=2*(y2-2*y1+y0) c=y1-y0
+
+    The returned value is [y0,x1,x2,y3] where if found x1, x2 are any extremals that were found;
+    there can be 0, 1 or 2 extremals
+    '''
+    a=y3-3*(y2-y1)-y0
+    b=2*(y2-2*y1+y0)
+    c=y1-y0
+    Y = [y0] #the set of points
+
+    #standard method to find roots of quadratic
+    d = b*b - 4*a*c
+    if d>=0:
+        d = sqrt(d)
+        if b<0: d = -d
+        q = -0.5*(b+d)
+        R = []
+        try:
+            R.append(q/a)
+        except:
+            pass
+        try:
+            R.append(c/q)
+        except:
+            pass
+        for t in R:
+            if 0<=t<=1:
+                #real root in range evaluate spline there and add to X
+                t2 = t*t
+                t3 = t*t2
+                Y.append(t3*a+1.5*t2*b+3*c*t+y0)
+    Y.append(y3)
+    return Y
 
 def getPathBounds(points):
     n = len(points)
@@ -918,7 +971,7 @@ def _renderPath(path, drawFuncs):
         if op == _CLOSEPATH:
             hadClosePath = hadClosePath + 1
         if op == _MOVETO:
-            hadMoveTo = hadMoveTo + 1
+            hadMoveTo += 1
     return hadMoveTo == hadClosePath
 
 class Path(SolidShape):
@@ -962,7 +1015,32 @@ class Path(SolidShape):
         self.operators.append(_CLOSEPATH)
 
     def getBounds(self):
-        return getPathBounds(self.points)
+        points = self.points
+        try:    #in case this complex algorithm is not yet ready :)
+            X = []
+            aX = X.append
+            eX = X.extend
+            Y=[]
+            aY = Y.append
+            eY = Y.extend
+            i = 0
+            for op in self.operators:
+                nArgs = _PATH_OP_ARG_COUNT[op]
+                j = i + nArgs
+                if nArgs==2:
+                    #either moveTo or lineT0
+                    aX(points[i])
+                    aY(points[i+1])
+                elif nArgs==6:
+                    #curveTo
+                    x1,x2,x3 = points[i:j:2]
+                    eX(_getBezierExtrema(X[-1],x1,x2,x3))
+                    y1,y2,y3 = points[i+1:j:2]
+                    eY(_getBezierExtrema(Y[-1],y1,y2,y3))
+                i = j
+            return min(X),min(Y),max(X),max(Y)
+        except:
+            return getPathBounds(points)
 
 EmptyClipPath=Path()    #special path
 
