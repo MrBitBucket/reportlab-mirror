@@ -109,6 +109,7 @@ class ParagraphStyle(PropertySet):
         'bulletFontName':_baseFontName,
         'bulletFontSize':10,
         'bulletIndent':0,
+        #'bulletColor':black,
         'textColor': black,
         'backColor':None,
         'wordWrap':None,

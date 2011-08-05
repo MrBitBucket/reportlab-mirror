@@ -869,6 +869,8 @@ class Paragraph(Flowable):
                     % (_parser.errors[0],text[:min(30,len(text))]))
             textTransformFrags(frags,style)
             if bulletTextFrags: bulletText = bulletTextFrags
+            elif bulletText is None:
+                bulletText = getattr(style,'bulletText',None)
 
         #AR hack
         self.text = text

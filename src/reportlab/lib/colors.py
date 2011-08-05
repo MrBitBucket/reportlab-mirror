@@ -914,7 +914,6 @@ def Blacker(c,f):
     else: b = black
     return linearlyInterpolatedColor(b, c, 0, 1, f)
 
-
 def fade(aSpotColor, percentages):
     """Waters down spot colors and returns a list of new ones
 
