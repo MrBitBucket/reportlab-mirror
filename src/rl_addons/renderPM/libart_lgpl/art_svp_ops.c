@@ -378,4 +378,31 @@ art_svp_diff (const ArtSVP *svp1, const ArtSVP *svp2)
 #endif
 }
 
-/* todo: implement minus */
+#ifdef ART_USE_NEW_INTERSECTOR 
+ArtSVP *
+art_svp_minus (const ArtSVP *svp1, const ArtSVP *svp2)
+{
+  ArtSVP *svp2_mod;
+  ArtSVP *svp3, *svp_new;
+  ArtSvpWriter *swr;
+  int i;
+
+  svp2_mod = (ArtSVP *) svp2; /* get rid of the const for a while */
+
+  /* First invert svp2 to "turn it inside out" */
+  for (i = 0; i < svp2_mod->n_segs; i++)
+    svp2_mod->segs[i].dir = !svp2_mod->segs[i].dir;
+
+  svp3 = art_svp_merge (svp1, svp2_mod);
+  swr = art_svp_writer_rewind_new (ART_WIND_RULE_POSITIVE);
+  art_svp_intersector (svp3, swr);
+  svp_new = art_svp_writer_rewind_reap (swr);
+  art_free (svp3); /* shallow free because svp3 contains shared segments */
+
+  /* Flip svp2 back to its original state */
+  for (i = 0; i < svp2_mod->n_segs; i++)
+    svp2_mod->segs[i].dir = !svp2_mod->segs[i].dir;
+
+  return svp_new;
+}
+#endif /* ART_USE_NEW_INTERSECTOR */
