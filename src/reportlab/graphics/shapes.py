@@ -254,12 +254,12 @@ def _getBezierExtrema(y0,y1,y2,y3):
             R.append(c/q)
         except:
             pass
+        b *= 1.5
+        c *= 3
         for t in R:
             if 0<=t<=1:
                 #real root in range evaluate spline there and add to X
-                t2 = t*t
-                t3 = t*t2
-                Y.append(t3*a+1.5*t2*b+3*c*t+y0)
+                Y.append(t*(t*(t*a+b)+c)+y0)
     Y.append(y3)
     return Y
 
