@@ -578,12 +578,12 @@ class KeepTogether(_ContainerSpace,Flowable):
         C0 = self._H>aH and (not self._maxHeight or aH>self._maxHeight)
         C1 = (self._H0>aH) or C0 and atTop
         if C0 or C1:
-            if C1:
-                from doctemplate import NullActionFlowable
-                A = NullActionFlowable
-            else:
+            if C0:
                 from doctemplate import FrameBreak
                 A = FrameBreak
+            else:
+                from doctemplate import NullActionFlowable
+                A = NullActionFlowable
             S.insert(0,A())
         return S
 
