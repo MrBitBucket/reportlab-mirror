@@ -13,7 +13,7 @@ in based on possible knowledge of the language and desirable 'niceness' of the a
 __version__=''' $Id$ '''
 
 from types import StringType, UnicodeType
-import unicodedata
+from unicodedata import category
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.rl_config import _FUZZ
 
@@ -35,6 +35,11 @@ CANNOT_END_LINE = [
     u'$\u00a3@#\uffe5\uff04\uffe1\uff20\u3012\u00a7'
     ]
 ALL_CANNOT_END = u''.join(CANNOT_END_LINE)
+
+def is_multi_byte(ch):
+    "Is this an Asian character?"
+    return (ord(ch) >= 0x3000)
+    
 def getCharWidths(word, fontName, fontSize):
     """Returns a list of glyph widths.  Should be easy to optimize in _rl_accel
 
@@ -121,20 +126,64 @@ def dumbSplit(word, widths, maxWidths):
         widthUsed += w
         i += 1
         if widthUsed > maxWidth + _FUZZ and widthUsed>0:
+            #print 'line end reached at %03d: "...%s|"' % (i, word[i-10:i])
             extraSpace = maxWidth - widthUsed
-            #we are pushing this character back, but
-            #the most important of the Japanese typography rules
-            #if this character cannot start a line, wrap it up to this line so it hangs
-            #in the right margin. We won't do two or more though - that's unlikely and
-            #would result in growing ugliness.
-            #and increase the extra space
-            #bug fix contributed by Alexander Vasilenko <alexs.vasilenko@gmail.com>
-            if c not in ALL_CANNOT_START and i>lineStartPos+1:
-                #otherwise we need to push the character back
-                #the i>lineStart+1 condition ensures progress
-                i -= 1
-                extraSpace += w
-            lines.append([extraSpace, word[lineStartPos:i]])
+
+            if ord(c) < 0x3000:
+                # we appear to be inside a non-Asian script section.
+                # (this is a very crude test but quick to compute).
+                # This is likely to be quite rare so the speed of the
+                # code below is hopefully not a big issue.  The main
+                # situation requiring this is that a document title
+                # with an english product name in it got cut.
+                
+                
+                # we count back and look for 
+                #  - a space-like character
+                #  - reversion to Kanji (which would be a good split point)
+                #  - in the worst case, roughly half way back along the line
+                
+                savedPos = i
+                savedWidth = widthUsed
+                curLineLength = i - lineStartPos
+                maxCountBack = curLineLength / 2    #(arbitrary taste issue)
+                countBack = 0
+                #print 'breaking inside English text, counting back'
+                while category(c) != 'Zs' and ord(c) < 0x3000 and countBack < maxCountBack:
+                    extraSpace += widths[i]
+                    i -= 1
+                    c = word[i]
+                    countBack += 1
+
+                #now we have 3 corrections to make
+                if countBack >= maxCountBack:
+                    #no good break points within half a line. Reset and give up
+                    i = savedPos
+                    widthUsed = savedWidth
+                elif ord(c) < 0x3000:
+                    pass
+                else:  #it's a space-like char.  Move cursor one forward
+                        #so we don't include the space
+                    i += 1
+
+            #end of English-within-Asian special case
+
+            else:
+                #we are pushing this character back, but
+                #the most important of the Japanese typography rules
+                #if this character cannot start a line, wrap it up to this line so it hangs
+                #in the right margin. We won't do two or more though - that's unlikely and
+                #would result in growing ugliness.
+                #and increase the extra space
+                #bug fix contributed by Alexander Vasilenko <alexs.vasilenko@gmail.com>
+                    
+                if c not in ALL_CANNOT_START and i>lineStartPos+1:
+                    #otherwise we need to push the character back
+                    #the i>lineStart+1 condition ensures progress
+                    i -= 1
+                    extraSpace += w
+
+            lines.append([extraSpace, word[lineStartPos:i].strip()])
             try:
                 maxWidth = maxWidths[len(lines)]
             except IndexError:
