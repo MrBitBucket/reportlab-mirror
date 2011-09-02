@@ -126,6 +126,7 @@ def dumbSplit(word, widths, maxWidths):
         widthUsed += w
         i += 1
         if widthUsed > maxWidth + _FUZZ and widthUsed>0:
+            extraSpace = maxWidth - widthUsed
             if ord(c)<0x3000:
                 # we appear to be inside a non-Asian script section.
                 # (this is a very crude test but quick to compute).
@@ -145,10 +146,11 @@ def dumbSplit(word, widths, maxWidths):
                     if category(cj)=='Zs' or ord(cj)>=0x3000:
                         k = j+1
                         if k<i:
-                            i = k
+                            j = k+1
+                            extraSpace += sum(widths[j:i])
                             w = widths[k]
                             c = word[k]
-                            i += 1
+                            i = j
                             break
 
                 #end of English-within-Asian special case
@@ -164,8 +166,10 @@ def dumbSplit(word, widths, maxWidths):
                 #otherwise we need to push the character back
                 #the i>lineStart+1 condition ensures progress
                 i -= 1
+                extraSpace += w
 
-            lines.append([maxWidth-sum(widths[lineStartPos:i]), word[lineStartPos:i].strip()])
+            #lines.append([maxWidth-sum(widths[lineStartPos:i]), word[lineStartPos:i].strip()])
+            lines.append([extraSpace, word[lineStartPos:i].strip()])
             try:
                 maxWidth = maxWidths[len(lines)]
             except IndexError:
@@ -175,7 +179,7 @@ def dumbSplit(word, widths, maxWidths):
 
     #any characters left?
     if widthUsed > 0:
-        lines.append([maxWidth - sum(widths[lineStartPos:]), word[lineStartPos:]])
+        lines.append([maxWidth - widthUsed, word[lineStartPos:]])
 
     return lines
 
