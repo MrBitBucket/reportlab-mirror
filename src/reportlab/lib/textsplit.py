@@ -126,10 +126,7 @@ def dumbSplit(word, widths, maxWidths):
         widthUsed += w
         i += 1
         if widthUsed > maxWidth + _FUZZ and widthUsed>0:
-            #print 'line end reached at %03d: "...%s|"' % (i, word[i-10:i])
-            extraSpace = maxWidth - widthUsed
-
-            if ord(c) < 0x3000:
+            if ord(c)<0x3000:
                 # we appear to be inside a non-Asian script section.
                 # (this is a very crude test but quick to compute).
                 # This is likely to be quite rare so the speed of the
@@ -142,48 +139,33 @@ def dumbSplit(word, widths, maxWidths):
                 #  - a space-like character
                 #  - reversion to Kanji (which would be a good split point)
                 #  - in the worst case, roughly half way back along the line
-                
-                savedPos = i
-                savedWidth = widthUsed
-                curLineLength = i - lineStartPos
-                maxCountBack = curLineLength / 2    #(arbitrary taste issue)
-                countBack = 0
-                #print 'breaking inside English text, counting back'
-                while category(c) != 'Zs' and ord(c) < 0x3000 and countBack < maxCountBack:
-                    extraSpace += widths[i]
-                    i -= 1
-                    c = word[i]
-                    countBack += 1
+                limitCheck = (lineStartPos+i)>>1        #(arbitrary taste issue)
+                for j in xrange(i-1,limitCheck,-1):
+                    cj = word[j]
+                    if category(cj)=='Zs' or ord(cj)>=0x3000:
+                        k = j+1
+                        if k<i:
+                            i = k
+                            w = widths[k]
+                            c = word[k]
+                            i += 1
+                            break
 
-                #now we have 3 corrections to make
-                if countBack >= maxCountBack:
-                    #no good break points within half a line. Reset and give up
-                    i = savedPos
-                    widthUsed = savedWidth
-                elif ord(c) < 0x3000:
-                    pass
-                else:  #it's a space-like char.  Move cursor one forward
-                        #so we don't include the space
-                    i += 1
+                #end of English-within-Asian special case
 
-            #end of English-within-Asian special case
+            #we are pushing this character back, but
+            #the most important of the Japanese typography rules
+            #if this character cannot start a line, wrap it up to this line so it hangs
+            #in the right margin. We won't do two or more though - that's unlikely and
+            #would result in growing ugliness.
+            #and increase the extra space
+            #bug fix contributed by Alexander Vasilenko <alexs.vasilenko@gmail.com>
+            if c not in ALL_CANNOT_START and i>lineStartPos+1:
+                #otherwise we need to push the character back
+                #the i>lineStart+1 condition ensures progress
+                i -= 1
 
-            else:
-                #we are pushing this character back, but
-                #the most important of the Japanese typography rules
-                #if this character cannot start a line, wrap it up to this line so it hangs
-                #in the right margin. We won't do two or more though - that's unlikely and
-                #would result in growing ugliness.
-                #and increase the extra space
-                #bug fix contributed by Alexander Vasilenko <alexs.vasilenko@gmail.com>
-                    
-                if c not in ALL_CANNOT_START and i>lineStartPos+1:
-                    #otherwise we need to push the character back
-                    #the i>lineStart+1 condition ensures progress
-                    i -= 1
-                    extraSpace += w
-
-            lines.append([extraSpace, word[lineStartPos:i].strip()])
+            lines.append([maxWidth-sum(widths[lineStartPos:i]), word[lineStartPos:i].strip()])
             try:
                 maxWidth = maxWidths[len(lines)]
             except IndexError:
@@ -193,7 +175,7 @@ def dumbSplit(word, widths, maxWidths):
 
     #any characters left?
     if widthUsed > 0:
-        lines.append([maxWidth - widthUsed, word[lineStartPos:]])
+        lines.append([maxWidth - sum(widths[lineStartPos:]), word[lineStartPos:]])
 
     return lines
 
