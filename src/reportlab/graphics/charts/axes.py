@@ -78,8 +78,8 @@ def _allInt(values):
 class AxisLineAnnotation:
     '''Create a grid like line using the given user value to draw the line
     kwds may contain
-    startOffset offset from the default grid start position
-    endOffset   offset from the default grid end position
+    startOffset if true v is offset from the default grid start position
+    endOffset   if true v is offset from the default grid end position
     scaleValue  True/not given --> scale the value
                 otherwise use the absolute value
     lo          lowest coordinate to draw default 0
@@ -95,6 +95,8 @@ class AxisLineAnnotation:
     def __call__(self,axis):
         kwds = self._kwds.copy()
         scaleValue = kwds.pop('scaleValue',True)
+        endOffset = kwds.pop('endOffset',False)
+        startOffset = kwds.pop('endOffset',False)
         if axis.isYAxis:
             offs = axis._x
             d0 = axis._y
@@ -122,6 +124,10 @@ class AxisLineAnnotation:
             axis._get_line_pos = lambda x: x
         try:
             v = self._v
+            if endOffset:
+                v = v + hi
+            elif startOffset:
+                v = v + lo
             func = axis._getLineFunc(s-offs,e-offs,kwds.pop('parent',None))
             if not hasattr(axis,'_tickValues'):
                 axis._pseudo_configure()
@@ -447,6 +453,7 @@ class CategoryAxis(_AxisG):
         annotations = AttrMapValue(None,desc='list of annotations'),
         loLLen = AttrMapValue(isNumber, desc='extra line length before start of the axis'),
         hiLLen = AttrMapValue(isNumber, desc='extra line length after end of the axis'),
+        skipGrid = AttrMapValue(OneOf('none','top','both','bottom'),"grid lines to skip top bottom both none"),
         )
 
     def __init__(self):
@@ -944,6 +951,7 @@ class ValueAxis(_AxisG):
         subGridStart = AttrMapValue(isNumberOrNone, desc='Start of grid lines wrt axis origin'),
         subGridEnd = AttrMapValue(isNumberOrNone, desc='End of grid lines wrt axis origin'),
         keepTickLabelsInside = AttrMapValue(isBoolean, desc='Ensure tick labels do not project beyond bounds of axis if true'),
+        skipGrid = AttrMapValue(OneOf('none','top','both','bottom'),"grid lines to skip top bottom both none"),
         )
 
     def __init__(self,**kw):
@@ -1557,6 +1565,7 @@ class NormalDateXValueAxis(XValueAxis):
         dailyFreq = AttrMapValue(isBoolean, desc='True if we are to assume daily data to be ticked at end of month.'),
         specifiedTickDates = AttrMapValue(NoneOr(SequenceOf(isNormalDate)), desc='Actual tick values to use; no calculations done'),
         specialTickClear = AttrMapValue(isBoolean, desc='clear rather than delete close ticks when forced first/end dates'),
+        skipGrid = AttrMapValue(OneOf('none','top','both','bottom'),"grid lines to skip top bottom both none"),
         )
 
     _valueClass = normalDate.ND

@@ -359,13 +359,25 @@ class LinePlot(AbstractLineChart):
             if self.behindAxes:
                 self._lineG = Group()
                 g.add(self._lineG)
+        xAex = xA.visibleAxis and [xA._y] or []
+        yAex = yA.visibleAxis and [yA._x] or []
+        skipGrid = getattr(xA,'skipGrid','none')
+        if skipGrid!=None:
+            if skipGrid in ('both','top'):
+                yAex.append(xA._x+xA._length)
+            if skipGrid in ('both','bottom'):
+                yAex.append(xA._x)
+        skipGrid = getattr(yA,'skipGrid','none')
+        if skipGrid!=None:
+            if skipGrid in ('both','top'):
+                xAex.append(yA._y+yA._length)
+            if skipGrid in ('both','bottom'):
+                xAex.append(yA._y)
         if self.gridFirst:
-            xA.makeGrid(g,parent=self,dim=yA.getGridDims)
-            yA.makeGrid(g,parent=self,dim=xA.getGridDims)
+            xA.makeGrid(g,parent=self,dim=yA.getGridDims,exclude=yAex)
+            yA.makeGrid(g,parent=self,dim=xA.getGridDims,exclude=xAex)
         g.add(xA.draw())
         g.add(yA.draw())
-        xAex = xA.visibleAxis and (xA._y,) or ()
-        yAex = yA.visibleAxis and (yA._x,) or ()
         if not self.gridFirst:
             xAdgl = getattr(xA,'drawGridLast',False)
             yAdgl = getattr(yA,'drawGridLast',False)
