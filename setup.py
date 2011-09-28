@@ -209,10 +209,10 @@ reportlab_files= [
         'fonts/_eb_____.pfb',
         'fonts/_ei_____.pfb',
         'fonts/_er_____.pfb',
-        'fonts/Sy______.pfb',
-        'fonts/Zd______.pfb',
-        'fonts/Zx______.pfb',
-        'fonts/Zy______.pfb',
+        'fonts/sy______.pfb',
+        'fonts/zd______.pfb',
+        'fonts/zx______.pfb',
+        'fonts/zy______.pfb',
         ]
 
 def get_fonts(PACKAGE_DIR, reportlab_files):
@@ -224,7 +224,7 @@ def get_fonts(PACKAGE_DIR, reportlab_files):
     try:
         infoline("Downloading standard T1 font curves")
 
-        remotehandle = urllib2.urlopen("http://www.reportlab.com/ftp/fonts/pfbfer.zip")
+        remotehandle = urllib2.urlopen("http://www.reportlab.com/ftp/pfbfer-20070710.zip")
         zipdata = StringIO.StringIO(remotehandle.read())
         remotehandle.close()
         archive = zipfile.ZipFile(zipdata)
