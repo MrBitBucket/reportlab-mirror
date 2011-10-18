@@ -359,6 +359,8 @@ class LinePlot(AbstractLineChart):
             if self.behindAxes:
                 self._lineG = Group()
                 g.add(self._lineG)
+        xA._joinToAxis()
+        yA._joinToAxis()
         xAex = xA.visibleAxis and [xA._y] or []
         yAex = yA.visibleAxis and [yA._x] or []
         skipGrid = getattr(xA,'skipGrid','none')
