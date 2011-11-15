@@ -17,7 +17,7 @@ cause the value to wrap (ie are like a traditional linefeed).
 See the test output from running this module as a script for a discussion of the method for constructing
 tables and table styles.
 """
-from reportlab.platypus.flowables import Flowable, Preformatted
+from reportlab.platypus.flowables import Flowable, Preformatted, Spacer
 from reportlab import rl_config
 from reportlab.lib.styles import PropertySet, ParagraphStyle, _baseFontName
 from reportlab.lib import colors
