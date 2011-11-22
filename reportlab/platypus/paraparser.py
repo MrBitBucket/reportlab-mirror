@@ -157,6 +157,16 @@ _fontAttrMap = {'size': ('fontSize', _num),
                 'backcolor':('backColor',toColor),
                 'bgcolor':('backColor',toColor),
                 }
+#things which are valid span attributes
+_spanAttrMap = {'size': ('fontSize', _num),
+                'face': ('fontName', None),
+                'name': ('fontName', None),
+                'fg':   ('textColor', toColor),
+                'color':('textColor', toColor),
+                'backcolor':('backColor',toColor),
+                'bgcolor':('backColor',toColor),
+                'style': ('style',None),
+                }
 #things which are valid font attributes
 _linkAttrMap = {'size': ('fontSize', _num),
                 'face': ('fontName', None),
@@ -202,6 +212,7 @@ def _addAttributeNames(m):
 
 _addAttributeNames(_paraAttrMap)
 _addAttributeNames(_fontAttrMap)
+_addAttributeNames(_spanAttrMap)
 _addAttributeNames(_bulletAttrMap)
 _addAttributeNames(_anchorAttrMap)
 _addAttributeNames(_linkAttrMap)
@@ -515,6 +526,7 @@ def _greekConvert(data):
 #       < sup > < /sup > - superscript
 #       < sub > < /sub > - subscript
 #       <font name=fontfamily/fontname color=colorname size=float>
+#        <span name=fontfamily/fontname color=colorname backcolor=colorname size=float style=stylename>
 #       < bullet > </bullet> - bullet text (at head of para only)
 #       <onDraw name=callable label="a label"/>
 #       <index [name="callablecanvasattribute"] label="a label"/>
@@ -754,6 +766,21 @@ class ParaParser(xmllib.XMLParser):
 
     def end_font(self):
         self._pop()
+
+    def start_span(self,attr):
+        A = self.getAttributes(attr,_spanAttrMap)
+        if 'style' in A:
+            style = self.findSpanStyle(A.pop('style'))
+            D = {}
+            for k in 'fontName fontSize textColor backColor'.split():
+                v = getattr(style,k,self)
+                if v is self: continue
+                D[k] = v
+            D.update(A)
+            A = D
+        self._push(**A)
+
+    end_span = end_font
 
     def start_br(self, attr):
         #just do the trick to make sure there is no content
@@ -1100,6 +1127,9 @@ class ParaParser(xmllib.XMLParser):
         self._tt_handlers = self.handle_data,self._tt_parse
         self._tt_parse(tt)
         return self._complete_parse()
+
+    def findSpanStyle(self,style):
+        raise ValueError('findSpanStyle not implemented in this parser')
 
 if __name__=='__main__':
     from reportlab.platypus import cleanBlockQuotedText
