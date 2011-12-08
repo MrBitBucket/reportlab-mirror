@@ -876,7 +876,7 @@ class Paragraph(Flowable):
     def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, encoding='utf8'):
         self.caseSensitive = caseSensitive
         self.encoding = encoding
-        self._setup(text, style, bulletText, frags, cleanBlockQuotedText)
+        self._setup(text, style, bulletText or getattr(style,'bulletText',None), frags, cleanBlockQuotedText)
 
     def __repr__(self):
         n = self.__class__.__name__
