@@ -6,6 +6,7 @@ __doc__='''The standard paragraph implementation'''
 from string import join, whitespace
 from operator import truth
 from types import StringType, ListType
+from unicodedata import category
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont, getAscentDescent
 from reportlab.platypus.paraparser import ParaParser
 from reportlab.platypus.flowables import Flowable
@@ -761,6 +762,32 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
         if endLine:
             extraSpace = maxWidth - widthUsed
             if not lineBreak:
+                if ord(u)<0x3000:
+                    # we appear to be inside a non-Asian script section.
+                    # (this is a very crude test but quick to compute).
+                    # This is likely to be quite rare so the speed of the
+                    # code below is hopefully not a big issue.  The main
+                    # situation requiring this is that a document title
+                    # with an english product name in it got cut.
+
+
+                    # we count back and look for
+                    #  - a space-like character
+                    #  - reversion to Kanji (which would be a good split point)
+                    #  - in the worst case, roughly half way back along the line
+                    limitCheck = (lineStartPos+i)>>1        #(arbitrary taste issue)
+                    for j in xrange(i-1,limitCheck,-1):
+                        uj = U[j]
+                        if uj and category(uj)=='Zs' or ord(uj)>=0x3000:
+                            k = j+1
+                            if k<i:
+                                j = k+1
+                                extraSpace += sum(U[ii].width for ii in xrange(j,i))
+                                w = U[k].width
+                                u = U[k]
+                                i = j
+                                break
+
                 #we are pushing this character back, but
                 #the most important of the Japanese typography rules
                 #if this character cannot start a line, wrap it up to this line so it hangs
@@ -974,8 +1001,8 @@ class Paragraph(Flowable):
             height = s*l
 
         n = len(lines)
-        allowWidows = getattr(self,'allowWidows',getattr(self,'allowWidows',1))
-        allowOrphans = getattr(self,'allowOrphans',getattr(self,'allowOrphans',0))
+        allowWidows = getattr(self,'allowWidows',getattr(style,'allowWidows',1))
+        allowOrphans = getattr(self,'allowOrphans',getattr(style,'allowOrphans',0))
         if not allowOrphans:
             if s<=1:    #orphan?
                 del self.blPara
