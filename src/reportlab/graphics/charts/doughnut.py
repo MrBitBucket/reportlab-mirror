@@ -27,7 +27,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, Ellipse, \
     Wedge, String, SolidShape, UserNode, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
-from reportlab.graphics.charts.piecharts import AbstractPieChart, WedgeProperties, _addWedgeLabel
+from reportlab.graphics.charts.piecharts import AbstractPieChart, WedgeProperties, _addWedgeLabel, fixLabelOverlaps
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgets.markers import Marker
 
@@ -54,6 +54,8 @@ class Doughnut(AbstractPieChart):
         direction = AttrMapValue(OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
         slices = AttrMapValue(None, desc="collection of sector descriptor objects"),
         simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use String not super duper WedgeLabel"),
+        # advanced usage
+        checkLabelOverlap = AttrMapValue(isBoolean, desc="If true check and attempt to fix\n standard label overlaps(default off)",advancedUsage=1),
         )
 
     def __init__(self):
@@ -66,13 +68,18 @@ class Doughnut(AbstractPieChart):
         self.startAngle = 90
         self.direction = "clockwise"
         self.simpleLabels = 1
+        self.checkLabelOverlap = 0
 
         self.slices = TypedPropertyCollection(SectorProperties)
         self.slices[0].fillColor = colors.darkcyan
         self.slices[1].fillColor = colors.blueviolet
         self.slices[2].fillColor = colors.blue
         self.slices[3].fillColor = colors.cyan
-
+        self.slices[4].fillColor = colors.pink
+        self.slices[5].fillColor = colors.magenta
+        self.slices[6].fillColor = colors.yellow
+        
+        
     def demo(self):
         d = Drawing(200, 100)
 
@@ -121,8 +128,12 @@ class Doughnut(AbstractPieChart):
             normData = self.normalizeData(self.data)
             n = len(normData)
             self._seriesCount = n
-
+        
         #labels
+        checkLabelOverlap = self.checkLabelOverlap
+        L = []
+        L_add = L.append
+        
         if self.labels is None:
             labels = []
             if type(n) not in (ListType,TupleType):
@@ -157,7 +168,7 @@ class Doughnut(AbstractPieChart):
             whichWay = -1
 
         g  = Group()
-
+        
         startAngle = self.startAngle #% 360
         styleCount = len(self.slices)
         if type(self.data[0]) in (ListType, TupleType):
@@ -203,14 +214,23 @@ class Doughnut(AbstractPieChart):
 
                     g.add(theSector)
 
-                    text = self.getSeriesName(i,'')
-                    if text:
-                        averageAngle = (a1+a2)/2.0
-                        aveAngleRadians = averageAngle*pi/180.0
-                        labelRadius = sectorStyle.labelRadius
-                        labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
-                        labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
-                        g.add(_addWedgeLabel(self,text,averageAngle,labelX,labelY,sectorStyle))
+                    if sn == 0:
+                        text = self.getSeriesName(i,'')
+                        if text:
+                            averageAngle = (a1+a2)/2.0
+                            aveAngleRadians = averageAngle*pi/180.0
+                            labelRadius = sectorStyle.labelRadius
+                            rx = xradius*labelRadius
+                            ry = yradius*labelRadius
+                            labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
+                            labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
+                            l = _addWedgeLabel(self,text,averageAngle,labelX,labelY,sectorStyle)
+                            if checkLabelOverlap:
+                                l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
+                                            'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
+                                            'bounds': l.getBounds(),
+                                            }
+                            L_add(l)
 
         else:
             #single series doughnut
@@ -261,18 +281,23 @@ class Doughnut(AbstractPieChart):
                     labelRadius = sectorStyle.labelRadius
                     labelX = centerx + (0.5 * self.width * cos(aveAngleRadians) * labelRadius)
                     labelY = centery + (0.5 * self.height * sin(aveAngleRadians) * labelRadius)
+                    rx = xradius*labelRadius
+                    ry = yradius*labelRadius
+                    l = _addWedgeLabel(self,labels[i],averageAngle,labelX,labelY,sectorStyle)
+                    if checkLabelOverlap:
+                        l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
+                                        'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
+                                        'bounds': l.getBounds(),
+                                        }
+                    L_add(l)
 
-                    theLabel = String(labelX, labelY, labels[i])
-                    theLabel.textAnchor = "middle"
-                    theLabel.fontSize = sectorStyle.fontSize
-                    theLabel.fontName = sectorStyle.fontName
-                    theLabel.fillColor = sectorStyle.fontColor
-
-                    g.add(theLabel)
-
-
+        if checkLabelOverlap and L:
+            fixLabelOverlaps(L)
+        
+        for l in L: g.add(l)
+        
         return g
-
+        
     def draw(self):
         g = Group()
         g.add(self.makeSectors())
@@ -331,6 +356,23 @@ def sample3():
     dn.height = 300
     dn.data = [[10,20,30,40,50,60], [10,20,30,40]]
     dn.labels = ['a','b','c','d','e','f']
+
+    d.add(dn)
+
+    return d
+
+def sample4():
+    "Make a more complex demo with Label Overlap fixing"
+
+    d = Drawing(400, 400)
+    dn = Doughnut()
+    dn.x = 50
+    dn.y = 50
+    dn.width = 300
+    dn.height = 300
+    dn.data = [[10,20,30,40,50,60], [10,20,30,40]]
+    dn.labels = ['a','b','c','d','e','f']
+    dn.checkLabelOverlap = True
 
     d.add(dn)
 
