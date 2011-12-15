@@ -16,9 +16,8 @@ def _2xpre(s,styles):
     s = s.replace('</div>','')
     s = s.replace('<pre>','')
     s = s.replace('</pre>','')
-    s = s.replace('</span>','</font>')
-    for k,c in styles+[('p','#000000'),('n','#000000')]:
-        s = s.replace('<span class="%s">' % k,'<font color="%s">' % c)
+    for k,c in styles+[('p','#000000'),('n','#000000'),('err','#000000')]:
+        s = s.replace('<span class="%s">' % k,'<span color="%s">' % c)
     return s
 
 def pygments2xpre(s, language="python"):
