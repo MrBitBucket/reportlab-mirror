@@ -826,7 +826,6 @@ class ScatterPlot(LinePlot):
                     height = AttrMapValue(isNumber, desc="Height of the area inside the axes"),
                     outerBorderOn = AttrMapValue(isBoolean, desc="Is there an outer border (continuation of axes)"),
                     outerBorderColor = AttrMapValue(isColorOrNone, desc="Color of outer border (if any)"),
-                    background = AttrMapValue(isColorOrNone, desc="Background color (if any)"),
                     labelOffset = AttrMapValue(isNumber, desc="Space between label and Axis (or other labels)",advancedUsage=1),
                     axisTickLengths = AttrMapValue(isNumber, desc="Lenth of the ticks on both axes"),
                     axisStrokeWidth = AttrMapValue(isNumber, desc="Stroke width for both axes"),
@@ -878,7 +877,6 @@ class ScatterPlot(LinePlot):
 
         #values for lineplot
         self.joinedLines = 0
-        self.fillColor = self.background
 
         self.leftPadding=5
         self.rightPadding=10
