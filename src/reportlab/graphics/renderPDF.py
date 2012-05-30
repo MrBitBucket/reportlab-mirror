@@ -78,10 +78,11 @@ class _PDFRenderer(Renderer):
                     )
 
     def drawImage(self, image):
+        path = image.path
         # currently not implemented in other renderers
-        if image.path and os.path.exists(image.path):
+        if path and (hasattr(path,'mode') or os.path.exists(image.path)):
             self._canvas.drawInlineImage(
-                    image.path,
+                    path,
                     image.x, image.y,
                     image.width, image.height
                     )

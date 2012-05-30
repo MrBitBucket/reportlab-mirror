@@ -123,19 +123,22 @@ class _PMRenderer(Renderer):
         self._canvas.line(line.x1,line.y1,line.x2,line.y2)
 
     def drawImage(self, image):
-        if image.path and os.path.exists(image.path):
-            if type(image.path) is type(''):
-                im = _getImage().open(image.path).convert('RGB')
-            else:
-                im = image.path.convert('RGB')
-            srcW, srcH = im.size
-            dstW, dstH = image.width, image.height
-            if dstW is None: dstW = srcW
-            if dstH is None: dstH = srcH
-            self._canvas._aapixbuf(
-                    image.x, image.y, dstW, dstH,
-                    im.tostring(), srcW, srcH, 3,
-                    )
+        path = image.path
+        if isinstance(path,basestring):
+            if not (path and os.path.isfile(path)): return
+            im = _getImage().open(path).convert('RGB')
+        elif hasattr(path,'convert'):
+            im = path.convert('RGB')
+        else:
+            return
+        srcW, srcH = im.size
+        dstW, dstH = image.width, image.height
+        if dstW is None: dstW = srcW
+        if dstH is None: dstH = srcH
+        self._canvas._aapixbuf(
+                image.x, image.y, dstW, dstH,
+                im.tostring(), srcW, srcH, 3,
+                )
 
     def drawCircle(self, circle):
         c = self._canvas
