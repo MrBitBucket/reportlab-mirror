@@ -250,7 +250,7 @@ class PageTemplate:
     derived classes can also implement beforeDrawPage and afterDrawPage if they want
     """
     def __init__(self,id=None,frames=[],onPage=_doNothing, onPageEnd=_doNothing,
-                 pagesize=None):
+                 pagesize=None, autoNextPageTemplate=None):
         frames = frames or []
         if type(frames) not in (ListType,TupleType): frames = [frames]
         assert filter(lambda x: not isinstance(x,Frame), frames)==[], "frames argument error"
@@ -259,6 +259,7 @@ class PageTemplate:
         self.onPage = onPage
         self.onPageEnd = onPageEnd
         self.pagesize = pagesize
+        self.autoNextPageTemplate = autoNextPageTemplate
 
     def beforeDrawPage(self,canv,doc):
         """Override this if you want additional functionality or prefer
@@ -585,6 +586,9 @@ class BaseDocTemplate:
             elif hasattr(self,'_nextPageTemplateIndex'):
                 self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
                 del self._nextPageTemplateIndex
+            elif self.pageTemplate.autoNextPageTemplate:
+                self.handle_nextPageTemplate(self.pageTemplate.autoNextPageTemplate)
+                self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
             if self._emptyPages==0:
                 pass    #store good state here
         self._hanging.append(PageBegin)
