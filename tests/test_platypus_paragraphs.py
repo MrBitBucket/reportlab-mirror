@@ -12,7 +12,7 @@ from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth, registerFont, registerFontFamily
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus.paraparser import ParaParser
-from reportlab.platypus.flowables import Flowable
+from reportlab.platypus.flowables import Flowable, DocAssert
 from reportlab.lib.colors import Color
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -585,6 +585,52 @@ phonemic and morphological analysis.'''
 
             a(Paragraph(text,style=normal_just))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_just.pdf'))
+        doc.build(story)
+
+    def testAutoPageTemplate(self):
+        from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, PageBegin
+        from reportlab.lib.units import inch
+        class onPage:
+            def __init__(self,label):
+                self.label = label
+            def __call__(self,canv,doc):
+                canv.drawString(72,72,'This is pageTemplate(%s)' % (self.label,))
+        class MyDocTemplate(BaseDocTemplate):
+            _invalidInitArgs = ('pageTemplates',)
+
+            def __init__(self, filename, **kw):
+                self.allowSplitting = 0
+                BaseDocTemplate.__init__(self, filename, **kw)
+                self.addPageTemplates(
+                        [
+                        PageTemplate('normal',
+                                [Frame(inch, inch, 6.27*inch, 9.69*inch, id='first',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red"))],
+                                onPage = onPage('normal'),
+                                ),
+                        PageTemplate('auto',
+                                [Frame(inch, inch, 6.27*inch, 9.69*inch, id='first',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red"))],
+                                onPage = onPage('auto'),
+                                autoNextPageTemplate = 'autoFollow',
+                                ),
+                        PageTemplate('autoFollow',
+                                [Frame(inch, inch, 6.27*inch, 9.69*inch, id='first',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red"))],
+                                onPage = onPage('autoFollow'),
+                                ),
+                        ])
+        styleSheet = getSampleStyleSheet()
+        normal = ParagraphStyle(name='normal',fontName='Times-Roman',fontSize=12,leading=1.2*12,parent=styleSheet['Normal'])
+        story =[]
+        a = story.append
+        a(Paragraph('should be on page template normal', normal))
+        a(NextPageTemplate('auto'))
+        a(PageBreak())
+        a(Paragraph('should be on page template auto', normal))
+        a(PageBreak())
+        a(DocAssert('doc.pageTemplate.id=="autoFollow"','expected doc.pageTemplate.id=="autoFollow"'))
+        a(Paragraph('should be on page template autoFollow 1', normal))
+        a(PageBreak())
+        a(Paragraph('should be on page template autoFollow 2', normal))
+        doc = MyDocTemplate(outputfile('test_platypus_paragraphs_AutoNextPageTemplate.pdf'))
         doc.build(story)
 
 #noruntests

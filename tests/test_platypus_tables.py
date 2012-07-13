@@ -11,6 +11,9 @@ from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
+from reportlab.graphics.charts.linecharts import HorizontalLineChart
+from reportlab.graphics.shapes import Drawing, _DrawingEditorMixin
+from reportlab.graphics.charts.barcharts import VerticalBarChart
 
 styleSheet = getSampleStyleSheet()
     
@@ -102,6 +105,18 @@ def run():
         lst.append(t)
         lst.append(Spacer(0,12))
     doc.build(lst)
+
+class TableBarChart(_DrawingEditorMixin,Drawing):
+    def __init__(self,width=400,height=200,*args,**kw):
+        Drawing.__init__(self,width,height,*args,**kw)
+        self.width = 136
+        self.height = 140
+        self._add(self,VerticalBarChart(),name='chart',validate=None,desc=None)
+        self.chart.y = 20
+        self.chart.width = self.width - 21
+        self.chart.height = self.height - 24
+        self.chart.categoryAxis.categoryNames = ['Spring','Summer','Autumn','Winter']
+        self.chart.categoryAxis.labels.fontSize = 7
 
 def old_tables_test():
     from reportlab.lib.units import inch, cm
@@ -563,11 +578,15 @@ LIST_STYLE = TableStyle(
     I.drawWidth = 1.25*inch
     #I.drawWidth = 9.25*inch #uncomment to see better messaging
     P = Paragraph("<para align=center spaceb=3>The <b>ReportLab Left <font color=red>Logo</font></b> Image</para>", styleSheet["BodyText"])
+    B = TableBarChart()
+    BP = Paragraph("<para align=center spaceb=3>A bar chart in a cell.</para>", styleSheet["BodyText"])
+
     data=  [['A', 'B', 'C', Paragraph("<b>A pa<font color=red>r</font>a<i>graph</i></b><super><font color=yellow>1</font></super>",styleSheet["BodyText"]), 'D'],
             ['00', '01', '02', [I,P], '04'],
             ['10', '11', '12', [I,P], '14'],
             ['20', '21', '22', '23', '24'],
-            ['30', '31', '32', '33', '34']]
+            ['30', '31', '32', '33', '34'],
+            ['40', '41', '42', [B,BP], '44']]
 
     t=Table(data,style=[('GRID',(1,1),(-2,-2),1,colors.green),
                     ('BOX',(0,0),(1,-1),2,colors.red),
