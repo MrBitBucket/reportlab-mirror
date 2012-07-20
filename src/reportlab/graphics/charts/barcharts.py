@@ -75,7 +75,8 @@ class BarChart(PlotArea):
     barLabels=4,
     categoryAxisGrid=5,
     valueAxisGrid=6,
-    annotations=7''')
+    annotations=7'''),
+        categoryNALabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for a group of N/A values.',advancedUsage=1),
         )
 
     def makeSwatchSample(self, rowNo, x, y, width, height):
@@ -153,9 +154,8 @@ class BarChart(PlotArea):
         self.bars[0].fillColor = colors.red
         self.bars[1].fillColor = colors.green
         self.bars[2].fillColor = colors.blue
-        self.naLabel = None #NA_Label()
+        self.naLabel = self.categoryNALabel = None
         self.zIndexOverrides = None
-
 
     def demo(self):
         """Shows basic use of a bar chart"""
@@ -459,16 +459,16 @@ class BarChart(PlotArea):
         if text:
             self._addLabel(text, self.barLabels[(rowNo, colNo)], g, rowNo, colNo, x, y, width, height)
 
-    def _addNABarLabel(self, g, rowNo, colNo, x, y, width, height):
-        na = self.naLabel
+    def _addNABarLabel(self, g, rowNo, colNo, x, y, width, height, calcOnly=False, na=None):
+        if na is None: na = self.naLabel
         if na and na.text:
             na = copy.copy(na)
             v = self.valueAxis._valueMax<=0 and -1e-8 or 1e-8
             if width is None: width = v
             if height is None: height = v
-            self._addLabel(na.text, na, g, rowNo, colNo, x, y, width, height)
+            return self._addLabel(na.text, na, g, rowNo, colNo, x, y, width, height, calcOnly=calcOnly)
 
-    def _addLabel(self, text, label, g, rowNo, colNo, x, y, width, height):
+    def _addLabel(self, text, label, g, rowNo, colNo, x, y, width, height, calcOnly=False):
         if label.visible:
             labelWidth = stringWidth(text, label.fontName, label.fontSize)
             flipXY = self._flipXY
@@ -508,6 +508,7 @@ class BarChart(PlotArea):
                     dx = 0
             else:
                 dy = dx = 0
+            if calcOnly: return x0+dx, y0+dy
             label.setOrigin(x0+dx, y0+dy)
             label.setText(text)
             sC, sW = label.lineStrokeColor, label.lineStrokeWidth
@@ -532,16 +533,41 @@ class BarChart(PlotArea):
         lenData = len(self.data)
         bars = self.bars
         br = getattr(self,'barRecord',None)
+        BP = self._barPositions
+
+        catNAL = self.categoryNALabel
+        catNNA = {}
+        if catNAL:
+            CBL = []
+            rowNoL = lenData - 1
+            #find all the categories that have at least one value
+            for rowNo in xrange(lenData):
+                row = BP[rowNo]
+                for colNo in xrange(len(row)):
+                    x, y, width, height = row[colNo]
+                    if None not in (width,height):
+                        catNNA[colNo] = 1
+
         for rowNo in xrange(lenData):
-            row = self._barPositions[rowNo]
+            row = BP[rowNo]
             styleCount = len(bars)
             styleIdx = rowNo % styleCount
             rowStyle = bars[styleIdx]
-            for colNo in range(len(row)):
+            for colNo in xrange(len(row)):
                 style = (styleIdx,colNo) in bars and bars[(styleIdx,colNo)] or rowStyle
-                (x, y, width, height) = row[colNo]
+                x, y, width, height = row[colNo]
                 if None in (width,height):
-                    self._addNABarLabel(lg,rowNo,colNo,x,y,width,height)
+                    if colNo in catNNA:
+                        self._addNABarLabel(lg,rowNo,colNo,x,y,width,height)
+                    elif catNAL and colNo not in CBL:
+                        r0 = self._addNABarLabel(lg,rowNo,colNo,x,y,width,height,True,catNAL)
+                        if r0:
+                            x, y, width, height = BP[rowNoL][colNo]
+                            r1 = self._addNABarLabel(lg,rowNoL,colNo,x,y,width,height,True,catNAL)
+                            x = (r0[0]+r1[0])/2.0
+                            y = (r0[1]+r1[1])/2.0
+                            self._addNABarLabel(lg,rowNoL,colNo,x,y,width,height,na=catNAL)
+                        CBL.append(colNo)
                     continue
 
                 # Draw a rectangular symbol for each data item,
