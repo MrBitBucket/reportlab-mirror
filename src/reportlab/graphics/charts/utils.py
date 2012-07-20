@@ -5,9 +5,9 @@
 __version__=''' $Id$ '''
 __doc__="Utilities used here and there."
 from time import mktime, gmtime, strftime
-from math import log10, pi, floor, sin, cos
+from math import log10, pi, floor, sin, cos, sqrt, hypot
 import weakref
-from reportlab.graphics.shapes import transformPoint, transformPoints, inverse, Ellipse, Group, String
+from reportlab.graphics.shapes import transformPoint, transformPoints, inverse, Ellipse, Group, String, Path
 from reportlab.lib.utils import flatten
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
@@ -300,7 +300,7 @@ class DrawTimeCollector(object):
 
 def xyDist( (x0,y0),(x1,y1) ):
     '''return distance between two points'''
-    return math.sqrt((x1-x0)**2+(y1-y0)**2)
+    return hypot((x1-x0),(y1-y0))
 
 def lineSegmentIntersect(
                 (x00,y00),(x01,y01),
