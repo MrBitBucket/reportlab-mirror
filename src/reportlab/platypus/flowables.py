@@ -1464,7 +1464,6 @@ class ListFlowable(_Container,Flowable):
                     #bulletFormat=None,
                     **kwds
                     ):
-        self._start = start
         self._flowables = flowables
 
         if style:
@@ -1474,6 +1473,14 @@ class ListFlowable(_Container,Flowable):
 
         for k,v in ListStyle.defaults.iteritems():
             setattr(self,'_'+k,kwds.get(k,getattr(style,k,v)))
+        if start is None:
+            start = getattr(self,'_start',None)
+            if start is None:
+                if getattr(self,'_bulletType','1')=='bullet':
+                    start = 'circle'
+                else:
+                    start = '1'
+        self._start = start
 
         for k in ('spaceBefore','spaceAfter'):
             v = kwds.get(k,getattr(style,k,None))

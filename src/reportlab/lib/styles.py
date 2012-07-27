@@ -146,6 +146,7 @@ class ListStyle(PropertySet):
                 bulletDedent='auto',
                 bulletDir='ltr',
                 bulletFormat=None,
+                start=None,         #starting value for a list
                 )
 
 _stylesheet1_undefined = object()
