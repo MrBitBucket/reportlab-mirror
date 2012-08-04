@@ -482,14 +482,7 @@ def rl_getmtime(pn,os_path_isfile=os.path.isfile,os_path_normpath=os.path.normpa
         return os_path_getmtime(pn)
     s = e[5]
     d = e[6]
-    y = ((d>>9)&0x7f)+1980
-    m = (d>>5)&0xf
-    d &= 0x1f
-    h = (s>>11)&0xf
-    m = (s>>5)&0x3f
-    s &= 0x1f
-    s <<= 1
-    return time_mktime((y,m,d,h,m,s,0,0,0))
+    return time_mktime((((d>>9)&0x7f)+1980,(d>>5)&0xf,d&0x1f,(s>>11)&0x1f,(s>>5)&0x3f,(s&0x1f)<<1,0,0,0))
 
 def rl_get_module(name,dir):
     if name in sys.modules:
