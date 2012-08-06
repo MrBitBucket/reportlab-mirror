@@ -25,7 +25,7 @@ from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
-from reportlab.lib.colors import black, _chooseEnforceColorSpace
+from reportlab.lib.colors import black, _chooseEnforceColorSpace, Color, CMYKColor, toColor
 from reportlab.lib.utils import import_zlib, ImageReader, fp_str, _digester
 from reportlab.lib.boxstuff import aspectRatioFix
 
@@ -73,6 +73,71 @@ def _annFormat(D,color,thickness,dashArray,hradius=0,vradius=0):
 #   BS['W'] = thickness or 0
 #   BS['S'] = bss
 #   D['BS'] = BS
+
+# helpers to guess color space for gradients
+def _normalizeColor(aColor):
+    if isinstance(aColor, CMYKColor):
+        d = aColor.density
+        return "DeviceCMYK", tuple(c*d for c in aColor.cmyk())
+    elif isinstance(aColor, Color):
+        return "DeviceRGB", aColor.rgb()
+    elif isinstance(aColor, (tuple, list)):
+        l = len(aColor)
+        if l == 3:
+            return "DeviceRGB", aColor
+        elif l == 4:
+            return "DeviceCMYK", aColor
+    elif isinstance(aColor, basestring):
+        return _normalizeColor(toColor(aColor))
+    raise ValueError("Unknown color %r" % aColor)
+
+def _normalizeColors(colors):
+    space = None
+    outcolors = []
+    for aColor in colors:
+        nspace, outcolor = _normalizeColor(aColor)
+        if space is not None and space != nspace:
+            raise ValueError("Mismatch in color spaces: %s and %s" % (space, nspace))
+        space = nspace
+        outcolors.append(outcolor)
+    return space, outcolors
+
+def _buildColorFunction(colors, positions):
+    from reportlab.pdfbase.pdfdoc import PDFExponentialFunction, PDFStitchingFunction
+    if positions is not None and len(positions) != len(colors):
+        raise ValueError("need to have the same number of colors and positions")
+    # simplified functions for edge cases
+    if len(colors) == 1:
+        # for completeness
+        return PDFExponentialFunction(N=1, C0=colors[0], C1=colors[0])
+    if len(colors) == 2:
+        if positions is None or (positions[0] == 0 and positions[1] == 1):
+            return PDFExponentialFunction(N=1, C0=colors[0], C1=colors[1])
+    # equally distribute if positions not specified
+    if positions is None:
+        nc = len(colors)
+        positions = [(1.0*x)/(nc-1) for x in range(nc)]
+    else:
+        # sort positions and colors in increasing order
+        poscolors = zip(positions, colors)
+        poscolors.sort(key=lambda x: x[0])
+        # add endpoint positions if not already present
+        if poscolors[0][0] != 0:
+            poscolors.insert(0, (0.0, poscolors[0][1]))
+        if poscolors[-1][0] != 1:
+            poscolors.append((1.0, poscolors[-1][1]))
+        positions, colors = zip(*poscolors) # unzip
+    # build stitching function
+    functions = []
+    bounds = [pos for pos in positions[1:-1]]
+    encode = []
+    lastcolor = colors[0]
+    for color in colors[1:]:
+        functions.append(PDFExponentialFunction(N=1, C0=lastcolor, C1=color))
+        lastcolor = color
+        encode.append(0.0)
+        encode.append(1.0)
+    return PDFStitchingFunction(functions, bounds, encode, Domain="[0.0 1.0]")
 
 class   ExtGState:
     defaults = dict(
@@ -583,6 +648,7 @@ class Canvas(textobject._PDFColorSetter):
         self._setColorSpace(page)
         self._setExtGState(page)
         self._setXObjects(page)
+        self._setShadingUsed(page)
         self._setAnnotations(page)
         self._doc.addPage(page)
 
@@ -608,6 +674,9 @@ class Canvas(textobject._PDFColorSetter):
 
     def _setColorSpace(self,obj):
         obj._colorsUsed = self._colorsUsed
+
+    def _setShadingUsed(self, page):
+        page._shadingUsed = self._shadingUsed
 
     def _setXObjects(self, thing):
         """for pages and forms, define the XObject dictionary for resources, if needed"""
@@ -890,7 +959,7 @@ class Canvas(textobject._PDFColorSetter):
             # restore the saved code
             saved = self._codeStack[-1]
             del self._codeStack[-1]
-            self._code, self._formsinuse, self._annotationrefs, self._formData,self._colorsUsed = saved
+            self._code, self._formsinuse, self._annotationrefs, self._formData,self._colorsUsed, self._shadingUsed = saved
         else:
             self._code = []    # ready for more...
             self._psCommandsAfterPage = []
@@ -899,10 +968,11 @@ class Canvas(textobject._PDFColorSetter):
             self._annotationrefs = []
             self._formData = None
             self._colorsUsed = {}
+            self._shadingUsed = {}
 
     def _pushAccumulators(self):
         "when you enter a form, save accumulator info not related to the form for page (if any)"
-        saved = (self._code, self._formsinuse, self._annotationrefs, self._formData, self._colorsUsed)
+        saved = (self._code, self._formsinuse, self._annotationrefs, self._formData, self._colorsUsed, self._shadingUsed)
         self._codeStack.append(saved)
         self._code = []    # ready for more...
         self._currentPageHasImages = 1 # for safety...
@@ -910,6 +980,7 @@ class Canvas(textobject._PDFColorSetter):
         self._annotationrefs = []
         self._formData = None
         self._colorsUsed = {}
+        self._shadingUsed = {}
 
     def _setExtGState(self, obj):
         obj.ExtGState = self._extgstate.getState()
@@ -1423,6 +1494,39 @@ class Canvas(textobject._PDFColorSetter):
         self._code.append('h')  #close off, although it should be where it started anyway
 
         self._code.append(PATH_OPS[stroke, fill, self._fillMode])
+
+    def _addShading(self, shading):
+        name = self._doc.addShading(shading)
+        self._shadingUsed[name] = name
+        return name
+
+    def shade(self, shading):
+        name = self._addShading(shading)
+        self._code.append('/%s sh' % name)
+
+    def linearGradient(self, x0, y0, x1, y1, colors, positions=None, extend=True):
+        from reportlab.pdfbase.pdfdoc import PDFAxialShading
+        colorSpace, ncolors = _normalizeColors(colors)
+        fcn = _buildColorFunction(ncolors, positions)
+        if extend:
+            extendStr = "[true true]"
+        else:
+            extendStr = "[false false]"
+        shading = PDFAxialShading(x0, y0, x1, y1, Function=fcn,
+                ColorSpace=colorSpace, Extend=extendStr)
+        self.shade(shading)
+
+    def radialGradient(self, x, y, radius, colors, positions=None, extend=True):
+        from reportlab.pdfbase.pdfdoc import PDFRadialShading
+        colorSpace, ncolors = _normalizeColors(colors)
+        fcn = _buildColorFunction(ncolors, positions)
+        if extend:
+            extendStr = "[true true]"
+        else:
+            extendStr = "[false false]"
+        shading = PDFRadialShading(x, y, 0.0, x, y, radius, Function=fcn,
+                ColorSpace=colorSpace, Extend=extendStr)
+        self.shade(shading)
 
         ##################################################
         #

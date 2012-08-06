@@ -139,13 +139,9 @@ class DummyDoc:
 ### the global document structure manager
 class PDFDocument:
     __PDFObject__ = True
-    _ID = None
-    objectcounter = 0
-    inObject = None
     # set this to define filters
     defaultStreamFilters = None
     encrypt = NoEncryption() # default no encryption
-    pageCounter = 1
     def __init__(self,
                  dummyoutline=0,
                  compression=rl_config.pageCompression,
@@ -153,6 +149,11 @@ class PDFDocument:
                  filename=None,
                  pdfVersion=PDF_VERSION_DEFAULT,
                  ):
+        self._ID = None
+        self.objectcounter = 0
+        self.shadingCounter = 0
+        self.inObject = None
+        self.pageCounter = 1
 
         # allow None value to be passed in to mean 'give system defaults'
         if invariant is None:
@@ -317,6 +318,12 @@ class PDFDocument:
     def refAnnotation(self, name):
         internalname = self.annotationName(name)
         return PDFObjectReference(internalname)
+
+    def addShading(self, shading):
+         name = "Sh%d" % self.shadingCounter
+         self.Reference(shading, name)
+         self.shadingCounter += 1
+         return name
 
     def addColor(self,cmyk):
         sname = cmyk.spotName
@@ -1117,6 +1124,7 @@ class PDFPage(PDFCatalog):
     compression = 0
     XObjects = None
     _colorsUsed = {}
+    _shadingsUsed = {}
     Trans = None
     # transitionstring?
     # xobjects?
@@ -1174,6 +1182,7 @@ class PDFPage(PDFCatalog):
                 resources.XObject = self.XObjects
             if self.ExtGState:
                 resources.ExtGState = self.ExtGState
+            resources.setShading(self._shadingUsed)
             resources.setColorSpace(self._colorsUsed)
 
             self.Resources = resources
@@ -1883,6 +1892,10 @@ class PDFResourceDictionary:
         for c,s in colorsUsed.iteritems():
             self.ColorSpace[s] = PDFObjectReference(c)
 
+    def setShading(self,shadingUsed):
+        for c,s in shadingUsed.iteritems():
+            self.Shading[s] = PDFObjectReference(c)
+
     def format(self, document):
         D = {}
         from types import ListType, DictType
@@ -2248,6 +2261,147 @@ class PDFSeparationCMYKColor:
                         filters=None,#[PDFBase85Encode, PDFZCompress],
                         )
                     ))
+
+class PDFFunction:
+    """superclass for all function types."""
+    __PDFObject__ = True
+    defaults = []
+    required = ("FunctionType", "Domain")
+    permitted = required+("Range",)
+    def FunctionDict(self, **kw):
+        d = {}
+        for (name,val) in self.defaults:
+            d[name] = val
+        d.update(kw)
+        for name in self.required:
+            if name not in d:
+                raise ValueError, "keyword argument %s missing" % name
+        permitted = self.permitted
+        for name in d.keys():
+            if name not in permitted:
+                raise ValueError, "bad annotation dictionary name %s" % name
+        return PDFDictionary(d)
+
+    def Dict(self, document):
+        raise ValueError, "Dict undefined for virtual superclass PDFShading, must overload"
+        # but usually
+        #return self.FunctionDict(self, ...)
+
+    def format(self, document):
+        D = self.Dict(document)
+        return D.format(document)
+
+class PDFExponentialFunction(PDFFunction):
+    defaults = PDFFunction.defaults + [("Domain", PDFArrayCompact((0.0, 1.0)))]
+    required = PDFFunction.required + ("N",)
+    permitted = PDFFunction.permitted + ("C0", "C1", "N")
+    def __init__(self, C0, C1, N, **kw):
+        self.C0 = C0
+        self.C1 = C1
+        self.N = N
+        self.otherkw = kw
+    def Dict(self, document):
+        d = {}
+        d.update(self.otherkw)
+        d["FunctionType"] = 2
+        d["C0"] = PDFArrayCompact(self.C0)
+        d["C1"] = PDFArrayCompact(self.C1)
+        d["N"] = self.N
+        return self.FunctionDict(**d)
+
+class PDFStitchingFunction(PDFFunction):
+    required = PDFFunction.required + ("Functions", "Bounds", "Encode")
+    permitted = PDFFunction.permitted + ("Functions", "Bounds", "Encode")
+    def __init__(self, Functions, Bounds, Encode, **kw):
+        self.Functions = Functions
+        self.Bounds = Bounds
+        self.Encode = Encode
+        self.otherkw = kw
+    def Dict(self, document):
+        d = {}
+        d.update(self.otherkw)
+        d["FunctionType"] = 3
+        d["Functions"] = PDFArray([document.Reference(x) for x in self.Functions])
+        d["Bounds"] = PDFArray(self.Bounds)
+        d["Encode"] = PDFArray(self.Encode)
+        return self.FunctionDict(**d)
+
+class PDFShading:
+    """superclass for all shading types."""
+    __PDFObject__ = True
+    required = ("ShadingType", "ColorSpace")
+    permitted = required+("Background", "BBox", "AntiAlias")
+    def ShadingDict(self, **kw):
+        d = {}
+        d.update(kw)
+        for name in self.required:
+            if name not in d:
+                raise ValueError, "keyword argument %s missing" % name
+        permitted = self.permitted
+        for name in d.keys():
+            if name not in permitted:
+                raise ValueError, "bad annotation dictionary name %s" % name
+        return PDFDictionary(d)
+
+    def Dict(self, document):
+        raise ValueError, "Dict undefined for virtual superclass PDFShading, must overload"
+        # but usually
+        #return self.ShadingDict(self, ...)
+
+    def format(self, document):
+        D = self.Dict(document)
+        return D.format(document)
+
+class PDFFunctionShading(PDFShading):
+    required = PDFShading.required + ("Function",)
+    permitted = PDFShading.permitted + ("Domain", "Matrix", "Function")
+    def __init__(self, Function, ColorSpace, **kw):
+        self.Function = Function
+        self.ColorSpace = ColorSpace
+        self.otherkw = kw
+    def Dict(self, document):
+        d = {}
+        d.update(self.otherkw)
+        d["ShadingType"] = 1
+        d["ColorSpace"] = PDFName(self.ColorSpace)
+        d["Function"] = document.Reference(self.Function)
+        return self.ShadingDict(**d)
+
+class PDFAxialShading(PDFShading):
+    required = PDFShading.required + ("Coords", "Function")
+    permitted = PDFShading.permitted + (
+            "Coords", "Domain", "Function", "Extend")
+    def __init__(self, x0, y0, x1, y1, Function, ColorSpace, **kw):
+        self.Coords = (x0, y0, x1, y1)
+        self.Function = Function
+        self.ColorSpace = ColorSpace
+        self.otherkw = kw
+    def Dict(self, document):
+        d = {}
+        d.update(self.otherkw)
+        d["ShadingType"] = 2
+        d["ColorSpace"] = PDFName(self.ColorSpace)
+        d["Coords"] = PDFArrayCompact(self.Coords)
+        d["Function"] = document.Reference(self.Function)
+        return self.ShadingDict(**d)
+
+class PDFRadialShading(PDFShading):
+    required = PDFShading.required + ("Coords", "Function")
+    permitted = PDFShading.permitted + (
+            "Coords", "Domain", "Function", "Extend")
+    def __init__(self, x0, y0, r0, x1, y1, r1, Function, ColorSpace, **kw):
+        self.Coords = (x0, y0, r0, x1, y1, r1)
+        self.Function = Function
+        self.ColorSpace = ColorSpace
+        self.otherkw = kw
+    def Dict(self, document):
+        d = {}
+        d.update(self.otherkw)
+        d["ShadingType"] = 3
+        d["ColorSpace"] = PDFName(self.ColorSpace)
+        d["Coords"] = PDFArrayCompact(self.Coords)
+        d["Function"] = document.Reference(self.Function)
+        return self.ShadingDict(**d)
 
 if __name__=="__main__":
     print "There is no script interpretation for pdfdoc."
