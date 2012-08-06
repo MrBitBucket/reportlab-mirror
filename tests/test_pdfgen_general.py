@@ -860,6 +860,35 @@ cost to performance.""")
     r1 = (inch, 1.5*inch, inch+2*3+c.stringWidth(link,c._fontname, c._fontsize), 1.75*inch) # this is x1,y1,x2,y2
     c.linkURL(xpdf, r1, thickness=1, color=colors.red, kind='GoToR')
     c.drawString(inch+3, 1.5*inch+6, link )
+    c.showPage()
+
+    ############# colour gradients
+    title = 'Gradients code contributed by Peter Johnson <johnson.peter@gmail.com>'
+    c.drawString(1*inch,10.8*inch,title)
+    c.addOutlineEntry(title+" section", title, level=0, closed=True)
+    c.bookmarkHorizontalAbsolute(title, 10.8*inch)
+    from reportlab.lib.colors import red, green, blue
+
+    c.saveState()
+    p = c.beginPath()
+    p.moveTo(1*inch,2*inch)
+    p.lineTo(1.5*inch,2.5*inch)
+    p.curveTo(2*inch,3*inch,3.0*inch,3*inch,4*inch,2.9*inch)
+    p.lineTo(5.5*inch,2.1*inch)
+    p.close()
+    c.clipPath(p)
+
+    # Draw a linear gradient from (0, 2*inch) to (5*inch, 3*inch), from orange to white.
+    # The gradient will extend past the endpoints (so you probably want a clip path in place)
+    c.linearGradient(1*inch, 2*inch, 6*inch, 3*inch, (red, blue))
+    c.restoreState()
+
+    # Draw a radial gradient with a radius of 3 inches.
+    # The color starts orange and stays orange until 20% of the radius,
+    # then fades to white at 80%, and ends up green at 3 inches from the center.
+    # Since extend is false, the gradient stops drawing at the edge of the circle.
+    c.radialGradient(4*inch, 6*inch, 3*inch, (red, green, blue), (0.2, 0.8, 1.0), extend=False)
+    c.showPage()
 
     ### now do stuff for the outline
     #for x in outlinenametree: print x
