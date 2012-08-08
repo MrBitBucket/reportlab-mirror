@@ -1438,6 +1438,7 @@ class Canvas(textobject._PDFColorSetter):
         self._code.append('/%s sh' % name)
 
     def linearGradient(self, x0, y0, x1, y1, colors, positions=None, extend=True):
+        #this code contributed by Peter Johnson <johnson.peter@gmail.com>
         from reportlab.pdfbase.pdfdoc import PDFAxialShading
         colorSpace, ncolors = _normalizeColors(colors)
         fcn = _buildColorFunction(ncolors, positions)
@@ -1450,6 +1451,7 @@ class Canvas(textobject._PDFColorSetter):
         self.shade(shading)
 
     def radialGradient(self, x, y, radius, colors, positions=None, extend=True):
+        #this code contributed by Peter Johnson <johnson.peter@gmail.com>
         from reportlab.pdfbase.pdfdoc import PDFRadialShading
         colorSpace, ncolors = _normalizeColors(colors)
         fcn = _buildColorFunction(ncolors, positions)
