@@ -434,43 +434,54 @@ cost to performance.""")
     t.textLine()
 
     #line demo
-    makesubsection(c, "lines", 10*inch)
-    c.line(inch, 8*inch, 3*inch, 8*inch)
-    t.setTextOrigin(4*inch, 8*inch)
+    makesubsection(c, "lines", 9*inch)
+    c.line(inch, 9*inch, 3*inch, 9*inch)
+    t.setTextOrigin(4*inch, 9*inch)
     t.textLine('canvas.line(x1, y1, x2, y2)')
 
     #bezier demo - show control points
-    makesubsection(c, "bezier curves", 7.5*inch)
+    makesubsection(c, "bezier curves", 8.5*inch)
     (x1, y1, x2, y2, x3, y3, x4, y4) = (
-                        inch, 6.5*inch,
-                        1.2*inch, 7.5 * inch,
-                        3*inch, 7.5 * inch,
-                        3.5*inch, 6.75 * inch
+                        inch, 7.8*inch,
+                        1.2*inch, 8.8 * inch,
+                        3*inch, 8.8 * inch,
+                        3.5*inch, 8.05 * inch
                         )
     c.bezier(x1, y1, x2, y2, x3, y3, x4, y4)
     c.setDash(3,3)
     c.line(x1,y1,x2,y2)
     c.line(x3,y3,x4,y4)
     c.setDash()
-    t.setTextOrigin(4*inch, 7 * inch)
+    t.setTextOrigin(4*inch, 8.3 * inch)
     t.textLine('canvas.bezier(x1, y1, x2, y2, x3, y3, x4, y4)')
 
     #rectangle
-    makesubsection(c, "rectangles", 7*inch)
-    c.rect(inch, 5.25 * inch, 2 * inch, 0.75 * inch)
-    t.setTextOrigin(4*inch, 5.5 * inch)
+    makesubsection(c, "rectangles", 8*inch)
+    c.rect(inch, 7 * inch, 2 * inch, 0.75 * inch)
+    t.setTextOrigin(4*inch, 7.375 * inch)
     t.textLine('canvas.rect(x, y, width, height) - x,y is lower left')
+
+    c.roundRect(inch,6.25*inch,2*inch,0.6*inch,0.1*inch)
+    t.setTextOrigin(4*inch, 6.55*inch)
+    t.textLine('canvas.roundRect(x,y,width,height,radius)')
+
+    makesubsection(c, "arcs", 8*inch)
+    c.arc(inch,5*inch,3*inch,6*inch,0,90)
+    t.setTextOrigin(4*inch, 5.5*inch)
+    t.textLine('canvas.arc(x1, y1, x2, y2, startDeg, extentDeg)')
+    t.textLine('Note that this is an elliptical arc, not just circular!')
+
 
     #wedge
     makesubsection(c, "wedges", 5*inch)
-    c.wedge(inch, 5*inch, 3*inch, 4*inch, 0, 315)
-    t.setTextOrigin(4*inch, 4.5 * inch)
+    c.wedge(inch, 4.5*inch, 3*inch, 3.5*inch, 0, 315)
+    t.setTextOrigin(4*inch, 4*inch)
     t.textLine('canvas.wedge(x1, y1, x2, y2, startDeg, extentDeg)')
     t.textLine('Note that this is an elliptical arc, not just circular!')
 
     #wedge the other way
-    c.wedge(inch, 4*inch, 3*inch, 3*inch, 0, -45)
-    t.setTextOrigin(4*inch, 3.5 * inch)
+    c.wedge(inch, 3.75*inch, 3*inch, 2.75*inch, 0, -45)
+    t.setTextOrigin(4*inch, 3*inch)
     t.textLine('Use a negative extent to go clockwise')
 
     #circle
