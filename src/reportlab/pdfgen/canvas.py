@@ -1384,25 +1384,11 @@ class Canvas(textobject._PDFColorSetter):
         """Draw a partial ellipse inscribed within the rectangle x1,y1,x2,y2,
         starting at startAng degrees and covering extent degrees.   Angles
         start with 0 to the right (+x) and increase counter-clockwise.
-        These should have x1<x2 and y1<y2.
+        These should have x1<x2 and y1<y2."""
+        pathobject.PDFPathObject(code=self._code).arc(x1,y1,x2,y2,startAng,extent)
+        self._strokeAndFill(1,0)
 
-        Contributed to piddlePDF by Robert Kern, 28/7/99.
-        Trimmed down by AR to remove color stuff for pdfgen.canvas and
-        revert to positive coordinates.
-
-        The algorithm is an elliptical generalization of the formulae in
-        Jim Fitzsimmon's TeX tutorial <URL: http://www.tinaja.com/bezarc1.pdf>."""
-
-        pointList = pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent)
-        #move to first point
-        self._code.append('n %s m' % fp_str(pointList[0][:2]))
-        for curve in pointList:
-            self._code.append('%s c' % fp_str(curve[2:]))
-        # stroke
-        self._code.append('S')
-
-        #--------now the shape drawing methods-----------------------
-
+    #--------now the shape drawing methods-----------------------
     def rect(self, x, y, width, height, stroke=1, fill=0):
         "draws a rectangle with lower left corner at (x,y) and width and height as given."
         self._code.append('n %s re ' % fp_str(x, y, width, height)
@@ -1413,35 +1399,18 @@ class Canvas(textobject._PDFColorSetter):
 
         Note that (x1,y1) and (x2,y2) are the corner points of
         the enclosing rectangle.
-
-        Uses bezierArc, which conveniently handles 360 degrees.
-        Special thanks to Robert Kern."""
-
-        pointList = pdfgeom.bezierArc(x1,y1, x2,y2, 0, 360)
-        #move to first point
-        self._code.append('n %s m' % fp_str(pointList[0][:2]))
-        for curve in pointList:
-            self._code.append('%s c' % fp_str(curve[2:]))
-        #finish
-        self._code.append(PATH_OPS[stroke, fill, self._fillMode])
+        """
+        pathobject.PDFPathObject(code=self._code).ellipse(x1, y1, x2-x1, y2-y1)
+        self._strokeAndFill(stroke, fill)
 
     def wedge(self, x1,y1, x2,y2, startAng, extent, stroke=1, fill=0):
         """Like arc, but connects to the centre of the ellipse.
         Most useful for pie charts and PacMan!"""
-
-        x_cen  = (x1+x2)/2.
-        y_cen  = (y1+y2)/2.
-        pointList = pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent)
-
-        self._code.append('n %s m' % fp_str(x_cen, y_cen))
-        # Move the pen to the center of the rectangle
-        self._code.append('%s l' % fp_str(pointList[0][:2]))
-        for curve in pointList:
-            self._code.append('%s c' % fp_str(curve[2:]))
-        # finish the wedge
-        self._code.append('%s l ' % fp_str(x_cen, y_cen))
-        # final operator
-        self._code.append(PATH_OPS[stroke, fill, self._fillMode])
+        p = pathobject.PDFPathObject(code=self._code)
+        p.moveTo(0.5*(x1+x2),0.5*(y1+y2))
+        p.arcTo(x1,y1,x2,y2,startAng,extent)
+        p.close()
+        self._strokeAndFill(stroke,fill)
 
     def circle(self, x_cen, y_cen, r, stroke=1, fill=0):
         """draw a cirle centered at (x_cen,y_cen) with radius r (special case of ellipse)"""
@@ -1455,45 +1424,9 @@ class Canvas(textobject._PDFColorSetter):
     def roundRect(self, x, y, width, height, radius, stroke=1, fill=0):
         """Draws a rectangle with rounded corners.  The corners are
         approximately quadrants of a circle, with the given radius."""
-        #use a precomputed set of factors for the bezier approximation
-        #to a circle. There are six relevant points on the x axis and y axis.
-        #sketch them and it should all make sense!
-        t = 0.4472 * radius
-
-        x0 = x
-        x1 = x0 + t
-        x2 = x0 + radius
-        x3 = x0 + width - radius
-        x4 = x0 + width - t
-        x5 = x0 + width
-
-        y0 = y
-        y1 = y0 + t
-        y2 = y0 + radius
-        y3 = y0 + height - radius
-        y4 = y0 + height - t
-        y5 = y0 + height
-
-        self._code.append('n %s m' % fp_str(x2, y0))
-        self._code.append('%s l' % fp_str(x3, y0))  # bottom row
-        self._code.append('%s c'
-                         % fp_str(x4, y0, x5, y1, x5, y2)) # bottom right
-
-        self._code.append('%s l' % fp_str(x5, y3))  # right edge
-        self._code.append('%s c'
-                         % fp_str(x5, y4, x4, y5, x3, y5)) # top right
-
-        self._code.append('%s l' % fp_str(x2, y5))  # top row
-        self._code.append('%s c'
-                         % fp_str(x1, y5, x0, y4, x0, y3)) # top left
-
-        self._code.append('%s l' % fp_str(x0, y2))  # left edge
-        self._code.append('%s c'
-                         % fp_str(x0, y1, x1, y0, x2, y0)) # bottom left
-
-        self._code.append('h')  #close off, although it should be where it started anyway
-
-        self._code.append(PATH_OPS[stroke, fill, self._fillMode])
+        #make the path operators draw into our code
+        pathobject.PDFPathObject(code=self._code).roundRect(x, y, width, height, radius)
+        self._strokeAndFill(stroke,fill)
 
     def _addShading(self, shading):
         name = self._doc.addShading(shading)
@@ -1708,10 +1641,11 @@ class Canvas(textobject._PDFColorSetter):
 
     def drawPath(self, aPath, stroke=1, fill=0):
         "Draw the path object in the mode indicated"
-        gc = aPath.getCode(); pathops = PATH_OPS[stroke, fill, self._fillMode]
-        item = "%s %s" % (gc, pathops) # ENSURE STRING CONVERSION
-        self._code.append(item)
-        #self._code.append(aPath.getCode() + ' ' + PATH_OPS[stroke, fill, self._fillMode])
+        self._code.append(str(aPath.getCode()))
+        self._strokeAndFill(stroke,fill)
+
+    def _strokeAndFill(self,stroke,fill):
+        self._code.append(PATH_OPS[stroke, fill, self._fillMode])
 
     def clipPath(self, aPath, stroke=1, fill=0):
         "clip as well as drawing"

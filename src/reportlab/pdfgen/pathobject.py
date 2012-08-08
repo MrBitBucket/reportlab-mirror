@@ -24,11 +24,13 @@ class PDFPathObject:
     curveto wherever you want; add whole shapes; and then add it back
     into the canvas with one of the relevant operators.
 
-    Path objects are probably not long, so we pack onto one line"""
+    Path objects are probably not long, so we pack onto one line
 
-    def __init__(self):
-        self._code = []
-        #self._code.append('n')  #newpath
+    the code argument allows a canvas to get the operatiosn appended directly so
+    avoiding the final getCode
+    """
+    def __init__(self,code=None):
+        self._code = (code,[])[code is None]
         self._code_append = self._init_code_append
 
     def _init_code_append(self,c):
@@ -61,19 +63,12 @@ class PDFPathObject:
         The algorithm is an elliptical generalization of the formulae in
         Jim Fitzsimmon's TeX tutorial <URL: http://www.tinaja.com/bezarc1.pdf>."""
 
-        pointList = pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent)
-        #move to first point
-        self._code_append('%s m' % fp_str(pointList[0][:2]))
-        for curve in pointList:
-            self._code_append('%s c' % fp_str(curve[2:]))
+        self._curves(pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent))
 
     def arcTo(self, x1,y1, x2,y2, startAng=0, extent=90):
         """Like arc, but draws a line from the current point to
         the start if the start is not the current point."""
-        pointList = pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent)
-        self._code_append('%s l' % fp_str(pointList[0][:2]))
-        for curve in pointList:
-            self._code_append('%s c' % fp_str(curve[2:]))
+        self._curves(pdfgeom.bezierArc(x1,y1, x2,y2, startAng, extent),'lineTo')
 
     def rect(self, x, y, width, height):
         """Adds a rectangle to the path"""
@@ -81,20 +76,52 @@ class PDFPathObject:
 
     def ellipse(self, x, y, width, height):
         """adds an ellipse to the path"""
-        pointList = pdfgeom.bezierArc(x, y, x + width,y + height, 0, 360)
-        self._code_append('%s m' % fp_str(pointList[0][:2]))
-        for curve in pointList:
-            self._code_append('%s c' % fp_str(curve[2:]))
+        self._curves(pdfgeom.bezierArc(x, y, x + width,y + height, 0, 360))
+
+    def _curves(self,curves,initial='moveTo'):
+        getattr(self,initial)(*curves[0][:2])
+        for curve in curves:
+            self.curveTo(*curve[2:])
 
     def circle(self, x_cen, y_cen, r):
         """adds a circle to the path"""
         x1 = x_cen - r
-        #x2 = x_cen + r
         y1 = y_cen - r
-        #y2 = y_cen + r
         width = height = 2*r
-        #self.ellipse(x_cen - r, y_cen - r, x_cen + r, y_cen + r)
         self.ellipse(x1, y1, width, height)
+
+    def roundRect(self, x, y, width, height, radius):
+        """Draws a rectangle with rounded corners. The corners are
+        approximately quadrants of a circle, with the given radius."""
+        #use a precomputed set of factors for the bezier approximation
+        #to a circle. There are six relevant points on the x axis and y axis.
+        #sketch them and it should all make sense!
+        t = 0.4472 * radius
+
+        x0 = x
+        x1 = x0 + t
+        x2 = x0 + radius
+        x3 = x0 + width - radius
+        x4 = x0 + width - t
+        x5 = x0 + width
+
+        y0 = y
+        y1 = y0 + t
+        y2 = y0 + radius
+        y3 = y0 + height - radius
+        y4 = y0 + height - t
+        y5 = y0 + height
+
+        self.moveTo(x2, y0)
+        self.lineTo(x3, y0) #bottom row
+        self.curveTo(x4, y0, x5, y1, x5, y2) #bottom right
+        self.lineTo(x5, y3) #right edge
+        self.curveTo(x5, y4, x4, y5, x3, y5) #top right
+        self.lineTo(x2, y5) #top row
+        self.curveTo(x1, y5, x0, y4, x0, y3) #top left
+        self.lineTo(x0, y2) #left edge
+        self.curveTo(x0, y1, x1, y0, x2, y0) #bottom left
+        self.close()
 
     def close(self):
         "draws a line back to where it started"
