@@ -178,9 +178,27 @@ def imgNormV(v,nv):
     else:
         return v
 
+def _getDotsInfo(style):
+    dots = style.endDots
+    if isinstance(dots,str):
+        text = dots
+        fontName = style.fontName
+        fontSize = style.fontSize
+        textColor = style.textColor
+        backColor = style.backColor
+        dy = 0
+    else:
+        text = getattr(dots,'text','.')
+        fontName = getattr(dots,'fontName',style.fontName)
+        fontSize = getattr(dots,'fontSize',style.fontSize)
+        textColor = getattr(dots,'textColor',style.textColor)
+        backColor = getattr(dots,'backColor',style.backColor)
+        dy = getattr(dots,'dy',0)
+    return text,fontName,fontSize,textColor,backColor,dy
+
 _56=5./6
 _16=1./6
-def _putFragLine(cur_x, tx, line):
+def _putFragLine(cur_x, tx, line, last, pKind):
     xs = tx.XtraState
     cur_y = xs.cur_y
     x0 = tx._x0
@@ -316,6 +334,8 @@ def _putFragLine(cur_x, tx, line):
             cur_x += txtlen
             nSpaces += text.count(' ')+_nbspCount(text)
     cur_x_s = cur_x+(nSpaces-1)*ws
+    if last and pKind!='right' and xs.style.endDots:
+        _do_dots_frag(cur_x,cur_x_s,line.maxWidth,xs,tx)
     if xs.underline:
         xs.underlines.append( (xs.underline_x, cur_x_s, xs.underlineColor) )
     if xs.strike:
@@ -326,22 +346,43 @@ def _putFragLine(cur_x, tx, line):
         xs.backColors.append( (xs.backColor_x, cur_x_s, xs.backColor) )
     if tx._x0!=x0:
         setXPos(tx,x0-tx._x0)
+    
+def _do_dots_frag(cur_x, cur_x_s, maxWidth, xs, tx):
+    text,fontName,fontSize,textColor,backColor,dy = _getDotsInfo(xs.style)
+    txtlen = tx._canvas.stringWidth(text, fontName, fontSize)
+    if cur_x_s+txtlen<=maxWidth:
+        if tx._fontname!=fontName or tx._fontsize!=fontSize:
+            tx.setFont(fontName,fontSize)
+        maxWidth += getattr(tx,'_dotsOffsetX',tx._x0)
+        tx.setTextOrigin(0,xs.cur_y+dy)
+        setXPos(tx,cur_x_s-cur_x)
+        n = int((maxWidth-cur_x_s)/txtlen)
+        setXPos(tx,maxWidth - txtlen*n)
+        if xs.textColor!=textColor:
+            tx.setFillColor(textColor)
+        if backColor: xs.backColors.append((cur_x,maxWidth,backColor))
+        tx._textOut(n*text,1)
+        if dy: tx.setTextOrigin(tx._x0,xs.cur_y-dy)
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,offset)
-    _putFragLine(offset, tx, line)
+    _putFragLine(offset, tx, line, last, 'left')
     setXPos(tx,-offset)
 
 def _centerDrawParaLineX( tx, offset, line, last=0):
-    m = offset+0.5*line.extraSpace
-    setXPos(tx,m)
-    _putFragLine(m,tx, line)
-    setXPos(tx,-m)
+    tx._dotsOffsetX = offset + tx._x0
+    try:
+        m = offset+0.5*line.extraSpace
+        setXPos(tx,m)
+        _putFragLine(m,tx, line, last,'center')
+        setXPos(tx,-m)
+    finally:
+        del tx._dotsOffsetX
 
 def _rightDrawParaLineX( tx, offset, line, last=0):
     m = offset+line.extraSpace
     setXPos(tx,m)
-    _putFragLine(m,tx, line)
+    _putFragLine(m,tx, line, last, 'right')
     setXPos(tx,-m)
 
 def _justifyDrawParaLineX( tx, offset, line, last=0):
@@ -353,10 +394,10 @@ def _justifyDrawParaLineX( tx, offset, line, last=0):
         simple = not nSpaces
     if not simple:
         tx.setWordSpace(extraSpace / float(nSpaces))
-        _putFragLine(offset, tx, line)
+        _putFragLine(offset, tx, line, last, 'justify')
         tx.setWordSpace(0)
     else:
-        _putFragLine(offset, tx, line)  #no space modification
+        _putFragLine(offset, tx, line, last, 'justify') #no space modification
     setXPos(tx,-offset)
 
 try:
@@ -1017,7 +1058,12 @@ class Paragraph(Flowable):
                     return []
         func = self._get_split_blParaFunc()
 
-        P1=self.__class__(None,style,bulletText=self.bulletText,frags=func(blPara,0,s))
+        if style.endDots:
+            style1 = deepcopy(style)
+            style1.endDots = None
+        else:
+            style1 = style
+        P1=self.__class__(None,style1,bulletText=self.bulletText,frags=func(blPara,0,s))
         #this is a major hack
         P1.blPara = ParaLines(kind=1,lines=blPara.lines[0:s],aH=availHeight,aW=availWidth)
         P1._JustifyLast = 1
@@ -1088,7 +1134,7 @@ class Paragraph(Flowable):
         calcBounds = autoLeading not in ('','off')
         frags = self.frags
         nFrags= len(frags)
-        if nFrags==1 and not hasattr(frags[0],'cbDefn'):
+        if nFrags==1 and not hasattr(frags[0],'cbDefn') and not style.endDots:
             f = frags[0]
             fontSize = f.fontSize
             fontName = f.fontName
@@ -1243,7 +1289,7 @@ class Paragraph(Flowable):
                     if currentWidth>self.width: self.width = currentWidth
                     #end of line
                     lines.append(FragLine(extraSpace=maxWidth-currentWidth, wordCount=n,
-                                        lineBreak=lineBreak, words=words, fontSize=maxSize, ascent=maxAscent, descent=minDescent))
+                                        lineBreak=lineBreak, words=words, fontSize=maxSize, ascent=maxAscent, descent=minDescent, maxWidth=maxWidth))
 
                     #start new line
                     lineno += 1
@@ -1293,7 +1339,7 @@ class Paragraph(Flowable):
             if words!=[]:
                 if currentWidth>self.width: self.width = currentWidth
                 lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,
-                                    words=words, fontSize=maxSize,ascent=maxAscent,descent=minDescent))
+                                    words=words, fontSize=maxSize,ascent=maxAscent,descent=minDescent,maxWidth=maxWidth))
             return ParaLines(kind=1, lines=lines)
 
         return lines
@@ -1438,7 +1484,7 @@ class Paragraph(Flowable):
                 tx.setFont(f.fontName, f.fontSize, leading)
                 ws = lines[0][0]
                 t_off = dpl( tx, offset, ws, lines[0][1], noJustifyLast and nLines==1)
-                if f.underline or f.link or f.strike:
+                if f.underline or f.link or f.strike or style.endDots:
                     xs = tx.XtraState = ABag()
                     xs.cur_y = cur_y
                     xs.f = f
@@ -1450,6 +1496,8 @@ class Paragraph(Flowable):
                     xs.strikeColor=None
                     xs.links=[]
                     xs.link=f.link
+                    xs.textColor = f.textColor
+                    xs.backColors = []
                     canvas.setStrokeColor(f.textColor)
                     dx = t_off+leftIndent
                     if dpl!=_justifyDrawParaLine: ws = 0
@@ -1459,15 +1507,18 @@ class Paragraph(Flowable):
                     if underline: _do_under_line(0, dx, ws, tx)
                     if strike: _do_under_line(0, dx, ws, tx, lm=0.125)
                     if link: _do_link_line(0, dx, ws, tx)
+                    if noJustifyLast and nLines==1 and style.endDots and dpl!=_rightDrawParaLine: _do_dots(0, dx, ws, xs, tx, dpl)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
                     for i in xrange(1, nLines):
                         ws = lines[i][0]
                         t_off = dpl( tx, _offsets[i], ws, lines[i][1], noJustifyLast and i==lim)
+                        dx = t_off+leftIndent
                         if dpl!=_justifyDrawParaLine: ws = 0
-                        if underline: _do_under_line(i, t_off+leftIndent, ws, tx)
-                        if strike: _do_under_line(i, t_off+leftIndent, ws, tx, lm=0.125)
-                        if link: _do_link_line(i, t_off+leftIndent, ws, tx)
+                        if underline: _do_under_line(i, dx, ws, tx)
+                        if strike: _do_under_line(i, dx, ws, tx, lm=0.125)
+                        if link: _do_link_line(i, dx, ws, tx)
+                        if noJustifyLast and i==lim and style.endDots and dpl!=_rightDrawParaLine: _do_dots(i, dx, ws, xs, tx, dpl)
                 else:
                     for i in xrange(1, nLines):
                         dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
