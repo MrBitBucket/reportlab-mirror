@@ -331,7 +331,7 @@ def randomText(theme=STARTUP, sentences=5):
     if type(theme)==type(''):
         if theme.lower()=='chomsky': return chomsky(sentences)
         elif theme.upper() in ('STARTUP','COMPUTERS','BLAH','BUZZWORD','STARTREK','PRINTING','PYTHON'):
-            theme = globals()[theme]
+            theme = globals()[theme.upper()]
         else:
             raise ValueError('Unknown theme "%s"' % theme)
 
@@ -359,6 +359,13 @@ if __name__=='__main__':
         theme = argv.pop(0)
         if argv:
             sentences = int(argv.pop(0))
-        print randomText(theme,sentences)
+        else:
+            sentences = 5
+        try:
+            print randomText(theme,sentences)
+        except:
+            print>>sys.stderr,"Usage: randomtext.py [theme [#sentences]]"
+            print>>sys.stderr," theme in chomsky|STARTUP|COMPUTERS|BLAH|BUZZWORD|STARTREK|PRINTING|PYTHON"
+            raise
     else:
         print chomsky(5)
