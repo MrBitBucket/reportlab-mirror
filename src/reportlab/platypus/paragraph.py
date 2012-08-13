@@ -1041,14 +1041,14 @@ class Paragraph(Flowable):
             s = int(availHeight/(l*1.0))
             height = s*l
 
+        allowOrphans = getattr(self,'allowOrphans',getattr(style,'allowOrphans',0))
+        if (not allowOrphans and s<=1) or s==0: #orphan or not enough room
+            del self.blPara
+            return []
         n = len(lines)
         allowWidows = getattr(self,'allowWidows',getattr(style,'allowWidows',1))
-        allowOrphans = getattr(self,'allowOrphans',getattr(style,'allowOrphans',0))
-        if not allowOrphans:
-            if s<=1:    #orphan?
-                del self.blPara
-                return []
-        if n<=s: return [self]
+        if n<=s:
+            return [self]
         if not allowWidows:
             if n==s+1: #widow?
                 if (allowOrphans and n==3) or n>3:
