@@ -430,7 +430,7 @@ class Pie(AbstractPieChart):
     _attrMap = AttrMap(BASE=AbstractPieChart,
         data = AttrMapValue(isListOfNumbers, desc='list of numbers defining wedge sizes; need not sum to 1'),
         labels = AttrMapValue(isListOfStringsOrNone, desc="optional list of labels to use for each data point"),
-        startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due North"),
+        startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due East"),
         direction = AttrMapValue(OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
         slices = AttrMapValue(None, desc="collection of wedge descriptor objects"),
         simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use String not super duper WedgeLabel",advancedUsage=1),
