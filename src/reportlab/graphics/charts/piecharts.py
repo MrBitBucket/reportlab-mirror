@@ -1545,11 +1545,11 @@ def sample7():
 
     "Case with overlapping pointers"
 
-    d = Drawing(400, 200)
+    d = Drawing(400, 400)
 
     pc = Pie()   
     pc.x = 125
-    pc.y = 50
+    pc.y = 25
 
     pc.data = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     pc.labels = ['example1', 'example2', 'example3', 'example4', 'example5', 'example6', 'example7', 
@@ -1645,7 +1645,7 @@ if __name__=='__main__':
     It's helpful for reportlab developers to put a 'main' block in to execute
     the most recently edited feature.
     """
-    drawing = sample5()
+    drawing = sample7()
     from reportlab.graphics import renderPDF
     renderPDF.drawToFile(drawing, 'side_labelled_pie.pdf', 'Side Labelled Pie')
 
