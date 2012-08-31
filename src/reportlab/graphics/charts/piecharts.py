@@ -31,7 +31,7 @@ from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, ST
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.charts.legends import _objStr
-from textlabels import Label
+from reportlab.graphics.charts.textlabels import Label
 
 _ANGLE2BOXANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw', -45: 'nw'}
 _ANGLE2RBOXANCHOR={0:'e', 45:'ne', 90:'n', 135:'nw', 180:'w', 225:'sw', 270:'s', 315: 'se', -45: 'se'}
@@ -142,7 +142,10 @@ def _addWedgeLabel(self,text,angle,labelX,labelY,wedgeStyle,labelClass=WedgeLabe
     # now draw a label
     if self.simpleLabels:
         theLabel = String(labelX, labelY, text)
-        theLabel.textAnchor = "middle"
+        if (abs(angle) < 90 ) or (angle >270 and angle<450) or (-450< angle <-270):
+            theLabel.textAnchor = "start"
+        else:
+            theLabel.textAnchor = "end"
         theLabel._pmv = angle
         theLabel._simple_pointer = 0
     else:
@@ -214,7 +217,7 @@ class AbstractPieChart(PlotArea):
         return text
 
 def boundsOverlap(P,Q):
-    return not(P[0]>Q[2]-1e-2 or Q[0]>P[2]-1e-2 or P[1]>Q[3]-1e-2 or Q[1]>P[3]-1e-2)
+    return not(P[0]>Q[2]-1e-2 or Q[0]>P[2]-1e-2 or P[1]>(0.5*(Q[1]+Q[3]))-1e-2 or Q[1]>(0.5*(P[1]+P[3]))-1e-2)
 
 def _findOverlapRun(B,i,wrap):
     '''find overlap run containing B[i]'''
@@ -241,7 +244,7 @@ def findOverlapRun(B,wrap=1):
             if len(R)>1: return R
     return None
 
-def fixLabelOverlaps(L):
+def fixLabelOverlaps(L, sideLabels=False):
     nL = len(L)
     if nL<2: return
     B = [l._origdata['bounds'] for l in L]
@@ -250,40 +253,69 @@ def fixLabelOverlaps(L):
     iter = 0
     mult = 1.
 
-    while iter<30:
-        R = findOverlapRun(B)
-        if not R: break
-        nR = len(R)
-        if nR==nL: break
-        if not [r for r in RP if r in R]:
-            mult = 1.0
-        da = 0
-        r0 = R[0]
-        rL = R[-1]
-        bi = B[r0]
-        taa = aa = _360(L[r0]._pmv)
-        for r in R[1:]:
-            b = B[r]
-            da = max(da,min(b[3]-bi[1],bi[3]-b[1]))
-            bi = b
-            aa += L[r]._pmv
-        aa = aa/float(nR)
-        utaa = abs(L[rL]._pmv-taa)
-        ntaa = _360(utaa)
-        da *= mult*(nR-1)/ntaa
+    if not sideLabels:
+        while iter<30:
+            R = findOverlapRun(B)
+            if not R: break
+            nR = len(R)
+            if nR==nL: break
+            if not [r for r in RP if r in R]:
+                mult = 1.0
+            da = 0
+            r0 = R[0]
+            rL = R[-1]
+            bi = B[r0]
+            taa = aa = _360(L[r0]._pmv)
+            for r in R[1:]:
+                b = B[r]
+                da = max(da,min(b[3]-bi[1],bi[3]-b[1]))
+                bi = b
+                aa += L[r]._pmv
+            aa = aa/float(nR)
+            utaa = abs(L[rL]._pmv-taa)
+            ntaa = _360(utaa)
+            da *= mult*(nR-1)/ntaa
+    
+            for r in R:
+                l = L[r]
+                orig = l._origdata
+                angle = l._pmv = _360(l._pmv+da*(_360(l._pmv)-aa))
+                rad = angle/_180_pi
+                l.x = orig['cx'] + orig['rx']*cos(rad)
+                l.y = orig['cy'] + orig['ry']*sin(rad)
+                B[r] = l.getBounds()
+            RP = R
+            mult *= 1.05
+            iter += 1
 
-        for r in R:
-            l = L[r]
-            orig = l._origdata
-            angle = l._pmv = _360(l._pmv+da*(_360(l._pmv)-aa))
-            rad = angle/_180_pi
-            l.x = orig['cx'] + orig['rx']*cos(rad)
-            l.y = orig['cy'] + orig['ry']*sin(rad)
-            B[r] = l.getBounds()
-        RP = R
-        mult *= 1.05
-        iter += 1
-
+    else:
+        while iter<30:
+            R = findOverlapRun(B)
+            if not R: break
+            nR = len(R)
+            if nR == nL: break
+            l1 = L[-1]
+            orig1 = l1._origdata
+            bounds1 = orig1['bounds']
+            for i,r in enumerate(R):
+                l = L[r]
+                orig = l._origdata
+                bounds = orig['bounds']
+                diff1 = 0
+                diff2 = 0
+                if not i == nR-1:
+                    if not bounds == bounds1:
+                        if bounds[3]>bounds1[1] and bounds1[1]<bounds[1]:
+                            diff1 = bounds[3]-bounds1[1]
+                        if bounds1[3]>bounds[1] and bounds[1]<bounds1[1]:
+                            diff2 = bounds1[3]-bounds[1]
+                        if diff1 > diff2: 
+                            l.y +=0.5*(bounds1[3]-bounds1[1])
+                        elif diff2 >= diff1:
+                            l.y -= 0.5*(bounds1[3]-bounds1[1])
+                    B[r] = l.getBounds()
+            iter += 1
+    
 def intervalIntersection(A,B):
     x,y = max(min(A),min(B)),min(max(A),max(B))
     if x>=y: return None
@@ -419,6 +451,31 @@ def _fixPointerLabels(n,L,x,y,width,height,side=None):
         mul = -1
     return G, mlr[0], mlr[1], mel
 
+def theta0(data, direction):
+    fac = (2*pi)/sum(data)
+    rads = [d*fac for d in data]
+    
+    r0 = 0
+    hrads = []
+    for r in rads:
+        hrads.append(r0+r*0.5)
+        r0 += r
+    
+    vstar = len(data)*1e6
+    rstar = 0
+    delta = pi/36.0
+    for i in xrange(36):
+        r = i*delta
+        v = sum([abs(sin(r+a)) for a in hrads])
+        if v < vstar:
+            if direction == 'clockwise':
+                rstar=-r
+            else:
+                rstar=r
+            vstar = v
+    return rstar*180/pi
+
+
 class AngleData(float):
     '''use this to carry the data along with the angle'''
     def __new__(cls,angle,data):
@@ -442,6 +499,7 @@ class Pie(AbstractPieChart):
         xradius = AttrMapValue(isNumberOrNone, desc="X direction Radius"),
         yradius = AttrMapValue(isNumberOrNone, desc="Y direction Radius"),
         wedgeRecord = AttrMapValue(None, desc="callable(wedge,*args,**kwds)",advancedUsage=1),
+        sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make piechart with nice labels along side"),
         )
     other_threshold=None
 
@@ -461,6 +519,7 @@ class Pie(AbstractPieChart):
         self.sameRadii = False
         self.orderMode = 'fixed'
         self.xradius = self.yradius = None
+        self.sideLabels = 0
 
         self.slices = TypedPropertyCollection(WedgeProperties)
         self.slices[0].fillColor = colors.darkcyan
@@ -590,10 +649,18 @@ class Pie(AbstractPieChart):
 
     def makeAngles(self):
         wr = getattr(self,'wedgeRecord',None)
-        startAngle = self.startAngle % 360
+        if self.sideLabels:
+            if self.y < 25:
+                self.y += 25
+            if self.x < 50:
+                self.x += 50
+            startAngle = theta0(self.data, self.direction)
+            self.slices.label_visible = 1
+        else:
+            startAngle = self.startAngle % 360
         whichWay = self.direction == "clockwise" and -1 or 1
         D = [a for a in enumerate(self.normalizeData(keepData=wr))]
-        if self.orderMode=='alternate':
+        if self.orderMode=='alternate' and not self.sideLabels:
             W = [a for a in D if abs(a[1])>=1e-5]
             W.sort(_arcCF)
             T = [[],[]]
@@ -627,6 +694,30 @@ class Pie(AbstractPieChart):
 
     def makeWedges(self):
         angles = self.makeAngles()
+        #Checking to see whether there are too many wedges packed in too small a space
+        halfAngles = []
+        for i,(a1,a2) in angles:
+            if a2 is None:
+                halfAngle = a1
+            else:
+                halfAngle = 0.5*(a2+a1)
+            halfAngles.append(halfAngle)
+        sideLabels = self.sideLabels
+        m1=0
+        m2=0
+        m3=0
+        m4=0
+        #for halfAngle in halfAngles:
+        #    if (halfAngle <90 and halfAngle >0) or (halfAngle <-270):
+        #        m1 += 1
+        #    elif (halfAngle <180 and halfAngle >90) or (halfAngle <-180):
+        #        m2 += 1
+        #    elif (halfAngle <270 and halfAngle >180) or (halfAngle <-90):
+        #        m3 += 1
+        #    elif (halfAngle <360 and halfAngle >270) or (halfAngle <0):
+        #        m4 += 1
+        #if m1>7 or m2>7 or m3>7 or m4>7:
+        #    sideLabels =0
         n = len(angles)
         labels = _fixLabels(self.labels,n)
         wr = getattr(self,'wedgeRecord',None)
@@ -635,6 +726,8 @@ class Pie(AbstractPieChart):
         styleCount = len(self.slices)
 
         plMode = self.pointerLabelMode
+        if sideLabels:
+            plMode = 0
         if plMode:
             checkLabelOverlap = False
             PL=self.makePointerLabels(angles,plMode)
@@ -700,48 +793,103 @@ class Pie(AbstractPieChart):
             if wr:
                 wr(theWedge,value=a1._data,label=text)
             if wedgeStyle.label_visible:
-                if text:
-                    labelRadius = wedgeStyle.labelRadius
-                    rx = xradius*labelRadius
-                    ry = yradius*labelRadius
-                    labelX = cx + rx*cosAA
-                    labelY = cy + ry*sinAA
-                    l = _addWedgeLabel(self,text,averageAngle,labelX,labelY,wedgeStyle)
-                    L_add(l)
-                    if not plMode and l._simple_pointer:
-                        l._aax = cx+xradius*cosAA
-                        l._aay = cy+yradius*sinAA
-                    if checkLabelOverlap:
-                        l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
-                                        'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
-                                        'bounds': l.getBounds(),
-                                        }
-                elif plMode and PL_data:
-                    l = PL_data[i]
-                    if l:
-                        data = l._origdata
-                        sinM = data['smid']
-                        cosM = data['cmid']
-                        lX = cx + xradius*cosM
-                        lY = cy + yradius*sinM
-                        lpel = wedgeStyle.label_pointer_elbowLength
-                        lXi = lX + lpel*cosM
-                        lYi = lY + lpel*sinM
-                        L_add(PolyLine((lX,lY,lXi,lYi,l.x,l.y),
-                                strokeWidth=wedgeStyle.label_pointer_strokeWidth,
-                                strokeColor=wedgeStyle.label_pointer_strokeColor))
+                if not sideLabels:
+                    if text:
+                        labelRadius = wedgeStyle.labelRadius
+                        rx = xradius*labelRadius
+                        ry = yradius*labelRadius
+                        labelX = cx + rx*cosAA
+                        labelY = cy + ry*sinAA
+                        l = _addWedgeLabel(self,text,averageAngle,labelX,labelY,wedgeStyle)
                         L_add(l)
-
+                        if not plMode and l._simple_pointer:
+                            l._aax = cx+xradius*cosAA
+                            l._aay = cy+yradius*sinAA
+                        if checkLabelOverlap:
+                            l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
+                                            'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
+                                            'bounds': l.getBounds(),
+                                            }
+                    elif plMode and PL_data:
+                        l = PL_data[i]
+                        if l:
+                            data = l._origdata
+                            sinM = data['smid']
+                            cosM = data['cmid']
+                            lX = cx + xradius*cosM
+                            lY = cy + yradius*sinM
+                            lpel = wedgeStyle.label_pointer_elbowLength
+                            lXi = lX + lpel*cosM
+                            lYi = lY + lpel*sinM
+                            L_add(PolyLine((lX,lY,lXi,lYi,l.x,l.y),
+                                    strokeWidth=wedgeStyle.label_pointer_strokeWidth,
+                                    strokeColor=wedgeStyle.label_pointer_strokeColor))
+                            L_add(l)
+                else:
+                    if text:
+                        slices_popout = self.slices.popout
+                        m=0
+                        for n, angle in angles:
+                            if self.slices[n].fillColor:
+                                m += 1
+                            else:
+                                r = n%m
+                                self.slices[n].fillColor = self.slices[r].fillColor
+                                self.slices[n].popout = self.slices[r].popout
+                        for j in range(0,m-1):
+                            if self.slices[j].popout > slices_popout:
+                                slices_popout = self.slices[j].popout
+                        labelRadius = wedgeStyle.labelRadius
+                        ry = yradius*labelRadius
+                        if (abs(averageAngle) < 90 ) or (averageAngle >270 and averageAngle <450) or (-450< 
+                                averageAngle <-270):
+                            labelX = 1.05*self.width + self.x + slices_popout
+                            rx = 0
+                        else:
+                            labelX = self.x - 0.05*self.width - slices_popout
+                            rx = 0
+                        labelY = cy + ry*sinAA
+                        l = _addWedgeLabel(self,text,averageAngle,labelX,labelY,wedgeStyle)
+                        L_add(l)
+                        if not plMode:
+                            l._aax = cx+xradius*cosAA
+                            l._aay = cy+yradius*sinAA
+                        if checkLabelOverlap:
+                            l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
+                                            'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
+                                            'bounds': l.getBounds(),
+                                            }
+                        x1,y1,x2,y2 = l.getBounds()
+                        if l.x-(x2-x1)<0:
+                            self.x += abs(l.x-(x2-x1))+abs(0.75*(x2-x1))
+        
         if checkLabelOverlap and L:
-            fixLabelOverlaps(L)
+            fixLabelOverlaps(L, sideLabels)
         for l in L: g_add(l)
 
         if not plMode:
             for l in L:
-                if l._simple_pointer:
+                if l._simple_pointer and not sideLabels:
                     g_add(Line(l.x,l.y,l._aax,l._aay,
                         strokeWidth=wedgeStyle.label_pointer_strokeWidth,
                         strokeColor=wedgeStyle.label_pointer_strokeColor))
+                elif sideLabels:
+                    x1,y1,x2,y2 = l.getBounds()
+                    #add pointers
+                    if l.x == 1.05*self.width + self.x:
+                        g_add(Line(l._aax,l._aay,0.5*(l._aax+l.x),l.y+(0.25*(y2-y1)),
+                            strokeWidth=wedgeStyle.label_pointer_strokeWidth,
+                            strokeColor=wedgeStyle.label_pointer_strokeColor))
+                        g_add(Line(0.5*(l._aax+l.x),l.y+(0.25*(y2-y1)),l.x,l.y+(0.25*(y2-y1)),
+                            strokeWidth=wedgeStyle.label_pointer_strokeWidth,
+                            strokeColor=wedgeStyle.label_pointer_strokeColor))
+                    else:
+                        g_add(Line(l._aax,l._aay,0.5*(l._aax+l.x),l.y+(0.25*(y2-y1)),
+                            strokeWidth=wedgeStyle.label_pointer_strokeWidth,
+                            strokeColor=wedgeStyle.label_pointer_strokeColor))
+                        g_add(Line(0.5*(l._aax+l.x),l.y+(0.25*(y2-y1)),l.x,l.y+(0.25*(y2-y1)),
+                            strokeWidth=wedgeStyle.label_pointer_strokeWidth,
+                            strokeColor=wedgeStyle.label_pointer_strokeColor))
 
         return g
 
@@ -904,7 +1052,7 @@ class LegendedPie(Pie):
         drawing.add(self.draw())
         return drawing
 
-from utils3d import _getShaded, _2rad, _360, _pi_2, _2pi, _180_pi
+from reportlab.graphics.charts.utils3d import _getShaded, _2rad, _360, _pi_2, _2pi, _180_pi
 class Wedge3dProperties(PropHolder):
     """This holds descriptive information about the wedges in a pie chart.
 
@@ -1168,7 +1316,7 @@ class Pie3d(Pie):
 
         S.sort(lambda a,b: -cmp(a[0],b[0]))
         if checkLabelOverlap and L:
-            fixLabelOverlaps(L)
+            fixLabelOverlaps(L,sideLabels)
         for x in ([s[1] for s in S]+T+L):
             g.add(x)
         return g
@@ -1345,3 +1493,43 @@ def sample4():
     d.add(pc)
 
     return d
+
+def sample5():
+    "Make a pie with side labels."
+
+    d = Drawing(400, 200)
+
+    pc = Pie()
+    pc.x = 125
+    pc.y = 25
+
+    pc.data = [74, 1, 1, 1, 1, 22]
+    pc.labels = ['example1', 'example2', 'example3', 'example4', 'example5', 'example6']
+    pc.sideLabels = 1
+
+    pc.width = 150
+    pc.height = 150
+    pc.slices.strokeWidth=1#0.5
+    pc.slices[0].fillColor = colors.steelblue
+    pc.slices[1].fillColor = colors.thistle
+    pc.slices[2].fillColor = colors.cornflower
+    pc.slices[3].fillColor = colors.lightsteelblue
+    pc.slices[4].fillColor = colors.aquamarine
+    pc.slices[5].fillColor = colors.cadetblue
+
+    d.add(pc)
+
+    return d
+
+if __name__=='__main__':
+    """Normally nobody will execute this
+
+    It's helpful for reportlab developers to put a 'main' block in to execute
+    the most recently edited feature.
+    """
+    drawing = sample5()
+    from reportlab.graphics import renderPDF
+    renderPDF.drawToFile(drawing, 'side_labelled_pie.pdf', 'Side Labelled Pie')
+
+    
+

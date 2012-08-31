@@ -367,7 +367,22 @@ class ChartTestCase(unittest.TestCase):
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
 
-    def test6(self):
+
+    def test7(self):
+        "Added some new side labelled pies"
+
+        story = self.story
+        story.append(Paragraph('Side Labelled Pie', h2))
+
+        story.append(Spacer(0, 0.5*cm))
+        from reportlab.graphics.charts.piecharts import sample5
+        drawing = sample5()
+        story.append(drawing)
+        story.append(Spacer(0, 1*cm))
+
+
+    def test999(self):
+        #keep this last
         from reportlab.graphics.charts.piecharts import Pie, _makeSideArcDefs, intervalIntersection
         L = []
 
@@ -409,6 +424,8 @@ class ChartTestCase(unittest.TestCase):
         # This triggers the document build operation (hackish).
         global FINISHED
         FINISHED = 1
+
+
 
 def makeSuite():
     return makeSuiteForClasses(ChartTestCase)
