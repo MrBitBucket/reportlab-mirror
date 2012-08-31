@@ -705,12 +705,10 @@ class XCategoryAxis(_XTicks,CategoryAxis):
         ja = self.joinAxis
         if ja:
             jam = self.joinAxisMode
-            jap = self.joinAxisPos
-            jta = self.joinToAxis
             if jam in ('bottom', 'top'):
-                jta(ja, mode=jam)
+                self.joinToAxis(ja, mode=jam)
             elif jam in ('value', 'points'):
-                jta(ja, mode=jam, pos=jap)
+                self.joinToAxis(ja, mode=jam, pos=self.joinAxisPos)
 
     def scale(self, idx):
         """returns the x position and width in drawing units of the slice"""
@@ -813,12 +811,10 @@ class YCategoryAxis(_YTicks,CategoryAxis):
         ja = self.joinAxis
         if ja:
             jam = self.joinAxisMode
-            jap = self.joinAxisPos
-            jta = self.joinToAxis
             if jam in ('left', 'right'):
-                jta(ja, mode=jam)
+                self.joinToAxis(ja, mode=jam)
             elif jam in ('value', 'points'):
-                jta(ja, mode=jam, pos=jap)
+                self.joinToAxis(ja, mode=jam, pos=self.joinAxisPos)
 
     def scale(self, idx):
         "Returns the y position and width in drawing units of the slice."
@@ -1458,13 +1454,11 @@ class XValueAxis(_XTicks,ValueAxis):
     def _joinToAxis(self):
         ja = self.joinAxis
         if ja:
-            jam = self.joinAxisMode
-            jap = self.joinAxisPos
-            jta = self.joinToAxis
+            jam = self.joinAxisMode or 'bottom'
             if jam in ('bottom', 'top'):
-                jta(ja, mode=jam)
+                self.joinToAxis(ja, mode=jam)
             elif jam in ('value', 'points'):
-                jta(ja, mode=jam, pos=jap)
+                self.joinToAxis(ja, mode=jam, pos=self.joinAxisPos)
 
     def makeAxis(self):
         g = Group()
@@ -1822,27 +1816,21 @@ class YValueAxis(_YTicks,ValueAxis):
         _assertXAxis(xAxis)
         if mode == 'left':
             self._x = xAxis._x * 1.0
-            self._y = xAxis._y * 1.0
         elif mode == 'right':
             self._x = (xAxis._x + xAxis._length) * 1.0
-            self._y = xAxis._y * 1.0
         elif mode == 'value':
             self._x = xAxis.scale(pos) * 1.0
-            self._y = xAxis._y * 1.0
         elif mode == 'points':
             self._x = pos * 1.0
-            self._y = xAxis._y * 1.0
 
     def _joinToAxis(self):
         ja = self.joinAxis
         if ja:
             jam = self.joinAxisMode
-            jap = self.joinAxisPos
-            jta = self.joinToAxis
             if jam in ('left', 'right'):
-                jta(ja, mode=jam)
+                self.joinToAxis(ja, mode=jam)
             elif jam in ('value', 'points'):
-                jta(ja, mode=jam, pos=jap)
+                self.joinToAxis(ja, mode=jam, pos=self.joinAxisPos)
 
     def makeAxis(self):
         g = Group()
