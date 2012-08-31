@@ -373,12 +373,43 @@ class ChartTestCase(unittest.TestCase):
 
         story = self.story
         story.append(Paragraph('Side Labelled Pie', h2))
+        story.append(Spacer(0,1*cm))
+        story.append(Paragraph('Here are two examples of side labelled pies.',bt))
 
         story.append(Spacer(0, 0.5*cm))
-        from reportlab.graphics.charts.piecharts import sample5
-        drawing = sample5()
-        story.append(drawing)
+        from reportlab.graphics.charts.piecharts import sample5, sample6, sample7, sample8, sample9
+        drawing5 = sample5()
+        story.append(drawing5)
+
+        story.append(Spacer(0, 0.5*cm))
+        drawing9 = sample9()
+        story.append(drawing9)
         story.append(Spacer(0, 1*cm))
+
+        story.append(Paragraph('Moving the pie', h3))
+        story.append(Paragraph('Here is a pie that has pie.x = 0 and is moved sideways in order to make space for the labels.', bt))
+        story.append(Paragraph('The line represents x = 0',bt))
+
+        story.append(Spacer(0,0.5*cm))
+        drawing6 = sample6()
+        story.append(drawing6)
+        story.append(Spacer(0,1*cm))
+
+        story.append(Paragraph('Case with overlapping pointers', h3))
+        story.append(Paragraph('If there are many slices then the pointer labels can end up overlapping as shown below.', bt))
+
+        story.append(Spacer(0,0.5*cm))
+        drawing7 = sample7()
+        story.append(drawing7)
+        story.append(Spacer(0,1*cm))
+
+        story.append(Paragraph('Case with overlapping labels', h3))
+        story.append(Paragraph('Labels overlap if they do not belong to adjacent pie slices.', bt))
+
+        story.append(Spacer(0,0.5*cm))
+        drawing8 = sample8()
+        story.append(drawing8)
+        story.append(Spacer(0,1*cm))
 
 
     def test999(self):
