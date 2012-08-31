@@ -1521,6 +1521,136 @@ def sample5():
 
     return d
 
+def sample6():
+
+    "Illustrates the pie moving to leave space for the left labels"
+
+    d = Drawing(400, 200)
+
+    pc = Pie()
+    "The x value of the pie chart is 0"
+    pc.x = 0
+    pc.y = 25
+
+    pc.data = [74, 1, 1, 1, 1, 22]
+    pc.labels = ['example1', 'example2', 'example3', 'example4', 'example5', 'example6']
+    pc.sideLabels = 1
+
+    pc.width = 150
+    pc.height = 150
+    pc.slices.strokeWidth=1#0.5
+    pc.slices[0].fillColor = colors.steelblue
+    pc.slices[1].fillColor = colors.thistle
+    pc.slices[2].fillColor = colors.cornflower
+    pc.slices[3].fillColor = colors.lightsteelblue
+    pc.slices[4].fillColor = colors.aquamarine
+    pc.slices[5].fillColor = colors.cadetblue
+
+    l = Line(0,0,0,200)
+
+    d.add(pc)
+    d.add(l)
+
+    return d
+
+def sample7():
+
+    "Case with overlapping pointers"
+
+    d = Drawing(400, 200)
+
+    pc = Pie()   
+    pc.x = 125
+    pc.y = 50
+
+    pc.data = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    pc.labels = ['example1', 'example2', 'example3', 'example4', 'example5', 'example6', 'example7', 
+                'example8', 'example9', 'example10', 'example11', 'example12', 'example13', 'example14', 
+                'example15', 'example16', 'example17', 'example18', 'example19', 'example20', 'example21', 
+                'example22', 'example23', 'example24', 'example25', 'example26', 'example27', 'example28']
+    pc.sideLabels = 1
+    pc.checkLabelOverlap = 1
+
+    pc.width = 100
+    pc.height = 100
+    pc.slices.strokeWidth=1#0.5
+    pc.slices[0].fillColor = colors.steelblue
+    pc.slices[1].fillColor = colors.thistle
+    pc.slices[2].fillColor = colors.cornflower
+    pc.slices[3].fillColor = colors.lightsteelblue
+    pc.slices[4].fillColor = colors.aquamarine
+    pc.slices[5].fillColor = colors.cadetblue
+
+    d.add(pc)
+
+    return d
+
+def sample8():
+
+    "Case with overlapping labels"
+    "Labels overlap if they do not belong to adjacent pie slices due to nature of checkLabelOverlap"
+
+    d = Drawing(400, 200)
+
+    pc = Pie()   
+    pc.x = 125
+    pc.y = 25
+
+    pc.data = [1, 1, 1, 1, 1, 30, 50, 1, 1, 1, 1, 1, 1, 40,20,10]
+    pc.labels = ['example1', 'example2', 'example3', 'example4', 'example5', 'example6', 'example7', 
+                'example8', 'example9', 'example10', 'example11', 'example12', 'example13', 'example14', 
+                'example15', 'example16']
+    pc.sideLabels = 1
+    pc.checkLabelOverlap = 1
+
+    pc.width = 100
+    pc.height = 100
+    pc.slices.strokeWidth=1#0.5
+    pc.slices[0].fillColor = colors.steelblue
+    pc.slices[1].fillColor = colors.thistle
+    pc.slices[2].fillColor = colors.cornflower
+    pc.slices[3].fillColor = colors.lightsteelblue
+    pc.slices[4].fillColor = colors.aquamarine
+    pc.slices[5].fillColor = colors.cadetblue
+
+    d.add(pc)
+
+    return d
+
+def sample9():
+
+    "Case with overlapping labels"
+    "Labels overlap if they do not belong to adjacent pies due to nature of checkLabelOverlap"
+
+    d = Drawing(400, 200)
+
+    pc = Pie()   
+    pc.x = 125
+    pc.y = 50
+
+    pc.data = [41, 20, 40, 15, 20, 30, 50, 15, 25, 35, 25, 20, 30, 40, 20, 30]
+    pc.labels = ['example1', 'example2', 'example3', 'example4', 'example5', 'example6', 'example7', 
+                'example8', 'example9', 'example10', 'example11', 'example12', 'example13', 'example14', 
+                'example15', 'example16']
+    pc.sideLabels = 1
+    pc.checkLabelOverlap = 1
+
+    pc.width = 100
+    pc.height = 100
+    pc.slices.strokeWidth=1#0.5
+    pc.slices[0].fillColor = colors.steelblue
+    pc.slices[1].fillColor = colors.thistle
+    pc.slices[2].fillColor = colors.cornflower
+    pc.slices[3].fillColor = colors.lightsteelblue
+    pc.slices[4].fillColor = colors.aquamarine
+    pc.slices[5].fillColor = colors.cadetblue
+
+    d.add(pc)
+
+    return d
+
+
+
 if __name__=='__main__':
     """Normally nobody will execute this
 
