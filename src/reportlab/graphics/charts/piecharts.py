@@ -500,6 +500,7 @@ class Pie(AbstractPieChart):
         yradius = AttrMapValue(isNumberOrNone, desc="Y direction Radius"),
         wedgeRecord = AttrMapValue(None, desc="callable(wedge,*args,**kwds)",advancedUsage=1),
         sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make piechart with nice labels along side"),
+        sideLabelsOffset = AttrMapValue(isNumber, desc="The fraction of the pie width that the labels are situated at from the edges of the pie"),
         )
     other_threshold=None
 
@@ -520,6 +521,7 @@ class Pie(AbstractPieChart):
         self.orderMode = 'fixed'
         self.xradius = self.yradius = None
         self.sideLabels = 0
+        self.sideLabelsOffset = 0.1
 
         self.slices = TypedPropertyCollection(WedgeProperties)
         self.slices[0].fillColor = colors.darkcyan
@@ -828,10 +830,10 @@ class Pie(AbstractPieChart):
                         ry = yradius*labelRadius
                         if (abs(averageAngle) < 90 ) or (averageAngle >270 and averageAngle <450) or (-450< 
                                 averageAngle <-270):
-                            labelX = 1.05*self.width + self.x + slices_popout
+                            labelX = (1+self.sideLabelsOffset)*self.width + self.x + slices_popout
                             rx = 0
                         else:
-                            labelX = self.x - 0.05*self.width - slices_popout
+                            labelX = self.x - (self.sideLabelsOffset)*self.width - slices_popout
                             rx = 0
                         labelY = cy + ry*sinAA
                         l = _addWedgeLabel(self,text,averageAngle,labelX,labelY,wedgeStyle)
@@ -862,7 +864,7 @@ class Pie(AbstractPieChart):
                 elif sideLabels:
                     x1,y1,x2,y2 = l.getBounds()
                     #add pointers
-                    if l.x == 1.05*self.width + self.x:
+                    if l.x == (1+self.sideLabelsOffset)*self.width + self.x:
                         g_add(Line(l._aax,l._aay,0.5*(l._aax+l.x),l.y+(0.25*(y2-y1)),
                             strokeWidth=wedgeStyle.label_pointer_strokeWidth,
                             strokeColor=wedgeStyle.label_pointer_strokeColor))
