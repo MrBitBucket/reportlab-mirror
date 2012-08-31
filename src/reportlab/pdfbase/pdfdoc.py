@@ -327,6 +327,19 @@ class PDFDocument:
 
     def addColor(self,cmyk):
         sname = cmyk.spotName
+        if not sname:
+            if cmyk.cyan==0 and cmyk.magenta==0 and cmyk.yellow==0:
+                sname = 'BLACK'
+            elif cmyk.black==0 and cmyk.magenta==0 and cmyk.yellow==0:
+                sname = 'CYAN'
+            elif cmyk.cyan==0 and cmyk.black==0 and cmyk.yellow==0:
+                sname = 'MAGENTA'
+            elif cmyk.cyan==0 and cmyk.magenta==0 and cmyk.black==0:
+                sname = 'YELLOW'
+            if not sname:
+                raise ValueError("CMYK colour %r used without a spotName" % cmyk)
+            else:
+                cmyk = cmyk.clone(spotName = sname)
         name = PDFName(sname)[1:]
         if name not in self.idToObject:
             sep = PDFSeparationCMYKColor(cmyk).value()  #PDFArray([/Separation /name /DeviceCMYK tint_tf])
