@@ -691,19 +691,14 @@ class XCategoryAxis(_XTicks,CategoryAxis):
 
     def joinToAxis(self, yAxis, mode='bottom', pos=None):
         "Join with y-axis using some mode."
-
         _assertYAxis(yAxis)
         if mode == 'bottom':
-            self._x = yAxis._x
             self._y = yAxis._y
         elif mode == 'top':
-            self._x = yAxis._x
             self._y = yAxis._y + yAxis._length
         elif mode == 'value':
-            self._x = yAxis._x
             self._y = yAxis.scale(pos)
         elif mode == 'points':
-            self._x = yAxis._x
             self._y = pos
 
     def _joinToAxis(self):
@@ -805,19 +800,14 @@ class YCategoryAxis(_YTicks,CategoryAxis):
         "Join with x-axis using some mode."
 
         _assertXAxis(xAxis)
-
         if mode == 'left':
             self._x = xAxis._x * 1.0
-            self._y = xAxis._y * 1.0
         elif mode == 'right':
             self._x = (xAxis._x + xAxis._length) * 1.0
-            self._y = xAxis._y * 1.0
         elif mode == 'value':
             self._x = xAxis.scale(pos) * 1.0
-            self._y = xAxis._y * 1.0
         elif mode == 'points':
             self._x = pos * 1.0
-            self._y = xAxis._y * 1.0
 
     def _joinToAxis(self):
         ja = self.joinAxis
@@ -1457,16 +1447,12 @@ class XValueAxis(_XTicks,ValueAxis):
         "Join with y-axis using some mode."
         _assertYAxis(yAxis)
         if mode == 'bottom':
-            self._x = yAxis._x * 1.0
             self._y = yAxis._y * 1.0
         elif mode == 'top':
-            self._x = yAxis._x * 1.0
             self._y = (yAxis._y + yAxis._length) * 1.0
         elif mode == 'value':
-            self._x = yAxis._x * 1.0
             self._y = yAxis.scale(pos) * 1.0
         elif mode == 'points':
-            self._x = yAxis._x * 1.0
             self._y = pos * 1.0
 
     def _joinToAxis(self):
