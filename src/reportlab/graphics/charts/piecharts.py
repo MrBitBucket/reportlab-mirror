@@ -650,10 +650,10 @@ class Pie(AbstractPieChart):
     def makeAngles(self):
         wr = getattr(self,'wedgeRecord',None)
         if self.sideLabels:
-            if self.y < 25:
-                self.y += 25
-            if self.x < 50:
-                self.x += 50
+            #if self.y < 25:
+            #    self.y += 25
+            #if self.x < 50:
+            #    self.x += 50
             startAngle = theta0(self.data, self.direction)
             self.slices.label_visible = 1
         else:
@@ -703,21 +703,6 @@ class Pie(AbstractPieChart):
                 halfAngle = 0.5*(a2+a1)
             halfAngles.append(halfAngle)
         sideLabels = self.sideLabels
-        m1=0
-        m2=0
-        m3=0
-        m4=0
-        #for halfAngle in halfAngles:
-        #    if (halfAngle <90 and halfAngle >0) or (halfAngle <-270):
-        #        m1 += 1
-        #    elif (halfAngle <180 and halfAngle >90) or (halfAngle <-180):
-        #        m2 += 1
-        #    elif (halfAngle <270 and halfAngle >180) or (halfAngle <-90):
-        #        m3 += 1
-        #    elif (halfAngle <360 and halfAngle >270) or (halfAngle <0):
-        #        m4 += 1
-        #if m1>7 or m2>7 or m3>7 or m4>7:
-        #    sideLabels =0
         n = len(angles)
         labels = _fixLabels(self.labels,n)
         wr = getattr(self,'wedgeRecord',None)
@@ -860,8 +845,9 @@ class Pie(AbstractPieChart):
                                             'bounds': l.getBounds(),
                                             }
                         x1,y1,x2,y2 = l.getBounds()
-                        if l.x-(x2-x1)<0:
-                            self.x += abs(l.x-(x2-x1))+abs(0.75*(x2-x1))
+                #The following code was trying to move the pie if there was not enough space for the labels
+                        #if l.x-(x2-x1)<0:
+                        #    self.x += abs(l.x-(x2-x1))+abs(0.75*(x2-x1))
         
         if checkLabelOverlap and L:
             fixLabelOverlaps(L, sideLabels)

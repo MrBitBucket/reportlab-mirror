@@ -389,6 +389,7 @@ class ChartTestCase(unittest.TestCase):
         story.append(Paragraph('Moving the pie', h3))
         story.append(Paragraph('Here is a pie that has pie.x = 0 and is moved sideways in order to make space for the labels.', bt))
         story.append(Paragraph('The line represents x = 0',bt))
+        story.append(Paragraph('This has not been implemented and is on line 863 in piecharts.py', bt))
 
         story.append(Spacer(0,0.5*cm))
         drawing6 = sample6()
