@@ -1101,6 +1101,7 @@ todo("Add properties table.")
 ##startAngle Where is the start angle of the first pie slice? The default is '90' which is twelve o'clock.
 ##direction Which direction do slices progress in? The default is 'clockwise'.
 ##sideLabels This creates a chart with the labels in two columns, one on either side.
+##sideLabelsOffset This is the fractoin of the width of the pie that the two columns in
 ##wedges Collection of wedges. This lets you customise each wedge, or individual ones. See below
 ##wedges.strokeWidth Border width for wedge
 ##wedges.strokeColor Border color
@@ -1121,15 +1122,42 @@ heading3("Side Labels")
 disc("""
 If the sideLabels attribute is set to true, then the labels of 
 the slices are placed in two columns, one on either side of the 
-pie.
-The columns are placed 0.05 times the width of the pie from the 
-edge of the pie.
+pie and the start angle of the pie will be set automatically.
+The distance from the edge of the pie from the edge of either 
+column is decided by the sideLabelsOffset attribute, which is 
+a fraction of the width of the pie.
+If xradius is changed, the pie can overlap the labels, and so 
+we advise leaving xradius as None.
 There is an example below.
 """)
 
-from reportlab.graphics.charts.piecharts import sample5
-drawing = sample5()
-draw(drawing, 'An example of a piechart with sideLabels =1')
+from reportlab.graphics.charts.piecharts import sample5, sample7, sample8
+drawing5 = sample5()
+draw(drawing5, 'An example of a piechart with sideLabels =1')
+
+disc("""
+If you have sideLabels set to True, then some of the attributes 
+become redundant, such as pointerLabelMode.
+Also sideLabelsOffset only changes the piechart if sideLabels is 
+set to true.
+""")
+
+heading4("Some issues")
+
+disc("""
+The pointers can cross if there are too many slices.
+""")
+
+drawing7 = sample7()
+draw(drawing7, 'An example of pointers crossing')
+
+disc("""
+Also the labels can overlap despite checkLabelOverlap if they 
+correspond to slices that are not adjacent.
+""")
+
+drawing8 = sample8()
+draw(drawing8, 'An example of labels overlapping')
 
 heading3("Legends")
 
