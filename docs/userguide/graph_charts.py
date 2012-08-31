@@ -1123,6 +1123,8 @@ disc("""
 If the sideLabels attribute is set to true, then the labels of 
 the slices are placed in two columns, one on either side of the 
 pie and the start angle of the pie will be set automatically.
+The anchor of the right hand column is set to 'start' and the 
+anchor of the left hand column is set to 'end'.
 The distance from the edge of the pie from the edge of either 
 column is decided by the sideLabelsOffset attribute, which is 
 a fraction of the width of the pie.
