@@ -1100,6 +1100,7 @@ todo("Add properties table.")
 ##labels None, or a list of strings. Make it None if you don't want labels around the edge of the pie. Since it is impossible to know the size of slices, we generally discourage placing labels in or around pies; it is much better to put them in a legend alongside.
 ##startAngle Where is the start angle of the first pie slice? The default is '90' which is twelve o'clock.
 ##direction Which direction do slices progress in? The default is 'clockwise'.
+##sideLabels This creates a chart with the labels in two columns, one on either side.
 ##wedges Collection of wedges. This lets you customise each wedge, or individual ones. See below
 ##wedges.strokeWidth Border width for wedge
 ##wedges.strokeColor Border color
@@ -1115,6 +1116,20 @@ todo("Add properties table.")
 ##will keep this to specify their anchor point)
 ##
 
+heading3("Side Labels")
+
+disc("""
+If the sideLabels attribute is set to true, then the labels of 
+the slices are placed in two columns, one on either side of the 
+pie.
+The columns are placed 0.05 times the width of the pie from the 
+edge of the pie.
+There is an example below.
+""")
+
+from reportlab.graphics.charts.piecharts import sample5
+drawing = sample5()
+draw(drawing, 'An example of a piechart with sideLabels =1')
 
 heading3("Legends")
 
