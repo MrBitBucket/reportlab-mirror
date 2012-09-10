@@ -163,7 +163,7 @@ class SVGCanvas:
         self.currGroup = self.groupTree
 
     def save(self, fn=None):
-        if isinstance(fn,str):
+        if type(fn) in types.StringTypes:
             f = open(fn, 'w')
         else:
             f = fn
