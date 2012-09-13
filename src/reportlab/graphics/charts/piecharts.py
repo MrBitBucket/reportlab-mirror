@@ -63,46 +63,46 @@ class WedgeProperties(PropHolder):
     format method.
     """
     _attrMap = AttrMap(
-        strokeWidth = AttrMapValue(isNumber,desc=''),
-        fillColor = AttrMapValue(isColorOrNone,desc=''),
-        strokeColor = AttrMapValue(isColorOrNone,desc=''),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone,desc=''),
+        strokeWidth = AttrMapValue(isNumber,desc='Width of the wedge border'),
+        fillColor = AttrMapValue(isColorOrNone,desc='Filling color of the wedge'),
+        strokeColor = AttrMapValue(isColorOrNone,desc='Color of the wedge border'),
+        strokeDashArray = AttrMapValue(isListOfNumbersOrNone,desc='Style of the wedge border, expressed as a list of lengths of alternating dashes and blanks'),
         strokeLineCap = AttrMapValue(OneOf(0,1,2),desc="Line cap 0=butt, 1=round & 2=square"),
         strokeLineJoin = AttrMapValue(OneOf(0,1,2),desc="Line join 0=miter, 1=round & 2=bevel"),
-        strokeMiterLimit = AttrMapValue(isNumber,desc='miter limit control miter line joins'),
-        popout = AttrMapValue(isNumber,desc="how far of centre a wedge to pop."),
-        fontName = AttrMapValue(isString,desc=''),
-        fontSize = AttrMapValue(isNumber,desc=''),
-        fontColor = AttrMapValue(isColorOrNone,desc=''),
-        labelRadius = AttrMapValue(isNumber,desc=''),
-        label_dx = AttrMapValue(isNumber,desc=''),
-        label_dy = AttrMapValue(isNumber,desc=''),
-        label_angle = AttrMapValue(isNumber,desc=''),
-        label_boxAnchor = AttrMapValue(isBoxAnchor,desc=''),
-        label_boxStrokeColor = AttrMapValue(isColorOrNone,desc=''),
-        label_boxStrokeWidth = AttrMapValue(isNumber,desc=''),
-        label_boxFillColor = AttrMapValue(isColorOrNone,desc=''),
-        label_strokeColor = AttrMapValue(isColorOrNone,desc=''),
-        label_strokeWidth = AttrMapValue(isNumber,desc=''),
-        label_text = AttrMapValue(isStringOrNone,desc=''),
+        strokeMiterLimit = AttrMapValue(isNumber,desc='Miter limit control miter line joins'),
+        popout = AttrMapValue(isNumber,desc="How far of centre a wedge to pop"),
+        fontName = AttrMapValue(isString,desc='Name of the font of the label text'),
+        fontSize = AttrMapValue(isNumber,desc='Size of the font of the label text in points'),
+        fontColor = AttrMapValue(isColorOrNone,desc='Color of the font of the label text'),
+        labelRadius = AttrMapValue(isNumber,desc='Distance between the center of the label box and the center of the pie, expressed in times the radius of the pie'),
+        label_dx = AttrMapValue(isNumber,desc='X Offset of the label'),
+        label_dy = AttrMapValue(isNumber,desc='Y Offset of the label'),
+        label_angle = AttrMapValue(isNumber,desc='Angle of the label, default (0) is horizontal, 90 is vertical, 180 is upside down'),
+        label_boxAnchor = AttrMapValue(isBoxAnchor,desc='Anchoring point of the label'),
+        label_boxStrokeColor = AttrMapValue(isColorOrNone,desc='Border color for the label box'),
+        label_boxStrokeWidth = AttrMapValue(isNumber,desc='Border width for the label box'),
+        label_boxFillColor = AttrMapValue(isColorOrNone,desc='Filling color of the label box'),
+        label_strokeColor = AttrMapValue(isColorOrNone,desc='Border color for the label text'),
+        label_strokeWidth = AttrMapValue(isNumber,desc='Border width for the label text'),
+        label_text = AttrMapValue(isStringOrNone,desc='Text of the label'),
         label_leading = AttrMapValue(isNumberOrNone,desc=''),
-        label_width = AttrMapValue(isNumberOrNone,desc=''),
-        label_maxWidth = AttrMapValue(isNumberOrNone,desc=''),
-        label_height = AttrMapValue(isNumberOrNone,desc=''),
-        label_textAnchor = AttrMapValue(isTextAnchor,desc=''),
+        label_width = AttrMapValue(isNumberOrNone,desc='Width of the label'),
+        label_maxWidth = AttrMapValue(isNumberOrNone,desc='Maximum width the label can grow to'),
+        label_height = AttrMapValue(isNumberOrNone,desc='Height of the label'),
+        label_textAnchor = AttrMapValue(isTextAnchor,desc='Maximum height the label can grow to'),
         label_visible = AttrMapValue(isBoolean,desc="True if the label is to be drawn"),
-        label_topPadding = AttrMapValue(isNumber,'padding at top of box'),
-        label_leftPadding = AttrMapValue(isNumber,'padding at left of box'),
-        label_rightPadding = AttrMapValue(isNumber,'padding at right of box'),
-        label_bottomPadding = AttrMapValue(isNumber,'padding at bottom of box'),
-        label_simple_pointer = AttrMapValue(isBoolean,'set to True for simple pointers'),
+        label_topPadding = AttrMapValue(isNumber,'Padding at top of box'),
+        label_leftPadding = AttrMapValue(isNumber,'Padding at left of box'),
+        label_rightPadding = AttrMapValue(isNumber,'Padding at right of box'),
+        label_bottomPadding = AttrMapValue(isNumber,'Padding at bottom of box'),
+        label_simple_pointer = AttrMapValue(isBoolean,'Set to True for simple pointers'),
         label_pointer_strokeColor = AttrMapValue(isColorOrNone,desc='Color of indicator line'),
         label_pointer_strokeWidth = AttrMapValue(isNumber,desc='StrokeWidth of indicator line'),
-        label_pointer_elbowLength = AttrMapValue(isNumber,desc='length of final indicator line segment'),
+        label_pointer_elbowLength = AttrMapValue(isNumber,desc='Length of final indicator line segment'),
         label_pointer_edgePad = AttrMapValue(isNumber,desc='pad between pointer label and box'),
         label_pointer_piePad = AttrMapValue(isNumber,desc='pad between pointer label and pie'),
         swatchMarker = AttrMapValue(NoneOr(isSymbol), desc="None or makeMarker('Diamond') ...",advancedUsage=1),
-        visible = AttrMapValue(isBoolean,'set to false to skip displaying'),
+        visible = AttrMapValue(isBoolean,'Set to false to skip displaying'),
         )
 
     def __init__(self):
@@ -142,10 +142,13 @@ def _addWedgeLabel(self,text,angle,labelX,labelY,wedgeStyle,labelClass=WedgeLabe
     # now draw a label
     if self.simpleLabels:
         theLabel = String(labelX, labelY, text)
-        if (abs(angle) < 90 ) or (angle >270 and angle<450) or (-450< angle <-270):
-            theLabel.textAnchor = "start"
+        if not self.sideLabels:
+            theLabel.textAnchor = "middle"
         else:
-            theLabel.textAnchor = "end"
+            if (abs(angle) < 90 ) or (angle >270 and angle<450) or (-450< angle <-270):
+                theLabel.textAnchor = "start"
+            else:
+                theLabel.textAnchor = "end"
         theLabel._pmv = angle
         theLabel._simple_pointer = 0
     else:
@@ -154,9 +157,23 @@ def _addWedgeLabel(self,text,angle,labelX,labelY,wedgeStyle,labelClass=WedgeLabe
         theLabel.x = labelX
         theLabel.y = labelY
         theLabel.dx = wedgeStyle.label_dx
-        theLabel.dy = wedgeStyle.label_dy
+        if not self.sideLabels:
+            theLabel.dy = wedgeStyle.label_dy
+            theLabel.boxAnchor = wedgeStyle.label_boxAnchor
+        else:
+            if wedgeStyle.fontSize is None:
+                sideLabels_dy = self.fontSize / 2.5
+            else:
+                sideLabels_dy = wedgeStyle.fontSize / 2.5
+            if wedgeStyle.label_dy is None:
+                theLabel.dy = sideLabels_dy
+            else:
+                theLabel.dy = wedgeStyle.label_dy + sideLabels_dy
+            if (abs(angle) < 90 ) or (angle >270 and angle<450) or (-450< angle <-270):
+                theLabel.boxAnchor = 'w'
+            else:
+                theLabel.boxAnchor = 'e'
         theLabel.angle = wedgeStyle.label_angle
-        theLabel.boxAnchor = wedgeStyle.label_boxAnchor
         theLabel.boxStrokeColor = wedgeStyle.label_boxStrokeColor
         theLabel.boxStrokeWidth = wedgeStyle.label_boxStrokeWidth
         theLabel.boxFillColor = wedgeStyle.label_boxFillColor
@@ -485,12 +502,12 @@ class AngleData(float):
 
 class Pie(AbstractPieChart):
     _attrMap = AttrMap(BASE=AbstractPieChart,
-        data = AttrMapValue(isListOfNumbers, desc='list of numbers defining wedge sizes; need not sum to 1'),
-        labels = AttrMapValue(isListOfStringsOrNone, desc="optional list of labels to use for each data point"),
-        startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due East"),
+        data = AttrMapValue(isListOfNumbers, desc='List of numbers defining wedge sizes; need not sum to 1'),
+        labels = AttrMapValue(isListOfStringsOrNone, desc="Optional list of labels to use for each data point"),
+        startAngle = AttrMapValue(isNumber, desc="Angle of first slice; 0 is due East"),
         direction = AttrMapValue(OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
-        slices = AttrMapValue(None, desc="collection of wedge descriptor objects"),
-        simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use String not super duper WedgeLabel",advancedUsage=1),
+        slices = AttrMapValue(None, desc="Collection of wedge descriptor objects"),
+        simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use a simple String not an advanced WedgeLabel. A WedgeLabel is customisable using the properties prefixed label_ in the collection slices."),
         other_threshold = AttrMapValue(isNumber, desc='A value for doing threshholding, not used yet.',advancedUsage=1),
         checkLabelOverlap = AttrMapValue(isBoolean, desc="If true check and attempt to fix\n standard label overlaps(default off)",advancedUsage=1),
         pointerLabelMode = AttrMapValue(OneOf(None,'LeftRight','LeftAndRight'), desc='',advancedUsage=1),
@@ -499,7 +516,7 @@ class Pie(AbstractPieChart):
         xradius = AttrMapValue(isNumberOrNone, desc="X direction Radius"),
         yradius = AttrMapValue(isNumberOrNone, desc="Y direction Radius"),
         wedgeRecord = AttrMapValue(None, desc="callable(wedge,*args,**kwds)",advancedUsage=1),
-        sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make piechart with nice labels along side"),
+        sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make piechart with labels along side and pointers"),
         sideLabelsOffset = AttrMapValue(isNumber, desc="The fraction of the pie width that the labels are situated at from the edges of the pie"),
         )
     other_threshold=None
@@ -652,10 +669,6 @@ class Pie(AbstractPieChart):
     def makeAngles(self):
         wr = getattr(self,'wedgeRecord',None)
         if self.sideLabels:
-            #if self.y < 25:
-            #    self.y += 25
-            #if self.x < 50:
-            #    self.x += 50
             startAngle = theta0(self.data, self.direction)
             self.slices.label_visible = 1
         else:
@@ -714,7 +727,7 @@ class Pie(AbstractPieChart):
 
         plMode = self.pointerLabelMode
         if sideLabels:
-            plMode = 0
+            plMode = None
         if plMode:
             checkLabelOverlap = False
             PL=self.makePointerLabels(angles,plMode)
@@ -847,9 +860,6 @@ class Pie(AbstractPieChart):
                                             'bounds': l.getBounds(),
                                             }
                         x1,y1,x2,y2 = l.getBounds()
-                #The following code was trying to move the pie if there was not enough space for the labels
-                        #if l.x-(x2-x1)<0:
-                        #    self.x += abs(l.x-(x2-x1))+abs(0.75*(x2-x1))
         
         if checkLabelOverlap and L:
             fixLabelOverlaps(L, sideLabels)
@@ -1491,7 +1501,7 @@ def sample5():
     pc.x = 125
     pc.y = 25
 
-    pc.data = [74, 1, 1, 1, 1, 22]
+    pc.data = [7, 1, 1, 1, 1, 2]
     pc.labels = ['example1', 'example2', 'example3', 'example4', 'example5', 'example6']
     pc.sideLabels = 1
 
@@ -1545,11 +1555,13 @@ def sample7():
 
     "Case with overlapping pointers"
 
-    d = Drawing(400, 400)
+    d = Drawing(400, 200)
 
     pc = Pie()   
-    pc.x = 125
-    pc.y = 25
+    pc.y = 50
+    pc.x = 150
+    pc.width = 100
+    pc.height = 100
 
     pc.data = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
     pc.labels = ['example1', 'example2', 'example3', 'example4', 'example5', 'example6', 'example7', 
@@ -1558,9 +1570,9 @@ def sample7():
                 'example22', 'example23', 'example24', 'example25', 'example26', 'example27', 'example28']
     pc.sideLabels = 1
     pc.checkLabelOverlap = 1
+    pc.simpleLabels = 0
+    
 
-    pc.width = 100
-    pc.height = 100
     pc.slices.strokeWidth=1#0.5
     pc.slices[0].fillColor = colors.steelblue
     pc.slices[1].fillColor = colors.thistle
@@ -1581,8 +1593,10 @@ def sample8():
     d = Drawing(400, 200)
 
     pc = Pie()   
-    pc.x = 125
-    pc.y = 25
+    pc.y = 50
+    pc.x = 150
+    pc.width = 100
+    pc.height = 100
 
     pc.data = [1, 1, 1, 1, 1, 30, 50, 1, 1, 1, 1, 1, 1, 40,20,10]
     pc.labels = ['example1', 'example2', 'example3', 'example4', 'example5', 'example6', 'example7', 
@@ -1591,8 +1605,6 @@ def sample8():
     pc.sideLabels = 1
     pc.checkLabelOverlap = 1
 
-    pc.width = 100
-    pc.height = 100
     pc.slices.strokeWidth=1#0.5
     pc.slices[0].fillColor = colors.steelblue
     pc.slices[1].fillColor = colors.thistle
