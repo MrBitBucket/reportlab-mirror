@@ -76,10 +76,97 @@ def _getFragWord(frags,maxWidth):
     return n, s, W
 
 class XPreformatted(Paragraph):
-    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, dedent=0):
+    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, dedent=0, maximumLineLength=None, splitCharacters=None, newLineCharacter=None):
         self.caseSensitive = caseSensitive
         cleaner = lambda text, dedent=dedent: string.join(_dedenter(text or '',dedent),'\n')
+        if maximumLineLength and text:
+            text = self.stopLine(text, maximumLineLength, splitCharacters, newLineCharacter)
         self._setup(text, style, bulletText, frags, cleaner)
+    
+    def stopLine(self, text_to_split, maximum_length, split_characters, new_line_character):
+        """ This function takes as argument a string representing
+        the block of preformatted text to be written
+        and makes sure that none of the lines length exceeds
+        the maximum length allowed by the surrounding box.
+        """
+        # Characters allowed to split on
+        if not split_characters:        
+            split_characters = [" ", ";", ",", "-", "/", "\\", "(", "[", "{"]
+
+        if not new_line_character:
+            new_line_character = "<b><font color='grey'>&rarr;</font></b>"
+
+        # Create a collection of the lines
+        lines = string.split(text_to_split, "\n")
+
+        # Iterate the collection to limit the length of the lines
+        new_lines = ""
+        for line in lines:
+            if len(line) > maximum_length:
+                new_lines += self.splitLine(line, maximum_length, split_characters, new_line_character) + "\n"
+            else:
+                new_lines += line + "\n"
+        return new_lines
+
+    def splitLine(self, text_to_split, maximum_length, split_characters, new_line_character):
+        # Text to return
+        splitted_text = ""
+        # Used to implement the arrow added at the beginning of each new line created
+        first_line = True
+        # Tag currently opened or not
+        tag_opened = False
+
+        # Check if the text can be splitted
+        while text_to_split and len(text_to_split)>0:
+
+            # Actual length of the line after the tags have been removed
+            actual_length = 0
+            # Index of the last character where we can split
+            last_split_index = 0
+            
+            # Iterate for each character of the line
+            for text_index in range(len(text_to_split)):
+
+                # Check if a tag has been opened
+                if tag_opened:
+                    # Check if the character is a closing tag character
+                    if text_to_split[text_index] == ">":
+                        tag_opened = False
+
+                else:
+                    # Check if the character is an opening tag character            
+                    if text_to_split[text_index] == "<":
+                        tag_opened = True
+                    else:
+                        actual_length += 1
+                        # Check if the actual length exceeds the maximum length
+                        if actual_length >= maximum_length:
+                            break
+                        # Check if the character is in the list
+                        # of allowed characters to split on
+                        if text_to_split[text_index] in split_characters:
+                            last_split_index = text_index + 1
+
+            if first_line:
+                first_line = False
+                maximum_length -= 2
+            elif actual_length > 0:
+                splitted_text += new_line_character
+
+            # Process the remaining of the text
+            if actual_length < maximum_length:
+                # Return the text provided
+                splitted_text += str(text_to_split)
+                break
+            
+            if last_split_index==0:
+                last_split_index = text_index + 1
+
+            # Create a new line
+            splitted_text += text_to_split[0:last_split_index] + "\n"
+            text_to_split = text_to_split[last_split_index:]
+
+        return splitted_text
 
     def breakLines(self, width):
         """
