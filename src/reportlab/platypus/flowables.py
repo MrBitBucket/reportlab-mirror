@@ -243,12 +243,71 @@ def _dedenter(text,dedent=0):
 
     return lines
 
+def splitLines(lines, maximum_length, split_characters, new_line_characters):
+    if split_characters is None:
+        split_characters = SPLIT_CHARS
+    if new_line_characters is None:
+        new_line_characters = ""
+    # Return a table of lines
+    lines_splitted = []
+    for line in lines:
+        if len(line) > maximum_length:
+            splitLine(line, lines_splitted, maximum_length, \
+            split_characters, new_line_characters)
+        else:
+            lines_splitted.append(line)
+    return lines_splitted
+
+def splitLine(line_to_split, lines_splitted, maximum_length, \
+split_characters, new_line_characters):
+    # Used to implement the characters added 
+    #at the beginning of each new line created
+    first_line = True
+
+    # Check if the text can be splitted
+    while line_to_split and len(line_to_split)>0:
+
+        # Index of the character where we can split
+        split_index = 0
+
+        # Check if the line length still exceeds the maximum length
+        if len(line_to_split) <= maximum_length:
+            # Return the remaining of the line                
+            split_index = len(line_to_split)
+        else:
+            # Iterate for each character of the line
+            for line_index in range(maximum_length):
+                # Check if the character is in the list
+                # of allowed characters to split on
+                if line_to_split[line_index] in split_characters:
+                    split_index = line_index + 1
+        
+        # If the end of the line was reached
+        # with no character to split on
+        if split_index==0:
+            split_index = line_index + 1
+
+        if first_line:
+            lines_splitted.append(line_to_split[0:split_index])
+            first_line = False
+            maximum_length -= len(new_line_characters)
+        else:
+            lines_splitted.append(new_line_characters + \
+            line_to_split[0:split_index])
+        
+        # Remaining text to split
+        line_to_split = line_to_split[split_index:]
+
+SPLIT_CHARS = "[{( ,.;:/\\-"
+
 class Preformatted(Flowable):
     """This is like the HTML <PRE> tag.
     It attempts to display text exactly as you typed it in a fixed width "typewriter" font.
-    The line breaks are exactly where you put
-    them, and it will not be wrapped."""
-    def __init__(self, text, style, bulletText = None, dedent=0):
+    By default the line breaks are exactly where you put them, and it will not be wrapped.
+    You can optionally define a maximum line length and the code will be wrapped; and 
+    extra characters to be inserted at the beginning of each wrapped line (e.g. '> ').
+    """
+    def __init__(self, text, style, bulletText = None, dedent=0, maxLineLength=None, splitChars=None, newLineChars=""):
         """text is the text to display. If dedent is set then common leading space
         will be chopped off the front (for example if the entire text is indented
         6 spaces or more then each line will have 6 spaces removed from the front).
@@ -256,6 +315,15 @@ class Preformatted(Flowable):
         self.style = style
         self.bulletText = bulletText
         self.lines = _dedenter(text,dedent)
+        if splitChars is None:
+            splitChars = SPLIT_CHARS
+        if text and maxLineLength:
+            self.lines = splitLines(
+                                self.lines, 
+                                maxLineLength, 
+                                splitChars, 
+                                newLineChars
+                        )
 
     def __repr__(self):
         bT = self.bulletText
