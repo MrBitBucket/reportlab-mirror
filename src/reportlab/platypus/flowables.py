@@ -243,6 +243,9 @@ def _dedenter(text,dedent=0):
 
     return lines
 
+
+SPLIT_CHARS = "[{( ,.;:/\\-"
+
 def splitLines(lines, maximum_length, split_characters, new_line_characters):
     if split_characters is None:
         split_characters = SPLIT_CHARS
@@ -298,8 +301,6 @@ split_characters, new_line_characters):
         # Remaining text to split
         line_to_split = line_to_split[split_index:]
 
-SPLIT_CHARS = "[{( ,.;:/\\-"
-
 class Preformatted(Flowable):
     """This is like the HTML <PRE> tag.
     It attempts to display text exactly as you typed it in a fixed width "typewriter" font.
@@ -315,8 +316,6 @@ class Preformatted(Flowable):
         self.style = style
         self.bulletText = bulletText
         self.lines = _dedenter(text,dedent)
-        if splitChars is None:
-            splitChars = SPLIT_CHARS
         if text and maxLineLength:
             self.lines = splitLines(
                                 self.lines, 
