@@ -202,7 +202,7 @@ class XPreformatted(Paragraph):
         return lines
 """
         
-        story.append(Preformatted(code,normalStyle,dedent=0, maxLineLength=40, newLineChars='> '))
+        story.append(Preformatted(code,normalStyle,dedent=0, maxLineLength=60, newLineChars='> '))
 
         doc = MyDocTemplate(outputfile('test_platypus_preformatted.pdf'))
         doc.multiBuild(story)
