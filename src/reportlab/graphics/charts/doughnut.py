@@ -56,6 +56,7 @@ class Doughnut(AbstractPieChart):
         simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use String not super duper WedgeLabel"),
         # advanced usage
         checkLabelOverlap = AttrMapValue(isBoolean, desc="If true check and attempt to fix\n standard label overlaps(default off)",advancedUsage=1),
+        sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make chart with labels along side and pointers", advancedUsage=1)
         )
 
     def __init__(self):
@@ -69,6 +70,7 @@ class Doughnut(AbstractPieChart):
         self.direction = "clockwise"
         self.simpleLabels = 1
         self.checkLabelOverlap = 0
+        self.sideLabels = 0
 
         self.slices = TypedPropertyCollection(SectorProperties)
         self.slices[0].fillColor = colors.darkcyan
