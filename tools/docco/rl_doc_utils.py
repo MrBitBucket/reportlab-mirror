@@ -24,6 +24,7 @@ from reportlab.platypus import figures
 from reportlab.platypus import Paragraph, Spacer, Preformatted,\
             PageBreak, CondPageBreak, Flowable, Table, TableStyle, \
             NextPageTemplate, KeepTogether, Image, XPreformatted
+from reportlab.platypus.xpreformatted import PythonPreformatted
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.sequencer import getSequencer
@@ -139,7 +140,7 @@ def bullet(text):
 
 def eg(text,before=0.1,after=0):
     space(before)
-    disc(text, klass=Preformatted, style=exampletextstyle)
+    disc(text, klass=PythonPreformatted, style=exampletextstyle)
     space(after)
 
 def space(inches=1./6):

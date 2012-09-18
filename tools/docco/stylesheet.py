@@ -112,8 +112,7 @@ def getStyleSheet():
 
     stylesheet.add(ParagraphStyle(name='Code',
                                   parent=stylesheet['Normal'],
-                                  fontName='Courier',
-                                  textColor=colors.navy,
+                                  fontName='Courier-Bold',
                                   fontSize=8,
                                   leading=8.8,
                                   leftIndent=36,
