@@ -667,7 +667,7 @@ def drawToString(d,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=
 
 save = drawToFile
 
-def test():
+def test(verbose=True):
     def ext(x):
         if x=='tiff': x='tif'
         return x
@@ -728,7 +728,7 @@ def test():
                     html.append('<a href="%s">python source</a><br>\n' % filename)
                 elif k=='svg':
                     html.append('<a href="%s">SVG</a><br>\n' % filename)
-                print 'wrote',fullpath
+                if verbose: print 'wrote',fullpath
             except AttributeError:
                 print 'Problem drawing %s file'%k
                 raise
@@ -740,7 +740,7 @@ def test():
     if sys.platform=='mac':
         from reportlab.lib.utils import markfilename
         markfilename(htmlFileName,ext='HTML')
-    print 'wrote %s' % htmlFileName
+    if verbose: print 'wrote %s' % htmlFileName
 
 if __name__=='__main__':
     test()
