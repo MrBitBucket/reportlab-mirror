@@ -133,7 +133,7 @@ disc("""You can subclass any chart component and use your replacement instead
        properties.""")
 
 
-heading3("Labels")
+heading2("Labels")
 
 disc("""
 A label is a string of text attached to some chart element.
@@ -246,7 +246,7 @@ it generates!
 
 
 
-heading3("Axes")
+heading2("Axes")
 
 disc("""
 We identify two basic kinds of axes - <i>Value</i> and <i>Category</i>
@@ -576,7 +576,7 @@ getStory().append(t)
 caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Axes joining properties""")
 
 
-heading3("Bar Charts")
+heading2("Bar Charts")
 
 disc("""
 This describes our current $VerticalBarChart$ class, which uses the
@@ -687,9 +687,6 @@ overwrite this."""],
       ["fillColor", """Defaults to None. This will fill the plot rectangle with
 a solid color. (Note that we could implement dashArray etc.
 as for any other solid shape)"""],
-      ["barLabelFormat", """This is a format string or function used for displaying
-labels above each bar. They are positioned automatically
-above the bar for positive values and below for negative ones."""],
       ["useAbsolute", """Defaults to 0. If 1, the three properties below are
 absolute values in points (which means you can make a chart
 where the bars stick out from the plot rectangle); if 0,
@@ -704,8 +701,9 @@ before the first bar in the chart, and another half at the end."""],
 group. If you wanted a little gap between green and red bars in
 the example above, you would make this non-zero."""],
       ["barLabelFormat", """Defaults to None. As with the YValueAxis, if you supply
-a function or format string then labels will be drawn next
-to each bar showing the numeric value."""],
+a function or format string then labels will be drawn next to each bar
+showing the numeric value. They are positioned automatically
+above the bar for positive values and below for negative ones."""],
       ["barLabels", """A collection of labels used to format all bar labels. Since
 this is a two-dimensional array, you may explicitly format the
 third label of the second series using this syntax:
@@ -865,7 +863,7 @@ draw(drawing, 'Stacking bars on top of each other.')
 ##title, subTitle Not implemented yet. These would be label-like objects whose text could be set directly and which would appear in sensible locations. For now, you can just place extra strings on the drawing.
 
 
-heading3("Line Charts")
+heading2("Line Charts")
 
 disc("""
 We consider "Line Charts" to be essentially the same as
@@ -943,10 +941,42 @@ draw(drawing, 'HorizontalLineChart sample')
 
 
 disc("")
-todo("Add properties table.")
 
+data=[["Property","Meaning"],
+      ["data", "Data to be plotted, list of (lists of) numbers."],
+      ["x, y, width, height", """Bounding box of the line chart.
+Note that x and y do NOT specify the centre but the bottom left corner"""],
+      ["valueAxis", """The value axis, which may be formatted as described previously."""],
+      ["categoryAxis", """The category axis, which may be formatted as described previously."""],
+ ["strokeColor", """Defaults to None. This will draw a border around the plot rectangle,
+which may be useful in debugging. Axes will overwrite this."""],
+      ["fillColor", """Defaults to None. This will fill the plot rectangle with a solid color."""],
+      ["lines.strokeColor", """Color of the line."""],
+      ["lines.strokeWidth", """Width of the line."""],
+      ["lineLabels", """A collection of labels used to format all line labels. Since
+this is a two-dimensional array, you may explicitly format the
+third label of the second line using this syntax:
+  chart.lineLabels[(1,2)].fontSize = 12"""],
+      ["lineLabelFormat", """Defaults to None. As with the YValueAxis, if you supply
+a function or format string then labels will be drawn next
+to each line showing the numeric value. You can also set it
+to 'values' to display the values explicity defined in lineLabelArray."""],
+      ["lineLabelArray", """Explicit array of line label values, must match size of data if present.
+These labels values will be displayed only if the property
+lineLabelFormat above is set to 'values'."""]]
+t=Table(data, colWidths=(100,330))
+t.setStyle(TableStyle([
+            ('FONT',(0,0),(-1,0),'Times-Bold',10,12),
+            ('FONT',(0,1),(0,-1),'Courier',8,8),
+            ('FONT',(1,1),(1,-1),'Times-Roman',10,12),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+getStory().append(t)
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - HorizontalLineChart properties""")
 
-heading3("Line Plots")
+heading2("Line Plots")
 
 disc("""
 Below we show a more complex example of a Line Plot that
@@ -1024,22 +1054,56 @@ draw(drawing, 'LinePlot sample')
 
 
 disc("")
-todo("Add properties table.")
+
+data=[["Property","Meaning"],
+      ["data", "Data to be plotted, list of (lists of) numbers."],
+      ["x, y, width, height", """Bounding box of the line chart.
+Note that x and y do NOT specify the centre but the bottom left corner"""],
+      ["xValueAxis", """The vertical value axis, which may be formatted as described previously."""],
+      ["yValueAxis", """The horizontal value axis, which may be formatted as described previously."""],
+      ["strokeColor", """Defaults to None. This will draw a border around the plot rectangle,
+which may be useful in debugging. Axes will overwrite this."""],
+      ["strokeWidth", """Defaults to None. Width of the border around the plot rectangle."""],
+      ["fillColor", """Defaults to None. This will fill the plot rectangle with a solid color."""],
+      ["lines.strokeColor", """Color of the line."""],
+      ["lines.strokeWidth", """Width of the line."""],
+      ["lines.symbol", """Marker used for each point.
+You can create a new marker using the function makeMarker().
+For example to use a circle, the function call would be makeMarker('Circle')"""],
+      ["lineLabels", """A collection of labels used to format all line labels. Since
+this is a two-dimensional array, you may explicitly format the
+third label of the second line using this syntax:
+  chart.lineLabels[(1,2)].fontSize = 12"""],
+      ["lineLabelFormat", """Defaults to None. As with the YValueAxis, if you supply
+a function or format string then labels will be drawn next
+to each line showing the numeric value. You can also set it
+to 'values' to display the values explicity defined in lineLabelArray."""],
+      ["lineLabelArray", """Explicit array of line label values, must match size of data if present.
+These labels values will be displayed only if the property
+lineLabelFormat above is set to 'values'."""]]
+t=Table(data, colWidths=(100,330))
+t.setStyle(TableStyle([
+            ('FONT',(0,0),(-1,0),'Times-Bold',10,12),
+            ('FONT',(0,1),(0,-1),'Courier',8,8),
+            ('FONT',(1,1),(1,-1),'Times-Roman',10,12),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+getStory().append(t)
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - LinePlot properties""")
 
 
 
-heading3("Pie Charts")
+
+heading2("Pie Charts")
 
 disc("""
-We've already seen a pie chart example above.
-This is provisional but seems to do most things.
-At the very least we need to change the name.
-For completeness we will cover it here.
+As usual, we will start with an example:
 """)
 
 eg("""
 from reportlab.graphics.charts.piecharts import Pie
-
 d = Drawing(200, 100)
 
 pc = Pie()
@@ -1056,19 +1120,18 @@ pc.slices[3].strokeWidth = 2
 pc.slices[3].strokeDashArray = [2,2]
 pc.slices[3].labelRadius = 1.75
 pc.slices[3].fontColor = colors.red
-
 d.add(pc)
 """)
 
 from reportlab.graphics.charts.piecharts import Pie
 
-d = Drawing(200, 100)
+d = Drawing(400, 200)
 
 pc = Pie()
-pc.x = 65
-pc.y = 15
-pc.width = 70
-pc.height = 70
+pc.x = 125
+pc.y = 25
+pc.width = 150
+pc.height = 150
 pc.data = [10,20,30,40,50,60]
 pc.labels = ['a','b','c','d','e','f']
 
@@ -1076,7 +1139,7 @@ pc.slices.strokeWidth=0.5
 pc.slices[3].popout = 10
 pc.slices[3].strokeWidth = 2
 pc.slices[3].strokeDashArray = [2,2]
-pc.slices[3].labelRadius = 1.75
+pc.slices[3].labelRadius = 1.25
 pc.slices[3].fontColor = colors.red
 
 d.add(pc)
@@ -1087,35 +1150,108 @@ disc("""
 Properties are covered below.
 The pie has a 'wedges' collection and we document wedge properties
 in the same table.
-This was invented before we finished the $Label$ class and will
-probably be reworked to use such labels shortly.
 """)
 
 disc("")
-todo("Add properties table.")
 
-##Property Value
-##data a list or tuple of numbers
-##x, y, width, height Bounding box of the pie. Note that x and y do NOT specify the centre but the bottom left corner, and that width and height do not have to be equal; pies may be elliptical and wedges will be drawn correctly.
-##labels None, or a list of strings. Make it None if you don't want labels around the edge of the pie. Since it is impossible to know the size of slices, we generally discourage placing labels in or around pies; it is much better to put them in a legend alongside.
-##startAngle Where is the start angle of the first pie slice? The default is '90' which is twelve o'clock.
-##direction Which direction do slices progress in? The default is 'clockwise'.
-##sideLabels This creates a chart with the labels in two columns, one on either side.
-##sideLabelsOffset This is the fractoin of the width of the pie that the two columns in
-##wedges Collection of wedges. This lets you customise each wedge, or individual ones. See below
-##wedges.strokeWidth Border width for wedge
-##wedges.strokeColor Border color
-##wedges.strokeDashArray Solid or dashed line configuration for
-##wedges.popout How far out should the slice(s) stick from the centre of
-##the pie? default is zero.
-##wedges.fontName
-##wedges.fontSize
-##wedges.fontColor Used for text labels
-##wedges.labelRadius This controls the anchor point for a text label. It
-##is a fraction of the radius; 0.7 will place the text inside the pie,
-##1.2 will place it slightly outside. (note that if we add labels, we
-##will keep this to specify their anchor point)
-##
+data=[["Property", "Meaning"],
+      ["data", "A list or tuple of numbers"],
+      ["x, y, width, height", """Bounding box of the pie.
+Note that x and y do NOT specify the centre but the bottom left
+corner, and that width and height do not have to be equal;
+pies may be elliptical and wedges will be drawn correctly."""],
+      ["labels", """None, or a list of strings.
+Make it None if you don't want labels around the edge of the pie.
+Since it is impossible to know the size of slices, we generally
+discourage placing labels in or around pies; it is much better 
+to put them in a legend alongside."""],
+      ["startAngle", """Where is the start angle of the first pie slice?
+The default is '90' which is twelve o'clock."""],
+      ["direction", """Which direction do slices progress in?
+The default is 'clockwise'."""],
+      ["sideLabels", """This creates a chart with the labels in two columns,
+one on either side."""],
+      ["sideLabelsOffset", """This is a fraction of the width of the pie that defines the horizontal
+distance between the pie and the columns of labels."""],
+      ["simpleLabels", """Default is 1. Set to 0 to enable the use of customizable labels 
+and of properties prefixed by label_ in the collection slices."""],
+      ["wedges", """Collection of wedges.
+This lets you customise each wedge, or individual ones. See below"""],
+      ["wedges.strokeWidth", "Border width for wedge"],
+      ["wedges.strokeColor", "Border color"],
+      ["wedges.strokeDashArray", "Solid or dashed line configuration"],
+      ["wedges.popout", """How far out should the slice(s) stick from the centre of the pie?
+Default is zero."""],
+      ["wedges.fontName", "Name of the label font"],
+      ["wedges.fontSize", "Size of the label font"],
+      ["wedges.fontColor", "Color of the label text"],
+      ["wedges.labelRadius", """This controls the anchor point for a text label.
+It is a fraction of the radius; 0.7 will place the text inside the
+pie, 1.2 will place it slightly outside. (note that if we add labels,
+we will keep this to specify their anchor point)"""]]
+t=Table(data, colWidths=(130,300))
+t.setStyle(TableStyle([
+            ('FONT',(0,0),(-1,0),'Times-Bold',10,12),
+            ('FONT',(0,1),(0,-1),'Courier',8,8),
+            ('FONT',(1,1),(1,-1),'Times-Roman',10,12),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+getStory().append(t)
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Pie properties""")
+
+heading3("Customizing Labels")
+
+disc("""
+Each slide label can be customized individually by changing
+the properties prefixed by $label_$ in the collection $wedges$.
+For example $pc.slices[2].label_angle = 10$ changes the angle 
+of the third label.
+""")
+
+disc("""
+Before being able to use these customization properties, you need
+to disable simple labels with: $pc.simplesLabels = 0$
+""")
+
+disc("")
+
+data=[["Property", "Meaning"],
+      ["label_dx", """X Offset of the label"""],
+      ["label_dy", """Y Offset of the label"""],
+      ["label_angle", """Angle of the label, default (0) is horizontal, 90 is vertical,
+180 is upside down"""],
+      ["label_boxAnchor", """Anchoring point of the label"""],
+      ["label_boxStrokeColor", """Border color for the label box"""],
+      ["label_boxStrokeWidth", """Border width for the label box"""],
+      ["label_boxFillColor", """Filling color of the label box"""],
+      ["label_strokeColor", """Border color for the label text"""],
+      ["label_strokeWidth", """Border width for the label text"""],
+      ["label_text", """Text of the label"""],
+      ["label_width", """Width of the label"""],
+      ["label_maxWidth", """Maximum width the label can grow to"""],
+      ["label_height", """Height of the label"""],
+      ["label_textAnchor", """Maximum height the label can grow to"""],
+      ["label_visible", """True if the label is to be drawn"""],
+      ["label_topPadding", """Padding at top of box"""],
+      ["label_leftPadding", """Padding at left of box"""],
+      ["label_rightPadding", """Padding at right of box"""],
+      ["label_bottomPadding", """Padding at bottom of box"""],
+      ["label_simple_pointer", """Set to 1 for simple pointers"""],
+      ["label_pointer_strokeColor", """Color of indicator line"""],
+      ["label_pointer_strokeWidth", """Width of indicator line"""]]
+t=Table(data, colWidths=(130,300))
+t.setStyle(TableStyle([
+            ('FONT',(0,0),(-1,0),'Times-Bold',10,12),
+            ('FONT',(0,1),(0,-1),'Courier',8,8),
+            ('FONT',(1,1),(1,-1),'Times-Roman',10,12),
+            ('VALIGN',(0,0),(-1,-1),'MIDDLE'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ]))
+getStory().append(t)
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Pie.wedges label customization properties""")
 
 heading3("Side Labels")
 
@@ -1161,7 +1297,7 @@ correspond to slices that are not adjacent.
 drawing8 = sample8()
 draw(drawing8, 'An example of labels overlapping')
 
-heading3("Legends")
+heading2("Legends")
 
 disc("""
 Various preliminary legend classes can be found but need a
@@ -1207,7 +1343,7 @@ is is a bit too early to start making them really public.
 Nevertheless, here is a list of things that are under way:
 """)
 
-list("""
+bullet("""
 Color specification - right now the chart has an undocumented property
 $defaultColors$, which provides a list of colors to cycle through,
 such that each data series gets its own color.
@@ -1220,7 +1356,7 @@ This legend can then also be shared by several charts, but need not
 be visible itself.
 """)
 
-list("""
+bullet("""
 Additional chart types - when the current design will have become
 more stable, we expect to add variants of bar charts to deal with
 percentile bars as well as the side-by-side variant seen here.

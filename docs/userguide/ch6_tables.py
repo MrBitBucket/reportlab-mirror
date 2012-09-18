@@ -397,16 +397,41 @@ The value of i is 1
 """)
 
 heading1("""Other Useful $Flowables$""")
-heading2("""$Preformatted(text, style, bulletText = None, dedent=0)$""")
+heading2("""$Preformatted(text, style, bulletText=None, dedent=0, maxLineLength=None, splitChars=None, newLineChars=None)$""")
 disc("""
 Creates a preformatted paragraph which does no wrapping, line splitting or other manipulations.
 No $XML$ style tags are taken account of in the text.
 If dedent is non zero $dedent$ common leading
 spaces will be removed from the front of each line.
 """)
-heading2("""$XPreformatted(text, style, bulletText = None, dedent=0, frags=None)$""")
+heading3("Defining a maximum line length")
 disc("""
-This is a non rearranging form of the $Paragraph$ class; $XML$ tags are allowed in
+You can use the property $maxLineLength$ to define a maximum line length. If a line length exceeds this maximum value, the line will be automatically splitted.
+""")
+disc("""
+The line will be splitted on any single character defined in $splitChars$. If no value is provided for this property, the line will be splited on any of the following standard characters: space, colon, full stop, semi-colon, coma, hyphen, forward slash, back slash, left parenthesis, left square bracket and left curly brace
+""")
+disc("""
+Characters can be automatically inserted at the beginning of each line that has been created. You can set the property $newLineChars$ to the characters you want to use. 
+""")
+EmbeddedCode("""
+from reportlab.lib.styles import getSampleStyleSheet
+stylesheet=getSampleStyleSheet()
+normalStyle = stylesheet['Code']
+text='''
+class XPreformatted(Paragraph):
+    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1):
+        self.caseSensitive = caseSensitive
+        if maximumLineLength and text:
+            text = self.stopLine(text, maximumLineLength, splitCharacters)
+        cleaner = lambda text, dedent=dedent: string.join(_dedenter(text or '',dedent),'')
+        self._setup(text, style, bulletText, frags, cleaner)
+'''
+t=Preformatted(text,normalStyle,maxLineLength=60, newLineChars='> ')
+""")
+heading2("""$XPreformatted(text, style, bulletText=None, dedent=0, frags=None)$""")
+disc("""
+This is a non rearranging form of the $Paragraph$ class; XML tags are allowed in
 $text$ and have the same meanings as for the $Paragraph$ class.
 As for $Preformatted$, if dedent is non zero $dedent$ common leading
 spaces will be removed from the front of each line.
@@ -414,7 +439,7 @@ spaces will be removed from the front of each line.
 EmbeddedCode("""
 from reportlab.lib.styles import getSampleStyleSheet
 stylesheet=getSampleStyleSheet()
-normalStyle = stylesheet['Normal']
+normalStyle = stylesheet['Code']
 text='''
 
    This is a non rearranging form of the <b>Paragraph</b> class;
@@ -429,6 +454,7 @@ text='''
 '''
 t=XPreformatted(text,normalStyle,dedent=3)
 """)
+
 heading2("""$Image(filename, width=None, height=None)$""")
 disc("""Create a flowable which will contain the image defined by the data in file $filename$.
 The default <b>PDF</b> image type <i>jpeg</i> is supported and if the <b>PIL</b> extension to <b>Python</b>
@@ -437,7 +463,7 @@ then they determine the dimension of the displayed image in <i>points</i>. If ei
 not specified (or specified as $None$) then the corresponding pixel dimension of the image is assumed
 to be in <i>points</i> and used.
 """)
-I=os.path.join(os.path.dirname(reportlab.__file__),'docs','images','lj8100.jpg')
+I="../images/lj8100.jpg"
 eg("""
 Image("lj8100.jpg")
 """,after=0.1)
