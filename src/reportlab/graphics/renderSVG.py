@@ -126,11 +126,15 @@ class SVGCanvas:
         self.svg = self.doc.documentElement
         self.svg.setAttribute("width", str(size[0]))
         self.svg.setAttribute("height", str(self.height))
+        self.svg.setAttribute("viewBox", "0 0 %d %d" % (self.width, self.height))
 
         #these suggested by Tim Roberts, as updated by peter@maubp.freeserve.co.uk 
         self.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
         self.svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink")
         self.svg.setAttribute("version", "1.0")
+
+
+
         #self.svg.setAttribute("baseProfile", "full")   #disliked in V 1.0
         title = self.doc.createElement('title')
         text = self.doc.createTextNode('...')
