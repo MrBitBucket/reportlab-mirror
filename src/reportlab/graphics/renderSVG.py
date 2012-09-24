@@ -126,6 +126,7 @@ class SVGCanvas:
         self.svg = self.doc.documentElement
         self.svg.setAttribute("width", str(size[0]))
         self.svg.setAttribute("height", str(self.height))
+        self.svg.setAttribute("preserveAspectRatio", "xMinYMin meet")
         self.svg.setAttribute("viewBox", "0 0 %d %d" % (self.width, self.height))
 
         #these suggested by Tim Roberts, as updated by peter@maubp.freeserve.co.uk 
