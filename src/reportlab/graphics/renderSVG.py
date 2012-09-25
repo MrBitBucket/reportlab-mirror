@@ -95,8 +95,9 @@ def transformNode(doc, newTag, node=None, **attrDict):
 
 ### classes ###
 class SVGCanvas:
-    def __init__(self, size=(300,300)):
-        self.verbose = 0
+    def __init__(self, size=(300,300), encoding='utf8', verbose=0):
+        self.verbose = verbose
+        self.encoding = encoding
         self.width, self.height = self.size = size
         # self.height = size[1]
         self.code = []
@@ -173,7 +174,7 @@ class SVGCanvas:
         else:
             f = fn
 
-        f.write(self.doc.toprettyxml(indent="     "))
+        f.write(self.doc.toprettyxml(indent="     ",encoding=self.encoding))
 
         if f is not fn:
             f.close()
