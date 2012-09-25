@@ -174,6 +174,30 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
 
         renderSVG.drawToFile(drawing, outputfile("test_renderSVG_simple_test3.svg"))
 
+    def test4(self):
+        "Test character encoding."
+
+        path = outputfile("test_renderSVG_simple_test4.svg")
+        specialChar = u'\u2019'
+
+        d = Drawing(200, 100)
+        d.add(String(0, 0, "foo"+specialChar))
+        d.add(String(100, 0, "bar"))
+        renderSVG.drawToFile(d, path)
+
+        if not HAVE_XML_PARSER:
+            warnIgnoredRestofTest()
+            return
+
+        svg = load(path)
+        fg = svg.getElementsByTagName('g')[0]           # flipping group
+        dg = fg.getElementsByTagName('g')[0]            # diagram group
+        textChildren = dg.getElementsByTagName('text')  # text nodes
+        t0 = string.strip(textChildren[0].childNodes[0].nodeValue)
+        t1 = string.strip(textChildren[1].childNodes[0].nodeValue)
+        assert t0 == 'foo'+specialChar
+        assert t1 == 'bar'
+
     def tearDown(self):
         "When finished, make a little index page to view them in situ"
         
