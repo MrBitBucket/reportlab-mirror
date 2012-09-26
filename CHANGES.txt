@@ -8,6 +8,47 @@ E.g. to retrieve the changes made between release 1.19 and release 1.20, type:
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+#################################################################################
+#################### RELEASE 2.6  imminent around 1/Oct/2012     #################
+#################################################################################
+(in draft)
+This is a minor release focusing mainly on improved documentation.  There are a 
+number of minor enhancements, and a larger number of previous-undocumented
+enhancements which we have documented better.
+
+
+###General changes
+   * Manuals have been reformatted with more pleasing code snippets and tables of 
+     contents, and reviewed and expanded
+
+###Flowing documents (Platypus):
+   * Added support for HTML-style list objects
+   * Added flexible mechanism for drawing bullets
+   * Allowed XPreformatted objects to use Asian line wrapping
+   * Added an 'autoNextPageTemplate' attribute to PageTemplates.  For example you 
+     can now set up a 'chapter first page template' which will always be followed
+     by a 'continuation template' on the next page break, saving the programmer from
+     having to issue control flow commands in the story.
+   * added a TopPadder flowable, which will 'wrap' another Flowable and move it 
+     to the bottom of the current page.  
+   * More helpful error messages when large tables cannot be rendered
+     
+   
+
+###Charts and graphics:
+   * Support for UPCA bar codes
+   * We now have a semi-intelligent system for labelling pie charts with 
+     callout lines.  Thanks to James Martin-Collar, a maths student at Warwick 
+     University, who did this as his summer internship.
+   * Axes - added startOffset and endOffset properties; allowed for axis 
+     background annotations.
+   * Bar charts - allow more control of z Index (i.e. drawing order of axes and
+     lines)
+   * Pie charts - fixed bugs in 3d appearance
+   * SVG output back end has seen some bugs fixed and now outputs resizeable SVG
+   
+   
+   
 
 #################################################################################
 #################### RELEASE 2.5  at 18:00 GMT  01/Oct/2010     #################
