@@ -489,8 +489,8 @@ enhancements which we have documented better.""")
 disc("""A big thanks goes to the community for their help in reporting bugs and providing patches. 
 Thanks to everybody who has contributed to the open-source toolkit in the run-up to the 2.6 release, 
 whether by reporting bugs, sending patches, or contributing to the reportlab-users mailing list. 
-Thanks especially to the following people: Alex Buck, Felix Labrecque <felixl@densi.com>,
-Peter Johnson <johnson.peter@gmail.com>, James Martin-Collar and Guillaume Francois.
+Thanks especially to the following people: Alex Buck, Felix Labrecque,
+Peter Johnson, James Martin-Collar and Guillaume Francois.
 This page documents what has changed since version 2.5.""")
 
 disc('Reportlab 2.6 is installable with easy_install. You must have installed a compatible C compiler and the dependencies such as Freetype and PIL.')
@@ -510,6 +510,8 @@ having to issue control flow commands in the story.""")
 bullet("""Added a TopPadder flowable, which will 'wrap' another Flowable and move it 
 to the bottom of the current page.""")
 bullet("""More helpful error messages when large tables cannot be rendered.""")
+bullet("""Documentation for images within text (test_032_images).""")
+bullet("""Trailing dots for use on contents pages.""")
 
 heading4('Charts and graphics')
 bullet("""Support for UPCA bar codes.""")
