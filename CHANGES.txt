@@ -32,6 +32,8 @@ enhancements which we have documented better.
    * added a TopPadder flowable, which will 'wrap' another Flowable and move it 
      to the bottom of the current page.  
    * More helpful error messages when large tables cannot be rendered
+   * Documentation for images within text (test_032_images)
+   * Trailing dots for use on contents pages
      
    
 
@@ -47,6 +49,12 @@ enhancements which we have documented better.
    * Pie charts - fixed bugs in 3d appearance
    * SVG output back end has seen some bugs fixed and now outputs resizeable SVG
    
+###Contributors:
+   * Alex Buck
+   * Felix Labrecque <felixl@densi.com>
+   * Peter Johnson <johnson.peter@gmail.com>
+   * James Martin-Collar
+   * Guillaume Francois
    
    
 
