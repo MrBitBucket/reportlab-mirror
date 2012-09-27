@@ -423,7 +423,7 @@ def main():
         setup(
             name="reportlab",
             version=get_version(),
-            license="BSD license (see license.txt for details), Copyright (c) 2000-2010, ReportLab Inc.",
+            license="BSD license (see license.txt for details), Copyright (c) 2000-2012, ReportLab Inc.",
             description="The Reportlab Toolkit",
             long_description="""The ReportLab Toolkit. An Open Source Python library for generating PDFs and graphics.""",
 
