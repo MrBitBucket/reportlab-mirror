@@ -409,7 +409,7 @@ disc("""
 You can use the property $maxLineLength$ to define a maximum line length. If a line length exceeds this maximum value, the line will be automatically splitted.
 """)
 disc("""
-The line will be splitted on any single character defined in $splitChars$. If no value is provided for this property, the line will be splited on any of the following standard characters: space, colon, full stop, semi-colon, coma, hyphen, forward slash, back slash, left parenthesis, left square bracket and left curly brace
+The line will be split on any single character defined in $splitChars$. If no value is provided for this property, the line will be split on any of the following standard characters: space, colon, full stop, semi-colon, coma, hyphen, forward slash, back slash, left parenthesis, left square bracket and left curly brace
 """)
 disc("""
 Characters can be automatically inserted at the beginning of each line that has been created. You can set the property $newLineChars$ to the characters you want to use. 
