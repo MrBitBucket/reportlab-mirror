@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2008
+#Copyright ReportLab Europe Ltd. 2000-2012
 #see license.txt for license details
 """Tests for context-dependent indentation
 """
@@ -95,7 +95,7 @@ and add a '>' to the start of the following line.
         story.append(Paragraph("",bt))
 
 	code = """
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2012
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/xpreformatted.py
 __version__=''' $Id: xpreformatted.py 3866 2011-06-27 13:08:20Z rgbecker $ '''

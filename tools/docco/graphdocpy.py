@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2008
+#Copyright ReportLab Europe Ltd. 2000-2012
 #see license.txt for license details
 """Generate documentation for reportlab.graphics classes.
 Type the following for usage info:

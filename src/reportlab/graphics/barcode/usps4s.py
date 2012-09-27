@@ -1,4 +1,4 @@
-#copyright ReportLab Inc. 2000-2006
+#copyright ReportLab Inc. 2000-2012
 #see license.txt for license details
 __version__=''' $Id$ '''
 __all__ = ('USPS_4State',)

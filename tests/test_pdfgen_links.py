@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2008
+#Copyright ReportLab Europe Ltd. 2000-2012
 #this test and associates functionality kinds donated by Ian Sparks.
 #see license.txt for license details
 """
