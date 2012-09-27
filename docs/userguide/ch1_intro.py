@@ -466,44 +466,47 @@ Bigger ideas and more substantial rewrites are deferred to Version 3.0, with no 
 target dates.
 """)
 
-heading2("What's New in ReportLab 2.4")
-disc("""Many new features have been added and numerous bugs have been fixed, a big
-thanks goes to the community for their help in reporting bugs and providing patches. 
-Thanks to everybody who has contributed to the open-source toolkit in the run-up to the 2.4 release, 
+heading2("What's New in ReportLab 2.6")
+disc("""This is a minor release focusing mainly on improved documentation. There are a 
+number of minor enhancements, and a larger number of previous-undocumented
+enhancements which we have documented better.""")
+
+disc("""A big thanks goes to the community for their help in reporting bugs and providing patches. 
+Thanks to everybody who has contributed to the open-source toolkit in the run-up to the 2.6 release, 
 whether by reporting bugs, sending patches, or contributing to the reportlab-users mailing list. 
-Thanks especially to the following people: PJACock, Hans Brand, Ian Stevens, Yoann Roman, Hosam Aly 
-Randolph Bentson, Volker Haas, Simon King, Henning Vonbargen, Michael Egorov, Mike Folwell and 
-Roberto Alsina.  
-This page documents what has changed since version 2.3.""")
+Thanks especially to the following people: Alex Buck, Felix Labrecque <felixl@densi.com>,
+Peter Johnson <johnson.peter@gmail.com>, James Martin-Collar and Guillaume Francois.
+This page documents what has changed since version 2.5.""")
 
-disc('Reportlab 2.4 is installable with easy_install. You must have installed a compatible C compiler and the dependencies such as Freetype and PIL.')
+disc('Reportlab 2.6 is installable with easy_install. You must have installed a compatible C compiler and the dependencies such as Freetype and PIL.')
 
-heading4('PDF')
-bullet("""Canvas automatic cropmarks.""")
-bullet("""RGB alpha colours - colours can now be transparent with an alpha value.""")
-bullet("""CMYK overPrint - physical colour mix in the printer - similar to RGB alpha but
- used in professional printing.""")
-bullet("""Colours module has a fade function that returns a list of different shades made
- up of one base colour.""")
-bullet("""Unicode font file names are now accepted.""")
-bullet("""Lots of improvements and verbosity to error messages and the way they are handled. 
-Font size can now be specified in pixels.""")
+heading4('General changes')
+bullet("""Manuals have been reformatted with more pleasing code snippets and tables of 
+contents, and reviewed and expanded.""")
 
-heading4('Platypus')
-bullet("""Added support for heading styles h4-h6.""")
-bullet("""Improved support for onDraw and SimpleIndex.""")
-bullet("""Add support for index tableStyle.""")
-bullet("""Added an alphabetic grouping indexing class.""")
-bullet("""Added support for multi-level and alphabetical indexes.""")
-bullet("""Added support for an unlimited number of TOC levels with default styles.""")
-bullet("""Index entries can now be clickable.""")
+heading4('Flowing documents (Platypus)')
+bullet("""Added support for HTML-style list objects.""")
+bullet("""Added flexible mechanism for drawing bullets.""")
+bullet("""Allowed XPreformatted objects to use Asian line wrapping.""")
+bullet("""Added an 'autoNextPageTemplate' attribute to PageTemplates. For example you 
+can now set up a 'chapter first page template' which will always be followed
+by a 'continuation template' on the next page break, saving the programmer from
+having to issue control flow commands in the story.""")
+bullet("""Added a TopPadder flowable, which will 'wrap' another Flowable and move it 
+to the bottom of the current page.""")
+bullet("""More helpful error messages when large tables cannot be rendered.""")
 
-heading4('Graphics')
-bullet("""Chart axes values can be reversible.""")
-bullet("""Labels on chart axes can now be drawn above or below the axes (hi or low).""")
-bullet("""A per swatch callout is now allowed in the legend.""")
-bullet("""A new anchoring mode for string 'numeric' that align numerical strings by their decimal place.""")
-bullet("""Drawing has a resized method now to change the size dynamically.""")
+heading4('Charts and graphics')
+bullet("""Support for UPCA bar codes.""")
+bullet("""We now have a semi-intelligent system for labelling pie charts with 
+callout lines.  Thanks to James Martin-Collar, a maths student at Warwick 
+University, who did this as his summer internship.""")
+bullet("""Axes - added startOffset and endOffset properties; allowed for axis 
+background annotations.""")
+bullet("""Bar charts - allow more control of z Index (i.e. drawing order of axes and
+lines)""")
+bullet("""Pie charts - fixed bugs in 3d appearance.""")
+bullet("""SVG output back end has seen some bugs fixed and now outputs resizeable SVG.""")
 
 # Noteworthy bug fixes Section #######################
 #heading3("Noteworthy bug fixes")
