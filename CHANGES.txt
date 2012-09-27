@@ -9,9 +9,9 @@ The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
 #################################################################################
-#################### RELEASE 2.6  imminent around 1/Oct/2012     #################
+#################### RELEASE 2.6  27/09/2012                    #################
 #################################################################################
-(in draft)
+
 This is a minor release focusing mainly on improved documentation.  There are a 
 number of minor enhancements, and a larger number of previous-undocumented
 enhancements which we have documented better.
