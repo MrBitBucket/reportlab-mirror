@@ -319,8 +319,10 @@ steps and warn you if anything is missing or mismatched.""")
 
 heading3("Installation instructions for Unix")
 disc("""
-     
+Many Linux distributions already include or can deliver a ReportLab distribution, although this may be a few months behind our own releases.  On Ubuntu, simply use ^sudo apt-get install python-reportlab^.   In addition, we support the Python packaging mechanisms so you can use ^easy_install reportlab^ in most Python environments.
 """)
+disc("""
+If you want to install the latest version of our code, or to install your own reportlab to go with our commercial distribution, you can install from source as follows:""")
 
 restartList()
 list("""First, install Python.  On a large number of Unix and Linux distributions, Python is already installed,
