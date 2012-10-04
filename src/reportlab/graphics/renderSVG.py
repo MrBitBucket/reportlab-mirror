@@ -93,6 +93,36 @@ def transformNode(doc, newTag, node=None, **attrDict):
 
     return newNode
 
+class EncodedWriter(list):
+    '''
+    EncodedWriter(encoding) assumes .write will be called with
+    either unicode or utf8 encoded strings.  it will accumulate
+    strings encoded as the specified encoding.
+    '''
+    def __init__(self,encoding):
+        list.__init__(self)
+        self.encoding = encoding
+
+    def write(self,s):
+        if isinstance(s,unicode):
+            s = s.encode(self.encoding)
+        elif isinstance(s,str):
+            try:
+                s.decode(self.encoding)
+            except:
+                et, ev, tb = sys.exc_info()
+                ev = str(ev)
+                del et, tb
+                raise ValueError('String %r not encoded as %r\nerror=%s' % (s,self.encoding,ev))
+        else:
+            raise ValueError('EncodedWriter.write(%r) argument should be string or unicode' % s)
+        self.append(s)
+
+    def getvalue(self):
+        r = ''.join(self)
+        del self[:]
+        return r
+
 ### classes ###
 class SVGCanvas:
     def __init__(self, size=(300,300), encoding='utf-8', verbose=0):
@@ -169,13 +199,14 @@ class SVGCanvas:
         self.currGroup = self.groupTree
 
     def save(self, fn=None):
+        writer = EncodedWriter(self.encoding)
+        self.doc.writexml(writer,addindent="\t",newl="\n",encoding=self.encoding)
+
         if type(fn) in types.StringTypes:
             f = open(fn, 'w')
         else:
             f = fn
-
-        f.write(self.doc.toprettyxml(indent="     ",encoding=self.encoding))
-
+        f.write(writer.getvalue())
         if f is not fn:
             f.close()
 
