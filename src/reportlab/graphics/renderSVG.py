@@ -7,7 +7,7 @@ objects download the svglib module here:
   http://python.net/~gherman/#svglib
 """
 
-import math, types, sys, os
+import math, types, sys, os, codecs
 from operator import getitem
 
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
@@ -99,23 +99,35 @@ class EncodedWriter(list):
     either unicode or utf8 encoded strings.  it will accumulate
     strings encoded as the specified encoding.
     '''
-    def __init__(self,encoding):
+    BOMS =  {
+        'utf-32':codecs.BOM_UTF32,
+        'utf-32-be':codecs.BOM_UTF32_BE,
+        'utf-32-le':codecs.BOM_UTF32_LE,
+        'utf-16':codecs.BOM_UTF16,
+        'utf-16-be':codecs.BOM_UTF16_BE,
+        'utf-16-le':codecs.BOM_UTF16_LE,
+        }
+    def __init__(self,encoding,bom=False):
         list.__init__(self)
-        self.encoding = encoding
+        self.encoding = encoding = codecs.lookup(encoding).name
+        if bom and '16' in encoding or '32' in encoding:
+            self.write(self.BOMS[encoding])
 
     def write(self,s):
         if isinstance(s,unicode):
             s = s.encode(self.encoding)
         elif isinstance(s,str):
             try:
-                s.decode(self.encoding)
+                 u = s.decode('utf-8')
             except:
                 et, ev, tb = sys.exc_info()
                 ev = str(ev)
                 del et, tb
-                raise ValueError('String %r not encoded as %r\nerror=%s' % (s,self.encoding,ev))
+                raise ValueError("String %r not encoded as 'utf-8'\nerror=%s" % (s,ev))
+            if self.encoding!='utf-8':
+                s = u.decode(self.encoding)
         else:
-            raise ValueError('EncodedWriter.write(%r) argument should be string or unicode' % s)
+            raise ValueError("EncodedWriter.write(%r) argument should be 'utf-8' string or unicode" % s)
         self.append(s)
 
     def getvalue(self):
@@ -125,9 +137,10 @@ class EncodedWriter(list):
 
 ### classes ###
 class SVGCanvas:
-    def __init__(self, size=(300,300), encoding='utf-8', verbose=0):
+    def __init__(self, size=(300,300), encoding='utf-8', verbose=0, bom=False):
         self.verbose = verbose
-        self.encoding = encoding
+        self.encoding = codecs.lookup(encoding).name
+        self.bom = bom
         self.width, self.height = self.size = size
         # self.height = size[1]
         self.code = []
@@ -199,7 +212,7 @@ class SVGCanvas:
         self.currGroup = self.groupTree
 
     def save(self, fn=None):
-        writer = EncodedWriter(self.encoding)
+        writer = EncodedWriter(self.encoding,bom=self.bom)
         self.doc.writexml(writer,addindent="\t",newl="\n",encoding=self.encoding)
 
         if type(fn) in types.StringTypes:
