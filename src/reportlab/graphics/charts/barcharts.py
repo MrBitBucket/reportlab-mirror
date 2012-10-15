@@ -557,7 +557,7 @@ class BarChart(PlotArea):
                 style = (styleIdx,colNo) in bars and bars[(styleIdx,colNo)] or rowStyle
                 x, y, width, height = row[colNo]
                 if None in (width,height):
-                    if colNo in catNNA:
+                    if not catNAL or colNo in catNNA:
                         self._addNABarLabel(lg,rowNo,colNo,x,y,width,height)
                     elif catNAL and colNo not in CBL:
                         r0 = self._addNABarLabel(lg,rowNo,colNo,x,y,width,height,True,catNAL)
@@ -566,7 +566,7 @@ class BarChart(PlotArea):
                             r1 = self._addNABarLabel(lg,rowNoL,colNo,x,y,width,height,True,catNAL)
                             x = (r0[0]+r1[0])/2.0
                             y = (r0[1]+r1[1])/2.0
-                            self._addNABarLabel(lg,rowNoL,colNo,x,y,width,height,na=catNAL)
+                            self._addNABarLabel(lg,rowNoL,colNo,x,y,0.0001,0.0001,na=catNAL)
                         CBL.append(colNo)
                     continue
 
