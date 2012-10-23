@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/linecharts.py
 
@@ -6,9 +6,9 @@ __version__=''' $Id$ '''
 __doc__="""This modules defines a very preliminary Line Chart example."""
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isListOfStrings, \
+from reportlab.lib.validators import isNumber, isNumberOrNone, isColor, isColorOrNone, isListOfStrings, \
                                     isListOfStringsOrNone, SequenceOf, isBoolean, NoneOr, \
-                                    isListOfNumbersOrNone, isStringOrNone
+                                    isListOfNumbersOrNone, isStringOrNone, OneOf, Percentage
 from reportlab.lib.attrmap import *
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing, Polygon, PolyLine
@@ -22,12 +22,15 @@ from reportlab.graphics.charts.legends import _objStr
 class LineChartProperties(PropHolder):
     _attrMap = AttrMap(
         strokeWidth = AttrMapValue(isNumber, desc='Width of a line.'),
-        strokeColor = AttrMapValue(isColorOrNone, desc='Color of a line.'),
+        strokeColor = AttrMapValue(isColorOrNone, desc='Color of a line or border.'),
+        fillColor = AttrMapValue(isColorOrNone, desc='fill color of a bar.'),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
         symbol = AttrMapValue(NoneOr(isSymbol), desc='Widget placed at data points.',advancedUsage=1),
         shader = AttrMapValue(None, desc='Shader Class.',advancedUsage=1),
         filler = AttrMapValue(None, desc='Filler Class.',advancedUsage=1),
         name = AttrMapValue(isStringOrNone, desc='Name of the line.'),
+        lineStyle = AttrMapValue(NoneOr(OneOf('line','joinedLine','bar')), desc="What kind of plot this line is",advancedUsage=1),
+        barWidth = AttrMapValue(isNumberOrNone,desc="Percentage of available width to be used for a bar",advancedUsage=1),
         )
 
 class AbstractLineChart(PlotArea):
@@ -37,11 +40,16 @@ class AbstractLineChart(PlotArea):
         styleIdx = rowNo % len(baseStyle)
         style = baseStyle[styleIdx]
         color = style.strokeColor
-        y = y+height/2.
-        if self.joinedLines:
+        yh2 = y+height/2.
+        lineStyle = getattr(style,'lineStyle',None)
+        if lineStyle=='bar':
             dash = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
             strokeWidth= getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
-            L = Line(x,y,x+width,y,strokeColor=color,strokeLineCap=0)
+            L = Rect(x,y,x+width,y+height,strokeWidth=strokeWidth,strokeColor=color,strokeLineCap=0,strokeDashArray=dash,fillColor=getattr(style,fillColor,color))
+        elif self.joinedLines or lineStyle=='joinedLine':
+            dash = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
+            strokeWidth= getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
+            L = Line(x,yh2,x+width,yh2,strokeColor=color,strokeLineCap=0)
             if strokeWidth: L.strokeWidth = strokeWidth
             if dash: L.strokeDashArray = dash
         else:
@@ -54,7 +62,7 @@ class AbstractLineChart(PlotArea):
         else:
             S = None
 
-        if S: S = uSymbol2Symbol(S,x+width/2.,y,color)
+        if S: S = uSymbol2Symbol(S,x+width/2.,yh2,color)
         if S and L:
             g = Group()
             g.add(L)
@@ -216,6 +224,9 @@ class HorizontalLineChart(LineChart):
             normWidth = self.groupSpacing
             availWidth = self.categoryAxis.scale(0)[1]
             normFactor = availWidth / normWidth
+        self._normFactor = normFactor
+        self._yzero = yzero = self.valueAxis.scale(0)
+        self._hngs = hngs = 0.5 * self.groupSpacing * normFactor
 
         self._positions = []
         for rowNo in range(len(self.data)):
@@ -224,8 +235,8 @@ class HorizontalLineChart(LineChart):
                 datum = self.data[rowNo][colNo]
                 if datum is not None:
                     (groupX, groupWidth) = self.categoryAxis.scale(colNo)
-                    x = groupX + (0.5 * self.groupSpacing * normFactor)
-                    y = self.valueAxis.scale(0)
+                    x = groupX + hngs
+                    y = yzero
                     height = self.valueAxis.scale(datum) - y
                     lineRow.append((x, y+height))
             self._positions.append(lineRow)
@@ -282,6 +293,7 @@ class HorizontalLineChart(LineChart):
             inFillX0 = self.valueAxis._x
             inFillX1 = inFillX0 + self.categoryAxis._length
             inFillG = getattr(self,'_inFillG',g)
+        yzero = self._yzero
 
         # Iterate over data rows.
         for rowNo in P:
@@ -291,16 +303,27 @@ class HorizontalLineChart(LineChart):
             rowStyle = self.lines[styleIdx]
             rowColor = rowStyle.strokeColor
             dash = getattr(rowStyle, 'strokeDashArray', None)
+            lineStyle = getattr(rowStyle,'lineStyle',None)
 
-            if hasattr(self.lines[styleIdx], 'strokeWidth'):
-                strokeWidth = self.lines[styleIdx].strokeWidth
+            if hasattr(rowStyle, 'strokeWidth'):
+                strokeWidth = rowStyle.strokeWidth
             elif hasattr(self.lines, 'strokeWidth'):
                 strokeWidth = self.lines.strokeWidth
             else:
                 strokeWidth = None
 
             # Iterate over data columns.
-            if self.joinedLines:
+            if lineStyle=='bar':
+                barWidth = getattr(rowStyle,'barWidth',Percentage(50))
+                fillColor = getattr(rowStyle,'fillColor',rowColor)
+                if isinstance(barWidth,Percentage):
+                    hbw = self._hngs*barWidth*0.01
+                else:
+                    hbw = barWidth*0.5
+                for colNo in range(len(row)):
+                    x,y = row[colNo]
+                    g.add(Rect(x-hbw,min(y,yzero),2*hbw,abs(y-yzero),strokeWidth=strokeWidth,strokeColor=rowColor,fillColor=fillColor))
+            elif self.joinedLines or lineStyle=='joinedLine':
                 points = []
                 for colNo in range(len(row)):
                     points += row[colNo]
@@ -315,8 +338,8 @@ class HorizontalLineChart(LineChart):
                         line.strokeDashArray = dash
                     g.add(line)
 
-            if hasattr(self.lines[styleIdx], 'symbol'):
-                uSymbol = self.lines[styleIdx].symbol
+            if hasattr(rowStyle, 'symbol'):
+                uSymbol = rowStyle.symbol
             elif hasattr(self.lines, 'symbol'):
                 uSymbol = self.lines.symbol
             else:

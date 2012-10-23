@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2004
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/validators.py
 __version__=''' $Id$ '''
@@ -12,6 +12,9 @@ from reportlab.lib import colors
 if sys.hexversion<0x2030000:
     True = 1
     False = 0
+
+class Percentage(float):
+    pass
 
 class Validator:
     "base validator class"
