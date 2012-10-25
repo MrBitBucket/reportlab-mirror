@@ -13,6 +13,9 @@ if sys.hexversion<0x2030000:
     True = 1
     False = 0
 
+class Percentage(float):
+    pass
+
 class Validator:
     "base validator class"
     def __call__(self,x):
