@@ -45,7 +45,7 @@ class AbstractLineChart(PlotArea):
         if lineStyle=='bar':
             dash = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
             strokeWidth= getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
-            L = Rect(x,y,x+width,y+height,strokeWidth=strokeWidth,strokeColor=color,strokeLineCap=0,strokeDashArray=dash,fillColor=getattr(style,fillColor,color))
+            L = Rect(x,y,width,height,strokeWidth=strokeWidth,strokeColor=color,strokeLineCap=0,strokeDashArray=dash,fillColor=getattr(style,'fillColor',color))
         elif self.joinedLines or lineStyle=='joinedLine':
             dash = getattr(style, 'strokeDashArray', getattr(baseStyle,'strokeDashArray',None))
             strokeWidth= getattr(style, 'strokeWidth', getattr(style, 'strokeWidth',None))
