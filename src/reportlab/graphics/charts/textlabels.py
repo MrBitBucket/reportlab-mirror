@@ -9,7 +9,7 @@ from reportlab.lib.utils import simpleSplit, _simpleSplit
 from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, \
         isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf, isNoneOrString
 from reportlab.lib.attrmap import *
-from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
 from reportlab.graphics.shapes import _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, definePath
 from reportlab.graphics.widgetbase import Widget, PropHolder
@@ -118,6 +118,7 @@ class Label(Widget):
         leftPadding = AttrMapValue(isNumber,desc='padding at left of box'),
         rightPadding = AttrMapValue(isNumber,desc='padding at right of box'),
         bottomPadding = AttrMapValue(isNumber,desc='padding at bottom of box'),
+        useAscentDescent = AttrMapValue(isBoolean,desc="If True then the font's Ascent & Descent will be used to compute default heights and baseline."),
         )
 
     def __init__(self,**kw):
@@ -149,6 +150,7 @@ class Label(Widget):
                 strokeWidth = 0.1,
                 textAnchor = 'start',
                 visible = 1,
+                useAscentDescent = False,
                 )
 
     def setText(self, text):
@@ -213,7 +215,18 @@ class Label(Widget):
                 self._width += max(self._lineWidths)
         else:
             self._width = self.width
-        self._height = self.height or ((self.leading or 1.2*self.fontSize) * len(self._lines)+topPadding+bottomPadding)
+        if self.useAscentDescent:
+            self._ascent, self._descent = getAscentDescent(self.fontName,self.fontSize)
+            self._baselineRatio = self._ascent/(self._ascent-self._descent)
+        else:
+            self._baselineRatio = 1/1.2
+        if self.leading:
+            self._leading = self.leading
+        elif self.useAscentDescent:
+            self._leading = self._ascent - self._descent
+        else:
+            self._leading = self.fontSize*1.2
+        self._height = self.height or (self._leading*len(self._lines) + topPadding + bottomPadding)
         self._ewidth = (self._width-leftPadding-rightPadding)
         self._eheight = (self._height-topPadding-bottomPadding)
         boxAnchor = self._getBoxAnchor()
@@ -248,7 +261,7 @@ class Label(Widget):
         g.translate(self.x + self.dx, self.y + self.dy)
         g.rotate(self.angle)
 
-        y = self._top - self.fontSize
+        y = self._top - self._leading*self._baselineRatio
         textAnchor = self._getTextAnchor()
         if textAnchor == 'start':
             x = self._left
@@ -270,7 +283,7 @@ class Label(Widget):
                         )
 
         fillColor, fontName, fontSize = self.fillColor, self.fontName, self.fontSize
-        strokeColor, strokeWidth, leading = self.strokeColor, self.strokeWidth, (self.leading or 1.2*fontSize)
+        strokeColor, strokeWidth, leading = self.strokeColor, self.strokeWidth, self._leading
         if strokeColor:
             for line in self._lines:
                 s = _text2Path(line, x, y, fontName, fontSize, textAnchor)
@@ -278,7 +291,7 @@ class Label(Widget):
                 s.strokeColor = strokeColor
                 s.strokeWidth = strokeWidth
                 g.add(s)
-                y = y - leading
+                y -= leading
         else:
             for line in self._lines:
                 s = String(x, y, line)
@@ -287,7 +300,7 @@ class Label(Widget):
                 s.fontSize = fontSize
                 s.fillColor = fillColor
                 g.add(s)
-                y = y - leading
+                y -= leading
 
         return g
 
