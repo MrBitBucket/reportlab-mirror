@@ -1039,7 +1039,7 @@ class PDFCatalog:
                 "PageMode": PDFName("UseNone"),
                 }
     __NoDefault__ = string.split("""
-        Dests Outlines Pages Threads AcroForm Names OpenActions PageMode URI
+        Dests Outlines Pages Threads AcroForm Names OpenAction PageMode URI
         ViewerPreferences PageLabels PageLayout JavaScript StructTreeRoot SpiderInfo"""
                                  )
     __Refs__ = __NoDefault__ # make these all into references, if present
