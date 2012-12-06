@@ -698,6 +698,13 @@ class PDFDictionary:
     def copy(self):
         return PDFDictionary(self.dict)
 
+    def normalize(self):
+        #normalize the names to use RL standard ie Name not /Name
+        D = self.dict
+        K = [k for k in D.iterkeys() if k.startswith('/')]
+        for k in K:
+            D[k[1:]] = D.pop(k)
+
 class checkPDFNames:
     def __init__(self,*names):
         self.names = map(PDFName,names)
