@@ -17,7 +17,7 @@ from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer,
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
-from reportlab.lib.utils import getStringIO
+from reportlab.lib.utils import getStringIO, RLFontName
 
 from xml.dom import getDOMImplementation
 
@@ -27,9 +27,9 @@ sin = math.sin
 cos = math.cos
 pi = math.pi
 
-AREA_STYLES = 'stroke-width stroke-linecap stroke fill stroke-dasharray'
-LINE_STYLES = 'stroke-width stroke-linecap stroke stroke-dasharray'
-TEXT_STYLES = 'font-family font-size'
+AREA_STYLES = 'stroke-width stroke-linecap stroke fill stroke-dasharray'.split()
+LINE_STYLES = 'stroke-width stroke-linecap stroke stroke-dasharray'.split()
+TEXT_STYLES = 'font-family font-weight font-style font-variant font-size'.split()
 
 ### top-level user function ###
 def drawToString(d, showBoundary=rl_config.showBoundary):
@@ -234,12 +234,12 @@ class SVGCanvas:
 
         return stringWidth(s, font, fontSize)
 
-    def _formatStyle(self, include='', exclude='',**kwds):
+    def _formatStyle(self, include=[], exclude='',**kwds):
         style = self.style.copy()
         style.update(kwds)
         keys = style.keys()
         if include:
-            keys = [k for k in keys if k in include.split()]
+            keys = [k for k in keys if k in include]
         if exclude:
             exclude = exclude.split()
             items = [k+': '+str(style[k]) for k in keys if k not in exclude]
@@ -338,9 +338,18 @@ class SVGCanvas:
 
     def setFont(self, font, fontSize):
         if self._font != font or self._fontSize != fontSize:
-            self._font, self._fontSize = (font, fontSize)
-            self.style['font-family'] = font
-            self.style['font-size'] = '%spx' % fontSize
+            self._font = font
+            self._fontSize = fontSize
+            style = self.style
+            for k in TEXT_STYLES:
+                if k in style:
+                    del style[k]
+            if isinstance(font,RLFontName):
+                for k,v in font.svgAttrs.iteritems():
+                    style['font-'+k] = v
+            if 'font-family' not in style:
+                style['font-family'] = font
+            style['font-size'] = '%spx' % fontSize
 
     def _add_link(self, dom_object, link_info) :
         assert isinstance(link_info, dict)

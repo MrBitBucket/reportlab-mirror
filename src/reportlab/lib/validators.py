@@ -64,7 +64,7 @@ class _isBoolean(Validator):
 
 class _isString(Validator):
     def test(self,x):
-        return type(x) in (StringType, UnicodeType)
+        return isinstance(x,(str,unicode))
 
 class _isCodec(Validator):
     def test(self,x):

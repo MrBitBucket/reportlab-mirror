@@ -1174,3 +1174,14 @@ class IdentStr(str):
         self = str.__new__(cls,value)
         self.__inc = inc
         return self
+
+class RLFontName(str):
+    '''allows specification of the properties of a font using a dictionary of extra attributes
+    eg fontName = RLFontName('proxima-nova-bold',
+                    svgAttrs=dict(family='"proxima-nova"',weight='bold'))
+    '''
+    def __new__(cls,v,**kwds):
+        self = str.__new__(cls,v)
+        for k,v in kwds.iteritems():
+            setattr(self,k,v)
+        return self
