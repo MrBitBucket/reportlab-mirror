@@ -17,7 +17,7 @@ from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer,
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
-from reportlab.lib.utils import getStringIO, RLFontName
+from reportlab.lib.utils import getStringIO, RLString
 
 from xml.dom import getDOMImplementation
 
@@ -27,9 +27,9 @@ sin = math.sin
 cos = math.cos
 pi = math.pi
 
-AREA_STYLES = 'stroke-width stroke-linecap stroke fill stroke-dasharray'.split()
-LINE_STYLES = 'stroke-width stroke-linecap stroke stroke-dasharray'.split()
-TEXT_STYLES = 'font-family font-weight font-style font-variant font-size'.split()
+AREA_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity fill fill-opacity stroke-dasharray id'.split()
+LINE_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity stroke-dasharray id'.split()
+TEXT_STYLES = 'font-family font-weight font-style font-variant font-size id'.split()
 
 ### top-level user function ###
 def drawToString(d, showBoundary=rl_config.showBoundary):
@@ -317,6 +317,11 @@ class SVGCanvas:
         else:
             r, g, b = color.red, color.green, color.blue
             self.style['stroke'] = 'rgb(%d%%,%d%%,%d%%)' % (r*100, g*100, b*100)
+            alpha = color.normalizedAlpha
+            if alpha!=1:
+                self.style['stroke-opacity'] = '%s' % alpha
+            elif 'stroke-opacity' in self.style:
+                del self.style['stroke-opacity']
 
     def setColor(self, color):
         if self._color != color:
@@ -330,6 +335,11 @@ class SVGCanvas:
         else:
             r, g, b = color.red, color.green, color.blue
             self.style['fill'] = 'rgb(%d%%,%d%%,%d%%)' % (r*100, g*100, b*100)
+            alpha = color.normalizedAlpha
+            if alpha!=1:
+                self.style['fill-opacity'] = '%s' % alpha
+            elif 'fill-opacity' in self.style:
+                del self.style['fill-opacity']
 
     def setLineWidth(self, width):
         if width != self._lineWidth:
@@ -344,7 +354,7 @@ class SVGCanvas:
             for k in TEXT_STYLES:
                 if k in style:
                     del style[k]
-            if isinstance(font,RLFontName):
+            if isinstance(font,RLString):
                 for k,v in font.svgAttrs.iteritems():
                     style['font-'+k] = v
             if 'font-family' not in style:
@@ -358,34 +368,36 @@ class SVGCanvas:
         return link
 
     ### shapes ###
-    def rect(self, x1,y1, x2,y2, rx=8, ry=8, link_info=None):
+    def rect(self, x1,y1, x2,y2, rx=8, ry=8, link_info=None, **_svgAttrs):
         "Draw a rectangle between x1,y1 and x2,y2."
 
         if self.verbose: print "+++ SVGCanvas.rect"
 
         x = min(x1,x2)
         y = min(y1,y2)
+        kwds = {}
         rect = transformNode(self.doc, "rect",
             x=x, y=y, width=max(x1,x2)-x, height=max(y1,y2)-y,
-            style=self._formatStyle(AREA_STYLES))
+            style=self._formatStyle(AREA_STYLES),**_svgAttrs)
 
         if link_info :
             rect = self._add_link(rect, link_info)
 
         self.currGroup.appendChild(rect)
 
-    def roundRect(self, x1,y1, x2,y2, rx=8, ry=8, link_info=None):
+    def roundRect(self, x1,y1, x2,y2, rx=8, ry=8, link_info=None, **_svgAttrs):
         """Draw a rounded rectangle between x1,y1 and x2,y2.
 
         Corners inset as ellipses with x-radius rx and y-radius ry.
         These should have x1<x2, y1<y2, rx>0, and ry>0.
         """
 
+        kwds = {}
         rect = transformNode(self.doc, "rect",
             x=x1, y=y1, width=x2-x1, height=y2-y1, rx=rx, ry=ry,
-            style=self._formatStyle(AREA_STYLES))
+            style=self._formatStyle(AREA_STYLES), **_svgAttrs)
 
-        if link_info :
+        if link_info:
             rect = self._add_link(rect, link_info)
 
         self.currGroup.appendChild(rect)
@@ -719,11 +731,12 @@ class _SVGRenderer(Renderer):
 
     def drawRect(self, rect):
         link_info = self._get_link_info_dict(rect)
+        svgAttrs = getattr(rect,'_svgAttrs',{})
         if rect.rx == rect.ry == 0:
             #plain old rectangle
             self._canvas.rect(
                     rect.x, rect.y,
-                    rect.x+rect.width, rect.y+rect.height, link_info=link_info)
+                    rect.x+rect.width, rect.y+rect.height, link_info=link_info, **svgAttrs)
         else:
             #cheat and assume ry = rx; better to generalize
             #pdfgen roundRect function.  TODO
@@ -731,7 +744,7 @@ class _SVGRenderer(Renderer):
                     rect.x, rect.y,
                     rect.x+rect.width, rect.y+rect.height,
                     rect.rx, rect.ry,
-                    link_info=link_info)
+                    link_info=link_info, **svgAttrs)
 
     def drawString(self, stringObj):
         if self._canvas._fillColor:
