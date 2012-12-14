@@ -127,6 +127,10 @@ class Color:
         t = self.red,self.green,self.blue
         return t in D and D[t] or None
 
+    @property
+    def normalizedAlpha(self):
+        return self.alpha
+
 
 class CMYKColor(Color):
     """This represents colors using the CMYK (cyan, magenta, yellow, black)
@@ -236,6 +240,10 @@ class CMYKColor(Color):
                     D[t] = n
         t = self.cyan,self.magenta,self.yellow,self.black
         return t in D and D[t] or None
+
+    @property
+    def normalizedAlpha(self):
+        return self.alpha*self._scale
 
 class PCMYKColor(CMYKColor):
     '''100 based CMYKColor with density and a spotName; just like Rimas uses'''
