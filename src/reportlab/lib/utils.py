@@ -1175,9 +1175,9 @@ class IdentStr(str):
         self.__inc = inc
         return self
 
-class RLFontName(str):
-    '''allows specification of the properties of a font using a dictionary of extra attributes
-    eg fontName = RLFontName('proxima-nova-bold',
+class RLString(str):
+    '''allows specification of extra properties of a string using a dictionary of extra attributes
+    eg fontName = RLString('proxima-nova-bold',
                     svgAttrs=dict(family='"proxima-nova"',weight='bold'))
     '''
     def __new__(cls,v,**kwds):
