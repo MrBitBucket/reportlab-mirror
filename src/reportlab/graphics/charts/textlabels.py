@@ -284,9 +284,10 @@ class Label(Widget):
 
         fillColor, fontName, fontSize = self.fillColor, self.fontName, self.fontSize
         strokeColor, strokeWidth, leading = self.strokeColor, self.strokeWidth, self._leading
+        svgAttrs=getattr(self,'_svgAttrs',{})
         if strokeColor:
             for line in self._lines:
-                s = _text2Path(line, x, y, fontName, fontSize, textAnchor)
+                s = _text2Path(line, x, y, fontName, fontSize, textAnchor, _svgAttrs=svgAttrs)
                 s.fillColor = fillColor
                 s.strokeColor = strokeColor
                 s.strokeWidth = strokeWidth
@@ -294,7 +295,7 @@ class Label(Widget):
                 y -= leading
         else:
             for line in self._lines:
-                s = String(x, y, line)
+                s = String(x, y, line, _svgAttrs=svgAttrs)
                 s.textAnchor = textAnchor
                 s.fontName = fontName
                 s.fontSize = fontSize

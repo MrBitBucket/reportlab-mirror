@@ -402,7 +402,7 @@ class SVGCanvas:
 
         self.currGroup.appendChild(rect)
 
-    def drawString(self, s, x, y, angle=0, link_info=None):
+    def drawString(self, s, x, y, angle=0, link_info=None,**_svgAttrs):
         if self.verbose: print "+++ SVGCanvas.drawString"
 
         if self._fillColor != None:
@@ -414,7 +414,9 @@ class SVGCanvas:
             st = st + " fill: %s;" % self.style['fill']
             text = transformNode(self.doc, "text",
                 x=x, y=y, style=st,
-                transform="translate(0,%d) scale(1,-1)" % (2*y))
+                transform="translate(0,%d) scale(1,-1)" % (2*y),
+                **_svgAttrs
+                )
             content = self.doc.createTextNode(s)
             text.appendChild(content)
 
@@ -761,7 +763,7 @@ class _SVGRenderer(Renderer):
                     x -= numericXShift(text_anchor,text,textLen,font,fontSize)
                 else:
                     raise ValueError, 'bad value for text_anchor ' + str(text_anchor)
-            self._canvas.drawString(text,x,y,link_info=self._get_link_info_dict(stringObj))
+            self._canvas.drawString(text,x,y,link_info=self._get_link_info_dict(stringObj),**getattr(stringObj,'_svgAttrs',{}))
 
     def drawLine(self, line):
         if self._canvas._strokeColor:
