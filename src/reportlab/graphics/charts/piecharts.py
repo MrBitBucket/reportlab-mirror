@@ -1163,25 +1163,15 @@ class Pie3d(Pie):
         return min(abs(a-_3dva),abs(a-_3dva+360))
 
     def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.width = 300
-        self.height = 200
-        self.data = [12.50,20.10,2.00,22.00,5.00,18.00,13.00]
-        self.labels = None  # or list of strings
-        self.startAngle = 90
-        self.direction = "clockwise"
-        self.simpleLabels = 1
-        self.slices = TypedPropertyCollection(Wedge3dProperties)
-        self.slices[0].fillColor = colors.darkcyan
-        self.slices[1].fillColor = colors.blueviolet
-        self.slices[2].fillColor = colors.blue
-        self.slices[3].fillColor = colors.cyan
+        Pie.__init__(self)
         self.slices[4].fillColor = colors.azure
         self.slices[5].fillColor = colors.crimson
         self.slices[6].fillColor = colors.darkviolet
-        self.checkLabelOverlap = 0
+        self.slices = TypedPropertyCollection(Wedge3dProperties)
         self.xradius = self.yradius = None
+        self.width = 300
+        self.height = 200
+        self.data = [12.50,20.10,2.00,22.00,5.00,18.00,13.00]
 
     def _fillSide(self,L,i,angle,strokeColor,strokeWidth,fillColor):
         rd = self.rad_dist(angle)
