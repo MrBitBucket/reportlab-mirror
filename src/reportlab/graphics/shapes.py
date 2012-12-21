@@ -772,7 +772,7 @@ class Drawing(Group, Flowable):
                         dtc = None
                 renderPM.drawToFile(self, filename,fmt=bmFmt,showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPM_',**kw))
                 ext = ext + '/.' + bmFmt
-                if dtc: dtc.save(fnroot)
+                if dtc: dtc.save(filename)
 
         if 'eps' in plotMode:
             try:
