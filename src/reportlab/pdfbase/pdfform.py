@@ -212,7 +212,6 @@ ZaDbPattern = [
 '    /Font'
 '>>']
 
-ZADB = PDFPattern(ZaDbPattern)
 
 FormResourcesDictionaryPattern = [
 '<<',
@@ -394,12 +393,6 @@ PDFDocEncodingPattern = [
 ' /Encoding'
 '>>']
 
-# global constant
-PDFDOCENC = PDFPattern(PDFDocEncodingPattern)
-# global constant
-ENCODING = PDFPattern(EncodingPattern, PDFDocEncoding=PDFDOCENC)
-
-
 def FormFont(BaseFont, Name):
     from reportlab.pdfbase.pdfdoc import PDFName
     return PDFPattern(FormFontPattern, BaseFont=PDFName(BaseFont), Name=PDFName(Name), Encoding=PDFDOCENC)
@@ -418,10 +411,16 @@ FormFontPattern = [
 ' /Font '
 '>>' ]
 
-# global constants
-GLOBALFONTSDICTIONARY = FormFontsDictionary()
-GLOBALRESOURCES = FormResources()
-
+def resetPdfForm():
+    global PDFDOCENC,ENCODING,GLOBALFONTSDICTIONARY,GLOBALRESOURCES,ZADB
+    PDFDOCENC = PDFPattern(PDFDocEncodingPattern)
+    ENCODING = PDFPattern(EncodingPattern, PDFDocEncoding=PDFDOCENC)
+    ZADB = PDFPattern(ZaDbPattern)
+    GLOBALFONTSDICTIONARY = FormFontsDictionary()
+    GLOBALRESOURCES = FormResources()
+from reportlab.rl_config import register_reset
+register_reset(resetPdfForm)
+resetPdfForm()
 
 def TextField(title, value, xmin, ymin, xmax, ymax, page,
               maxlen=1000000, font="Helvetica-Bold", fontsize=9, R=0, G=0, B=0.627, multiline=0):
@@ -627,6 +626,7 @@ APDYES = ButtonStream(
 'n BT /ZaDb 11.3086 Tf 0 g  1 0 0 1 3.6017 3.3881 Tm (4) Tj ET'+LINEEND)
 APNYES = ButtonStream(
 'q 1 1 14.7704 12.907 re W n BT /ZaDb 11.3086 Tf 0 g  1 0 0 1 3.6017 3.3881 Tm (4) Tj ET Q'+LINEEND)
+
 
 #==== script interpretation
 

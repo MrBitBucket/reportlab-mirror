@@ -62,9 +62,13 @@ def _setup():
                         pass
     return F
 
-for f in _setup():
-    if f not in _FONTS:
-        _FONTS.append(f)
+def resetFonts():
+    for f in _setup():
+        if f not in _FONTS:
+            _FONTS.append(f)
+from reportlab.rl_config import register_reset
+register_reset(resetFonts)
+resetFonts()
 
 #########################################################
 #
