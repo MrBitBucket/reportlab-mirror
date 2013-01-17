@@ -32,15 +32,15 @@ LINE_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity stroke-dasharra
 TEXT_STYLES = 'font-family font-weight font-style font-variant font-size id'.split()
 
 ### top-level user function ###
-def drawToString(d, showBoundary=rl_config.showBoundary,useClip=False):
+def drawToString(d, showBoundary=rl_config.showBoundary,useClip=False,fontHacks={}):
     "Returns a SVG as a string in memory, without touching the disk"
     s = getStringIO()
-    drawToFile(d, s, showBoundary=showBoundary,useClip=useClip)
+    drawToFile(d, s, showBoundary=showBoundary,useClip=useClip,fontHacks=fontHacks)
     return s.getvalue()
 
-def drawToFile(d, fn, showBoundary=rl_config.showBoundary,useClip=False):
+def drawToFile(d, fn, showBoundary=rl_config.showBoundary,useClip=False,fontHacks={}):
     d = renderScaledDrawing(d)
-    c = SVGCanvas((d.width, d.height), useClip = useClip)
+    c = SVGCanvas((d.width, d.height), useClip = useClip,fontHacks=fontHacks)
     draw(d, c, 0, 0, showBoundary=showBoundary)
     c.save(fn)
 
@@ -137,7 +137,7 @@ class EncodedWriter(list):
 
 ### classes ###
 class SVGCanvas:
-    def __init__(self, size=(300,300), encoding='utf-8', verbose=0, bom=False, useClip=False):
+    def __init__(self, size=(300,300), encoding='utf-8', verbose=0, bom=False, useClip=False,fontHacks={}):
         '''
         useClip = True  means don't use a clipPath definition put the global clip into the clip property
                         to get around an issue with safari
@@ -146,6 +146,7 @@ class SVGCanvas:
         self.encoding = codecs.lookup(encoding).name
         self.bom = bom
         self.useClip = useClip
+        self.fontHacks = fontHacks
         self.width, self.height = self.size = size
         # self.height = size[1]
         self.code = []
@@ -364,9 +365,14 @@ class SVGCanvas:
             for k in TEXT_STYLES:
                 if k in style:
                     del style[k]
+            svgAttrs = self.fontHacks[font] if font in self.fontHacks else {}
             if isinstance(font,RLString):
-                for k,v in font.svgAttrs.iteritems():
-                    style['font-'+k] = v
+                svgAttrs.update(font.svgAttrs.iteritems())
+            if svgAttrs:
+                for k,v in svgAttrs.iteritems():
+                    a = 'font-'+k
+                    if a in TEXT_STYLES:
+                        style[a] = v
             if 'font-family' not in style:
                 style['font-family'] = font
             style['font-size'] = '%spx' % fontSize
