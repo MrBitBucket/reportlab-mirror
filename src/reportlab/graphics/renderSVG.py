@@ -32,15 +32,15 @@ LINE_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity stroke-dasharra
 TEXT_STYLES = 'font-family font-weight font-style font-variant font-size id'.split()
 
 ### top-level user function ###
-def drawToString(d, showBoundary=rl_config.showBoundary,useClip=False,fontHacks={}):
+def drawToString(d, showBoundary=rl_config.showBoundary,useClip=False,fontHacks={},extraXmlDecl=''):
     "Returns a SVG as a string in memory, without touching the disk"
     s = getStringIO()
-    drawToFile(d, s, showBoundary=showBoundary,useClip=useClip,fontHacks=fontHacks)
+    drawToFile(d, s, showBoundary=showBoundary,useClip=useClip,fontHacks=fontHacks,extraXmlDecl=extraXmlDecl)
     return s.getvalue()
 
-def drawToFile(d, fn, showBoundary=rl_config.showBoundary,useClip=False,fontHacks={}):
+def drawToFile(d, fn, showBoundary=rl_config.showBoundary,useClip=False,fontHacks={},extraXmlDecl=''):
     d = renderScaledDrawing(d)
-    c = SVGCanvas((d.width, d.height), useClip = useClip,fontHacks=fontHacks)
+    c = SVGCanvas((d.width, d.height), useClip = useClip,fontHacks=fontHacks,extraXmlDecl=extraXmlDecl)
     draw(d, c, 0, 0, showBoundary=showBoundary)
     c.save(fn)
 
@@ -137,7 +137,7 @@ class EncodedWriter(list):
 
 ### classes ###
 class SVGCanvas:
-    def __init__(self, size=(300,300), encoding='utf-8', verbose=0, bom=False, useClip=False,fontHacks={}):
+    def __init__(self, size=(300,300), encoding='utf-8', verbose=0, bom=False, useClip=False,fontHacks={},extraXmlDecl=''):
         '''
         useClip = True  means don't use a clipPath definition put the global clip into the clip property
                         to get around an issue with safari
@@ -147,6 +147,7 @@ class SVGCanvas:
         self.bom = bom
         self.useClip = useClip
         self.fontHacks = fontHacks
+        self.extraXmlDecl = extraXmlDecl
         self.width, self.height = self.size = size
         # self.height = size[1]
         self.code = []
@@ -230,7 +231,11 @@ class SVGCanvas:
             f = open(fn, 'w')
         else:
             f = fn
-        f.write(writer.getvalue())
+        svg = writer.getvalue()
+        exd = self.extraXmlDecl
+        if exd:
+            svg = svg.replace('?>','?>'+exd)
+        f.write(svg)
         if f is not fn:
             f.close()
 
