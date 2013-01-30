@@ -315,13 +315,13 @@ def color2bw(colorRGB):
     bwColorRGB = Color(n, n, n, a)
     return bwColorRGB
 
-def HexColor(val, htmlOnly=False, alpha=False):
+def HexColor(val, htmlOnly=False, hasAlpha=False):
     """This function converts a hex string, or an actual integer number,
     into the corresponding color.  E.g., in "#AABBCC" or 0xAABBCC,
     AA is the red, BB is the green, and CC is the blue (00-FF).
 
     An alpha value can also be given in the form #AABBCCDD or 0xAABBCCDD where
-    DD is the alpha value.
+    DD is the alpha value if hasAlpha is True.
 
     For completeness I assume that #aabbcc or 0xaabbcc are hex numbers
     otherwise a pure integer is converted as decimal rgb.  If htmlOnly is true,
@@ -369,8 +369,8 @@ def HexColor(val, htmlOnly=False, alpha=False):
                 if len(val) == 8:
                     alpha = True
         val = int(val,b)
-    if alpha:
-        return Color((val>>24)&0xFF/255.0,((val>>16)&0xFF)/255.0,((val>>8)&0xFF)/255.0,(val&0xFF)/255.0)
+    if hasAlpha:
+        return Color(((val>>24)&0xFF)/255.0,((val>>16)&0xFF)/255.0,((val>>8)&0xFF)/255.0,(val&0xFF)/255.0)
     return Color(((val>>16)&0xFF)/255.0,((val>>8)&0xFF)/255.0,(val&0xFF)/255.0)
 
 def linearlyInterpolatedColor(c0, c1, x0, x1, x):
