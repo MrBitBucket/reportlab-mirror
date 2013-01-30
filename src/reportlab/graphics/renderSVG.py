@@ -32,15 +32,15 @@ LINE_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity stroke-dasharra
 TEXT_STYLES = 'font-family font-weight font-style font-variant font-size id'.split()
 
 ### top-level user function ###
-def drawToString(d, showBoundary=rl_config.showBoundary,useClip=False,fontHacks={},extraXmlDecl=''):
+def drawToString(d, showBoundary=rl_config.showBoundary,**kwds):
     "Returns a SVG as a string in memory, without touching the disk"
     s = getStringIO()
-    drawToFile(d, s, showBoundary=showBoundary,useClip=useClip,fontHacks=fontHacks,extraXmlDecl=extraXmlDecl)
+    drawToFile(d, s, showBoundary=showBoundary,**kwds)
     return s.getvalue()
 
-def drawToFile(d, fn, showBoundary=rl_config.showBoundary,useClip=False,fontHacks={},extraXmlDecl=''):
+def drawToFile(d, fn, showBoundary=rl_config.showBoundary,**kwds):
     d = renderScaledDrawing(d)
-    c = SVGCanvas((d.width, d.height), useClip = useClip,fontHacks=fontHacks,extraXmlDecl=extraXmlDecl)
+    c = SVGCanvas((d.width, d.height),**kwds)
     draw(d, c, 0, 0, showBoundary=showBoundary)
     c.save(fn)
 
@@ -137,17 +137,23 @@ class EncodedWriter(list):
 
 ### classes ###
 class SVGCanvas:
-    def __init__(self, size=(300,300), encoding='utf-8', verbose=0, bom=False, useClip=False,fontHacks={},extraXmlDecl=''):
+    def __init__(self, size=(300,300), encoding='utf-8', verbose=0, bom=False, **kwds):
         '''
-        useClip = True  means don't use a clipPath definition put the global clip into the clip property
+        verbose = 0 >0 means do verbose stuff
+        useClip = False True means don't use a clipPath definition put the global clip into the clip property
                         to get around an issue with safari
+        extraXmlDecl = ''   use to add extra xml declarations
+        scaleGroupId = ''   id of an extra group to add around the drawing to allow easy scaling
+        svgAttrs = {}       dictionary of attributes to be applied to the svg tag itself
         '''
         self.verbose = verbose
         self.encoding = codecs.lookup(encoding).name
         self.bom = bom
-        self.useClip = useClip
-        self.fontHacks = fontHacks
-        self.extraXmlDecl = extraXmlDecl
+        useClip = kwds.pop('useClip',False)
+        self.fontHacks = kwds.pop('fontHacks',{})
+        self.extraXmlDecl = kwds.pop('extraXmlDecl','')
+        scaleGroupId = kwds.pop('scaleGroupId','')
+
         self.width, self.height = self.size = size
         # self.height = size[1]
         self.code = []
@@ -175,19 +181,22 @@ class SVGCanvas:
                   "http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd")
         self.doc = implementation.createDocument(None,"svg",doctype)
         self.svg = self.doc.documentElement
-        self.svg.setAttribute("width", str(size[0]))
-        self.svg.setAttribute("height", str(self.height))
-        self.svg.setAttribute("preserveAspectRatio", "xMinYMin meet")
-        self.svg.setAttribute("viewBox", "0 0 %d %d" % (self.width, self.height))
+        svgAttrs = dict(
+                    width = str(size[0]),
+                    height=str(self.height),
+                    preserveAspectRatio="xMinYMin meet",
+                    viewBox="0 0 %d %d" % (self.width, self.height),
+                    #baseProfile = "full",  #disliked in V 1.0
 
-        #these suggested by Tim Roberts, as updated by peter@maubp.freeserve.co.uk 
-        self.svg.setAttribute("xmlns", "http://www.w3.org/2000/svg")
-        self.svg.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink")
-        self.svg.setAttribute("version", "1.0")
+                    #these suggested by Tim Roberts, as updated by peter@maubp.freeserve.co.uk 
+                    xmlns="http://www.w3.org/2000/svg",
+                    version="1.0",
+                    )
+        svgAttrs["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
+        svgAttrs.update(kwds.pop('svgAttrs',{}))
+        for k,v in svgAttrs.iteritems():
+            self.svg.setAttribute(k,v)
 
-
-
-        #self.svg.setAttribute("baseProfile", "full")   #disliked in V 1.0
         title = self.doc.createElement('title')
         text = self.doc.createTextNode('...')
         title.appendChild(text)
@@ -204,7 +213,7 @@ class SVGCanvas:
         self.setLineJoin(0)
         self.setLineWidth(1)
 
-        if not self.useClip:
+        if not useClip:
             # Add a rectangular clipping path identical to view area.
             clipPath = transformNode(self.doc, "clipPath", id="clip")
             clipRect = transformNode(self.doc, "rect", x=0, y=0,
@@ -220,7 +229,13 @@ class SVGCanvas:
             transform="scale(1,-1) translate(0,-%d)" % self.height,
             **gtkw
             )
-        self.svg.appendChild(self.groupTree)
+
+        if scaleGroupId:
+            self.scaleTree = transformNode(self.doc, "g", id=scaleGroupId, transform="scale(1,1)")
+            self.scaleTree.appendChild(self.groupTree)
+            self.svg.appendChild(self.scaleTree)
+        else:
+            self.svg.appendChild(self.groupTree)
         self.currGroup = self.groupTree
 
     def save(self, fn=None):
