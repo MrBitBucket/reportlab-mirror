@@ -353,6 +353,7 @@ isNoneOrListOfNoneOrStrings=SequenceOf(isNoneOrString,'isNoneOrListOfNoneOrStrin
 isListOfNoneOrString=SequenceOf(isNoneOrString,'isListOfNoneOrString',NoneOK=0)
 isNoneOrListOfNoneOrNumbers=SequenceOf(isNumberOrNone,'isNoneOrListOfNoneOrNumbers',NoneOK=1)
 isCallable = _isCallable()
+isNoneOrCallable = NoneOr(isCallable)
 isStringOrCallable=EitherOr((isString,isCallable),'isStringOrCallable')
 isStringOrCallableOrNone=NoneOr(isStringOrCallable,'isStringOrCallableNone')
 isStringOrNone=NoneOr(isString,'isStringOrNone')

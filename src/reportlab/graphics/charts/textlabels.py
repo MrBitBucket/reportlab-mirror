@@ -7,7 +7,7 @@ import string
 from reportlab.lib import colors
 from reportlab.lib.utils import simpleSplit, _simpleSplit
 from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, \
-        isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf, isNoneOrString
+        isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf, isNoneOrString, isNoneOrCallable
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
@@ -119,6 +119,7 @@ class Label(Widget):
         rightPadding = AttrMapValue(isNumber,desc='padding at right of box'),
         bottomPadding = AttrMapValue(isNumber,desc='padding at bottom of box'),
         useAscentDescent = AttrMapValue(isBoolean,desc="If True then the font's Ascent & Descent will be used to compute default heights and baseline."),
+        customDrawChanger = AttrMapValue(isNoneOrCallable,desc="An instance of CustomDrawChanger to modify the behavior at draw time", _advancedUsage=1),
         )
 
     def __init__(self,**kw):
@@ -252,7 +253,7 @@ class Label(Widget):
         if ta=='boxauto': ta = _BA2TA[self._getBoxAnchor()]
         return ta
 
-    def draw(self):
+    def _rawDraw(self):
         _text = self._text
         self._text = _text or ''
         self.computeSize()
@@ -304,6 +305,17 @@ class Label(Widget):
                 y -= leading
 
         return g
+
+    def draw(self):
+        customDrawChanger = getattr(self,'customDrawChanger',None)
+        if customDrawChanger:
+            customDrawChanger(True,self)
+            try:
+                return self._rawDraw()
+            finally:
+                customDrawChanger(False,self)
+        else:
+            return self._rawDraw()
 
 class LabelDecorator:
     _attrMap = AttrMap(
@@ -432,3 +444,15 @@ class NA_Label(BarChartLabel):
         BarChartLabel.__init__(self)
         self.text = 'n/a'
 NoneOrInstanceOfNA_Label=NoneOr(isInstanceOf(NA_Label))
+
+from reportlab.graphics.charts.utils import CustomDrawChanger
+class RedNegativeChanger(CustomDrawChanger):
+    def __init__(self,fillColor=colors.red):
+        CustomDrawChanger.__init__(self)
+        self.fillColor = fillColor
+    def _changer(self,obj):
+        R = {}
+        if obj._text.startswith('-'):
+            R['fillColor'] = obj.fillColor
+            obj.fillColor = self.fillColor
+        return R
