@@ -27,6 +27,7 @@ from reportlab.lib.validators import isNumber, isColor, isString, Validator
 from reportlab.lib.attrmap import *
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.lib.units import mm
+from itertools import zip_longest
 
 class isLevel(Validator):
     def test(self,x):
@@ -133,7 +134,7 @@ class QR:
         return self.data
 
     def write(self, buffer):
-        for g in map(None, *[iter(self.data)] * self.group):
+        for g in zip_longest(*[iter(self.data)] * self.group):
             bits = 0
             n = 0
             for i in range(self.group):
