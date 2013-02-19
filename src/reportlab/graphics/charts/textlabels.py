@@ -411,12 +411,12 @@ class PMVLabel(Label):
         self._pmv = 0
 
     def _getBoxAnchor(self):
-        a = self.boxAnchor
+        a = Label._getBoxAnchor(self)
         if self._pmv<0: a = {'nw':'se','n':'s','ne':'sw','w':'e','c':'c','e':'w','sw':'ne','s':'n','se':'nw'}[a]
         return a
 
     def _getTextAnchor(self):
-        a = self.textAnchor
+        a = Label._getTextAnchor(self)
         if self._pmv<0: a = {'start':'end', 'middle':'middle', 'end':'start'}[a]
         return a
 
