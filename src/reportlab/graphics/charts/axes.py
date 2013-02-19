@@ -39,7 +39,7 @@ from reportlab.lib.attrmap import *
 from reportlab.lib import normalDate
 from reportlab.graphics.shapes import Drawing, Line, PolyLine, Rect, Group, STATE_DEFAULTS, _textBoxLimits, _rotatedBoxLimits
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
-from reportlab.graphics.charts.textlabels import Label
+from reportlab.graphics.charts.textlabels import Label, PMVLabel
 from reportlab.graphics.charts.utils import nextRoundNumber
 from reportlab.graphics.widgets.grids import ShadedRect
 from reportlab.lib.colors import Color
@@ -405,12 +405,12 @@ class _AxisG(Widget):
         self.addAnnotations(g,A['late'])
         return g
 
-class CALabel(Label):
-    _attrMap = AttrMap(BASE=Label,
+class CALabel(PMVLabel):
+    _attrMap = AttrMap(BASE=PMVLabel,
         labelPosFrac = AttrMapValue(isNumber, desc='where in the category range [0,1] the labels should be anchored'),
         )
     def __init__(self,**kw):
-        Label.__init__(self,**kw)
+        PMVLabel.__init__(self,**kw)
         self._setKeywords(
                 labelPosFrac = 0.5,
                 )
@@ -446,7 +446,7 @@ class CategoryAxis(_AxisG):
         joinAxisPos = AttrMapValue(isNumberOrNone, desc='Position at which to join with other axis.'),
         reverseDirection = AttrMapValue(isBoolean, desc='If true reverse category direction.'),
         style = AttrMapValue(OneOf('parallel','stacked','parallel_3d'),"How common category bars are plotted"),
-        labelAxisMode = AttrMapValue(OneOf('high','low','axis'), desc="Like joinAxisMode, but for the axis labels"),
+        labelAxisMode = AttrMapValue(OneOf('high','low','axis', 'axispmv'), desc="Like joinAxisMode, but for the axis labels"),
         tickShift = AttrMapValue(isBoolean, desc='Tick shift typically'),
         loPad = AttrMapValue(isNumber, desc='extra inner space before start of the axis'),
         hiPad = AttrMapValue(isNumber, desc='extra inner space after end of the axis'),
@@ -520,6 +520,8 @@ class CategoryAxis(_AxisG):
         self._catCount = max(map(len,multiSeries))
         self._barWidth = barWidth or ((self._length-self.loPad-self.hiPad)/float(self._catCount or 1))
         self._calcTickmarkPositions()
+        if self.labelAxisMode == 'axispmv':
+            self._pmv = [sum([series[i] for series in multiSeries]) for i in xrange(self._catCount)]
 
     def _calcTickmarkPositions(self):
         n = self._catCount
@@ -740,6 +742,7 @@ class XCategoryAxis(_XTicks,CategoryAxis):
             barWidth = self._barWidth
             _y = self._labelAxisPos()
             _x = self._x
+            pmv = self._pmv if self.labelAxisMode=='axispmv' else None
 
             for i in xrange(catCount):
                 if reverseDirection: ic = catCount-i-1
@@ -750,9 +753,13 @@ class XCategoryAxis(_XTicks,CategoryAxis):
                     label = self.labels[label]
                 else:
                     label = self.labels[i]
+                dy = label.dy
+                if pmv:
+                    v = label._pmv = pmv[ic]
+                    if v<0: dy = -2*dy
                 lpf = label.labelPosFrac
                 x = _x + (i+lpf) * barWidth
-                label.setOrigin(x, _y)
+                label.setOrigin(x, _y+dy)
                 label.setText(categoryNames[ic] or '')
                 g.add(label)
 
@@ -847,6 +854,7 @@ class YCategoryAxis(_YTicks,CategoryAxis):
             labels = self.labels
             _x = self._labelAxisPos()
             _y = self._y
+            pmv = self._pmv if self.labelAxisMode=='axispmv' else None
 
             for i in xrange(catCount):
                 if reverseDirection: ic = catCount-i-1
@@ -859,7 +867,11 @@ class YCategoryAxis(_YTicks,CategoryAxis):
                     label = self.labels[i]
                 lpf = label.labelPosFrac
                 y = _y + (i+lpf) * barWidth
-                label.setOrigin(_x, y)
+                dx = label.dx
+                if pmv:
+                    v = label._pmv = pmv[ic]
+                    if v<0: dx = -2*dx
+                label.setOrigin(_x+dx, y)
                 label.setText(categoryNames[ic] or '')
                 g.add(label)
         return g
