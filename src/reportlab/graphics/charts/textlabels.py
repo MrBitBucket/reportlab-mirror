@@ -288,7 +288,7 @@ class Label(Widget):
         svgAttrs=getattr(self,'_svgAttrs',{})
         if strokeColor:
             for line in self._lines:
-                s = _text2Path(line, x, y, fontName, fontSize, textAnchor, _svgAttrs=svgAttrs)
+                s = _text2Path(line, x, y, fontName, fontSize, textAnchor)
                 s.fillColor = fillColor
                 s.strokeColor = strokeColor
                 s.strokeWidth = strokeWidth
@@ -401,25 +401,13 @@ class LabelOffset(PropHolder):
 
 NoneOrInstanceOfLabelOffset=NoneOr(isInstanceOf(LabelOffset))
 
-class BarChartLabel(Label):
-    """
-    An extended Label allowing for nudging, lines visibility etc
-    """
+class PMVLabel(Label):
     _attrMap = AttrMap(
         BASE=Label,
-        lineStrokeWidth = AttrMapValue(isNumberOrNone, desc="Non-zero for a drawn line"),
-        lineStrokeColor = AttrMapValue(isColorOrNone, desc="Color for a drawn line"),
-        fixedEnd = AttrMapValue(NoneOrInstanceOfLabelOffset, desc="None or fixed draw ends +/-"),
-        fixedStart = AttrMapValue(NoneOrInstanceOfLabelOffset, desc="None or fixed draw starts +/-"),
-        nudge = AttrMapValue(isNumber, desc="Non-zero sign dependent nudge"),
         )
 
     def __init__(self):
         Label.__init__(self)
-        self.lineStrokeWidth = 0
-        self.lineStrokeColor = None
-        self.nudge = 0
-        self.fixedStart = self.fixedEnd = None
         self._pmv = 0
 
     def _getBoxAnchor(self):
@@ -431,6 +419,26 @@ class BarChartLabel(Label):
         a = self.textAnchor
         if self._pmv<0: a = {'start':'end', 'middle':'middle', 'end':'start'}[a]
         return a
+
+class BarChartLabel(PMVLabel):
+    """
+    An extended Label allowing for nudging, lines visibility etc
+    """
+    _attrMap = AttrMap(
+        BASE=PMVLabel,
+        lineStrokeWidth = AttrMapValue(isNumberOrNone, desc="Non-zero for a drawn line"),
+        lineStrokeColor = AttrMapValue(isColorOrNone, desc="Color for a drawn line"),
+        fixedEnd = AttrMapValue(NoneOrInstanceOfLabelOffset, desc="None or fixed draw ends +/-"),
+        fixedStart = AttrMapValue(NoneOrInstanceOfLabelOffset, desc="None or fixed draw starts +/-"),
+        nudge = AttrMapValue(isNumber, desc="Non-zero sign dependent nudge"),
+        )
+
+    def __init__(self):
+        PMVLabel.__init__(self)
+        self.lineStrokeWidth = 0
+        self.lineStrokeColor = None
+        self.fixedStart = self.fixedEnd = None
+        self.nudge = 0
 
 class NA_Label(BarChartLabel):
     """
