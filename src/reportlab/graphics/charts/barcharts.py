@@ -373,6 +373,7 @@ class BarChart(PlotArea):
             cA.labels.labelPosFrac = lbpf
 
         self._barPositions = []
+        aBP = self._barPositions.append
         reversePlotOrder = self.reversePlotOrder
         for rowNo in xrange(seriesCount):
             barRow = []
@@ -409,7 +410,7 @@ class BarChart(PlotArea):
                         if datum<-1e-8: height = -1e-8
                 barRow.append(flipXY and (y,x,height,width) or (x,y,width,height))
 
-            self._barPositions.append(barRow)
+            aBP(barRow)
 
     def _getLabelText(self, rowNo, colNo):
         '''return formatted label text'''
@@ -634,11 +635,87 @@ class BarChart(PlotArea):
             label.setText(text)
             return pm,label.getBounds()
 
+    def _computeBarPositions(self):
+        """Information function, can be called by charts which want to with space around bars"""
+        cA, vA = self.categoryAxis, self.valueAxis
+        if vA: vA.joinAxis = cA
+        if cA: cA.joinAxis = vA
+        if self._flipXY:
+            cA.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
+        else:
+            cA.setPosition(self.x, self._drawBegin(self.y,self.height), self.width)
+        cA.configure(self._configureData)
+        self.calcBarPositions()
+
+    def _computeMaxSpace(self,size,required):
+        '''helper for madmen who want to put stuff inside their barcharts
+        basically after _computebarPositions we slide a line of length size
+        down the bar profile on either side of the bars to find the
+        maximum space. If the space at any point is >= required then we're
+        done. Otherwise we return the largest space location and amount.
+        '''
+        flipXY = self._flipXY
+        self._computeBarPositions()
+        lenData = len(self.data)
+        BP = self._barPositions
+        C = []
+        aC = C.append
+        if flipXY:
+            lo = self.x
+            hi = lo + self.width
+            end = self.y+self.height
+            for i in xrange(lenData):
+                for x, y, w, h in BP[i]:
+                    v = x+w
+                    z = y+h
+                    aC((min(y,z),max(y,z), min(x,v) - lo, hi - max(x,v)))
+        else:
+            lo = self.y
+            hi = lo + self.height
+            end = self.x+self.width
+            for i in xrange(lenData):
+                for x, y, w, h in BP[i]:
+                    v = y+h
+                    z = x+w
+                    aC((min(x,z), max(x,z), min(y,v) - lo, hi - max(y,v)))
+        C.sort()
+        R = [C[0]]
+        for c in C:
+            r = R[-1]
+            if r[0]<c[1] and c[0]<r[1]: #merge overlapping space
+                R[-1] = (min(r[0],c[0]),max(r[1],c[1]),min(r[2],c[2]),min(r[3],c[3]))
+            else:
+                R.append(c)
+        C = R
+        maxS = -0x7fffffff
+        maxP = None
+        nC = len(C)
+        for i,ci in enumerate(C):
+            v0 = ci[0]
+            v1 = v0+size
+            if v1>end: break
+            j = i
+            alo = ahi = 0x7fffffff
+            while j<nC and C[j][1]<=v1:
+                alo = min(C[j][2],alo)
+                ahi = min(C[j][3],ahi)
+                j += 1
+            if alo>ahi:
+                if alo>maxS:
+                    maxS = alo
+                    maxP = flipXY and (lo,v0,lo+alo,v0+size,0) or (v0,lo,v0+size,lo+alo,0)
+                    if maxS >= required: break
+            elif ahi>maxS:
+                maxS = ahi
+                maxP = flipXY and (hi-ahi,v0,hi,v0+size,1) or (v0,hi-ahi,v0+size,hi,1)
+                if maxS >= required: break
+        return maxS, maxP
+
     def _computeSimpleBarLabelPositions(self):
         """Information function, can be called by charts which want to mess with labels"""
         cA, vA = self.categoryAxis, self.valueAxis
-        if vA: ovAjA, vA.joinAxis = vA.joinAxis, cA
-        if cA: ocAjA, cA.joinAxis = cA.joinAxis, vA
+        if vA: vA.joinAxis = cA
+        if cA: cA.joinAxis = vA
         if self._flipXY:
             cA.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
         else:
@@ -649,8 +726,9 @@ class BarChart(PlotArea):
         lenData = len(self.data)
         bars = self.bars
         R = [].append
+        BP = self._barPositions
         for rowNo in xrange(lenData):
-            row = self._barPositions[rowNo]
+            row = BP[rowNo]
             C = [].append
             for colNo in range(len(row)):
                 x, y, width, height = row[colNo]
@@ -694,8 +772,8 @@ class BarChart(PlotArea):
 
     def draw(self):
         cA, vA = self.categoryAxis, self.valueAxis
-        if vA: ovAjA, vA.joinAxis = vA.joinAxis, cA
-        if cA: ocAjA, cA.joinAxis = cA.joinAxis, vA
+        if vA: vA.joinAxis = cA
+        if cA: cA.joinAxis = vA
         if self._flipXY:
             cA.setPosition(self._drawBegin(self.x,self.width), self.y, self.height)
         else:
