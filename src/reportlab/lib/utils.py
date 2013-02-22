@@ -255,43 +255,9 @@ try:
     #raise ImportError
     ### NOTE!  FP_STR SHOULD PROBABLY ALWAYS DO A PYTHON STR() CONVERSION ON ARGS
     ### IN CASE THEY ARE "LAZY OBJECTS".  ACCELLERATOR DOESN'T DO THIS (YET)
-    try:
-        from _rl_accel import fp_str                # in case of builtin version
-    except ImportError:
-        from reportlab.lib._rl_accel import fp_str  # specific
+    from reportlab.lib._rl_accel import fp_str  # specific
 except ImportError:
-    from math import log
-    _log_10 = lambda x,log=log,_log_e_10=log(10.0): log(x)/_log_e_10
-    _fp_fmts = "%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f", "%.6f"
-    import re
-    _tz_re = re.compile('0+$')
-    del re
-    def fp_str(*a):
-        '''convert separate arguments (or single sequence arg) into space separated numeric strings'''
-        if len(a)==1 and isSeqType(a[0]): a = a[0]
-        s = []
-        A = s.append
-        for i in a:
-            sa =abs(i)
-            if sa<=1e-7: A('0')
-            else:
-                l = sa<=1 and 6 or min(max(0,(6-int(_log_10(sa)))),6)
-                n = _fp_fmts[l]%i
-                if l:
-                    n = _tz_re.sub('',n)
-                    try:
-                        if n[-1]=='.': n = n[:-1]
-                    except:
-                        print(i, n)
-                        raise
-                A((n[0]!='0' or len(n)==1) and n or n[1:])
-        return ' '.join(s)
-
-#hack test for comma users
-if ',' in fp_str(0.25):
-    _FP_STR = fp_str
-    def fp_str(*a):
-        return _FP_STR(*a).replace(',','.')
+    from reportlab.lib.rl_accel import fp_str   # specific
 
 def recursiveGetAttr(obj, name):
     "Can call down into e.g. object1.object2[4].attr"

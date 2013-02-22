@@ -34,36 +34,10 @@ _typefaces = {}
 _encodings = {}
 _fonts = {}
 
-def _py_unicode2T1(utext,fonts):
-    '''return a list of (font,string) pairs representing the unicode text'''
-    R = []
-    font, fonts = fonts[0], fonts[1:]
-    enc = font.encName
-    if 'UCS-2' in enc:
-        enc = 'UTF16'
-    while utext:
-        try:
-            if isUnicodeType(utext):
-                s = utext.encode(enc)
-            else:
-                s = utext
-            R.append((font,s))
-            break
-        except UnicodeEncodeError as e:
-            i0, il = e.args[2:4]
-            if i0:
-                R.append((font,utext[:i0].encode(enc)))
-            if fonts:
-                R.extend(_py_unicode2T1(utext[i0:il],fonts))
-            else:
-                R.append((_notdefFont,_notdefChar*(il-i0)))
-            utext = utext[il:]
-    return R
-
 try:
-    from _rl_accel import unicode2T1
+    from reportlab.lib._rl_accel import unicode2T1
 except ImportError:
-    unicode2T1 = _py_unicode2T1
+    from reportlab.lib.rl_accel import unicode2T1
 
 class FontError(Exception):
     pass
@@ -405,14 +379,6 @@ class Font:
                         pass
         self.widths = w
 
-    def _py_stringWidth(self, text, size, encoding='utf8'):
-        """This is the "purist" approach to width.  The practical approach
-        is to use the stringWidth function, which may be swapped in for one
-        written in C."""
-        if not isUnicodeType(text): text = text.decode(encoding)
-        return sum([sum(map(f.widths.__getitem__,list(map(ord,t)))) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
-    stringWidth = _py_stringWidth
-
     def _formatWidths(self):
         "returns a pretty block in PDF Array format to aid inspection"
         text = b'['
@@ -739,11 +705,11 @@ def stringWidth(text, fontName, fontSize, encoding='utf8'):
     return getFont(fontName).stringWidth(text, fontSize, encoding=encoding)
 
 try:
-    from _rl_accel import _instanceStringWidthU
-    import new
-    Font.stringWidth = new.instancemethod(_instanceStringWidthU,None,Font)
+    from reportlab.lib._rl_accel import _instanceStringWidthU
 except ImportError:
-    pass
+    from reportlab.lib.rl_accel import _instanceStringWidthU
+import new
+Font.stringWidth = new.instancemethod(_instanceStringWidthU,None,Font)
 
 def dumpFontData():
     print('Registered Encodings:')
