@@ -2,6 +2,7 @@
 #see license.txt for license details
 __version__=''' $Id$ '''
 import os, sys, glob, configparser, shutil
+import functools
 platform = sys.platform
 pjoin = os.path.join
 abspath = os.path.abspath
@@ -50,8 +51,9 @@ def get_version():
     try:
         for l in open(pjoin(FN+'.py'),'r').readlines():
             if l.startswith('Version'):
-                exec(l.strip())
-                return Version
+                D = {}
+                exec(l.strip(),D)
+                return D['Version']
     except:
         pass
 
@@ -164,7 +166,7 @@ def _find_rl_ccode(dn='rl_accel',cn='_rl_accel.c'):
     if _:
         _ = list(filter(_rl_dir_info(cn),_))
         if len(_):
-            _.sort(_cmp_rl_ccode_dirs)
+            _.sort(key=functools.cmp_to_key(_cmp_rl_ccode_dirs))
             return abspath(_[0])
     return None
 
