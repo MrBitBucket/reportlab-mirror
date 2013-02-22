@@ -622,8 +622,18 @@ _monthlyIndexData = [[(19971202, 100.0),
   (20000531, 112.6),
   (20000630, 114.6)]]
 
-class GridLinePlot(LinePlot):
+class SimpleTimeSeriesPlot(LinePlot):
     """A customized version of LinePlot.
+    It uses NormalDateXValueAxis() and AdjYValueAxis() for the X and Y axes.
+    """
+    def __init__(self):
+        LinePlot.__init__(self)
+        self.xValueAxis = NormalDateXValueAxis()
+        self.yValueAxis = AdjYValueAxis()
+        self.data = _monthlyIndexData
+
+class GridLinePlot(SimpleTimeSeriesPlot):
+    """A customized version of SimpleTimeSeriesSPlot.
     It uses NormalDateXValueAxis() and AdjYValueAxis() for the X and Y axes.
     The chart has a default grid background with thin horizontal lines
     aligned with the tickmarks (and labels). You can change the back-
@@ -639,9 +649,7 @@ class GridLinePlot(LinePlot):
 
     def __init__(self):
         from reportlab.lib import colors
-        LinePlot.__init__(self)
-        self.xValueAxis = NormalDateXValueAxis()
-        self.yValueAxis = AdjYValueAxis()
+        SimpleTimeSeriesPlot.__init__(self)
         self.scaleFactor = None
         self.background = Grid()
         self.background.orientation = 'horizontal'
@@ -649,13 +657,12 @@ class GridLinePlot(LinePlot):
         self.background.useLines = 1
         self.background.strokeWidth = 0.5
         self.background.strokeColor = colors.black
-        self.data = _monthlyIndexData
 
     def demo(self,drawing=None):
         from reportlab.lib import colors
         if not drawing:
             drawing = Drawing(400, 200)
-        lp = AdjLinePlot()
+        lp = GridLinePlot()
         lp.x = 50
         lp.y = 50
         lp.height = 125
