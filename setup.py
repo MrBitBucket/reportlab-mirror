@@ -274,21 +274,21 @@ def main():
         fn = pjoin(RL_ACCEL,'hyphen.mashed')
         SPECIAL_PACKAGE_DATA = {fn: pjoin('lib','hyphen.mashed')}
         EXT_MODULES += [
-                    Extension( '_rl_accel',
+                    Extension( 'reportlab.lib._rl_accel',
                                 [pjoin(RL_ACCEL,'_rl_accel.c')],
                                 include_dirs=[],
                             define_macros=[],
                             library_dirs=[],
                             libraries=[], # libraries to link against
                             ),
-                    Extension( 'sgmlop',
+                    Extension( 'reportlab.lib.sgmlop',
                             [pjoin(RL_ACCEL,'sgmlop.c')],
                             include_dirs=[],
                             define_macros=[],
                             library_dirs=[],
                             libraries=[], # libraries to link against
                             ),
-                    Extension( 'pyHnj',
+                    Extension( 'reportlab.lib.pyHnj',
                             [pjoin(RL_ACCEL,'pyHnjmodule.c'),
                              pjoin(RL_ACCEL,'hyphen.c'),
                              pjoin(RL_ACCEL,'hnjalloc.c')],
@@ -400,7 +400,7 @@ def main():
             infoline('# If you need truetype support in renderPM')
             infoline('# You may need to edit setup.cfg (win32)')
             infoline('# or edit this file to access the library if it is installed')
-        EXT_MODULES +=  [Extension( '_renderPM',
+        EXT_MODULES +=  [Extension( 'reportlab.graphics._renderPM',
                                         SOURCES,
                                         include_dirs=[RENDERPM,LIBART_DIR,GT1_DIR]+FT_INC_DIR,
                                         define_macros=FT_MACROS+[('LIBART_COMPILATION',None)]+MACROS+[('LIBART_VERSION',LIBART_VERSION)],

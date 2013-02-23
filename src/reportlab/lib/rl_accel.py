@@ -30,11 +30,10 @@ if ',' in fp_str(0.25):
     def fp_str(*a):
         return _FP_STR(*a).replace(',','.')
 
-def unicode2T1(utext,fonts,font0=None):
+def unicode2T1(utext,fonts):
     '''return a list of (font,string) pairs representing the unicode text'''
     R = []
     font, fonts = fonts[0], fonts[1:]
-    if font0 is None: font0 = font
     enc = font.encName
     if 'UCS-2' in enc:
         enc = 'UTF16'
@@ -51,9 +50,9 @@ def unicode2T1(utext,fonts,font0=None):
             if i0:
                 R.append((font,utext[:i0].encode(enc)))
             if fonts:
-                R.extend(unicode2T1(utext[i0:il],fonts,font0))
+                R.extend(unicode2T1(utext[i0:il],fonts))
             else:
-                R.append((font0._notdefFont,font0._notdefChar*(il-i0)))
+                R.append((font._notdefFont,font._notdefChar*(il-i0)))
             utext = utext[il:]
     return R
 

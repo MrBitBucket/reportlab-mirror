@@ -9,6 +9,9 @@
 static __version__=" $Id$ "
 #endif
 #include "Python.h"
+#if PY_MAJOR_VERSION >= 3
+#	define isPy3
+#endif
 #include <stdlib.h>
 #include <math.h>
 #define DEFERRED_ADDRESS(A) 0
@@ -32,11 +35,18 @@ static __version__=" $Id$ "
 #define VERSION "0.64"
 #define MODULE "_rl_accel"
 
-static PyObject *moduleVersion;
-static PyObject *moduleObject;
-static int moduleLineno;
+struct moduleState	{
+	PyObject *moduleVersion;
+	PyObject *error;
+	int moduleLineno;
+	};
+#ifdef isPy3
+#	define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#else
+#	define GETSTATE(m) (&_state)
+	static struct module_state _state;
+#endif
 
-static PyObject *ErrorObject;
 
 #define a85_0		   1L
 #define a85_1		   85L
@@ -143,7 +153,7 @@ PyObject *_a85_decode(PyObject *self, PyObject *args)
 	length = q - inData;
 	buf = inData+length-2;
 	if(buf[0]!='~' || buf[1]!='>'){
-		PyErr_SetString(ErrorObject, "Invalid terminator for Ascii Base 85 Stream");
+		PyErr_SetString(GETSTATE(module)->error, "Invalid terminator for Ascii Base 85 Stream");
 		free(inData);
 		return NULL;
 		}
@@ -202,7 +212,7 @@ static	char *_fp_one(PyObject *pD)
 		Py_DECREF(pD);
 		}
 	else {
-		PyErr_SetString(ErrorObject, "bad numeric value");
+		PyErr_SetString(GETSTATE(module)->error, "bad numeric value");
 		return NULL;
 		}
 	ad = fabs(d);
@@ -212,7 +222,7 @@ static	char *_fp_one(PyObject *pD)
 		}
 	else{
 		if(ad>1e20){
-			PyErr_SetString(ErrorObject, "number too large");
+			PyErr_SetString(GETSTATE(module)->error, "number too large");
 			return NULL;
 			}
 		if(ad>1) l = min(max(0,6-(int)log10(ad)),6);
@@ -492,8 +502,6 @@ static PyObject *hex32(PyObject *self, PyObject* args)
 	return PyString_FromString(buf);
 }
 
-static PyObject *_notdefFont=NULL;	/*should only be used by older versions of reportlab*/
-static PyObject *_notdefChar=NULL;
 static PyObject *_GetExcValue(void)
 {
 	PyObject *type = NULL, *value = NULL, *tb = NULL, *result=NULL;
@@ -520,11 +528,11 @@ static PyObject *_GetAttrString(PyObject *obj, char *name)
 }
 
 #define ERROR_EXIT() {moduleLineno=__LINE__;goto L_ERR;}
-#define ADD_TB(name) _add_TB(name)
+#define ADD_TB(module,name) _add_TB(module,name)
 #include "compile.h"
 #include "frameobject.h"
 #include "traceback.h"
-static void _add_TB(char *funcname)
+static void _add_TB(PyObject *module,char *funcname)
 {
 	PyObject *py_srcfile = NULL, *py_funcname = NULL, *py_globals = NULL, *empty_tuple = NULL, *empty_string = NULL;
 	PyCodeObject *py_code = NULL;
@@ -534,7 +542,7 @@ static void _add_TB(char *funcname)
 	if(!py_srcfile) goto bad;
 	py_funcname = PyString_FromString(funcname);
 	if(!py_funcname) goto bad;
-	py_globals = PyModule_GetDict(moduleObject);
+	py_globals = PyModule_GetDict(module);
 	if(!py_globals) goto bad;
 	empty_tuple = PyTuple_New(0);
 	if(!empty_tuple) goto bad;
@@ -674,37 +682,15 @@ static PyObject *unicode2T1(PyObject *self, PyObject *args, PyObject *kwds)
 				}
 			else{
 				_o3 = _GetAttrString(font,"_notdefChar");
-				if(!_o3){
-					PyErr_Clear();
-					_o2 = PyInt_FromLong((j - i)); if(!_o2) ERROR_EXIT();
-					if(!_notdefFont){
-						_o1 = PyImport_ImportModule("reportlab.pdfbase.pdfmetrics"); if(!_o1) ERROR_EXIT();
-						_o2 = _GetAttrString(_o1,"_notdefFont");
-						_o3 = _GetAttrString(_o1,"_notdefChar");
-						if(!_o2 || !_o3 || !_o3) ERROR_EXIT();
-						_notdefFont = _o2;
-						_notdefChar = _o3;
-						Py_DECREF(_o1);
-						_o1 = _o2 = _o3 = NULL;
-						}
-					_o2 = PyInt_FromLong((j - i)); if(!_o2) ERROR_EXIT();
-					_o1 = PyNumber_Multiply(_notdefChar, _o2); if(!_o1) ERROR_EXIT();
-					Py_DECREF(_o2);
-					_o2 = PyTuple_New(2); if(!_o2) ERROR_EXIT();
-					PyTuple_SET_ITEM(_o2, 0, _notdefFont);
-					PyTuple_SET_ITEM(_o2, 1, _o1);
-					Py_INCREF(_notdefFont);
-					}
-				else{
-					_o2 = PyInt_FromLong((j - i)); if(!_o2) ERROR_EXIT();
-					_o1 = PyNumber_Multiply(_o3, _o2); if(!_o1) ERROR_EXIT();
-					Py_DECREF(_o2); Py_DECREF(_o3); _o2=_o3=NULL;
-					_o2 = PyTuple_New(2); if(!_o2) ERROR_EXIT();
-					_o3 = _GetAttrString(font,"_notdefFont"); if(!_o3) ERROR_EXIT();
-					PyTuple_SET_ITEM(_o2, 0, _o3);
-					PyTuple_SET_ITEM(_o2, 1, _o1);
-					Py_INCREF(_o3); _o3=NULL;
-					}
+				if(!_o3) ERROR_EXIT();
+				_o2 = PyInt_FromLong((j - i)); if(!_o2) ERROR_EXIT();
+				_o1 = PyNumber_Multiply(_o3, _o2); if(!_o1) ERROR_EXIT();
+				Py_DECREF(_o2); Py_DECREF(_o3); _o2=_o3=NULL;
+				_o2 = PyTuple_New(2); if(!_o2) ERROR_EXIT();
+				_o3 = _GetAttrString(font,"_notdefFont"); if(!_o3) ERROR_EXIT();
+				PyTuple_SET_ITEM(_o2, 0, _o3);
+				PyTuple_SET_ITEM(_o2, 1, _o1);
+				Py_INCREF(_o3); _o3=NULL;
 				_o1 = NULL;
 				if(PyList_Append(R, _o2)) ERROR_EXIT();
 				Py_DECREF(_o2); _o2 = NULL;
@@ -723,7 +709,7 @@ static PyObject *unicode2T1(PyObject *self, PyObject *args, PyObject *kwds)
 	goto L_OK;
 
 L_ERR:
-	ADD_TB("unicode2T1");
+	ADD_TB(module,"unicode2T1");
 	Py_XDECREF(_o1);
 	Py_XDECREF(_o2);
 	Py_XDECREF(_o3);
@@ -832,7 +818,7 @@ static PyObject *_instanceStringWidthU(PyObject *module, PyObject *args, PyObjec
 	Py_DECREF(_o1);
 	goto L_OK;
 L_ERR:
-	ADD_TB("_instanceStringWidthU");
+	ADD_TB(module,"_instanceStringWidthU");
 	Py_XDECREF(_o1);
 	Py_XDECREF(_o2);
 	Py_XDECREF(_o3);
@@ -915,7 +901,7 @@ static PyObject *_instanceStringWidthTTF(PyObject *module, PyObject *args, PyObj
 	Py_DECREF(_o1);
 	goto L_OK;
 L_ERR:
-	ADD_TB("_instanceStringWidthTTF");
+	ADD_TB(module,"_instanceStringWidthTTF");
 	Py_XDECREF(_o1);
 	Py_XDECREF(_o2);
 	Py_XDECREF(_o3);
@@ -924,16 +910,6 @@ L_OK:
 	Py_DECREF(text);
 	Py_DECREF(encoding);
 	return res;
-}
-/*we may need to reload pdfmtrics etc etc*/
-static PyObject *_reset(PyObject *module)
-{
-	if(_notdefFont){
-		Py_DECREF(_notdefFont); _notdefFont = NULL;
-		Py_DECREF(_notdefChar);	_notdefChar = NULL;
-		}
-	Py_INCREF(Py_None);
-	return Py_None;
 }
 
 #define HAVE_BOX
@@ -1258,7 +1234,6 @@ static char *__doc__=
 "\t_instanceStringWidthU version2 Font instance stringWidth\n\
 \t_instanceStringWidthTTF version2 TTFont instance stringWidth\n\
 \tunicode2T1 version2 pdfmetrics.unicode2T1\n\
-\t_reset() version2 clears _rl_accel state\n"
 #ifdef	HAVE_BOX
 "\tBox(width,character=None) creates a Knuth character Box with the specified width.\n"
 "\tGlue(width,stretch,shrink) creates a Knuth glue Box with the specified width, stretch and shrink.\n"
@@ -1282,7 +1257,6 @@ static struct PyMethodDef _methods[] = {
 	{"unicode2T1", (PyCFunction)unicode2T1, METH_VARARGS|METH_KEYWORDS, "return a list of (font,string) pairs representing the unicode text"},
 	{"_instanceStringWidthU", (PyCFunction)_instanceStringWidthU, METH_VARARGS|METH_KEYWORDS, "Font.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
 	{"_instanceStringWidthTTF", (PyCFunction)_instanceStringWidthTTF, METH_VARARGS|METH_KEYWORDS, "TTFont.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
-	{"_reset", (PyCFunction)_reset, METH_NOARGS, "_rl_accel._reset() reset _rl_accel state"},
 #ifdef	HAVE_BOX
 	{"Box",	(PyCFunction)Box,	METH_VARARGS|METH_KEYWORDS, "Box(width,character=None) create a Knuth Box instance"},
 	{"Glue", (PyCFunction)Glue,	METH_VARARGS|METH_KEYWORDS, "Glue(width,stretch,shrink) create a Knuth Glue instance"},
@@ -1292,30 +1266,75 @@ static struct PyMethodDef _methods[] = {
 	};
 
 /*Initialization function for the module (*must* be called init_pdfmetrics)*/
+#ifdef isPy3
+static int _traverse(PyObject *m, visitproc visit, void *arg) {
+	struct module_state *st = GETSTATE(m);
+	Py_VISIT(st->error);
+	Py_VISIT(st->moduleVersion);
+	return 0;
+	}
+
+static int _clear(PyObject *m) {
+	struct module_state *st = GETSTATE(m);
+    Py_CLEAR(st->error);
+    Py_CLEAR(st->moduleVersion);
+	return 0;
+	}
+
+static struct PyModuleDef moduledef = {
+	PyModuleDef_HEAD_INIT,
+	"_rl_accel",
+	NULL,
+	sizeof(struct module_state),
+	_methods,
+	NULL,
+	_traverse,
+	_clear,
+	NULL
+	};
+
+PyMODINIT_FUNC PyInit_rl_accel(void)
+#define INITERROR return NULL
+#else
 void init_rl_accel(void)
+#endif
 {
-
+	PyObject			*module=NULL;
+	struct module_state *st=NULL;
 	/*Create the module and add the functions and module doc string*/
-	moduleObject = Py_InitModule3("_rl_accel", _methods,__doc__);
-
+	module = Py_InitModule3("_rl_accel", _methods,__doc__);
+	if(!module) INITERROR;
+	st=GETSTATE(module);
 	/*Add some symbolic constants to the module */
-	if(!ErrorObject){
-		ErrorObject = PyErr_NewException("_rl_accel.error", NULL, NULL);
-		if(!ErrorObject) goto err;
-		}
-	Py_INCREF(ErrorObject);
-	moduleVersion = PyString_FromString(VERSION);
-	PyModule_AddObject(moduleObject, "error", ErrorObject);
-	PyModule_AddObject(moduleObject, "version", moduleVersion );
+	st->error = PyErr_NewException("_rl_accel.error", NULL, NULL);
+	if(!st->error) INITERROR;
+	st->moduleVersion = PyString_FromString(VERSION);
+	if(!st->moduleVersion)INITERROR;
+	PyModule_AddObject(module, "error", st->error);
+	PyModule_AddObject(module, "version", st->moduleVersion );
 
 #ifdef	HAVE_BOX
+#ifndef isPy3
 	BoxType.ob_type = &PyType_Type;
+#endif
 	BoxList_type.tp_base = &PyList_Type;
-	if(PyType_Ready(&BoxList_type)<0) goto err;
+	if(PyType_Ready(&BoxList_type)<0) INITERROR;
 	Py_INCREF(&BoxList_type);
-	if(PyModule_AddObject(moduleObject, "BoxList", (PyObject *)&BoxList_type)<0)goto err;
+	if(PyModule_AddObject(module, "BoxList", (PyObject *)&BoxList_type)<0)goto err;
 #endif
 
+#ifdef isPy3
+	return module;
+#else
 err:/*Check for errors*/
+#ifdef isPy3
+	if(st){
+		Py_XDECREF(st->moduleVersion);
+		Py_XDECREF(st->error);
+		}
+	Py_XDECREF(module);
+	return NULL;
+#else
 	if (PyErr_Occurred()) Py_FatalError("can't initialize module _rl_accel");
+#endif
 }
