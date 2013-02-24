@@ -126,8 +126,8 @@ except:
     def hex32(i):
         return '0X%8.8X' % (int(i)&0xFFFFFFFF)
 try:
-    add32 = _rl_accel.add32L
-    calcChecksum = _rl_accel.calcChecksumL
+    add32 = _rl_accel.add32
+    calcChecksum = _rl_accel.calcChecksum
 except:
     def add32(x, y):
         "Calculate (x + y) modulo 2**32"

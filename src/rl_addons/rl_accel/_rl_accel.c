@@ -5,9 +5,6 @@
 * for details.
 * history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/_rl_accel.c
 */
-#if 0
-static __version__=" $Id$ "
-#endif
 #include "Python.h"
 #if PY_MAJOR_VERSION >= 3
 #	define isPy3
@@ -32,10 +29,10 @@ static __version__=" $Id$ "
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.64"
+#define VERSION "0.70"
 #define MODULE "_rl_accel"
 
-struct moduleState	{
+struct module_state	{
 	PyObject *moduleVersion;
 	PyObject *error;
 	int moduleLineno;
@@ -43,8 +40,9 @@ struct moduleState	{
 #ifdef isPy3
 #	define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
 #else
-#	define GETSTATE(m) (&_state)
 	static struct module_state _state;
+#	include "bytesobject.h"
+#	define GETSTATE(m) (&_state)
 #endif
 
 
@@ -54,7 +52,7 @@ struct moduleState	{
 #define a85_3	   614125L
 #define a85_4	 52200625L
 
-PyObject *_a85_encode(PyObject *self, PyObject *args)
+PyObject *_a85_encode(PyObject *module, PyObject *args)
 {
 	unsigned char	*inData;
 	int				length, blocks, extra, i, k, lim;
@@ -123,12 +121,12 @@ PyObject *_a85_encode(PyObject *self, PyObject *args)
 
 	buf[k++] = '~';
 	buf[k++] = '>';
-	retVal = PyString_FromStringAndSize(buf, k);
+	retVal = PyBytes_FromStringAndSize(buf, k);
 	free(buf);
 	return retVal;
 }
 
-PyObject *_a85_decode(PyObject *self, PyObject *args)
+PyObject *_a85_decode(PyObject *module, PyObject *args)
 {
 	unsigned char	*inData, *p, *q, *tmp, *buf;
 	unsigned int	length, blocks, extra, k, num, c1, c2, c3, c4, c5;
@@ -194,14 +192,14 @@ PyObject *_a85_decode(PyObject *self, PyObject *args)
 				}
 			}
 		}
-	retVal = PyString_FromStringAndSize((const char*)buf, k);
+	retVal = PyBytes_FromStringAndSize((const char*)buf, k);
 	free(buf);
 	free(tmp);
 	return retVal;
 }
 
 static	char* _fp_fmts[]={"%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f", "%.6f"};
-static	char *_fp_one(PyObject *pD)
+static	char *_fp_one(PyObject* module,PyObject *pD)
 {
 	double	d, ad;
 	static	char s[30];
@@ -245,7 +243,7 @@ static	char *_fp_one(PyObject *pD)
 	return s;
 }
 
-PyObject *_fp_str(PyObject *self, PyObject *args)
+PyObject *_fp_str(PyObject *module, PyObject *args)
 {
 	int				aL;
 	PyObject		*retVal;
@@ -268,7 +266,7 @@ PyObject *_fp_str(PyObject *self, PyObject *args)
 		for(i=0;i<aL;i++){
 			retVal = PySequence_GetItem(args,i);
 			if(retVal){
-				pD = _fp_one(retVal);
+				pD = _fp_one(module,retVal);
 				Py_DECREF(retVal);
 				}
 			else pD = NULL;
@@ -283,7 +281,7 @@ PyObject *_fp_str(PyObject *self, PyObject *args)
 			pB = pB + strlen(pB);
 			}
 		*pB = 0;
-		retVal = PyString_FromString(buf);
+		retVal = PyBytes_FromString(buf);
 		free(buf);
 		return retVal;
 		}
@@ -315,12 +313,12 @@ static PyObject *_escapePDF(unsigned char* text, int textlen)
 			out[j++] = c;
 			}
 		}
-	ret = PyString_FromStringAndSize((const char *)out,j);
+	ret = PyBytes_FromStringAndSize((const char *)out,j);
 	PyMem_Free(out);
 	return ret;
 }
 
-static PyObject *escapePDF(PyObject *self, PyObject* args)
+static PyObject *escapePDF(PyObject *module, PyObject* args)
 {
 	unsigned char	*text;
 	int				textLen;
@@ -329,7 +327,7 @@ static PyObject *escapePDF(PyObject *self, PyObject* args)
 	return _escapePDF(text,textLen);
 }
 
-static PyObject *_instanceEscapePDF(PyObject *unused, PyObject* args)
+static PyObject *_instanceEscapePDF(PyObject *module, PyObject* args)
 {
 	PyObject		*self;
 	unsigned char	*text;
@@ -339,7 +337,7 @@ static PyObject *_instanceEscapePDF(PyObject *unused, PyObject* args)
 	return _escapePDF(text,textLen);
 }
 
-static PyObject *_sameFrag(PyObject *self, PyObject* args)
+static PyObject *_sameFrag(PyObject *module, PyObject* args)
 {
 	PyObject *f, *g;
 	static char *names[] = {"fontName", "fontSize", "textColor", "rise", "underline", "strike", "link", "backColor", NULL};
@@ -353,7 +351,7 @@ static PyObject *_sameFrag(PyObject *self, PyObject* args)
 		fa = PyObject_GetAttrString(f,*p);
 		ga = PyObject_GetAttrString(g,*p);
 		if(fa && ga){
-			t = PyObject_Compare(fa,ga);
+			t = PyObject_RichCompareBool(fa,ga,Py_NE);
 			Py_DECREF(fa);
 			Py_DECREF(ga);
 			if(PyErr_Occurred()) goto L1;
@@ -367,45 +365,11 @@ static PyObject *_sameFrag(PyObject *self, PyObject* args)
 		if(t) goto L0;
 		}
 	r = 1;
-L0:	return PyInt_FromLong((long)r);
+L0:	return PyBool_FromLong((long)r);
 L1:	return NULL;
 }
 
-static PyObject *ttfonts_calcChecksum(PyObject *self, PyObject* args)
-{
-	unsigned char	*data;
-	int				dataLen;
-	unsigned long	Sum = 0L;
-	unsigned char	*EndPtr;
-	unsigned long n;
-	int leftover;
-
-
-	if (!PyArg_ParseTuple(args, "s#:calcChecksum", &data, &dataLen)) return NULL;
-	EndPtr = data + (dataLen & ~3);
-
-	/*full ULONGs*/
-	while(data < EndPtr){
-		n = ((*data++) << 24);
-		n += ((*data++) << 16);
-		n += ((*data++) << 8);
-		n += ((*data++));
-		Sum += n;
-		}
-
-	/*pad with zeros*/
-	leftover = dataLen & 3;
-	if(leftover){
-		n = ((*data++) << 24);
-		if (leftover>1) n += ((*data++) << 16);
-		if (leftover>2) n += ((*data++) << 8);
-		Sum += n;
-		}
-
-	return PyInt_FromLong(Sum);
-}
-
-static PyObject *ttfonts_calcChecksumL(PyObject *self, PyObject* args)
+static PyObject *ttfonts_calcChecksum(PyObject *module, PyObject* args)
 {
 	unsigned char	*data;
 	int				dataLen;
@@ -439,67 +403,21 @@ static PyObject *ttfonts_calcChecksumL(PyObject *self, PyObject* args)
 	return PyLong_FromUnsignedLong(Sum&0xFFFFFFFFU);
 }
 
-static PyObject *ttfonts_add32(PyObject *self, PyObject* args)
+static PyObject *ttfonts_add32(PyObject *module, PyObject* args)
 {
 	unsigned long x, y;
-	PyObject	*ox, *oy;
-	if(!PyArg_ParseTuple(args, "OO:add32", &ox, &oy)) return NULL;
-	if(PyLong_Check(ox)){
-		x = PyLong_AsUnsignedLongMask(ox);
-		}
-	else{
-		x = PyInt_AsLong(ox);
-		if(PyErr_Occurred()) return NULL;
-		}
-	if(PyLong_Check(oy)){
-		y = PyLong_AsUnsignedLongMask(oy);
-		}
-	else{
-		y = PyInt_AsLong(oy);
-		if(PyErr_Occurred()) return NULL;
-		}
-	x += y;
-	return PyInt_FromLong(x);
-}
-
-static PyObject *ttfonts_add32L(PyObject *self, PyObject* args)
-{
-	unsigned long x, y;
-	PyObject	*ox, *oy;
-	if(!PyArg_ParseTuple(args, "OO:add32", &ox, &oy)) return NULL;
-	if(PyLong_Check(ox)){
-		x = PyLong_AsUnsignedLongMask(ox);
-		}
-	else{
-		x = PyInt_AsLong(ox);
-		if(PyErr_Occurred()) return NULL;
-		}
-	if(PyLong_Check(oy)){
-		y = PyLong_AsUnsignedLongMask(oy);
-		}
-	else{
-		y = PyInt_AsLong(oy);
-		if(PyErr_Occurred()) return NULL;
-		}
+	if(!PyArg_ParseTuple(args, "kk:add32", &x, &y)) return NULL;
 	x += y;
 	return PyLong_FromUnsignedLong(x&0xFFFFFFFFU);
 }
 
-static PyObject *hex32(PyObject *self, PyObject* args)
+static PyObject *hex32(PyObject *module, PyObject* args)
 {
 	unsigned long x;
 	char	buf[20];
-	PyObject	*ox;
-	if(!PyArg_ParseTuple(args, "O:hex32", &ox)) return NULL;
-	if(PyLong_Check(ox)){
-		x = PyLong_AsUnsignedLongMask(ox);
-		}
-	else{
-		x = PyInt_AsLong(ox);
-		if(PyErr_Occurred()) return NULL;
-		}
-	sprintf(buf,"0X%8.8X",x);
-	return PyString_FromString(buf);
+	if(!PyArg_ParseTuple(args, "k:hex32", &x)) return NULL;
+	sprintf(buf,"0X%8.8lX",x);
+	return PyUnicode_FromString(buf);
 }
 
 static PyObject *_GetExcValue(void)
@@ -527,42 +445,24 @@ static PyObject *_GetAttrString(PyObject *obj, char *name)
 	return res;
 }
 
-#define ERROR_EXIT() {moduleLineno=__LINE__;goto L_ERR;}
+#define ERROR_EXIT() {GETSTATE(module)->moduleLineno=__LINE__;goto L_ERR;}
 #define ADD_TB(module,name) _add_TB(module,name)
 #include "compile.h"
 #include "frameobject.h"
 #include "traceback.h"
 static void _add_TB(PyObject *module,char *funcname)
 {
-	PyObject *py_srcfile = NULL, *py_funcname = NULL, *py_globals = NULL, *empty_tuple = NULL, *empty_string = NULL;
+	int	moduleLineno = GETSTATE(module)->moduleLineno;
+	PyObject *py_globals = NULL;
 	PyCodeObject *py_code = NULL;
 	PyFrameObject *py_frame = NULL;
 	
-	py_srcfile = PyString_FromString(__FILE__);
-	if(!py_srcfile) goto bad;
-	py_funcname = PyString_FromString(funcname);
-	if(!py_funcname) goto bad;
 	py_globals = PyModule_GetDict(module);
 	if(!py_globals) goto bad;
-	empty_tuple = PyTuple_New(0);
-	if(!empty_tuple) goto bad;
-	empty_string = PyString_FromString("");
-	if(!empty_string) goto bad;
-	py_code = PyCode_New(
-						0,				/*int argcount,*/
-						0,				/*int nlocals,*/
-						0,				/*int stacksize,*/
-						0,				/*int flags,*/
-						empty_string,	/*PyObject *code,*/
-						empty_tuple,	/*PyObject *consts,*/
-						empty_tuple,	/*PyObject *names,*/
-						empty_tuple,	/*PyObject *varnames,*/
-						empty_tuple,	/*PyObject *freevars,*/
-						empty_tuple,	/*PyObject *cellvars,*/
-						py_srcfile,		/*PyObject *filename,*/
-						py_funcname,	/*PyObject *name,*/
-						moduleLineno,	/*int firstlineno,*/
-						empty_string	/*PyObject *lnotab*/
+	py_code = PyCode_NewEmpty(
+						__FILE__,		/*PyObject *filename,*/
+						funcname,	/*PyObject *name,*/
+						moduleLineno	/*int firstlineno,*/
 						);
 	if(!py_code) goto bad;
 	py_frame = PyFrame_New(
@@ -575,16 +475,12 @@ static void _add_TB(PyObject *module,char *funcname)
 	py_frame->f_lineno = moduleLineno;
 	PyTraceBack_Here(py_frame);
 bad:
-	Py_XDECREF(py_srcfile);
-	Py_XDECREF(py_funcname);
-	Py_XDECREF(empty_tuple);
-	Py_XDECREF(empty_string);
 	Py_XDECREF(py_code);
 	Py_XDECREF(py_frame);
 }
-static PyObject *unicode2T1(PyObject *self, PyObject *args, PyObject *kwds)
+static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 {
-	int			i, j, _i1, _i2;
+	long		i, j, _i1, _i2;
 	PyObject	*R, *font, *enc, *res, *utext=NULL, *fonts=NULL,
 				*_o1 = NULL, *_o2 = NULL, *_o3 = NULL;
 	static char *argnames[] = {"utext","fonts",NULL};
@@ -615,7 +511,7 @@ static PyObject *unicode2T1(PyObject *self, PyObject *args, PyObject *kwds)
 	enc = _o2;
 	_o2 = NULL;
 
-	encStr = PyString_AsString(enc);
+	encStr = PyBytes_AsString(enc);
 	if(PyErr_Occurred()) ERROR_EXIT();
 	if(strstr(encStr,"UCS-2")) encStr = "UTF16";
 
@@ -641,11 +537,11 @@ static PyObject *unicode2T1(PyObject *self, PyObject *args, PyObject *kwds)
 			_o1 = PySequence_GetSlice(_o2, 2, 4); if(!_o1) ERROR_EXIT();
 			Py_DECREF(_o2);
 				_o2 = PySequence_GetItem(_o1, 0); if(!_o2) ERROR_EXIT();
-				i = PyInt_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
+				i = PyLong_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
 				Py_DECREF(_o2);
 
 				_o2 = PySequence_GetItem(_o1, 1); if(!_o1) ERROR_EXIT();
-				j = PyInt_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
+				j = PyLong_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
 				Py_DECREF(_o2);
 
 			Py_DECREF(_o1); _o2 = _o1 = 0;
@@ -670,7 +566,7 @@ static PyObject *unicode2T1(PyObject *self, PyObject *args, PyObject *kwds)
 				PyTuple_SET_ITEM(_o2, 0, _o1);
 				Py_INCREF(fonts);
 				PyTuple_SET_ITEM(_o2, 1, fonts);
-				_o1 = unicode2T1(self,_o2,NULL); if(!_o1) ERROR_EXIT();
+				_o1 = unicode2T1(module,_o2,NULL); if(!_o1) ERROR_EXIT();
 				Py_DECREF(_o2); _o2 = 0;
 				_o3 = PyTuple_New(1); if(!_o3) ERROR_EXIT();
 				PyTuple_SET_ITEM(_o3, 0, _o1);
@@ -683,7 +579,7 @@ static PyObject *unicode2T1(PyObject *self, PyObject *args, PyObject *kwds)
 			else{
 				_o3 = _GetAttrString(font,"_notdefChar");
 				if(!_o3) ERROR_EXIT();
-				_o2 = PyInt_FromLong((j - i)); if(!_o2) ERROR_EXIT();
+				_o2 = PyLong_FromLong((j - i)); if(!_o2) ERROR_EXIT();
 				_o1 = PyNumber_Multiply(_o3, _o2); if(!_o1) ERROR_EXIT();
 				Py_DECREF(_o2); Py_DECREF(_o3); _o2=_o3=NULL;
 				_o2 = PyTuple_New(2); if(!_o2) ERROR_EXIT();
@@ -739,7 +635,7 @@ static PyObject *_instanceStringWidthU(PyObject *module, PyObject *args, PyObjec
 		Py_INCREF(encoding);
 		}
 	else{
-		_o1 = PyString_FromString("utf8"); if(!_o1) ERROR_EXIT();
+		_o1 = PyBytes_FromString("utf8"); if(!_o1) ERROR_EXIT();
 		encoding = _o1;
 		_o1 = NULL;
 		}
@@ -800,13 +696,13 @@ static PyObject *_instanceStringWidthU(PyObject *module, PyObject *args, PyObjec
 		Py_DECREF(_o1);
 		_o1 = _o2 = NULL;
 
-		m = PyString_Size(t);
-		b = PyString_AS_STRING(t);
+		m = PyBytes_Size(t);
+		b = (unsigned char*)PyBytes_AS_STRING(t);
 
 		for(j=0;j<m;++j){
 			_i1 = (long)(b[j]);
 			_o2 = PyList_GetItem(f,_i1); if(!_o2) {PyErr_Format(PyExc_IndexError,"widths index %d out of range",_i1);ERROR_EXIT();}
-			_i1 = PyInt_AsLong(_o2);
+			_i1 = PyLong_AsLong(_o2);
 			_o2 = NULL;	/*we borrowed this*/
 			if(PyErr_Occurred()) ERROR_EXIT();
 			s += _i1;
@@ -849,7 +745,7 @@ static PyObject *_instanceStringWidthTTF(PyObject *module, PyObject *args, PyObj
 		Py_INCREF(encoding);
 		}
 	else{
-		_o1 = PyString_FromString("utf8"); if(!_o1) ERROR_EXIT();
+		_o1 = PyBytes_FromString("utf8"); if(!_o1) ERROR_EXIT();
 		encoding = _o1;
 		_o1 = NULL;
 		}
@@ -858,7 +754,7 @@ static PyObject *_instanceStringWidthTTF(PyObject *module, PyObject *args, PyObj
 		i = PyObject_IsTrue(encoding); if(i<0) ERROR_EXIT();
 		if(!i){
 			Py_DECREF(encoding);
-			encoding = PyString_FromString("utf8"); if(!encoding) ERROR_EXIT();
+			encoding = PyBytes_FromString("utf8"); if(!encoding) ERROR_EXIT();
 			}
 		_o1 = _GetAttrString(text, "decode"); if(!_o1) ERROR_EXIT();
 		_o3 = PyTuple_New(1); if(!_o3) ERROR_EXIT();
@@ -884,7 +780,7 @@ static PyObject *_instanceStringWidthTTF(PyObject *module, PyObject *args, PyObj
 	b = PyUnicode_AS_UNICODE(text);
 
 	for(s=i=0;i<n;++i){
-		_o3 = PyInt_FromLong((long)b[i]); if(!_o3) ERROR_EXIT();
+		_o3 = PyLong_FromLong((long)b[i]); if(!_o3) ERROR_EXIT();
 		_o2 = PyDict_GetItem(_o1,_o3);
 		Py_DECREF(_o3); _o3 = NULL;
 		if(!_o2) _d1 = dw;
@@ -933,9 +829,9 @@ static void BoxFree(BoxObject* self)
 
 static int Box_set_int(char* name, int* pd, PyObject *value)
 {
-	PyObject *v = PyNumber_Int(value);
+	PyObject *v = PyNumber_Long(value);
 	if(!v) return -1;
-	*pd = PyInt_AsLong(v);
+	*pd = PyLong_AsLong(v);
 	Py_DECREF(v);
 	return 0;
 }
@@ -955,10 +851,10 @@ static int Box_set_character(BoxObject *self, PyObject *value)
 		self->is_none = 1;
 		}
 	else {
-		char *v = PyString_AsString(value);
+		char *v = PyBytes_AsString(value);
 		if(!v) return -1;
-		if(PyString_GET_SIZE(value)!=1){
-			PyErr_Format(PyExc_AttributeError,"Bad size %d('%s') for attribute character",PyString_GET_SIZE(value),v);
+		if(PyBytes_GET_SIZE(value)!=1){
+			PyErr_Format(PyExc_AttributeError,"Bad size %d('%s') for attribute character",PyBytes_GET_SIZE(value),v);
 			return -1;
 			}
 		self->character = v[0];
@@ -1005,7 +901,7 @@ static struct PyMethodDef Box_methods[] = {
 
 static PyObject* Box_get_character(unsigned is_none, char c)
 {
-	if(!is_none) return PyString_FromStringAndSize(&c,1);
+	if(!is_none) return PyBytes_FromStringAndSize(&c,1);
 	else {
 		Py_INCREF(Py_None);
 		return Py_None;
@@ -1016,14 +912,14 @@ static PyObject* Box_getattr(BoxObject *self, char *name)
 {
 	if(!strcmp(name,"width")) return PyFloat_FromDouble(self->width);
 	else if(!strcmp(name,"character")) return Box_get_character(self->is_none,self->character);
-	else if(!strcmp(name,"is_box")) return PyInt_FromLong(self->is_box);
-	else if(!strcmp(name,"is_glue")) return PyInt_FromLong(self->is_glue);
-	else if(!strcmp(name,"is_penalty")) return PyInt_FromLong(self->is_penalty);
+	else if(!strcmp(name,"is_box")) return PyBool_FromLong(self->is_box);
+	else if(!strcmp(name,"is_glue")) return PyBool_FromLong(self->is_glue);
+	else if(!strcmp(name,"is_penalty")) return PyBool_FromLong(self->is_penalty);
 	else if(!strcmp(name,"stretch")) return PyFloat_FromDouble(self->stretch);
 	else if(!strcmp(name,"shrink")) return PyFloat_FromDouble(self->shrink);
 	else if(!strcmp(name,"penalty")) return PyFloat_FromDouble(self->penalty);
-	else if(!strcmp(name,"flagged")) return PyInt_FromLong(self->flagged);
-	return Py_FindMethod(Box_methods, (PyObject *)self, name);
+	else if(!strcmp(name,"flagged")) return PyBool_FromLong(self->flagged);
+	return PyObject_GetAttrString((PyObject *)self, name);
 }
 
 static PyTypeObject BoxType = {
@@ -1226,10 +1122,8 @@ static char *__doc__=
 \t_AsciiBase85Decode does what is says\n\
 \n\
 \tfp_str converts numeric arguments to a single blank separated string\n"
-"\tcalcChecksum calculate checksums for TTFs (legacy)\n"
-"\tcalcChecksumL calculate checksums for TTFs (returns long)\n"
-"\tadd32 32 bit unsigned addition (legacy)\n"
-"\tadd32L 32 bit unsigned addition (returns long)\n"
+"\tcalcChecksum calculate checksums for TTFs (returns long)\n"
+"\tadd32 32 bit unsigned addition (returns long)\n"
 "\thex32 32 bit unsigned to 0X8.8X string\n"
 "\t_instanceStringWidthU version2 Font instance stringWidth\n\
 \t_instanceStringWidthTTF version2 TTFont instance stringWidth\n\
@@ -1249,10 +1143,8 @@ static struct PyMethodDef _methods[] = {
 	{"_instanceEscapePDF", _instanceEscapePDF, METH_VARARGS, "_instanceEscapePDF(s) return PDF safed string"},
 	{"fp_str", _fp_str, METH_VARARGS, "fp_str(a0, a1,...) convert numerics to blank separated string"},
 	{"_sameFrag", _sameFrag, 1, "_sameFrag(f,g) return 1 if fragments have same style"},
-	{"calcChecksum", ttfonts_calcChecksum, METH_VARARGS, "calcChecksum(string) calculate checksums for TTFs (legacy)"},
-	{"calcChecksumL", ttfonts_calcChecksumL, METH_VARARGS, "calcChecksumL(string) calculate checksums for TTFs (returns long)"},
-	{"add32", ttfonts_add32, METH_VARARGS, "add32(x,y)  32 bit unsigned x+y (legacy)"},
-	{"add32L", ttfonts_add32L, METH_VARARGS, "add32L(x,y)  32 bit unsigned x+y (returns long)"},
+	{"calcChecksum", ttfonts_calcChecksum, METH_VARARGS, "calcChecksum(string) calculate checksums for TTFs (returns long)"},
+	{"add32", ttfonts_add32L, METH_VARARGS, "add32(x,y)  32 bit unsigned x+y (returns long)"},
 	{"hex32", hex32, METH_VARARGS, "hex32(x)  32 bit unsigned-->0X8.8X string"},
 	{"unicode2T1", (PyCFunction)unicode2T1, METH_VARARGS|METH_KEYWORDS, "return a list of (font,string) pairs representing the unicode text"},
 	{"_instanceStringWidthU", (PyCFunction)_instanceStringWidthU, METH_VARARGS|METH_KEYWORDS, "Font.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
@@ -1284,7 +1176,7 @@ static int _clear(PyObject *m) {
 static struct PyModuleDef moduledef = {
 	PyModuleDef_HEAD_INIT,
 	"_rl_accel",
-	NULL,
+	__doc__,
 	sizeof(struct module_state),
 	_methods,
 	NULL,
@@ -1294,7 +1186,6 @@ static struct PyModuleDef moduledef = {
 	};
 
 PyMODINIT_FUNC PyInit_rl_accel(void)
-#define INITERROR return NULL
 #else
 void init_rl_accel(void)
 #endif
@@ -1302,14 +1193,18 @@ void init_rl_accel(void)
 	PyObject			*module=NULL;
 	struct module_state *st=NULL;
 	/*Create the module and add the functions and module doc string*/
+#ifdef isPy3
+	module = PyModule_Create(moduledef);
+#else
 	module = Py_InitModule3("_rl_accel", _methods,__doc__);
-	if(!module) INITERROR;
+#endif
+	if(!module) goto err;
 	st=GETSTATE(module);
 	/*Add some symbolic constants to the module */
 	st->error = PyErr_NewException("_rl_accel.error", NULL, NULL);
-	if(!st->error) INITERROR;
-	st->moduleVersion = PyString_FromString(VERSION);
-	if(!st->moduleVersion)INITERROR;
+	if(!st->error) goto err;
+	st->moduleVersion = PyBytes_FromString(VERSION);
+	if(!st->moduleVersion)goto err;
 	PyModule_AddObject(module, "error", st->error);
 	PyModule_AddObject(module, "version", st->moduleVersion );
 
@@ -1317,8 +1212,9 @@ void init_rl_accel(void)
 #ifndef isPy3
 	BoxType.ob_type = &PyType_Type;
 #endif
+	if(PyType_Ready(&BoxType)<0) goto err;
 	BoxList_type.tp_base = &PyList_Type;
-	if(PyType_Ready(&BoxList_type)<0) INITERROR;
+	if(PyType_Ready(&BoxList_type)<0) goto err;
 	Py_INCREF(&BoxList_type);
 	if(PyModule_AddObject(module, "BoxList", (PyObject *)&BoxList_type)<0)goto err;
 #endif
