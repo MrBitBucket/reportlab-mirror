@@ -560,7 +560,7 @@ class Table(Flowable):
                                 raise LayoutError("Flowable %s (%sx%s points) too wide for cell(%d,%d) (%sx* points) in\n%s" % (v[0].identity(30),fp_str(dW),fp_str(t),i,j, fp_str(w), self.identity(30)))
                         else:
                             v = (v is not None and str(v) or '').split("\n")
-                            t = (s.leading or 1.2*s.fontSize)*len(v)
+                            t = (s.leading or 1.2*s.fontsize)*len(v)
                         t += s.bottomPadding+s.topPadding
                         if span:
                             r0 = span[1]
