@@ -629,7 +629,7 @@ class SimpleTimeSeriesPlot(LinePlot):
     def __init__(self):
         LinePlot.__init__(self)
         self.xValueAxis = NormalDateXValueAxis()
-        self.yValueAxis = AdjYValueAxis()
+        self.yValueAxis = YValueAxis()
         self.data = _monthlyIndexData
 
 class GridLinePlot(SimpleTimeSeriesPlot):
