@@ -511,7 +511,7 @@ static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 	enc = _o2;
 	_o2 = NULL;
 
-	encStr = PyBytes_AsString(enc);
+	encStr = PyUnicode_AsUTF8(enc);
 	if(PyErr_Occurred()) ERROR_EXIT();
 	if(strstr(encStr,"UCS-2")) encStr = "UTF16";
 
@@ -620,7 +620,7 @@ L_OK:
 }
 static PyObject *_instanceStringWidthU(PyObject *module, PyObject *args, PyObject *kwds)
 {
-	PyObject *L, *t, *f, *self, *text, *size, *res,
+	PyObject *L=0, *t=0, *f=0, *self, *text, *size, *res,
 				*encoding = 0, *_o1 = 0, *_o2 = 0, *_o3 = 0;
 	unsigned char *b;
 	int n, m, i, j, s, _i1;
@@ -681,7 +681,6 @@ static PyObject *_instanceStringWidthU(PyObject *module, PyObject *args, PyObjec
 		Py_INCREF(_o1);
 
 		_o2 = PySequence_GetItem(_o1, 0); if(!_o2) ERROR_EXIT();
-		Py_DECREF(f);
 		f = _o2;
 		_o2 = NULL;
 
@@ -720,9 +719,9 @@ L_ERR:
 	Py_XDECREF(_o3);
 	res = NULL;
 L_OK:
-	Py_DECREF(L);
-	Py_DECREF(t);
-	Py_DECREF(f);
+	Py_XDECREF(L);
+	Py_XDECREF(t);
+	Py_XDECREF(f);
 	Py_DECREF(self);
 	Py_DECREF(text);
 	Py_DECREF(size);
@@ -745,7 +744,7 @@ static PyObject *_instanceStringWidthTTF(PyObject *module, PyObject *args, PyObj
 		Py_INCREF(encoding);
 		}
 	else{
-		_o1 = PyBytes_FromString("utf8"); if(!_o1) ERROR_EXIT();
+		_o1 = PyUnicode_FromString("utf8"); if(!_o1) ERROR_EXIT();
 		encoding = _o1;
 		_o1 = NULL;
 		}
@@ -754,7 +753,7 @@ static PyObject *_instanceStringWidthTTF(PyObject *module, PyObject *args, PyObj
 		i = PyObject_IsTrue(encoding); if(i<0) ERROR_EXIT();
 		if(!i){
 			Py_DECREF(encoding);
-			encoding = PyBytes_FromString("utf8"); if(!encoding) ERROR_EXIT();
+			encoding = PyUnicode_FromString("utf8"); if(!encoding) ERROR_EXIT();
 			}
 		_o1 = _GetAttrString(text, "decode"); if(!_o1) ERROR_EXIT();
 		_o3 = PyTuple_New(1); if(!_o3) ERROR_EXIT();
@@ -824,7 +823,7 @@ typedef struct {
 
 static void BoxFree(BoxObject* self)
 {
-	PyMem_DEL(self);
+	PyObject_Del(self);
 }
 
 static int Box_set_int(char* name, int* pd, PyObject *value)
@@ -923,9 +922,8 @@ static PyObject* Box_getattr(BoxObject *self, char *name)
 }
 
 static PyTypeObject BoxType = {
-	PyObject_HEAD_INIT(0)
-	0,								/*ob_size*/
-	"Box",							/*tp_name*/
+	PyVarObject_HEAD_INIT(NULL,0)
+	"_rl_accel.Box",				/*tp_name*/
 	sizeof(BoxObject),				/*tp_basicsize*/
 	0,								/*tp_itemsize*/
 	/* methods */
@@ -933,19 +931,38 @@ static PyTypeObject BoxType = {
 	(printfunc)0,					/*tp_print*/
 	(getattrfunc)Box_getattr,		/*tp_getattr*/
 	(setattrfunc)Box_setattr,		/*tp_setattr*/
-	(cmpfunc)0,						/*tp_compare*/
-	(reprfunc)0,					/*tp_repr*/
+	0,								/*tp_reserved*/
+	0,								/*tp_repr*/
 	0,								/*tp_as_number*/
 	0,								/*tp_as_sequence*/
 	0,								/*tp_as_mapping*/
-	(hashfunc)0,					/*tp_hash*/
-	(ternaryfunc)0,					/*tp_call*/
-	(reprfunc)0,					/*tp_str*/
-
-	/* Space for future expansion */
-	0L,0L,0L,0L,
-	/* Documentation string */
-	"Box instance, see doc string for details."
+	0,								/*tp_hash*/
+	0,								/*tp_call*/
+	0,								/*tp_str*/
+	0,	 							/*tp_getattro*/
+	0,								/*tp_setattro*/
+	0,								/*tp_as_buffer*/
+	Py_TPFLAGS_DEFAULT,				/*tp_flags*/
+	"Box instance, see doc string for details.", /*tp_doc*/
+	0,								/*tp_traverse*/
+	0,								/*tp_clear*/
+	0,								/*tp_richcompare*/
+	0,								/*tp_weaklistoffset*/
+	0,								/*tp_iter*/
+	0,								/*tp_iternext*/
+	Box_methods,					/*tp_methods*/
+	0,								/*tp_members*/
+	0,								/*tp_getset*/
+	0,								/*tp_base*/
+	0,								/*tp_dict*/
+	0,								/*tp_descr_get*/
+	0,								/*tp_descr_set*/
+	0,								/*tp_dictoffset*/
+	0,								/*tp_init*/
+	0,								/*tp_alloc*/
+	0,								/*tp_new*/
+	0,								/*tp_free*/
+	0,								/*tp_is_gc*/
 };
 
 static BoxObject* Box(PyObject* module, PyObject* args, PyObject* kw)
@@ -1011,7 +1028,7 @@ typedef struct {
 static PyObject *BoxList_getstate(BoxListobject *self, PyObject *args)
 {
 	if (!PyArg_ParseTuple(args, ":getstate")) return NULL;
-	return PyInt_FromLong(self->state);
+	return PyLong_FromLong(self->state);
 }
 
 static PyObject *BoxList_setstate(BoxListobject *self, PyObject *args)
@@ -1061,7 +1078,7 @@ static int BoxList_init(BoxListobject *self, PyObject *args, PyObject *kwds)
 
 static PyObject *BoxList_state_get(BoxListobject *self)
 {
-	return PyInt_FromLong(self->state);
+	return PyLong_FromLong(self->state);
 }
 
 static PyGetSetDef BoxList_getsets[] = {
@@ -1070,8 +1087,7 @@ static PyGetSetDef BoxList_getsets[] = {
 	};
 
 static PyTypeObject BoxList_type = {
-	PyObject_HEAD_INIT(DEFERRED_ADDRESS(&PyType_Type))
-	0,
+    PyVarObject_HEAD_INIT(DEFERRED_ADDRESS(&PyType_Type), 0)
 	"_rl_accel.BoxList",
 	sizeof(BoxListobject),
 	0,
@@ -1112,29 +1128,6 @@ static PyTypeObject BoxList_type = {
 };
 #endif
 
-static char *__doc__=
-"_rl_accel contains various accelerated utilities\n\
-\n\
-\tescapePDF makes a string safe for PDF\n\
-\t_instanceEscapePDF method equivalent of escapePDF\n\
-\n\
-\t_AsciiBase85Encode does what is says\n\
-\t_AsciiBase85Decode does what is says\n\
-\n\
-\tfp_str converts numeric arguments to a single blank separated string\n"
-"\tcalcChecksum calculate checksums for TTFs (returns long)\n"
-"\tadd32 32 bit unsigned addition (returns long)\n"
-"\thex32 32 bit unsigned to 0X8.8X string\n"
-"\t_instanceStringWidthU version2 Font instance stringWidth\n\
-\t_instanceStringWidthTTF version2 TTFont instance stringWidth\n\
-\tunicode2T1 version2 pdfmetrics.unicode2T1\n\
-#ifdef	HAVE_BOX
-"\tBox(width,character=None) creates a Knuth character Box with the specified width.\n"
-"\tGlue(width,stretch,shrink) creates a Knuth glue Box with the specified width, stretch and shrink.\n"
-"\tPenalty(width,penalty,flagged=0) creates a Knuth penalty Box with the specified width and penalty.\n"
-"\tBoxList() creates a knuth box list.\n"
-#endif
-;
 
 static struct PyMethodDef _methods[] = {
 	{"_AsciiBase85Encode", _a85_encode, METH_VARARGS, "_AsciiBase85Encode(\".....\") return encoded string"},
@@ -1144,7 +1137,7 @@ static struct PyMethodDef _methods[] = {
 	{"fp_str", _fp_str, METH_VARARGS, "fp_str(a0, a1,...) convert numerics to blank separated string"},
 	{"_sameFrag", _sameFrag, 1, "_sameFrag(f,g) return 1 if fragments have same style"},
 	{"calcChecksum", ttfonts_calcChecksum, METH_VARARGS, "calcChecksum(string) calculate checksums for TTFs (returns long)"},
-	{"add32", ttfonts_add32L, METH_VARARGS, "add32(x,y)  32 bit unsigned x+y (returns long)"},
+	{"add32", ttfonts_add32, METH_VARARGS, "add32(x,y)  32 bit unsigned x+y (returns long)"},
 	{"hex32", hex32, METH_VARARGS, "hex32(x)  32 bit unsigned-->0X8.8X string"},
 	{"unicode2T1", (PyCFunction)unicode2T1, METH_VARARGS|METH_KEYWORDS, "return a list of (font,string) pairs representing the unicode text"},
 	{"_instanceStringWidthU", (PyCFunction)_instanceStringWidthU, METH_VARARGS|METH_KEYWORDS, "Font.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
@@ -1168,15 +1161,36 @@ static int _traverse(PyObject *m, visitproc visit, void *arg) {
 
 static int _clear(PyObject *m) {
 	struct module_state *st = GETSTATE(m);
-    Py_CLEAR(st->error);
-    Py_CLEAR(st->moduleVersion);
+	Py_CLEAR(st->error);
+	Py_CLEAR(st->moduleVersion);
 	return 0;
 	}
 
 static struct PyModuleDef moduledef = {
 	PyModuleDef_HEAD_INIT,
 	"_rl_accel",
-	__doc__,
+"_rl_accel contains various accelerated utilities\n\
+\n\
+\tescapePDF makes a string safe for PDF\n\
+\t_instanceEscapePDF method equivalent of escapePDF\n\
+\n\
+\t_AsciiBase85Encode does what is says\n\
+\t_AsciiBase85Decode does what is says\n\
+\n\
+\tfp_str converts numeric arguments to a single blank separated string\n"
+"\tcalcChecksum calculate checksums for TTFs (returns long)\n"
+"\tadd32 32 bit unsigned addition (returns long)\n"
+"\thex32 32 bit unsigned to 0X8.8X string\n"
+"\t_instanceStringWidthU version2 Font instance stringWidth\n\
+\t_instanceStringWidthTTF version2 TTFont instance stringWidth\n\
+\tunicode2T1 version2 pdfmetrics.unicode2T1\n"
+#ifdef	HAVE_BOX
+"\tBox(width,character=None) creates a Knuth character Box with the specified width.\n"
+"\tGlue(width,stretch,shrink) creates a Knuth glue Box with the specified width, stretch and shrink.\n"
+"\tPenalty(width,penalty,flagged=0) creates a Knuth penalty Box with the specified width and penalty.\n"
+"\tBoxList() creates a knuth box list.\n"
+#endif
+	,
 	sizeof(struct module_state),
 	_methods,
 	NULL,
@@ -1185,7 +1199,7 @@ static struct PyModuleDef moduledef = {
 	NULL
 	};
 
-PyMODINIT_FUNC PyInit_rl_accel(void)
+PyMODINIT_FUNC PyInit__rl_accel(void)
 #else
 void init_rl_accel(void)
 #endif
@@ -1194,7 +1208,7 @@ void init_rl_accel(void)
 	struct module_state *st=NULL;
 	/*Create the module and add the functions and module doc string*/
 #ifdef isPy3
-	module = PyModule_Create(moduledef);
+	module = PyModule_Create(&moduledef);
 #else
 	module = Py_InitModule3("_rl_accel", _methods,__doc__);
 #endif
@@ -1222,6 +1236,9 @@ void init_rl_accel(void)
 #ifdef isPy3
 	return module;
 #else
+	return;
+#endif
+
 err:/*Check for errors*/
 #ifdef isPy3
 	if(st){

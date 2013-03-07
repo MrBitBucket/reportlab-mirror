@@ -329,6 +329,12 @@ class Encoding:
 #for encName in standardEncodings:
 #    registerEncoding(Encoding(encName))
 
+
+try:
+    from reportlab.lib._rl_accel import _instanceStringWidthU
+except ImportError:
+    from reportlab.lib.rl_accel import _instanceStringWidthU
+
 standardT1SubstitutionFonts = []
 class Font:
     """Represents a font (i.e combination of face and encoding).
@@ -355,6 +361,9 @@ class Font:
         self._calcWidths()
         self._notdefChar = _notdefChar
         self._notdefFont = name=='ZapfDingbats' and self or _notdefFont
+
+    def stringWidth(self, text, size, encoding='utf8'):
+        return _instanceStringWidthU(self, text, size, encoding=encoding)
 
     def __repr__(self):
         return "<%s %s>" % (self.__class__.__name__, self.face.name)
@@ -703,13 +712,6 @@ def stringWidth(text, fontName, fontSize, encoding='utf8'):
     """Compute width of string in points;
     not accelerated as fast enough because of _instanceStringWidthU"""
     return getFont(fontName).stringWidth(text, fontSize, encoding=encoding)
-
-try:
-    from reportlab.lib._rl_accel import _instanceStringWidthU
-except ImportError:
-    from reportlab.lib.rl_accel import _instanceStringWidthU
-import new
-Font.stringWidth = new.instancemethod(_instanceStringWidthU,None,Font)
 
 def dumpFontData():
     print('Registered Encodings:')
