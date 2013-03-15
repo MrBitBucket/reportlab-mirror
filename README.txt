@@ -58,15 +58,11 @@ techniques - please pick your preferred one below...
 2.1. Source Distribution or Subversion
 --------------------------------------
 
-Use:
-
-.. code-block:: bash
+Use::
 
     python setup.py install
 
-After this has completed you should be able to run:
-
-.. code-block:: bash
+After this has completed you should be able to run::
 
     python setup.py tests
 
@@ -85,9 +81,7 @@ that extension has not been compiled yet.)
 
 This assumes you have a C compiler and the necessary
 packages to build Python extensions. If you are installing
-system-wide you will need root permissions e.g.:
-
-.. code-block:: bash
+system-wide you will need root permissions e.g.::
 
     sudo python setup.py install
 
@@ -136,9 +130,7 @@ available on our website.
 The latest releases are generally available in the Ubuntu repositories
 within 2-3 weeks.  At the time of writing (20th Jan 2010) the basic
 reportlab installer does not include the C extensions, so we recommend
-installing these THREE packages for a full-speed, full-features installation:
-
-.. code-block:: bash
+installing these THREE packages for a full-speed, full-features installation::
 
     sudo apt-get install python-reportlab python-reportlab-accel python-renderpm  
     
@@ -147,9 +139,7 @@ which are also available on our website.
 
 Alternatively, if you would rather compile from source
 you will need compilers and other dependencies as follows, and can then
-follow the instructions in 2.1 above...
-
-.. code-block:: bash
+follow the instructions in 2.1 above::
 
     sudo apt-get install build-essential libfreetype6-dev python-dev python-imaging
 
