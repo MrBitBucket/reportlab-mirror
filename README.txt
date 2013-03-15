@@ -23,15 +23,15 @@ Contents of this file:
 
 2. Installation
 
-   2.1 Source Distribution or Subversion
+   2.1. Source Distribution or Subversion
    
-   2.2 Manual Installation without C Compiler (e.g. Windows)
+   2.2. Manual Installation without C Compiler (e.g. Windows)
    
-   2.3 easy_install
+   2.3. easy_install
    
-   2.4 Windows .exe Installer 
+   2.4. Windows .exe Installer 
    
-   2.5 Ubuntu and other Debian-based Systems
+   2.5. Ubuntu and other Debian-based Systems
 
 3. Prerequisites / Dependencies
 
