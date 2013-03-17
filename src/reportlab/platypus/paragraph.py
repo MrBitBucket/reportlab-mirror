@@ -91,10 +91,6 @@ class FragLine(ABag):
                     but could be used for line spacing.
     """
 
-#our one and only parser
-# XXXXX if the parser has any internal state using only one is probably a BAD idea!
-_parser=ParaParser()
-
 def _lineClean(L):
     return join(filter(truth,split(strip(L))))
 
@@ -916,7 +912,9 @@ class Paragraph(Flowable):
     def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, encoding='utf8'):
         self.caseSensitive = caseSensitive
         self.encoding = encoding
+
         self._setup(text, style, bulletText or getattr(style,'bulletText',None), frags, cleanBlockQuotedText)
+
 
     def __repr__(self):
         n = self.__class__.__name__
@@ -928,6 +926,12 @@ class Paragraph(Flowable):
         return '\n'.join(L)
 
     def _setup(self, text, style, bulletText, frags, cleaner):
+        
+        #This used to be a global parser to save overhead.
+        #In the interests of thread safety it is being instantiated per paragraph.
+        #On the next release, we'll replace with a cElementTree parser
+        _parser = ParaParser()
+
         if frags is None:
             text = cleaner(text)
             _parser.caseSensitive = self.caseSensitive
