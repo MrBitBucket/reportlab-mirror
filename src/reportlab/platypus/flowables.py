@@ -1302,7 +1302,8 @@ class FrameSplitter(NullDraw):
 
 from reportlab.lib.sequencer import _type2formatter
 _bulletNames = dict(
-                circle=u'\u25cf',
+                bulletchar=u'\u2022',   #usually a small circle
+                circle=u'\u25cf',   #circle as high as the font
                 square=u'\u25a0',
                 disc=u'\u25cf',
                 diamond=u'\u25c6',
@@ -1544,7 +1545,7 @@ class ListFlowable(_Container,Flowable):
             start = getattr(self,'_start',None)
             if start is None:
                 if getattr(self,'_bulletType','1')=='bullet':
-                    start = 'circle'
+                    start = 'bulletchar'
                 else:
                     start = '1'
         self._start = start
