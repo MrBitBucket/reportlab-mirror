@@ -1087,6 +1087,17 @@ class PdfgenTestCase(unittest.TestCase):
         canv.showPage()
         canv.save()
 
+    def testMultipleSavesOk(self):
+        c=canvas.Canvas(outputfile('test_pdfgen_savetwice.pdf'))
+        c.drawString(100, 700, 'Hello. This was saved twice')
+        c.showPage()
+
+        # Output the PDF
+        stuff = c.getpdfdata()
+        #multiple calls to save / getpdfdata used to cause errors
+        stuff = c.getpdfdata()    
+
+
 def trySomeColors(C,enforceColorSpace=None):
     from StringIO import StringIO
     out=StringIO()
