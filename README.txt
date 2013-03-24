@@ -222,8 +222,15 @@ if you are aiming to create long documents.
 =============
 Tests are in the ``tests/`` directory.  They can be executed by cd'ing into the
 directory and executing ``python runAll.py``, or from ``python setup.py tests``.
-If you run them prior to installation/compilation, there may be one or two failures
-from tests which exercise the C extensions.
+
+The tests will simply try to 'import reportlab'.  Be warned that if you already have a copy
+of reportlab installed (which happens by default in Ubuntu 12.04 desktop), it may try to
+run the installed reportlab and cause permission errors as it can't generate PDF files
+without sudo rights.  
+
+If you do not have a copy insralled and run them prior to installation/compilation, 
+there may be one or two failures from tests which exercise the C extensions that have not
+been compiled.
 
 The tests mostly produce output files with the same name as the test, but extension
 .pdf.  It is worth reviewing the list of test scripts as they provide valuable 'how
