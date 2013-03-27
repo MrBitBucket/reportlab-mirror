@@ -291,10 +291,15 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
         return m
     except ImportError:
         sys.path = opath
-        msg = "recursiveimport(%s,baseDir=%s) failed" % (modulename,baseDir)
+        msg = "Could not import '%s'" % modulename
         if baseDir:
-            msg = msg + " under paths '%s'" % repr(path)
+            msg = msg + " under %s" % baseDir
         raise ImportError, msg
+
+    except Exception, e:
+        msg = "Exception raised while importing '%s': %s" % (modulename, e.message)
+        raise ImportError, msg
+        
 
 def recursiveGetAttr(obj, name):
     "Can call down into e.g. object1.object2[4].attr"
