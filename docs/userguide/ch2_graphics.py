@@ -774,6 +774,8 @@ are guaranteed to be present in Acrobat Reader.
 
 illust(examples.fonts, "the 14 standard fonts")
 
+disc("""The Symbol and ZapfDingbats fonts cannot display properly because the required glyphs are not present in those fonts.""")
+
 disc("""
 For information on how to use arbitrary fonts, see the next chapter.
 """)
