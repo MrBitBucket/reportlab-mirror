@@ -49,47 +49,20 @@ BSD license.  See ``LICENSE.txt`` for details.
 ===============
 
 In most cases, ``easy_install reportlab`` or ``pip install reportlab`` will 
-do the job.  Full details follow below.
+do the job.  Full details follow below for each platform.
 
+
+2.1 General prerequisites
+--------------------------
 You need to have installed Python (versions 2.5 through 2.7),
 and ideally PIL with Freetype support; more notes on prerequisites
 follow below.  
 
-On Unix and Mac OS we assume a C compiler is available to compile the
-C extensions.  For Windows, we make binary versions available.
-
-On Ubuntu, you will need
-*build-essential*, *libfreetype6-dev*, *python-dev* and *python-imaging*.
-Most other Linux and xBSD distributions have packages with
-similar names.
-
-On Mac OS, you will need XCode with the Command Line Tools option.  On Lion
-or later, type ``clang`` at a prompt; if you get ``command not found`` or
-similar, the C compiler is not installed.  We then recommend the *brew* 
-installation tool to fetch open source packages. You should run::
-
-    brew install freetype
-    
-before instaling *reportlab* to ensure that the Python Imaging Library gets 
-compiled with JPEG support.    
-
-On Windows, if you wish to compile the C extensions yourself, you need the correct 
-version of Visual Studio for the Python you are using. However most people will 
-simply use the .exe installer. 
-
-
-We aim to be compatible with several of the popular installation
-techniques - please pick your preferred one below...
-
-
-2.1. Source Distribution or Mercurial repo
+2.2. Where to get the code
 ------------------------------------------
-From March 2013, the code is being hosted in Mercurial on BitBucket.
-You can obtain the latest code from our Mercurial repository with::
 
-    hg clone http://bitbucket.org/rptlab/reportlab
     
-Alternatively, daily and release builds are available from ReportLab's
+Daily and release builds are available from ReportLab's
 open download area::
 
     http://www.reportlab.org/ftp/
@@ -98,65 +71,25 @@ Daily builds will unzip/untar to produce a dated directory e.g.
 ``reportlab-YYYYMMDD/`` but are otherwise structured just like the Mercurial
 repository and release builds.
 
+Releases are also available from the Python Package Index:
+
+    http://pypi.python.org/
+
+From March 2013, the code is being hosted in Mercurial on BitBucket.
+You can obtain the latest code from our Mercurial repository with::
+
+    hg clone http://bitbucket.org/rptlab/reportlab
+
+
 Users of our commercial libraries, and/or anyone who registers on our site,
 can also access our commercial area which has exactly the same packages,
 paired with the matching commercial ones (rlextra); it is important to keep
 both in sync.
 
-We strongly recommend using ``virtualenv`` for Python projects.
-
-Use::
-
-    python setup.py install   
-
-After this has completed you should be able to run::
-
-    python setup.py tests
-
-and see error-free output.  
-
-(Note 1: If you see a line of dots, and a small number of errors
-relating to renderPM, it's likely that your C compiler
-environment is incorrect and that the renderPM C extension
-could not be installed. However, it's only needed if you
-want to generate bitmap graphics - more on this below.)
-
-(Note 2: There is also an option ``python setup.py tests-preinstall``, 
-which will run the tests where you unpack the files; this is 
-expected to fail on one or two tests involving renderPM as 
-that extension has not been compiled yet.)
-
-(Note 3: with no internet connection, there may be issues downloading
-fonts, and also two tests which load images from a URL will fail)
 
 
 
-2.2 Manual Installation without C Compiler (e.g. Windows)
----------------------------------------------------------
-
-- Either place the ``src/`` folder on your path, or move
-  the ``reportlab`` package inside it to somewhere on your
-  path such as ``site-packages``.  
-
-- Optional: on Win32, get the DLLs for your Python version from
-  here and copy them into ``site-packages``.  The library can
-  make PDFs without these but will go slower and lack
-  bitmap image generation capabilities.
-  
-    http://www.reportlab.org/ftp/win32-dlls/
-
-
-2.3 easy-install / setuptools / pip
------------------------------------
-These are popular Python deployment tools.
-
-You should be able to install with 
-``easy_install reportlab``.   We do NOT use a setuptools-based
-script, but have modified our distribution to be compatible with 
-easy_install.  You can also do ``pip install reportlab``
-
-
-2.4 Windows .exe Installer
+2.3 Windows Installer
 --------------------------
 A binary ``.exe`` installer for Windows (built with distutils) is
 available on our website.  This will install the 'reportlab' package
@@ -167,24 +100,44 @@ to learn your way around the package or do development with it on Windows,
 we suggest you also download a source copy, unzip it and work with the
 examples/tests within that directory.
 
+2.4 Mac OS
+-------------
+On Mac OS, you will need XCode with the Command Line Tools option installed
+in order to compile the C extensions.  On Lion
+or later, type ``clang`` at a prompt; if you get ``command not found`` or
+similar, the C compiler is not installed.  
 
-2.5 Ubuntu and other Debian-based Systems
------------------------------------------
-The latest releases are generally available in the Ubuntu repositories
-within 2-3 weeks.  At the time of writing (20th Jan 2010) the basic
-reportlab installer does not include the C extensions, so we recommend
-installing these THREE packages for a full-speed, full-features installation::
+We then recommend the *brew* installation tool to fetch open source packages. 
+You should run::
 
-    sudo apt-get install python-reportlab python-reportlab-accel python-renderpm  
+    brew install freetype
     
-There is also a package python-reportlab-doc including the built PDF manuals,
-which are also available on our website.
+before instaling *reportlab* to ensure that the Python Imaging Library gets 
+compiled with JPEG support.    
 
-Alternatively, if you would rather compile from source
-you will need compilers and other dependencies as follows, and can then
-follow the instructions in 2.1 above::
+Thereafter, you can install with  ``easy_install reportlab`` or by fetching
+the source and using ``python setup.py install``
+    
 
-    sudo apt-get install build-essential libfreetype6-dev python-dev python-imaging
+2.5 Unix / Linux
+-----------------
+
+On Unix and Mac OS we assume a C compiler is available to compile the
+C extensions.  
+
+On Ubuntu, you will need
+*build-essential*, *libfreetype6-dev*, *python-dev* and *python-imaging*.
+Most other Linux and xBSD distributions have packages with
+similar names.
+
+
+Thereafter, you can use ``easy_install reportlab``, ``pip install reportlab``,
+or fetch the source and use ``python setup.py install``.
+
+From Ubuntu 12.04 desktop onwards, a copy of reportlab is already installed.
+Take care not to confuse it with any releases you download. 
+
+
 
 
 3. Prerequisites / Dependencies
@@ -236,7 +189,9 @@ The tests mostly produce output files with the same name as the test, but extens
 .pdf.  It is worth reviewing the list of test scripts as they provide valuable 'how
 to' information.
 
-
+If you have no internet connection, one or two tests may fail where we try to load images
+from URLs.  This is normal.  The next release of this package will silently skip 
+such tests using features only available in Python 2.7.
 
 6. Demos
 ========
