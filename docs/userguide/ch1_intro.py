@@ -242,118 +242,15 @@ for and Bitstream Inc. for the Vera fonts.""")
 
 heading2("Installation and Setup")
 
-heading3("A note on available versions")
-disc("""Our website ^http://www.reportlab.com/^ will always have up-to-date
-information on setups and installations. The latest version of the ReportLab library can be found at
-^http://www.reportlab.com/software/opensource/rl-toolkit/download/^.
-Older versions can be found at ^http://www.reportlab.com/ftp/^.
-""")
-disc("""Each successive version is stored in both zip
-and tgz format, but the contents are identical apart from line endings.
-Versions are numbered:  $ReportLab_<major_version>_<minor_version>.zip$, 
-$ReportLab_<major_version>_<minor_version>.tgz$ and so on.
-""")
-disc("""
-The latest stable version is $reportlab2.6$ (.zip or .tgz). 
-Daily snapshots of the trunk are available as
-$reportlab-daily-unix.tar.gz$ or $reportlab-daily-win32.zip$.
-""")
-disc("""Finally, from version 2.4 onwards, there is also a Windows installer
-available for Python versions 2.5 - 2.7, named $ReportLab-2.x.win32-py2.x.exe$
+disc("""To avoid duplication, the installation instructions are kept in the README file
+in our distribution, which can be viewed online at ^http://bitbucket.org/rptlab/reportlab/^""")
+
+disc("""This release (2.7) of ReportLab requires Python versions 2.5, 2.6 or 2.7.   We will
+be maintaining a 2.7.x branch for essential bug fixes, but after this release the focus of
+our development will shift to dual support for Python 2.7 and 3.3+.  We advise everyone who
+can to move to Python 2.7.
 """)
 
-pencilnote()
-disc("""We plan to drop the support of Python 2.5 in our next release.
-We advise you to move to Python 2.6 or 2.7.
-""")
-
-heading3("Installation on Windows")
-
-restartList()
-
-list("""First, install Python from $http://www.python.org/.$
-Reportlab 2.x works with Python 2.5 upwards but we recommend to use
-the latest stable version of Python 2.7.  
-After installing, you should be able to run the
-'Python (command line)' option from the Start Menu.
-""")
-
-list("""We strongly recommend installing the Python Windows
-Extensions, which gives you access to Windows data sources, COM support, WinAPI calls, and the PythonWin IDE.  This
-can be found at ^http://sourceforge.net/projects/pywin32/^.
-Once this is installed, you can start
-Pythonwin from the Start Menu and get a GUI application.
-""")
-
-list("""Install the Python Imaging Library ($PIL$) from $http://www.pythonware.com/products/pil/$.  This
-step is optional but allows you to include images in your reports.
-""")
-
-list("""Now you are ready to install reportlab itself.  
-The easiest way to do this is to use the .exe installer for Windows, which
-installs both the ReportLab source code and the precompiled DLLs for you.
-""")
-
-list("""
-If, however, you wish to install from source, download and unzip the archive
-from from the downloads page on ^http://www.reportlab.com/^ and copy the $reportlab$ directory
-onto your PythonPath;  You should now be able to go to a Python
-command line interpreter and type $import reportlab$ without getting
-an error message.
-""")
-
-list("""Next, Download the zip file of precompiled DLLs for your Python version from
-the bottom of the downloads page on ^http://www.reportlab.com/^, and unzip
-them into ^C:\Python2x\lib\site-packages^ (or its equivalent for other Python versions
-""")
-
-list("""Open up a $MS-DOS$ command prompt and CD to
-"$reportlab\\..\\tests$".  Enter "$runAll.py$". You should see lots of dots
-and no error messages.  This will also create many PDF files and generate
-the manuals in ^reportlab/docs^ (including this one). """)
-
-list("""
-Finally, we recommend you download and run the script ^rl_check.py^ from
-^http://www.reportlab.com/ftp/^. This will health-check all the above
-steps and warn you if anything is missing or mismatched.""")
-
-heading3("Installation instructions for Unix")
-disc("""
-Many Linux distributions already include or can deliver a ReportLab distribution, although this may be a few months behind our own releases.  On Ubuntu, simply use ^sudo apt-get install python-reportlab^.   In addition, we support the Python packaging mechanisms so you can use ^easy_install reportlab^ in most Python environments.
-""")
-disc("""
-If you want to install the latest version of our code, or to install your own reportlab to go with our commercial distribution, you can install from source as follows:""")
-
-restartList()
-list("""First, install Python.  On a large number of Unix and Linux distributions, Python is already installed,
-or is available as a standard package you can install with the relevant package manager.""")
-
-list("""
-    You will also need to install the Freetype 2 Font Engine, Python Imaging Library, and the gzip library,
-    along with a C compiler.
-""")
-
-list("""You will also need the source code or relevant dev packages for Python and the FreeType 2 Font engine.
-""")
-
-list("""
-Download the latest ReportLab.tgz from the download page on http://www.reportlab.com.
-""")
-
-list("""
-Unpack the archive and follow the instructions in INSTALL.txt.
-""")
-
-list("""You should now be able to run python and execute the python statement
-$import reportlab$ without errors.
-""")
-
-heading3("Instructions for Python novices: Mac")
-disc("""
-This is much, much easier with Mac OS X since Python is installed on your
-system as standard.   Just follow the instructions for installing the ReportLab archive
-above.
-""")
 
 
 heading2("Getting Involved")
@@ -389,6 +286,12 @@ $http://two.pairlist.net/mailman/listinfo/reportlab-users$.
 From there you can also browse through the group's archives
 and contributions.  The mailing list is
 the place to report bugs and get support. """)
+
+disc("""The code now lives on BitBucket ($http://bitbucket.org/rptlab/reportlab/$)
+in a Mercurial repository, along with an issue tracker and wiki.  Everyone should
+feel free to contribute, but if you are working actively on some improvements
+or want to draw attention to an issue, please use the mailing list to let us know.""")
+
 
 
 heading2("Site Configuration")
@@ -465,65 +368,25 @@ styles = getStyleSheet()
 indent0_style = styles['Indent0']
 indent1_style = styles['Indent1']
 
-heading2("Goals for the 2.x series")
+heading2("Goals for the 2.x and 3.x release series")
 disc("""The main rationale for 2.0 was an incompatible change at the character level:
-to properly support Unicode input. Now that it's out we will maintain compatibility
-with 2.0. There are no pressing feature wishlists and new features will be driven,
-as always, by contributions and the demands of projects.""")
+to properly support Unicode input. Since then, we have tried to maintain backward
+compatibility up to this version 2.7""")
 
-disc("""One area where we do want to make progress from release to release is with documentation
-and installability. We'll be looking into better support for distutils, setuptools,
-eggs and so on; and into better examples and tools to help people learn what's in the
-(substantial) code base.""")
+disc("""One main area where we have tried to make progress from release to release is with documentation
+and installability. We now offer full support for distutils, setuptools, pip and so on. """)
 
 disc("""
-Bigger ideas and more substantial rewrites are deferred to Version 3.0, with no particular
-target dates.
+Immediately after this release, we will be shifting focus to work on compatibility with both
+Python 2.7 and 3.3+, and starting to make larger changes to the ReportLab Toolkit to bring it
+up to date - using more modern Python libraries, supporting newer PDF features and more.  The
+next ReportLab release is likely to be numbered 3.0.  Inevitability this modernisation will need
+some changes to applications, although we do not plan to needlessly change APIs.
 """)
 
-heading2("What's New in ReportLab 2.6")
-disc("""This is a minor release focusing mainly on improved documentation. There are a 
-number of minor enhancements, and a larger number of previous-undocumented
-enhancements which we have documented better.""")
+heading2("What's New in ReportLab 2.7")
+disc("""This is a minor release to collect a small number of bug fixes since the last release
+at end of September 2012.   Detailed release notes are available at 
+$http://www.reportlab.com/software/documentation/relnotes/27/$""")
 
-disc("""A big thanks goes to the community for their help in reporting bugs and providing patches. 
-Thanks to everybody who has contributed to the open-source toolkit in the run-up to the 2.6 release, 
-whether by reporting bugs, sending patches, or contributing to the reportlab-users mailing list. 
-Thanks especially to the following people: Alex Buck, Felix Labrecque,
-Peter Johnson, James Martin-Collar and Guillaume Francois.
-This page documents what has changed since version 2.5.""")
 
-disc('Reportlab 2.6 is installable with easy_install. You must have installed a compatible C compiler and the dependencies such as Freetype and PIL.')
-
-heading4('General changes')
-bullet("""Manuals have been reformatted with more pleasing code snippets and tables of 
-contents, and reviewed and expanded.""")
-
-heading4('Flowing documents (Platypus)')
-bullet("""Added support for HTML-style list objects.""")
-bullet("""Added flexible mechanism for drawing bullets.""")
-bullet("""Allowed XPreformatted objects to use Asian line wrapping.""")
-bullet("""Added an 'autoNextPageTemplate' attribute to PageTemplates. For example you 
-can now set up a 'chapter first page template' which will always be followed
-by a 'continuation template' on the next page break, saving the programmer from
-having to issue control flow commands in the story.""")
-bullet("""Added a TopPadder flowable, which will 'wrap' another Flowable and move it 
-to the bottom of the current page.""")
-bullet("""More helpful error messages when large tables cannot be rendered.""")
-bullet("""Documentation for images within text (test_032_images).""")
-bullet("""Trailing dots for use on contents pages.""")
-
-heading4('Charts and graphics')
-bullet("""Support for UPCA bar codes.""")
-bullet("""We now have a semi-intelligent system for labelling pie charts with 
-callout lines.  Thanks to James Martin-Collar, a maths student at Warwick 
-University, who did this as his summer internship.""")
-bullet("""Axes - added startOffset and endOffset properties; allowed for axis 
-background annotations.""")
-bullet("""Bar charts - allow more control of z Index (i.e. drawing order of axes and
-lines)""")
-bullet("""Pie charts - fixed bugs in 3d appearance.""")
-bullet("""SVG output back end has seen some bugs fixed and now outputs resizeable SVG.""")
-
-# Noteworthy bug fixes Section #######################
-#heading3("Noteworthy bug fixes")
