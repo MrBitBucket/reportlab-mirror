@@ -182,12 +182,12 @@ class Doughnut(AbstractPieChart):
                 iradius = (self.height/5.0)
             else:
                 iradius = self.height*float(self.iradius)
-            iradius /= len(data)
+            iradius /= len(self.data)
             if self.dradius is None:
                 dradius = self.height/5.0
             else:
                 dradius = self.height*float(self.dradius)
-            dradius /= len(data)
+            dradius /= len(self.data)
             for sn,series in enumerate(normData):
                 for i,angle in enumerate(series):
                     endAngle = (startAngle + (angle * whichWay)) #% 360
