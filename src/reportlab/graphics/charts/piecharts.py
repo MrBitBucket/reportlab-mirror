@@ -515,6 +515,7 @@ class Pie(AbstractPieChart):
         orderMode = AttrMapValue(OneOf('fixed','alternate'),advancedUsage=1),
         xradius = AttrMapValue(isNumberOrNone, desc="X direction Radius"),
         yradius = AttrMapValue(isNumberOrNone, desc="Y direction Radius"),
+        innerRadiusFraction = AttrMapValue(isNumberOrNone, desc="fraction of radii to start wedges at"),
         wedgeRecord = AttrMapValue(None, desc="callable(wedge,*args,**kwds)",advancedUsage=1),
         sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make piechart with labels along side and pointers"),
         sideLabelsOffset = AttrMapValue(isNumber, desc="The fraction of the pie width that the labels are situated at from the edges of the pie"),
@@ -536,7 +537,7 @@ class Pie(AbstractPieChart):
         self.pointerLabelMode = None
         self.sameRadii = False
         self.orderMode = 'fixed'
-        self.xradius = self.yradius = None
+        self.xradius = self.yradius = self.innerRadiusFraction = None
         self.sideLabels = 0
         self.sideLabelsOffset = 0.1
 
@@ -753,6 +754,8 @@ class Pie(AbstractPieChart):
         L = []
         L_add = L.append
 
+        innerRadiusFraction = self.innerRadiusFraction
+
         for i,(a1,a2) in angles:
             if a2 is None: continue
             #if we didn't use %stylecount here we'd end up with the later wedges
@@ -775,10 +778,15 @@ class Pie(AbstractPieChart):
                     cx = centerx + popout*cosAA
                     cy = centery + popout*sinAA
 
-            if aa>=_ANGLEHI:
-                theWedge = Ellipse(cx, cy, xradius, yradius)
+            if innerRadiusFraction:
+                theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius,
+                        radius1=xradius*innerRadiusFraction,yradius1=yradius*innerRadiusFraction)
             else:
-                theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
+                if aa>=_ANGLEHI:
+                    theWedge = Ellipse(cx, cy, xradius, yradius)
+                else:
+                    theWedge = Wedge(cx, cy, xradius, a1, a2, yradius=yradius)
+
 
             theWedge.fillColor = wedgeStyle.fillColor
             theWedge.strokeColor = wedgeStyle.strokeColor

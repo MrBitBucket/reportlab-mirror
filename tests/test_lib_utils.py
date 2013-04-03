@@ -119,6 +119,32 @@ class ImporterTestCase(unittest.TestCase):
         b = getStringIO(_rel_open_and_read('../docs/images/Edit_Prefs.gif'))
         b = open_and_read(b)
 
+
+    def testRecursiveImportErrors(self):
+        "check we get useful error messages"
+        try:
+            m1 = recursiveImport('reportlab.pdfgen.brush')
+            self.fail("Imported a nonexistent module")
+        except ImportError, e:
+            self.assertEquals(e.message, "Could not import 'reportlab.pdfgen.brush'")
+            
+        try:
+            m1 = recursiveImport('totally.non.existent')
+            self.fail("Imported a nonexistent module")
+        except ImportError, e:
+            self.assertEquals(e.message, "Could not import 'totally.non.existent'")
+
+        try:
+            #import a module in the 'tests' directory with a bug
+            m1 = recursiveImport('unimportable')
+            self.fail("Imported a buggy module")
+        except ImportError, e:
+            self.assert_('integer division or modulo by zero' in e.message)
+
+
+
+
+
 def makeSuite():
     return makeSuiteForClasses(ImporterTestCase)
 

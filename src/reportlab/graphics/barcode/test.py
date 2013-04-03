@@ -21,7 +21,7 @@ from reportlab.platypus.frames import Frame
 from reportlab.platypus.flowables import XBox, KeepTogether
 from reportlab.graphics.shapes import Drawing
 
-from reportlab.graphics.barcode import getCodes, getCodeNames, createBarcodeDrawing
+from reportlab.graphics.barcode import getCodes, getCodeNames, createBarcodeDrawing, createBarcodeImageInMemory
 def run():
     styles = getSampleStyleSheet()
     styleN = styles['Normal']
@@ -190,3 +190,11 @@ def fullTest(fileName="test_full.pdf"):
 if __name__=='__main__':
     run()
     fullTest()
+    def createSample(name,memory):
+        f = open(name,'wb')
+        f.write(memory)
+        f.close()
+    createSample('test_cbcim.png',createBarcodeImageInMemory('EAN13', value='123456789012'))
+    createSample('test_cbcim.gif',createBarcodeImageInMemory('EAN8', value='1234567', format='gif'))
+    createSample('test_cbcim.pdf',createBarcodeImageInMemory('UPCA', value='03600029145',format='pdf'))
+    createSample('test_cbcim.tiff',createBarcodeImageInMemory('USPS_4State', value='01234567094987654321',routing='01234567891',format='tiff'))
