@@ -85,19 +85,22 @@ eg("""
 """)
 
 
-heading2("Changing the built-in fonts output encoding")
+heading2("Automatic output font substitution")
 
 disc("""
 There are still a number of places in the code, including the rl_config
-defaultEncoding parameter, and arguments passed to various Font constructors.
-These generally relate to the OUTPUT encoding used when we write data in the font
-file. This affects which characters are actually available in the font if
-you are using Type 1 fonts, since only 256 glyphs can be available at
-one time. Unless you have a very specific need for
-MacRoman or MacExpert encoding characters, we advise you to ignore
-this.  By default the standard fonts (Helvetica, Courier, Times Roman)
-will offer the glyphs available in Latin-1.  If you try to print a non-Latin-1
-character using the built-in Helvetica, you'll see a rectangle or blob.
+defaultEncoding parameter, and arguments passed to various Font constructors,
+which refer to encodings.  These were useful in the past when people needed to
+use glyphs in the Symbol and ZapfDingbats fonts which are supported by PDF
+viewing devices.
+
+By default the standard fonts (Helvetica, Courier, Times Roman)
+will offer the glyphs available in Latin-1.  However, if our engine detects
+a character not in the font, it will attempt to switch to Symbol or ZapfDingbats to
+display these.   For example, if you include the Unicode character for a pair of 
+right-facing scissors, \\u2702, in a call to ^drawString^, you should see them (there is
+an example in ^test_pdfgen_general.py/pdf^).  It is not
+necessary to switch fonts in your code.
 
 """)
 

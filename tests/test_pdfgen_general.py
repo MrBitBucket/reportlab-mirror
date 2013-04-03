@@ -204,7 +204,7 @@ def makeDocument(filename, pageCallBack=None):
 
     #quickie encoding test: when canvas encoding not set,
     #the following should do (tm), (r) and (c)
-    msg_uni = u'copyright\u00A9 trademark\u2122 registered\u00AE ReportLab in unicode!'
+    msg_uni = u'copyright\u00A9 trademark\u2122 registered\u00AE scissors\u2702: ReportLab in unicode!'
     msg_utf8 = msg_uni.replace('unicode','utf8').encode('utf8')
     c.drawString(100, 100, msg_uni)
     c.drawString(100, 80, msg_utf8)
