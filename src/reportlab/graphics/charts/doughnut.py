@@ -43,7 +43,7 @@ class SectorProperties(WedgeProperties):
             )
 
 class Doughnut(AbstractPieChart):
-    _attrMap = AttrMap(BASE=AbstractPieChart,
+    _attrMap = AttrMap(
         x = AttrMapValue(isNumber, desc='X position of the chart within its container.'),
         y = AttrMapValue(isNumber, desc='Y position of the chart within its container.'),
         width = AttrMapValue(isNumber, desc='width of doughnut bounding box. Need not be same as width.'),
@@ -56,9 +56,7 @@ class Doughnut(AbstractPieChart):
         simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use String not super duper WedgeLabel"),
         # advanced usage
         checkLabelOverlap = AttrMapValue(isBoolean, desc="If true check and attempt to fix\n standard label overlaps(default off)",advancedUsage=1),
-        sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make chart with labels along side and pointers", advancedUsage=1),
-        iradius = AttrMapValue(isNumberOrNone, desc='fraction for initial radius per series (default 0.2))'),
-        dradius = AttrMapValue(isNumberOrNone, desc='fraction for change of radius per series (default 0.2)'),
+        sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make chart with labels along side and pointers", advancedUsage=1)
         )
 
     def __init__(self):
@@ -73,7 +71,6 @@ class Doughnut(AbstractPieChart):
         self.simpleLabels = 1
         self.checkLabelOverlap = 0
         self.sideLabels = 0
-        self.iradius = self.dradius = None
 
         self.slices = TypedPropertyCollection(SectorProperties)
         self.slices[0].fillColor = colors.darkcyan
@@ -178,16 +175,7 @@ class Doughnut(AbstractPieChart):
         styleCount = len(self.slices)
         if type(self.data[0]) in (ListType, TupleType):
             #multi-series doughnut
-            if self.iradius is None:
-                iradius = (self.height/5.0)
-            else:
-                iradius = self.height*float(self.iradius)
-            iradius /= len(self.data)
-            if self.dradius is None:
-                dradius = self.height/5.0
-            else:
-                dradius = self.height*float(self.dradius)
-            dradius /= len(self.data)
+            iradius = (self.height/5.0)/len(self.data)
             for sn,series in enumerate(normData):
                 for i,angle in enumerate(series):
                     endAngle = (startAngle + (angle * whichWay)) #% 360
@@ -217,7 +205,7 @@ class Doughnut(AbstractPieChart):
                         cy = centery + popdistance * sin(aveAngleRadians)
 
                     if type(n) in (ListType,TupleType):
-                        theSector = Wedge(cx, cy, xradius+(sn*dradius)-iradius, a1, a2, yradius=yradius+(sn*dradius)-iradius, radius1=yradius+(sn*dradius)-(2*dradius))
+                        theSector = Wedge(cx, cy, xradius+(sn*iradius)-iradius, a1, a2, yradius=yradius+(sn*iradius)-iradius, radius1=yradius+(sn*iradius)-(2*iradius))
                     else:
                         theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius)
 
@@ -248,10 +236,7 @@ class Doughnut(AbstractPieChart):
 
         else:
             #single series doughnut
-            if self.iradius is None:
-                iradius = (self.height/5.0)
-            else:
-                iradius = self.height*float(self.iradius)
+            iradius = self.height/5.0
             for i,angle in enumerate(normData):
                 endAngle = (startAngle + (angle * whichWay)) #% 360
                 if abs(startAngle-endAngle)<1e-5:
@@ -279,7 +264,10 @@ class Doughnut(AbstractPieChart):
                     cx = centerx + popdistance * cos(aveAngleRadians)
                     cy = centery + popdistance * sin(aveAngleRadians)
 
-                theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius)
+                if n > 1:
+                    theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius)
+                elif n==1:
+                    theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, iradius=iradius)
 
                 theSector.fillColor = sectorStyle.fillColor
                 theSector.strokeColor = sectorStyle.strokeColor
