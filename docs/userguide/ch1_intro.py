@@ -345,11 +345,6 @@ $http://www.freenetpages.co.uk/hp/alan.gauld/$
 """)
 
 
-bullet("""<b>How to think like a computer scientist</b> (Python version)</b>.
-$http://www.ibiblio.org/obp/thinkCSpy/$
-""")
-
-
 bullet("""<b>Instant Python</b>.
 A 6-page minimal crash course by Magnus Lie Hetland.
 $http://www.hetland.org/python/instant-python.php$
