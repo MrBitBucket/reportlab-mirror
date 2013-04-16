@@ -950,6 +950,7 @@ class ValueAxis(_AxisG):
         subGridEnd = AttrMapValue(isNumberOrNone, desc='End of grid lines wrt axis origin'),
         keepTickLabelsInside = AttrMapValue(isBoolean, desc='Ensure tick labels do not project beyond bounds of axis if true'),
         skipGrid = AttrMapValue(OneOf('none','top','both','bottom'),"grid lines to skip top bottom both none"),
+        requiredRange = AttrMapValue(isNumberOrNone, desc='Minimum required value range.'),
         )
 
     def __init__(self,**kw):
@@ -1035,6 +1036,7 @@ class ValueAxis(_AxisG):
                         reverseDirection=0,
                         loLLen=0,
                         hiLLen=0,
+                        requiredRange=0,
                         )
         self.labels.angle = 0
 
@@ -1076,6 +1078,26 @@ class ValueAxis(_AxisG):
             r = cache[K] = valueStep, T, valueStep*1e-8
         return r
 
+    def _preRangeAdjust(self,valueMin,valueMax):
+        rr = self.requiredRange
+        if rr>0:
+            r = valueMax - valueMin
+            if r<rr:
+                m = 0.5*(valueMax+valueMin)
+                rr *= 0.5
+                y1 = min(m-rr,valueMin)
+                y2 = max(m+rr,valueMax)
+                if valueMin>=100 and y1<100:
+                    y2 = y2 + 100 - y1
+                    y1 = 100
+                elif valueMin>=0 and y1<0:
+                    y2 = y2 - y1
+                    y1 = 0
+                valueMin = self._cValueMin = y1
+                valueMax = self._cValueMax = y2
+        return valueMin,valueMax
+
+
     def _setRange(self, dataSeries):
         """Set minimum and maximum axis values.
 
@@ -1087,7 +1109,6 @@ class ValueAxis(_AxisG):
 
         oMin = valueMin = self.valueMin
         oMax = valueMax = self.valueMax
-        rangeRound = self.rangeRound
         if valueMin is None: valueMin = self._cValueMin = _findMin(dataSeries,self._dataIndex,0)
         if valueMax is None: valueMax = self._cValueMax = _findMax(dataSeries,self._dataIndex,0)
         if valueMin == valueMax:
@@ -1131,6 +1152,10 @@ class ValueAxis(_AxisG):
                 return func(T[x]+bubbleV,T[x]-bubbleV)
             if oMin is None: valueMin = self._cValueMin = _findMin(dataSeries,self._dataIndex,0,special=special)
             if oMax is None: valueMax = self._cValueMax = _findMax(dataSeries,self._dataIndex,0,special=special)
+
+        valueMin, valueMax = self._preRangeAdjust(valueMin,valueMax)
+
+        rangeRound = self.rangeRound
 
         cMin = valueMin
         cMax = valueMax
@@ -1863,7 +1888,6 @@ class AdjYValueAxis(YValueAxis):
     may choose to adjust its range and origin.
     """
     _attrMap = AttrMap(BASE = YValueAxis,
-        requiredRange = AttrMapValue(isNumberOrNone, desc='Minimum required value range.'),
         leftAxisPercent = AttrMapValue(isBoolean, desc='When true add percent sign to label values.'),
         leftAxisOrigShiftIPC = AttrMapValue(isNumber, desc='Lowest label shift interval ratio.'),
         leftAxisOrigShiftMin = AttrMapValue(isNumber, desc='Minimum amount to shift.'),
