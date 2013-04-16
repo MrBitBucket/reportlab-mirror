@@ -956,20 +956,30 @@ def main():
         print "Saved %s." % builder.outPath
 
     #if doing the usual, put a copy in docs
+    cwd = os.getcwd()
     if builder.outPath=='reportlab.graphics.pdf':
         import shutil
         try:
             import tools
         except ImportError: #probably running in tools/docco
-            sys.path.insert(0, os.path.dirname(os.path.dirname(os.getcwd())))
+            sys.path.insert(0, os.path.dirname(os.path.dirname(cwd)))
             import tools
         topDir=tools.__path__[0]
         if not os.path.isabs(topDir): topDir=os.path.abspath(topDir)
         topDir=os.path.dirname(topDir)
-        dst = os.path.join(topDir,'docs','reportlab-graphics-reference.pdf')
-        shutil.copyfile('reportlab.graphics.pdf', dst)
-        if not isSilent:
-            print 'copied to '+dst
+        dst = os.path.join(topDir,'docs')
+        if not os.path.isdir(dst):
+            if os.path.basename(cwd)=='docco':
+                dst=os.path.realpath(os.path.join(cwd,'..','..','docs'))
+
+        dst = os.path.join(dst,'reportlab-graphics-reference.pdf')
+        try:
+            shutil.copyfile('reportlab.graphics.pdf', dst)
+            if not isSilent:
+                print 'copied to '+dst
+        except:
+            if not isSilent:
+                print '!!!!! cannot copy to '+dst
 
 def makeSuite():
     "standard test harness support - run self as separate process"
