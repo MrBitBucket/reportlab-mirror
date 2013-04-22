@@ -557,7 +557,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
     doct = getattr(canv,'_doctemplate',None)
     cframe = getattr(doct,'frame',None)
     if cframe:
-        from reportlab.platypus.doctemplate import _addGeneratedContent
+        from reportlab.platypus.doctemplate import _addGeneratedContent, Indenter
         doct_frame = cframe
         cframe = doct.frame = deepcopy(doct_frame)
         cframe._generated_content = None
@@ -570,7 +570,11 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
         F = F[:]
         while F:
             f = F.pop(0)
-            if hasattr(f,'frameAction'): continue
+            if hasattr(f,'frameAction'):
+                from reportlab.platypus.doctemplate import Indenter
+                if isinstance(f,Indenter):
+                    availWidth -= f.left+f.right
+                continue
             w,h = f.wrapOn(canv,availWidth,0xfffffff)
             if dims is not None: dims.append((w,h))
             if cframe:
@@ -825,7 +829,7 @@ def cdeepcopy(obj):
 class _Container(_ContainerSpace):  #Abstract some common container like behaviour
     def drawOn(self, canv, x, y, _sW=0, scale=1.0, content=None, aW=None):
         '''we simulate being added to a frame'''
-        from doctemplate import ActionFlowable
+        from doctemplate import ActionFlowable, Indenter
         pS = 0
         if aW is None: aW = self.width
         aW *= scale
@@ -836,6 +840,10 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
         for c in content:
             if not ignoreContainerActions and isinstance(c,ActionFlowable):
                 c.apply(self.canv._doctemplate)
+                continue
+            if isinstance(c,Indenter):
+                x += c.left*scale
+                aW -= (c.left+c.right)*scale
                 continue
             w, h = c.wrapOn(canv,aW,0xfffffff)
             if (w<_FUZZ or h<_FUZZ) and not getattr(c,'_ZEROSIZE',None): continue
@@ -874,12 +882,14 @@ class PTOContainer(_Container,Flowable):
         return self.width,self.height
 
     def split(self, availWidth, availHeight):
+        from reportlab.platypus.doctemplate import Indenter
         if availHeight<0: return []
         canv = self.canv
         C = self._content
         x = i = H = pS = hx = 0
         n = len(C)
         I2W = {}
+        dLeft = dRight = 0
         for x in xrange(n):
             c = C[x]
             I = c._ptoinfo
@@ -895,10 +905,18 @@ class PTOContainer(_Container,Flowable):
             else:
                 T,tW,tH,tSB = I2W[I]
             _, h = c.wrapOn(canv,availWidth,0xfffffff)
-            if x:
-                hx = max(c.getSpaceBefore()-pS,0)
-                h += hx
-            pS = c.getSpaceAfter()
+            if isinstance(c,Indenter):
+                dw = c.left+c.right
+                dLeft += c.left
+                dRight += c.right
+                availWidth -= dw
+                pS = 0
+                hx = 0
+            else:
+                if x:
+                    hx = max(c.getSpaceBefore()-pS,0)
+                    h += hx
+                pS = c.getSpaceAfter()
             H += h+pS
             tHS = tH+max(tSB,pS)
             if H+tHS>=availHeight-_FUZZ: break
@@ -914,6 +932,12 @@ class PTOContainer(_Container,Flowable):
         else:
             SS = []
 
+        if abs(dLeft)+abs(dRight)>1e-8:
+            R1I = [Indenter(-dLeft,-dRight)]
+            R2I = [Indenter(dLeft,dRight)]
+        else:
+            R1I = R2I = []
+
         if not SS:
             j = i
             while i>1 and C[i-1].getKeepWithNext():
@@ -928,13 +952,13 @@ class PTOContainer(_Container,Flowable):
         F = [UseUpSpace()]
 
         if len(SS)>1:
-            R1 = C[:i] + SS[:1] + T + F
-            R2 = Hdr + SS[1:]+C[i+1:]
+            R1 = C[:i]+SS[:1]+R1I+T+F
+            R2 = Hdr+R2I+SS[1:]+C[i+1:]
         elif not i:
             return []
         else:
-            R1 = C[:i]+T+F
-            R2 = Hdr + C[i:]
+            R1 = C[:i]+R1I+T+F
+            R2 = Hdr+R2I+C[i:]
         T =  R1 + [PTOContainer(R2,[copy(x) for x in I.trailer],[copy(x) for x in I.header])]
         return T
 

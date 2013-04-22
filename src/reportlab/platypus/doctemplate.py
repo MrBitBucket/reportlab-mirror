@@ -222,6 +222,9 @@ class Indenter(FrameActionFlowable):
     This allows one to have a 'context-sensitive' indentation
     and makes nested lists way easier.
     """
+    _ZEROSIZE=True
+    width=0
+    height=0
     def __init__(self, left=0, right=0):
         self.left = _evalMeasurement(left)
         self.right = _evalMeasurement(right)
