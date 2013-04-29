@@ -1190,3 +1190,10 @@ class RLString(str):
         for k,v in kwds.iteritems():
             setattr(self,k,v)
         return self
+
+def makeFileName(s):
+    '''force filename strings to unicode so python can handle encoding stuff'''
+    assert isinstance(s,basestring),"filename is %r should be str or unicode" % s
+    if isinstance(s,str):
+        s = s.decode('utf8')
+    return s

@@ -18,7 +18,7 @@ import string, types, binascii, codecs
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
 from reportlab import rl_config
-from reportlab.lib.utils import import_zlib, open_for_read, fp_str, _digester
+from reportlab.lib.utils import import_zlib, open_for_read, fp_str, _digester, makeFileName
 from reportlab.pdfbase import pdfmetrics
 try:
     from hashlib import md5
@@ -228,10 +228,10 @@ class PDFDocument:
         if hasattr(getattr(filename, "write",None),'__call__'):
             myfile = 0
             f = filename
-            filename = utf8str(getattr(filename,'name',''))
+            filename = makeFileName(getattr(filename,'name',''))
         else :
             myfile = 1
-            filename = utf8str(filename)
+            filename = makeFileName(filename)
             f = open(filename, "wb")
         f.write(self.GetPDFData(canvas))
         if myfile:

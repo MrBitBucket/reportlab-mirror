@@ -83,6 +83,14 @@ class TextEncodingTestCase(NearTestCase):
         self.assertNear(pdfmetrics.stringWidth(testUTF8, 'Vera', 10),279.809570313)
         self.assertNear(pdfmetrics.stringWidth(testUni, 'Vera', 10),279.809570313)
 
+    def testUtf8FileName(self):
+        fn=outputfile('test_pdfbase_utf8_filename').decode('utf8')
+        fn += u'_portr\xe4t.pdf'
+        print repr(fn)
+        c = Canvas(fn)
+        c.drawString(100,700, u'Filename='+fn)
+        c.save()
+
     def testUtf8Canvas(self):
         """Verify canvas declared as utf8 autoconverts.
 
