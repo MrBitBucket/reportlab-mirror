@@ -70,6 +70,57 @@ else:
         import types
         return isinstance(v, types.ClassType)
 
+isPython3 = sys.version_info[0]==3
+
+def isFunctionType(v):
+    return type(v) == type(isFunctionType)
+
+class c:
+    def m(self): pass
+
+def isMethodType(v,mt=type(c.m)):
+    return type(v) == mt
+del c
+
+def isModuleType(v):
+    return type(v) == type(sys)
+
+def isSeqType(v,_st=(tuple,list)):
+    return isinstance(v,_st)
+
+if isPython3:
+    def UniChr(v):
+        return chr(v)
+
+    def isStrType(v):
+        return isinstance(v, str)
+
+    def isBytesType(v):
+        return isinstance(v, bytes)
+
+    def isUnicodeType(v):
+        return isinstance(v, str)
+
+    def isClassType(v):
+        return isinstance(v, type)
+else:
+    def UniChr(v):
+        return unichr(v)
+
+    def isStrType(v):
+        return isinstance(v, basestring)
+
+    def isBytesType(v):
+        return isinstance(v, str)
+
+    def isUnicodeType(v):
+        return isinstance(v, unicode)
+
+    def isClassType(v):
+        import types
+        return isinstance(v, types.ClassType)
+
+
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
     from os import listdir
