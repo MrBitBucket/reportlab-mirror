@@ -16,7 +16,7 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.renderbase import StateTracker, getStateDelta, renderScaledDrawing
 from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1
 from math import sin, cos, pi, ceil
-from reportlab.lib.utils import getStringIO, open_and_read
+from reportlab.lib.utils import getBytesIO, open_and_read
 from reportlab import rl_config
 
 class RenderPMError(Exception):
@@ -274,11 +274,11 @@ class PMCanvas:
         A = {'ctm':None, 'strokeWidth':None, 'strokeColor':None, 'lineCap':None, 'lineJoin':None, 'dashArray':None, 'fillColor':None}
         gs = self._gs
         fN,fS = gs.fontName, gs.fontSize
-        for k in list(A.keys()):
+        for k in A.keys():
             A[k] = getattr(gs,k)
         del gs, self._gs
         gs = self.__dict__['_gs'] = _renderPM.gstate(w,h,bg=bg)
-        for k in list(A.keys()):
+        for k in A.keys():
             setattr(self,k,A[k])
         gs.setFont(fN,fS)
 
@@ -355,7 +355,7 @@ class PMCanvas:
             markfilename(fn,ext=fmt)
 
     def saveToString(self,fmt='GIF'):
-        s = getStringIO()
+        s = getBytesIO()
         self.saveToFile(s,fmt=fmt)
         return s.getvalue()
 
@@ -661,7 +661,7 @@ def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary
     c.saveToFile(fn,fmt)
 
 def drawToString(d,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_):
-    s = getStringIO()
+    s = getBytesIO()
     drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, configPIL=configPIL)
     return s.getvalue()
 

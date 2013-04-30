@@ -18,7 +18,7 @@ changed
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.lib.utils import getStringIO
+from reportlab.lib.utils import getBytesIO
 from reportlab import rl_config
 from .renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
 
@@ -195,7 +195,7 @@ class _PDFRenderer(Renderer):
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the PDF operators
         needed to set those properties"""
-        for key, value in list(delta.items()):
+        for key, value in delta.items():
             if key == 'transform':
                 self._canvas.transform(value[0], value[1], value[2],
                                  value[3], value[4], value[5])
@@ -303,7 +303,7 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1):
 
 def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1):
     "Returns a PDF as a string in memory, without touching the disk"
-    s = getStringIO()
+    s = getBytesIO()
     drawToFile(d, s, msg=msg, showBoundary=showBoundary,autoSize=autoSize)
     return s.getvalue()
 

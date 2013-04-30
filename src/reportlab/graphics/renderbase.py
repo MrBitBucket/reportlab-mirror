@@ -37,7 +37,7 @@ def getStateDelta(shape):
     to set the pen color to red in between. Returns the effect
     the given shape would have on the graphics state"""
     delta = {}
-    for (prop, value) in list(shape.getProperties().items()):
+    for prop, value in shape.getProperties().items():
         if prop in STATE_DEFAULTS:
             delta[prop] = value
     return delta
@@ -72,7 +72,7 @@ class StateTracker:
         through getState()"""
 
         newstate = self._combined[-1].copy()
-        for (key, value) in list(delta.items()):
+        for key, value in delta.items():
             if key == 'transform':  #do cumulative matrix
                 newstate['transform'] = delta['transform']
                 newstate['ctm'] = mmult(self._combined[-1]['ctm'], delta['transform'])
@@ -97,7 +97,7 @@ class StateTracker:
         #need to diff this against the last one in the state
         reverseDelta = {}
         #print 'pop()...'
-        for key, curValue in list(lastDelta.items()):
+        for key, curValue in lastDelta.items():
             #print '   key=%s, value=%s' % (key, curValue)
             prevValue = newState[key]
             if prevValue != curValue:
@@ -230,7 +230,7 @@ class Renderer:
         parent.
         
         """
-        for (key, value) in list(node.__dict__.items()):
+        for key, value in node.__dict__.items():
             if isinstance(value, DerivedValue):
                 #just replace with default for key?
                 #print '    fillDerivedValues(%s)' % key

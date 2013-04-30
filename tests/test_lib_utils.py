@@ -115,8 +115,8 @@ class ImporterTestCase(unittest.TestCase):
 
     def test10(self):
         "test open and read of a simple relative file"
-        from reportlab.lib.utils import open_and_read, getStringIO
-        b = getStringIO(_rel_open_and_read('../docs/images/Edit_Prefs.gif'))
+        from reportlab.lib.utils import open_and_read, getBytesIO
+        b = getBytesIO(_rel_open_and_read('../docs/images/Edit_Prefs.gif'))
         b = open_and_read(b)
 
 

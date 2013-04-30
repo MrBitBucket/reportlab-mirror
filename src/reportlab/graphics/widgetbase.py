@@ -27,11 +27,11 @@ class PropHolder:
         """
 
         if self._attrMap is not None:
-            for key in list(self.__dict__.keys()):
+            for key in self.__dict__.keys():
                 if key[0] != '_':
                     msg = "Unexpected attribute %s found in %s" % (key, self)
                     assert key in self._attrMap, msg
-            for (attr, metavalue) in list(self._attrMap.items()):
+            for attr, metavalue in self._attrMap.items():
                 msg = "Missing attribute %s from %s" % (attr, self)
                 assert hasattr(self, attr), msg
                 value = getattr(self, attr)
@@ -64,14 +64,14 @@ class PropHolder:
         # expose sequence contents?
 
         props = {}
-        for name in list(self.__dict__.keys()):
+        for name in self.__dict__.keys():
             if name[0:1] != '_':
                 component = getattr(self, name)
 
                 if recur and isValidChild(component):
                     # child object, get its properties too
                     childProps = component.getProperties(recur=recur)
-                    for (childKey, childValue) in list(childProps.items()):
+                    for childKey, childValue in childProps.items():
                         #key might be something indexed like '[2].fillColor'
                         #or simple like 'fillColor'; in the former case we
                         #don't need a '.' between me and my child.
@@ -98,7 +98,7 @@ class PropHolder:
         """
 
         childPropDicts = {}
-        for (name, value) in list(propDict.items()):
+        for name, value in propDict.items():
             parts = string.split(name, '.', 1)
             if len(parts) == 1:
                 #simple attribute, set it now
@@ -111,7 +111,7 @@ class PropHolder:
                     childPropDicts[childName] = {remains: value}
 
         # now assign to children
-        for (childName, childPropDict) in list(childPropDicts.items()):
+        for childName, childPropDict in childPropDicts.items():
             child = getattr(self, childName)
             child.setProperties(childPropDict)
 
@@ -136,7 +136,7 @@ class Widget(PropHolder, shapes.UserNode):
     widgets and vice versa."""
 
     def _setKeywords(self,**kw):
-        for k,v in list(kw.items()):
+        for k,v in kw.items():
             if k not in self.__dict__:
                 setattr(self,k,v)
 
@@ -273,19 +273,19 @@ class TypedPropertyCollection(PropHolder):
         # differs from the parent
         props = {}
 
-        for (key, value) in list(self._value.getProperties(recur=recur).items()):
+        for key, value in self._value.getProperties(recur=recur).items():
             props['%s' % key] = value
 
-        for idx in list(self._children.keys()):
+        for idx in self._children.keys():
             childProps = self._children[idx].getProperties(recur=recur)
-            for (key, value) in list(childProps.items()):
+            for key, value in childProps.items():
                 if not hasattr(self,key) or getattr(self, key)!=value:
                     newKey = '[%s].%s' % (idx, key)
                     props[newKey] = value
         return props
 
     def setVector(self,**kw):
-        for name, value in list(kw.items()):
+        for name, value in kw.items():
             for i in range(len(value)):
                 setattr(self[i],name,value[i])
 
@@ -333,7 +333,7 @@ class StyleProperties(PropHolder):
     def __init__(self, **kwargs):
         "Initialize with attributes if any."
 
-        for k, v in list(kwargs.items()):
+        for k, v in kwargs.items():
             setattr(self, k, v)
 
 

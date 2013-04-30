@@ -308,7 +308,7 @@ class I2of5(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in list(args.items()):
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:
@@ -433,7 +433,7 @@ class MSI(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in list(args.items()):
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:
@@ -569,7 +569,7 @@ class Codabar(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in list(args.items()):
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:
@@ -689,7 +689,7 @@ class Code11(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in list(args.items()):
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:

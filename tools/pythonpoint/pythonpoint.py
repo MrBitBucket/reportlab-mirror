@@ -77,7 +77,7 @@ from reportlab import rl_config
 from reportlab.lib import styles
 from reportlab.lib import colors
 from reportlab.lib.units import cm
-from reportlab.lib.utils import getStringIO
+from reportlab.lib.utils import getBytesIO
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
@@ -352,7 +352,7 @@ class PPPresentation:
         if self.verbose:
             print(filename)
         #canv = canvas.Canvas(filename, pagesize = pageSize)
-        outfile = getStringIO()
+        outfile = getBytesIO()
         if self.notes:
             #translate the page from landscape to portrait
             pageSize= pageSize[1], pageSize[0]
@@ -403,7 +403,7 @@ class PPPresentation:
         if self.sourceFilename :
             filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
 
-        outfile = getStringIO()
+        outfile = getBytesIO()
         doc = SimpleDocTemplate(outfile, pagesize=rl_config.defaultPageSize, showBoundary=0)
         doc.leftMargin = 1*cm
         doc.rightMargin = 1*cm

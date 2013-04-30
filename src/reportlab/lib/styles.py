@@ -62,7 +62,7 @@ class PropertySet:
 
     def _setKwds(self,**kw):
         #step three - copy keywords if any
-        for (key, value) in list(kw.items()):
+        for key, value in kw.items():
              self.__dict__[key] = value
 
     def __repr__(self):
@@ -73,7 +73,7 @@ class PropertySet:
         use if you have been hacking the styles.  This is
         used by __init__"""
         if self.parent:
-            for (key, value) in list(self.parent.__dict__.items()):
+            for key, value in self.parent.__dict__.items():
                 if (key not in ['name','parent']):
                     self.__dict__[key] = value
 

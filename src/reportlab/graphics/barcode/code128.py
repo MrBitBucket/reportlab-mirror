@@ -223,7 +223,7 @@ class Code128(MultiWidthBarcode):
         if type(value) is type(1):
             value = str(value)
             
-        for (k, v) in list(args.items()):
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:

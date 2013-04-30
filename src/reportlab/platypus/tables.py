@@ -578,7 +578,7 @@ class Table(Flowable):
                     if height > availHeight:
                         #we can terminate if all spans are complete in H[:i]
                         if spanCons:
-                            msr = max([x[1] for x in list(spanCons.keys())])  #RS=[endrowspan,.....]
+                            msr = max([x[1] for x in spanCons.keys()])  #RS=[endrowspan,.....]
                             if hmax>=msr:
                                 break
             if None not in H: hmax = lim
@@ -761,7 +761,7 @@ class Table(Flowable):
             desiredWidths = []
             totalDesired = 0
             effectiveRemaining = remaining
-            for colNo, minimum in list(minimums.items()):
+            for colNo, minimum in minimums.items():
                 w = W[colNo]
                 if _endswith(w,'%'):
                     desired = (float(w[:-1])/percentTotal)*availWidth
@@ -821,7 +821,7 @@ class Table(Flowable):
                     assert adjusted >= minimum
                     W[colNo] = adjusted
         else:
-            for colNo, minimum in list(minimums.items()):
+            for colNo, minimum in minimums.items():
                 W[colNo] = minimum
         if verbose: print('new widths are:', W)
         self._argW = self._colWidths = W
@@ -986,7 +986,7 @@ class Table(Flowable):
                 spanRects[coord] = (x, y, width, height)
 
         for _ in hBlocks, vBlocks:
-            for value in list(_.values()):
+            for value in _.values():
                 value.sort()
         self._spanRects = spanRects
         self._vBlocks = vBlocks
@@ -998,7 +998,7 @@ class Table(Flowable):
             tblstyle = TableStyle(tblstyle)
         for cmd in tblstyle.getCommands():
             self._addCommand(cmd)
-        for k,v in list(tblstyle._opts.items()):
+        for k,v in tblstyle._opts.items():
             setattr(self,k,v)
         for a in ('spaceBefore','spaceAfter'):
             if not hasattr(self,a) and hasattr(tblstyle,a):

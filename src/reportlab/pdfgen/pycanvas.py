@@ -149,7 +149,7 @@ def buildargs(*args, **kwargs) :
     arguments = ""
     for arg in args :
         arguments = arguments + ("%s, " % repr(arg))
-    for (kw, val) in list(kwargs.items()) :
+    for kw, val in kwargs.items() :
         arguments = arguments+ ("%s=%s, " % (kw, repr(val)))
     if arguments[-2:] == ", " :
         arguments = arguments[:-2]

@@ -46,7 +46,7 @@ def structToPDF(structure):
     "Converts deeply nested structure to PDFdoc dictionary/array objects"
     if type(structure) is DictType:
         newDict = {}
-        for k, v in list(structure.items()):
+        for k, v in structure.items():
             newDict[k] = structToPDF(v)
         return pdfdoc.PDFDictionary(newDict)
     elif type(structure) in (ListType, TupleType):

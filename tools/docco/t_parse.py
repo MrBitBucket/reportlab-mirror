@@ -113,7 +113,7 @@ class Template:
               raise ValueError("Marks must be single characters: "+repr(mark))
        # compile the regular expressions if needed
        self.marker_dict = marker_dict = {}
-       for (mark, rgex) in list(marker_to_regex_dict.items()):
+       for mark, rgex in marker_to_regex_dict.items():
            if type(rgex) == StringType:
               rgex = re.compile(rgex)
            marker_dict[mark] = rgex

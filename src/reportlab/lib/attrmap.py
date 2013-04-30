@@ -28,7 +28,6 @@ class Rect(SolidShape):
 
 
 '''
-from UserDict import UserDict
 from reportlab.lib.validators import isAnything, _SequenceTypes, DerivedValue
 from reportlab import rl_config
 
@@ -50,7 +49,7 @@ class AttrMapValue:
         self.desc = desc
         self._initial = initial
         self._advancedUsage = advancedUsage
-        for k,v in list(kw.items()):
+        for k,v in kw.items():
             setattr(self,k,v)
 
     def __getattr__(self,name):
@@ -65,7 +64,7 @@ class AttrMapValue:
     def __repr__(self):
         return 'AttrMapValue(%s)' % ', '.join(['%s=%r' % i for i in self.__dict__.items()])
 
-class AttrMap(UserDict):
+class AttrMap(dict):
     def __init__(self,BASE=None,UNWANTED=[],**kw):
         data = {}
         if BASE:
@@ -79,7 +78,7 @@ class AttrMap(UserDict):
                     else:
                         raise ValueError('BASE=%s has wrong kind of value' % str(B))
 
-        UserDict.__init__(self,data)
+        dict.__init__(self,data)
         self.remove(UNWANTED)
         self.data.update(kw)
 

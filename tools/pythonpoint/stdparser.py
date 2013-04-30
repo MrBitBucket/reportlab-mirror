@@ -786,7 +786,7 @@ class PPMLParser(xmllib.XMLParser):
     def unknown_starttag(self, tag, attrs):
         if  self._curPara:
             echo = '<%s' % tag
-            for (key, value) in list(attrs.items()):
+            for key, value in attrs.items():
                 echo = echo + ' %s="%s"' % (key, value)
             echo = echo + '>'
             self._curPara.rawtext = self._curPara.rawtext + echo

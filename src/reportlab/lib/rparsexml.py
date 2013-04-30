@@ -382,7 +382,7 @@ def pprettyprint(parsedxml):
     if not attdict: attdict={}
     join = string.join
     attlist = []
-    for k in list(attdict.keys()):
+    for k in attdict.keys():
         v = attdict[k]
         attlist.append("%s=%s" % (k, repr(v)))
     attributes = join(attlist, " ")

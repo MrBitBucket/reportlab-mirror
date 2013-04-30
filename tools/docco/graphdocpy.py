@@ -26,9 +26,9 @@ from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
-from reportlab.lib.utils import getStringIO
+from reportlab.lib.utils import getBytesIO
 #from StringIO import StringIO
-#getStringIO=StringIO
+#getBytesIO=StringIO
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen import canvas
 from reportlab.platypus.flowables import Flowable, Spacer
@@ -470,7 +470,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         for key in keys:
             value = props[key]
 
-            f = getStringIO()
+            f = getBytesIO()
             pprint.pprint(value, f)
             value = f.getvalue()[:-1]
             valueLines = string.split(value, '\n')
@@ -654,7 +654,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             value = props[key]
 
             # Method 3
-            f = getStringIO()
+            f = getBytesIO()
             pprint.pprint(value, f)
             value = f.getvalue()[:-1]
             valueLines = string.split(value, '\n')

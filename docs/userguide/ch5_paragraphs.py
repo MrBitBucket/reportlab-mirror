@@ -188,7 +188,7 @@ from reportlab.platypus.paraparser import _addAttributeNames, _paraAttrMap, _bul
 def getAttrs(A):
     _addAttributeNames(A)
     S={}
-    for k, v in list(A.items()):
+    for k, v in A.items():
         a = v[0]
         if a not in S:
             S[a] = k

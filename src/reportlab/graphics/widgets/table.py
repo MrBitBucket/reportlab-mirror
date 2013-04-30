@@ -62,7 +62,7 @@ class TableWidget(Widget):
         self.textAnchor = 'start'
 
 
-        for k, v in list(kw.items()):
+        for k, v in kw.items():
             if k in list(self.__class__._attrMap.keys()):
                 setattr(self, k, v)
                 print('setting %s = %s'%(k, v))

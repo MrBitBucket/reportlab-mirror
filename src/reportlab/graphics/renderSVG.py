@@ -17,7 +17,7 @@ from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer,
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
-from reportlab.lib.utils import getStringIO, RLString
+from reportlab.lib.utils import getBytesIO, RLString
 
 from xml.dom import getDOMImplementation
 
@@ -34,7 +34,7 @@ TEXT_STYLES = 'font-family font-weight font-style font-variant font-size id'.spl
 ### top-level user function ###
 def drawToString(d, showBoundary=rl_config.showBoundary,**kwds):
     "Returns a SVG as a string in memory, without touching the disk"
-    s = getStringIO()
+    s = getBytesIO()
     drawToFile(d, s, showBoundary=showBoundary,**kwds)
     return s.getvalue()
 
@@ -83,7 +83,7 @@ def transformNode(doc, newTag, node=None, **attrDict):
     """
 
     newNode = doc.createElement(newTag)
-    for newAttr, attr in list(attrDict.items()):
+    for newAttr, attr in attrDict.items():
         sattr =  str(attr)
         if not node:
             newNode.setAttribute(newAttr, sattr)
@@ -709,7 +709,7 @@ class _SVGRenderer(Renderer):
         self._canvas._color = color
 
         #restore things we might have lost (without actually doing anything).
-        for k, v in list(rDeltas.items()):
+        for k, v in rDeltas.items():
             if k in self._restores:
                 setattr(self._canvas,self._restores[k],v)
         self._canvas.style = style
@@ -850,7 +850,7 @@ class _SVGRenderer(Renderer):
         """This takes a set of states, and outputs the operators
         needed to set those properties"""
 
-        for key, value in list(delta.items()):
+        for key, value in delta.items():
             if key == 'transform':
                 pass
                 #self._canvas.transform(value[0], value[1], value[2], value[3], value[4], value[5])

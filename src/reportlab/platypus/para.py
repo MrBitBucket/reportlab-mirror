@@ -988,13 +988,13 @@ class SimpleStyle:
     def __init__(self, name, parent=None, **kw):
         mydict = self.__dict__
         if parent:
-            for (a,b) in list(parent.__dict__.items()):
+            for a,b in parent.__dict__.items():
                 mydict[a]=b
-        for (a,b) in list(kw.items()):
+        for a,b in kw.items():
             mydict[a] =  b
 
     def addAttributes(self, dictionary):
-        for key in list(dictionary.keys()):
+        for key in dictionary.keys():
             value = dictionary[key]
             if value is not None:
                 if hasattr(StyleAttributeConverters, key):
@@ -1186,7 +1186,7 @@ def defaultContext():
     result = {}
     from reportlab.lib.styles import getSampleStyleSheet
     styles = getSampleStyleSheet()
-    for (stylenamekey, stylenamevalue) in list(DEFAULT_ALIASES.items()):
+    for stylenamekey, stylenamevalue in DEFAULT_ALIASES.items():
         result[stylenamekey] = styles[stylenamevalue]
     return result
 
@@ -1195,17 +1195,17 @@ def buildContext(stylesheet=None):
     from reportlab.lib.styles import getSampleStyleSheet
     if stylesheet is not None:
         # Copy styles with the same name as aliases
-        for (stylenamekey, stylenamevalue) in list(DEFAULT_ALIASES.items()):
+        for stylenamekey, stylenamevalue in DEFAULT_ALIASES.items():
             if stylenamekey in stylesheet:
                 result[stylenamekey] = stylesheet[stylenamekey]
         # Then make aliases
-        for (stylenamekey, stylenamevalue) in list(DEFAULT_ALIASES.items()):
+        for stylenamekey, stylenamevalue in DEFAULT_ALIASES.items():
             if stylenamevalue in stylesheet:
                 result[stylenamekey] = stylesheet[stylenamevalue]
 
     styles = getSampleStyleSheet()
     # Then, fill in defaults if they were not filled yet.
-    for (stylenamekey, stylenamevalue) in list(DEFAULT_ALIASES.items()):
+    for stylenamekey, stylenamevalue in DEFAULT_ALIASES.items():
         if stylenamekey not in result and stylenamevalue in styles:
             result[stylenamekey] = styles[stylenamevalue]
     return result
@@ -1490,7 +1490,7 @@ class Para(Flowable):
                     L = [ "<" + tagname ]
                     a = L.append
                     if not attdict: attdict = {}
-                    for (k, v) in list(attdict.items()):
+                    for k, v in attdict.items():
                         a(" %s=%s" % (k,v))
                     if content:
                         a(">")
@@ -1915,7 +1915,6 @@ class SeqResetObject(NameObject):
 
     def getOp(self, tuple, engine):
         from reportlab.lib.sequencer import getSequencer
-        import math
         globalsequencer = getSequencer()
         attr = self.attdict
         try:
@@ -1923,7 +1922,7 @@ class SeqResetObject(NameObject):
         except KeyError:
             id = None
         try:
-            base = math.atoi(attr['base'])
+            base = int(attr['base'])
         except:
             base=0
         globalsequencer.reset(id, base)
@@ -1994,7 +1993,7 @@ def EmbedInRml2pdf():
 
 def handleSpecialCharacters(engine, text, program=None):
     from .paraparser import greeks
-    from string import whitespace, atoi, atoi_error
+    from string import whitespace
     standard={'lt':'<', 'gt':'>', 'amp':'&'}
     # add space prefix if space here
     if text[0:1] in whitespace:
@@ -2025,10 +2024,10 @@ def handleSpecialCharacters(engine, text, program=None):
                 if name[0]=='#':
                     try:
                         if name[1] == 'x':
-                            n = atoi(name[2:], 16)
+                            n = int(name[2:], 16)
                         else:
-                            n = atoi(name[1:])
-                    except atoi_error:
+                            n = int(name[1:])
+                    except ValueError:
                         n = -1
                     if n>=0:
                         fragment = chr(n).encode('utf8')+fragment[semi+1:]

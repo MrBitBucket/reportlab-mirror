@@ -191,7 +191,7 @@ def FormFontsDictionary():
     from reportlab.pdfbase.pdfdoc import PDFDictionary
     fontsdictionary = PDFDictionary()
     fontsdictionary.__RefOnly__ = 1
-    for (fullname, shortname) in list(FORMFONTNAMES.items()):
+    for fullname, shortname in FORMFONTNAMES.items():
         fontsdictionary[shortname] = FormFont(fullname, shortname)
     fontsdictionary["ZaDb"] = ZADB
     return fontsdictionary

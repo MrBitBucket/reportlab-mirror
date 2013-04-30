@@ -6,7 +6,7 @@ __doc__="""Render drawing objects in Postscript"""
 
 import string, types
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth, unicode2T1 # for font info
-from reportlab.lib.utils import fp_str, getStringIO
+from reportlab.lib.utils import fp_str, getBytesIO
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS
@@ -589,7 +589,7 @@ class PSCanvas:
         hex_encoded = self._AsciiHexEncode(rawimage)
 
         # write in blocks of 78 chars per line
-        outstream = getStringIO(hex_encoded)
+        outstream = getBytesIO(hex_encoded)
 
         dataline = outstream.read(78)
         while dataline != "":
@@ -601,7 +601,7 @@ class PSCanvas:
     # end of drawImage
     def _AsciiHexEncode(self, input):  # also based on piddlePDF
         "Helper function used by images"
-        output = getStringIO()
+        output = getBytesIO()
         for char in input:
             output.write('%02x' % ord(char))
         return output.getvalue()
@@ -659,7 +659,7 @@ class PSCanvas:
         hex_encoded = self._AsciiHexEncode(rawimage)
 
         # write in blocks of 78 chars per line
-        outstream = getStringIO(hex_encoded)
+        outstream = getBytesIO(hex_encoded)
 
         dataline = outstream.read(78)
         while dataline != "":
@@ -726,7 +726,7 @@ class _PSRenderer(Renderer):
         self._canvas._color = color
 
         #restore things we might have lost (without actually doing anything).
-        for k, v in list(rDeltas.items()):
+        for k, v in rDeltas.items():
             if k in self._restores:
                 setattr(self._canvas,self._restores[k],v)
 
@@ -816,7 +816,7 @@ class _PSRenderer(Renderer):
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the operators
         needed to set those properties"""
-        for key, value in list(delta.items()):
+        for key, value in delta.items():
             if key == 'transform':
                 self._canvas.transform(value[0], value[1], value[2],
                                  value[3], value[4], value[5])
@@ -879,7 +879,7 @@ def drawToFile(d,fn, showBoundary=rl_config.showBoundary,**kwd):
 
 def drawToString(d, showBoundary=rl_config.showBoundary):
     "Returns a PS as a string in memory, without touching the disk"
-    s = getStringIO()
+    s = getBytesIO()
     drawToFile(d, s, showBoundary=showBoundary)
     return s.getvalue()
 

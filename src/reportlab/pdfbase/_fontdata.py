@@ -17,7 +17,7 @@ __doc__="""Database of font related things
     as Jython cannot handle more than 64k of bytecode in the 'top level'
     code of a Python module.  
 """
-import UserDict, os, sys
+import os, sys
 
 # mapping of name to width vector, starts empty until fonts are added
 # e.g. widths['Courier'] = [...600,600,600,...]
@@ -88,8 +88,8 @@ if sys.platform in ('linux2',):
                 'courier-oblique': 'Courier-Oblique',
                 }
     _font2fnrMap = _font2fnrMapLinux2
-    for k, v in list(_font2fnrMap.items()):
-        if k in list(_font2fnrMapWin32.keys()):
+    for k, v in _font2fnrMap.items():
+        if k in _font2fnrMapWin32.keys():
             _font2fnrMapWin32[v.lower()] = _font2fnrMapWin32[k]
     del k, v
 else:
@@ -130,21 +130,21 @@ def findT1File(fontName,ext='.pfb'):
 standardEncodings = ('WinAnsiEncoding','MacRomanEncoding','StandardEncoding','SymbolEncoding','ZapfDingbatsEncoding','PDFDocEncoding', 'MacExpertEncoding')
 
 #this is the global mapping of standard encodings to name vectors
-class _Name2StandardEncodingMap(UserDict.UserDict):
+class _Name2StandardEncodingMap(dict):
     '''Trivial fake dictionary with some [] magic'''
     _XMap = {'winansi':'WinAnsiEncoding','macroman': 'MacRomanEncoding','standard':'StandardEncoding','symbol':'SymbolEncoding', 'zapfdingbats':'ZapfDingbatsEncoding','pdfdoc':'PDFDocEncoding', 'macexpert':'MacExpertEncoding'}
     def __setitem__(self,x,v):
         y = x.lower()
         if y[-8:]=='encoding': y = y[:-8]
         y = self._XMap[y]
-        if y in list(self.keys()): raise IndexError('Encoding %s is already set' % y)
-        self.data[y] = v
+        if y in self: raise IndexError('Encoding %s is already set' % y)
+        dict.__setitem__(self,y,v)
 
     def __getitem__(self,x):
         y = x.lower()
         if y[-8:]=='encoding': y = y[:-8]
         y = self._XMap[y]
-        return self.data[y]
+        return dict.__getitem__(self,y)
 
 encodings = _Name2StandardEncodingMap()
 
@@ -153,11 +153,22 @@ encodings = _Name2StandardEncodingMap()
 #well under 64k.  We might well be able to ditch many of
 #these anyway now we run on Unicode.
 
-for keyname in standardEncodings:
-    modname = '_fontdata_enc_%s' % keyname.lower()[:-8]  #chop off 'Encoding'
-    module = __import__(modname, globals(), locals())
-    encodings[keyname] = getattr(module, keyname)
-    
+from reportlab.pdfbase._fontdata_enc_winansi import WinAnsiEncoding
+from reportlab.pdfbase._fontdata_enc_macroman import MacRomanEncoding
+from reportlab.pdfbase._fontdata_enc_standard import StandardEncoding
+from reportlab.pdfbase._fontdata_enc_symbol import SymbolEncoding
+from reportlab.pdfbase._fontdata_enc_zapfdingbats import ZapfDingbatsEncoding
+from reportlab.pdfbase._fontdata_enc_pdfdoc import PDFDocEncoding
+from reportlab.pdfbase._fontdata_enc_macexpert import MacExpertEncoding
+encodings.update({
+    'WinAnsiEncoding': WinAnsiEncoding,
+    'MacRomanEncoding': MacRomanEncoding,
+    'StandardEncoding': StandardEncoding,
+    'SymbolEncoding': SymbolEncoding,
+    'ZapfDingbatsEncoding': ZapfDingbatsEncoding,
+    'PDFDocEncoding': PDFDocEncoding,
+    'MacExpertEncoding': MacExpertEncoding,
+})
 
 ascent_descent = {
     'Courier': (629, -157),
@@ -177,12 +188,50 @@ ascent_descent = {
     }
 
 # ditto about 64k limit - profusion of external files
-widthsByFontGlyph = {}
-for fontName in standardFonts:
-    modname = '_fontdata_widths_%s' % fontName.lower().replace('-','')
-    module = __import__(modname, globals(), locals())
-    widthsByFontGlyph[fontName] = module.widths
-
+import reportlab.pdfbase._fontdata_widths_courier
+import reportlab.pdfbase._fontdata_widths_courierbold
+import reportlab.pdfbase._fontdata_widths_courieroblique
+import reportlab.pdfbase._fontdata_widths_courierboldoblique
+import reportlab.pdfbase._fontdata_widths_helvetica
+import reportlab.pdfbase._fontdata_widths_helveticabold
+import reportlab.pdfbase._fontdata_widths_helveticaoblique
+import reportlab.pdfbase._fontdata_widths_helveticaboldoblique
+import reportlab.pdfbase._fontdata_widths_timesroman
+import reportlab.pdfbase._fontdata_widths_timesbold
+import reportlab.pdfbase._fontdata_widths_timesitalic
+import reportlab.pdfbase._fontdata_widths_timesbolditalic
+import reportlab.pdfbase._fontdata_widths_symbol
+import reportlab.pdfbase._fontdata_widths_zapfdingbats
+widthsByFontGlyph = {
+    'Courier':
+    reportlab.pdfbase._fontdata_widths_courier.widths,
+    'Courier-Bold':
+    reportlab.pdfbase._fontdata_widths_courierbold.widths,
+    'Courier-Oblique':
+    reportlab.pdfbase._fontdata_widths_courieroblique.widths,
+    'Courier-BoldOblique':
+    reportlab.pdfbase._fontdata_widths_courierboldoblique.widths,
+    'Helvetica':
+    reportlab.pdfbase._fontdata_widths_helvetica.widths,
+    'Helvetica-Bold':
+    reportlab.pdfbase._fontdata_widths_helveticabold.widths,
+    'Helvetica-Oblique':
+    reportlab.pdfbase._fontdata_widths_helveticaoblique.widths,
+    'Helvetica-BoldOblique':
+    reportlab.pdfbase._fontdata_widths_helveticaboldoblique.widths,
+    'Times-Roman':
+    reportlab.pdfbase._fontdata_widths_timesroman.widths,
+    'Times-Bold':
+    reportlab.pdfbase._fontdata_widths_timesbold.widths,
+    'Times-Italic':
+    reportlab.pdfbase._fontdata_widths_timesitalic.widths,
+    'Times-BoldItalic':
+    reportlab.pdfbase._fontdata_widths_timesbolditalic.widths,
+    'Symbol':
+    reportlab.pdfbase._fontdata_widths_symbol.widths,
+    'ZapfDingbats':
+    reportlab.pdfbase._fontdata_widths_zapfdingbats.widths,
+}
 
 
 #preserve the initial values here

@@ -218,7 +218,7 @@ _addAttributeNames(_anchorAttrMap)
 _addAttributeNames(_linkAttrMap)
 
 def _applyAttributes(obj, attr):
-    for k, v in list(attr.items()):
+    for k, v in attr.items():
         if type(v) is TupleType and v[0]=='relative':
             #AR 20/5/2000 - remove 1.5.2-ism
             #v = v[1]+getattr(obj,k,0)
@@ -972,13 +972,13 @@ class ParaParser(xmllib.XMLParser):
     def _pop(self,**kw):
         frag = self._stack[-1]
         del self._stack[-1]
-        for k, v in list(kw.items()):
+        for k, v in kw.items():
             assert getattr(frag,k)==v
         return frag
 
     def getAttributes(self,attr,attrMap):
         A = {}
-        for k, v in list(attr.items()):
+        for k, v in attr.items():
             if not self.caseSensitive:
                 k = string.lower(k)
             if k in list(attrMap.keys()):

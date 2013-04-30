@@ -308,7 +308,7 @@ class ParaBox(figures.Figure):
     def getStyleText(self, style):
         """Converts style to preformatted block of text"""
         lines = []
-        for (key, value) in list(style.__dict__.items()):
+        for key, value in style.__dict__.items():
             lines.append('%s = %s' % (key, value))
         lines.sort()
         return string.join(lines, '\n')
@@ -346,7 +346,7 @@ class ParaBox(figures.Figure):
     def getStyleText(self, style):
         """Converts style to preformatted block of text"""
         lines = []
-        for (key, value) in list(style.__dict__.items()):
+        for key, value in style.__dict__.items():
             if key not in ('name','parent'):
                 lines.append('%s = %s' % (key, value))
         return string.join(lines, '\n')

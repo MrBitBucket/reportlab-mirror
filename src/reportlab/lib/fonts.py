@@ -63,7 +63,7 @@ _tt2ps_map = {
             }
 
 _ps2tt_map={}
-for k,v in list(_tt2ps_map.items()):
+for k,v in _tt2ps_map.items():
     if k not in _ps2tt_map:
         _ps2tt_map[v.lower()] = k
 

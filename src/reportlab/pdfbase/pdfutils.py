@@ -6,9 +6,11 @@ __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
 
+import sys
 import os
+import binascii
 from reportlab import rl_config
-from reportlab.lib.utils import getStringIO, ImageReader
+from reportlab.lib.utils import getBytesIO, ImageReader, isStrType, isUnicodeType, isPython3
 
 LINEEND = '\015\012'
 
@@ -80,7 +82,7 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
     if filename==cachedname:
         if cachedImageExists(filename):
             from reportlab.lib.utils import open_for_read
-            if returnInMemory: return [_f for _f in open_for_read(cachedname).read().split(LINEEND) if _f]
+            if returnInMemory: return filter(None,open_for_read(cachedname).read().split(LINEEND))
         else:
             raise IOError('No such cached image %s' % filename)
     else:
@@ -108,7 +110,7 @@ def preProcessImages(spec):
 
     import types, glob
 
-    if type(spec) is bytes:
+    if type(spec) is types.StringType:
         filelist = glob.glob(spec)
     else:  #list or tuple OK
         filelist = spec
@@ -154,26 +156,23 @@ except ImportError:
         _escape = escapePDF
     except ImportError:
         _instanceEscapePDF=None
-        if rl_config.sys_version>='2.1':
-            _ESCAPEDICT={}
-            for c in range(0,256):
-                if c<32 or c>=127:
-                    _ESCAPEDICT[chr(c)]= '\\%03o' % c
-                elif c in (ord('\\'),ord('('),ord(')')):
-                    _ESCAPEDICT[chr(c)] = '\\'+chr(c)
-                else:
-                    _ESCAPEDICT[chr(c)] = chr(c)
-            del c
-            #Michael Hudson donated this
-            def _escape(s):
-                return ''.join(map(lambda c, d=_ESCAPEDICT: d[c],s))
-        else:
-            def _escape(s):
-                """Escapes some PDF symbols (in fact, parenthesis).
-                PDF escapes are almost like Python ones, but brackets
-                need slashes before them too. Uses Python's repr function
-                and chops off the quotes first."""
-                return repr(s)[1:-1].replace('(','\(').replace(')','\)')
+        _ESCAPEDICT={}
+        for c in range(256):
+            if c<32 or c>=127:
+                _ESCAPEDICT[c]= '\\%03o' % c
+            elif c in (ord('\\'),ord('('),ord(')')):
+                _ESCAPEDICT[c] = '\\'+chr(c)
+            else:
+                _ESCAPEDICT[c] = chr(c)
+        del c
+        #Michael Hudson donated this
+        def _escape(s):
+            r = []
+            for c in s:
+                if not type(c) is int:
+                    c = ord(c)
+                r.append(_ESCAPEDICT[c])
+            return ''.join(r)
 
 def _normalizeLineEnds(text,desired=LINEEND,unlikely='\x00\x01\x02\x03'):
     """Normalizes different line end character(s).
@@ -193,10 +192,11 @@ def _AsciiHexEncode(input):
     This is a verbose encoding used for binary data within
     a PDF file.  One byte binary becomes two bytes of ASCII.
     Helper function used by images."""
-    output = getStringIO()
-    for char in input:
-        output.write('%02x' % ord(char))
-    output.write('>')
+    if isUnicodeType(input):
+        input = input.encode('utf-8')
+    output = getBytesIO()
+    output.write(binascii.b2a_hex(input))
+    output.write(b'>')
     return output.getvalue()
 
 
@@ -206,6 +206,8 @@ def _AsciiHexDecode(input):
     Not used except to provide a test of the inverse function."""
 
     #strip out all whitespace
+    if not isStrType(input):
+        input = input.decode('utf-8')
     stripped = ''.join(input.split())
     assert stripped[-1] == '>', 'Invalid terminator for Ascii Hex Stream'
     stripped = stripped[:-1]  #chop off terminator
@@ -224,14 +226,20 @@ if 1: # for testing always define this
         whole_word_count, remainder_size = divmod(len(input), 4)
         cut = 4 * whole_word_count
         body, lastbit = input[0:cut], input[cut:]
+        if isPython3 and isStrType(lastbit):
+            lastbit = lastbit.encode('utf-8')
 
         out = [].append
         for i in range(whole_word_count):
             offset = i*4
-            b1 = ord(body[offset])
-            b2 = ord(body[offset+1])
-            b3 = ord(body[offset+2])
-            b4 = ord(body[offset+3])
+            b1 = body[offset]
+            b2 = body[offset+1]
+            b3 = body[offset+2]
+            b4 = body[offset+3]
+            if isStrType(b1): b1 = ord(b1)
+            if isStrType(b2): b2 = ord(b2)
+            if isStrType(b3): b3 = ord(b3)
+            if isStrType(b4): b4 = ord(b4)
 
             if b1<128:
                 num = (((((b1<<8)|b2)<<8)|b3)<<8)|b4
@@ -261,11 +269,15 @@ if 1: # for testing always define this
         #encode however many bytes we have as usual
         if remainder_size > 0:
             while len(lastbit) < 4:
-                lastbit = lastbit + '\000'
-            b1 = ord(lastbit[0])
-            b2 = ord(lastbit[1])
-            b3 = ord(lastbit[2])
-            b4 = ord(lastbit[3])
+                lastbit = lastbit + b'\000'
+            b1 = lastbit[0]
+            b2 = lastbit[1]
+            b3 = lastbit[2]
+            b4 = lastbit[3]
+            if isStrType(b1): b1 = ord(b1)
+            if isStrType(b2): b2 = ord(b2)
+            if isStrType(b3): b3 = ord(b3)
+            if isStrType(b4): b4 = ord(b4)
 
             num = 16777216 * b1 + 65536 * b2 + 256 * b3 + b4
 

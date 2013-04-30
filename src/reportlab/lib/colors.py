@@ -706,7 +706,7 @@ def getAllNamedColors():
     if _namedColors is not None: return _namedColors
     from . import colors
     _namedColors = {}
-    for (name, value) in list(colors.__dict__.items()):
+    for name, value in colors.__dict__.items():
         if isinstance(value, Color):
             _namedColors[name] = value
 
@@ -720,7 +720,7 @@ def describe(aColor,mode=0):
     '''
     namedColors = getAllNamedColors()
     closest = (10, None, None)  #big number, name, color
-    for (name, color) in list(namedColors.items()):
+    for name, color in namedColors.items():
         distance = colorDistance(aColor, color)
         if distance < closest[0]:
             closest = (distance, name, color)
@@ -874,7 +874,7 @@ def setColors(**kw):
     assigned = {}
     while kw and progress:
         progress = 0
-        for k, v in list(kw.items()):
+        for k, v in kw.items():
             if isinstance(v,(tuple,list)):
                 c = list(map(lambda x,UNDEF=UNDEF: toColor(x,UNDEF),v))
                 if isinstance(v,tuple): c = tuple(c)
@@ -889,7 +889,7 @@ def setColors(**kw):
 
     if kw: raise ValueError("Can't convert\n%s" % str(kw))
     getAllNamedColors()
-    for k, c in list(assigned.items()):
+    for k, c in assigned.items():
         globals()[k] = c
         if isinstance(c,Color): _namedColors[k] = c
 

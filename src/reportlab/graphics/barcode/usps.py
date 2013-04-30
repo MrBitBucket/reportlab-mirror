@@ -97,7 +97,7 @@ class FIM(Barcode):
     lquiet = inch * (15.0/32.0)
     quiet = 0
     def __init__(self, value='', **args):
-        for (k, v) in list(args.items()):
+        for k, v in args.items():
             setattr(self, k, v)
 
         Barcode.__init__(self, value)
@@ -109,7 +109,7 @@ class FIM(Barcode):
             if c in string.whitespace:
                 continue
             elif c in "abcdABCD":
-                self.validated = self.validated + string.upper(c)
+                self.validated = self.validated + c.upper()
             else:
                 self.valid = 0
 
@@ -162,7 +162,7 @@ class POSTNET(Barcode):
     spaceWidth = inch * 0.0275
     def __init__(self, value='', **args):
 
-        for (k, v) in list(args.items()):
+        for k, v in args.items():
             setattr(self, k, v)
 
         Barcode.__init__(self, value)
@@ -193,7 +193,7 @@ class POSTNET(Barcode):
         for c in self.validated:
             if c in string.digits:
                 self.encoded = self.encoded + c
-                check = check + string.atoi(c)
+                check = check + int(c)
             elif c == '-':
                 pass
             else:

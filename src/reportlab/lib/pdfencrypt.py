@@ -4,13 +4,13 @@ __version__=''' $Id$ '''
 
 """helpers for pdf encryption/decryption"""
 
-import string, sys, os
+import sys, os
 try:
     from hashlib import md5
 except ImportError:
     from md5 import md5
 
-from reportlab.lib.utils import getStringIO
+from reportlab.lib.utils import getBytesIO
 import tempfile
 
 from reportlab.pdfgen.canvas import Canvas
@@ -176,7 +176,7 @@ else:
         return out
 
 def hexchar(x):
-    return chr(string.atoi(x, 16))
+    return chr(int(x, 16))
 
 def hexText(text):
     "a legitimate way to show strings in PDF"
@@ -196,7 +196,7 @@ def unHexText(hexText):
         out = out + char
     return out
 
-PadString = string.join(list(map(hexchar, string.split(string.strip(padding)))), "")
+PadString = ''.join(map(hexchar, padding.strip().split()))
 
 def encryptionkey(password, OwnerKey, Permissions, FileId1, revision=2):
     # FileId1 is first string of the fileid array
@@ -408,7 +408,7 @@ See http://developer.reportlab.com''')
     firstPageSize = bboxInfo['PageForms0'][2:]
 
     #now make a new PDF document
-    buf = getStringIO()
+    buf = getBytesIO()
     canv = Canvas(buf, pagesize=firstPageSize)
 
     # set a standard ID while debugging

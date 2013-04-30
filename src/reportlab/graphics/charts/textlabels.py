@@ -344,7 +344,7 @@ class LabelDecorator:
     def __init__(self):
         self.textAnchor = 'start'
         self.boxAnchor = 'w'
-        for a in list(self._attrMap.keys()):
+        for a in self._attrMap.keys():
             if not hasattr(self,a): setattr(self,a,None)
 
     def decorate(self,l,L):
@@ -355,7 +355,7 @@ class LabelDecorator:
     def __call__(self,l):
         from copy import deepcopy
         L = Label()
-        for a,v in list(self.__dict__.items()):
+        for a,v in self.__dict__.items():
             if v is None: v = getattr(l,a,None)
             setattr(L,a,v)
         self.decorate(l,L)

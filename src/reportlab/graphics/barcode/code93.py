@@ -55,7 +55,7 @@ _patterns = {
 }
 
 _charsbyval = {}
-for k, v in list(_patterns.items()):
+for k, v in _patterns.items():
     _charsbyval[v[1]] = k
 
 _extended = {

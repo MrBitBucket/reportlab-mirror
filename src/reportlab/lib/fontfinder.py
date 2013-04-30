@@ -105,7 +105,7 @@ class FontDescriptor:
     def getTag(self):
         "Return an XML tag representation"
         attrs = []
-        for (k, v) in list(self.__dict__.items()):
+        for k, v in self.__dict__.items():
             if k not in ['timeModified']:
                 if v:
                     attrs.append('%s=%s' % (k, quoteattr(str(v))))
@@ -178,7 +178,7 @@ class FontFinder:
         selected = []
         for font in self._fonts:
             OK = True
-            for (k, v) in list(kwds.items()):
+            for k, v in kwds.items():
                 if getattr(font, k, None) != v:
                     OK = False
             if OK:

@@ -463,7 +463,7 @@ class BaseDocTemplate:
         self._nameSpace = dict(doc=self)
         self._lifetimes = {}
 
-        for k in list(self._initArgs.keys()):
+        for k in self._initArgs.keys():
             if k not in kw:
                 v = self._initArgs[k]
             else:

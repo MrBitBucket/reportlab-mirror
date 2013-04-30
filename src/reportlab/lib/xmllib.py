@@ -8,7 +8,6 @@ __doc__='''From before xmllib was in the Python standard library.
 Probably ought to be removed'''
 
 import re
-import string
 
 try:
     import sgmlop   # this works for both builtin on the path or relative
@@ -116,7 +115,7 @@ class SlowXMLParser:
             res = ref.search(data, i)
             if res is None:
                 newdata.append(data[i:])
-                return string.join(newdata, '')
+                return ''.join(newdata)
             if data[res.end(0) - 1] != ';':
                 self.syntax_error(self.lineno,
                                   '; missing after entity/char reference')
@@ -124,9 +123,9 @@ class SlowXMLParser:
             str = res.group(1)
             if str[0] == '#':
                 if str[1] == 'x':
-                    newdata.append(chr(string.atoi(str[2:], 16)))
+                    newdata.append(chr(int(str[2:], 16)))
                 else:
-                    newdata.append(chr(string.atoi(str[1:])))
+                    newdata.append(chr(int(str[1:])))
             else:
                 try:
                     newdata.append(self.entitydefs[str])
@@ -146,7 +145,7 @@ class SlowXMLParser:
             if self.nomoretags:
                 data = rawdata[i:n]
                 self.handle_data(data)
-                self.lineno = self.lineno + string.count(data, '\n')
+                self.lineno = self.lineno + '\n'.count(data)
                 i = n
                 break
             res = interesting.search(rawdata, i)
@@ -157,7 +156,7 @@ class SlowXMLParser:
             if i < j:
                 data = rawdata[i:j]
                 self.handle_data(data)
-                self.lineno = self.lineno + string.count(data, '\n')
+                self.lineno = self.lineno + '\n'.count(data)
             i = j
             if i == n: break
             if rawdata[i] == '<':
@@ -165,18 +164,18 @@ class SlowXMLParser:
                     if self.literal:
                         data = rawdata[i]
                         self.handle_data(data)
-                        self.lineno = self.lineno + string.count(data, '\n')
+                        self.lineno = self.lineno + '\n'.count(data)
                         i = i+1
                         continue
                     k = self.parse_starttag(i)
                     if k < 0: break
-                    self.lineno = self.lineno + string.count(rawdata[i:k], '\n')
+                    self.lineno = self.lineno + '\n'.count(rawdata[i:k])
                     i = k
                     continue
                 if endtagopen.match(rawdata, i):
                     k = self.parse_endtag(i)
                     if k < 0: break
-                    self.lineno = self.lineno + string.count(rawdata[i:k], '\n')
+                    self.lineno = self.lineno + '\n'.count(rawdata[i:k])
                     i =  k
                     self.literal = 0
                     continue
@@ -184,25 +183,25 @@ class SlowXMLParser:
                     if self.literal:
                         data = rawdata[i]
                         self.handle_data(data)
-                        self.lineno = self.lineno + string.count(data, '\n')
+                        self.lineno = self.lineno + '\n'.count(data)
                         i = i+1
                         continue
                     k = self.parse_comment(i)
                     if k < 0: break
-                    self.lineno = self.lineno + string.count(rawdata[i:k], '\n')
+                    self.lineno = self.lineno + '\n'.count(rawdata[i:k])
                     i = k
                     continue
                 if cdataopen.match(rawdata, i):
                     k = self.parse_cdata(i)
                     if k < 0: break
-                    self.lineno = self.lineno + string.count(rawdata[i:i], '\n')
+                    self.lineno = self.lineno + '\n'.count(rawdata[i:i])
                     i = k
                     continue
                 res = procopen.match(rawdata, i)
                 if res:
                     k = self.parse_proc(i, res)
                     if k < 0: break
-                    self.lineno = self.lineno + string.count(rawdata[i:k], '\n')
+                    self.lineno = self.lineno + '\n'.count(rawdata[i:k])
                     i = k
                     continue
                 res = special.match(rawdata, i)
@@ -210,11 +209,11 @@ class SlowXMLParser:
                     if self.literal:
                         data = rawdata[i]
                         self.handle_data(data)
-                        self.lineno = self.lineno + string.count(data, '\n')
+                        self.lineno = self.lineno + '\n'.count(data)
                         i = i+1
                         continue
                     self.handle_special(res.group('special'))
-                    self.lineno = self.lineno + string.count(res.group(0), '\n')
+                    self.lineno = self.lineno + '\n'.count(res.group(0))
                     i = res.end(0)
                     continue
             elif rawdata[i] == '&':
@@ -225,7 +224,7 @@ class SlowXMLParser:
                         self.syntax_error(self.lineno, '; missing in charref')
                         i = i-1
                     self.handle_charref(res.group('char')[:-1])
-                    self.lineno = self.lineno + string.count(res.group(0), '\n')
+                    self.lineno = self.lineno + '\n'.count(res.group(0))
                     continue
                 res = entityref.match(rawdata, i)
                 if res is not None:
@@ -234,7 +233,7 @@ class SlowXMLParser:
                         self.syntax_error(self.lineno, '; missing in entityref')
                         i = i-1
                     self.handle_entityref(res.group('name'))
-                    self.lineno = self.lineno + string.count(res.group(0), '\n')
+                    self.lineno = self.lineno + '\n'.count(res.group(0))
                     continue
             else:
                 raise RuntimeError('neither < nor & ??')
@@ -244,7 +243,7 @@ class SlowXMLParser:
             if not res:
                 data = rawdata[i]
                 self.handle_data(data)
-                self.lineno = self.lineno + string.count(data, '\n')
+                self.lineno = self.lineno + '\n'.count(data)
                 i = i+1
                 continue
             j = res.end(0)
@@ -253,13 +252,13 @@ class SlowXMLParser:
             self.syntax_error(self.lineno, 'bogus < or &')
             data = res.group(0)
             self.handle_data(data)
-            self.lineno = self.lineno + string.count(data, '\n')
+            self.lineno = self.lineno + '\n'.count(data)
             i = j
         # end while
         if end and i < n:
             data = rawdata[i:n]
             self.handle_data(data)
-            self.lineno = self.lineno + string.count(data, '\n')
+            self.lineno = self.lineno + '\n'.count(data)
             i = n
         self.rawdata = rawdata[i:]
         # XXX if end: check for empty stack
@@ -424,10 +423,10 @@ class SlowXMLParser:
     def handle_charref(self, name):
         try:
             if name[0] == 'x':
-                n = string.atoi(name[1:], 16)
+                n = int(name[1:], 16)
             else:
-                n = string.atoi(name)
-        except string.atoi_error:
+                n = int(name)
+        except int_error:
             self.unknown_charref(name)
             return
         if not 0 <= n <= 255:
@@ -530,7 +529,7 @@ class FastXMLParser:
             res = ref.search(data, i)
             if res is None:
                 newdata.append(data[i:])
-                return string.join(newdata, '')
+                return ''.join(newdata)
             if data[res.end(0) - 1] != ';':
                 self.syntax_error(self.lineno,
                                   '; missing after entity/char reference')
@@ -538,9 +537,9 @@ class FastXMLParser:
             str = res.group(1)
             if str[0] == '#':
                 if str[1] == 'x':
-                    newdata.append(chr(string.atoi(str[2:], 16)))
+                    newdata.append(chr(int(str[2:], 16)))
                 else:
-                    newdata.append(chr(string.atoi(str[1:])))
+                    newdata.append(chr(int(str[1:])))
             else:
                 try:
                     newdata.append(self.entitydefs[str])
@@ -603,10 +602,10 @@ class FastXMLParser:
     def handle_charref(self, name):
         try:
             if name[0] == 'x':
-                n = string.atoi(name[1:], 16)
+                n = int(name[1:], 16)
             else:
-                n = string.atoi(name)
-        except string.atoi_error:
+                n = int(name)
+        except ValueError:
             self.unknown_charref(name)
             return
         if not 0 <= n <= 255:
@@ -713,7 +712,7 @@ class TestXMLParser(XMLParser):
             print('start tag: <' + tag + '>')
         else:
             print('start tag: <' + tag, end=' ')
-            for name, value in list(attrs.items()):
+            for name, value in attrs.items():
                 print(name + '=' + '"' + value + '"', end=' ')
             print('>')
 

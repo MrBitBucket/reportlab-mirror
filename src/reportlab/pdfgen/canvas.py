@@ -12,21 +12,17 @@ ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 import os
 import sys
 import re
-from string import join, split, strip, atoi, replace, upper, digits
+import hashlib
+from string import digits
 import tempfile
 from math import sin, cos, tan, pi, ceil
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
-
 from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.colors import black, _chooseEnforceColorSpace, Color, CMYKColor, toColor
-from reportlab.lib.utils import import_zlib, ImageReader, fp_str, _digester
+from reportlab.lib.utils import import_zlib, ImageReader, fp_str, isSeqType, isStrType, isUnicodeType, _digester
 from reportlab.lib.boxstuff import aspectRatioFix
 
 digitPat = re.compile('\d')  #used in decimal alignment
@@ -317,8 +313,8 @@ class Canvas(textobject._PDFColorSetter):
         '''
         if encrypt:
             from reportlab.lib import pdfencrypt
-            if isinstance(encrypt, str): #encrypt is the password itself
-                if isinstance(encrypt, str):
+            if isStrType(encrypt): #encrypt is the password itself
+                if isUnicodeType(encrypt):
                     encrypt = encrypt.encode('utf-8')
                 encrypt = pdfencrypt.StandardEncryption(encrypt)    #now it's the encrypt object
                 encrypt.setAllPermissions(1)
@@ -376,11 +372,10 @@ class Canvas(textobject._PDFColorSetter):
         d = self.__dict__
         d.update(state)
 
-    STATE_ATTRIBUTES = split("""
-     _x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
+    STATE_ATTRIBUTES = """_x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
      _fillMode _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
      _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorObj
-     _strokeColorObj _extgstate""")
+     _strokeColorObj _extgstate""".split()
     STATE_RANGE = list(range(len(STATE_ATTRIBUTES)))
 
         #self._addStandardFonts()
@@ -912,10 +907,15 @@ class Canvas(textobject._PDFColorSetter):
                 mdata = smask.getRGBData()
             else:
                 mdata = str(mask)
+            if isUnicodeType(mdata):
+                mdata = mdata.encode('utf8')
             name = _digester(rawdata+mdata)
         else:
             #filename, use it
-            name = _digester('%s%s' % (image, mask))
+            s = '%s%s' % (image, mask)
+            if isUnicodeType(s):
+                s = s.encode('utf-8')
+            name = _digester(s)
 
         # in the pdf document, this will be prefixed with something to
         # say it is an XObject.  Does it exist yet?
@@ -1044,7 +1044,10 @@ class Canvas(textobject._PDFColorSetter):
         will error in Distiller but work on printers supporting it.
         """
         #check if we've done this one already...
-        rawName = 'PS' + md5(command).hexdigest()
+        if isUnicodeType(command):
+            rawName = 'PS' + hashlib.md5(command.encode('utf-8')).hexdigest()
+        else:
+            rawName = 'PS' + hashlib.md5(command).hexdigest()
         regName = self._doc.getXObjectName(rawName)
         psObj = self._doc.idToObject.get(regName, None)
         if not psObj:
@@ -1198,7 +1201,10 @@ class Canvas(textobject._PDFColorSetter):
         If there is current data a ShowPage is executed automatically.
         After this operation the canvas must not be used further."""
         if len(self._code): self.showPage()
-        return self._doc.GetPDFData(self)
+        s = self._doc.GetPDFData(self)
+        if isUnicodeType(s):
+            s = s.encode('utf-8')
+        return s
 
     def setPageSize(self, size):
         """accepts a 2-tuple in points for paper size for this
@@ -1254,7 +1260,7 @@ class Canvas(textobject._PDFColorSetter):
                                    a0*c+c0*d,    b0*c+d0*d,
                                    a0*e+c0*f+e0, b0*e+d0*f+f0)
         if self._code and self._code[-1][-3:]==' cm':
-            L = split(self._code[-1])
+            L = self._code[-1].split()
             a0, b0, c0, d0, e0, f0 = list(map(float,L[-7:-1]))
             s = len(L)>7 and join(L)+ ' %s cm' or '%s cm'
             self._code[-1] = s % fp_str(a0*a+c0*b,b0*a+d0*b,a0*c+c0*d,b0*c+d0*d,a0*e+c0*f+e0,b0*e+d0*f+f0)
@@ -1475,6 +1481,8 @@ class Canvas(textobject._PDFColorSetter):
 
     def drawString(self, x, y, text, mode=None):
         """Draws a string in the current text styles."""
+        if sys.version_info[0] == 3 and not isinstance(text, str):
+            text = text.decode('utf-8')
         #we could inline this for speed if needed
         t = self.beginText(x, y)
         if mode is not None: t.setTextRenderMode(mode)
@@ -1483,6 +1491,8 @@ class Canvas(textobject._PDFColorSetter):
 
     def drawRightString(self, x, y, text, mode=None):
         """Draws a string right-aligned with the x coordinate"""
+        if sys.version_info[0] == 3 and not isinstance(text, str):
+            text = text.decode('utf-8')
         width = self.stringWidth(text, self._fontname, self._fontsize)
         t = self.beginText(x - width, y)
         if mode is not None: t.setTextRenderMode(mode)
@@ -1493,6 +1503,8 @@ class Canvas(textobject._PDFColorSetter):
         """Draws a string centred on the x coordinate. 
         
         We're British, dammit, and proud of our spelling!"""
+        if sys.version_info[0] == 3 and not isinstance(text, str):
+            text = text.decode('utf-8')
         width = self.stringWidth(text, self._fontname, self._fontsize)
         t = self.beginText(x - 0.5*width, y)
         if mode is not None: t.setTextRenderMode(mode)
@@ -1628,9 +1640,9 @@ class Canvas(textobject._PDFColorSetter):
         """Two notations.  pass two numbers, or an array and phase"""
         if isinstance(array,(int,float)):
             self._code.append('[%s %s] 0 d' % (array, phase))
-        elif isinstance(array,(tuple,list)):
+        elif isSeqType(array):
             assert phase >= 0, "phase is a length in user space"
-            textarray = ' '.join(map(str, array))
+            textarray = ' '.join([str(s) for s in array])
             self._code.append('[%s] %s d' % (textarray, phase))
 
     # path stuff - the separate path object builds it

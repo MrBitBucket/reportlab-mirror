@@ -119,7 +119,7 @@ class RlAccelTestCase(unittest.TestCase):
             def __init__(self,**kwd):
                 self.__dict__.update(kwd)
             def __str__(self):
-                V=['%s=%r' % v for v in list(self.__dict__.items())]
+                V=['%s=%r' % v for v in self.__dict__.items()]
                 V.sort()
                 return 'ABag(%s)' % ','.join(V)
 
