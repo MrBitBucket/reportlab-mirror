@@ -57,14 +57,14 @@ class _isBoolean(Validator):
         try:
             S = string.upper(x)
         except:
-            raise ValueError, 'Must be boolean'
+            raise ValueError('Must be boolean')
         if S in ('YES','TRUE'): return True
         if S in ('NO','FALSE',None): return False
-        raise ValueError, 'Must be boolean'
+        raise ValueError('Must be boolean')
 
 class _isString(Validator):
     def test(self,x):
-        return isinstance(x,(str,unicode))
+        return isinstance(x,str)
 
 class _isCodec(Validator):
     def test(self,x):
@@ -210,7 +210,7 @@ class OneOf(Validator):
     def __init__(self, enum,*args):
         if type(enum) in [ListType,TupleType]:
             if args!=():
-                raise ValueError, "Either all singleton args or a single sequence argument"
+                raise ValueError("Either all singleton args or a single sequence argument")
             self._enum = tuple(enum)+args
         else:
             self._enum = (enum,)+args
@@ -280,7 +280,7 @@ class matchesPattern(Validator):
         self._pattern = re.compile(pattern)
 
     def test(self,x):
-        print 'testing %s against %s' % (x, self._pattern)
+        print('testing %s against %s' % (x, self._pattern))
         if type(x) is StringType:
             text = x
         else:

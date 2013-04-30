@@ -22,8 +22,8 @@ class ArcIV:
 		#Initialize private key, k With the values of the key mod 256.
 		#and sbox With numbers 0 - 255. Then compute sbox
 		key = self._key
-		sbox = range(256)
-		k = range(256)
+		sbox = list(range(256))
+		k = list(range(256))
 		lk = len(key)
 		for i in sbox:
 			k[i] = ord(key[i % lk]) % 256
@@ -32,7 +32,7 @@ class ArcIV:
 		#Iterating each element of sbox re-calculate the counter j
 		#Then interchange the elements sbox[a] & sbox[b]
 		j = 0
-		for i in xrange(256):
+		for i in range(256):
 			j = (j+sbox[i]+k[i]) % 256
 			sbox[i], sbox[j] = sbox[j], sbox[i]
 		self._sbox, self._i, self._j = sbox, 0, 0
@@ -44,7 +44,7 @@ class ArcIV:
 		'''
 		sbox, i, j = self._sbox, self._i, self._j
 
-		C = type(B) is StringType and map(ord,B) or B[:]
+		C = type(B) is StringType and list(map(ord,B)) or B[:]
 		n = len(C)
 		p = 0
 		while p<n:
@@ -208,7 +208,7 @@ if __name__=='__main__':
 	i = 0
 	for t in _TESTS:
 		o = ArcIV(t['key']).encode(t['input'])
-		print 'Forward test %d %s!' %(i,o!=t['output'] and 'failed' or 'succeeded')
+		print('Forward test %d %s!' %(i,o!=t['output'] and 'failed' or 'succeeded'))
 		o = ArcIV(t['key']).encode(t['output'])
-		print 'Reverse test %d %s!' %(i,o!=t['input'] and 'failed' or 'succeeded')
+		print('Reverse test %d %s!' %(i,o!=t['input'] and 'failed' or 'succeeded'))
 		i += 1

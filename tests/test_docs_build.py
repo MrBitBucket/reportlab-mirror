@@ -14,7 +14,7 @@ class ManualTestCase(SecureTestCase):
         try:
             docsFolder = os.path.join(os.path.dirname(testsFolder),'docs')
         except:
-            print testsFolder
+            print(testsFolder)
             raise
         cwd = os.getcwd()
         os.chdir(docsFolder)

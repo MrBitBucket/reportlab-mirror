@@ -188,14 +188,14 @@ from reportlab.platypus.paraparser import _addAttributeNames, _paraAttrMap, _bul
 def getAttrs(A):
     _addAttributeNames(A)
     S={}
-    for k, v in A.items():
+    for k, v in list(A.items()):
         a = v[0]
         if a not in S:
             S[a] = k
         else:
             S[a] = "%s, %s" %(S[a],k)
 
-    K = S.keys()
+    K = list(S.keys())
     K.sort()
     D=[('Attribute','Synonyms')]
     for k in K:

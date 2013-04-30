@@ -67,7 +67,7 @@ def run(verbose=1):
         accelStr = 'with _rl_accel'
     else:
         accelStr = 'without _rl_accel'
-    print 'Benchmark of %s %s %s' % (impl, verStr, accelStr)
+    print('Benchmark of %s %s %s' % (impl, verStr, accelStr))
 
     started = time.time()
     canv = canvas.Canvas('odyssey.pdf', invariant=1)
@@ -119,7 +119,7 @@ def run(verbose=1):
             #page
             pg = canv.getPageNumber()
             if verbose and pg % 10 == 0:
-                print 'formatted page %d' % canv.getPageNumber()
+                print('formatted page %d' % canv.getPageNumber())
 
     if tx:
         canv.drawText(tx)
@@ -127,7 +127,7 @@ def run(verbose=1):
         drawPageFrame(canv)
 
     if verbose:
-        print 'about to write to disk...'
+        print('about to write to disk...')
 
     canv.save()
 
@@ -136,10 +136,10 @@ def run(verbose=1):
     pages = canv.getPageNumber()-1
     speed =  pages / elapsed
     fileSize = os.stat('odyssey.pdf')[6] / 1024
-    print '%d pages in %0.2f seconds = %0.2f pages per second, file size %d kb' % (
-                pages, elapsed, speed, fileSize)
+    print('%d pages in %0.2f seconds = %0.2f pages per second, file size %d kb' % (
+                pages, elapsed, speed, fileSize))
     import md5
-    print 'file digest: %s' % md5.md5(open('odyssey.pdf','rb').read()).hexdigest()
+    print('file digest: %s' % md5.md5(open('odyssey.pdf','rb').read()).hexdigest())
 
 if __name__=='__main__':
     quiet = ('-q' in sys.argv)

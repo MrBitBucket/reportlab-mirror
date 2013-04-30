@@ -71,15 +71,15 @@ if __name__=='__main__':
 	percent=79.2
 	class dingo:
 		a=3
-	print(magicformat('''
+	print((magicformat('''
 $%%(df(x,dp=3))s --> $%(df(x,dp=3))s
 $%%(df(x,dp=2,ds=',',ts='.'))s --> $%(df(x,dp=2,ds=',',ts='.'))s
 %%(percent).2f%%%% --> %(percent).2f%%
 %%(dingo.a)s --> %(dingo.a)s
 %%(Z['abc'][0])s --> %(Z['abc'][0])s
-'''))
+''')))
 	def func0(aa=1):
 		def func1(bb=2):
-			print(magicformat('bb=%(bb)s Z=%(Z)r'))
+			print((magicformat('bb=%(bb)s Z=%(Z)r')))
 		func1('BB')
 	func0('AA')

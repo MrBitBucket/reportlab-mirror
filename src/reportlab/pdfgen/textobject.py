@@ -78,7 +78,7 @@ class _PDFColorSetter:
                 self._code.append('%s k' % fp_str(aColor))
             else:
                 raise ValueError('Unknown color %r' % aColor)
-        elif isinstance(aColor,basestring):
+        elif isinstance(aColor,str):
             self.setFillColor(toColor(aColor))
         else:
             raise ValueError('Unknown color %r' % aColor)
@@ -114,7 +114,7 @@ class _PDFColorSetter:
                 self._code.append('%s K' % fp_str(aColor))
             else:
                 raise ValueError('Unknown color %r' % aColor)
-        elif isinstance(aColor,basestring):
+        elif isinstance(aColor,str):
             self.setStrokeColor(toColor(aColor))
         else:
             raise ValueError('Unknown color %r' % aColor)
@@ -383,10 +383,10 @@ class PDFTextObject(_PDFColorSetter):
         else:
             #convert to T1  coding
             fc = font
-            if not isinstance(text,unicode):
+            if not isinstance(text,str):
                 try:
                     text = text.decode('utf8')
-                except UnicodeDecodeError,e:
+                except UnicodeDecodeError as e:
                     i,j = e.args[2:4]
                     raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[max(i-10,0):i],text[i:j],text[j:j+10]),)))
 
@@ -431,10 +431,10 @@ class PDFTextObject(_PDFColorSetter):
         since this may be indented, by default it trims whitespace
         off each line and from the beginning; set trim=0 to preserve
         whitespace."""
-        if isinstance(stuff,basestring):
+        if isinstance(stuff,str):
             lines = string.split(string.strip(stuff), '\n')
             if trim==1:
-                lines = map(string.strip,lines)
+                lines = list(map(string.strip,lines))
         elif isinstance(stuff,(tuple,list)):
             lines = stuff
         else:
@@ -445,6 +445,6 @@ class PDFTextObject(_PDFColorSetter):
         for line in lines:
             self.textLine(line)
 
-    def __nonzero__(self):
+    def __bool__(self):
         'PDFTextObject is true if it has something done after the init'
         return self._code != ['BT']

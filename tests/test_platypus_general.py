@@ -537,8 +537,8 @@ class AndyTemplate(BaseDocTemplate):
             self.handle_flowable(flowables)
 
     def build(self, flowables1, flowables2):
-        assert filter(lambda x: not isinstance(x,Flowable), flowables1)==[], "flowables1 argument error"
-        assert filter(lambda x: not isinstance(x,Flowable), flowables2)==[], "flowables2 argument error"
+        assert [x for x in flowables1 if not isinstance(x,Flowable)]==[], "flowables1 argument error"
+        assert [x for x in flowables2 if not isinstance(x,Flowable)]==[], "flowables2 argument error"
         self._startBuild()
         while (len(flowables1) > 0 or len(flowables1) > 0):
             self.clean_hanging()
@@ -548,7 +548,7 @@ class AndyTemplate(BaseDocTemplate):
         self._endBuild()
 
 def showProgress(pageNo):
-    print 'CALLBACK SAYS: page %d' % pageNo
+    print('CALLBACK SAYS: page %d' % pageNo)
 
 
 def run():

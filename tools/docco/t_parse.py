@@ -100,7 +100,7 @@ class Template:
        self.wild_card = wild_card_marker
        self.char = single_char_marker
        # determine the set of markers for this template
-       markers = marker_to_regex_dict.keys()
+       markers = list(marker_to_regex_dict.keys())
        if wild_card_marker:
           markers.append(wild_card_marker)
        if single_char_marker:
@@ -110,10 +110,10 @@ class Template:
        self.markers = markers
        for mark in markers:
            if len(mark)>1:
-              raise ValueError, "Marks must be single characters: "+repr(mark)
+              raise ValueError("Marks must be single characters: "+repr(mark))
        # compile the regular expressions if needed
        self.marker_dict = marker_dict = {}
-       for (mark, rgex) in marker_to_regex_dict.items():
+       for (mark, rgex) in list(marker_to_regex_dict.items()):
            if type(rgex) == StringType:
               rgex = re.compile(rgex)
            marker_dict[mark] = rgex
@@ -131,14 +131,14 @@ class Template:
           # is it a wildcard?
           if thischar == wild_card_marker:
              if lastchar == wild_card_marker:
-                raise ValueError, "two wild cards in sequence is not allowed"
+                raise ValueError("two wild cards in sequence is not allowed")
              parse_seq.append( (wild_card_marker, None) )
              index = index+1
              ndirectives = ndirectives+1
           # is it a sequence of single character markers?
           elif single_char_marker and thischar in single_char_marker:
              if lastchar == wild_card_marker:
-                raise ValueError, "wild card cannot precede single char marker"
+                raise ValueError("wild card cannot precede single char marker")
              while index<last and template[index] == thischar:
                 index = index+1
              parse_seq.append( (single_char_primary, index-start) )
@@ -169,12 +169,12 @@ class Template:
        current_directive_index = 0
        currentindex = start
        # scan through the parse sequence, recognizing
-       for parse_index in xrange(lparse_seq + 1):
+       for parse_index in range(lparse_seq + 1):
            (indicator, data) = parse_seq[parse_index]
            # is it a literal indicator?
            if indicator is None:
               if find(str, data, currentindex) != currentindex:
-                 raise ValueError, "literal not found at "+repr((currentindex,data))
+                 raise ValueError("literal not found at "+repr((currentindex,data)))
               currentindex = currentindex + len(data)
            else:
               # anything else is a directive
@@ -191,14 +191,12 @@ class Template:
                        # search for literal
                        last = find(str, nextdata, currentindex)
                        if last<currentindex:
-                          raise ValueError, \
-                           "couldn't terminate wild with lit "+repr(currentindex)
+                          raise ValueError("couldn't terminate wild with lit "+repr(currentindex))
                     else:
                        # data is a re, search for it
                        last = nextdata.search(str, currentindex)
                        if last<currentindex:
-                          raise ValueError, \
-                           "couldn't terminate wild with re "+repr(currentindex)
+                          raise ValueError("couldn't terminate wild with re "+repr(currentindex))
               elif indicator == single_char:
                  # data is length to eat
                  last = currentindex + data
@@ -206,14 +204,14 @@ class Template:
                  # other directives are always regular expressions
                  last = data.match(str, currentindex) + currentindex
                  if last<currentindex:
-                    raise ValueError, "couldn't match re at "+repr(currentindex)
+                    raise ValueError("couldn't match re at "+repr(currentindex))
               #print "accepting", str[currentindex:last]
               result[current_directive_index] = str[currentindex:last]
               current_directive_index = current_directive_index+1
               currentindex = last
        # sanity check
        if current_directive_index != ndirectives:
-          raise SystemError, "not enough directives found?"
+          raise SystemError("not enough directives found?")
        return (result, currentindex)
 
 # some useful regular expressions
@@ -229,20 +227,20 @@ def test():
     global T, T1, T2, T3
 
     T = Template("(NNN)NNN-NNNN X X", "X", "N")
-    print T.PARSE("(908)949-2726 Aaron Watters")
+    print(T.PARSE("(908)949-2726 Aaron Watters"))
 
     T1 = Template("s --> s blah", s=str)
     s = "' <-- a string --> ' --> 'blah blah another string blah' blah"
-    print T1.PARSE(s)
+    print(T1.PARSE(s))
 
     T2 = Template("s --> NNNiX", "X", "N", s=str, i=int)
-    print T2.PARSE("'A STRING' --> 15964653alpha beta gamma")
+    print(T2.PARSE("'A STRING' --> 15964653alpha beta gamma"))
 
     T3 = Template("XsXi", "X", "N", s=str, i=int)
-    print T3.PARSE("prefix'string'interior1234junk not parsed")
+    print(T3.PARSE("prefix'string'interior1234junk not parsed"))
 
     T4 = Template("MMDDYYX", "X", "MDY")
-    print T4.PARSE("122961 Somebody's birthday!")
+    print(T4.PARSE("122961 Somebody's birthday!"))
 
 
 if __name__=="__main__": test()

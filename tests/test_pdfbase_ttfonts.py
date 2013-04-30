@@ -7,7 +7,7 @@ Serif Regular and is covered under the license in ../fonts/bitstream-vera-licens
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, NearTestCase
 setOutDir(__name__)
 import string
-from cStringIO import StringIO
+from io import StringIO
 import unittest
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
@@ -22,7 +22,7 @@ from reportlab import rl_config
 def utf8(code):
     "Convert a given UCS character index into UTF-8"
     if code < 0 or code > 0x7FFFFFFF:
-        raise ValueError, 'Invalid UCS character 0x%x' % code
+        raise ValueError('Invalid UCS character 0x%x' % code)
     elif code < 0x00000080:
         return chr(code)
     elif code < 0x00000800:
@@ -61,11 +61,11 @@ def _simple_subset_generation(fn,npages,alter=0):
     c.setFont('Helvetica', 30)
     c.drawString(100,700, 'Unicode TrueType Font Test %d pages' % npages)
     # Draw a table of Unicode characters
-    for p in xrange(npages):
+    for p in range(npages):
         for fontName in ('Vera','VeraBI'):
             c.setFont(fontName, 10)
-            for i in xrange(32):
-                for j in xrange(32):
+            for i in range(32):
+                for j in range(32):
                     ch = utf8(i * 32 + j+p*alter)
                     c.drawString(80 + j * 13 + int(j / 16.0) * 4, 600 - i * 13 - int(i / 8.0) * 8, ch)
         c.showPage()
@@ -110,7 +110,7 @@ class TTFontFileTestCase(NearTestCase):
                 self._pos = 0
 
         ttf = FakeTTFontFile("\x81\x02\x03\x04" "\x85\x06" "ABCD" "\x7F\xFF" "\x80\x00" "\xFF\xFF")
-        self.assertEquals(ttf.read_ulong(), 0x81020304L) # big-endian
+        self.assertEquals(ttf.read_ulong(), 0x81020304) # big-endian
         self.assertEquals(ttf._pos, 4)
         self.assertEquals(ttf.read_ushort(), 0x8506)
         self.assertEquals(ttf._pos, 6)
@@ -136,24 +136,24 @@ class TTFontFileTestCase(NearTestCase):
     def testAdd32(self):
         "Test add32"
         self.assertEquals(add32(10, -6), 4)
-        self.assertEquals(add32(6, -10), -4&0xFFFFFFFFL)
-        self.assertEquals(add32(0x80000000L, -1), 0x7FFFFFFF)
-        self.assertEquals(add32(0x7FFFFFFF, 1), 0x80000000L)
+        self.assertEquals(add32(6, -10), -4&0xFFFFFFFF)
+        self.assertEquals(add32(0x80000000, -1), 0x7FFFFFFF)
+        self.assertEquals(add32(0x7FFFFFFF, 1), 0x80000000)
 
     def testChecksum(self):
         "Test calcChecksum function"
         self.assertEquals(calcChecksum(""), 0)
         self.assertEquals(calcChecksum("\1"), 0x01000000)
         self.assertEquals(calcChecksum("\x01\x02\x03\x04\x10\x20\x30\x40"), 0x11223344)
-        self.assertEquals(calcChecksum("\x81"), 0x81000000L)
-        self.assertEquals(calcChecksum("\x81\x02"), 0x81020000L)
-        self.assertEquals(calcChecksum("\x81\x02\x03"), 0x81020300L)
-        self.assertEquals(calcChecksum("\x81\x02\x03\x04"), 0x81020304L)
-        self.assertEquals(calcChecksum("\x81\x02\x03\x04\x05"), 0x86020304L)
+        self.assertEquals(calcChecksum("\x81"), 0x81000000)
+        self.assertEquals(calcChecksum("\x81\x02"), 0x81020000)
+        self.assertEquals(calcChecksum("\x81\x02\x03"), 0x81020300)
+        self.assertEquals(calcChecksum("\x81\x02\x03\x04"), 0x81020304)
+        self.assertEquals(calcChecksum("\x81\x02\x03\x04\x05"), 0x86020304)
         self.assertEquals(calcChecksum("\x41\x02\x03\x04\xD0\x20\x30\x40"), 0x11223344)
         self.assertEquals(calcChecksum("\xD1\x02\x03\x04\x40\x20\x30\x40"), 0x11223344)
         self.assertEquals(calcChecksum("\x81\x02\x03\x04\x90\x20\x30\x40"), 0x11223344)
-        self.assertEquals(calcChecksum("\x7F\xFF\xFF\xFF\x00\x00\x00\x01"), 0x80000000L)
+        self.assertEquals(calcChecksum("\x7F\xFF\xFF\xFF\x00\x00\x00\x01"), 0x80000000)
 
     def testFontFileChecksum(self):
         "Tests TTFontFile and TTF parsing code"
@@ -237,7 +237,7 @@ class TTFontTestCase(NearTestCase):
         self.assertEquals(parse_utf8("\xE2\x89\xA0x"), [0x2260, 0x78])
         self.assertRaises(ValueError, parse_utf8, "\xE2\x89x")
         # for i in range(0, 0xFFFF): - overkill
-        for i in range(0x80, 0x200) + range(0x300, 0x400) + [0xFFFE, 0xFFFF]:
+        for i in list(range(0x80, 0x200)) + list(range(0x300, 0x400)) + [0xFFFE, 0xFFFF]:
             self.assertEquals(parse_utf8(utf8(i)), [i])
 
     def testStringWidth(self):
@@ -252,16 +252,16 @@ class TTFontTestCase(NearTestCase):
         "Tests TTFont.splitString"
         doc = PDFDocument()
         font = TTFont("Vera", "Vera.ttf")
-        text = string.join(map(utf8, xrange(0, 511)), "")
-        allchars = string.join(map(chr, xrange(0, 256)), "")
+        text = string.join(list(map(utf8, range(0, 511))), "")
+        allchars = string.join(list(map(chr, range(0, 256))), "")
         nospace = allchars[:32] + allchars[33:]
         chunks = [(0, allchars), (1, nospace)]
         self.assertEquals(font.splitString(text, doc), chunks)
         # Do it twice
         self.assertEquals(font.splitString(text, doc), chunks)
 
-        text = string.join(map(utf8, range(510, -1, -1)), "")
-        allchars = string.join(map(chr, range(255, -1, -1)), "")
+        text = string.join(list(map(utf8, list(range(510, -1, -1)))), "")
+        allchars = string.join(list(map(chr, list(range(255, -1, -1)))), "")
         nospace = allchars[:223] + allchars[224:]
         chunks = [(1, nospace), (0, allchars)]
         self.assertEquals(font.splitString(text, doc), chunks)
@@ -273,7 +273,7 @@ class TTFontTestCase(NearTestCase):
 
         doc = PDFDocument()
         font = TTFont("Vera", "Vera.ttf")
-        text = string.join(map(utf8, range(512, -1, -1)), "")
+        text = string.join(list(map(utf8, list(range(512, -1, -1)))), "")
         chunks = font.splitString(text, doc)
         state = font.state[doc]
         self.assertEquals(state.assignments[32], 32)
@@ -285,7 +285,7 @@ class TTFontTestCase(NearTestCase):
         doc = PDFDocument()
         font = TTFont("Vera", "Vera.ttf")
         # Actually generate some subsets
-        text = string.join(map(utf8, range(0, 513)), "")
+        text = string.join(list(map(utf8, list(range(0, 513)))), "")
         font.splitString(text, doc)
         self.assertRaises(IndexError, font.getSubsetInternalName, -1, doc)
         self.assertRaises(IndexError, font.getSubsetInternalName, 3, doc)
@@ -322,12 +322,12 @@ class TTFontTestCase(NearTestCase):
             doc1 = PDFDocument()
             doc2 = PDFDocument()
             font = TTFont("Vera", "Vera.ttf")
-            self.assertEquals(font.splitString(u'hello ', doc1), [(0, 'hello ')])
-            self.assertEquals(font.splitString(u'hello ', doc2), [(0, 'hello ')])
-            self.assertEquals(font.splitString(u'\u0410\u0411'.encode('UTF-8'), doc1), [(0, '\x80\x81')])
-            self.assertEquals(font.splitString(u'\u0412'.encode('UTF-8'), doc2), [(0, '\x80')])
+            self.assertEquals(font.splitString('hello ', doc1), [(0, 'hello ')])
+            self.assertEquals(font.splitString('hello ', doc2), [(0, 'hello ')])
+            self.assertEquals(font.splitString('\u0410\u0411'.encode('UTF-8'), doc1), [(0, '\x80\x81')])
+            self.assertEquals(font.splitString('\u0412'.encode('UTF-8'), doc2), [(0, '\x80')])
             font.addObjects(doc1)
-            self.assertEquals(font.splitString(u'\u0413'.encode('UTF-8'), doc2), [(0, '\x81')])
+            self.assertEquals(font.splitString('\u0413'.encode('UTF-8'), doc2), [(0, '\x81')])
             font.addObjects(doc2)
         finally:
             rl_config.ttfAsciiReadable = ttfAsciiReadable

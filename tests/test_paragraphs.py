@@ -167,7 +167,7 @@ class ParagraphTestCase(unittest.TestCase):
         SA(Indenter("-1cm"))
         SA(Indenter("-1cm"))
         
-        for i in xrange(2):
+        for i in range(2):
             SA(PageBreak())
             SA(Paragraph('''%s dotted paragraphs''' % (i and 'CJK' or 'Normal'), styNormal))
             SA(Paragraph('''Simple paragraph with dots''', i and styDotsCJK or styDots))

@@ -16,7 +16,7 @@ def mkTimeTuple(timeString):
     "Convert a 'dd/mm/yyyy' formatted string to a tuple for use in the time module."
 
     list = [0] * 9
-    dd, mm, yyyy = map(int, timeString.split('/'))
+    dd, mm, yyyy = list(map(int, timeString.split('/')))
     list[:3] = [yyyy, mm, dd]
 
     return tuple(list)
@@ -84,7 +84,7 @@ def find_interval(lo,hi,I=5):
                 lo = 0.9*lo
                 hi = 1.1*hi
         else:
-            raise ValueError, "lo>hi"
+            raise ValueError("lo>hi")
     x=(hi - lo)/float(I)
     b= (x>0 and (x<1 or x>10)) and 10**floor(log10(x)) or 1
     b = b
@@ -129,7 +129,7 @@ def find_good_grid(lower,upper,n=(4,5,6,7,8,9), grid=None):
         try:
             n[0]
         except TypeError:
-            n = xrange(max(1,n-2),max(n+3,2))
+            n = range(max(1,n-2),max(n+3,2))
 
         w = 1e308
         for i in n:
@@ -166,13 +166,13 @@ def ticks(lower, upper, n=(4,5,6,7,8,9), split=1, percent=0, grid=None, labelVOf
     n = int(float(hi-t)/grid+0.1)+1
     if split:
         labels = []
-        for i in xrange(n):
+        for i in range(n):
             v = t+grid*i
             T.append(v)
             labels.append(format % (v+labelVOffset))
         return T, labels
     else:
-        for i in xrange(n):
+        for i in range(n):
             v = t+grid*i
             T.append((v, format % (v+labelVOffset)))
         return T
@@ -189,7 +189,7 @@ def findNones(data):
             l -= 1
         l+=1
         if b or l: data = data[b:l]
-        I = [i for i in xrange(len(data)) if data[i] is None]
+        I = [i for i in range(len(data)) if data[i] is None]
         for i in I:
             data[i] = 0.5*(data[i-1]+data[i+1])
         return b, l, data
@@ -206,7 +206,7 @@ def pairFixNones(pairs):
 
 def maverage(data,n=6):
     data = (n-1)*[data[0]]+data
-    data = [float(sum(data[i-n:i]))/n for i in xrange(n,len(data)+1)]
+    data = [float(sum(data[i-n:i]))/n for i in range(n,len(data)+1)]
     return data
 
 def pairMaverage(data,n=6):
@@ -279,7 +279,7 @@ class DrawTimeCollector(object):
             p = [(x[1],x[2]) for x in p]
         else:
             p = node.asPolygon().points
-            p = [(p[i],p[i+1]) for i in xrange(0,len(p),2)]
+            p = [(p[i],p[i+1]) for i in range(0,len(p),2)]
 
         D = kwds.copy()
         D['poly'] = self.transformAndFlatten(A,p)
@@ -298,14 +298,18 @@ class DrawTimeCollector(object):
         finally:
             f.close()
 
-def xyDist( (x0,y0),(x1,y1) ):
+def xyDist(xxx_todo_changeme, xxx_todo_changeme1 ):
     '''return distance between two points'''
+    (x0,y0) = xxx_todo_changeme
+    (x1,y1) = xxx_todo_changeme1
     return hypot((x1-x0),(y1-y0))
 
-def lineSegmentIntersect(
-                (x00,y00),(x01,y01),
-                (x10,y10),(x11,y11)
+def lineSegmentIntersect(xxx_todo_changeme2, xxx_todo_changeme3, xxx_todo_changeme4, xxx_todo_changeme5
                 ):
+    (x00,y00) = xxx_todo_changeme2
+    (x01,y01) = xxx_todo_changeme3
+    (x10,y10) = xxx_todo_changeme4
+    (x11,y11) = xxx_todo_changeme5
     p = x00,y00
     r = x01-x00,y01-y00
 
@@ -373,7 +377,7 @@ class CustomDrawChanger:
             self.store = self._changer(obj)
             assert isinstance(self.store,dict), '%s.changer should return a dict of changed attributes' % self.__class__.__name__
         elif self.store is not None:
-            for a,v in self.store.iteritems():
+            for a,v in self.store.items():
                 setattr(obj,a,v)
             self.store = None
 

@@ -36,7 +36,7 @@ from reportlab.lib.attrmap import *
 from reportlab.graphics.shapes import Line, Rect, Polygon, Drawing, Group, String, Circle, Wedge
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics import renderPDF
-from signsandsymbols import _Symbol
+from .signsandsymbols import _Symbol
 import copy
 from math import sin, cos, pi
 
@@ -113,7 +113,7 @@ class Star(_Symbol):
         r = R*sin(18*(pi/180.0))/cos(36*(pi/180.0))
         P = []
         angle = 90
-        for i in xrange(5):
+        for i in range(5):
             for radius in R, r:
                 theta = angle*(pi/180.0)
                 P.append(radius*cos(theta))
@@ -158,7 +158,7 @@ class Flag(_Symbol):
 
     def availableFlagNames(self):
         '''return a list of the things we can display'''
-        return filter(lambda x: x is not None, self._attrMap['kind'].validate._enum)
+        return [x for x in self._attrMap['kind'].validate._enum if x is not None]
 
     def _Flag_None(self):
         s = _size  # abbreviate as we will use this a lot

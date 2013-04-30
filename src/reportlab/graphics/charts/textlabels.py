@@ -35,14 +35,14 @@ def _processGlyph(G, truncate=1, pathReverse=0):
             if O[0]=='moveToClosed':
                 O = O[1:]
                 if pathReverse:
-                    for i in xrange(0,len(P),2):
+                    for i in range(0,len(P),2):
                         P[i+1], P[i] = P[i:i+2]
                     P.reverse()
                     O.reverse()
                 O.insert(0,'moveTo')
                 O.append('closePath')
             i = 0
-            if truncate: P = map(_pathNumTrunc,P)
+            if truncate: P = list(map(_pathNumTrunc,P))
             for o in O:
                 j = i + _PATH_OP_ARG_COUNT[_PATH_OP_NAMES.index(o)]
                 if o=='closePath':
@@ -344,7 +344,7 @@ class LabelDecorator:
     def __init__(self):
         self.textAnchor = 'start'
         self.boxAnchor = 'w'
-        for a in self._attrMap.keys():
+        for a in list(self._attrMap.keys()):
             if not hasattr(self,a): setattr(self,a,None)
 
     def decorate(self,l,L):
@@ -355,7 +355,7 @@ class LabelDecorator:
     def __call__(self,l):
         from copy import deepcopy
         L = Label()
-        for a,v in self.__dict__.items():
+        for a,v in list(self.__dict__.items()):
             if v is None: v = getattr(l,a,None)
             setattr(L,a,v)
         self.decorate(l,L)

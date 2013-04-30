@@ -53,7 +53,7 @@ class PlatypusProgrammingTestCase(unittest.TestCase):
     def test2(self):
         "This makes one long multi-page paragraph in multi-pass for testing docWhile etc etc"
         from reportlab.platypus.flowables import DocAssign, DocExec, DocPara, DocIf, DocWhile
-        from test_platypus_xref import MyDocTemplate
+        from .test_platypus_xref import MyDocTemplate
         from reportlab.platypus.tableofcontents import TableOfContents, SimpleIndex
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         from reportlab.platypus import Paragraph

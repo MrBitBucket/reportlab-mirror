@@ -85,7 +85,7 @@ class PDFImage:
         cachedname = os.path.splitext(image)[0] + (rl_config.useA85 and '.a85' or '.bin')
         imagedata = open(cachedname,'rb').readlines()
         #trim off newlines...
-        imagedata = map(string.strip, imagedata)
+        imagedata = list(map(string.strip, imagedata))
         return imagedata
 
     def PIL_imagedata(self):
@@ -204,5 +204,5 @@ if __name__=='__main__':
     img = PDFImage(srcfile, 100, 100)
     import pprint
     doc = pdfdoc.PDFDocument()
-    print 'source=',img.source
-    print img.format(doc)
+    print('source=',img.source)
+    print(img.format(doc))

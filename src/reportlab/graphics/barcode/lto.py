@@ -3,7 +3,7 @@
 
 import string
 
-from code39 import Standard39
+from .code39 import Standard39
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 
@@ -45,15 +45,15 @@ class BaseLTOLabel(Standard39) :
         self.border = border
         if (len(subtype) != 1) \
             or (subtype not in string.ascii_uppercase + string.digits) :
-            raise ValueError, "Invalid subtype '%s'" % subtype
+            raise ValueError("Invalid subtype '%s'" % subtype)
         if ((not number) and (len(prefix) > 6)) \
            or not prefix.isalnum() :
-            raise ValueError, "Invalid prefix '%s'" % prefix
+            raise ValueError("Invalid prefix '%s'" % prefix)
         label = "%sL%s" % ((prefix + str(number or 0).zfill(6 - len(prefix)))[:6],
                            subtype)
         if len(label) != 8 :
-            raise ValueError, "Invalid set of parameters (%s, %s, %s)" \
-                                % (prefix, number, subtype)
+            raise ValueError("Invalid set of parameters (%s, %s, %s)" \
+                                % (prefix, number, subtype))
         self.label = label
         Standard39.__init__(self,
                             label,

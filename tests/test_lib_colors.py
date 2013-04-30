@@ -35,7 +35,7 @@ class ColorTestCase(unittest.TestCase):
     def test0(self):
         "Test color2bw function on all named colors."
 
-        cols = colors.getAllNamedColors().values()
+        cols = list(colors.getAllNamedColors().values())
         for col in cols:
             gray = colors.color2bw(col)
             r, g, b = gray.red, gray.green, gray.blue
@@ -45,7 +45,7 @@ class ColorTestCase(unittest.TestCase):
     def test1(self):
         "Test colorDistance function."
 
-        cols = colors.getAllNamedColors().values()
+        cols = list(colors.getAllNamedColors().values())
         for col in cols:
             d = colors.colorDistance(col, col)
             assert d == 0
@@ -67,7 +67,7 @@ class ColorTestCase(unittest.TestCase):
         # Take all colors as test subjects, except 'transparent'.
 ##        rgbCols = colors.getAllNamedColors()
 ##        del rgbCols['transparent']
-        rgbCols = colors.getAllNamedColors().items()
+        rgbCols = list(colors.getAllNamedColors().items())
 
         # Make a roundtrip test (RGB > CMYK > RGB).
         for name, rgbCol in rgbCols:
@@ -79,13 +79,13 @@ class ColorTestCase(unittest.TestCase):
             # Make sure the differences for each RGB component
             # isreally small (< power(10, -N)!
             N = 16 # max. value found to work on Python2.0 and Win2K.
-            deltas = map(abs, (r1-r2, g1-g2, b1-b2))
+            deltas = list(map(abs, (r1-r2, g1-g2, b1-b2)))
             assert deltas < [math.pow(10, -N)] * 3
 
     def test4(self):
         "Construct CMYK instances and test round trip conversion"
 
-        rgbCols = colors.getAllNamedColors().items()
+        rgbCols = list(colors.getAllNamedColors().items())
 
         # Make a roundtrip test (RGB > CMYK > RGB).
         for name, rgbCol in rgbCols:
@@ -98,7 +98,7 @@ class ColorTestCase(unittest.TestCase):
             # Make sure the differences for each RGB component
             # isreally small (< power(10, -N)!
             N = 16 # max. value found to work on Python2.0 and Win2K.
-            deltas = map(abs, (r1-r2, g1-g2, b1-b2))
+            deltas = list(map(abs, (r1-r2, g1-g2, b1-b2)))
             assert deltas < [math.pow(10, -N)] * 3
 
 
@@ -110,7 +110,7 @@ class ColorTestCase(unittest.TestCase):
         #do all named colors
         framePage(canvas, 'Color Demo - page %d' % canvas.getPageNumber())
 
-        all_colors = reportlab.lib.colors.getAllNamedColors().items()
+        all_colors = list(reportlab.lib.colors.getAllNamedColors().items())
         all_colors.sort() # alpha order by name
         canvas.setFont('Times-Roman', 10)
         text = 'This shows all the named colors in the HTML standard (plus their gray and CMYK equivalents).'

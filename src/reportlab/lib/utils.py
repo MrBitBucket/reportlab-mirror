@@ -10,7 +10,7 @@ try:
 except:
     from md5 import md5
 from reportlab.lib.logger import warnOnce
-from rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
+from .rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
 
 def isSeqType(v,_st=(tuple,list)):
     return isinstance(v,_st)
@@ -25,7 +25,7 @@ if sys.hexversion >= 0x02000000:
 else:
     # hexdigest not available in 1.5
     def _digester(s):
-        return join(map(lambda x : "%02x" % ord(x), md5(s).digest()), '')
+        return join(["%02x" % ord(x) for x in md5(s).digest()], '')
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
@@ -51,7 +51,7 @@ class CIDict(_UserDict):
         self.update(kwds)
 
     def update(self,D):
-        for k,v in D.items(): self[k] = v
+        for k,v in list(D.items()): self[k] = v
 
     def __setitem__(self,k,v):
         try:
@@ -189,7 +189,7 @@ try:
         c, pfn = __startswith_rl(pattern)
         r = glob(pfn)
         if c or r==[]:
-            r += map(lambda x,D=_archivepfx,pjoin=pjoin: pjoin(_archivepfx,x),filter(lambda x,pfn=pfn,fnmatch=fnmatch: fnmatch(x,pfn),__loader__._files.keys()))
+            r += list(map(lambda x,D=_archivepfx,pjoin=pjoin: pjoin(_archivepfx,x),list(filter(lambda x,pfn=pfn,fnmatch=fnmatch: fnmatch(x,pfn),list(__loader__._files.keys())))))
         return r
 except:
     _isFSD = os.path.isfile(__file__)   #slight risk of wrong path
@@ -244,7 +244,7 @@ except ImportError:
                     try:
                         if n[-1]=='.': n = n[:-1]
                     except:
-                        print i, n
+                        print(i, n)
                         raise
                 A((n[0]!='0' or len(n)==1) and n or n[1:])
         return ' '.join(s)
@@ -258,12 +258,12 @@ if ',' in fp_str(0.25):
 def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
     normalize = lambda x: os.path.normcase(os.path.abspath(os.path.normpath(x)))
-    path = map(normalize,sys.path)
+    path = list(map(normalize,sys.path))
     if baseDir:
         if not isSeqType(baseDir):
             tp = [baseDir]
         else:
-            tp = filter(None,list(baseDir))
+            tp = [_f for _f in list(baseDir) if _f]
         for p in tp:
             p = normalize(p)
             if p not in path: path.insert(0,p)
@@ -271,7 +271,7 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     if noCWD:
         for p in ('','.',normalize('.')):
             while p in path:
-                if debug: print 'removed "%s" from path' % p
+                if debug: print('removed "%s" from path' % p)
                 path.remove(p)
     elif '.' not in path:
             path.insert(0,'.')
@@ -279,14 +279,14 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     if debug:
         import pprint
         pp = pprint.pprint
-        print 'path=',
+        print('path=', end=' ')
         pp(path)
 
     #make import errors a bit more informative
     opath = sys.path
     try:
         sys.path = path
-        exec 'import %s\nm = %s\n' % (modulename,modulename) in locals()
+        exec('import %s\nm = %s\n' % (modulename,modulename), locals())
         sys.path = opath
         return m
     except ImportError:
@@ -294,11 +294,11 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
         msg = "Could not import '%s'" % modulename
         if baseDir:
             msg = msg + " under %s" % baseDir
-        raise ImportError, msg
+        raise ImportError(msg)
 
     except Exception, e:
         msg = "Exception raised while importing '%s': %s" % (modulename, e.message)
-        raise ImportError, msg
+        raise ImportError(msg)
         
 
 def recursiveGetAttr(obj, name):
@@ -348,9 +348,9 @@ else:
     haveImages = Image is not None
 
 try:
-    from cStringIO import StringIO as __StringIO
+    from io import StringIO as __StringIO
 except ImportError:
-    from StringIO import StringIO as __StringIO
+    from io import StringIO as __StringIO
 def getStringIO(buf=None):
     '''unified StringIO instance interface'''
     return buf is not None and __StringIO(buf) or __StringIO()
@@ -371,8 +371,8 @@ def getArgvDict(**kw):
         if func:
             v = func(av)
         else:
-            if isinstance(v,basestring):
-                if isinstance(v,unicode): v = v.encode('utf8')
+            if isinstance(v,str):
+                if isinstance(v,str): v = v.encode('utf8')
                 v = av
             elif isinstance(v,float):
                 v = float(av)
@@ -388,7 +388,7 @@ def getArgvDict(**kw):
 
     A = sys.argv[1:]
     R = {}
-    for k, v in kw.items():
+    for k, v in list(kw.items()):
         if isinstance(v,ArgvDictValue):
             v, func = v.value, v.func
         else:
@@ -412,7 +412,7 @@ def getHyphenater(hDict=None):
         from reportlab.lib.pyHnj import Hyphen
         if hDict is None: hDict=os.path.join(os.path.dirname(__file__),'hyphen.mashed')
         return Hyphen(hDict)
-    except ImportError, errMsg:
+    except ImportError as errMsg:
         if str(errMsg)!='No module named pyHnj': raise
         return None
 
@@ -439,8 +439,8 @@ def open_for_read_by_name(name,mode='b'):
         if 'b' not in mode and os.linesep!='\n': s = s.replace(os.linesep,'\n')
         return getStringIO(s)
 
-import urllib2
-def open_for_read(name,mode='b', urlopen=urllib2.urlopen):
+import urllib.request, urllib.error, urllib.parse
+def open_for_read(name,mode='b', urlopen=urllib.request.urlopen):
     '''attempt to open a file or URL for reading'''
     if hasattr(name,'read'): return name
     try:
@@ -463,20 +463,20 @@ def rl_isfile(fn,os_path_isfile=os.path.isfile):
     if os_path_isfile(fn): return True
     if _isFSD or __loader__ is None: return False
     fn = _startswith_rl(fn)
-    return fn in __loader__._files.keys()
+    return fn in list(__loader__._files.keys())
 
 def rl_isdir(pn,os_path_isdir=os.path.isdir,os_path_normpath=os.path.normpath):
     if os_path_isdir(pn): return True
     if _isFSD or __loader__ is None: return False
     pn = _startswith_rl(os_path_normpath(pn))
     if not pn.endswith(os.sep): pn += os.sep
-    return len(filter(lambda x,pn=pn: x.startswith(pn),__loader__._files.keys()))>0
+    return len(list(filter(lambda x,pn=pn: x.startswith(pn),list(__loader__._files.keys()))))>0
 
 def rl_listdir(pn,os_path_isdir=os.path.isdir,os_path_normpath=os.path.normpath,os_listdir=os.listdir):
     if os_path_isdir(pn) or _isFSD or __loader__ is None: return os_listdir(pn)
     pn = _startswith_rl(os_path_normpath(pn))
     if not pn.endswith(os.sep): pn += os.sep
-    return [x[len(pn):] for x in __loader__._files.keys() if x.startswith(pn)]
+    return [x[len(pn):] for x in list(__loader__._files.keys()) if x.startswith(pn)]
 
 def rl_getmtime(pn,os_path_isfile=os.path.isfile,os_path_normpath=os.path.normpath,os_path_getmtime=os.path.getmtime,time_mktime=time.mktime):
     if os_path_isfile(pn) or _isFSD or __loader__ is None: return os_path_getmtime(pn)
@@ -561,7 +561,7 @@ class ImageReader(object):
                             register_reset(self._cache.clear)
                         data=self._cache.setdefault(md5(data).digest(),data)
                     self.fp=getStringIO(data)
-                elif imageReaderFlags==-1 and isinstance(fileName,(str,unicode)):
+                elif imageReaderFlags==-1 and isinstance(fileName,str):
                     #try Ralf Schmitt's re-opening technique of avoiding too many open files
                     self.fp.close()
                     del self.fp #will become a property in the next statement
@@ -587,7 +587,7 @@ class ImageReader(object):
     def identity(self):
         '''try to return information that will identify the instance'''
         fn = self.fileName
-        if not isinstance(fn,basestring):
+        if not isinstance(fn,str):
             fn = getattr(getattr(self,'fp',None),'name',None)
         ident = self._ident
         return '[%s@%s%s%s]' % (self.__class__.__name__,hex(id(self)),ident and (' ident=%r' % ident) or '',fn and (' filename=%r' % fn) or '')
@@ -670,7 +670,7 @@ class ImageReader(object):
                     palette = palette.palette
                 except:
                     palette = palette.data
-                return map(ord, palette[transparency:transparency+3])
+                return list(map(ord, palette[transparency:transparency+3]))
             else:
                 return None
 
@@ -747,7 +747,7 @@ class DebugMemo:
         except:
             pass
         env = os.environ
-        K=env.keys()
+        K=list(env.keys())
         K.sort()
         store.update({  'gmt': time.asctime(time.gmtime(time.time())),
                         'platform': sys.platform,
@@ -763,7 +763,7 @@ class DebugMemo:
                         'lcwd': lcwd,
                         'lpcwd': lpcwd,
                         'byteorder': sys.byteorder,
-                        'maxint': sys.maxint,
+                        'maxint': sys.maxsize,
                         'maxint': getattr(sys,'maxunicode','????'),
                         'api_version': getattr(sys,'api_version','????'),
                         'version_info': getattr(sys,'version_info','????'),
@@ -798,11 +798,11 @@ class DebugMemo:
                 except:
                     pass
         module_versions = {}
-        for n,m in sys.modules.items():
+        for n,m in list(sys.modules.items()):
             if n=='reportlab' or n=='rlextra' or n[:10]=='reportlab.' or n[:8]=='rlextra.':
                 v = [getattr(m,x,None) for x in ('__version__','__path__','__file__')]
-                if filter(None,v):
-                    v = [v[0]] + filter(None,v[1:])
+                if [_f for _f in v if _f]:
+                    v = [v[0]] + [_f for _f in v[1:] if _f]
                     module_versions[n] = tuple(v)
         store['__module_versions'] = module_versions
         self.store['__payload'] = {}
@@ -810,7 +810,7 @@ class DebugMemo:
 
     def _add(self,D):
         payload = self.store['__payload']
-        for k, v in D.items():
+        for k, v in list(D.items()):
             payload[k] = v
 
     def add(self,**kw):
@@ -824,7 +824,7 @@ class DebugMemo:
         except:
             S=self.store.copy()
             ff=getStringIO()
-            for k,v in S.iteritems():
+            for k,v in S.items():
                 try:
                     pickle.dump({k:v},ff)
                 except:
@@ -860,7 +860,7 @@ class DebugMemo:
 
     def _show_module_versions(self,k,v):
         self._writeln(k[2:])
-        K = v.keys()
+        K = list(v.keys())
         K.sort()
         for k in K:
             vk = vk0 = v[k]
@@ -917,12 +917,12 @@ class DebugMemo:
                 '__script': _show_file,
                 }
     def show(self):
-        K = self.store.keys()
+        K = list(self.store.keys())
         K.sort()
         for k in K:
-            if k not in self.specials.keys(): self._writeln('%-15s = %s' % (k,self.store[k]))
+            if k not in list(self.specials.keys()): self._writeln('%-15s = %s' % (k,self.store[k]))
         for k in K:
-            if k in self.specials.keys(): self.specials[k](self,k,self.store[k])
+            if k in list(self.specials.keys()): self.specials[k](self,k,self.store[k])
         self._show_extensions()
 
     def payload(self,name):
@@ -1044,12 +1044,12 @@ def prev_this_next(items):
     extend = itertools.chain([None], items, [None])
     prev, this, next = itertools.tee(extend, 3)
     try:
-        this.next()
-        next.next()
-        next.next()
+        next(this)
+        next(next)
+        next(next)
     except StopIteration:
         pass
-    return itertools.izip(prev, this, next)
+    return zip(prev, this, next)
 
 def commasplit(s):
     '''
@@ -1118,15 +1118,15 @@ def annotateException(msg,enc='utf8'):
     e = -1
     A = list(v.args)
     for i,a in enumerate(A):
-        if isinstance(a,basestring):
+        if isinstance(a,str):
             e = i
             break
     if e>=0:
-        if isinstance(a,unicode):
-            if not isinstance(msg,unicode):
+        if isinstance(a,str):
+            if not isinstance(msg,str):
                 msg=msg.decode(enc)
         else:
-            if isinstance(msg,unicode):
+            if isinstance(msg,str):
                 msg=msg.encode(enc)
             else:
                 msg = str(msg)
@@ -1137,7 +1137,7 @@ def annotateException(msg,enc='utf8'):
     else:
         A.append(msg)
     v.args = tuple(A)
-    raise t,v,b
+    raise t(v).with_traceback(b)
     
 def escapeOnce(data):
     """Ensure XML output is escaped just once, irrespective of input
@@ -1187,7 +1187,7 @@ class RLString(str):
     '''
     def __new__(cls,v,**kwds):
         self = str.__new__(cls,v)
-        for k,v in kwds.iteritems():
+        for k,v in kwds.items():
             setattr(self,k,v)
         return self
 

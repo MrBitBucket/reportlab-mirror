@@ -18,7 +18,7 @@ def warnIgnoredRestofTest():
         warnings.warn(msg)
     else:
         # should better also be printed only once...
-        print msg
+        print(msg)
 
 # Check if we have a default XML parser available or not.
 try:
@@ -178,7 +178,7 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         "Test character encoding."
 
         path = outputfile("test_renderSVG_simple_test4.svg")
-        specialChar = u'\u2019'
+        specialChar = '\u2019'
 
         d = Drawing(200, 100)
         d.add(String(0, 0, "foo"+specialChar))

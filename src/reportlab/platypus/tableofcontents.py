@@ -56,7 +56,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 from base64 import encodestring, decodestring
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 dumps = pickle.dumps
@@ -99,7 +99,7 @@ def drawPageNumbers(canvas, style, pages, availWidth, availHeight, dot=' . '):
         pagestrw = stringWidth(pagestr, style.fontName, fontSize)
         
     
-    if isinstance(dot, basestring):
+    if isinstance(dot, str):
         if dot:
             dotw = stringWidth(dot, style.fontName, fontSize)
             dotsn = int((availWidth-x-pagestrw)/dotw)
@@ -311,7 +311,7 @@ class SimpleIndex(IndexingFlowable):
 
     def getFormatFunc(self,format):
         try:
-            exec 'from reportlab.lib.sequencer import _format_%s as formatFunc' % format in locals()
+            exec('from reportlab.lib.sequencer import _format_%s as formatFunc' % format, locals())
         except ImportError:
             raise ValueError('Unknown format %r' % format)
         return formatFunc
@@ -421,9 +421,9 @@ class SimpleIndex(IndexingFlowable):
         '''Return the last run's entries!  If there are none, returns dummy.'''
         if not self._lastEntries:
             if self._entries:
-                return self._entries.items()
+                return list(self._entries.items())
             return dummy
-        return self._lastEntries.items()
+        return list(self._lastEntries.items())
 
     def _build(self,availWidth,availHeight):
         _tempEntries = self._getlastEntries()

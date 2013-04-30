@@ -187,7 +187,7 @@ class Ean13BarcodeWidget(PlotArea):
     y = 0
     def __init__(self,value='123456789012',**kw):
         self.value=max(self._digits-len(value),0)*'0'+value[:self._digits]
-        for k, v in kw.iteritems():
+        for k, v in kw.items():
             setattr(self, k, v)
 
     width = property(lambda self: self.barWidth*(self._nbars-18+self._calc_quiet(self.lquiet)+self._calc_quiet(self.rquiet)))

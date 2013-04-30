@@ -30,6 +30,7 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropH
 from reportlab.graphics.charts.piecharts import AbstractPieChart, WedgeProperties, _addWedgeLabel, fixLabelOverlaps
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgets.markers import Marker
+from functools import reduce
 
 class SectorProperties(WedgeProperties):
     """This holds descriptive information about the sectors in a doughnut chart.
@@ -113,7 +114,7 @@ class Doughnut(AbstractPieChart):
     def normalizeData(self, data=None):
         from operator import add
         sum = float(reduce(add,data,0))
-        return abs(sum)>=1e-8 and map(lambda x,f=360./sum: f*x, data) or len(data)*[0]
+        return abs(sum)>=1e-8 and list(map(lambda x,f=360./sum: f*x, data)) or len(data)*[0]
 
     def makeSectors(self):
         # normalize slice data

@@ -27,4 +27,4 @@ def toLength(s):
         if s[-4:]=='pica': return float(s[:-4])*pica
         return float(s)
     except:
-        raise ValueError, "Can't convert '%s' to length" % s
+        raise ValueError("Can't convert '%s' to length" % s)

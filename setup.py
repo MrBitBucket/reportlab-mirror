@@ -1,7 +1,7 @@
 #Copyright ReportLab Europe Ltd. 2000-2012
 #see license.txt for license details
 __version__=''' $Id$ '''
-import os, sys, glob, ConfigParser, shutil
+import os, sys, glob, configparser, shutil
 platform = sys.platform
 pjoin = os.path.join
 abspath = os.path.abspath
@@ -19,7 +19,7 @@ elif not os.path.isabs(pkgDir):
 try:
     os.chdir(pkgDir)
 except:
-    print '!!!!! warning could not change directory to %r' % pkgDir
+    print('!!!!! warning could not change directory to %r' % pkgDir)
 daily=os.environ.get('RL_EXE_DAILY','')
 
 import distutils
@@ -50,7 +50,7 @@ def get_version():
     try:
         for l in open(pjoin(FN+'.py'),'r').readlines():
             if l.startswith('Version'):
-                exec l.strip()
+                exec(l.strip())
                 return Version
     except:
         pass
@@ -70,7 +70,7 @@ def get_version():
 class config:
     def __init__(self):
         try:
-            self.parser = ConfigParser.RawConfigParser()
+            self.parser = configparser.RawConfigParser()
             self.parser.read(pjoin(pkgDir,'setup.cfg'))
         except:
             self.parser = None
@@ -162,7 +162,7 @@ def _find_rl_ccode(dn='rl_accel',cn='_rl_accel.c'):
         if isfile(fn):
             _.append(x)
     if _:
-        _ = filter(_rl_dir_info(cn),_)
+        _ = list(filter(_rl_dir_info(cn),_))
         if len(_):
             _.sort(_cmp_rl_ccode_dirs)
             return abspath(_[0])
@@ -181,7 +181,7 @@ def pfxJoin(pfx,*N):
 
 INFOLINES=[]
 def infoline(t):
-    print t
+    print(t)
     INFOLINES.append(t)
 
 reportlab_files= [
@@ -216,7 +216,7 @@ reportlab_files= [
         ]
 
 def get_fonts(PACKAGE_DIR, reportlab_files):
-    import sys, os, os.path, urllib2, zipfile, StringIO
+    import sys, os, os.path, urllib.request, urllib.error, urllib.parse, zipfile, io
     rl_dir = PACKAGE_DIR['reportlab']
     if not [x for x in reportlab_files if not os.path.isfile(pjoin(rl_dir,x))]:
         infoline("Standard T1 font curves already downloaded")
@@ -224,8 +224,8 @@ def get_fonts(PACKAGE_DIR, reportlab_files):
     try:
         infoline("Downloading standard T1 font curves")
 
-        remotehandle = urllib2.urlopen("http://www.reportlab.com/ftp/pfbfer-20070710.zip")
-        zipdata = StringIO.StringIO(remotehandle.read())
+        remotehandle = urllib.request.urlopen("http://www.reportlab.com/ftp/pfbfer-20070710.zip")
+        zipdata = io.StringIO(remotehandle.read())
         remotehandle.close()
         archive = zipfile.ZipFile(zipdata)
         dst = pjoin(rl_dir, 'fonts')
@@ -415,7 +415,7 @@ def main():
 
     #copy some special case files into place so package_data will treat them properly
     PACKAGE_DIR = {'reportlab': pjoin('src','reportlab')}
-    for fn,dst in SPECIAL_PACKAGE_DATA.iteritems():
+    for fn,dst in SPECIAL_PACKAGE_DATA.items():
         shutil.copyfile(fn,pjoin(PACKAGE_DIR['reportlab'],dst))
         reportlab_files.append(dst)
     get_fonts(PACKAGE_DIR, reportlab_files)
@@ -450,11 +450,11 @@ def main():
             package_data = {'reportlab': reportlab_files},
             ext_modules =   EXT_MODULES,
             )
-        print
-        print '########## SUMMARY INFO #########'
-        print '\n'.join(INFOLINES)
+        print()
+        print('########## SUMMARY INFO #########')
+        print('\n'.join(INFOLINES))
     finally:
-        for dst in SPECIAL_PACKAGE_DATA.itervalues():
+        for dst in SPECIAL_PACKAGE_DATA.values():
             os.remove(pjoin(PACKAGE_DIR['reportlab'],dst))
             reportlab_files.remove(dst)
 

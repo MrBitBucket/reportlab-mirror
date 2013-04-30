@@ -276,7 +276,7 @@ class ModuleSkeleton0:
             self._inspectBuiltin(object)
         else:
             msg = "Don't know how to document this kind of object."
-            raise TypeError, msg
+            raise TypeError(msg)
 
 
     def _inspectModule(self, object):
@@ -288,7 +288,7 @@ class ModuleSkeleton0:
             self.module['version'] = object.__version__
 
         cadr = lambda list: list[1]
-        modules = map(cadr, inspect.getmembers(object, inspect.ismodule))
+        modules = list(map(cadr, inspect.getmembers(object, inspect.ismodule)))
 
         classes, cdict = [], {}
         for key, value in inspect.getmembers(object, inspect.isclass):
@@ -317,7 +317,7 @@ class ModuleSkeleton0:
         self.module['doc'] = doc
 
         if modules:
-            self.module['importedModules'] = map(lambda m:m.__name__, modules)
+            self.module['importedModules'] = [m.__name__ for m in modules]
 
         if classes:
             for item in classes:
@@ -363,7 +363,7 @@ class ModuleSkeleton0:
     def _inspectMethod(self, object, functions={}, classes={}, methods={}, clname=''):
         """Collect information about a given method object."""
 
-        self._inspectFunction(object.im_func, functions, classes, methods, clname)
+        self._inspectFunction(object.__func__, functions, classes, methods, clname)
 
 
     def _inspectFunction(self, object, functions={}, classes={}, methods={}, clname=''):
@@ -401,7 +401,7 @@ class ModuleSkeleton0:
     def _inspectBuiltin(self, object):
         """Collect information about a given built-in."""
 
-        print object.__name__ + '( ... )'
+        print(object.__name__ + '( ... )')
 
 
     def walk(self, formatter):
@@ -423,8 +423,8 @@ class ModuleSkeleton0:
 
         # Classes
         f.indentLevel = f.indentLevel + 1
-        f.beginClasses(s.classes.keys())
-        items = s.classes.items()
+        f.beginClasses(list(s.classes.keys()))
+        items = list(s.classes.items())
         items.sort()
         for k, v in items:
             cDoc = s.classes[k]['doc']
@@ -438,8 +438,8 @@ class ModuleSkeleton0:
 
             # Methods
             #f.indentLevel = f.indentLevel + 1
-            f.beginMethods(s.classes[k]['methods'].keys())
-            items = s.classes[k]['methods'].items()
+            f.beginMethods(list(s.classes[k]['methods'].keys()))
+            items = list(s.classes[k]['methods'].items())
             items.sort()
             for m, v in items:
                 mDoc = v['doc']
@@ -450,7 +450,7 @@ class ModuleSkeleton0:
                 f.endMethod(m, mDoc, sig)
 
             #f.indentLevel = f.indentLevel - 1
-            f.endMethods(s.classes[k]['methods'].keys())
+            f.endMethods(list(s.classes[k]['methods'].keys()))
 
             f.indentLevel = f.indentLevel - 1
             f.endClass(k, cDoc, bases)
@@ -458,12 +458,12 @@ class ModuleSkeleton0:
             # And what about attributes?!
 
         f.indentLevel = f.indentLevel - 1
-        f.endClasses(s.classes.keys())
+        f.endClasses(list(s.classes.keys()))
 
         # Functions
         f.indentLevel = f.indentLevel + 1
-        f.beginFunctions(s.functions.keys())
-        items = s.functions.items()
+        f.beginFunctions(list(s.functions.keys()))
+        items = list(s.functions.items())
         items.sort()
         for k, v in items:
             doc = v['doc']
@@ -473,7 +473,7 @@ class ModuleSkeleton0:
             f.indentLevel = f.indentLevel - 1
             f.endFunction(k, doc, sig)
         f.indentLevel = f.indentLevel - 1
-        f.endFunctions(s.functions.keys())
+        f.endFunctions(list(s.functions.keys()))
 
         #f.indentLevel = f.indentLevel - 1
         f.endModule(modName, modDoc, imported)
@@ -612,7 +612,7 @@ class AsciiDocBuilder0(DocBuilder0):
         lev, label = self.indentLevel, self.indentLabel
 
         if bases:
-            bases = map(lambda b:b.__name__, bases) # hack
+            bases = [b.__name__ for b in bases] # hack
             append('%s%s(%s)' % (lev*label, name, join(bases, ', ')))
         else:
             append('%s%s' % (lev*label, name))
@@ -720,7 +720,7 @@ class HtmlDocBuilder0(DocBuilder0):
 ##        self.currentBaseClasses = bases
 
         if bases:
-            bases = map(lambda b:b.__name__, bases) # hack
+            bases = [b.__name__ for b in bases] # hack
             self.outLines.append(makeHtmlSubSection('%s(%s)' % (name, join(bases, ', '))))
         else:
             self.outLines.append(makeHtmlSubSection('%s' % name))
@@ -833,7 +833,7 @@ class PdfDocBuilder0(DocBuilder0):
             self.outPath = self.skeleton.getModuleName() + self.fileSuffix
         else:
             self.outPath = ''
-        print 'output path is %s' % self.outPath
+        print('output path is %s' % self.outPath)
         if self.outPath:
             doc = MyTemplate(self.outPath)
             doc.multiBuild(self.story)
@@ -875,7 +875,7 @@ class PdfDocBuilder0(DocBuilder0):
         bt = self.bt
         story = self.story
         if bases:
-            bases = map(lambda b:b.__name__, bases) # hack
+            bases = [b.__name__ for b in bases] # hack
             story.append(Paragraph('%s(%s)' % (name, join(bases, ', ')), self.makeHeadingStyle(self.indentLevel, 'class')))
         else:
             story.append(Paragraph(name, self.makeHeadingStyle(self.indentLevel, 'class')))
@@ -959,7 +959,7 @@ class UmlPdfDocBuilder0(PdfDocBuilder0):
         self.methodCompartment = []
 
         if bases:
-            bases = map(lambda b:b.__name__, bases) # hack
+            bases = [b.__name__ for b in bases] # hack
             self.classCompartment = '%s(%s)' % (name, join(bases, ', '))
         else:
             self.classCompartment = name
@@ -1130,7 +1130,7 @@ def documentModule0(pathOrName, builder, opts={}):
     try:
         module = __import__(modname)
     except:
-        print 'Failed to import %s.' % modname
+        print('Failed to import %s.' % modname)
         os.chdir(cwd)
         return
 
@@ -1146,17 +1146,16 @@ def documentModule0(pathOrName, builder, opts={}):
     os.chdir(cwd)
 
 
-def _packageWalkCallback((builder, opts), dirPath, files):
+def _packageWalkCallback(xxx_todo_changeme, dirPath, files):
     "A callback function used when waking over a package tree."
+    (builder, opts) = xxx_todo_changeme
+    files = [f for f in files if f != '__init__.py']
 
-    # Skip __init__ files.
-    files = filter(lambda f:f != '__init__.py', files)
-
-    files = filter(lambda f:f[-3:] == '.py', files)
+    files = [f for f in files if f[-3:] == '.py']
     for f in files:
         path = os.path.join(dirPath, f)
         if not opts.get('isSilent', 0):
-            print path
+            print(path)
         builder.indentLevel = builder.indentLevel + 1
         documentModule0(path, builder)
         builder.indentLevel = builder.indentLevel - 1
@@ -1207,7 +1206,7 @@ def main():
 
     # On -h print usage and exit immediately.
     if hasOpt('-h'):
-        print printUsage.__doc__
+        print(printUsage.__doc__)
         sys.exit(0)
 
     # On -s set silent mode.
@@ -1228,19 +1227,19 @@ def main():
     if hasOpt('-m'):
         nameOrPath = optsDict['-m']
         if not isSilent:
-            print "Generating documentation for module %s..." % nameOrPath
+            print("Generating documentation for module %s..." % nameOrPath)
         builder.begin(name=nameOrPath, typ='module')
         documentModule0(nameOrPath, builder, options)
     elif hasOpt('-p'):
         nameOrPath = optsDict['-p']
         if not isSilent:
-            print "Generating documentation for package %s..." % nameOrPath
+            print("Generating documentation for package %s..." % nameOrPath)
         builder.begin(name=nameOrPath, typ='package')
         documentPackage0(nameOrPath, builder, options)
     builder.end()
 
     if not isSilent:
-        print "Saved %s." % builder.outPath
+        print("Saved %s." % builder.outPath)
 
 
 if __name__ == '__main__':

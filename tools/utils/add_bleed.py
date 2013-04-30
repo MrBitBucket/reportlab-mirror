@@ -10,7 +10,7 @@ def process_pdf(c,infn,prefix='PageForms'):
     names, data = pageCatcher.storeFormsInMemory(open(infn,'rb').read(),prefix=prefix,all=1)
     names = pageCatcher.restoreFormsInMemory(data,c)
     del data
-    for i in xrange(len(names)):
+    for i in range(len(names)):
         thisname = names[i]
         c.saveState()
         c.translate(bleedX,bleedY)

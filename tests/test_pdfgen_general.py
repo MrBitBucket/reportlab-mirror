@@ -133,7 +133,7 @@ class DocBlock:
         self.namespace = {'canvas':canvas,'cm': cm,'inch':inch}
         canvas.translate(x+9, y - height + 9)
         codeObj = compile(self.code, '<sample>','exec')
-        exec codeObj in self.namespace
+        exec(codeObj, self.namespace)
 
         canvas.restoreState()
 
@@ -204,7 +204,7 @@ def makeDocument(filename, pageCallBack=None):
 
     #quickie encoding test: when canvas encoding not set,
     #the following should do (tm), (r) and (c)
-    msg_uni = u'copyright\u00A9 trademark\u2122 registered\u00AE scissors\u2702: ReportLab in unicode!'
+    msg_uni = 'copyright\u00A9 trademark\u2122 registered\u00AE scissors\u2702: ReportLab in unicode!'
     msg_utf8 = msg_uni.replace('unicode','utf8').encode('utf8')
     c.drawString(100, 100, msg_uni)
     c.drawString(100, 80, msg_utf8)
@@ -724,7 +724,7 @@ cost to performance.""")
     c.drawString(1*inch, 10.25*inch-2*14.4, "The second image is white alpha=0% to purple=100%")
 
 
-    for i in xrange(8):
+    for i in range(8):
         c.drawString(1*inch,8*inch+i*14.4,"mask=None   Line %d"%i)
         c.drawString(3*inch,8*inch+i*14.4,"mask='auto' Line %d"%i)
         c.drawString(1*inch,6*inch+i*14.4,"mask=None   Line %d"%i)
@@ -910,10 +910,10 @@ cost to performance.""")
 
 def run(filename):
     c = makeDocument(filename)
-    c.setAuthor(u'R\xfcp\xe9rt B\xe8\xe4r')
+    c.setAuthor('R\xfcp\xe9rt B\xe8\xe4r')
     c.setTitle('R\xc3\xbcp\xc3\xa9rt B\xc3\xa8\xc3\xa4r\'s Book')
-    c.setCreator(u'Some Creator')
-    c.setSubject(u'Some Subject')
+    c.setCreator('Some Creator')
+    c.setSubject('Some Subject')
     c.save()
     c = makeDocument(filename)
     import os
@@ -936,7 +936,7 @@ def pageShapes(c):
     d = DocBlock()
     d.comment1 = 'Lesson one'
     d.code = "canvas.textOut('hello, world')"
-    print d.code
+    print(d.code)
 
     d.comment2 = 'Lesson two'
 
@@ -966,7 +966,7 @@ class PdfgenTestCase(unittest.TestCase):
         c.addPageLabel(102, prefix="Back",start=1)
 
         # Make some (mostly) empty pages
-        for i in xrange(113):
+        for i in range(113):
             c.drawString(100, 100, 'Tis is page '+str(i))
             c.showPage()
 
@@ -1099,7 +1099,7 @@ class PdfgenTestCase(unittest.TestCase):
 
 
 def trySomeColors(C,enforceColorSpace=None):
-    from StringIO import StringIO
+    from io import StringIO
     out=StringIO()
     canv = canvas.Canvas(out,enforceColorSpace=enforceColorSpace)
     canv.setFont('Helvetica',10)

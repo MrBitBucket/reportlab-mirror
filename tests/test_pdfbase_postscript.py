@@ -70,6 +70,6 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-    print 'saved '+outputfile('test_pdfgen_postscript_visible.pdf')
-    print 'saved '+outputfile('test_pdfgen_postscript_tray.pdf')
+    print('saved '+outputfile('test_pdfgen_postscript_visible.pdf'))
+    print('saved '+outputfile('test_pdfgen_postscript_tray.pdf'))
     printLocation()

@@ -63,8 +63,8 @@ class ListsTestCase(unittest.TestCase):
             ]
         normal = styleSheet['BodyText']
         lpSty = normal.clone('lpSty',spaceAfter=18)
-        data = [[str(i+1), Paragraph("xx "* (i%10), styleSheet["BodyText"]), Paragraph(("blah "*(i%40)), normal)] for i in xrange(5)]
-        data1 = [[str(i+1), Paragraph(["zz ","yy "][i]*(i+3), styleSheet["BodyText"]), Paragraph(("duh  "*(i+3)), normal)] for i in xrange(2)]
+        data = [[str(i+1), Paragraph("xx "* (i%10), styleSheet["BodyText"]), Paragraph(("blah "*(i%40)), normal)] for i in range(5)]
+        data1 = [[str(i+1), Paragraph(["zz ","yy "][i]*(i+3), styleSheet["BodyText"]), Paragraph(("duh  "*(i+3)), normal)] for i in range(2)]
         OL = ListFlowable(
             [
             Paragraph("A table with 5 rows", lpSty),

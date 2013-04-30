@@ -122,7 +122,7 @@ class EyeballTestCase(unittest.TestCase):
                                           strength=strength)
                             
                             canv.save()
-                            if VERBOSE: print 'saved %s' % filepath
+                            if VERBOSE: print('saved %s' % filepath)
         
 def makeSuite():
     return unittest.TestSuite((

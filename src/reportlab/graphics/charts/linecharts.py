@@ -214,7 +214,7 @@ class HorizontalLineChart(LineChart):
         """
 
         self._seriesCount = len(self.data)
-        self._rowLength = max(map(len,self.data))
+        self._rowLength = max(list(map(len,self.data)))
 
         if self.useAbsolute:
             # Dimensions are absolute.
@@ -285,7 +285,7 @@ class HorizontalLineChart(LineChart):
         g = Group()
 
         labelFmt = self.lineLabelFormat
-        P = range(len(self._positions))
+        P = list(range(len(self._positions)))
         if self.reversePlotOrder: P.reverse()
         inFill = self.inFill
         if inFill:
@@ -453,7 +453,7 @@ class HorizontalLineChart3D(HorizontalLineChart):
 
     def makeLines(self):
         labelFmt = self.lineLabelFormat
-        P = range(len(self._positions))
+        P = list(range(len(self._positions)))
         if self.reversePlotOrder: P.reverse()
         inFill = self.inFill
         assert not inFill, "inFill not supported for 3d yet"
@@ -467,7 +467,7 @@ class HorizontalLineChart3D(HorizontalLineChart):
         theta_x = self.theta_x
         theta_y = self.theta_y
         F = _FakeGroup()
-        from utils3d import _make_3d_line_info
+        from .utils3d import _make_3d_line_info
         tileWidth = getattr(self,'_3d_tilewidth',None)
         if not tileWidth and self.categoryAxis.style!='parallel_3d': tileWidth = 1
 
@@ -494,7 +494,7 @@ class HorizontalLineChart3D(HorizontalLineChart):
             if self.joinedLines:
                 if n:
                     x0, y0 = row[0]
-                    for colNo in xrange(1,n):
+                    for colNo in range(1,n):
                         x1, y1 = row[colNo]
                         _make_3d_line_info( F, x0, x1, y0, y1, z0, z1,
                                 theta_x, theta_y,
@@ -511,14 +511,14 @@ class HorizontalLineChart3D(HorizontalLineChart):
                 uSymbol = None
 
             if uSymbol:
-                for colNo in xrange(n):
+                for colNo in range(n):
                     x1, y1 = row[colNo]
                     x1, y1 = _zadjust(x1,y1,z0)
                     symbol = uSymbol2Symbol(uSymbol,x1,y1,rowColor)
                     if symbol: F.add((2,z0,z0,x1,y1,symbol))
 
             # Draw item labels.
-            for colNo in xrange(n):
+            for colNo in range(n):
                 x1, y1 = row[colNo]
                 x1, y1 = _zadjust(x1,y1,z0)
                 L = self._innerDrawLabel(rowNo, colNo, x1, y1)

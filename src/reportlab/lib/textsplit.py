@@ -19,22 +19,22 @@ from reportlab.rl_config import _FUZZ
 
 CANNOT_START_LINE = [
     #strongly prohibited e.g. end brackets, stop, exclamation...
-    u'!\',.:;?!")]\u3001\u3002\u300d\u300f\u3011\u3015\uff3d\u3011\uff09',
+    '!\',.:;?!")]\u3001\u3002\u300d\u300f\u3011\u3015\uff3d\u3011\uff09',
     #middle priority e.g. continuation small vowels - wrapped on two lines but one string...
-    u'\u3005\u2015\u3041\u3043\u3045\u3047\u3049\u3063\u3083\u3085\u3087\u308e\u30a1\u30a3'
-    u'\u30a5\u30a7\u30a9\u30c3\u30e3\u30e5\u30e7\u30ee\u30fc\u30f5\u30f6',
+    '\u3005\u2015\u3041\u3043\u3045\u3047\u3049\u3063\u3083\u3085\u3087\u308e\u30a1\u30a3'
+    '\u30a5\u30a7\u30a9\u30c3\u30e3\u30e5\u30e7\u30ee\u30fc\u30f5\u30f6',
     #weakly prohibited - continuations, celsius symbol etc.
-    u'\u309b\u309c\u30fb\u30fd\u30fe\u309d\u309e\u2015\u2010\xb0\u2032\u2033\u2103\uffe0\uff05\u2030'
+    '\u309b\u309c\u30fb\u30fd\u30fe\u309d\u309e\u2015\u2010\xb0\u2032\u2033\u2103\uffe0\uff05\u2030'
     ]
 
-ALL_CANNOT_START = u''.join(CANNOT_START_LINE)
+ALL_CANNOT_START = ''.join(CANNOT_START_LINE)
 CANNOT_END_LINE = [
     #strongly prohibited
-    u'\u2018\u201c\uff08[{\uff08\u3014\uff3b\uff5b\u3008\u300a\u300c\u300e\u3010',
+    '\u2018\u201c\uff08[{\uff08\u3014\uff3b\uff5b\u3008\u300a\u300c\u300e\u3010',
     #weaker - currency symbols, hash, postcode - prefixes
-    u'$\u00a3@#\uffe5\uff04\uffe1\uff20\u3012\u00a7'
+    '$\u00a3@#\uffe5\uff04\uffe1\uff20\u3012\u00a7'
     ]
-ALL_CANNOT_END = u''.join(CANNOT_END_LINE)
+ALL_CANNOT_END = ''.join(CANNOT_END_LINE)
 
 def is_multi_byte(ch):
     "Is this an Asian character?"
@@ -141,7 +141,7 @@ def dumbSplit(word, widths, maxWidths):
                 #  - reversion to Kanji (which would be a good split point)
                 #  - in the worst case, roughly half way back along the line
                 limitCheck = (lineStartPos+i)>>1        #(arbitrary taste issue)
-                for j in xrange(i-1,limitCheck,-1):
+                for j in range(i-1,limitCheck,-1):
                     cj = word[j]
                     if category(cj)=='Zs' or ord(cj)>=0x3000:
                         k = j+1
@@ -224,7 +224,7 @@ def kinsokuShoriSplit(word, widths, availWidth):
 #
 #  http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/148061
 import re
-rx=re.compile(u"([\u2e80-\uffff])", re.UNICODE)
+rx=re.compile("([\u2e80-\uffff])", re.UNICODE)
 def cjkwrap(text, width, encoding="utf8"):
      return reduce(lambda line, word, width=width: '%s%s%s' %
                 (line,
@@ -232,10 +232,10 @@ def cjkwrap(text, width, encoding="utf8"):
                        + len(word.split('\n',1)[0] ) >= width) or
                       line[-1:] == '\0' and 2],
                  word),
-                rx.sub(r'\1\0 ', unicode(text,encoding)).split(' ')
+                rx.sub(r'\1\0 ', str(text,encoding)).split(' ')
             ).replace('\0', '').encode(encoding)
 
 if __name__=='__main__':
     import doctest
-    import textsplit
+    from . import textsplit
     doctest.testmod(textsplit)

@@ -41,7 +41,7 @@ Special commands understood at present are:
 import sys
 import string
 import imp
-import codegrab
+from . import codegrab
 
 #modes:
 PLAIN = 1
@@ -91,7 +91,7 @@ class Parser:
                 #we have to hack the traceback
                 try:
                     getattr(self,cmd)(*args)
-                except TypeError, err:
+                except TypeError as err:
                     sys.stderr.write("Parser method: %s(*%s) %s at line %d\n" % (cmd, tuple(args), err, self._lineNo))
                     raise
             else:
@@ -192,7 +192,7 @@ class Parser:
 
 if __name__=='__main__': #NORUNTESTS
     if len(sys.argv) != 2:
-        print 'usage: yaml.py source.txt'
+        print('usage: yaml.py source.txt')
     else:
         p = Parser()
         results = p.parseFile(sys.argv[1])

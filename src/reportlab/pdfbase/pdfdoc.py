@@ -39,10 +39,10 @@ if platform[:4] == 'java' and version_info[:2] == (2, 1):
     def list(sequence):
         def f(x):
             return x
-        return map(f, sequence)
+        return list(map(f, sequence))
 
 def utf8str(x):
-    if isinstance(x,unicode):
+    if isinstance(x,str):
         return x.encode('utf8')
     else:
         return str(x)
@@ -240,7 +240,7 @@ class PDFDocument:
             if os.name=='mac':
                 from reportlab.lib.utils import markfilename
                 markfilename(filename) # do platform specific file junk
-        if getattr(canvas,'_verbosity',None): print 'saved', filename
+        if getattr(canvas,'_verbosity',None): print('saved', filename)
 
     def GetPDFData(self, canvas):
         # realize delayed fonts
@@ -261,7 +261,7 @@ class PDFDocument:
         """specify the current object as a page (enables reference binding and other page features)"""
         if self.inObject is not None:
             if self.inObject=="page": return
-            raise ValueError, "can't go in page already in object %s" % self.inObject
+            raise ValueError("can't go in page already in object %s" % self.inObject)
         self.inObject = "page"
 
     def inForm(self):
@@ -392,9 +392,9 @@ class PDFDocument:
         self.info._dateFormatter = dateFormatter
 
     def getAvailableFonts(self):
-        fontnames = self.fontMapping.keys()
+        fontnames = list(self.fontMapping.keys())
         # the standard 14 are also always available! (even if not initialized yet)
-        import _fontdata
+        from . import _fontdata
         for name in _fontdata.standardFonts:
             if name not in fontnames:
                 fontnames.append(name)
@@ -450,7 +450,7 @@ class PDFDocument:
         # sanity checks (must happen AFTER formatting)
         lno = len(numbertoid)
         if counter-1!=lno:
-            raise ValueError, "counter %s doesn't match number to id dictionary %s" %(counter, lno)
+            raise ValueError("counter %s doesn't match number to id dictionary %s" %(counter, lno))
         # now add the xref
         xref = PDFCrossReferenceTable()
         xref.addsection(0, ids)
@@ -491,7 +491,7 @@ class PDFDocument:
                 # externally defined form
                 return list(theform.dictionary.dict[boxType].sequence)
             else:
-                raise ValueError, "I don't understand the form instance %s" % repr(name)
+                raise ValueError("I don't understand the form instance %s" % repr(name))
 
     def getXObjectName(self, name):
         """Lets canvas find out what form is called internally.
@@ -521,10 +521,10 @@ class PDFDocument:
             # already registered
             intname = object.__InternalName__
             if name is not None and name!=intname:
-                raise ValueError, "attempt to reregister object %s with new name %s" % (
-                    repr(intname), repr(name))
+                raise ValueError("attempt to reregister object %s with new name %s" % (
+                    repr(intname), repr(name)))
             if intname not in idToObject:
-                raise ValueError, "object named but not registered"
+                raise ValueError("object named but not registered")
             return PDFObjectReference(intname)
         # otherwise register the new object
         objectcounter = self.objectcounter = self.objectcounter+1
@@ -533,7 +533,7 @@ class PDFDocument:
         if name in idToObject:
             other = idToObject[name]
             if other!=object:
-                raise ValueError, "redefining named object: "+repr(name)
+                raise ValueError("redefining named object: "+repr(name))
             return PDFObjectReference(name)
         if iob:
             object.__InternalName__ = name
@@ -581,7 +581,7 @@ def _checkPdfdoc(utext):
     try:
         utext.encode('pdfdoc')
         return 1
-    except UnicodeEncodeError, e:
+    except UnicodeEncodeError as e:
         return 0
 
 class PDFString:
@@ -617,9 +617,9 @@ class PDFString:
                         s.decode('pdfdoc')
                     except:
                         import sys
-                        print >>sys.stderr, 'Error in',repr(s)
+                        print('Error in',repr(s), file=sys.stderr)
                         raise
-        elif type(s) is unicode:
+        elif type(s) is str:
             if enc is 'auto':
                 if _checkPdfdoc(s):
                     s = s.encode('pdfdoc')
@@ -679,9 +679,9 @@ class PDFDictionary:
     def format(self, document,IND=LINEEND+' '):
         dict = self.dict
         try:
-            keys = dict.keys()
+            keys = list(dict.keys())
         except:
-            print repr(dict)
+            print(repr(dict))
             raise
         keys.sort()
         L = [(format(PDFName(k),document)+" "+format(dict[k],document)) for k in keys]
@@ -690,7 +690,7 @@ class PDFDictionary:
         else:
             # break up every 6 elements anyway
             t=L.insert
-            for i in xrange(6, len(L), 6):
+            for i in range(6, len(L), 6):
                 t(i,LINEEND)
             L = " ".join(L)
         return "<< %s >>" % L
@@ -701,13 +701,13 @@ class PDFDictionary:
     def normalize(self):
         #normalize the names to use RL standard ie Name not /Name
         D = self.dict
-        K = [k for k in D.iterkeys() if k.startswith('/')]
+        K = [k for k in D.keys() if k.startswith('/')]
         for k in K:
             D[k[1:]] = D.pop(k)
 
 class checkPDFNames:
     def __init__(self,*names):
-        self.names = map(PDFName,names)
+        self.names = list(map(PDFName,names))
     def __call__(self,value):
         if not value.startswith('/'):
             value=PDFName(value)
@@ -755,12 +755,12 @@ class PDFStreamFilterZCompress:
     def encode(self, text):
         from reportlab.lib.utils import import_zlib
         zlib = import_zlib()
-        if not zlib: raise ImportError, "cannot z-compress zlib unavailable"
+        if not zlib: raise ImportError("cannot z-compress zlib unavailable")
         return zlib.compress(text)
     def decode(self, encoded):
         from reportlab.lib.utils import import_zlib
         zlib = import_zlib()
-        if not zlib: raise ImportError, "cannot z-decompress zlib unavailable"
+        if not zlib: raise ImportError("cannot z-decompress zlib unavailable")
         return zlib.decompress(encoded)
 
 # need only one of these, unless we implement parameters later
@@ -769,13 +769,13 @@ PDFZCompress = PDFStreamFilterZCompress()
 class PDFStreamFilterBase85Encode:
     pdfname = "ASCII85Decode"
     def encode(self, text):
-        from pdfutils import _AsciiBase85Encode, _wrap
+        from .pdfutils import _AsciiBase85Encode, _wrap
         text = _AsciiBase85Encode(text)
         if rl_config.wrapA85:
             text = _wrap(text)
         return text
     def decode(self, text):
-        from pdfutils import _AsciiBase85Decode
+        from .pdfutils import _AsciiBase85Decode
         return _AsciiBase85Decode(text)
 
 # need only one of these too
@@ -805,7 +805,7 @@ class PDFStream:
         content = self.content
         filters = self.filters
         if self.content is None:
-            raise ValueError, "stream content not set"
+            raise ValueError("stream content not set")
         if filters is None:
             filters = document.defaultStreamFilters
         # only apply filters if they haven't been applied elsewhere
@@ -862,7 +862,7 @@ class PDFArray:
         self.sequence = list(sequence)
     def References(self, document):
         """make all objects in sequence references"""
-        self.sequence = map(document.Reference, self.sequence)
+        self.sequence = list(map(document.Reference, self.sequence))
     def format(self, document, IND=LINEEND+' '):
         L = [format(e, document) for e in self.sequence]
         if self.multiline:
@@ -909,7 +909,7 @@ class PDFObjectReference:
         try:
             return "%s %s R" % document.idToObjectNumberAndVersion[self.name]
         except:
-            raise KeyError, "forward reference to %s not resolved upon final formatting" % repr(self.name)
+            raise KeyError("forward reference to %s not resolved upon final formatting" % repr(self.name))
 
 ### chapter 5
 # Following Ken Lunde's advice and the PDF spec, this includes
@@ -940,7 +940,7 @@ class PDFFile:
         self.write(s)
         return result
     def format(self, document):
-        strings = map(str, self.strings) # final conversion, in case of lazy objects
+        strings = list(map(str, self.strings)) # final conversion, in case of lazy objects
         return string.join(strings, "")
 
 XREFFMT = '%0.10d %0.5d n'
@@ -968,9 +968,9 @@ class PDFCrossReferenceSubsection:
         for id in idsequence:
             (num, version) = idToNV[id]
             if num in taken:
-                raise ValueError, "object number collision %s %s %s" % (num, repr(id), repr(taken[id]))
+                raise ValueError("object number collision %s %s %s" % (num, repr(id), repr(taken[id])))
             if num>lastentrynumber or num<firstentrynumber:
-                raise ValueError, "object number %s not in range %s..%s" % (num, firstentrynumber, lastentrynumber)
+                raise ValueError("object number %s not in range %s..%s" % (num, firstentrynumber, lastentrynumber))
             # compute position in list
             rnum = num-firstentrynumber
             taken[num] = id
@@ -986,7 +986,7 @@ class PDFCrossReferenceSubsection:
         elif LINEEND=="\r\n":
             reflineend = LINEEND
         else:
-            raise ValueError, "bad end of line! %s" % repr(LINEEND)
+            raise ValueError("bad end of line! %s" % repr(LINEEND))
         return string.join(entries, LINEEND)
 
 class PDFCrossReferenceTable:
@@ -1000,7 +1000,7 @@ class PDFCrossReferenceTable:
     def format(self, document):
         sections = self.sections
         if not sections:
-            raise ValueError, "no crossref sections"
+            raise ValueError("no crossref sections")
         L = ["xref"+LINEEND]
         for s in self.sections:
             fs = format(s, document)
@@ -1019,7 +1019,7 @@ class PDFTrailer:
     def __init__(self, startxref, Size=None, Prev=None, Root=None, Info=None, ID=None, Encrypt=None):
         self.startxref = startxref
         if Size is None or Root is None:
-            raise ValueError, "Size and Root keys required"
+            raise ValueError("Size and Root keys required")
         dict = self.dict = PDFDictionary()
         for (n,v) in [("Size", Size), ("Prev", Prev), ("Root", Root),
                       ("Info", Info), ("ID", ID), ("Encrypt", Encrypt)]:
@@ -1056,7 +1056,7 @@ class PDFCatalog:
         defaults = self.__Defaults__
         Refs = self.__Refs__
         D = {}
-        for k in defaults.keys():
+        for k in list(defaults.keys()):
             default = defaults[k]
             v = None
             if hasattr(self, k) and getattr(self,k) is not None:
@@ -1157,7 +1157,7 @@ class PDFPage(PDFCatalog):
         self.compression = onoff
     def setStream(self, code):
         if self.Override_default_compilation:
-            raise ValueError, "overridden! must set stream explicitly"
+            raise ValueError("overridden! must set stream explicitly")
         from types import ListType
         if type(code) is ListType:
             code = string.join(code, LINEEND)+LINEEND
@@ -1398,9 +1398,9 @@ class PDFOutlines:
         """destinationname of None means "close the tree" """
         from types import IntType, TupleType
         if destinationname is None and level!=0:
-            raise ValueError, "close tree must have level of 0"
-        if type(level) is not IntType: raise ValueError, "level must be integer, got %s" % type(level)
-        if level<0: raise ValueError, "negative levels not allowed"
+            raise ValueError("close tree must have level of 0")
+        if type(level) is not IntType: raise ValueError("level must be integer, got %s" % type(level))
+        if level<0: raise ValueError("negative levels not allowed")
         if title is None: title = destinationname
         currentlevel = self.currentlevel
         stack = self.levelstack
@@ -1408,7 +1408,7 @@ class PDFOutlines:
         # adjust currentlevel and stack to match level
         if level>currentlevel:
             if level>currentlevel+1:
-                raise ValueError, "can't jump from outline level %s to level %s, need intermediates (destinationname=%r, title=%r)" %(currentlevel, level, destinationname, title)
+                raise ValueError("can't jump from outline level %s to level %s, need intermediates (destinationname=%r, title=%r)" %(currentlevel, level, destinationname, title))
             level = currentlevel = currentlevel+1
             stack.append([])
         while level<currentlevel:
@@ -1419,7 +1419,7 @@ class PDFOutlines:
             lastinprevious = previous[-1]
             if type(lastinprevious) is TupleType:
                 (name, sectionlist) = lastinprevious
-                raise ValueError, "cannot reset existing sections: " + repr(lastinprevious)
+                raise ValueError("cannot reset existing sections: " + repr(lastinprevious))
             else:
                 name = lastinprevious
                 sectionlist = current
@@ -1513,9 +1513,9 @@ class PDFOutlines:
             self.count = self.count+1
             levelname = "Outline.%s" % self.count
             if Parent is None:
-                raise ValueError, "non-top level outline elt parent must be specified"
+                raise ValueError("non-top level outline elt parent must be specified")
         if tdestinationtree is not ListType and tdestinationtree is not TupleType:
-            raise ValueError, "destinationtree must be list or tuple, got %s"
+            raise ValueError("destinationtree must be list or tuple, got %s")
         nelts = len(destinationtree)
         lastindex = nelts-1
         lastelt = firstref = lastref = None
@@ -1545,15 +1545,15 @@ class PDFOutlines:
                 try:
                     (leafdict, subsections) = elt
                 except:
-                    raise ValueError, "destination tree elt tuple should have two elts, got %s" % len(elt)
+                    raise ValueError("destination tree elt tuple should have two elts, got %s" % len(elt))
                 eltobj.Count = count(subsections, closedict)
                 (eltobj.First, eltobj.Last) = self.maketree(document, subsections, eltref)
             else:
-                raise ValueError, "destination tree elt should be dict or tuple, got %s" % te
+                raise ValueError("destination tree elt should be dict or tuple, got %s" % te)
             try:
-                [(Title, Dest)] = leafdict.items()
+                [(Title, Dest)] = list(leafdict.items())
             except:
-                raise ValueError, "bad outline leaf dictionary, should have one entry "+utf8str(elt)
+                raise ValueError("bad outline leaf dictionary, should have one entry "+utf8str(elt))
             eltobj.Title = destinationnamestotitles[Title]
             eltobj.Dest = Dest
             if te is TupleType and Dest in closedict:
@@ -1569,7 +1569,7 @@ def count(tree, closedict=None):
     if tt is TupleType:
         # leaf with subsections XXXX should clean up this structural usage
         (leafdict, subsections) = tree
-        [(Title, Dest)] = leafdict.items()
+        [(Title, Dest)] = list(leafdict.items())
         if closedict and Dest in closedict:
             return 1 # closed tree element
     if tt is TupleType or tt is ListType:
@@ -1617,7 +1617,7 @@ class PDFInfo:
     def copy(self):
         "shallow copy - useful in pagecatchering"
         thing = self.__klass__()
-        for (k, v) in self.__dict__.items():
+        for (k, v) in list(self.__dict__.items()):
             setattr(thing, k, v)
         return thing
 # skipping thumbnails, etc
@@ -1632,7 +1632,7 @@ class Annotation:
     def cvtdict(self, d, escape=1):
         """transform dict args from python form to pdf string rep as needed"""
         Rect = d["Rect"]
-        if type(Rect) is not types.StringType:
+        if type(Rect) is not bytes:
             d["Rect"] = PDFArray(Rect)
         d["Contents"] = PDFString(d["Contents"],escape)
         return d
@@ -1648,15 +1648,15 @@ class Annotation:
         d.update(kw)
         for name in self.required:
             if name not in d:
-                raise ValueError, "keyword argument %s missing" % name
+                raise ValueError("keyword argument %s missing" % name)
         d = self.cvtdict(d,escape=escape)
         permitted = self.permitted
-        for name in d.keys():
+        for name in list(d.keys()):
             if name not in permitted:
-                raise ValueError, "bad annotation dictionary name %s" % name
+                raise ValueError("bad annotation dictionary name %s" % name)
         return PDFDictionary(d)
     def Dict(self):
-        raise ValueError, "DictString undefined for virtual superclass Annotation, must overload"
+        raise ValueError("DictString undefined for virtual superclass Annotation, must overload")
         # but usually
         #return self.AnnotationDict(self, Rect=(a,b,c,d)) or whatever
     def format(self, document):
@@ -1747,7 +1747,7 @@ class PDFDate:
     # gmt offset now suppported properly
     def __init__(self, invariant=rl_config.invariant, dateFormatter=None):
         if invariant:
-            now = (2000,01,01,00,00,00,0)
+            now = (2000,0o1,0o1,00,00,00,0)
             self.dhh = 0
             self.dmm = 0
         else:
@@ -1790,9 +1790,9 @@ class Destination:
         self.fmt = self.page = None
     def format(self, document):
         f = self.fmt
-        if f is None: raise ValueError, "format not resolved %s" % self.name
+        if f is None: raise ValueError("format not resolved %s" % self.name)
         p = self.page
-        if p is None: raise ValueError, "Page reference unbound %s" % self.name
+        if p is None: raise ValueError("Page reference unbound %s" % self.name)
         f.page = p
         return f.format(document)
     def xyz(self, left, top, zoom):  # see pdfspec mar 11 99 pp184+
@@ -1895,7 +1895,7 @@ class PDFResourceDictionary:
         self.Shading = {}
         # ?by default define the basicprocs
         self.basicProcs()
-    stdprocs = map(PDFName, string.split("PDF Text ImageB ImageC ImageI"))
+    stdprocs = list(map(PDFName, string.split("PDF Text ImageB ImageC ImageI")))
     dict_attributes = ("ColorSpace", "XObject", "ExtGState", "Font", "Pattern", "Properties", "Shading")
 
     def allProcs(self):
@@ -1909,11 +1909,11 @@ class PDFResourceDictionary:
         self.Font = PDFObjectReference(BasicFonts)
 
     def setColorSpace(self,colorsUsed):
-        for c,s in colorsUsed.iteritems():
+        for c,s in colorsUsed.items():
             self.ColorSpace[s] = PDFObjectReference(c)
 
     def setShading(self,shadingUsed):
-        for c,s in shadingUsed.iteritems():
+        for c,s in shadingUsed.items():
             self.Shading[s] = PDFObjectReference(c)
 
     def format(self, document):
@@ -2023,7 +2023,7 @@ class PDFFormXObject:
         self.lowerx = lowerx; self.lowery=lowery; self.upperx=upperx; self.uppery=uppery
 
     def setStreamList(self, data):
-        if type(data) is types.ListType:
+        if type(data) is list:
             data = string.join(data, LINEEND)
         self.stream = data
 
@@ -2130,9 +2130,9 @@ class PDFImageXObject:
 
     def loadImageFromA85(self,source):
         IMG=[]
-        imagedata = map(string.strip,pdfutils.makeA85Image(source,IMG=IMG))
+        imagedata = list(map(string.strip,pdfutils.makeA85Image(source,IMG=IMG)))
         words = string.split(imagedata[1])
-        self.width, self.height = map(string.atoi,(words[1],words[3]))
+        self.width, self.height = list(map(string.atoi,(words[1],words[3])))
         self.colorSpace = {'/RGB':'DeviceRGB', '/G':'DeviceGray', '/CMYK':'DeviceCMYK'}[words[7]]
         self.bitsPerComponent = 8
         self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
@@ -2170,7 +2170,7 @@ class PDFImageXObject:
         IMG=[]
         imagedata = pdfutils.makeRawImage(source,IMG=IMG)
         words = string.split(imagedata[1])
-        self.width, self.height = map(string.atoi,(words[1],words[3]))
+        self.width, self.height = list(map(string.atoi,(words[1],words[3])))
         self.colorSpace = {'/RGB':'DeviceRGB', '/G':'DeviceGray', '/CMYK':'DeviceCMYK'}[words[7]]
         self.bitsPerComponent = 8
         self._filters = 'FlateDecode', #'Fl'
@@ -2228,7 +2228,7 @@ class PDFImageXObject:
             dict["Decode"] = PDFArray([1,0,1,0,1,0,1,0])
         elif getattr(self,'_decode',None):
             dict["Decode"] = PDFArray(self._decode)
-        dict["Filter"] = PDFArray(map(PDFName,self._filters))
+        dict["Filter"] = PDFArray(list(map(PDFName,self._filters)))
         dict["Length"] = len(self.streamContent)
         if self.mask: dict["Mask"] = PDFArray(self.mask)
         if getattr(self,'smask',None): dict["SMask"] = self.smask
@@ -2295,15 +2295,15 @@ class PDFFunction:
         d.update(kw)
         for name in self.required:
             if name not in d:
-                raise ValueError, "keyword argument %s missing" % name
+                raise ValueError("keyword argument %s missing" % name)
         permitted = self.permitted
-        for name in d.keys():
+        for name in list(d.keys()):
             if name not in permitted:
-                raise ValueError, "bad annotation dictionary name %s" % name
+                raise ValueError("bad annotation dictionary name %s" % name)
         return PDFDictionary(d)
 
     def Dict(self, document):
-        raise ValueError, "Dict undefined for virtual superclass PDFShading, must overload"
+        raise ValueError("Dict undefined for virtual superclass PDFShading, must overload")
         # but usually
         #return self.FunctionDict(self, ...)
 
@@ -2356,15 +2356,15 @@ class PDFShading:
         d.update(kw)
         for name in self.required:
             if name not in d:
-                raise ValueError, "keyword argument %s missing" % name
+                raise ValueError("keyword argument %s missing" % name)
         permitted = self.permitted
-        for name in d.keys():
+        for name in list(d.keys()):
             if name not in permitted:
-                raise ValueError, "bad annotation dictionary name %s" % name
+                raise ValueError("bad annotation dictionary name %s" % name)
         return PDFDictionary(d)
 
     def Dict(self, document):
-        raise ValueError, "Dict undefined for virtual superclass PDFShading, must overload"
+        raise ValueError("Dict undefined for virtual superclass PDFShading, must overload")
         # but usually
         #return self.ShadingDict(self, ...)
 
@@ -2424,4 +2424,4 @@ class PDFRadialShading(PDFShading):
         return self.ShadingDict(**d)
 
 if __name__=="__main__":
-    print "There is no script interpretation for pdfdoc."
+    print("There is no script interpretation for pdfdoc.")

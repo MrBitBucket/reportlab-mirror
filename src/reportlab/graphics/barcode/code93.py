@@ -31,7 +31,7 @@
 #
 
 from reportlab.lib.units import inch
-from common import MultiWidthBarcode
+from .common import MultiWidthBarcode
 import string
 
 _patterns = {
@@ -55,7 +55,7 @@ _patterns = {
 }
 
 _charsbyval = {}
-for k, v in _patterns.items():
+for k, v in list(_patterns.items()):
     _charsbyval[v[1]] = k
 
 _extended = {
@@ -85,7 +85,7 @@ _extended = {
 }
 
 def _encode93(str):
-    s = map(None, str)
+    s = list(str)
     s.reverse()
 
     # compute 'C' checksum
@@ -122,7 +122,7 @@ class _Code93Base(MultiWidthBarcode):
         if type(value) is type(1):
             value = str(value)
             
-        for (k, v) in args.iteritems():
+        for (k, v) in args.items():
             setattr(self, k, v)
 
         if self.quiet:

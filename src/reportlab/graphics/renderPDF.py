@@ -20,7 +20,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.utils import getStringIO
 from reportlab import rl_config
-from renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
+from .renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
 
 # the main entry point for users...
 def draw(drawing, canvas, x, y, showBoundary=rl_config._unset_):
@@ -165,7 +165,7 @@ class _PDFRenderer(Renderer):
                 elif text_anchor=='numeric':
                     x -= numericXShift(text_anchor,text,textLen,font,font_size,enc)
                 else:
-                    raise ValueError, 'bad value for textAnchor '+str(text_anchor)
+                    raise ValueError('bad value for textAnchor '+str(text_anchor))
             t = self._canvas.beginText(x,y)
             t.textLine(text)
             self._canvas.drawText(t)
@@ -195,7 +195,7 @@ class _PDFRenderer(Renderer):
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the PDF operators
         needed to set those properties"""
-        for key, value in delta.items():
+        for key, value in list(delta.items()):
             if key == 'transform':
                 self._canvas.transform(value[0], value[1], value[2],
                                  value[3], value[4], value[5])
@@ -356,7 +356,7 @@ def test():
     if y!=740: c.showPage()
 
     c.save()
-    print 'saved renderPDF.pdf'
+    print('saved renderPDF.pdf')
 
 ##def testFlowable():
 ##    """Makes a platypus document"""

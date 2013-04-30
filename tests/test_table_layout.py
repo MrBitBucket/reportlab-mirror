@@ -415,5 +415,5 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-    print 'saved '+outputfile('test_table_layout.pdf')
+    print('saved '+outputfile('test_table_layout.pdf'))
     printLocation()

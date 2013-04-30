@@ -856,7 +856,7 @@ g = globals()
 Dprime = {}
 from types import StringType
 from string import strip
-for (a,b) in g.items():
+for (a,b) in list(g.items()):
     if a[:4]=="test" and type(b) is StringType:
         #print 'for', a
         #print b

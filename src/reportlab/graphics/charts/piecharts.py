@@ -256,7 +256,7 @@ def findOverlapRun(B,wrap=1):
     '''determine a set of overlaps in bounding boxes B or return None'''
     n = len(B)
     if n>1:
-        for i in xrange(n-1):
+        for i in range(n-1):
             R = _findOverlapRun(B,i,wrap)
             if len(R)>1: return R
     return None
@@ -481,7 +481,7 @@ def theta0(data, direction):
     vstar = len(data)*1e6
     rstar = 0
     delta = pi/36.0
-    for i in xrange(36):
+    for i in range(36):
         r = i*delta
         v = sum([abs(sin(r+a)) for a in hrads])
         if v < vstar:
@@ -658,7 +658,7 @@ class Pie(AbstractPieChart):
         return PL(centerx,centery,xradius,yradius,G,lu,ru)
 
     def normalizeData(self,keepData=False):
-        data = map(abs,self.data)
+        data = list(map(abs,self.data))
         s = self._sum = float(sum(data))
         if s<=1e-8: s = 0
         f = 360./s
@@ -968,7 +968,7 @@ class LegendedPie(Pie):
         self.legend1.columnMaximum = 7
         self.legend1.alignment = 'right'
         self.legend_names = ['AAA:','AA:','A:','BBB:','NR:']
-        for f in xrange(len(self.data)):
+        for f in range(len(self.data)):
             self.legend1.colorNamePairs.append((self.pieAndLegend_colors[f], self.legend_names[f]))
         self.legend1.fontName = "Helvetica-Bold"
         self.legend1.fontSize = 6
@@ -993,7 +993,7 @@ class LegendedPie(Pie):
         if self.drawLegend:
             self.legend1.colorNamePairs = []
             self._legend2.colorNamePairs = []
-        for f in xrange(len(self.data)):
+        for f in range(len(self.data)):
             if self.legend_names == None:
                 self.slices[f].fillColor = self.pieAndLegend_colors[f]
                 self.legend1.colorNamePairs.append((self.pieAndLegend_colors[f], None))
@@ -1027,7 +1027,7 @@ class LegendedPie(Pie):
                         ldf = lNF(ldf)
                     else:
                         msg = "Unknown formatter type %s, expected string or function" % self.legendNumberFormat
-                        raise Exception, msg
+                        raise Exception(msg)
                     self._legend2.colorNamePairs.append((None,ldf))
         p = Pie.draw(self)
         if self.drawLegend:
@@ -1243,7 +1243,7 @@ class Pie3d(Pie):
     
         checkLabelOverlap = self.checkLabelOverlap
 
-        for i in xrange(n):
+        for i in range(n):
             style = slices[i]
             if not style.visible: continue
             sl = _sl3d[i]

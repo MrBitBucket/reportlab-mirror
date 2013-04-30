@@ -31,7 +31,7 @@ class PdfEncodingTestCase(unittest.TestCase):
         plain = 'What is the average velocity of a sparrow?'
 
         #the remainder block can be absent or from 1 to 4 bytes
-        for i in xrange(55):
+        for i in range(55):
             encoded = _AsciiBase85Encode(plain)
             decoded = _AsciiBase85Decode(encoded)
             assert decoded == plain, msg

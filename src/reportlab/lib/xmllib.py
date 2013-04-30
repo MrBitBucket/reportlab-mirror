@@ -237,7 +237,7 @@ class SlowXMLParser:
                     self.lineno = self.lineno + string.count(res.group(0), '\n')
                     continue
             else:
-                raise RuntimeError, 'neither < nor & ??'
+                raise RuntimeError('neither < nor & ??')
             # We get here only if incomplete matches but
             # nothing else
             res = incomplete.match(rawdata, i)
@@ -268,7 +268,7 @@ class SlowXMLParser:
     def parse_comment(self, i):
         rawdata = self.rawdata
         if rawdata[i:i+4] != '<!--':
-            raise RuntimeError, 'unexpected call to handle_comment'
+            raise RuntimeError('unexpected call to handle_comment')
         res = commentclose.search(rawdata, i+4)
         if not res:
             return -1
@@ -282,7 +282,7 @@ class SlowXMLParser:
     def parse_cdata(self, i):
         rawdata = self.rawdata
         if rawdata[i:i+9] != '<![CDATA[':
-            raise RuntimeError, 'unexpected call to handle_cdata'
+            raise RuntimeError('unexpected call to handle_cdata')
         res = cdataclose.search(rawdata, i+9)
         if not res:
             return -1
@@ -292,7 +292,7 @@ class SlowXMLParser:
     def parse_proc(self, i, res):
         rawdata = self.rawdata
         if not res:
-            raise RuntimeError, 'unexpected call to parse_proc'
+            raise RuntimeError('unexpected call to parse_proc')
         name = res.group('proc')
         res = procclose.search(rawdata, res.end(0))
         if not res:
@@ -312,7 +312,7 @@ class SlowXMLParser:
         attrdict = {}
         res = tagfind.match(rawdata, i+1)
         if not res:
-            raise RuntimeError, 'unexpected call to parse_starttag'
+            raise RuntimeError('unexpected call to parse_starttag')
         k = res.end(0)
         tag = res.group(0)
         if hasattr(self, tag + '_attributes'):
@@ -469,7 +469,7 @@ class SlowXMLParser:
 
     # Example -- handle relatively harmless syntax errors, could be overridden
     def syntax_error(self, lineno, message):
-        raise RuntimeError, 'Syntax error at line %d: %s' % (lineno, message)
+        raise RuntimeError('Syntax error at line %d: %s' % (lineno, message))
 
     # To be overridden -- handlers for unknown objects
     def unknown_starttag(self, tag, attrs): pass
@@ -648,7 +648,7 @@ class FastXMLParser:
 
     # Example -- handle relatively harmless syntax errors, could be overridden
     def syntax_error(self, lineno, message):
-        raise RuntimeError, 'Syntax error at line %d: %s' % (lineno, message)
+        raise RuntimeError('Syntax error at line %d: %s' % (lineno, message))
 
     # To be overridden -- handlers for unknown objects
     def unknown_starttag(self, tag, attrs): pass
@@ -683,51 +683,51 @@ class TestXMLParser(XMLParser):
         data = self.testdata
         if data:
             self.testdata = ""
-            print 'data:', repr(data)
+            print('data:', repr(data))
 
     def handle_cdata(self, data):
         self.flush()
-        print 'cdata:', repr(data)
+        print('cdata:', repr(data))
 
     def handle_proc(self, name, data):
         self.flush()
-        print 'processing:',name,repr(data)
+        print('processing:',name,repr(data))
 
     def handle_special(self, data):
         self.flush()
-        print 'special:',repr(data)
+        print('special:',repr(data))
 
     def handle_comment(self, data):
         self.flush()
         r = repr(data)
         if len(r) > 68:
             r = r[:32] + '...' + r[-32:]
-        print 'comment:', r
+        print('comment:', r)
 
     def syntax_error(self, lineno, message):
-        print 'error at line %d:' % lineno, message
+        print('error at line %d:' % lineno, message)
 
     def unknown_starttag(self, tag, attrs):
         self.flush()
         if not attrs:
-            print 'start tag: <' + tag + '>'
+            print('start tag: <' + tag + '>')
         else:
-            print 'start tag: <' + tag,
-            for name, value in attrs.items():
-                print name + '=' + '"' + value + '"',
-            print '>'
+            print('start tag: <' + tag, end=' ')
+            for name, value in list(attrs.items()):
+                print(name + '=' + '"' + value + '"', end=' ')
+            print('>')
 
     def unknown_endtag(self, tag):
         self.flush()
-        print 'end tag: </' + tag + '>'
+        print('end tag: </' + tag + '>')
 
     def unknown_entityref(self, ref):
         self.flush()
-        print '*** unknown entity ref: &' + ref + ';'
+        print('*** unknown entity ref: &' + ref + ';')
 
     def unknown_charref(self, ref):
         self.flush()
-        print '*** unknown char ref: &#' + ref + ';'
+        print('*** unknown char ref: &#' + ref + ';')
 
     def close(self):
         XMLParser.close(self)
@@ -755,8 +755,8 @@ def test(args = None):
     else:
         try:
             f = open(file, 'r')
-        except IOError, msg:
-            print file, ":", msg
+        except IOError as msg:
+            print(file, ":", msg)
             sys.exit(1)
 
     data = f.read()

@@ -19,7 +19,7 @@ class HelloTestCase(unittest.TestCase):
         #Author with Japanese text
         c.setAuthor('\xe3\x83\x9b\xe3\x83\x86\xe3\x83\xab\xe3\x83\xbbe\xe3\x83\x91\xe3\x83\xb3\xe3\x83\x95\xe3\x83\xac\xe3\x83\x83\xe3\x83\x88')
         #Subject with Arabic magic
-        c.setSubject(u'\u0643\u0644\u0627\u0645 \u0639\u0631\u0628\u064a')
+        c.setSubject('\u0643\u0644\u0627\u0645 \u0639\u0631\u0628\u064a')
         c.setFont('Helvetica-Bold', 36)
         c.drawString(100,700, 'Hello World')
         c.save()

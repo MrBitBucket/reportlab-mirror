@@ -11,7 +11,7 @@ import os
 import copy
 import base64
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except:
     import pickle
 import unicodedata
@@ -203,7 +203,7 @@ _indexAttrMap = {
                 }
 
 def _addAttributeNames(m):
-    K = m.keys()
+    K = list(m.keys())
     for k in K:
         n = m[k][0]
         if n not in m: m[n] = m[k]
@@ -218,7 +218,7 @@ _addAttributeNames(_anchorAttrMap)
 _addAttributeNames(_linkAttrMap)
 
 def _applyAttributes(obj, attr):
-    for k, v in attr.items():
+    for k, v in list(attr.items()):
         if type(v) is TupleType and v[0]=='relative':
             #AR 20/5/2000 - remove 1.5.2-ism
             #v = v[1]+getattr(obj,k,0)
@@ -501,16 +501,16 @@ def _greekConvert(data):
     if not _greek2Utf8:
         from reportlab.pdfbase.rl_codecs import RL_Codecs
         import codecs
-        dm = decoding_map = codecs.make_identity_dict(xrange(32,256))
-        for k in xrange(0,32):
+        dm = decoding_map = codecs.make_identity_dict(range(32,256))
+        for k in range(0,32):
             dm[k] = None
         dm.update(RL_Codecs._RL_Codecs__rl_codecs_data['symbol'][0])
         _greek2Utf8 = {}
-        for k,v in dm.iteritems():
+        for k,v in dm.items():
             if not v:
                 u = '\0'
             else:
-                u = unichr(v).encode('utf8')
+                u = chr(v).encode('utf8')
             _greek2Utf8[chr(k)] = u
     return ''.join(map(_greek2Utf8.__getitem__,data))
 
@@ -577,7 +577,7 @@ class ParaParser(xmllib.XMLParser):
         if attrName!=attrName.lower() and attrName!="caseSensitive" and not self.caseSensitive and \
             (attrName.startswith("start_") or attrName.startswith("end_")):
                 return getattr(self,attrName.lower())
-        raise AttributeError, attrName
+        raise AttributeError(attrName)
 
     #### bold
     def start_b( self, attributes ):
@@ -713,7 +713,7 @@ class ParaParser(xmllib.XMLParser):
         except ValueError:
             self.unknown_charref(name)
             return
-        self.handle_data(unichr(n).encode('utf8'))
+        self.handle_data(chr(n).encode('utf8'))
 
     def handle_entityref(self,name):
         if name in greeks:
@@ -745,14 +745,14 @@ class ParaParser(xmllib.XMLParser):
                 v = '\0'
         elif 'code' in attr:
             try:
-                v = unichr(int(eval(attr['code']))).encode('utf8')
+                v = chr(int(eval(attr['code']))).encode('utf8')
             except:
                 self._syntax_error('<unichar/> invalid code attribute %s' % attr['code'])
                 v = '\0'
         else:
             v = None
             if attr:
-                self._syntax_error('<unichar/> invalid attribute %s' % attr.keys()[0])
+                self._syntax_error('<unichar/> invalid attribute %s' % list(attr.keys())[0])
 
         if v is not None:
             self.handle_data(v)
@@ -972,16 +972,16 @@ class ParaParser(xmllib.XMLParser):
     def _pop(self,**kw):
         frag = self._stack[-1]
         del self._stack[-1]
-        for k, v in kw.items():
+        for k, v in list(kw.items()):
             assert getattr(frag,k)==v
         return frag
 
     def getAttributes(self,attr,attrMap):
         A = {}
-        for k, v in attr.items():
+        for k, v in list(attr.items()):
             if not self.caseSensitive:
                 k = string.lower(k)
-            if k in attrMap.keys():
+            if k in list(attrMap.keys()):
                 j = attrMap[k]
                 func = j[1]
                 try:
@@ -1099,10 +1099,10 @@ class ParaParser(xmllib.XMLParser):
             #reconvert to unicode
             if fragList:
                 for frag in fragList:
-                    frag.text = unicode(frag.text, self._enc)
+                    frag.text = str(frag.text, self._enc)
             if bFragList:
                 for frag in bFragList:
-                    frag.text = unicode(frag.text, self._enc)
+                    frag.text = str(frag.text, self._enc)
 
         return style, fragList, bFragList
 
@@ -1136,19 +1136,19 @@ if __name__=='__main__':
     from reportlab.lib.styles import _baseFontName
     _parser=ParaParser()
     def check_text(text,p=_parser):
-        print '##########'
+        print('##########')
         text = cleanBlockQuotedText(text)
         l,rv,bv = p.parse(text,style)
         if rv is None:
             for l in _parser.errors:
-                print l
+                print(l)
         else:
-            print 'ParaStyle', l.fontName,l.fontSize,l.textColor
+            print('ParaStyle', l.fontName,l.fontSize,l.textColor)
             for l in rv:
-                print l.fontName,l.fontSize,l.textColor,l.bold, l.rise, '|%s|'%l.text[:25],
+                print(l.fontName,l.fontSize,l.textColor,l.bold, l.rise, '|%s|'%l.text[:25], end=' ')
                 if hasattr(l,'cbDefn'):
-                    print 'cbDefn',getattr(l.cbDefn,'name',''),getattr(l.cbDefn,'label',''),l.cbDefn.kind
-                else: print
+                    print('cbDefn',getattr(l.cbDefn,'name',''),getattr(l.cbDefn,'label',''),l.cbDefn.kind)
+                else: print()
 
     style=ParaFrag()
     style.fontName=_baseFontName

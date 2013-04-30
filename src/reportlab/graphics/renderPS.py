@@ -15,7 +15,7 @@ from types import StringType
 from operator import getitem
 from reportlab import rl_config
 _ESCAPEDICT={}
-for c in xrange(256):
+for c in range(256):
     if c<32 or c>=127:
         _ESCAPEDICT[chr(c)]= '\\%03o' % c
     elif c in (ord('\\'),ord('('),ord(')')):
@@ -243,10 +243,10 @@ class PSCanvas:
         fontSize = self._fontSize
         fontsUsed = self._fontsUsed
         escape = self._escape
-        if not isinstance(s,unicode):
+        if not isinstance(s,str):
             try:
                 s = s.decode('utf8')
-            except UnicodeDecodeError,e:
+            except UnicodeDecodeError as e:
                 i,j = e.args[2:4]
                 raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],s[i-10:i],s[i:j],s[j:j+10]),)))
 
@@ -491,7 +491,7 @@ class PSCanvas:
                     a("%s l" % fp_str(args[:2]))
                 a("%s curveto" % fp_str(args[2:]))
             else:
-                raise TypeError, "unknown figure operator: "+op
+                raise TypeError("unknown figure operator: "+op)
 
         if closed:
             a("closepath")
@@ -673,7 +673,7 @@ class PSCanvas:
     from reportlab.graphics import renderPS
     renderPS.draw(drawing, canvas, x, y)
 Execute the script to see some test drawings."""
-from shapes import *
+from .shapes import *
 
 # hack so we only get warnings once each
 #warnOnce = WarnOnce()
@@ -691,7 +691,7 @@ def _pointsFromList(L):
     '''
     P=[]
     a = P.append
-    for i in xrange(0,len(L),2):
+    for i in range(0,len(L),2):
         a((L[i],L[i+1]))
     return P
 
@@ -726,7 +726,7 @@ class _PSRenderer(Renderer):
         self._canvas._color = color
 
         #restore things we might have lost (without actually doing anything).
-        for k, v in rDeltas.items():
+        for k, v in list(rDeltas.items()):
             if k in self._restores:
                 setattr(self._canvas,self._restores[k],v)
 
@@ -801,7 +801,7 @@ class _PSRenderer(Renderer):
                 elif text_anchor=='numeric':
                     x -= numericXShift(text_anchor,text,textLen,font,fontSize,encoding='winansi')
                 else:
-                    raise ValueError, 'bad value for text_anchor '+str(text_anchor)
+                    raise ValueError('bad value for text_anchor '+str(text_anchor))
             self._canvas.drawString(x,y,text)
 
     def drawPath(self, path):
@@ -816,7 +816,7 @@ class _PSRenderer(Renderer):
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the operators
         needed to set those properties"""
-        for key, value in delta.items():
+        for key, value in list(delta.items()):
             if key == 'transform':
                 self._canvas.transform(value[0], value[1], value[2],
                                  value[3], value[4], value[5])
@@ -896,7 +896,7 @@ def test(outdir='epsout'):
     if not os.path.isdir(outdir):
         os.mkdir(outdir)
     #grab all drawings from the test module
-    import testshapes
+    from . import testshapes
     drawings = []
 
     for funcname in dir(testshapes):
@@ -911,7 +911,7 @@ def test(outdir='epsout'):
     for (d, docstring) in drawings:
         filename = outdir + os.sep + 'renderPS_%d.eps'%i
         drawToFile(d,filename)
-        print 'saved', filename
+        print('saved', filename)
         i = i + 1
 
 if __name__=='__main__':

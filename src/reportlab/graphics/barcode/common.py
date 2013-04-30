@@ -60,7 +60,7 @@ class Barcode(Flowable):
         self.computeSize()
 
     def _setKeywords(self,**kwd):
-        for (k, v) in kwd.iteritems():
+        for (k, v) in kwd.items():
             setattr(self, k, v)
 
     def validate(self):
@@ -308,7 +308,7 @@ class I2of5(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in args.items():
+        for (k, v) in list(args.items()):
             setattr(self, k, v)
 
         if self.quiet:
@@ -342,7 +342,7 @@ class I2of5(Barcode):
             c += 1
 
         if cs:
-            c = 3*sum([int(s[i]) for i in xrange(0,c,2)])+sum([int(s[i]) for i in xrange(1,c,2)])
+            c = 3*sum([int(s[i]) for i in range(0,c,2)])+sum([int(s[i]) for i in range(1,c,2)])
             s += str((10 - c) % 10)
 
         self.encoded = s
@@ -351,7 +351,7 @@ class I2of5(Barcode):
         dval = self.stop and [self.patterns['start']] or []
         a = dval.append
 
-        for i in xrange(0, len(self.encoded), 2):
+        for i in range(0, len(self.encoded), 2):
             b = self.patterns['B' + self.encoded[i]]
             s = self.patterns['S' + self.encoded[i+1]]
 
@@ -433,7 +433,7 @@ class MSI(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in args.items():
+        for (k, v) in list(args.items()):
             setattr(self, k, v)
 
         if self.quiet:
@@ -569,7 +569,7 @@ class Codabar(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in args.items():
+        for (k, v) in list(args.items()):
             setattr(self, k, v)
 
         if self.quiet:
@@ -689,7 +689,7 @@ class Code11(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in args.items():
+        for (k, v) in list(args.items()):
             setattr(self, k, v)
 
         if self.quiet:
@@ -705,7 +705,7 @@ class Code11(Barcode):
         vval = ""
         self.valid = 1
         s = string.strip(self.value)
-        for i in xrange(0, len(s)):
+        for i in range(0, len(s)):
             c = s[i]
             if c not in self.chars:
                 self.Valid = 0

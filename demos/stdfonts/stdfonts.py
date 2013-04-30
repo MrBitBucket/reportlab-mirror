@@ -64,10 +64,10 @@ if __name__ == '__main__':
     if len(sys.argv)==2:
         mode = string.lower(sys.argv[1])
         if mode not in ['dec','oct','hex']:
-            print __doc__
+            print(__doc__)
 
     elif len(sys.argv) == 1:
         mode = 'dec'
         run(mode)
     else:
-        print __doc__
+        print(__doc__)

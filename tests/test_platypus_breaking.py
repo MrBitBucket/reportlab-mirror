@@ -90,9 +90,9 @@ def _test0(self):
         at the end of each paragraph is its position in the story. (%d)""" % (
             time.ctime(time.time()), len(story)), bt))
 
-    for i in xrange(10):
+    for i in range(10):
         a(Paragraph('Heading 1 always starts a new page (%d)' % len(story), h1))
-        for j in xrange(3):
+        for j in range(3):
             a(Paragraph('Heading1 paragraphs should always'
                             'have a page break before.  Heading 2 on the other hand'
                             'should always have a FRAME break before (%d)' % len(story), bt))
@@ -100,7 +100,7 @@ def _test0(self):
             a(Paragraph('Heading1 paragraphs should always'
                             'have a page break before.  Heading 2 on the other hand'
                             'should always have a FRAME break before (%d)' % len(story), bt))
-            for j in xrange(3):
+            for j in range(3):
                 a(Paragraph(randomText(theme=PYTHON, sentences=2)+' (%d)' % len(story), bt))
                 a(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h3))
                 a(Paragraph(randomText(theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))

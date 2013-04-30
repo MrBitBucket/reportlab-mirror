@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-import os, sys, string, re, ConfigParser
+import os, sys, string, re, configparser
 VERSION = re.search(r'^#\s*define\s+VERSION\s*"([^"]+)"',open('_renderPM.c','r').read(),re.MULTILINE)
 VERSION = VERSION and VERSION.group(1) or 'unknown'
 
 INFOLINES=[]
 def infoline(t):
-	print t
+	print(t)
 	INFOLINES.append(t)
 
 platform = sys.platform
@@ -48,7 +48,7 @@ def check_ft_lib(ft_lib):
 class config:
 	def __init__(self):
 		try:
-			self.parser = ConfigParser.RawConfigParser()
+			self.parser = configparser.RawConfigParser()
 			self.parser.read(pjoin('setup.cfg'))
 		except:
 			self.parser = None

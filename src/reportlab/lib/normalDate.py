@@ -33,16 +33,16 @@ _fmtPat = re.compile('\\{(m{1,5}|yyyy|yy|d{1,4})\\}',re.MULTILINE|re.IGNORECASE)
 _iso_re = re.compile(r'(\d\d\d\d|\d\d)-(\d\d)-(\d\d)')
 
 def getStdMonthNames():
-    return map(string.lower,_monthName)
+    return list(map(string.lower,_monthName))
 
 def getStdShortMonthNames():
-    return map(lambda x: x[:3],getStdMonthNames())
+    return [x[:3] for x in getStdMonthNames()]
 
 def getStdDayNames():
-    return map(string.lower,_dayOfWeekName)
+    return list(map(string.lower,_dayOfWeekName))
 
 def getStdShortDayNames():
-    return map(lambda x: x[:3],getStdDayNames())
+    return [x[:3] for x in getStdDayNames()]
 
 def isLeapYear(year):
     """determine if specified year is leap year, returns Python boolean"""
@@ -183,7 +183,7 @@ class NormalDate:
         else:
             daysByMonth = _daysInMonthNormal
         priorMonthDays = 0
-        for m in xrange(self.month() - 1):
+        for m in range(self.month() - 1):
             priorMonthDays = priorMonthDays + daysByMonth[m]
         return self.day() + priorMonthDays
 
@@ -390,14 +390,14 @@ class NormalDate:
         else:
             daysByMonth = _daysInMonthNormal
         dc = 0; month = 12
-        for m in xrange(len(daysByMonth)):
+        for m in range(len(daysByMonth)):
             dc = dc + daysByMonth[m]
             if dc >= days:
                 month = m + 1
                 break
         # add up the days in prior months
         priorMonthDays = 0
-        for m in xrange(month - 1):
+        for m in range(month - 1):
             priorMonthDays = priorMonthDays + daysByMonth[m]
         day = days - priorMonthDays
         self.setNormalDate((year, month, day))
@@ -427,10 +427,10 @@ class NormalDate:
         (year, month, day) = self.toTuple()
         days = firstDayOfYear(year) + day - 1
         if self.isLeapYear():
-            for m in xrange(month - 1):
+            for m in range(month - 1):
                 days = days + _daysInMonthLeapYear[m]
         else:
-            for m in xrange(month - 1):
+            for m in range(month - 1):
                 days = days + _daysInMonthNormal[m]
         if year == 1582:
             if month > 10 or (month == 10 and day > 4):
@@ -459,7 +459,7 @@ class NormalDate:
         (year, month, day, ...)"""
         if isinstance(normalDate,int):
             self.normalDate = normalDate
-        elif isinstance(normalDate,basestring):
+        elif isinstance(normalDate,str):
             try:
                 self.normalDate = int(normalDate)
             except:
@@ -599,20 +599,20 @@ class BusinessDate(NormalDate):
 
 if __name__ == '__main__':
     today = NormalDate()
-    print "NormalDate test:"
-    print "  Today (%s) is: %s %s" % (today, today.dayOfWeekAbbrev(), today.localeFormat())
+    print("NormalDate test:")
+    print("  Today (%s) is: %s %s" % (today, today.dayOfWeekAbbrev(), today.localeFormat()))
     yesterday = today - 1
-    print "  Yesterday was: %s %s" % (yesterday.dayOfWeekAbbrev(), yesterday.localeFormat())
+    print("  Yesterday was: %s %s" % (yesterday.dayOfWeekAbbrev(), yesterday.localeFormat()))
     tomorrow = today + 1
-    print "  Tomorrow will be: %s %s" % (tomorrow.dayOfWeekAbbrev(), tomorrow.localeFormat())
-    print "  Days between tomorrow and yesterday: %d" % (tomorrow - yesterday)
-    print today.formatMS('{d}/{m}/{yy}')
-    print today.formatMS('{dd}/{m}/{yy}')
-    print today.formatMS('{ddd} {d}/{m}/{yy}')
-    print today.formatMS('{dddd} {d}/{m}/{yy}')
-    print today.formatMS('{d}/{mm}/{yy}')
-    print today.formatMS('{d}/{mmm}/{yy}')
-    print today.formatMS('{d}/{mmmm}/{yy}')
-    print today.formatMS('{d}/{m}/{yyyy}')
+    print("  Tomorrow will be: %s %s" % (tomorrow.dayOfWeekAbbrev(), tomorrow.localeFormat()))
+    print("  Days between tomorrow and yesterday: %d" % (tomorrow - yesterday))
+    print(today.formatMS('{d}/{m}/{yy}'))
+    print(today.formatMS('{dd}/{m}/{yy}'))
+    print(today.formatMS('{ddd} {d}/{m}/{yy}'))
+    print(today.formatMS('{dddd} {d}/{m}/{yy}'))
+    print(today.formatMS('{d}/{mm}/{yy}'))
+    print(today.formatMS('{d}/{mmm}/{yy}'))
+    print(today.formatMS('{d}/{mmmm}/{yy}'))
+    print(today.formatMS('{d}/{m}/{yyyy}'))
     b = BusinessDate('20010116')
-    print 'b=',b,'b.scalar()', b.scalar()
+    print('b=',b,'b.scalar()', b.scalar())

@@ -40,13 +40,13 @@ def findCMapFile(name):
         if os.path.isfile(cmapfile):
             #print "found", cmapfile
             return cmapfile
-    raise IOError, 'CMAP file for encodings "%s" not found!' % name
+    raise IOError('CMAP file for encodings "%s" not found!' % name)
 
 def structToPDF(structure):
     "Converts deeply nested structure to PDFdoc dictionary/array objects"
     if type(structure) is DictType:
         newDict = {}
-        for k, v in structure.items():
+        for k, v in list(structure.items()):
             newDict[k] = structToPDF(v)
         return pdfdoc.PDFDictionary(newDict)
     elif type(structure) in (ListType, TupleType):
@@ -241,9 +241,8 @@ class CIDTypeFace(pdfmetrics.TypeFace):
         try:
             fontDict = CIDFontInfo[name]
         except KeyError:
-            raise KeyError, ("Unable to find information on CID typeface '%s'" % name +
-                            "Only the following font names work:" + repr(allowedTypeFaces)
-                             )
+            raise KeyError("Unable to find information on CID typeface '%s'" % name +
+                            "Only the following font names work:" + repr(allowedTypeFaces))
         descFont = fontDict['DescendantFonts'][0]
         self.ascent = descFont['FontDescriptor']['Ascent']
         self.descent = descFont['FontDescriptor']['Descent']
@@ -422,7 +421,7 @@ class UnicodeCIDFont(CIDFont):
         #these ones should be encoded asUTF16 minus the BOM
         from codecs import utf_16_be_encode
         #print 'formatting %s: %s' % (type(text), repr(text))
-        if type(text) is not unicode:
+        if type(text) is not str:
             text = text.decode('utf8')
         utfText = utf_16_be_encode(text)[0]
         encoded = _escape(utfText)
@@ -454,10 +453,10 @@ def precalculate(cmapdir):
         try:
             enc = CIDEncoding(file)
         except:
-            print 'cannot parse %s, skipping' % enc
+            print('cannot parse %s, skipping' % enc)
             continue
         enc.fastSave(cmapdir)
-        print 'saved %s.fastmap' % file
+        print('saved %s.fastmap' % file)
 
 def test():
     # only works if you have cirrect encodings on your box!
@@ -477,7 +476,7 @@ def test():
     message1 = '\202\261\202\352\202\315\225\275\220\254\226\276\222\251\202\305\202\267\201B'
     c.drawString(100, 675, message1)
     c.save()
-    print 'saved test_japanese.pdf'
+    print('saved test_japanese.pdf')
 
 
 ##    print 'CMAP_DIR = ', CMAP_DIR
@@ -489,10 +488,10 @@ def test():
 
     encName = '90ms-RKSJ-H'
     enc = CIDEncoding(encName)
-    print message1, '->', enc.translate(message1)
+    print(message1, '->', enc.translate(message1))
 
     f = CIDFont('HeiseiMin-W3','90ms-RKSJ-H')
-    print 'width = %0.2f' % f.stringWidth(message1, 10)
+    print('width = %0.2f' % f.stringWidth(message1, 10))
 
 
     #testing all encodings
@@ -511,7 +510,7 @@ def test():
 
 if __name__=='__main__':
     import doctest
-    import cidfonts
+    from . import cidfonts
     doctest.testmod(cidfonts)
     #test()
 

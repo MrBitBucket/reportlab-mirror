@@ -986,7 +986,7 @@ class RL_Codecs:
     def _256_exception_codec(xt):
         exceptions,rexceptions = xt
         import codecs
-        decoding_map = codecs.make_identity_dict(xrange(32,256))
+        decoding_map = codecs.make_identity_dict(range(32,256))
         decoding_map.update(exceptions)
         encoding_map = codecs.make_encoding_map(decoding_map)
         if rexceptions: encoding_map.update(rexceptions)
@@ -1020,7 +1020,7 @@ class RL_Codecs:
 
     def _rl_codecs(name):
         name = name.lower()
-        from pdfmetrics import standardEncodings
+        from .pdfmetrics import standardEncodings
         for e in standardEncodings:
             e = e[:-8].lower()
             if name.startswith(e): return RL_Codecs.__rl_codecs(e)

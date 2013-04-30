@@ -298,7 +298,7 @@ def test():
     for format in ['pdf']:#,'gif','png']:
         out = d.asString(format)
         open('eventcal.%s' % format, 'wb').write(out)
-        print 'saved eventcal.%s' % format
+        print('saved eventcal.%s' % format)
 
 if __name__=='__main__':
     test()

@@ -83,7 +83,7 @@ def getModuleObjects(folder, rootName, typ, pattern='*.py'):
                         for m in dir(obj):
                             a = getattr(obj, m)
                             if type(a) == typ and a not in lookup:
-                                if find(a.im_class.__module__, rootName) != 0:
+                                if find(a.__self__.__class__.__module__, rootName) != 0:
                                     continue
                                 cName = obj.__name__
                                 objects.append((mName, a))
@@ -132,7 +132,7 @@ class DocstringTestCase(SecureTestCase):
                     if objType == ClassType:
                         lines.append("%s.%s\n" % (obj.__module__, obj.__name__))
                     elif objType == MethodType:
-                        lines.append("%s.%s\n" % (obj.im_class, obj.__name__))
+                        lines.append("%s.%s\n" % (obj.__self__.__class__, obj.__name__))
                     else:
                         lines.append("%s\n" % (obj.__name__))
 

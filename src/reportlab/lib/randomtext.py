@@ -305,7 +305,7 @@ def chomsky(times = 1):
     prevparts = []
     newparts = []
     output = []
-    for i in xrange(times):
+    for i in range(times):
         for partlist in (leadins, subjects, verbs, objects):
             while 1:
                 part = random.choice(partlist)
@@ -322,7 +322,7 @@ if rl_config.invariant:
     if not getattr(rl_config,'_random',None):
         rl_config._random = 1
         import random
-        random.seed(2342471922L)
+        random.seed(2342471922)
         del random
 del rl_config
 
@@ -362,10 +362,10 @@ if __name__=='__main__':
         else:
             sentences = 5
         try:
-            print randomText(theme,sentences)
+            print(randomText(theme,sentences))
         except:
-            print>>sys.stderr,"Usage: randomtext.py [theme [#sentences]]"
-            print>>sys.stderr," theme in chomsky|STARTUP|COMPUTERS|BLAH|BUZZWORD|STARTREK|PRINTING|PYTHON"
+            print("Usage: randomtext.py [theme [#sentences]]", file=sys.stderr)
+            print(" theme in chomsky|STARTUP|COMPUTERS|BLAH|BUZZWORD|STARTREK|PRINTING|PYTHON", file=sys.stderr)
             raise
     else:
-        print chomsky(5)
+        print(chomsky(5))

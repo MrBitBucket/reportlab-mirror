@@ -120,10 +120,10 @@ def transformPoint(A,v):
     return (A[0]*v[0]+A[2]*v[1]+A[4],A[1]*v[0]+A[3]*v[1]+A[5])
 
 def transformPoints(matrix, V):
-    return map(transformPoint, V)
+    return list(map(transformPoint, V))
 
 def zTransformPoints(matrix, V):
-    return map(lambda x,matrix=matrix: zTransformPoint(matrix,x), V)
+    return list(map(lambda x,matrix=matrix: zTransformPoint(matrix,x), V))
 
 def _textBoxLimits(text, font, fontSize, leading, textAnchor, boxAnchor):
     w = 0
@@ -165,8 +165,8 @@ def _rotatedBoxLimits( x, y, w, h, angle):
     return the corner points and the min max points in the original space
     '''
     C = zTransformPoints(rotate(angle),((x,y),(x+w,y),(x+w,y+h),(x,y+h)))
-    X = map(lambda x: x[0], C)
-    Y = map(lambda x: x[1], C)
+    X = [x[0] for x in C]
+    Y = [x[1] for x in C]
     return min(X), max(X), min(Y), max(Y), C
 
 
@@ -183,7 +183,7 @@ class _DrawTimeResizeable:
 class _SetKeyWordArgs:
     def __init__(self, keywords={}):
         """In general properties may be supplied to the constructor."""
-        for key, value in keywords.items():
+        for key, value in list(keywords.items()):
             setattr(self, key, value)
 
 
@@ -195,7 +195,7 @@ class _SetKeyWordArgs:
 
 def getRectsBounds(rectList):
     # filter out any None objects, e.g. empty groups
-    L = filter(lambda x: x is not None, rectList)
+    L = [x for x in rectList if x is not None]
     if not L: return None
 
     xMin, yMin, xMax, yMax = L[0]
@@ -266,16 +266,16 @@ def _getBezierExtrema(y0,y1,y2,y3):
 def getPathBounds(points):
     n = len(points)
     f = lambda i,p = points: p[i]
-    xs = map(f,xrange(0,n,2))
-    ys = map(f,xrange(1,n,2))
+    xs = list(map(f,range(0,n,2)))
+    ys = list(map(f,range(1,n,2)))
     return (min(xs), min(ys), max(xs), max(ys))
 
 def getPointsBounds(pointList):
     "Helper function for list of points"
     first = pointList[0]
     if type(first) in (ListType, TupleType):
-        xs = map(lambda xy: xy[0],pointList)
-        ys = map(lambda xy: xy[1],pointList)
+        xs = [xy[0] for xy in pointList]
+        ys = [xy[1] for xy in pointList]
         return (min(xs), min(ys), max(xs), max(ys))
     else:
         return getPathBounds(pointList)
@@ -298,7 +298,7 @@ class Shape(_SetKeyWordArgs,_DrawTimeResizeable):
         """Return a clone of this shape."""
 
         # implement this in the descendants as they need the right init methods.
-        raise NotImplementedError, "No copy method implemented for %s" % self.__class__.__name__
+        raise NotImplementedError("No copy method implemented for %s" % self.__class__.__name__)
 
     def getProperties(self,recur=1):
         """Interface to make it easy to extract automatic
@@ -308,7 +308,7 @@ class Shape(_SetKeyWordArgs,_DrawTimeResizeable):
         #for more complex objects like widgets you
         #may need to override this.
         props = {}
-        for key, value in self.__dict__.items():
+        for key, value in list(self.__dict__.items()):
             if key[0:1] != '_':
                 props[key] = value
         return props
@@ -325,12 +325,12 @@ class Shape(_SetKeyWordArgs,_DrawTimeResizeable):
         may provide a prefix - mostly helps to generate code
         samples for documentation."""
 
-        propList = self.getProperties().items()
+        propList = list(self.getProperties().items())
         propList.sort()
         if prefix:
             prefix = prefix + '.'
         for (name, value) in propList:
-            print '%s%s = %s' % (prefix, name, value)
+            print('%s%s = %s' % (prefix, name, value))
 
     def verify(self):
         """If the programmer has provided the optional
@@ -341,10 +341,10 @@ class Shape(_SetKeyWordArgs,_DrawTimeResizeable):
         an informative exception."""
 
         if self._attrMap is not None:
-            for key in self.__dict__.keys():
+            for key in list(self.__dict__.keys()):
                 if key[0] != '_':
                     assert key in self._attrMap, "Unexpected attribute %s found in %s" % (key, self)
-            for (attr, metavalue) in self._attrMap.items():
+            for (attr, metavalue) in list(self._attrMap.items()):
                 assert hasattr(self, attr), "Missing attribute %s from %s" % (attr, self)
                 value = getattr(self, attr)
                 assert metavalue.validate(value), "Invalid value %s for attribute %s in class %s" % (value, attr, self.__class__.__name__)
@@ -396,7 +396,7 @@ class Group(Shape):
     def _addNamedNode(self,name,node):
         'if name is not None add an attribute pointing to node and add to the attrMap'
         if name:
-            if name not in self._attrMap.keys():
+            if name not in list(self._attrMap.keys()):
                 self._attrMap[name] = AttrMapValue(isValidChild)
             setattr(self, name, node)
 
@@ -473,8 +473,8 @@ class Group(Shape):
     def _copyNamedContents(self,obj,aKeys=None,noCopy=('contents',)):
         from copy import copy
         self_contents = self.contents
-        if not aKeys: aKeys = self._attrMap.keys()
-        for (k, v) in self.__dict__.items():
+        if not aKeys: aKeys = list(self._attrMap.keys())
+        for (k, v) in list(self.__dict__.items()):
             if v in self_contents:
                 pos = self_contents.index(v)
                 setattr(obj, k, obj.contents[pos])
@@ -571,14 +571,14 @@ def _repr(self,I=None):
         if I: _addObjImport(self,I)
         if isinstance(self,Shape):
             from inspect import getargs
-            args, varargs, varkw = getargs(self.__init__.im_func.func_code)
+            args, varargs, varkw = getargs(self.__init__.__func__.__code__)
             P = self.getProperties()
             s = self.__class__.__name__+'('
             for n in args[1:]:
                 v = P[n]
                 del P[n]
                 s = s + '%s,' % _repr(v,I)
-            for n,v in P.items():
+            for n,v in list(P.items()):
                 v = P[n]
                 s = s + '%s=%s,' % (n, _repr(v,I))
             return s[:-1]+')'
@@ -617,7 +617,7 @@ def _extraKW(self,pfx,**kw):
     kw.update(self.__dict__)
     R = {}
     n = len(pfx)
-    for k in kw.keys():
+    for k in list(kw.keys()):
         if k.startswith(pfx):
             R[k[n:]] = kw[k]
     return R
@@ -661,7 +661,7 @@ class Drawing(Group, Flowable):
         G = _renderGroupPy(self._explode(),'self',I)
         n = 'ExplodedDrawing_' + self.__class__.__name__
         s = '#Autogenerated by ReportLab guiedit do not edit\n'
-        for m, o in I.items():
+        for m, o in list(I.items()):
             s = s + 'from %s import %s\n' % (m,string.replace(str(o)[1:-1],"'",""))
         s = s + '\nclass %s(_DrawingEditorMixin,Drawing):\n' % n
         s = s + '\tdef __init__(self,width=%s,height=%s,*args,**kw):\n' % (self.width,self.height)
@@ -674,7 +674,7 @@ class Drawing(Group, Flowable):
         """This is used by the Platypus framework to let the document
         draw itself in a story.  It is specific to PDF and should not
         be used directly."""
-        import renderPDF
+        from . import renderPDF
         renderPDF.draw(self, self.canv, 0, 0, showBoundary=showBoundary)
 
     def wrap(self, availWidth, availHeight):
@@ -725,7 +725,7 @@ class Drawing(Group, Flowable):
             else:
                 try:
                     fnRoot = fnRoot % chartId
-                except TypeError, err:
+                except TypeError as err:
                     #the exact error message changed from 2.2 to 2.3 so we need to
                     #check a substring
                     if str(err).find('not all arguments converted') < 0: raise
@@ -750,7 +750,7 @@ class Drawing(Group, Flowable):
         if 'pdf' in plotMode:
             from reportlab.graphics import renderPDF
             filename = fnroot+'.pdf'
-            if verbose: print genFmt % ('PDF',filename)
+            if verbose: print(genFmt % ('PDF',filename))
             renderPDF.drawToFile(self, filename, title, showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPDF_',**kw))
             ext = ext +  '/.pdf'
             if sys.platform=='mac':
@@ -762,7 +762,7 @@ class Drawing(Group, Flowable):
             if bmFmt in plotMode:
                 from reportlab.graphics import renderPM
                 filename = '%s.%s' % (fnroot,bmFmt)
-                if verbose: print genFmt % (bmFmt,filename)
+                if verbose: print(genFmt % (bmFmt,filename))
                 dtc = getattr(self,'_drawTimeCollector',None)
                 if dtc:
                     dtcfmts = getattr(dtc,'formats',[bmFmt])
@@ -780,7 +780,7 @@ class Drawing(Group, Flowable):
             except ImportError:
                 from reportlab.graphics import renderPS
             filename = fnroot+'.eps'
-            if verbose: print genFmt % ('EPS',filename)
+            if verbose: print(genFmt % ('EPS',filename))
             renderPS.drawToFile(self,
                                 filename,
                                 title = fnroot,
@@ -795,7 +795,7 @@ class Drawing(Group, Flowable):
         if 'svg' in plotMode:
             from reportlab.graphics import renderSVG
             filename = fnroot+'.svg'
-            if verbose: print genFmt % ('SVG',filename)
+            if verbose: print(genFmt % ('SVG',filename))
             renderSVG.drawToFile(self,
                                 filename,
                                 showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderSVG_',**kw))
@@ -804,13 +804,13 @@ class Drawing(Group, Flowable):
         if 'ps' in plotMode:
             from reportlab.graphics import renderPS
             filename = fnroot+'.ps'
-            if verbose: print genFmt % ('EPS',filename)
+            if verbose: print(genFmt % ('EPS',filename))
             renderPS.drawToFile(self, filename, showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderPS_',**kw))
             ext = ext +  '/.ps'
 
         if 'py' in plotMode:
             filename = fnroot+'.py'
-            if verbose: print genFmt % ('py',filename)
+            if verbose: print(genFmt % ('py',filename))
             open(filename,'w').write(self._renderPy())
             ext = ext +  '/.py'
 
@@ -885,7 +885,7 @@ class _DrawingEditorMixin:
         elif name:
             setattr(obj,name,value)
         else:
-            raise ValueError, "Can't add, need name"
+            raise ValueError("Can't add, need name")
 
 class LineShape(Shape):
     # base for types of lines
@@ -951,7 +951,7 @@ class SolidShape(LineShape):
 
 
 # path operator  constants
-_MOVETO, _LINETO, _CURVETO, _CLOSEPATH = range(4)
+_MOVETO, _LINETO, _CURVETO, _CLOSEPATH = list(range(4))
 _PATH_OP_ARG_COUNT = (2, 2, 6, 0)  # [moveTo, lineTo, curveTo, closePath]
 _PATH_OP_NAMES=['moveTo','lineTo','curveTo','closePath']
 
@@ -1065,7 +1065,7 @@ def getArcPoints(centerx, centery, radius, startangledegrees, endangledegrees, y
         n = 1
         radiansdelta = 0
 
-    for angle in xrange(n):
+    for angle in range(n):
         angle = startangle+angle*radiansdelta
         a((centerx+radius*cos(angle),centery+yradius*sin(angle)))
 
@@ -1092,14 +1092,14 @@ def definePath(pathSegs=[],isClipPath=0, dx=0, dy=0, **kw):
             opName = seg[0]
             args = seg[1:]
         if opName not in _PATH_OP_NAMES:
-            raise ValueError, 'bad operator name %s' % opName
+            raise ValueError('bad operator name %s' % opName)
         op = _PATH_OP_NAMES.index(opName)
         if len(args)!=_PATH_OP_ARG_COUNT[op]:
-            raise ValueError, '%s bad arguments %s' % (opName,str(args))
+            raise ValueError('%s bad arguments %s' % (opName,str(args)))
         O.append(op)
         P.extend(list(args))
     for d,o in (dx,0), (dy,1):
-        for i in xrange(o,len(P),2):
+        for i in range(o,len(P),2):
             P[i] = P[i]+d
     return Path(P,O,isClipPath,**kw)
 
@@ -1272,7 +1272,7 @@ class Wedge(SolidShape):
         CA = []
         CAA = CA.append
         a = points.append
-        for angle in xrange(n):
+        for angle in range(n):
             angle = startangle+angle*radiansdelta
             CAA((cos(angle),sin(angle)))
         for c,s in CA:
@@ -1423,24 +1423,24 @@ class UserNode(_DrawTimeResizeable):
         added to drawings; they must create a shape (typically a group)
         so that the renderer can draw the custom node."""
 
-        raise NotImplementedError, "this method must be redefined by the user/programmer"
+        raise NotImplementedError("this method must be redefined by the user/programmer")
 
 
 def test():
     r = Rect(10,10,200,50)
     import pprint
     pp = pprint.pprint
-    print 'a Rectangle:'
+    print('a Rectangle:')
     pp(r.getProperties())
-    print
-    print 'verifying...',
+    print()
+    print('verifying...', end=' ')
     r.verify()
-    print 'OK'
+    print('OK')
     #print 'setting rect.z = "spam"'
     #r.z = 'spam'
-    print 'deleting rect.width'
+    print('deleting rect.width')
     del r.width
-    print 'verifying...',
+    print('verifying...', end=' ')
     r.verify()
 
 

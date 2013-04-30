@@ -116,11 +116,11 @@ def test1():
     buttonFieldRelative(c, "field3_1", "Off", 100, 800)
     c.rect(100, 800, 20, 20)
     c.save()
-    print "wrote", fn
+    print("wrote", fn)
 
 #==========================end of public interfaces
 
-from pdfpattern import PDFPattern
+from .pdfpattern import PDFPattern
 
 def getForm(canvas):
     "get form from canvas, create the form if needed"
@@ -191,7 +191,7 @@ def FormFontsDictionary():
     from reportlab.pdfbase.pdfdoc import PDFDictionary
     fontsdictionary = PDFDictionary()
     fontsdictionary.__RefOnly__ = 1
-    for (fullname, shortname) in FORMFONTNAMES.items():
+    for (fullname, shortname) in list(FORMFONTNAMES.items()):
         fontsdictionary[shortname] = FormFont(fullname, shortname)
     fontsdictionary["ZaDb"] = ZADB
     return fontsdictionary
@@ -466,9 +466,9 @@ def SelectField(title, value, options, xmin, ymin, xmax, ymax, page,
     #print "ARGS", (title, value, options, xmin, ymin, xmax, ymax, page, font, fontsize, R, G, B)
     from reportlab.pdfbase.pdfdoc import PDFString, PDFName, PDFArray
     if value not in options:
-        raise ValueError, "value %s must be one of options %s" % (repr(value), repr(options))
+        raise ValueError("value %s must be one of options %s" % (repr(value), repr(options)))
     fontname = FORMFONTNAMES[font]
-    optionstrings = map(PDFString, options)
+    optionstrings = list(map(PDFString, options))
     optionarray = PDFArray(optionstrings)
     return PDFPattern(SelectFieldPattern,
                       Options=optionarray,
@@ -522,7 +522,7 @@ SelectFieldPattern = [
 
 def ButtonField(title, value, xmin, ymin, page):
     if value not in ("Yes", "Off"):
-        raise ValueError, "button value must be 'Yes' or 'Off': "+repr(value)
+        raise ValueError("button value must be 'Yes' or 'Off': "+repr(value))
     (dx, dy) = (16.77036, 14.90698)
     return PDFPattern(ButtonFieldPattern,
                       Name=PDFString(title),

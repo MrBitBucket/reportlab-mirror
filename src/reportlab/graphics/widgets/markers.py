@@ -117,7 +117,7 @@ class Marker(Widget):
         r = R*sin(18*_toradians)/cos(36*_toradians)
         P = []
         angle = 90
-        for i in xrange(5):
+        for i in range(5):
             for radius in R, r:
                 theta = angle*_toradians
                 P.append(radius*cos(theta))
@@ -145,7 +145,7 @@ class Marker(Widget):
 
     def _doPolygon(self,P):
         x, y = self.x+self.dx, self.y+self.dy
-        if x or y: P = map(lambda i,P=P,A=[x,y]: P[i] + A[i&1], range(len(P)))
+        if x or y: P = list(map(lambda i,P=P,A=[x,y]: P[i] + A[i&1], list(range(len(P)))))
         return Polygon(P, strokeWidth =self.strokeWidth, strokeColor=self.strokeColor, fillColor=self.fillColor)
 
     def _doFill(self):
@@ -159,7 +159,7 @@ class Marker(Widget):
     def _doNgon(self,n):
         P = []
         size = float(self.size)/2
-        for i in xrange(n):
+        for i in range(n):
             r = (2.*i/n+0.5)*pi
             P.append(size*cos(r))
             P.append(size*sin(r))
@@ -237,7 +237,7 @@ def makeMarker(name,**kw):
         m.kind = name[:-5]
         m.size = 10
     else:
-        raise ValueError, "Invalid marker name %s" % name
+        raise ValueError("Invalid marker name %s" % name)
     return m
 
 if __name__=='__main__':

@@ -52,7 +52,7 @@ def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
         modname = os.path.splitext(os.path.basename(filename))[0]
         if modname not in exclude:
             try:
-                exec 'import %s as module' % modname
+                exec('import %s as module' % modname)
                 allTests.addTest(module.makeSuite())
             except:
                 tt, tv, tb = sys.exc_info()[:]
@@ -100,7 +100,7 @@ def main(pattern='test_*.py'):
         if NI:
             sys.stderr.write('\n###################### the following tests could not be imported\n')
             for f,tb in NI:
-                print 'file: "%s"\n%s\n' % (f,string.join(tb,''))
+                print('file: "%s"\n%s\n' % (f,string.join(tb,'')))
         printLocation()
 
 def mainEx():

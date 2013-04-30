@@ -17,18 +17,18 @@ class GridTestCase(unittest.TestCase):
 
         c0, c1 = colors.Color(0, 0, 0), colors.Color(1, 1, 1)
         for c in colorRange(c0, c1, 4):
-            print c
-        print
+            print(c)
+        print()
 
         c0, c1 = colors.CMYKColor(0, 0, 0, 0), colors.CMYKColor(0, 0, 0, 1)
         for c in colorRange(c0, c1, 4):
-            print c
-        print
+            print(c)
+        print()
 
         c0, c1 = colors.PCMYKColor(0, 0, 0, 0), colors.PCMYKColor(0, 0, 0, 100)
         for c in colorRange(c0, c1, 4):
-            print c
-        print
+            print(c)
+        print()
 
 
     def makeDrawing0(self):

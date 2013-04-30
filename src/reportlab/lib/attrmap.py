@@ -50,7 +50,7 @@ class AttrMapValue:
         self.desc = desc
         self._initial = initial
         self._advancedUsage = advancedUsage
-        for k,v in kw.items():
+        for k,v in list(kw.items()):
             setattr(self,k,v)
 
     def __getattr__(self,name):
@@ -60,10 +60,10 @@ class AttrMapValue:
             return self._initial
         elif name=='hidden':
             return 0
-        raise AttributeError, name
+        raise AttributeError(name)
 
     def __repr__(self):
-        return 'AttrMapValue(%s)' % ', '.join(['%s=%r' % i for i in self.__dict__.iteritems()])
+        return 'AttrMapValue(%s)' % ', '.join(['%s=%r' % i for i in self.__dict__.items()])
 
 class AttrMap(UserDict):
     def __init__(self,BASE=None,UNWANTED=[],**kw):
@@ -77,7 +77,7 @@ class AttrMap(UserDict):
                     if hasattr(B,'_attrMap'):
                         data.update(getattr(B._attrMap,'data',{}))
                     else:
-                        raise ValueError, 'BASE=%s has wrong kind of value' % str(B)
+                        raise ValueError('BASE=%s has wrong kind of value' % str(B))
 
         UserDict.__init__(self,data)
         self.remove(UNWANTED)
@@ -113,9 +113,9 @@ def validateSetattr(obj,name,value):
                 try:
                     validate = map[name].validate
                     if not validate(value):
-                        raise AttributeError, "Illegal assignment of '%s' to '%s' in class %s" % (value, name, obj.__class__.__name__)
+                        raise AttributeError("Illegal assignment of '%s' to '%s' in class %s" % (value, name, obj.__class__.__name__))
                 except KeyError:
-                    raise AttributeError, "Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__)
+                    raise AttributeError("Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__))
     obj.__dict__[name] = value
 
 def _privateAttrMap(obj,ret=0):

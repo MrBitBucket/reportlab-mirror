@@ -18,7 +18,7 @@ def unique(seq):
         return seq
 
     # Make a sorted copy of the input sequence.
-    cnvt = isinstance(seq,basestring)
+    cnvt = isinstance(seq,str)
     seq2 = seq[:]
     if cnvt: seq2 = list(seq2)
     seq2.sort()
@@ -71,11 +71,11 @@ class AsciiFileTestCase(unittest.TestCase):
 
         for path in allPyFiles:
             fileContent = open_and_read(path,'r')
-            nonAscii = filter(lambda c: ord(c)>127, fileContent)
+            nonAscii = [c for c in fileContent if ord(c)>127]
             nonAscii = unique(nonAscii)
 
             truncPath = path[string.find(path, 'reportlab'):]
-            args = (truncPath, repr(map(ord, nonAscii)))
+            args = (truncPath, repr(list(map(ord, nonAscii))))
             msg = "File %s contains characters: %s." % args
 ##            if nonAscii:
 ##                print msg

@@ -80,7 +80,7 @@ def sample1bar(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     bc.categoryAxis.labels.angle = 30
 
     catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
-    catNames = map(lambda n:n+'-99', catNames)
+    catNames = [n+'-99' for n in catNames]
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
 
@@ -114,7 +114,7 @@ def sample1line(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     bc.categoryAxis.labels.angle = 30
 
     catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
-    catNames = map(lambda n:n+'-99', catNames)
+    catNames = [n+'-99' for n in catNames]
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
 
@@ -347,7 +347,7 @@ class ChartTestCase(unittest.TestCase):
     def test4b(self):
         story = self.story
         for code in (lpleg, hlcleg, bcleg, pcleg, scleg, plpleg):
-            code_name = code.func_code.co_name
+            code_name = code.__code__.co_name
             for i in ('standard', 'col auto', 'full auto', 'swatch set', 'swatch auto'):
                 d = code(i)
                 assert notFail(d),'getContents failed for %s %s' % (code_name,i)

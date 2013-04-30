@@ -13,7 +13,7 @@ from reportlab.lib.utils import getStringIO, ImageReader
 LINEEND = '\015\012'
 
 def _chunker(src,dst=[],chunkSize=60):
-    for i in xrange(0,len(src),chunkSize):
+    for i in range(0,len(src),chunkSize):
         dst.append(src[i:i+chunkSize])
     return dst
 
@@ -80,9 +80,9 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
     if filename==cachedname:
         if cachedImageExists(filename):
             from reportlab.lib.utils import open_for_read
-            if returnInMemory: return filter(None,open_for_read(cachedname).read().split(LINEEND))
+            if returnInMemory: return [_f for _f in open_for_read(cachedname).read().split(LINEEND) if _f]
         else:
-            raise IOError, 'No such cached image %s' % filename
+            raise IOError('No such cached image %s' % filename)
     else:
         if rl_config.useA85:
             code = makeA85Image(filename,IMG)
@@ -95,7 +95,7 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
         f.write(LINEEND.join(code)+LINEEND)
         f.close()
         if rl_config.verbose:
-            print 'cached image as %s' % cachedname
+            print('cached image as %s' % cachedname)
 
 
 def preProcessImages(spec):
@@ -108,7 +108,7 @@ def preProcessImages(spec):
 
     import types, glob
 
-    if type(spec) is types.StringType:
+    if type(spec) is bytes:
         filelist = glob.glob(spec)
     else:  #list or tuple OK
         filelist = spec
@@ -116,7 +116,7 @@ def preProcessImages(spec):
     for filename in filelist:
         if cachedImageExists(filename):
             if rl_config.verbose:
-                print 'cached version of %s already exists' % filename
+                print('cached version of %s already exists' % filename)
         else:
             cacheImageFile(filename)
 
@@ -156,7 +156,7 @@ except ImportError:
         _instanceEscapePDF=None
         if rl_config.sys_version>='2.1':
             _ESCAPEDICT={}
-            for c in xrange(0,256):
+            for c in range(0,256):
                 if c<32 or c>=127:
                     _ESCAPEDICT[chr(c)]= '\\%03o' % c
                 elif c in (ord('\\'),ord('('),ord(')')):
@@ -211,7 +211,7 @@ def _AsciiHexDecode(input):
     stripped = stripped[:-1]  #chop off terminator
     assert len(stripped) % 2 == 0, 'Ascii Hex stream has odd number of bytes'
 
-    return ''.join([chr(int(stripped[i:i+2],16)) for i in xrange(0,len(stripped),2)])
+    return ''.join([chr(int(stripped[i:i+2],16)) for i in range(0,len(stripped),2)])
         
 if 1: # for testing always define this
     def _AsciiBase85EncodePYTHON(input):
@@ -226,7 +226,7 @@ if 1: # for testing always define this
         body, lastbit = input[0:cut], input[cut:]
 
         out = [].append
-        for i in xrange(whole_word_count):
+        for i in range(whole_word_count):
             offset = i*4
             b1 = ord(body[offset])
             b2 = ord(body[offset+1])
@@ -236,7 +236,7 @@ if 1: # for testing always define this
             if b1<128:
                 num = (((((b1<<8)|b2)<<8)|b3)<<8)|b4
             else:
-                num = 16777216L * b1 + 65536 * b2 + 256 * b3 + b4
+                num = 16777216 * b1 + 65536 * b2 + 256 * b3 + b4
 
             if num == 0:
                 #special case
@@ -267,7 +267,7 @@ if 1: # for testing always define this
             b3 = ord(lastbit[2])
             b4 = ord(lastbit[3])
 
-            num = 16777216L * b1 + 65536 * b2 + 256 * b3 + b4
+            num = 16777216 * b1 + 65536 * b2 + 256 * b3 + b4
 
             #solve for c1..c5
             temp, c5 = divmod(num, 85)
@@ -306,7 +306,7 @@ if 1: # for testing always define this
         body, lastbit = stripped[0:cut], stripped[cut:]
 
         out = [].append
-        for i in xrange(whole_word_count):
+        for i in range(whole_word_count):
             offset = i*5
             c1 = ord(body[offset]) - 33
             c2 = ord(body[offset+1]) - 33
@@ -314,7 +314,7 @@ if 1: # for testing always define this
             c4 = ord(body[offset+3]) - 33
             c5 = ord(body[offset+4]) - 33
 
-            num = ((85L**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5
+            num = ((85**4) * c1) + ((85**3) * c2) + ((85**2) * c3) + (85*c4) + c5
 
             temp, b4 = divmod(num,256)
             temp, b3 = divmod(temp,256)
@@ -335,7 +335,7 @@ if 1: # for testing always define this
             c3 = ord(lastbit[2]) - 33
             c4 = ord(lastbit[3]) - 33
             c5 = ord(lastbit[4]) - 33
-            num = (((85*c1+c2)*85+c3)*85+c4)*85L + (c5
+            num = (((85*c1+c2)*85+c3)*85+c4)*85 + (c5
                      +(0,0,0xFFFFFF,0xFFFF,0xFF)[remainder_size])
             temp, b4 = divmod(num,256)
             temp, b3 = divmod(temp,256)
@@ -406,7 +406,7 @@ def readJPEGInfo(image):
     "Read width, height and number of components from open JPEG file."
 
     import struct
-    from pdfdoc import PDFError
+    from .pdfdoc import PDFError
 
     #Acceptable JPEG Markers:
     #  SROF0=baseline, SOF1=extended sequential or SOF2=progressive
@@ -456,10 +456,10 @@ class _fusc:
         self._n = int(n) or 7
 
     def encrypt(self,s):
-        return self.__rotate(_AsciiBase85Encode(''.join(map(chr,self.__fusc(map(ord,s))))),self._n)
+        return self.__rotate(_AsciiBase85Encode(''.join(map(chr,self.__fusc(list(map(ord,s)))))),self._n)
 
     def decrypt(self,s):
-        return ''.join(map(chr,self.__fusc(map(ord,_AsciiBase85Decode(self.__rotate(s,-self._n))))))
+        return ''.join(map(chr,self.__fusc(list(map(ord,_AsciiBase85Decode(self.__rotate(s,-self._n)))))))
 
     def __rotate(self,s,n):
         l = len(s)
@@ -470,4 +470,4 @@ class _fusc:
 
     def __fusc(self,s):
         slen = len(s)
-        return map(lambda x,y: x ^ y,s,map(ord,((int(slen/self._klen)+1)*self._k)[:slen]))
+        return list(map(lambda x,y: x ^ y,s,list(map(ord,((int(slen/self._klen)+1)*self._k)[:slen]))))

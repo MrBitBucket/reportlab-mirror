@@ -9,7 +9,7 @@ fontSize=12
 N = 30000
 def tim(msg,func,*args):
     t0 = time.time()
-    for i in xrange(N):
+    for i in range(N):
         x = func(*args)
     t1 = time.time()
     return "%s N=%d t=%.3f\n%r" % (msg,N,t1-t0,x)
@@ -23,6 +23,6 @@ assert unicode2T1(utext,[font]+font.substitutionFonts)==_py_unicode2T1(utext,[fo
 #print _py_unicode2T1(u'ABCDEF',[font]+font.substitutionFonts)
 defns = "font font.widths font.substitutionFonts font.encName fontName utext"
 rcv = getrc(defns)
-print tim('unicode2T1',unicode2T1,utext,[font]+font.substitutionFonts)
-print tim('_py_unicode2T1',_py_unicode2T1,utext,[font]+font.substitutionFonts)
-print "rc diffs=(%s)" % checkrc(defns,rcv)
+print(tim('unicode2T1',unicode2T1,utext,[font]+font.substitutionFonts))
+print(tim('_py_unicode2T1',_py_unicode2T1,utext,[font]+font.substitutionFonts))
+print("rc diffs=(%s)" % checkrc(defns,rcv))

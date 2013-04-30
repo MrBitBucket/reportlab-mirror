@@ -27,14 +27,14 @@ def getModule(modulename,fromPath='tools.pythonpoint.styles'):
     """
 
     try:
-        exec 'from tools.pythonpoint import '+modulename
+        exec('from tools.pythonpoint import '+modulename)
         return eval(modulename)
     except ImportError:
         try:
-            exec 'from tools.pythonpoint.styles import '+modulename
+            exec('from tools.pythonpoint.styles import '+modulename)
             return eval(modulename)
         except ImportError:
-            exec 'import '+modulename
+            exec('import '+modulename)
             return eval(modulename)
 
 
@@ -786,19 +786,19 @@ class PPMLParser(xmllib.XMLParser):
     def unknown_starttag(self, tag, attrs):
         if  self._curPara:
             echo = '<%s' % tag
-            for (key, value) in attrs.items():
+            for (key, value) in list(attrs.items()):
                 echo = echo + ' %s="%s"' % (key, value)
             echo = echo + '>'
             self._curPara.rawtext = self._curPara.rawtext + echo
         else:
-            print 'Unknown start tag %s' % tag
+            print('Unknown start tag %s' % tag)
 
 
     def unknown_endtag(self, tag):
         if  self._curPara:
             self._curPara.rawtext = self._curPara.rawtext + '</%s>'% tag
         else:
-            print 'Unknown end tag %s' % tag
+            print('Unknown end tag %s' % tag)
 
     def handle_charref(self, name):
         try:
@@ -809,4 +809,4 @@ class PPMLParser(xmllib.XMLParser):
         except ValueError:
             self.unknown_charref(name)
             return
-        self.handle_data(unichr(n).encode('utf8'))
+        self.handle_data(chr(n).encode('utf8'))

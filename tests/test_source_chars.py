@@ -57,10 +57,10 @@ def zapTrailingWhitespace(dirname):
     """Eliminates trailing spaces IN PLACE.  Use with extreme care
     and only after a backup or with version-controlled code."""
     assert os.path.isdir(dirname), "Directory not found!"
-    print "This will eliminate all trailing spaces in py files under %s." % dirname
-    ok = raw_input("Shall I proceed?  type YES > ")
+    print("This will eliminate all trailing spaces in py files under %s." % dirname)
+    ok = input("Shall I proceed?  type YES > ")
     if ok != 'YES':
-        print 'aborted by user'
+        print('aborted by user')
         return
     w = GlobDirectoryWalker(dirname, '*.py')
     for filename in w:
@@ -77,8 +77,8 @@ def zapTrailingWhitespace(dirname):
 
         if badChars != 0:
             open(filename, 'w').write(string.join(cleaned, '\n'))
-            print "file %s contained %d trailing spaces, FIXED" % (filename, badChars)
-    print 'done'
+            print("file %s contained %d trailing spaces, FIXED" % (filename, badChars))
+    print('done')
 
 def makeSuite():
     return makeSuiteForClasses(SourceTester)

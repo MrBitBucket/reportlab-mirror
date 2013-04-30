@@ -27,11 +27,11 @@ class PropHolder:
         """
 
         if self._attrMap is not None:
-            for key in self.__dict__.keys():
+            for key in list(self.__dict__.keys()):
                 if key[0] != '_':
                     msg = "Unexpected attribute %s found in %s" % (key, self)
                     assert key in self._attrMap, msg
-            for (attr, metavalue) in self._attrMap.items():
+            for (attr, metavalue) in list(self._attrMap.items()):
                 msg = "Missing attribute %s from %s" % (attr, self)
                 assert hasattr(self, attr), msg
                 value = getattr(self, attr)
@@ -64,14 +64,14 @@ class PropHolder:
         # expose sequence contents?
 
         props = {}
-        for name in self.__dict__.keys():
+        for name in list(self.__dict__.keys()):
             if name[0:1] != '_':
                 component = getattr(self, name)
 
                 if recur and isValidChild(component):
                     # child object, get its properties too
                     childProps = component.getProperties(recur=recur)
-                    for (childKey, childValue) in childProps.items():
+                    for (childKey, childValue) in list(childProps.items()):
                         #key might be something indexed like '[2].fillColor'
                         #or simple like 'fillColor'; in the former case we
                         #don't need a '.' between me and my child.
@@ -98,7 +98,7 @@ class PropHolder:
         """
 
         childPropDicts = {}
-        for (name, value) in propDict.items():
+        for (name, value) in list(propDict.items()):
             parts = string.split(name, '.', 1)
             if len(parts) == 1:
                 #simple attribute, set it now
@@ -111,7 +111,7 @@ class PropHolder:
                     childPropDicts[childName] = {remains: value}
 
         # now assign to children
-        for (childName, childPropDict) in childPropDicts.items():
+        for (childName, childPropDict) in list(childPropDicts.items()):
             child = getattr(self, childName)
             child.setProperties(childPropDict)
 
@@ -122,12 +122,12 @@ class PropHolder:
         samples for documentation.
         """
 
-        propList = self.getProperties().items()
+        propList = list(self.getProperties().items())
         propList.sort()
         if prefix:
             prefix = prefix + '.'
         for (name, value) in propList:
-            print '%s%s = %s' % (prefix, name, value)
+            print('%s%s = %s' % (prefix, name, value))
 
 
 class Widget(PropHolder, shapes.UserNode):
@@ -136,17 +136,17 @@ class Widget(PropHolder, shapes.UserNode):
     widgets and vice versa."""
 
     def _setKeywords(self,**kw):
-        for k,v in kw.items():
+        for k,v in list(kw.items()):
             if k not in self.__dict__:
                 setattr(self,k,v)
 
     def draw(self):
         msg = "draw() must be implemented for each Widget!"
-        raise shapes.NotImplementedError, msg
+        raise shapes.NotImplementedError(msg)
 
     def demo(self):
         msg = "demo() must be implemented for each Widget!"
-        raise shapes.NotImplementedError, msg
+        raise shapes.NotImplementedError(msg)
 
     def provideNode(self):
         return self.draw()
@@ -251,7 +251,7 @@ class TypedPropertyCollection(PropHolder):
                     child._index = None
             else:
                 child._index = None
-            for i in filter(lambda x,K=child.__dict__.keys(): x in K,child._attrMap.keys()):
+            for i in filter(lambda x,K=list(child.__dict__.keys()): x in K,list(child._attrMap.keys())):
                 del child.__dict__[i]
 
             self._children[index] = child
@@ -266,27 +266,27 @@ class TypedPropertyCollection(PropHolder):
         assert isinstance(value, self._value.__class__), msg
 
     def __len__(self):
-        return len(self._children.keys())
+        return len(list(self._children.keys()))
 
     def getProperties(self,recur=1):
         # return any children which are defined and whatever
         # differs from the parent
         props = {}
 
-        for (key, value) in self._value.getProperties(recur=recur).items():
+        for (key, value) in list(self._value.getProperties(recur=recur).items()):
             props['%s' % key] = value
 
-        for idx in self._children.keys():
+        for idx in list(self._children.keys()):
             childProps = self._children[idx].getProperties(recur=recur)
-            for (key, value) in childProps.items():
+            for (key, value) in list(childProps.items()):
                 if not hasattr(self,key) or getattr(self, key)!=value:
                     newKey = '[%s].%s' % (idx, key)
                     props[newKey] = value
         return props
 
     def setVector(self,**kw):
-        for name, value in kw.items():
-            for i in xrange(len(value)):
+        for name, value in list(kw.items()):
+            for i in range(len(value)):
                 setattr(self[i],name,value[i])
 
     def __getattr__(self,name):
@@ -333,7 +333,7 @@ class StyleProperties(PropHolder):
     def __init__(self, **kwargs):
         "Initialize with attributes if any."
 
-        for k, v in kwargs.items():
+        for k, v in list(kwargs.items()):
             setattr(self, k, v)
 
 
@@ -456,7 +456,7 @@ class Sizer(Widget):
     def _addNamedNode(self,name,node):
         'if name is not None add an attribute pointing to node and add to the attrMap'
         if name:
-            if name not in self._attrMap.keys():
+            if name not in list(self._attrMap.keys()):
                 self._attrMap[name] = AttrMapValue(isValidChild)
             setattr(self, name, node)
 
@@ -501,29 +501,29 @@ def test():
     wedges = TypedPropertyCollection(WedgeProperties)
     wedges.fillColor = colors.red
     wedges.setVector(fillColor=(colors.blue,colors.green,colors.white))
-    print len(_ItemWrapper)
+    print(len(_ItemWrapper))
 
     d = shapes.Drawing(400, 200)
     tc = TwoCircles()
     d.add(tc)
-    import renderPDF
+    from . import renderPDF
     renderPDF.drawToFile(d, 'sample_widget.pdf', 'A Sample Widget')
-    print 'saved sample_widget.pdf'
+    print('saved sample_widget.pdf')
 
     d = shapes.Drawing(400, 200)
     f = Face()
     f.skinColor = colors.yellow
     f.mood = "sad"
     d.add(f, name='theFace')
-    print 'drawing 1 properties:'
+    print('drawing 1 properties:')
     d.dumpProperties()
     renderPDF.drawToFile(d, 'face.pdf', 'A Sample Widget')
-    print 'saved face.pdf'
+    print('saved face.pdf')
 
     d2 = d.expandUserNodes()
     renderPDF.drawToFile(d2, 'face_copy.pdf', 'An expanded drawing')
-    print 'saved face_copy.pdf'
-    print 'drawing 2 properties:'
+    print('saved face_copy.pdf')
+    print('drawing 2 properties:')
     d2.dumpProperties()
 
 

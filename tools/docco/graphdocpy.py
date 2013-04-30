@@ -15,11 +15,11 @@ from string import find, join, split, replace, expandtabs, rstrip
 import reportlab
 from reportlab import rl_config
 
-from docpy import PackageSkeleton0, ModuleSkeleton0
-from docpy import DocBuilder0, PdfDocBuilder0, HtmlDocBuilder0
-from docpy import htmlescape, htmlrepr, defaultformat, \
+from .docpy import PackageSkeleton0, ModuleSkeleton0
+from .docpy import DocBuilder0, PdfDocBuilder0, HtmlDocBuilder0
+from .docpy import htmlescape, htmlrepr, defaultformat, \
      getdoc, reduceDocStringLength
-from docpy import makeHtmlSection, makeHtmlSubSection, \
+from .docpy import makeHtmlSection, makeHtmlSubSection, \
      makeHtmlInlineImage
 
 from reportlab.lib.units import inch, cm
@@ -138,7 +138,7 @@ class MyTemplate(BaseDocTemplate):
                 except:
                     if VERBOSE:
                         # AR hacking in exception handlers
-                        print 'caught exception in MyTemplate.afterFlowable with heading text %s' % f.text
+                        print('caught exception in MyTemplate.afterFlowable with heading text %s' % f.text)
                         traceback.print_exc()
                     else:
                         pass
@@ -267,7 +267,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         "Append a graphic demo of a Widget or Drawing at the end of a class."
 
         if VERBOSE:
-            print 'GraphPdfDocBuilder.beginClass(%s...)' % name
+            print('GraphPdfDocBuilder.beginClass(%s...)' % name)
 
         aClass = eval('self.skeleton.moduleSpace.' + name)
         if issubclass(aClass, Widget):
@@ -305,7 +305,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
         map = aClass._attrMap
         if map:
-            map = map.items()
+            map = list(map.items())
             map.sort()
         else:
             map = []
@@ -333,7 +333,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         elif issubclass(aClass, Widget):
             try:
                 widget = aClass()
-            except AssertionError, err:
+            except AssertionError as err:
                 if _abstractclasserr_re.match(str(err)): return
                 raise
             self.story.append(Spacer(0*cm, 0.5*cm))
@@ -373,7 +373,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             return
 
         if VERBOSE:
-            print 'GraphPdfDocBuilder.endFunction(%s...)' % name
+            print('GraphPdfDocBuilder.endFunction(%s...)' % name)
         PdfDocBuilder0.endFunction(self, name, doc, sig)
         aFunc = eval('self.skeleton.moduleSpace.' + name)
         drawing = aFunc()
@@ -421,7 +421,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             self.story.append(Spacer(6,6))
         except:
             if VERBOSE:
-                print 'caught exception in _showDrawingDemo'
+                print('caught exception in _showDrawingDemo')
                 traceback.print_exc()
             else:
                 pass
@@ -443,7 +443,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             self.story.append(Spacer(6,6))
         except:
             if VERBOSE:
-                print 'caught exception in _showWidgetDemo'
+                print('caught exception in _showWidgetDemo')
                 traceback.print_exc()
             else:
                 pass
@@ -464,7 +464,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         """Dump all properties of a widget."""
 
         props = widget.getProperties()
-        keys = props.keys()
+        keys = list(props.keys())
         keys.sort()
         lines = []
         for key in keys:
@@ -600,7 +600,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             self.outLines.append(makeHtmlInlineImage(path))
         except:
             if VERBOSE:
-                print 'caught exception in GraphHTMLDocBuilder._showDrawingDemo'
+                print('caught exception in GraphHTMLDocBuilder._showDrawingDemo')
                 traceback.print_exc()
             else:
                 pass
@@ -625,7 +625,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
         except:
             if VERBOSE:
 
-                print 'caught exception in GraphHTMLDocBuilder._showWidgetDemo'
+                print('caught exception in GraphHTMLDocBuilder._showWidgetDemo')
                 traceback.print_exc()
             else:
                 pass
@@ -647,7 +647,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
         """Dump all properties of a widget."""
 
         props = widget.getProperties()
-        keys = props.keys()
+        keys = list(props.keys())
         keys.sort()
         lines = []
         for key in keys:
@@ -716,7 +716,7 @@ class PlatypusDocBuilder0(DocBuilder0):
         bt = self.bt
         story = self.story
         if bases:
-            bases = map(lambda b:b.__name__, bases) # hack
+            bases = [b.__name__ for b in bases] # hack
             story.append(Paragraph('%s(%s)' % (name, join(bases, ', ')), bt))
         else:
             story.append(Paragraph(name, bt))
@@ -826,7 +826,7 @@ def documentModule0(pathOrName, builder, opts={}):
     try:
         module = __import__(modname)
     except:
-        print 'Failed to import %s.' % modname
+        print('Failed to import %s.' % modname)
         os.chdir(cwd)
         return
 
@@ -842,17 +842,17 @@ def documentModule0(pathOrName, builder, opts={}):
     os.chdir(cwd)
 
 
-def _packageWalkCallback((builder, opts), dirPath, files):
+def _packageWalkCallback(xxx_todo_changeme, dirPath, files):
     "A callback function used when waking over a package tree."
-    #must CD into a directory to document the module correctly
+    (builder, opts) = xxx_todo_changeme
     cwd = os.getcwd()
     os.chdir(dirPath)
 
 
     # Skip __init__ files.
-    files = filter(lambda f:f != '__init__.py', files)
+    files = [f for f in files if f != '__init__.py']
 
-    files = filter(lambda f:f[-3:] == '.py', files)
+    files = [f for f in files if f[-3:] == '.py']
     for f in files:
         path = os.path.join(dirPath, f)
 ##        if not opts.get('isSilent', 0):
@@ -904,7 +904,7 @@ def makeGraphicsReference(outfilename):
     builder.begin(name='reportlab.graphics', typ='package')
     documentPackage0('reportlab.graphics', builder, {'isSilent': 0})
     builder.end(outfilename)
-    print 'made graphics reference in %s' % outfilename
+    print('made graphics reference in %s' % outfilename)
 
 def main():
     "Handle command-line options and trigger corresponding action."
@@ -919,7 +919,7 @@ def main():
 
     # On -h print usage and exit immediately.
     if hasOpt('-h'):
-        print printUsage.__doc__
+        print(printUsage.__doc__)
         sys.exit(0)
 
     # On -s set silent mode.
@@ -941,19 +941,19 @@ def main():
     if hasOpt('-m'):
         nameOrPath = optsDict['-m']
         if not isSilent:
-            print "Generating documentation for module %s..." % nameOrPath
+            print("Generating documentation for module %s..." % nameOrPath)
         builder.begin(name=nameOrPath, typ='module')
         documentModule0(nameOrPath, builder, options)
     elif hasOpt('-p'):
         nameOrPath = optsDict['-p']
         if not isSilent:
-            print "Generating documentation for package %s..." % nameOrPath
+            print("Generating documentation for package %s..." % nameOrPath)
         builder.begin(name=nameOrPath, typ='package')
         documentPackage0(nameOrPath, builder, options)
     builder.end()
 
     if not isSilent:
-        print "Saved %s." % builder.outPath
+        print("Saved %s." % builder.outPath)
 
     #if doing the usual, put a copy in docs
     cwd = os.getcwd()
@@ -976,10 +976,10 @@ def main():
         try:
             shutil.copyfile('reportlab.graphics.pdf', dst)
             if not isSilent:
-                print 'copied to '+dst
+                print('copied to '+dst)
         except:
             if not isSilent:
-                print '!!!!! cannot copy to '+dst
+                print('!!!!! cannot copy to '+dst)
 
 def makeSuite():
     "standard test harness support - run self as separate process"

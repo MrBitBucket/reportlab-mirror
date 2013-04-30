@@ -33,11 +33,11 @@ def pygments2xpre(s, language="python"):
     l = get_lexer_by_name(language)
     
     h = HtmlFormatter()
-    from StringIO import StringIO
+    from io import StringIO
     out = StringIO()
     highlight(s,l,h,out)
     styles = [(cls, style.split(';')[0].split(':')[1].strip())
-                for cls, (style, ttype, level) in h.class2style.iteritems()
+                for cls, (style, ttype, level) in h.class2style.items()
                 if cls and style and style.startswith('color:')]
     return _2xpre(out.getvalue(),styles)
 
@@ -57,12 +57,12 @@ def convertSourceFiles(filenames):
         fmt = pygments2xpre(src)
         S(XPreformatted(fmt, style=styC))
     doc.build(S.__self__)
-    print 'saved pygments2xpre.pdf'
+    print('saved pygments2xpre.pdf')
 
 if __name__=='__main__':
     import sys
     filenames = sys.argv[1:]
     if not filenames:
-        print 'usage:  pygments2xpre.py file1.py [file2.py] [...]'
+        print('usage:  pygments2xpre.py file1.py [file2.py] [...]')
         sys.exit(0)
     convertSourceFiles(filenames)

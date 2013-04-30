@@ -31,7 +31,7 @@
 #
 
 from reportlab.lib.units import inch
-from common import Barcode
+from .common import Barcode
 import string
 
 _patterns = {
@@ -112,7 +112,7 @@ class _Code39Base(Barcode):
     bearers = 0.0
     stop = 1
     def __init__(self, value = "", **args):
-        for k, v in args.iteritems():
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:

@@ -136,7 +136,7 @@ class DocBlock:
         self.namespace = {'canvas':canvas,'cm': cm,'inch':inch}
         canvas.translate(x+9, y - height + 9)
         codeObj = compile(self.code, '<sample>','exec')
-        exec codeObj in self.namespace
+        exec(codeObj, self.namespace)
 
         canvas.restoreState()
 
@@ -747,7 +747,7 @@ def run(filename):
     open(outputfile("test_pdfgen_pycanvas_out.txt"),"w").write(source)
     import reportlab.rl_config
     if reportlab.rl_config.verbose:
-        print source
+        print(source)
 
 
 def pageShapes(c):
@@ -764,7 +764,7 @@ def pageShapes(c):
     d = DocBlock()
     d.comment1 = 'Lesson one'
     d.code = "canvas.textOut('hello, world')"
-    print d.code
+    print(d.code)
 
     d.comment2 = 'Lesson two'
 

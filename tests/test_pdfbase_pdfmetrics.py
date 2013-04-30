@@ -53,7 +53,7 @@ def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
         glyphName = glyphNames[i]
         if glyphName is not None:
             canv.setFont('Helvetica', 10)
-            text = unicode(chr(i),encName).encode('utf8')*30
+            text = str(chr(i),encName).encode('utf8')*30
             try:
                 w = canv.stringWidth(text, fontName, 10)
                 canv.drawString(80, y, '%03d   %s w=%3d' % (i, glyphName, int((w/3.)*10)))
@@ -76,17 +76,17 @@ def makeTestDoc(fontNames):
     c.showOutline()
     c.addOutlineEntry('Glyph Width Tests', 'Glyph Width Tests', level=0)
     if verbose:
-        print   # get it on a different line to the unittest log output.
+        print()   # get it on a different line to the unittest log output.
     for fontName in fontNames:
         if verbose:
-            print 'width test for', fontName
+            print('width test for', fontName)
 
         makeWidthTestForAllGlyphs(c, fontName)
         c.showPage()
     c.save()
     if verbose:
         if verbose:
-            print 'saved',filename
+            print('saved',filename)
 
 
 class PDFMetricsTestCase(unittest.TestCase):
@@ -112,8 +112,8 @@ if __name__=='__main__':
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
             if not arg in fontNamesToTest:
-                print 'unknown font %s' % arg
-                print usage
+                print('unknown font %s' % arg)
+                print(usage)
                 sys.exit(0)
 
         fontNamesToTest = sys.argv[1:]

@@ -41,6 +41,7 @@ ValueError: css color 'pcmyka(100,0,0,0)' has wrong number of components
 '''
 import math, re
 from reportlab.lib.utils import fp_str
+import collections
 
 class Color:
     """This class is used to represent color.  Components red, green, blue
@@ -85,10 +86,10 @@ class Color:
         return (self.red, self.green, self.blue, self.alpha)
 
     def bitmap_rgb(self):
-        return tuple(map(lambda x: int(x*255)&255, self.rgb()))
+        return tuple([int(x*255)&255 for x in self.rgb()])
 
     def bitmap_rgba(self):
-        return tuple(map(lambda x: int(x*255)&255, self.rgba()))
+        return tuple([int(x*255)&255 for x in self.rgba()])
 
     def hexval(self):
         return '0x%02x%02x%02x' % self.bitmap_rgb()
@@ -118,7 +119,7 @@ class Color:
 
     def _lookupName(self,D={}):
         if not D:
-            for n,v in getAllNamedColors().iteritems():
+            for n,v in getAllNamedColors().items():
                 if not isinstance(v,CMYKColor):
                     t = v.red,v.green,v.blue
                     if t in D:
@@ -190,7 +191,7 @@ class CMYKColor(Color):
         *NB* note this dosen't reach density zero'''
         scale = self._scale
         dd = scale/float(n)
-        L = [self.clone(density=scale - i*dd) for i in xrange(n)]
+        L = [self.clone(density=scale - i*dd) for i in range(n)]
         if reverse: L.reverse()
         return L
 
@@ -232,7 +233,7 @@ class CMYKColor(Color):
 
     def _lookupName(self,D={}):
         if not D:
-            for n,v in getAllNamedColors().iteritems():
+            for n,v in getAllNamedColors().items():
                 if isinstance(v,CMYKColor):
                     t = v.cyan,v.magenta,v.yellow,v.black
                     if t in D:
@@ -353,7 +354,7 @@ def HexColor(val, htmlOnly=False, hasAlpha=False):
 
     """ #" for emacs
 
-    if isinstance(val,basestring):
+    if isinstance(val,str):
         b = 10
         if val[:1] == '#':
             val = val[1:]
@@ -385,7 +386,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
     if x1<x0:
         x0,x1,c0,c1 = x1,x0,c1,c0 # normalized so x1>x0
     if x<x0-1e-8 or x>x1+1e-8: # fudge factor for numerical problems
-        raise ValueError, "Can't interpolate: x=%f is not between %f and %f!" % (x,x0,x1)
+        raise ValueError("Can't interpolate: x=%f is not between %f and %f!" % (x,x0,x1))
     if x<=x0:
         return c0
     elif x>=x1:
@@ -481,7 +482,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
             a = c0.alpha+x*(c1.alpha - c0.alpha)/dx
             return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, alpha=a*100)
     else:
-        raise ValueError, "Can't interpolate: Unknown color class %s!" % cname
+        raise ValueError("Can't interpolate: Unknown color class %s!" % cname)
 
 def obj_R_G_B(c):
     '''attempt to convert an object to (red,green,blue)'''
@@ -703,9 +704,9 @@ def getAllNamedColors():
     # uses a singleton for efficiency
     global _namedColors
     if _namedColors is not None: return _namedColors
-    import colors
+    from . import colors
     _namedColors = {}
-    for (name, value) in colors.__dict__.items():
+    for (name, value) in list(colors.__dict__.items()):
         if isinstance(value, Color):
             _namedColors[name] = value
 
@@ -719,18 +720,18 @@ def describe(aColor,mode=0):
     '''
     namedColors = getAllNamedColors()
     closest = (10, None, None)  #big number, name, color
-    for (name, color) in namedColors.items():
+    for (name, color) in list(namedColors.items()):
         distance = colorDistance(aColor, color)
         if distance < closest[0]:
             closest = (distance, name, color)
     if mode<=1:
         s = 'best match is %s, distance %0.4f' % (closest[1], closest[0])
-        if mode==0: print s
+        if mode==0: print(s)
         else: return s
     elif mode==2:
         return (closest[1], closest[0])
     else:
-        raise ValueError, "Illegal value for mode "+str(mode)
+        raise ValueError("Illegal value for mode "+str(mode))
 
 def hue2rgb(m1, m2, h):
     if h<0: h += 1
@@ -816,7 +817,7 @@ class cssParse:
             if hsl:
                 R,G,B= hsl2rgb(self.hueVal(n[0]),self.pcVal(n[1]),self.pcVal(n[2]))
             else:
-                R,G,B = map('%' in n[0] and self.rgbPcVal or self.rgbVal,n)
+                R,G,B = list(map('%' in n[0] and self.rgbPcVal or self.rgbVal,n))
 
             return Color(R,G,B,a)
 
@@ -839,7 +840,7 @@ class toColor:
             assert 3<=len(arg)<=4, 'Can only convert 3 and 4 sequences to color'
             assert 0<=min(arg) and max(arg)<=1
             return len(arg)==3 and Color(arg[0],arg[1],arg[2]) or CMYKColor(arg[0],arg[1],arg[2],arg[3])
-        elif isinstance(arg,basestring):
+        elif isinstance(arg,str):
             C = cssParse(arg)
             if C: return C
             if arg in self.extraColorsNS: return self.extraColorsNS[arg]
@@ -873,9 +874,9 @@ def setColors(**kw):
     assigned = {}
     while kw and progress:
         progress = 0
-        for k, v in kw.items():
+        for k, v in list(kw.items()):
             if isinstance(v,(tuple,list)):
-                c = map(lambda x,UNDEF=UNDEF: toColor(x,UNDEF),v)
+                c = list(map(lambda x,UNDEF=UNDEF: toColor(x,UNDEF),v))
                 if isinstance(v,tuple): c = tuple(c)
                 ok = UNDEF not in c
             else:
@@ -888,7 +889,7 @@ def setColors(**kw):
 
     if kw: raise ValueError("Can't convert\n%s" % str(kw))
     getAllNamedColors()
-    for k, c in assigned.items():
+    for k, c in list(assigned.items()):
         globals()[k] = c
         if isinstance(c,Color): _namedColors[k] = c
 
@@ -1000,8 +1001,8 @@ def _enforceRGB(c):
     return tc
 
 def _chooseEnforceColorSpace(enforceColorSpace):
-    if enforceColorSpace is not None and not callable(enforceColorSpace):
-        if isinstance(enforceColorSpace,basestring): enforceColorSpace=enforceColorSpace.upper()
+    if enforceColorSpace is not None and not isinstance(enforceColorSpace, collections.Callable):
+        if isinstance(enforceColorSpace,str): enforceColorSpace=enforceColorSpace.upper()
         if enforceColorSpace=='CMYK':
             enforceColorSpace = _enforceCMYK
         elif enforceColorSpace=='RGB':

@@ -308,7 +308,7 @@ class TocTestCase(unittest.TestCase):
 
             def draw(self):
                 self.canv.doForm(self._formName)
-                for i in xrange(chapters):
+                for i in range(chapters):
                     yb = y - i*leading      #baseline
                     self.canv.linkRect('','TOC_%s' % i,(x,yb-descent,x1,yb+fontSize),thickness=0.5,color=pink,relative=0)
 

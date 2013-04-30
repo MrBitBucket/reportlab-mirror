@@ -12,7 +12,7 @@
 #
 #
 
-import string, cStringIO
+import string, io
 try :
     from Shared.reportlab.platypus.paragraph import Paragraph
     from Shared.reportlab.platypus.doctemplate import *
@@ -55,7 +55,7 @@ class MyPDFDoc :
                 return None
 
             # Convert it to PIL
-            image = ImageReader(cStringIO.StringIO(str(logo.data)))
+            image = ImageReader(io.StringIO(str(logo.data)))
             (width, height) = image.getSize()
 
             # scale it to be 0.75 inch high
@@ -84,7 +84,7 @@ class MyPDFDoc :
 
         # we will build an in-memory document
         # instead of creating an on-disk file.
-        self.report = cStringIO.StringIO()
+        self.report = io.StringIO()
 
         # initialise a PDF document using ReportLab's platypus
         self.document = BaseDocTemplate(self.report)
@@ -158,7 +158,7 @@ def rlzope(self) :
         self.REQUEST.RESPONSE.setHeader('Content-Disposition', 'attachment; filename=%s' % filename)
     except:
         import traceback, sys, cgi
-        content = sys.stdout = sys.stderr = cStringIO.StringIO()
+        content = sys.stdout = sys.stderr = io.StringIO()
         self.REQUEST.RESPONSE.setHeader('Content-Type', 'text/html')
         traceback.print_exc()
         sys.stdout = sys.__stdout__

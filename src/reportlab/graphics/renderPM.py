@@ -26,10 +26,10 @@ import string, os, sys
 
 try:
     import _renderPM
-except ImportError, errMsg:
-    raise ImportError, "No module named _renderPM\n" + \
+except ImportError as errMsg:
+    raise ImportError("No module named _renderPM\n" + \
         (str(errMsg)!='No module named _renderPM' and "it may be the wrong version or badly installed!" or
-                                    "see https://www.reportlab.com/software/opensource/rl-addons/")
+                                    "see https://www.reportlab.com/software/opensource/rl-addons/"))
 
 def _getImage():
     try:
@@ -124,7 +124,7 @@ class _PMRenderer(Renderer):
 
     def drawImage(self, image):
         path = image.path
-        if isinstance(path,basestring):
+        if isinstance(path,str):
             if not (path and os.path.isfile(path)): return
             im = _getImage().open(path).convert('RGB')
         elif hasattr(path,'convert'):
@@ -186,7 +186,7 @@ class _PMRenderer(Renderer):
                 elif text_anchor=='numeric':
                     x -= numericXShift(text_anchor,text,textLen,fontName,fontSize,stringObj.encoding)
                 else:
-                    raise ValueError, 'bad value for textAnchor '+str(text_anchor)
+                    raise ValueError('bad value for textAnchor '+str(text_anchor))
             canv.drawString(x,y,text,_fontInfo=(fontName,fontSize))
 
     def drawPath(self, path):
@@ -216,7 +216,7 @@ class _PMRenderer(Renderer):
 def _setFont(gs,fontName,fontSize):
     try:
         gs.setFont(fontName,fontSize)
-    except _renderPM.Error, errMsg:
+    except _renderPM.Error as errMsg:
         if errMsg.args[0]!="Can't find font!": raise
         #here's where we try to add a font to the canvas
         try:
@@ -226,8 +226,8 @@ def _setFont(gs,fontName,fontSize):
             else:
                 _renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector,open_and_read)
         except:
-            s1, s2 = map(str,sys.exc_info()[:2])
-            raise RenderPMError, "Can't setFont(%s) missing the T1 files?\nOriginally %s: %s" % (fontName,s1,s2)
+            s1, s2 = list(map(str,sys.exc_info()[:2]))
+            raise RenderPMError("Can't setFont(%s) missing the T1 files?\nOriginally %s: %s" % (fontName,s1,s2))
         gs.setFont(fontName,fontSize)
 
 def _convert2pilp(im):
@@ -274,11 +274,11 @@ class PMCanvas:
         A = {'ctm':None, 'strokeWidth':None, 'strokeColor':None, 'lineCap':None, 'lineJoin':None, 'dashArray':None, 'fillColor':None}
         gs = self._gs
         fN,fS = gs.fontName, gs.fontSize
-        for k in A.keys():
+        for k in list(A.keys()):
             A[k] = getattr(gs,k)
         del gs, self._gs
         gs = self.__dict__['_gs'] = _renderPM.gstate(w,h,bg=bg)
-        for k in A.keys():
+        for k in list(A.keys()):
             setattr(self,k,A[k])
         gs.setFont(fN,fS)
 
@@ -291,7 +291,7 @@ class PMCanvas:
         im = self.toPIL()
         if fmt is None:
             if type(fn) is not StringType:
-                raise ValueError, "Invalid type '%s' for fn when fmt is None" % type(fn)
+                raise ValueError("Invalid type '%s' for fn when fmt is None" % type(fn))
             fmt = os.path.splitext(fn)[1]
             if fmt.startswith('.'): fmt = fmt[1:]
         configPIL = self.configPIL or {}
@@ -328,7 +328,7 @@ class PMCanvas:
         elif fmt in ('GIF',):
             pass
         else:
-            raise RenderPMError,"Unknown image kind %s" % fmt
+            raise RenderPMError("Unknown image kind %s" % fmt)
         if fmt=='TIFF':
             tc = configPIL.get('transparent',None)
             if tc:
@@ -489,14 +489,14 @@ class PMCanvas:
             gfont = None
         font = getFont(fontName)
         if font._dynamicFont:
-            if isinstance(text,unicode): text = text.encode('utf8')
+            if isinstance(text,str): text = text.encode('utf8')
             gs.drawString(x,y,text)
         else:
             fc = font
-            if not isinstance(text,unicode):
+            if not isinstance(text,str):
                 try:
                     text = text.decode('utf8')
-                except UnicodeDecodeError,e:
+                except UnicodeDecodeError as e:
                     i,j = e.args[2:4]
                     raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[i-10:i],text[i:j],text[j:j+10]),)))
 
@@ -504,14 +504,14 @@ class PMCanvas:
             n = len(FT)
             nm1 = n-1
             wscale = 0.001*fontSize
-            for i in xrange(n):
+            for i in range(n):
                 f, t = FT[i]
                 if f!=fc:
                     _setFont(gs,f.fontName,fontSize)
                     fc = f
                 gs.drawString(x,y,t)
                 if i!=nm1:
-                    x += wscale*sum(map(f.widths.__getitem__,map(ord,t)))
+                    x += wscale*sum(map(f.widths.__getitem__,list(map(ord,t))))
             if font!=fc:
                 _setFont(gs,fontName,fontSize)
 
@@ -728,9 +728,9 @@ def test(verbose=True):
                     html.append('<a href="%s">python source</a><br>\n' % filename)
                 elif k=='svg':
                     html.append('<a href="%s">SVG</a><br>\n' % filename)
-                if verbose: print 'wrote',fullpath
+                if verbose: print('wrote',fullpath)
             except AttributeError:
-                print 'Problem drawing %s file'%k
+                print('Problem drawing %s file'%k)
                 raise
         if os.environ.get('RL_NOEPSPREVIEW','0')=='1': drawing.__dict__['preview'] = 0
         drawing.save(formats=['eps','pdf'],outDir='pmout',fnRoot=fnRoot)
@@ -740,7 +740,7 @@ def test(verbose=True):
     if sys.platform=='mac':
         from reportlab.lib.utils import markfilename
         markfilename(htmlFileName,ext='HTML')
-    if verbose: print 'wrote %s' % htmlFileName
+    if verbose: print('wrote %s' % htmlFileName)
 
 if __name__=='__main__':
     test()

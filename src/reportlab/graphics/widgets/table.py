@@ -62,10 +62,10 @@ class TableWidget(Widget):
         self.textAnchor = 'start'
 
 
-        for k, v in kw.items():
-            if k in self.__class__._attrMap.keys():
+        for k, v in list(kw.items()):
+            if k in list(self.__class__._attrMap.keys()):
                 setattr(self, k, v)
-                print 'setting %s = %s'%(k, v)
+                print('setting %s = %s'%(k, v))
             else:
                 raise ValueError('invalid argument supplied for class %s'%self.__class__)
 
@@ -104,7 +104,7 @@ class TableWidget(Widget):
         #print "(row_step,col_step)=(%s, %s)"%(row_step,col_step)
         # draw the grid
         if self.horizontalDividerStrokeColor:
-            for i in xrange(rows): # make horizontal lines
+            for i in range(rows): # make horizontal lines
                 x1 = self.x
                 x2 = self.x + self.width
                 y = self.y + row_step*i
@@ -115,7 +115,7 @@ class TableWidget(Widget):
                 line.strokeColor = self.horizontalDividerStrokeColor
                 g.add(line)
         if self.verticalDividerStrokeColor:
-            for i in xrange(cols): # make vertical lines
+            for i in range(cols): # make vertical lines
                 x = self.x+col_step*i
                 y1 = self.y
                 y2 = self.y + self.height

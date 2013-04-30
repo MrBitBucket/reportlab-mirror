@@ -30,7 +30,7 @@ from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, PolyL
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.charts.legends import _objStr
-from piecharts import WedgeLabel
+from .piecharts import WedgeLabel
 from reportlab.graphics.widgets.markers import makeMarker, uSymbol2Symbol, isSymbol
 
 class StrandProperty(PropHolder):
@@ -75,7 +75,7 @@ class SpokeProperty(PropHolder):
 class SpokeLabel(WedgeLabel):
     def __init__(self,**kw):
         WedgeLabel.__init__(self,**kw)
-        if '_text' not in kw.keys(): self._text = ''
+        if '_text' not in list(kw.keys()): self._text = ''
 
 class StrandLabel(SpokeLabel):
     _attrMap = AttrMap(BASE=SpokeLabel,
@@ -189,8 +189,8 @@ class SpiderChart(PlotArea):
         """Turns data into normalized ones where each datum is < 1.0,
         and 1.0 = maximum radius.  Adds 10% at outside edge by default"""
         data = self.data
-        assert min(map(min,data)) >=0, "Cannot do spider plots of negative numbers!"
-        norm = max(map(max,data))
+        assert min(list(map(min,data))) >=0, "Cannot do spider plots of negative numbers!"
+        norm = max(list(map(max,data)))
         norm *= (1.0+outer)
         if norm<1e-9: norm = 1.0
         self._norm = norm
@@ -259,7 +259,7 @@ class SpiderChart(PlotArea):
         angleBetween = direction*(2 * pi)/float(n)
         spokes = self.spokes
         spokeLabels = self.spokeLabels
-        for i in xrange(n):
+        for i in range(n):
             car = cos(angle)*radius
             sar = sin(angle)*radius
             csa.append((car,sar,angle))
@@ -286,7 +286,7 @@ class SpiderChart(PlotArea):
             r = row[-1]
             points.append(cx+car*r)
             points.append(cy+sar*r)
-            for i in xrange(n):
+            for i in range(n):
                 car, sar, angle = csa[i]
                 r = row[i]
                 points.append(cx+car*r)

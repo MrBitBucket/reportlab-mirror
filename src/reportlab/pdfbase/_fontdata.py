@@ -88,8 +88,8 @@ if sys.platform in ('linux2',):
                 'courier-oblique': 'Courier-Oblique',
                 }
     _font2fnrMap = _font2fnrMapLinux2
-    for k, v in _font2fnrMap.items():
-        if k in _font2fnrMapWin32.keys():
+    for k, v in list(_font2fnrMap.items()):
+        if k in list(_font2fnrMapWin32.keys()):
             _font2fnrMapWin32[v.lower()] = _font2fnrMapWin32[k]
     del k, v
 else:
@@ -137,7 +137,7 @@ class _Name2StandardEncodingMap(UserDict.UserDict):
         y = x.lower()
         if y[-8:]=='encoding': y = y[:-8]
         y = self._XMap[y]
-        if y in self.keys(): raise IndexError, 'Encoding %s is already set' % y
+        if y in list(self.keys()): raise IndexError('Encoding %s is already set' % y)
         self.data[y] = v
 
     def __getitem__(self,x):
@@ -196,7 +196,7 @@ def _reset(
             widthsByFontGlyph=widthsByFontGlyph.copy(),
             )
         ):
-    for k,v in initial_dicts.iteritems():
+    for k,v in initial_dicts.items():
         d=globals()[k]
         d.clear()
         d.update(v)

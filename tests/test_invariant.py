@@ -51,6 +51,6 @@ if __name__ == "__main__":
         raw = open(filename,'rb').read()
         digest = md5.md5(raw).hexdigest()
         major, minor = sys.version_info[0:2]
-        print '%s on %s (Python %d.%d):\n    %d bytes, digest %s' % (
-            filename,sys.platform, major, minor, fileSize, digest)
+        print('%s on %s (Python %d.%d):\n    %d bytes, digest %s' % (
+            filename,sys.platform, major, minor, fileSize, digest))
     printLocation()

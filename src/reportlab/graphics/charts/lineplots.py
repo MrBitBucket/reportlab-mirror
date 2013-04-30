@@ -71,7 +71,7 @@ class ShadedPolyFiller(Filler,ShadedPolygon):
 class PolyFiller(Filler,Polygon):
     pass
 
-from linecharts import AbstractLineChart
+from .linecharts import AbstractLineChart
 class LinePlot(AbstractLineChart):
     """Line plot with multiple lines.
 
@@ -184,7 +184,7 @@ class LinePlot(AbstractLineChart):
         """
 
         self._seriesCount = len(self.data)
-        self._rowLength = max(map(len,self.data))
+        self._rowLength = max(list(map(len,self.data)))
 
         self._positions = []
         for rowNo in range(len(self.data)):
@@ -249,7 +249,7 @@ class LinePlot(AbstractLineChart):
 
         labelFmt = self.lineLabelFormat
 
-        P = range(len(self._positions))
+        P = list(range(len(self._positions)))
         if self.reversePlotOrder: P.reverse()
         inFill = getattr(self,'_inFill',None)
         styleCount = len(self.lines)
@@ -405,9 +405,9 @@ class LinePlot(AbstractLineChart):
             x = xScale(xv)
             y = yScale(yv)
             g = Group()
-            xA = xScale.im_self #the x axis
+            xA = xScale.__self__ #the x axis
             g.add(Line(xA._x,y,xA._x+xA._length,y,strokeColor=strokeColor,strokeWidth=strokeWidth))
-            yA = yScale.im_self #the y axis
+            yA = yScale.__self__ #the y axis
             g.add(Line(x,yA._y,x,yA._y+yA._length,strokeColor=strokeColor,strokeWidth=strokeWidth))
             return g
         annotation.beforeLines = beforeLines
@@ -461,7 +461,7 @@ class LinePlot3D(LinePlot):
         labelFmt = self.lineLabelFormat
         positions = self._positions
 
-        P = range(len(positions))
+        P = list(range(len(positions)))
         if self.reversePlotOrder: P.reverse()
         inFill = getattr(self,'_inFill',None)
         assert not inFill, "inFill not supported for 3d yet"
@@ -474,15 +474,15 @@ class LinePlot3D(LinePlot):
         _zadjust = self._zadjust
         theta_x = self.theta_x
         theta_y = self.theta_y
-        from linecharts import _FakeGroup
+        from .linecharts import _FakeGroup
         F = _FakeGroup()
 
-        from utils3d import _make_3d_line_info, find_intersections
+        from .utils3d import _make_3d_line_info, find_intersections
         if self.xValueAxis.style!='parallel_3d':
             tileWidth = getattr(self,'_3d_tilewidth',1)
             if getattr(self,'_find_intersections',None):
                 from copy import copy
-                fpositions = map(copy,positions)
+                fpositions = list(map(copy,positions))
                 I = find_intersections(fpositions,small=tileWidth)
                 ic = None
                 for i,j,x,y in I:
@@ -522,7 +522,7 @@ class LinePlot3D(LinePlot):
                 if n:
                     frow = fpositions[rowNo]
                     x0, y0 = frow[0]
-                    for colNo in xrange(1,len(frow)):
+                    for colNo in range(1,len(frow)):
                         x1, y1 = frow[colNo]
                         _make_3d_line_info( F, x0, x1, y0, y1, z0, z1,
                                 theta_x, theta_y,
@@ -546,7 +546,7 @@ class LinePlot3D(LinePlot):
                     if symbol: F.add((1,z0,z0,x1,y1,symbol))
 
             # Draw data labels.
-            for colNo in xrange(n):
+            for colNo in range(n):
                 x1, y1 = row[colNo]
                 x1, y1 = _zadjust(x1,y1,z0)
                 L = self._innerDrawLabel(rowNo, colNo, x1, y1)
@@ -716,13 +716,13 @@ class GridLinePlot(SimpleTimeSeriesPlot):
         back = self.background
         if isinstance(back, Grid):
             if back.orientation == 'vertical' and xva._tickValues:
-                xpos = map(xva.scale, [xva._valueMin] + xva._tickValues)
+                xpos = list(map(xva.scale, [xva._valueMin] + xva._tickValues))
                 steps = []
                 for i in range(len(xpos)-1):
                     steps.append(xpos[i+1] - xpos[i])
                 back.deltaSteps = steps
             elif back.orientation == 'horizontal' and yva._tickValues:
-                ypos = map(yva.scale, [yva._valueMin] + yva._tickValues)
+                ypos = list(map(yva.scale, [yva._valueMin] + yva._tickValues))
                 steps = []
                 for i in range(len(ypos)-1):
                     steps.append(ypos[i+1] - ypos[i])
@@ -740,25 +740,25 @@ class GridLinePlot(SimpleTimeSeriesPlot):
 
             # some room left for optimization...
             if back.grid0.orientation == 'vertical' and xva._tickValues:
-                xpos = map(xva.scale, [xva._valueMin] + xva._tickValues)
+                xpos = list(map(xva.scale, [xva._valueMin] + xva._tickValues))
                 steps = []
                 for i in range(len(xpos)-1):
                     steps.append(xpos[i+1] - xpos[i])
                 back.grid0.deltaSteps = steps
             elif back.grid0.orientation == 'horizontal' and yva._tickValues:
-                ypos = map(yva.scale, [yva._valueMin] + yva._tickValues)
+                ypos = list(map(yva.scale, [yva._valueMin] + yva._tickValues))
                 steps = []
                 for i in range(len(ypos)-1):
                     steps.append(ypos[i+1] - ypos[i])
                 back.grid0.deltaSteps = steps
             if back.grid1.orientation == 'vertical' and xva._tickValues:
-                xpos = map(xva.scale, [xva._valueMin] + xva._tickValues)
+                xpos = list(map(xva.scale, [xva._valueMin] + xva._tickValues))
                 steps = []
                 for i in range(len(xpos)-1):
                     steps.append(xpos[i+1] - xpos[i])
                 back.grid1.deltaSteps = steps
             elif back.grid1.orientation == 'horizontal' and yva._tickValues:
-                ypos = map(yva.scale, [yva._valueMin] + yva._tickValues)
+                ypos = list(map(yva.scale, [yva._valueMin] + yva._tickValues))
                 steps = []
                 for i in range(len(ypos)-1):
                     steps.append(ypos[i+1] - ypos[i])
@@ -795,9 +795,9 @@ class AreaLinePlot(LinePlot):
             m = len(odata[0])
             S = n*[0]
             self.data = []
-            for i in xrange(1,m):
+            for i in range(1,m):
                 D = []
-                for j in xrange(n):
+                for j in range(n):
                     S[j] = S[j] + odata[j][i]
                     D.append((odata[j][0],S[j]))
                 self.data.append(D)
@@ -822,8 +822,8 @@ class SplitLinePlot(AreaLinePlot):
 def _maxWidth(T, fontName, fontSize):
     '''return max stringWidth for the list of strings T'''
     if type(T) not in (type(()),type([])): T = (T,)
-    T = filter(None,T)
-    return T and max(map(lambda t,sW=stringWidth,fN=fontName, fS=fontSize: sW(t,fN,fS),T)) or 0
+    T = [_f for _f in T if _f]
+    return T and max(list(map(lambda t,sW=stringWidth,fN=fontName, fS=fontSize: sW(t,fN,fS),T))) or 0
 
 class ScatterPlot(LinePlot):
     """A scatter plot widget"""
@@ -1086,7 +1086,7 @@ def sample1c():
 def preprocessData(series):
     "Convert date strings into seconds and multiply values by 100."
 
-    return map(lambda x: (str2seconds(x[0]), x[1]*100), series)
+    return [(str2seconds(x[0]), x[1]*100) for x in series]
 
 
 def sample2():

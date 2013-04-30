@@ -27,7 +27,7 @@ def _genAll(verbose=1):
                 if verbose: traceback.print_exc()
         else:
             cmd = '"%s" %s %s' % (sys.executable,os.path.basename(p), not verbose and '-s' or '')
-            if verbose: print cmd
+            if verbose: print(cmd)
             os.system(cmd)
 
 """Runs the manual-building scripts"""

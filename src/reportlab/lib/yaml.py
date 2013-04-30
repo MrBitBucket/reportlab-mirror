@@ -105,7 +105,7 @@ class BaseParser:
                 #we have to hack the traceback
                 try:
                     getattr(self,cmd)(*args)
-                except TypeError, err:
+                except TypeError as err:
                     sys.stderr.write("Parser method: %s(*%s) %s at line %d\n" % (cmd, args, err, self._lineNo))
                     raise
             else:

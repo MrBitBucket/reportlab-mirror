@@ -12,8 +12,8 @@ This module contains utilities for generating guides
 import os, sys, glob
 import string
 
-from rltemplate import RLDocTemplate
-from stylesheet import getStyleSheet
+from .rltemplate import RLDocTemplate
+from .stylesheet import getStyleSheet
 styleSheet = getStyleSheet()
 
 #from reportlab.platypus.doctemplate import SimpleDocTemplate
@@ -29,11 +29,11 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.sequencer import getSequencer
 
-import examples
+from . import examples
 
 appmode=0
 
-from t_parse import Template
+from .t_parse import Template
 QFcodetemplate = Template("X$X$", "X")
 QFreptemplate = Template("X^X^", "X")
 codesubst = "%s<font name=Courier>%s</font>"
@@ -149,7 +149,7 @@ def space(inches=1./6):
 def EmbeddedCode(code,name='t'):
     eg(code)
     disc("produces")
-    exec code+("\ngetStory().append(%s)\n"%name)
+    exec(code+("\ngetStory().append(%s)\n"%name))
 
 def startKeep():
     return len(getStory())
@@ -308,7 +308,7 @@ class ParaBox(figures.Figure):
     def getStyleText(self, style):
         """Converts style to preformatted block of text"""
         lines = []
-        for (key, value) in style.__dict__.items():
+        for (key, value) in list(style.__dict__.items()):
             lines.append('%s = %s' % (key, value))
         lines.sort()
         return string.join(lines, '\n')
@@ -346,7 +346,7 @@ class ParaBox(figures.Figure):
     def getStyleText(self, style):
         """Converts style to preformatted block of text"""
         lines = []
-        for (key, value) in style.__dict__.items():
+        for (key, value) in list(style.__dict__.items()):
             if key not in ('name','parent'):
                 lines.append('%s = %s' % (key, value))
         return string.join(lines, '\n')

@@ -27,7 +27,7 @@ class SequencerTestCase(unittest.TestCase):
         seq = Sequencer()
 
         for i in range(1, 101):
-            n = seq.next()
+            n = next(seq)
             msg = 'Sequence value is not correct!'
             assert seq._this() == n, msg
 
@@ -39,7 +39,7 @@ class SequencerTestCase(unittest.TestCase):
         start = seq._this()
 
         for i in range(1, 101):
-            n = seq.next()
+            n = next(seq)
 
         seq.reset()
 

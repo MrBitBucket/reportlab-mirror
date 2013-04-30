@@ -7,10 +7,10 @@ assert stringWidthU('ABCDEF','Times-Roman',12)==_py_stringWidth('ABCDEF','Times-
 assert stringWidthU(testCp1252,'Times-Roman',12,enc)==_py_stringWidth(testCp1252,'Times-Roman',12,enc)
 def tim(N,msg,func,*args):
     t0 = time.time()
-    for i in xrange(N):
+    for i in range(N):
         x = func(*args)
     t1 = time.time()
     return "%s N=%d t=%.3f\n%r" % (msg,N,t1-t0,x)
 
-print tim(1000000,'_py_stringWidth',_py_stringWidth,'ABCDEF','Times-Roman',12)
-print tim(1000000,'stringWidthU',stringWidthU,'ABCDEF','Times-Roman',12)
+print(tim(1000000,'_py_stringWidth',_py_stringWidth,'ABCDEF','Times-Roman',12))
+print(tim(1000000,'stringWidthU',stringWidthU,'ABCDEF','Times-Roman',12))

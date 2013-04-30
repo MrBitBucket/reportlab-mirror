@@ -97,7 +97,7 @@ Why would you want to use such a beast ?
     - For fun because you can do it !
 """
 
-import cStringIO
+import io
 from reportlab.pdfgen import canvas
 from reportlab.pdfgen import pathobject
 from reportlab.pdfgen import textobject
@@ -149,7 +149,7 @@ def buildargs(*args, **kwargs) :
     arguments = ""
     for arg in args :
         arguments = arguments + ("%s, " % repr(arg))
-    for (kw, val) in kwargs.items() :
+    for (kw, val) in list(kwargs.items()) :
         arguments = arguments+ ("%s=%s, " % (kw, repr(val)))
     if arguments[-2:] == ", " :
         arguments = arguments[:-2]
@@ -274,7 +274,7 @@ class Canvas :
         self._footerpresent = 0
         self._object = canvas.Canvas(*args,**kwargs)
         self._enforceColorSpace = self._object._enforceColorSpace
-        self._pyfile = cStringIO.StringIO()
+        self._pyfile = io.StringIO()
         self._PyWrite(PyHeader)
         try :
             del kwargs["filename"]
@@ -282,7 +282,7 @@ class Canvas :
             pass
         self._PyWrite("    # create the PDF document\n    %s = Canvas(file, %s)\n\n    # Begins page 1" % (self._name, buildargs(*args[1:], **kwargs)))
 
-    def __nonzero__(self) :
+    def __bool__(self) :
         """This is needed by platypus' tables."""
         return 1
 
@@ -307,4 +307,4 @@ class Canvas :
         self._pyfile.write("%s\n" % pycode)
 
 if __name__ == '__main__':
-    print 'For test scripts, look in tests'
+    print('For test scripts, look in tests')

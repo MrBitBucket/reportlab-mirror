@@ -150,7 +150,7 @@ class SingleByteEncodingChart(CodeChartBase):
 
     def draw(self):
         self.drawLabels()
-        charList = [None] * 32 + map(chr, range(32, 256))
+        charList = [None] * 32 + list(map(chr, list(range(32, 256))))
 
         #we need to convert these to Unicode, since ReportLab
         #2.0 can only draw in Unicode.
@@ -357,7 +357,7 @@ def test():
 ##    #Big5CodeChart(0xA1, 'MSungStd-Light-Acro','ETenms-B5-H').drawOn(c, 72, 500)
 
     c.save()
-    print 'saved codecharts.pdf'
+    print('saved codecharts.pdf')
 
 if __name__=='__main__':
     test()

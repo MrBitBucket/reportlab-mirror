@@ -42,7 +42,7 @@ except NameError:
 
 from base64 import encodestring, decodestring
 try:
-    import cPickle as pickle
+    import pickle as pickle
 except ImportError:
     import pickle
 dumps = pickle.dumps
@@ -144,14 +144,14 @@ class ActionFlowable(Flowable):
             pass
         try:
             getattr(doc,arn)(*args)
-        except AttributeError, aerr:
+        except AttributeError as aerr:
             if aerr.args[0]==arn:
-                raise NotImplementedError, "Can't handle ActionFlowable(%s)" % action
+                raise NotImplementedError("Can't handle ActionFlowable(%s)" % action)
             else:
                 raise
         except:
             t, v, tb = sys.exc_info()
-            raise t, "%s\n   handle_%s args=%s"%(v,action,args), tb
+            raise t("%s\n   handle_%s args=%s"%(v,action,args)).with_traceback(tb)
 
     def __call__(self):
         return self
@@ -203,7 +203,7 @@ PageBegin = LCActionFlowable('pageBegin')
 
 def _evalMeasurement(n):
     if type(n) is type(''):
-        from paraparser import _num
+        from .paraparser import _num
         n = _num(n)
         if type(n) is type(()): n = n[1]
     return n
@@ -256,7 +256,7 @@ class PageTemplate:
                  pagesize=None, autoNextPageTemplate=None):
         frames = frames or []
         if type(frames) not in (ListType,TupleType): frames = [frames]
-        assert filter(lambda x: not isinstance(x,Frame), frames)==[], "frames argument error"
+        assert [x for x in frames if not isinstance(x,Frame)]==[], "frames argument error"
         self.id = id
         self.frames = frames
         self.onPage = onPage
@@ -282,9 +282,9 @@ class PageTemplate:
         cp = None
         dp = None
         sp = None
-        if canv._pagesize: cp = map(int, canv._pagesize)
-        if self.pagesize: sp = map(int, self.pagesize)
-        if doc.pagesize: dp = map(int, doc.pagesize)
+        if canv._pagesize: cp = list(map(int, canv._pagesize))
+        if self.pagesize: sp = list(map(int, self.pagesize))
+        if doc.pagesize: dp = list(map(int, doc.pagesize))
         if cp!=sp:
             if sp:
                 canv.setPageSize(self.pagesize)
@@ -463,12 +463,12 @@ class BaseDocTemplate:
         self._nameSpace = dict(doc=self)
         self._lifetimes = {}
 
-        for k in self._initArgs.keys():
+        for k in list(self._initArgs.keys()):
             if k not in kw:
                 v = self._initArgs[k]
             else:
                 if k in self._invalidInitArgs:
-                    raise ValueError, "Invalid argument %s" % k
+                    raise ValueError("Invalid argument %s" % k)
                 v = kw[k]
             setattr(self,k,v)
 
@@ -585,7 +585,7 @@ class BaseDocTemplate:
 
             if hasattr(self,'_nextPageTemplateCycle'):
                 #they are cycling through pages'; we keep the index
-                self.pageTemplate = self._nextPageTemplateCycle.next()
+                self.pageTemplate = next(self._nextPageTemplateCycle)
             elif hasattr(self,'_nextPageTemplateIndex'):
                 self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
                 del self._nextPageTemplateIndex
@@ -644,7 +644,7 @@ class BaseDocTemplate:
                 if t.id == pt:
                     self._nextPageTemplateIndex = self.pageTemplates.index(t)
                     return
-            raise ValueError, "can't find template('%s')"%pt
+            raise ValueError("can't find template('%s')"%pt)
         elif type(pt) is IntType:
             if hasattr(self, '_nextPageTemplateCycle'): del self._nextPageTemplateCycle
             self._nextPageTemplateIndex = pt
@@ -684,7 +684,7 @@ class BaseDocTemplate:
         elif type(fx) is IntType:
             self._nextFrameIndex = fx
         else:
-            raise TypeError, "argument fx should be string or integer"
+            raise TypeError("argument fx should be string or integer")
 
     def handle_currentFrame(self,fx,resume=0):
         '''change to the frame with name or index fx'''
@@ -938,8 +938,8 @@ class BaseDocTemplate:
 
     def pageRef(self, label):
         """hook to register a page number"""
-        if verbose: print "pageRef called with label '%s' on page %d" % (
-            label, self.page)
+        if verbose: print("pageRef called with label '%s' on page %d" % (
+            label, self.page))
         self._pageRefs[label] = self.page
 
     def multiBuild(self, story,
@@ -965,7 +965,7 @@ class BaseDocTemplate:
             passes += 1
             if self._onProgress:
                 self._onProgress('PASS', passes)
-            if verbose: print 'building pass '+str(passes) + '...',
+            if verbose: print('building pass '+str(passes) + '...', end=' ')
 
             for fl in self._indexingFlowables:
                 fl.beforeBuild()
@@ -985,7 +985,7 @@ class BaseDocTemplate:
                 self.canv.save()
                 break
             if passes > maxPasses:
-                raise IndexError, "Index entries not resolved after %d passes" % maxPasses
+                raise IndexError("Index entries not resolved after %d passes" % maxPasses)
 
             #work through any edits
             while mbe:
@@ -993,7 +993,7 @@ class BaseDocTemplate:
                 e[0](*e[1:])
 
         del self._multiBuildEdits
-        if verbose: print 'saved'
+        if verbose: print('saved')
         return passes
         
     #these are pure virtuals override in derived classes
@@ -1035,7 +1035,7 @@ class BaseDocTemplate:
 
     _allowedLifetimes = 'page','frame','build','forever'
     def docAssign(self,var,expr,lifetime):
-        if not isinstance(expr,(str,unicode)): expr=str(expr)
+        if not isinstance(expr,str): expr=str(expr)
         expr=expr.strip()
         var=var.strip()
         self.docExec('%s=(%s)'%(var.strip(),expr.strip()),lifetime)
@@ -1043,28 +1043,28 @@ class BaseDocTemplate:
     def docExec(self,stmt,lifetime):
         stmt=stmt.strip()
         NS=self._nameSpace
-        K0=NS.keys()
+        K0=list(NS.keys())
         try:
             if lifetime not in self._allowedLifetimes:
                 raise ValueError('bad lifetime %r not in %r'%(lifetime,self._allowedLifetimes))
-            exec stmt in {},NS
+            exec(stmt, {},NS)
         except:
             exc = sys.exc_info()[1]
             args = list(exc.args)
             msg = '\ndocExec %s lifetime=%r failed!' % (stmt,lifetime)
             args.append(msg)
             exc.args = tuple(args)
-            for k in NS.iterkeys():
+            for k in NS.keys():
                 if k not in K0:
                     del NS[k]
             raise
-        self._addVars([k for k in NS.iterkeys() if k not in K0],lifetime)
+        self._addVars([k for k in NS.keys() if k not in K0],lifetime)
 
     def _addVars(self,vars,lifetime):
         '''add namespace variables to lifetimes lists'''
         LT=self._lifetimes
         for var in vars:
-            for v in LT.itervalues():
+            for v in LT.values():
                 if var in v:
                     v.remove(var)
             LT.setdefault(lifetime,set([])).add(var)
@@ -1165,7 +1165,7 @@ def progressCB(typ, value):
     really accurate would be to do two passes, and I don't
     want to take that performance hit.
     """
-    print 'PROGRESS MONITOR:  %-10s   %d' % (typ, value)
+    print('PROGRESS MONITOR:  %-10s   %d' % (typ, value))
 
 if __name__ == '__main__':
     from reportlab.lib.styles import _baseFontName, _baseFontNameB
@@ -1197,7 +1197,7 @@ if __name__ == '__main__':
         objects_to_draw = []
         from reportlab.lib.styles import ParagraphStyle
         #from paragraph import Paragraph
-        from doctemplate import SimpleDocTemplate
+        from .doctemplate import SimpleDocTemplate
 
         #need a style
         normal = ParagraphStyle('normal')

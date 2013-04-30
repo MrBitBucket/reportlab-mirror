@@ -31,9 +31,9 @@ class KoreanFontTests(unittest.TestCase):
         c.drawString(100,680, 'Short sample in Unicode; grey area should outline the text with correct width.')
 
 
-        hBoxText(u'\ub300\ud55c\ubbfc\uad6d = Korea',
+        hBoxText('\ub300\ud55c\ubbfc\uad6d = Korea',
                  c, 100, 660, 'HYSMyeongJo-Medium')
-        hBoxText(u'\uc548\uc131\uae30 = AHN Sung-Gi (Actor)',
+        hBoxText('\uc548\uc131\uae30 = AHN Sung-Gi (Actor)',
                  c, 100, 640, 'HYGothic-Medium')
 
 ##        pdfmetrics.registerFont(UnicodeCIDFont('HYSMyeongJo-Medium'))
@@ -107,7 +107,7 @@ class KoreanFontTests(unittest.TestCase):
         c.save()
 
         if VERBOSE:
-            print 'saved '+outputfile('test_multibyte_kor.pdf')
+            print('saved '+outputfile('test_multibyte_kor.pdf'))
 
 
 def makeSuite():

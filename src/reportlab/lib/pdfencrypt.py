@@ -77,15 +77,15 @@ class StandardEncryption:
     def encode(self, t):
         "encode a string, stream, text"
         if not self.prepared:
-            raise ValueError, "encryption not prepared!"
+            raise ValueError("encryption not prepared!")
         if self.objnum is None:
-            raise ValueError, "not registered in PDF object"
+            raise ValueError("not registered in PDF object")
         return encodePDF(self.key, self.objnum, self.version, t, revision=self.revision)
     def prepare(self, document, overrideID=None):
         # get ready to do encryption
-        if DEBUG: print 'StandardEncryption.prepare(...) - revision %d' % self.revision
+        if DEBUG: print('StandardEncryption.prepare(...) - revision %d' % self.revision)
         if self.prepared:
-            raise ValueError, "encryption already prepared!"
+            raise ValueError("encryption already prepared!")
         # get the unescaped string value of the document id (first array element).
         # we allow one to be passed in instead to permit reproducible tests
         # of our algorithm, but in real life overrideID will always be None
@@ -99,36 +99,36 @@ class StandardEncryption:
                 internalID = "xxxxxxxxxxxxxxxx"
 
         if DEBUG:
-            print 'userPassword    = %s' % self.userPassword
-            print 'ownerPassword   = %s' % self.ownerPassword
-            print 'internalID      = %s' % internalID
-        self.P = int(self.permissionBits() - 2**31L)
+            print('userPassword    = %s' % self.userPassword)
+            print('ownerPassword   = %s' % self.ownerPassword)
+            print('internalID      = %s' % internalID)
+        self.P = int(self.permissionBits() - 2**31)
         if CLOBBERPERMISSIONS: self.P = -44 # AR hack
         if DEBUG:
-            print "self.P          = %s" % repr(self.P)
+            print("self.P          = %s" % repr(self.P))
         self.O = computeO(self.userPassword, self.ownerPassword, self.revision)
         if DEBUG:
-            print "self.O (as hex) = %s" % hexText(self.O)
+            print("self.O (as hex) = %s" % hexText(self.O))
 
         #print "\nself.O", self.O, repr(self.O)
         self.key = encryptionkey(self.userPassword, self.O, self.P, internalID, revision=self.revision)
         if DEBUG:
-            print "self.key (hex)  = %s" % hexText(self.key)
+            print("self.key (hex)  = %s" % hexText(self.key))
         self.U = computeU(self.key, revision=self.revision, documentId=internalID)
         if DEBUG:
-            print "self.U (as hex) = %s" % hexText(self.U)
+            print("self.U (as hex) = %s" % hexText(self.U))
         self.objnum = self.version = None
         self.prepared = 1
     def register(self, objnum, version):
         # enter a new direct object
         if not self.prepared:
-            raise ValueError, "encryption not prepared!"
+            raise ValueError("encryption not prepared!")
         self.objnum = objnum
         self.version = version
     def info(self):
         # the representation of self in file if any (should be None or PDFDict)
         if not self.prepared:
-            raise ValueError, "encryption not prepared!"
+            raise ValueError("encryption not prepared!")
         return StandardEncryptionDictionary(O=self.O, U=self.U, P=self.P, revision=self.revision)
 
 class StandardEncryptionDictionary:
@@ -165,7 +165,7 @@ if hasattr(padding,'join'):
         "xor's each bytes of the key with the number, which is <256"
         if num==0: return key
         from operator import xor
-        return ''.join(map(chr,map(xor,len(key)*[num],map(ord,key))))
+        return ''.join(map(chr,list(map(xor,len(key)*[num],list(map(ord,key))))))
 else:
     def xorKey(num, key):
         "xor's each bytes of the key with the number, which is <256"
@@ -196,7 +196,7 @@ def unHexText(hexText):
         out = out + char
     return out
 
-PadString = string.join(map(hexchar, string.split(string.strip(padding))), "")
+PadString = string.join(list(map(hexchar, string.split(string.strip(padding)))), "")
 
 def encryptionkey(password, OwnerKey, Permissions, FileId1, revision=2):
     # FileId1 is first string of the fileid array
@@ -227,7 +227,7 @@ def encryptionkey(password, OwnerKey, Permissions, FileId1, revision=2):
         for x in range(50):
             md5output = md5(md5output).digest()
         key = md5output[:16]
-    if DEBUG: print 'encryptionkey(%s,%s,%s,%s,%s)==>%s' % tuple(map(lambda x: hexText(str(x)),(password, OwnerKey, Permissions, FileId1, revision, key)))
+    if DEBUG: print('encryptionkey(%s,%s,%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (password, OwnerKey, Permissions, FileId1, revision, key)]))
     return key
 
 def computeO(userPassword, ownerPassword, revision):
@@ -254,7 +254,7 @@ def computeO(userPassword, ownerPassword, revision):
         for i in range(20):
             thisKey = xorKey(i, digest)
             O = ArcIV(thisKey).encode(O)
-    if DEBUG: print 'computeO(%s,%s,%s)==>%s' % tuple(map(lambda x: hexText(str(x)),(userPassword, ownerPassword, revision,O)))
+    if DEBUG: print('computeO(%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (userPassword, ownerPassword, revision,O)]))
     return O
 
 def computeU(encryptionkey, encodestring=PadString,revision=2,documentId=None):
@@ -273,7 +273,7 @@ def computeU(encryptionkey, encodestring=PadString,revision=2,documentId=None):
         while len(tmp) < 32:
             tmp = tmp + '\000'
         result = tmp
-    if DEBUG: print 'computeU(%s,%s,%s,%s)==>%s' % tuple(map(lambda x: hexText(str(x)),(encryptionkey, encodestring,revision,documentId,result)))
+    if DEBUG: print('computeU(%s,%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (encryptionkey, encodestring,revision,documentId,result)]))
     return result
 
 def checkU(encryptionkey, U):
@@ -281,8 +281,8 @@ def checkU(encryptionkey, U):
     #print len(decoded), len(U), len(PadString)
     if decoded!=PadString:
         if len(decoded)!=len(PadString):
-            raise ValueError, "lengths don't match! (password failed)"
-        raise ValueError, "decode of U doesn't match fixed padstring (password failed)"
+            raise ValueError("lengths don't match! (password failed)")
+        raise ValueError("decode of U doesn't match fixed padstring (password failed)")
 
 def encodePDF(key, objectNumber, generationNumber, string, revision=2):
     "Encodes a string or stream"
@@ -306,7 +306,7 @@ def encodePDF(key, objectNumber, generationNumber, string, revision=2):
     from reportlab.lib.arciv import ArcIV
     encrypted = ArcIV(key).encode(string)
     #print 'encrypted=', hexText(encrypted)
-    if DEBUG: print 'encodePDF(%s,%s,%s,%s,%s)==>%s' % tuple(map(lambda x: hexText(str(x)),(key, objectNumber, generationNumber, string, revision,encrypted)))
+    if DEBUG: print('encodePDF(%s,%s,%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (key, objectNumber, generationNumber, string, revision,encrypted)]))
     return encrypted
 
     ######################################################################
@@ -403,7 +403,7 @@ def encryptPdfInMemory(inputPDF,
 See http://developer.reportlab.com''')
 
     (bboxInfo, pickledForms) = storeFormsInMemory(inputPDF, all=1, BBoxes=1)
-    names = bboxInfo.keys()
+    names = list(bboxInfo.keys())
 
     firstPageSize = bboxInfo['PageForms0'][2:]
 
@@ -503,7 +503,7 @@ See PdfEncryptIntro.pdf for more information.
     argv = list(sys_argv)[1:]
     if len(argv)>0:
         if argv[0] == '-h' or argv[0] == 'help':
-            print usage
+            print(usage)
             return
         if len(argv)<2:
             raise ValueError("Must include a filename and one or more arguments!")
@@ -575,7 +575,7 @@ See PdfEncryptIntro.pdf for more information.
                         else:
                             exec(thisarg[1] +' = argv[pos+1]')
                         if verbose:
-                            print "%s set to: '%s'." % (thisarg[3], argv[pos+1])
+                            print("%s set to: '%s'." % (thisarg[3], argv[pos+1]))
                         argv.remove(argv[pos+1])
                         argv.remove(thisarg[0])
                 except:
@@ -583,17 +583,17 @@ See PdfEncryptIntro.pdf for more information.
 
         if verbose>4:
             #useful if feeling paranoid and need to double check things at this point...
-            print "\ninfile:", infile
-            print "STRENGTH:", STRENGTH
-            print "SAVEFILE:", SAVEFILE
-            print "USER:", USER
-            print "OWNER:", OWNER
-            print "PRINTABLE:", PRINTABLE
-            print "MODIFIABLE:", MODIFIABLE
-            print "COPYPASTABLE:", COPYPASTABLE
-            print "ANNOTATABLE:", ANNOTATABLE
-            print "SAVEFILE:", SAVEFILE
-            print "VERBOSE:", verbose
+            print("\ninfile:", infile)
+            print("STRENGTH:", STRENGTH)
+            print("SAVEFILE:", SAVEFILE)
+            print("USER:", USER)
+            print("OWNER:", OWNER)
+            print("PRINTABLE:", PRINTABLE)
+            print("MODIFIABLE:", MODIFIABLE)
+            print("COPYPASTABLE:", COPYPASTABLE)
+            print("ANNOTATABLE:", ANNOTATABLE)
+            print("SAVEFILE:", SAVEFILE)
+            print("VERBOSE:", verbose)
 
 
         if SAVEFILE == 'encrypted.pdf':
@@ -608,21 +608,21 @@ See PdfEncryptIntro.pdf for more information.
                                     strength=STRENGTH)
 
         if verbose:
-            print "wrote output file '%s'(%s bytes)\n  owner password is '%s'\n  user password is '%s'" % (SAVEFILE, filesize, OWNER, USER)
+            print("wrote output file '%s'(%s bytes)\n  owner password is '%s'\n  user password is '%s'" % (SAVEFILE, filesize, OWNER, USER))
 
         if len(argv)>0:
             raise "\nUnrecognised arguments : %s\nknown arguments are:\n%s" % (str(argv)[1:-1], known_modes)
     else:
-        print usage
+        print(usage)
 
 def main():
     from reportlab.rl_config import verbose
     scriptInterp()
 
 if __name__=="__main__": #NO RUNTESTS
-    a = filter(lambda x: x[:7]=='--debug',sys.argv)
+    a = [x for x in sys.argv if x[:7]=='--debug']
     if a:
-        sys.argv = filter(lambda x: x[:7]!='--debug',sys.argv)
+        sys.argv = [x for x in sys.argv if x[:7]!='--debug']
         DEBUG = len(a)
     if '--test' in sys.argv: test()
     else: main()

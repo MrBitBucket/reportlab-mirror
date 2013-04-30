@@ -10,25 +10,25 @@ if  __name__=='__main__':
         g=_renderPM.gstate(1,1)
         try:
             g.aaa = 3
-            print 'Wrong handling of bad attribute'
+            print('Wrong handling of bad attribute')
         except AttributeError:
-            if verbose: print 'bad attribute handled ok'
+            if verbose: print('bad attribute handled ok')
 
         for fontName, fontSize in (('aaa',10),('Times-Roman','10'),('Times-Roman',-10),(1,10)):
             try:
                 g.setFont(fontName,fontSize)
-                print 'Wrong handling of setFont(%s,%s)' % (fontName,fontSize)
+                print('Wrong handling of setFont(%s,%s)' % (fontName,fontSize))
             except _renderPM.Error:
-                if verbose: print '_renderPM.error detected OK'
+                if verbose: print('_renderPM.error detected OK')
             except TypeError:
-                if verbose: print 'Type detected OK'
+                if verbose: print('Type detected OK')
 
         for a in ('strokeColor','fillColor'):
             try:
                 setattr(g,a,(1,2,3))
-                print 'Wrong handling of bad '+a
+                print('Wrong handling of bad '+a)
             except ValueError:
-                if verbose: print 'wrong handling of bad %s detected OK' % a
+                if verbose: print('wrong handling of bad %s detected OK' % a)
 
             try:
                 c=dummy()
@@ -38,26 +38,26 @@ if  __name__=='__main__':
                 for v,r in ((None,None),(0xfffafb,0xfffafb),(c,0xffafbf)):
                     setattr(g,a,v)
                     assert getattr(g,a)==r, "%s should be %s" % (a,hex(r))
-                if verbose: print 'setattr(%s) OK' % a
+                if verbose: print('setattr(%s) OK' % a)
             except:
-                print 'wrong handling of good %s' % a
+                print('wrong handling of good %s' % a)
                 traceback.print_exc()
-                print hex(getattr(g,a))
+                print(hex(getattr(g,a)))
 
         for v in ('a',1,(1,'a'),('a',1),(1,()),(1,('a',2))):
             try:
                 g.dashArray=v
-                print 'Wrong handling of dashArray %s' % v
+                print('Wrong handling of dashArray %s' % v)
             except ValueError:
-                if verbose: print 'Wrong handling of dashArray %s detected OK' % v
+                if verbose: print('Wrong handling of dashArray %s detected OK' % v)
         try:
             g.dashArray=7,(1,2,3)
             assert g.dashArray==(7.0,(1.0,2.0,3.0)), "should be (7.0,(1.0,2.0,3.0))"
-            if verbose: print 'dashArray obtained OK'
+            if verbose: print('dashArray obtained OK')
         except:
-            print 'wrong handling of dashArray'
+            print('wrong handling of dashArray')
             traceback.print_exc()
-            print g.dashArray
+            print(g.dashArray)
 
         try:
             g.pathBegin()
@@ -68,11 +68,11 @@ if  __name__=='__main__':
             g.pathClose()
             good = (('moveToClosed', 0.0, 0.0), ('lineTo', 1.0, 0.0), ('lineTo', 1.0, 1.0), ('lineTo', 0.0, 1.0), ('lineTo', 0.0, 0.0))
             assert good==g.path, 'Wrong path should be %s' % str(good)
-            if verbose: print 'path attribute obtained OK'
+            if verbose: print('path attribute obtained OK')
         except:
-            print 'wrong handling of path'
+            print('wrong handling of path')
             traceback.print_exc()
-            print g.path
+            print(g.path)
 
     if len(sys.argv)==1:
         test_base()
@@ -87,9 +87,9 @@ if  __name__=='__main__':
                 w = c.width
                 h = c.height
                 k = 0
-                for i in xrange(h):
+                for i in range(h):
                     f.write('%6.6x: '% i );
-                    for j in xrange(w):
+                    for j in range(w):
                         v = (ord(b[k])<<16) | (ord(b[k+1])<<8) | ord(b[k+2])
                         k = k + 3
                         f.write(' %6.6x'%v)
@@ -100,9 +100,9 @@ if  __name__=='__main__':
                     im = Image.new('RGB', size=(w, h))
                     im.fromstring(b)
                     f.write('PIL\n')
-                    for i in xrange(h):
+                    for i in range(h):
                         f.write('%6.6x: '% i );
-                        for j in xrange(w):
+                        for j in range(w):
                             v = im.getpixel((i,j))
                             f.write(' %2.2x%2.2x%2.2x'%v)
                         f.write('\n')
@@ -190,7 +190,7 @@ if  __name__=='__main__':
                 can.rotate(dw*ii)
                 # print dw*ii
                 can.gstate.fill_opacity = end_alpha-ii*dalpha
-                print "alpha = ", can.gstate.fill_opacity
+                print("alpha = ", can.gstate.fill_opacity)
                 can.drawString(off_x,0, text)
                 can.grestore()
 

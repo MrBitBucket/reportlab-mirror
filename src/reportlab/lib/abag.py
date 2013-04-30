@@ -25,12 +25,12 @@ class ABag:
 
     def __repr__(self):
         D = self.__dict__
-        K = D.keys()
+        K = list(D.keys())
         K.sort()
         return '%s(%s)' % (self.__class__.__name__,', '.join(['%s=%r' % (k,D[k]) for k in K]))
 
 if __name__=="__main__":
     AB = ABag(a=1, c="hello")
     CD = AB.clone()
-    print AB
-    print CD
+    print(AB)
+    print(CD)

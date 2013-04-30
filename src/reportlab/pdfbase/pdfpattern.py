@@ -27,9 +27,9 @@ class PDFPattern:
         for x in pattern_sequence:
             if type(x) not in toptypes:
                 if len(x)!=1:
-                    raise ValueError, "sequence elts must be strings or singletons containing strings: "+repr(x)
+                    raise ValueError("sequence elts must be strings or singletons containing strings: "+repr(x))
                 if type(x[0]) is not StringType:
-                    raise ValueError, "Singletons must contain strings or instances only: "+repr(x[0])
+                    raise ValueError("Singletons must contain strings or instances only: "+repr(x[0]))
     def __setitem__(self, item, value):
         self.arguments[item] = value
     def __getitem__(self, item):
@@ -48,7 +48,7 @@ class PDFPattern:
                 name = x[0]
                 value = arguments.get(name, None)
                 if value is None:
-                    raise ValueError, "%s value not defined" % repr(name)
+                    raise ValueError("%s value not defined" % repr(name))
                 if type(value) is InstanceType:
                     #L.append( value.format(document) )
                     L.append(format(value, document))

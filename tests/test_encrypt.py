@@ -13,7 +13,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import pdfencrypt
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.platypus import SimpleDocTemplate, Paragraph
-from test_pdfencryption import parsedoc
+from .test_pdfencryption import parsedoc
 
 class EncryptTestCase(unittest.TestCase):
 

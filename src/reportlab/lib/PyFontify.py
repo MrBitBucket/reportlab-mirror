@@ -157,4 +157,4 @@ def test(path):
     f.close()
     tags = fontify(text)
     for tag, start, end, sublist in tags:
-        print tag, repr(text[start:end])
+        print(tag, repr(text[start:end]))

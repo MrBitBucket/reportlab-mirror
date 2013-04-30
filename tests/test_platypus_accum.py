@@ -51,7 +51,7 @@ def textAccum2():
     data = [[PA.onDrawStr(str(i+1),i+1),
                 myCV("xx "* (i%10),maxWidth=100-12),
                 myCV("blah "*(i%40),maxWidth=200-12)]
-                    for i in xrange(500)]
+                    for i in range(500)]
     t=LongTable(data, style=sty, colWidths = [50,100,200])
     story.append(t)
     doc.build(story)
@@ -67,7 +67,7 @@ def textAccum1():
     data = [[str(i+1), Paragraph("xx "* (i%10),
                 styleSheet["BodyText"]),
                 Paragraph(("blah "*(i%40))+PA.onDrawText(i+1), styleSheet["BodyText"])]
-                    for i in xrange(500)]
+                    for i in range(500)]
     t=LongTable(data, style=sty, colWidths = [50,100,200])
     story.append(t)
     doc.build(story)
