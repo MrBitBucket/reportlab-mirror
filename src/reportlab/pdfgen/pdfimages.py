@@ -11,7 +11,7 @@ import reportlab
 from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
-from reportlab.lib.utils import fp_str, getBytesIO, isStrType
+from reportlab.lib.utils import fp_str, getBytesIO, isStr
 from reportlab.lib.utils import import_zlib, haveImages
 from reportlab.lib.boxstuff import aspectRatioFix
 
@@ -136,7 +136,7 @@ class PDFImage:
         "Gets data, height, width - whatever type of image"
         image = self.image
 
-        if isStrType(image):
+        if isStr(image):
             self.filename = image
             if os.path.splitext(image)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
                 try:

@@ -22,7 +22,7 @@ from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.colors import black, _chooseEnforceColorSpace, Color, CMYKColor, toColor
-from reportlab.lib.utils import import_zlib, ImageReader, fp_str, isSeqType, isStrType, isUnicodeType, _digester
+from reportlab.lib.utils import import_zlib, ImageReader, fp_str, isSeq, isStr, isUnicode, _digester
 from reportlab.lib.boxstuff import aspectRatioFix
 
 digitPat = re.compile('\d')  #used in decimal alignment
@@ -313,8 +313,8 @@ class Canvas(textobject._PDFColorSetter):
         '''
         if encrypt:
             from reportlab.lib import pdfencrypt
-            if isStrType(encrypt): #encrypt is the password itself
-                if isUnicodeType(encrypt):
+            if isStr(encrypt): #encrypt is the password itself
+                if isUnicode(encrypt):
                     encrypt = encrypt.encode('utf-8')
                 encrypt = pdfencrypt.StandardEncryption(encrypt)    #now it's the encrypt object
                 encrypt.setAllPermissions(1)
@@ -907,13 +907,13 @@ class Canvas(textobject._PDFColorSetter):
                 mdata = smask.getRGBData()
             else:
                 mdata = str(mask)
-            if isUnicodeType(mdata):
+            if isUnicode(mdata):
                 mdata = mdata.encode('utf8')
             name = _digester(rawdata+mdata)
         else:
             #filename, use it
             s = '%s%s' % (image, mask)
-            if isUnicodeType(s):
+            if isUnicode(s):
                 s = s.encode('utf-8')
             name = _digester(s)
 
@@ -1044,7 +1044,7 @@ class Canvas(textobject._PDFColorSetter):
         will error in Distiller but work on printers supporting it.
         """
         #check if we've done this one already...
-        if isUnicodeType(command):
+        if isUnicode(command):
             rawName = 'PS' + hashlib.md5(command.encode('utf-8')).hexdigest()
         else:
             rawName = 'PS' + hashlib.md5(command).hexdigest()
@@ -1202,7 +1202,7 @@ class Canvas(textobject._PDFColorSetter):
         After this operation the canvas must not be used further."""
         if len(self._code): self.showPage()
         s = self._doc.GetPDFData(self)
-        if isUnicodeType(s):
+        if isUnicode(s):
             s = s.encode('utf-8')
         return s
 
@@ -1640,7 +1640,7 @@ class Canvas(textobject._PDFColorSetter):
         """Two notations.  pass two numbers, or an array and phase"""
         if isinstance(array,(int,float)):
             self._code.append('[%s %s] 0 d' % (array, phase))
-        elif isSeqType(array):
+        elif isSeq(array):
             assert phase >= 0, "phase is a length in user space"
             textarray = ' '.join([str(s) for s in array])
             self._code.append('[%s] %s d' % (textarray, phase))

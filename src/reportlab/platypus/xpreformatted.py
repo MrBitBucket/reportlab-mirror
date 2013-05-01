@@ -4,7 +4,6 @@
 __version__=''' $Id$ '''
 __doc__='''A 'rich preformatted text' widget allowing internal markup'''
 import string
-from types import StringType, ListType
 from reportlab.lib import PyFontify
 from .paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, \
      ParaLines, _getFragWords, stringWidth, _sameFrag, getAscentDescent, imgVRange, imgNormV
@@ -113,7 +112,7 @@ class XPreformatted(Paragraph):
         different first line indent; a longer list could be created to facilitate custom wraps
         around irregular objects."""
 
-        if type(width) != ListType: maxWidths = [width]
+        if not isSeq(width): maxWidths = [width]
         else: maxWidths = width
         lines = []
         lineno = 0

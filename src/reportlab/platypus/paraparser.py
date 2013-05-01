@@ -5,7 +5,6 @@ __version__=''' $Id$ '''
 __doc__='''The parser used to process markup within paragraphs'''
 import string
 import re
-from types import TupleType, UnicodeType, StringType
 import sys
 import os
 import copy
@@ -106,7 +105,7 @@ def _autoLeading(x):
     raise ValueError('Invalid autoLeading=%r' % x )
 
 def _align(s):
-    s = string.lower(s)
+    s = s.lower()
     if s=='left': return TA_LEFT
     elif s=='right': return TA_RIGHT
     elif s=='justify': return TA_JUSTIFY
@@ -207,7 +206,7 @@ def _addAttributeNames(m):
     for k in K:
         n = m[k][0]
         if n not in m: m[n] = m[k]
-        n = string.lower(n)
+        n = n.lower()
         if n not in m: m[n] = m[k]
 
 _addAttributeNames(_paraAttrMap)
@@ -219,7 +218,7 @@ _addAttributeNames(_linkAttrMap)
 
 def _applyAttributes(obj, attr):
     for k, v in attr.items():
-        if type(v) is TupleType and v[0]=='relative':
+        if isisntance(v,(list,tuple)) and v[0]=='relative':
             #AR 20/5/2000 - remove 1.5.2-ism
             #v = v[1]+getattr(obj,k,0)
             if hasattr(obj, k):
@@ -980,7 +979,7 @@ class ParaParser(xmllib.XMLParser):
         A = {}
         for k, v in attr.items():
             if not self.caseSensitive:
-                k = string.lower(k)
+                k = k.lower()
             if k in list(attrMap.keys()):
                 j = attrMap[k]
                 func = j[1]
@@ -1070,7 +1069,7 @@ class ParaParser(xmllib.XMLParser):
         # and revert at end.  Yuk.  Preliminary step prior to
         # removal of parser altogether.
         enc = self._enc = 'utf8' #our legacy default
-        self._UNI = type(text) is UnicodeType
+        self._UNI = isinstance(text,str)
         if self._UNI:
             text = text.encode(enc)
 
@@ -1118,7 +1117,7 @@ class ParaParser(xmllib.XMLParser):
         if C:
             M = self._tt_handlers
             for c in C:
-                M[type(c) is TupleType](c)
+                M[isinstance(c,(list,tuple))](c)
         end()
 
     def tt_parse(self,tt,style):

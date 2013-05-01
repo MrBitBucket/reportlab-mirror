@@ -18,7 +18,7 @@ import string, types, binascii, codecs
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
 from reportlab import rl_config
-from reportlab.lib.utils import import_zlib, open_for_read, fp_str, makeFileName, isSeqType, isBytesType, isUnicodeType, _digester
+from reportlab.lib.utils import import_zlib, open_for_read, fp_str, makeFileName, isSeq, isBytes, isUnicode, _digester
 from reportlab.pdfbase import pdfmetrics
 from hashlib import md5
 
@@ -228,7 +228,7 @@ class PDFDocument:
             filename = makeFileName(filename)
             f = open(filename, "wb")
         data = self.GetPDFData(canvas)
-        if isUnicodeType(data):
+        if isUnicode(data):
             data = data.encode('utf8')
         f.write(data)
         if myfile:
@@ -551,7 +551,7 @@ class PDFText:
         self.t = t
     def format(self, document):
         t = self.t
-        if isUnicodeType(t):
+        if isUnicode(t):
             t = t.encode('utf-8')
         result = binascii.hexlify(document.encrypt.encode(t))
         return b"<" + result + b">"
@@ -604,7 +604,7 @@ class PDFString:
     def format(self, document):
         s = self.s
         enc = getattr(self,'enc','auto')
-        if (isBytesType(s)):
+        if (isBytes(s)):
             if enc is 'auto':
                 try:
                     u = s.decode(s.startswith(codecs.BOM_UTF16_BE) and 'utf16' or 'utf8')
@@ -618,7 +618,7 @@ class PDFString:
                     except:
                         sys.stderr.write('Error in %s' % (repr(s),))
                         raise
-        elif isUnicodeType(s):
+        elif isUnicode(s):
             if enc is 'auto':
                 if _checkPdfdoc(s):
                     s = s.encode('pdfdoc')
@@ -755,7 +755,7 @@ class PDFStreamFilterZCompress:
         from reportlab.lib.utils import import_zlib
         zlib = import_zlib()
         if not zlib: raise ImportError("cannot z-compress zlib unavailable")
-        if isUnicodeType(text):
+        if isUnicode(text):
             text = text.encode('utf8')
         return zlib.compress(text)
     def decode(self, encoded):
@@ -1155,7 +1155,7 @@ class PDFPage(PDFCatalog):
     def setStream(self, code):
         if self.Override_default_compilation:
             raise ValueError("overridden! must set stream explicitly")
-        if isSeqType(code):
+        if isSeq(code):
             code = LINEEND.join(code)+LINEEND
         self.stream = code
 
@@ -1455,7 +1455,7 @@ class PDFOutlines:
         destinationnamestotitles = self.destinationnamestotitles
         destinationstotitles = self.destinationstotitles
         closedict = self.closedict
-        if isStrType(object):
+        if isStr(object):
             destination = canvas._bookmarkReference(object)
             title = object
             if object in destinationnamestotitles:
@@ -1466,7 +1466,7 @@ class PDFOutlines:
             if object in closedict:
                 closedict[destination] = 1 # mark destination closed
             return {object: canvas._bookmarkReference(object)} # name-->ref
-        if isSeqType(object):
+        if isSeq(object):
             L = []
             for o in object:
                 L.append(self.translateNames(canvas, o))
@@ -1505,7 +1505,7 @@ class PDFOutlines:
             levelname = "Outline.%s" % self.count
             if Parent is None:
                 raise ValueError("non-top level outline elt parent must be specified")
-        if not isSeqType(destinationtree):
+        if not isSeq(destinationtree):
             raise ValueError("destinationtree must be list or tuple, got %s")
         nelts = len(destinationtree)
         lastindex = nelts-1
@@ -1560,7 +1560,7 @@ def count(tree, closedict=None):
         [(Title, Dest)] = list(leafdict.items())
         if closedict and Dest in closedict:
             return 1 # closed tree element
-    if isSeqType(tree):
+    if isSeq(tree):
         #return reduce(add, map(count, tree))
         counts = []
         for e in tree:
@@ -1620,7 +1620,7 @@ class Annotation:
     def cvtdict(self, d, escape=1):
         """transform dict args from python form to pdf string rep as needed"""
         Rect = d["Rect"]
-        if not isStrType(Rect):
+        if not isStr(Rect):
             d["Rect"] = PDFArray(Rect)
         d["Contents"] = PDFString(d["Contents"],escape)
         return d
@@ -1916,7 +1916,7 @@ class PDFResourceDictionary:
                 D[dname] = v
         v = self.ProcSet
         dname = "ProcSet"
-        if isSeqType(v):
+        if isSeq(v):
             if v:
                 dv = PDFArray(v)
                 D[dname] = dv
@@ -2010,7 +2010,7 @@ class PDFFormXObject:
         self.lowerx = lowerx; self.lowery=lowery; self.upperx=upperx; self.uppery=uppery
 
     def setStreamList(self, data):
-        if isSeqType(data):
+        if isSeq(data):
             data = LINEEND.join(data)
         self.stream = data
 

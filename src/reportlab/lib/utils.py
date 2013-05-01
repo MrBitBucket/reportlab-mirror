@@ -22,101 +22,51 @@ else:
 
 isPython3 = sys.version_info[0]==3
 
-def isFunctionType(v):
-    return type(v) == type(isFunctionType)
+def isFunction(v):
+    return type(v) == type(isFunction)
 
 class c:
     def m(self): pass
 
-def isMethodType(v,mt=type(c.m)):
+def isMethod(v,mt=type(c.m)):
     return type(v) == mt
 del c
 
-def isModuleType(v):
+def isModule(v):
     return type(v) == type(sys)
 
-def isSeqType(v,_st=(tuple,list)):
+def isSeq(v,_st=(tuple,list)):
     return isinstance(v,_st)
 
 if isPython3:
     def UniChr(v):
         return chr(v)
 
-    def isStrType(v):
+    def isStr(v):
         return isinstance(v, str)
 
-    def isBytesType(v):
+    def isBytes(v):
         return isinstance(v, bytes)
 
-    def isUnicodeType(v):
+    def isUnicode(v):
         return isinstance(v, str)
 
-    def isClassType(v):
+    def isClass(v):
         return isinstance(v, type)
 else:
     def UniChr(v):
         return unichr(v)
 
-    def isStrType(v):
+    def isStr(v):
         return isinstance(v, basestring)
 
-    def isBytesType(v):
+    def isBytes(v):
         return isinstance(v, str)
 
-    def isUnicodeType(v):
+    def isUnicode(v):
         return isinstance(v, unicode)
 
-    def isClassType(v):
-        import types
-        return isinstance(v, types.ClassType)
-
-isPython3 = sys.version_info[0]==3
-
-def isFunctionType(v):
-    return type(v) == type(isFunctionType)
-
-class c:
-    def m(self): pass
-
-def isMethodType(v,mt=type(c.m)):
-    return type(v) == mt
-del c
-
-def isModuleType(v):
-    return type(v) == type(sys)
-
-def isSeqType(v,_st=(tuple,list)):
-    return isinstance(v,_st)
-
-if isPython3:
-    def UniChr(v):
-        return chr(v)
-
-    def isStrType(v):
-        return isinstance(v, str)
-
-    def isBytesType(v):
-        return isinstance(v, bytes)
-
-    def isUnicodeType(v):
-        return isinstance(v, str)
-
-    def isClassType(v):
-        return isinstance(v, type)
-else:
-    def UniChr(v):
-        return unichr(v)
-
-    def isStrType(v):
-        return isinstance(v, basestring)
-
-    def isBytesType(v):
-        return isinstance(v, str)
-
-    def isUnicodeType(v):
-        return isinstance(v, unicode)
-
-    def isClassType(v):
+    def isClass(v):
         import types
         return isinstance(v, types.ClassType)
 
@@ -310,6 +260,51 @@ try:
 except ImportError:
     from reportlab.lib.rl_accel import fp_str   # specific
 
+def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
+    """Dynamically imports possible packagized module, or raises ImportError"""
+    normalize = lambda x: os.path.normcase(os.path.abspath(os.path.normpath(x)))
+    path = map(normalize,sys.path)
+    if baseDir:
+        if not isSeq(baseDir):
+            tp = [baseDir]
+        else:
+            tp = filter(None,list(baseDir))
+        for p in tp:
+            p = normalize(p)
+            if p not in path: path.insert(0,p)
+
+    if noCWD:
+        for p in ('','.',normalize('.')):
+            while p in path:
+                if debug: print('removed "%s" from path' % p)
+                path.remove(p)
+    elif '.' not in path:
+            path.insert(0,'.')
+
+    if debug:
+        import pprint
+        pp = pprint.pprint
+        print('path=')
+        pp(path)
+
+    #make import errors a bit more informative
+    opath = sys.path
+    try:
+        sys.path = path
+        exec('import %s\nm = %s\n' % (modulename,modulename),locals())
+        sys.path = opath
+        return m
+    except ImportError:
+        sys.path = opath
+        msg = "Could not import '%s'" % modulename
+        if baseDir:
+            msg = msg + " under %s" % baseDir
+        raise ImportError(msg)
+    except:
+        e = sys.exc_info()
+        msg = "Exception raised while importing '%s': %s" % (modulename, e[1])
+        raise ImportError(msg)
+
 def recursiveGetAttr(obj, name):
     "Can call down into e.g. object1.object2[4].attr"
     return eval(name, obj.__dict__)
@@ -377,7 +372,7 @@ def getArgvDict(**kw):
         if func:
             v = func(av)
         else:
-            if isStrType(v):
+            if isStr(v):
                 v = av
             elif isinstance(v,float):
                 v = float(av)
@@ -598,7 +593,7 @@ class ImageReader(object):
     def identity(self):
         '''try to return information that will identify the instance'''
         fn = self.fileName
-        if not isStrType(fn):
+        if not isStr(fn):
             fn = getattr(getattr(self,'fp',None),'name',None)
         ident = self._ident
         return '[%s@%s%s%s]' % (self.__class__.__name__,hex(id(self)),ident and (' ident=%r' % ident) or '',fn and (' filename=%r' % fn) or '')
@@ -952,7 +947,7 @@ class DebugMemo:
 
 def _flatten(L,a):
     for x in L:
-        if isSeqType(x): _flatten(x,a)
+        if isSeq(x): _flatten(x,a)
         else: a(x)
 
 def flatten(L):
@@ -1182,12 +1177,12 @@ def escapeOnce(data):
 
 def encode_label(args):
     s = base64.encodestring(pickle.dumps(args)).strip()
-    if not isStrType(s):
+    if not isStr(s):
         s = s.decode('utf-8')
     return s
 
 def decode_label(label):
-    if isUnicodeType(label):
+    if isUnicode(label):
         label = label.encode('utf-8')
     v = pickle.loads(base64.decodestring(label))
     return v
@@ -1219,7 +1214,6 @@ class RLString(str):
 
 def makeFileName(s):
     '''force filename strings to unicode so python can handle encoding stuff'''
-    assert isinstance(s,basestring),"filename is %r should be str or unicode" % s
-    if isinstance(s,str):
+    if not isUnicode(s):
         s = s.decode('utf8')
     return s

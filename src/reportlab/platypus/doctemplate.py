@@ -35,6 +35,7 @@ from reportlab.platypus.frames import Frame
 from reportlab.rl_config import defaultPageSize, verbose
 import reportlab.lib.sequencer
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import isSeq
 try:
     set
 except NameError:
@@ -48,7 +49,6 @@ except ImportError:
 dumps = pickle.dumps
 loads = pickle.loads
 
-from types import *
 import sys
 import logging
 logger = logging.getLogger("reportlab.platypus")
@@ -128,7 +128,7 @@ class ActionFlowable(Flowable):
         #must call super init to ensure it has a width and height (of zero),
         #as in some cases the packer might get called on it...
         Flowable.__init__(self)
-        if type(action) not in (ListType, TupleType):
+        if not isSeq(action):
             action = (action,)
         self.action = tuple(action)
 
@@ -202,10 +202,10 @@ FrameBreak = _FrameBreak('frameEnd')
 PageBegin = LCActionFlowable('pageBegin')
 
 def _evalMeasurement(n):
-    if type(n) is type(''):
+    if isinstance(n,str):
         from .paraparser import _num
         n = _num(n)
-        if type(n) is type(()): n = n[1]
+        if isSeq(n): n = n[1]
     return n
 
 class FrameActionFlowable(Flowable):
@@ -255,7 +255,7 @@ class PageTemplate:
     def __init__(self,id=None,frames=[],onPage=_doNothing, onPageEnd=_doNothing,
                  pagesize=None, autoNextPageTemplate=None):
         frames = frames or []
-        if type(frames) not in (ListType,TupleType): frames = [frames]
+        if not isSeq(frames): frames = [frames]
         assert [x for x in frames if not isinstance(x,Frame)]==[], "frames argument error"
         self.id = id
         self.frames = frames
@@ -521,7 +521,7 @@ class BaseDocTemplate:
 
     def addPageTemplates(self,pageTemplates):
         'add one or a sequence of pageTemplates'
-        if type(pageTemplates) not in (ListType,TupleType):
+        if not isSeq(pageTemplates):
             pageTemplates = [pageTemplates]
         #this test below fails due to inconsistent imports!
         #assert filter(lambda x: not isinstance(x,PageTemplate), pageTemplates)==[], "pageTemplates argument error"
@@ -638,17 +638,17 @@ class BaseDocTemplate:
 
     def handle_nextPageTemplate(self,pt):
         '''On endPage change to the page template with name or index pt'''
-        if type(pt) is StringType:
+        if isinstance(pt,''):
             if hasattr(self, '_nextPageTemplateCycle'): del self._nextPageTemplateCycle
             for t in self.pageTemplates:
                 if t.id == pt:
                     self._nextPageTemplateIndex = self.pageTemplates.index(t)
                     return
             raise ValueError("can't find template('%s')"%pt)
-        elif type(pt) is IntType:
+        elif isinstance(pt,int):
             if hasattr(self, '_nextPageTemplateCycle'): del self._nextPageTemplateCycle
             self._nextPageTemplateIndex = pt
-        elif type(pt) in (ListType, TupleType):
+        elif isSeq(pt):
             #used for alternating left/right pages
             #collect the refs to the template objects, complain if any are bad
             c = PTCycle()
@@ -675,13 +675,13 @@ class BaseDocTemplate:
 
     def handle_nextFrame(self,fx,resume=0):
         '''On endFrame change to the frame with name or index fx'''
-        if type(fx) is StringType:
+        if isinstance(fx,str):
             for f in self.pageTemplate.frames:
                 if f.id == fx:
                     self._nextFrameIndex = self.pageTemplate.frames.index(f)
                     return
             raise ValueError("can't find frame('%s') in %r(%s) which has frames %r"%(fx,self.pageTemplate,self.pageTemplate.id,[(f,f.id) for f in self.pageTemplate.frames]))
-        elif type(fx) is IntType:
+        elif isinstance(fx,int):
             self._nextFrameIndex = fx
         else:
             raise TypeError("argument fx should be string or integer")

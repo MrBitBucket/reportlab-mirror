@@ -1,10 +1,10 @@
-from reportlab.lib.utils import isUnicodeType, isSeqType
+from reportlab.lib.utils import isUnicode, isSeq
 from math import log
 _log_10 = lambda x,log=log,_log_e_10=log(10.0): log(x)/_log_e_10
 _fp_fmts = "%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f", "%.6f"
 def fp_str(*a):
     '''convert separate arguments (or single sequence arg) into space separated numeric strings'''
-    if len(a)==1 and isSeqType(a[0]): a = a[0]
+    if len(a)==1 and isSeq(a[0]): a = a[0]
     s = []
     A = s.append
     for i in a:
@@ -39,7 +39,7 @@ def unicode2T1(utext,fonts):
         enc = 'UTF16'
     while utext:
         try:
-            if isUnicodeType(utext):
+            if isUnicode(utext):
                 s = utext.encode(enc)
             else:
                 s = utext
@@ -58,7 +58,7 @@ def unicode2T1(utext,fonts):
 
 def _instanceStringWidthU(self, text, size, encoding='utf8'):
     """This is the "purist" approach to width"""
-    if not isUnicodeType(text): text = text.decode(encoding)
+    if not isUnicode(text): text = text.decode(encoding)
     return sum([sum(map(f.widths.__getitem__,list(map(ord,t)))) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
 
 if __name__=='__main__':
@@ -70,7 +70,7 @@ if __name__=='__main__':
             "_instanceStringWidthU(font,'abcde fghi . jkl ; mno',10)",
             "_instanceStringWidthU(font,u'abcde fghi . jkl ; mno',10)",
             ):
-            print '%s %s' % (modname,cmd)
+            print('%s %s' % (modname,cmd))
             s=';'.join((
                 "from reportlab.pdfbase.pdfmetrics import getFont",
                 "from %s import unicode2T1,_instanceStringWidthU" % modname,

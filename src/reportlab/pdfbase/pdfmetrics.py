@@ -21,7 +21,7 @@ trap attempts to access them and do it on first access.
 import string, os, sys
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
-from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines, findInPaths, isSeqType, isStrType, isUnicodeType, isPython3
+from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines, findInPaths, isSeq, isStr, isUnicode, isPython3
 from reportlab.rl_config import defaultEncoding, T1SearchPath
 from . import rl_codecs
 _notdefChar = b'n'
@@ -227,11 +227,11 @@ class Encoding:
             # assume based on the usual one
             self.baseEncodingName = defaultEncoding
             self.vector = _fontdata.encodings[defaultEncoding]
-        elif isStrType(base):
+        elif isStr(base):
             baseEnc = getEncoding(base)
             self.baseEncodingName = baseEnc.name
             self.vector = baseEnc.vector[:]
-        elif isSeqType(base):
+        elif isSeq(base):
             self.baseEncodingName = defaultEncoding
             self.vector = base[:]
         elif isinstance(base, Encoding):

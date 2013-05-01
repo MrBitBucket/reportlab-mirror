@@ -34,8 +34,6 @@ syntax: glob
 *.scc
 build
 __pycache__
-build
-__pycache__
 *.pyd
 demos/stdfonts/*.pdf
 docs/*.pdf

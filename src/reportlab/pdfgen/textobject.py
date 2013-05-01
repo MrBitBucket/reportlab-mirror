@@ -13,7 +13,7 @@ import sys
 import string
 from types import *
 from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor, black, white, _CMYK_black, _CMYK_white
-from reportlab.lib.utils import fp_str, isStrType, isPython3
+from reportlab.lib.utils import fp_str, isStr, isPython3
 from reportlab.pdfbase import pdfmetrics
 
 class _PDFColorSetter:
@@ -79,7 +79,7 @@ class _PDFColorSetter:
                 self._code.append('%s k' % fp_str(aColor))
             else:
                 raise ValueError('Unknown color %r' % aColor)
-        elif isStrType(aColor):
+        elif isStr(aColor):
             self.setFillColor(toColor(aColor))
         else:
             raise ValueError('Unknown color %r' % aColor)
@@ -115,7 +115,7 @@ class _PDFColorSetter:
                 self._code.append('%s K' % fp_str(aColor))
             else:
                 raise ValueError('Unknown color %r' % aColor)
-        elif isStrType(aColor):
+        elif isStr(aColor):
             self.setStrokeColor(toColor(aColor))
         else:
             raise ValueError('Unknown color %r' % aColor)
@@ -432,7 +432,7 @@ class PDFTextObject(_PDFColorSetter):
         since this may be indented, by default it trims whitespace
         off each line and from the beginning; set trim=0 to preserve
         whitespace."""
-        if isStrType(stuff):
+        if isStr(stuff):
             lines = '\n'.split(stuff.strip())
             if trim==1:
                 lines = [s.strip() for s in lines]

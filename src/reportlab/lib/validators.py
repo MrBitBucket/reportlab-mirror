@@ -5,9 +5,7 @@ __version__=''' $Id$ '''
 __doc__="""Standard verifying functions used by attrmap."""
 
 import string, sys, codecs
-from types import *
-_SequenceTypes = (ListType,TupleType)
-_NumberTypes = (FloatType,IntType)
+from reportlab.lib.utils import isSeq, isStr, isUnicode
 from reportlab.lib import colors
 if sys.hexversion<0x2030000:
     True = 1
@@ -78,7 +76,7 @@ class _isCodec(Validator):
 
 class _isNumber(Validator):
     def test(self,x):
-        if type(x) in _NumberTypes: return True
+        if isinstance(x,(float,int): return True
         return self.normalizeTest(x)
 
     def normalize(self,x):
@@ -128,7 +126,7 @@ class _isListOfShapes(Validator):
     "ListOfShapes validator class."
     def test(self, x):
         from reportlab.graphics.shapes import Shape
-        if type(x) in _SequenceTypes:
+        if isSeq(x):
             answer = 1
             for e in x:
                 if not isinstance(e, Shape):
@@ -147,7 +145,7 @@ class _isListOfStringsOrNone(Validator):
 class _isTransform(Validator):
     "Transform validator class."
     def test(self, x):
-        if type(x) in _SequenceTypes:
+        if isSeq(x):
             if len(x) == 6:
                 for element in x:
                     if not isNumber(element):
@@ -227,7 +225,7 @@ class SequenceOf(Validator):
         if name: self._str = name
 
     def test(self, x):
-        if type(x) not in _SequenceTypes:
+        if not isSeq(x):
             if x is None: return self._NoneOK
             return False
         if x==[] or x==():
@@ -239,7 +237,7 @@ class SequenceOf(Validator):
 
 class EitherOr(Validator):
     def __init__(self,tests,name=None):
-        if type(tests) not in _SequenceTypes: tests = (tests,)
+        if not isSeq(tests): tests = (tests,)
         self._tests = tests
         if name: self._str = name
 

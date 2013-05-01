@@ -3,9 +3,8 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/paragraph.py
 __version__=''' $Id$ '''
 __doc__='''The standard paragraph implementation'''
-from string import join, whitespace
+from string import whitespace
 from operator import truth
-from types import StringType, ListType
 from unicodedata import category
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont, getAscentDescent
 from reportlab.platypus.paraparser import ParaParser
@@ -19,6 +18,7 @@ from copy import deepcopy
 from reportlab.lib.abag import ABag
 from reportlab.rl_config import platypus_link_underline
 from reportlab import rl_config
+from reportlab.lib.utils import isUnicode, isStr
 import re
 
 #on UTF8 branch, split and strip must be unicode-safe!
@@ -59,15 +59,15 @@ _wsc = ''.join((
 _wsc_re_split=re.compile('[%s]+'% re.escape(_wsc)).split
 
 def split(text, delim=None):
-    if type(text) is str: text = text.decode('utf8')
-    if type(delim) is str: delim = delim.decode('utf8')
+    if not isUnicode(text): text = text.decode('utf8')
+    if delim is not None and not isUnicode(delim): delim = delim.decode('utf8')
     if delim is None and '\xa0' in text:
         return [uword.encode('utf8') for uword in _wsc_re_split(text)]
-    return [uword.encode('utf8') for uword in text.split(delim)]
+    return [uword for uword in text.split(delim)]
 
 def strip(text):
-    if type(text) is str: text = text.decode('utf8')
-    return text.strip(_wsc).encode('utf8')
+    if not isUnicode(text): text = text.decode('utf8')
+    return text.strip(_wsc)
 
 class ParaLines(ABag):
     """
@@ -92,14 +92,14 @@ class FragLine(ABag):
     """
 
 def _lineClean(L):
-    return join(list(filter(truth,split(strip(L)))))
+    return ' '.join(list(filter(truth,split(strip(L)))))
 
 def cleanBlockQuotedText(text,joiner=' '):
     """This is an internal utility which takes triple-
     quoted text form within the document and returns
     (hopefully) the paragraph the user intended originally."""
     L=list(filter(truth,list(map(_lineClean, split(text, '\n')))))
-    return join(L, joiner)
+    return joiner.join(L)
 
 def setXPos(tx,dx):
     if dx>1e-6 or dx<-1e-6:
@@ -107,33 +107,33 @@ def setXPos(tx,dx):
 
 def _leftDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,offset)
-    tx._textOut(join(words),1)
+    tx._textOut(' '.join(words),1)
     setXPos(tx,-offset)
     return offset
 
 def _centerDrawParaLine( tx, offset, extraspace, words, last=0):
     m = offset + 0.5 * extraspace
     setXPos(tx,m)
-    tx._textOut(join(words),1)
+    tx._textOut(' '.join(words),1)
     setXPos(tx,-m)
     return m
 
 def _rightDrawParaLine( tx, offset, extraspace, words, last=0):
     m = offset + extraspace
     setXPos(tx,m)
-    tx._textOut(join(words),1)
+    tx._textOut(' '.join(words),1)
     setXPos(tx,-m)
     return m
 
 def _nbspCount(w):
-    if isinstance(w,str):
+    if isStr(str):
         return w.count('\xc2\xa0')
     else:
         return w.count('\xa0')
 
 def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,offset)
-    text  = join(words)
+    text  = ' '.join(words)
     if last or extraspace<=1e-8:
         #last one, left align
         tx._textOut(text,1)
@@ -607,7 +607,7 @@ def splitLines0(frags,widths):
 
 def _do_under_line(i, t_off, ws, tx, lm=-0.125):
     y = tx.XtraState.cur_y - i*tx.XtraState.style.leading + lm*tx.XtraState.f.fontSize
-    textlen = tx._canvas.stringWidth(join(tx.XtraState.lines[i][1]), tx._fontname, tx._fontsize)
+    textlen = tx._canvas.stringWidth(' '.join(tx.XtraState.lines[i][1]), tx._fontname, tx._fontsize)
     tx._canvas.line(t_off, y, t_off+textlen+ws, y)
 
 _scheme_re = re.compile('^[a-zA-Z][-+a-zA-Z0-9]+$')
@@ -630,7 +630,7 @@ def _do_link_line(i, t_off, ws, tx):
     xs = tx.XtraState
     leading = xs.style.leading
     y = xs.cur_y - i*leading - xs.f.fontSize/8.0 # 8.0 factor copied from para.py
-    text = join(xs.lines[i][1])
+    text = ' '.join(xs.lines[i][1])
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
     _doLink(tx, xs.link, (t_off, y, t_off+textlen+ws, y+leading))
 
@@ -1594,7 +1594,7 @@ class Paragraph(Flowable):
             for frag in frags:
                 if hasattr(frag, 'text'):
                     plains.append(frag.text)
-            return join(plains, '')
+            return ''.join(plains)
         elif identify:
             text = getattr(self,'text',None)
             if text is None: text = repr(self)
