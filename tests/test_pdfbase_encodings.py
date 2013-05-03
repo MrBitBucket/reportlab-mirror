@@ -86,7 +86,6 @@ class TextEncodingTestCase(NearTestCase):
     def testUtf8FileName(self):
         fn=outputfile('test_pdfbase_utf8_filename').decode('utf8')
         fn += u'_portr\xe4t.pdf'
-        print repr(fn)
         c = Canvas(fn)
         c.drawString(100,700, u'Filename='+fn)
         c.save()
