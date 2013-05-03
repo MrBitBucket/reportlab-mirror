@@ -1,7 +1,8 @@
+from random import randint
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import os,unittest
-from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle, ListFlowable, ListItem, Paragraph
+from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle, ListFlowable, ListItem, Paragraph, PageBreak
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, cm
 from reportlab.lib.utils import simpleSplit
@@ -95,6 +96,26 @@ class ListsTestCase(unittest.TestCase):
             ])
 
         story.append(OL)
+        
+        
+        story.append(PageBreak())
+        story.append(Paragraph("Now try a list with a very long URL in it.  It appears that this can push out the right page margin", normal))
+
+        
+        
+        OL = ListFlowable(
+            [
+            Paragraph(TEXTS[1], normal),
+            Paragraph('''For details about pairing the smart card reader with the Android device, refer to the baiMobile specification: 
+<a href="http://www.biometricassociates.com/downloads/user-guides/baiMobile-3000MP-User-Guide-for-Android-v2.0.pdf" color="blue">http://www.biometricassociates.com/downloads/user-guides/make-the-url-even-longer/baiMobile-3000MP-User-Guide-for-Android-v2.0.pdf</a>.''', normal),
+            
+            Paragraph(TEXTS[1], normal),
+            ])
+
+        story.append(OL)
+        
+        
+        
         doc.build(story)
 
 def makeSuite():
