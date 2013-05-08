@@ -123,6 +123,7 @@ class ParagraphStyle(PropertySet):
         'endDots':None,         #dots on the last line of left/right justified paras
                                 #string or object with text and optional fontName, fontSize, textColor & backColor
                                 #dy
+        'splitLongWords':1,     #make best efforts to split long words
         }
 
 class LineStyle(PropertySet):
