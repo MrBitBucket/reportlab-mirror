@@ -484,6 +484,84 @@ def _getFragWords(frags,maxWidth=None):
 
     return R
 
+def _fragWordIter(w):
+    for f, s in w[1:]:
+        if hasattr(f,'cbDefn'):
+            yield f, getattr(f,'width'), s
+        elif s:
+            for c in s:
+                yield f, stringWidth(c,f.fontName, f.fontSize), c
+        else:
+            yield f, 0, s
+
+def _splitFragWord(w,maxWidth,maxWidths,lineno):
+    '''given a frag word, w, as returned by getFragWords
+    split it into frag words that fit in lines of length
+    maxWidth
+    maxWidths[lineno+1]
+    .....
+    maxWidths[lineno+n]
+
+    return the new word list
+    '''
+    R = []
+    maxlineno = len(maxWidths)-1
+    W = []
+    lineWidth = 0
+    fragText = ''
+    wordWidth = 0
+    f = w[1][0]
+    for g,cw,c in _fragWordIter(w):
+        newLineWidth = lineWidth+cw
+        tooLong = newLineWidth>maxWidth
+        if g is not f or tooLong:
+            W.append((f,fragText))
+            if tooLong:
+                W = [wordWidth]+W
+                R.append(W)
+                lineno += 1
+                maxWidth = maxWidths[min(maxlineno,lineno)]
+                W = []
+                newLineWidth = wordWidth = cw
+            fragText = ''
+            f = g
+        wordWidth += cw
+        fragText += c
+        lineWidth = newLineWidth
+    W.append((f,fragText))
+    W = [wordWidth]+W
+    R.append(W)
+    return R
+
+def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding):
+    '''
+    split w into words that fit in lines of length
+    maxWidth
+    maxWidths[lineno+1]
+    .....
+    maxWidths[lineno+n]
+
+    then push those new words onto words
+    '''
+    #TODO fix this to use binary search for the split points
+    R = []
+    maxlineno = len(maxWidths)-1
+    lineWidth = 0
+    wordText = ''
+    for c in w:
+        cw = stringWidth(c,fontName,fontSize,encoding)
+        newLineWidth = lineWidth+cw
+        if newLineWidth>maxWidth:
+            R.append(wordText)
+            lineno += 1
+            maxWidth = maxWidths[min(maxlineno,lineno)]
+            newLineWidth = cw
+            wordText = ''
+        wordText += c
+        lineWidth = newLineWidth
+    R.append(wordText)
+    return R
+
 def _split_blParaSimple(blPara,start,stop):
     f = blPara.clone()
     for a in ('lines', 'kind', 'text'):
@@ -1127,6 +1205,7 @@ class Paragraph(Flowable):
         else: maxWidths = width
         lines = []
         self.height = lineno = 0
+        maxlineno = len(maxWidths)-1
         style = self.style
 
         #for bullets, work out width and ensure we wrap the right amount onto line one
@@ -1158,10 +1237,17 @@ class Paragraph(Flowable):
             spaceWidth = stringWidth(' ', fontName, fontSize, self.encoding)
             cLine = []
             currentWidth = -spaceWidth   # hack to get around extra space for word 1
-            for word in words:
+            while words:
+                word = words.pop(0)
                 #this underscores my feeling that Unicode throughout would be easier!
                 wordWidth = stringWidth(word, fontName, fontSize, self.encoding)
                 newWidth = currentWidth + spaceWidth + wordWidth
+                if newWidth>maxWidth:
+                    nmw = min(lineno,maxlineno)
+                    if wordWidth>max(maxWidths[nmw:nmw+1]):
+                        #a long word
+                        words[0:0] = _splitWord(word,maxWidth-spaceWidth-currentWidth,maxWidths,lineno,fontName,fontSize,self.encoding)
+                        continue
                 if newWidth <= maxWidth or not len(cLine):
                     # fit one more on this line
                     cLine.append(word)
@@ -1173,10 +1259,7 @@ class Paragraph(Flowable):
                     cLine = [word]
                     currentWidth = wordWidth
                     lineno += 1
-                    try:
-                        maxWidth = maxWidths[lineno]
-                    except IndexError:
-                        maxWidth = maxWidths[-1]  # use the last one
+                    maxWidth = maxWidths[min(maxlineno,lineno)]
 
             #deal with any leftovers on the final line
             if cLine!=[]:
@@ -1195,7 +1278,9 @@ class Paragraph(Flowable):
                 return self.blPara
             n = 0
             words = []
-            for w in _getFragWords(frags,maxWidth):
+            _words = _getFragWords(frags,maxWidth)
+            while _words:
+                w = _words.pop(0)
                 f=w[-1][0]
                 fontName = f.fontName
                 fontSize = f.fontSize
@@ -1216,6 +1301,12 @@ class Paragraph(Flowable):
                 #test to see if this frag is a line break. If it is we will only act on it
                 #if the current width is non-negative or the previous thing was a deliberate lineBreak
                 lineBreak = hasattr(f,'lineBreak')
+                if not lineBreak and newWidth>maxWidth:
+                    nmw = min(lineno,maxlineno)
+                    if wordWidth>max(maxWidths[nmw:nmw+1]):
+                        #a long word
+                        _words[0:0] = _splitFragWord(w,maxWidth-spaceWidth-currentWidth,maxWidths,lineno)
+                        continue
                 endLine = (newWidth>maxWidth and n>0) or lineBreak
                 if not endLine:
                     if lineBreak: continue      #throw it away
@@ -1297,10 +1388,7 @@ class Paragraph(Flowable):
 
                     #start new line
                     lineno += 1
-                    try:
-                        maxWidth = maxWidths[lineno]
-                    except IndexError:
-                        maxWidth = maxWidths[-1]  # use the last one
+                    maxWidth = maxWidths[min(maxlineno,lineno)]
 
                     if lineBreak:
                         n = 0
