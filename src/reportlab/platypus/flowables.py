@@ -580,7 +580,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
             if cframe:
                 _addGeneratedContent(F,cframe)
             if w<=_FUZZ or h<=_FUZZ: continue
-            W = max(W,w)
+            W = max(W,min(w,availWidth))
             H += h
             if not atTop:
                 h = f.getSpaceBefore()
