@@ -99,7 +99,7 @@ class ListsTestCase(unittest.TestCase):
         
         
         story.append(PageBreak())
-        story.append(Paragraph("Now try a list with a very long URL in it.  It appears that this can push out the right page margin", normal))
+        story.append(Paragraph("Now try a list with a very long URL in it.  Without splitting the long word it used to be that this can push out the right page margin", normal))
         OL = ListFlowable(
             [
             Paragraph(TEXTS[1], normal),
@@ -119,7 +119,16 @@ class ListsTestCase(unittest.TestCase):
 http://www.biometricassociates.com/downloads/user-guides/make-the-url-even-longer/baiMobile-3000MP-User-Guide-for-Android-v2.0.pdf.''', normal),
             Paragraph(TEXTS[1], normal),
             ])
+        story.append(OL)
 
+        story.append(Paragraph("Same as above with a simple unicode paragraph for the long word", normal))
+        OL = ListFlowable(
+            [
+            Paragraph(TEXTS[1], normal),
+            Paragraph(u'''For details about pairing the smart card reader with the Android device, refer to the baiMobile specification: 
+http://www.biometricassociates.com/downloads/user-guides/make-the-url-even-longer/baiMobile-3000MP-User-Guide-for-Android-v2.0.pdf.''', normal),
+            Paragraph(TEXTS[1], normal),
+            ])
         story.append(OL)
         
         
