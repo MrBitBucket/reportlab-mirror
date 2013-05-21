@@ -332,7 +332,7 @@ class BarChart(PlotArea):
             fB = fS = (aW-wG)/(wB+wS)
         elif useAbsolute==3: #groupspacing & barwidth are fixed
             fB = fG = 1.0
-            fS = (aW-wG-wB)/wS
+            fS = (aW-wG-wB)/wS if wS else 0
         elif useAbsolute==4: #barspacing is fixed
             fS=1.0
             fG = fB = (aW-wS)/(wG+wB)
