@@ -7,8 +7,13 @@ Version = "2.7"
 
 import sys
 
-if sys.version_info[0:2] < (2, 5):
-    warning = """The trunk of reportlab currently requires Python 2.5 or higher.
+if sys.version_info[0:2] < (2, 7):
+    warning = """The trunk of reportlab currently requires Python 2.7 or higher.
+
+    This is being done to let us move forwards with 2.7/3.x compatibility
+    with the minimum of baggage.
+    
+    ReportLab 2.7 was the last packaged version to suppo0rt Python 2.5 and 2.6.
 
     Python 2.3 users may still use ReportLab 2.4 or any other bugfixes
     derived from it, and Python 2.4 users may use ReportLab 2.5.  
