@@ -753,13 +753,15 @@ class XCategoryAxis(_XTicks,CategoryAxis):
                     label = self.labels[label]
                 else:
                     label = self.labels[i]
-                dy = label.dy
                 if pmv:
+                    _dy = label.dy
                     v = label._pmv = pmv[ic]
-                    if v<0: dy = -2*dy
+                    if v<0: _dy *= -2
+                else:
+                    _dy = 0
                 lpf = label.labelPosFrac
                 x = _x + (i+lpf) * barWidth
-                label.setOrigin(x, _y+dy)
+                label.setOrigin(x,_y+_dy)
                 label.setText(categoryNames[ic] or '')
                 g.add(label)
 
@@ -867,11 +869,13 @@ class YCategoryAxis(_YTicks,CategoryAxis):
                     label = self.labels[i]
                 lpf = label.labelPosFrac
                 y = _y + (i+lpf) * barWidth
-                dx = label.dx
                 if pmv:
+                    _dx = label.dx
                     v = label._pmv = pmv[ic]
-                    if v<0: dx = -2*dx
-                label.setOrigin(_x+dx, y)
+                    if v<0: _dx *= -2
+                else:
+                    _dx = 0
+                label.setOrigin(_x+_dx, y)
                 label.setText(categoryNames[ic] or '')
                 g.add(label)
         return g
