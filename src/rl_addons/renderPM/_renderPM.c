@@ -6,6 +6,7 @@
 #include <string.h>
 #include "libart_lgpl/libart.h"
 #include "gt1/gt1-parset1.h"
+#include "gt1/gt1-misc.h"
 
 #if defined(macintosh)
 #	include <extras.h>
@@ -1620,7 +1621,7 @@ static	char* my_pfb_reader(void *data, const char *filename, int *psize)
 			char	*pystr = PyString_AS_STRING(result);
 			int		size = PyString_GET_SIZE(result);
 			*psize = size;
-			memcpy(pfb=PyMem_Malloc(size),pystr,size);
+			memcpy(pfb=gt1_alloc(size),pystr,size);
 			}
 		Py_DECREF(result);
 		}
