@@ -72,7 +72,6 @@ T1SearchPath =  (
                 '%(REPORTLAB_DIR)s/../fonts',           #special
                 '%(REPORTLAB_DIR)s/../../fonts',        #special
                 '%(HOME)s/fonts',                       #special
-                '/code/fid-sfr/fonts',
                  )
 
 # places to look for TT Font information
@@ -91,7 +90,6 @@ TTFSearchPath = (
                 '/Library/Fonts',
                 '/Network/Library/Fonts',
                 '/System/Library/Fonts',
-                '/code/fid-sfr/fonts',
                 )
 
 # places to look for CMap files - should ideally merge with above
