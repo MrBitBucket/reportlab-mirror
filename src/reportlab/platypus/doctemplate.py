@@ -240,15 +240,16 @@ class FrameBG(FrameActionFlowable):
     _ZEROSIZE=True
     width=0
     height=0
-    def __init__(self, bg=None, left=0, right=0, start=True):
-        self.bgLeft = _evalMeasurement(left)
-        self.bgRight = _evalMeasurement(right)
-        self.bg = bg
+    def __init__(self, color=None, left=0, right=0, start=True):
         self.start = start
+        if start:
+            self.left = _evalMeasurement(left)
+            self.right = _evalMeasurement(right)
+            self.color = color
 
     def frameAction(self, frame):
         if self.start:
-            frame._frameBGs.append((self.bgLeft,self.bgRight,self.bg))
+            frame._frameBGs.append((self.left,self.right,self.color))
         elif frame._frameBGs:
             frame._frameBGs.pop()
 

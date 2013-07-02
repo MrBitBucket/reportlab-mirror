@@ -50,7 +50,7 @@ def run():
     styNormal = styleSheet['Normal']
     styBackground = ParagraphStyle('background', parent=styNormal, backColor=colors.pink)
     styH1 = styleSheet['Heading1']
-    lst.append(FrameBG(bg=colors.red))
+    lst.append(FrameBG(color=colors.red))
     lst.append(Paragraph("First, a test of how tables align their content...", styH1))
     lst.append(Paragraph("""Generated with version %s""" % Version,
                         styNormal))
@@ -58,7 +58,7 @@ def run():
                          text differently to cells with Paragraphs using the
                          same font.  Hopefully now they are back on the same baseline""",
                         styNormal))
-    lst.append(FrameBG(bg=colors.blue))
+    lst.append(FrameBG(color=colors.blue))
     ts1 = TableStyle([
                 ('ALIGN', (0,0), (-1,0), 'RIGHT'),
                 ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
