@@ -171,10 +171,18 @@ class Frame:
                 return 0
             else:
                 #now we can draw it, and update the current point.
+                s = flowable.getSpaceAfter()
+                fbg = getattr(self,'_frameBGs',None)
+                if fbg:
+                    fbgl, fbgr, fbgc = fbg[-1]
+                    canv.saveState()
+                    canv.setFillColor(fbgc)
+                    canv.rect(self._x1+fbgl,y-s,self._width-fbgl-fbgr,h+s,stroke=0,fill=1)
+                    canv.restoreState()
+
                 flowable.drawOn(canv, self._x + self._leftExtraIndent, y, _sW=aW-w)
                 flowable.canv=canv
                 if self._debug: logger.debug('drew %s' % flowable.identity())
-                s = flowable.getSpaceAfter()
                 y -= s
                 if self._oASpace: self._prevASpace = s
                 if y!=self._y: self._atTop = 0
