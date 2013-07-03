@@ -830,6 +830,7 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
     def drawOn(self, canv, x, y, _sW=0, scale=1.0, content=None, aW=None):
         '''we simulate being added to a frame'''
         from doctemplate import ActionFlowable, Indenter
+        x0 = x
         pS = 0
         if aW is None: aW = self.width
         aW *= scale
@@ -837,6 +838,7 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
             content = self._content
         x = self._hAlignAdjust(x,_sW*scale)
         y += self.height*scale
+        frame = getattr(self,'_frame',None)
         for c in content:
             if not ignoreContainerActions and isinstance(c,ActionFlowable):
                 c.apply(self.canv._doctemplate)
@@ -849,10 +851,22 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
             if (w<_FUZZ or h<_FUZZ) and not getattr(c,'_ZEROSIZE',None): continue
             if c is not content[0]: h += max(c.getSpaceBefore()-pS,0)
             y -= h
+            fbg = getattr(frame,'_frameBGs',None)
+            pS = c.getSpaceAfter()
+            if fbg:
+                fbgl, fbgr, fbgc = fbg[-1]
+                fbw = scale*(frame._width-fbgl-fbgr)
+                fbh = h+pS
+                if abs(fbw)>_FUZZ and abs(fbh)>_FUZZ:
+                    canv.saveState()
+                    canv.setFillColor(fbgc)
+                    canv.rect(x0+scale*(fbgl-frame._leftPadding)-0.1,y-pS-0.1,fbw+0.2,fbh+0.2,stroke=0,fill=1)
+                    canv.restoreState()
+            c._frame = frame
             c.drawOn(canv,x,y,_sW=aW-w)
             if c is not content[-1]:
-                pS = c.getSpaceAfter()
                 y -= pS
+            del c._frame
 
     def copyContent(self,content=None):
         C = [].append
@@ -1271,6 +1285,31 @@ class AnchorFlowable(Spacer):
 
     def draw(self):
         self.canv.bookmarkHorizontal(self._name,0,0)
+
+class FrameBG(AnchorFlowable):
+    """Start or stop coloring the frame background
+    left & right are distances from the edge of the frame to start stop colouring.
+    """
+    _ZEROSIZE=1
+    def __init__(self, color=None, left=0, right=0, start=True):
+        Spacer.__init__(self,0,0)
+        self.start = start
+        if start:
+            from reportlab.platypus.doctemplate import _evalMeasurement
+            self.left = _evalMeasurement(left)
+            self.right = _evalMeasurement(right)
+            self.color = color
+
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__,', '.join(['%s=%r' % (i,getattr(self,i,None)) for i in 'start color left right'.split()]))
+
+    def draw(self):
+        frame = getattr(self,'_frame',None)
+        if frame is None: return
+        if self.start:
+            frame._frameBGs.append((self.left,self.right,self.color))
+        elif frame._frameBGs:
+            frame._frameBGs.pop()
 
 class FrameSplitter(NullDraw):
     '''When encountered this flowable should either switch directly to nextTemplate

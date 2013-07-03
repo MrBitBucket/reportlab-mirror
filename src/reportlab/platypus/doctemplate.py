@@ -233,26 +233,6 @@ class Indenter(FrameActionFlowable):
         frame._leftExtraIndent += self.left
         frame._rightExtraIndent += self.right
 
-class FrameBG(FrameActionFlowable):
-    """Start or stop coloring the frame background
-    left & right are distances from the edge of the frame to start stop colouring.
-    """
-    _ZEROSIZE=True
-    width=0
-    height=0
-    def __init__(self, color=None, left=0, right=0, start=True):
-        self.start = start
-        if start:
-            self.left = _evalMeasurement(left)
-            self.right = _evalMeasurement(right)
-            self.color = color
-
-    def frameAction(self, frame):
-        if self.start:
-            frame._frameBGs.append((self.left,self.right,self.color))
-        elif frame._frameBGs:
-            frame._frameBGs.pop()
-
 class NotAtTopPageBreak(FrameActionFlowable):
     def __init__(self):
         pass

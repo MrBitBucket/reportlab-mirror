@@ -175,10 +175,13 @@ class Frame:
                 fbg = getattr(self,'_frameBGs',None)
                 if fbg:
                     fbgl, fbgr, fbgc = fbg[-1]
-                    canv.saveState()
-                    canv.setFillColor(fbgc)
-                    canv.rect(self._x1+fbgl,y-s,self._width-fbgl-fbgr,h+s,stroke=0,fill=1)
-                    canv.restoreState()
+                    fbw = self._width-fbgl-fbgr
+                    fbh = h+s
+                    if abs(fbw)>_FUZZ and abs(fbh)>_FUZZ:
+                        canv.saveState()
+                        canv.setFillColor(fbgc)
+                        canv.rect(self._x1+fbgl,y-s,fbw,fbh,stroke=0,fill=1)
+                        canv.restoreState()
 
                 flowable.drawOn(canv, self._x + self._leftExtraIndent, y, _sW=aW-w)
                 flowable.canv=canv
