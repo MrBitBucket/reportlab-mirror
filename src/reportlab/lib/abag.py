@@ -19,7 +19,7 @@ class ABag:
         self.__dict__.update(attr)
 
     def clone(self,**attr):
-        n = ABag(**self.__dict__)
+        n = self.__class__(**self.__dict__)
         if attr: n.__dict__.update(attr)
         return n
 
