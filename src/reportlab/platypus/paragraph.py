@@ -1240,7 +1240,7 @@ class Paragraph(Flowable):
                 else:
                     words = split(text)
             else:
-                words = f.words
+                words = f.words[:]
                 for w in words:
                     if strip(w): break
                 else:
