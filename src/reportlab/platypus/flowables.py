@@ -575,7 +575,11 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
                 if isinstance(f,Indenter):
                     availWidth -= f.left+f.right
                 continue
-            w,h = cdeepcopy(f).wrapOn(canv,availWidth,0xfffffff)
+            try:
+                w,h = copy(f).wrapOn(canv,availWidth,0xfffffff)
+            except:
+                print repr(f)
+                raise
             if dims is not None: dims.append((w,h))
             if cframe:
                 _addGeneratedContent(F,cframe)
@@ -1261,7 +1265,7 @@ class ImageAndFlowables(_Container,Flowable):
                     if nH<aH: nH += leading
                     availHeight += nH-aH
                     aH = nH
-                S = cdeepcopy(f).splitOn(canv,availWidth,aH)
+                S = f.splitOn(canv,availWidth,aH)
                 if not S:
                     return W, availHeight, F[:i],F[i:]
                 else:
