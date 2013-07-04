@@ -575,7 +575,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
                 if isinstance(f,Indenter):
                     availWidth -= f.left+f.right
                 continue
-            w,h = f.wrapOn(canv,availWidth,0xfffffff)
+            w,h = cdeepcopy(f).wrapOn(canv,availWidth,0xfffffff)
             if dims is not None: dims.append((w,h))
             if cframe:
                 _addGeneratedContent(F,cframe)
@@ -1228,7 +1228,8 @@ class ImageAndFlowables(_Container,Flowable):
         if self._C0:
             _Container.drawOn(self, canv, Fx, y, content=self._C0, aW=self._iW)
         if self._C1:
-            _Container.drawOn(self, canv, x, y-self._aH,content=self._C1)
+            aW, aH = self._wrapArgs
+            _Container.drawOn(self, canv, x, y-self._aH,content=self._C1, aW=aW)
 
     def _findSplit(self,canv,availWidth,availHeight,mergeSpace=1,obj=None):
         '''return max width, required height for a list of flowables F'''

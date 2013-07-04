@@ -50,7 +50,8 @@ class MyDocTemplate(BaseDocTemplate):
         BaseDocTemplate.__init__(self, filename, **kw)
         template = PageTemplate('normal', [frame1], myMainPageFrame)
         template1 = PageTemplate('special', [frame2], myMainPageFrame)
-        self.addPageTemplates([template,template1])
+        template2 = PageTemplate('template2', [Frame(395, 108, 165, 645, id='second2')])
+        self.addPageTemplates([template,template1,template2])
 
 class ParagraphCorners(unittest.TestCase):
     "some corner cases which should parse"
@@ -286,8 +287,27 @@ providing the ultimate in ease of installation.''',
                     imageSide='left',
                     )
                 )
-
-        
+        text = '''With this clarification, an important property of these three types of
+EC can be defined in such a way as to impose problems of phonemic and
+morphological analysis.  Another superficial similarity is the interest
+in simulation of behavior, this analysis of a formative as a pair of
+sets of features does not readily tolerate a stipulation to place the
+constructions into these various categories.  We will bring evidence in
+favor of the following thesis:  the earlier discussion of deviance is
+not to be considered in determining the extended c-command discussed in
+connection with (34).  Another superficial similarity is the interest in
+simulation of behavior, relational information may remedy and, at the
+same time, eliminate a descriptive fact.  There is also a different
+approach to the [unification] problem, the descriptive power of the base
+component delimits the traditional practice of grammarians.'''
+        from reportlab.platypus.flowables import ImageAndFlowables, Image
+        from reportlab.lib.testutils import testsFolder
+        gif = os.path.join(testsFolder,'pythonpowered.gif')
+        heading = Paragraph('This is a heading',h3)
+        story.append(NextPageTemplate('template2'))
+        story.append(PageBreak())
+        story.append(heading)
+        story.append(ImageAndFlowables(Image(gif,width=66,height=81),[Paragraph(text,bt)],imageSide='left',imageRightPadding=10))
         doc = MyDocTemplate(outputfile('test_platypus_imageandflowables.pdf'),showBoundary=1)
         doc.multiBuild(story)
 
