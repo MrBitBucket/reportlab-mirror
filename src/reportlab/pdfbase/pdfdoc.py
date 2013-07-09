@@ -1723,7 +1723,12 @@ class LinkAnnotation(Annotation):
 
 class HighlightAnnotation(Annotation):
     """
-    HighlightAnnotation adds a highlighted
+    HighlightAnnotation is an annotation that highlights the selected area.
+
+    Rect is the mouseover area that will show the contents.
+
+    QuadPoints is a list of points to highlight, you can have many groups of
+    four QuadPoints to allow highlighting many lines.
     """
     permitted = Annotation.permitted + ("QuadPoints", )
 
@@ -1739,13 +1744,13 @@ class HighlightAnnotation(Annotation):
         Rect = d["Rect"]
         Quad = d["QuadPoints"]
         Color = d["C"]
-        if type(Rect) is not types.StringType:
+        if not isinstance(Rect, str):
             d["Rect"] = PDFArray(Rect)
-        if type(Quad) is not types.StringType:
+        if not isinstance(Quad, str):
             d["QuadPoints"] = PDFArray(Quad)
-        if type(Color) is not types.StringType:
+        if not isinstance(Color, str):
             d["C"] = PDFArray(Color)
-        d["Contents"] = PDFString(d["Contents"],escape)
+        d["Contents"] = PDFString(d["Contents"], escape)
         return d
 
     def Dict(self):
