@@ -3,6 +3,7 @@
 __version__=''' $Id$ '''
 import os, sys, glob, configparser, shutil
 import functools
+isPython3 = sys.version_info[0]==3
 platform = sys.platform
 pjoin = os.path.join
 abspath = os.path.abspath
@@ -281,6 +282,9 @@ def main():
                             library_dirs=[],
                             libraries=[], # libraries to link against
                             ),
+                        ]
+        if not isPython3:
+            EXT_MODULES += [
                     Extension( 'reportlab.lib.sgmlop',
                             [pjoin(RL_ACCEL,'sgmlop.c')],
                             include_dirs=[],
