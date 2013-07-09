@@ -1103,10 +1103,11 @@ class Canvas(textobject._PDFColorSetter):
         Allows adding of a highlighted annotation.
 
         Rect: Mouseover area to show contents of annotation
-        QuadPoints: List of four x/y points in counter-clockwise order to highlight areas.
+        QuadPoints: List of four x/y points [TOP-LEFT, TOP-RIGHT, BOTTOM-LEFT, BOTTOM-RIGHT]
+          These points outline the areas to highlight.
           You can have multiple groups of four to allow multiple highlighted areas.
           Is in the format [x1, y1, x2, y2, x3, y3, x4, y4, x1, y1, x2, y2, x3, y3, x4, y4] etc
-          Default is to be area inside of Rect
+          QuadPoints defaults to be area inside of passed in Rect
         Color: The color of the highlighting.
         """
         Rect = self._absRect(Rect, relative)
