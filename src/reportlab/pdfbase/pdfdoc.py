@@ -1721,6 +1721,51 @@ class LinkAnnotation(Annotation):
         d["Dest"] = self.Destination
         return self.AnnotationDict(**d)
 
+class HighlightAnnotation(Annotation):
+    """
+    HighlightAnnotation adds a highlighted
+    """
+    permitted = Annotation.permitted + ("QuadPoints", )
+
+    def __init__(self, Rect, Contents, QuadPoints, Color=[0.83, 0.89, 0.95], **kw):
+        self.Rect = Rect
+        self.Contents = Contents
+        self.otherkw = kw
+        self.QuadPoints = QuadPoints
+        self.Color = Color
+
+    def cvtdict(self, d, escape=1):
+        """transform dict args from python form to pdf string rep as needed"""
+        Rect = d["Rect"]
+        Quad = d["QuadPoints"]
+        Color = d["C"]
+        if type(Rect) is not types.StringType:
+            d["Rect"] = PDFArray(Rect)
+        if type(Quad) is not types.StringType:
+            d["QuadPoints"] = PDFArray(Quad)
+        if type(Color) is not types.StringType:
+            d["C"] = PDFArray(Color)
+        d["Contents"] = PDFString(d["Contents"],escape)
+        return d
+
+    def Dict(self):
+        d = {}
+        d.update(self.otherkw)
+        d["Rect"] = self.Rect
+        d["Contents"] = self.Contents
+        d["Subtype"] = "/Highlight"
+        d["QuadPoints"] = self.QuadPoints
+        d["C"] = self.Color
+        return self.AnnotationDict(**d)
+
+
+def rect_to_quad(Rect):
+    """
+    Utility method to convert a Rect to a QuadPoint
+    """
+    return [Rect[0], Rect[1], Rect[2], Rect[1],
+            Rect[0], Rect[3], Rect[2], Rect[3]]
+
 # skipping names tree
 # skipping actions
 # skipping names trees
