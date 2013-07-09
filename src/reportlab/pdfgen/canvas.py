@@ -1097,6 +1097,13 @@ class Canvas(textobject._PDFColorSetter):
         self._addAnnotation(pdfdoc.TextAnnotation(Rect, contents, **kw), name, addtopage)
     textAnnotation0 = textAnnotation    #deprecated
 
+    def highlightAnnotation(self, contents, Rect, QuadPoints=None, Color=[0.83, 0.89, 0.95], addtopage=1,
+                            name=None, relative=0, **kw):
+        Rect = self._absRect(Rect, relative)
+        if not QuadPoints:
+            QuadPoints = pdfdoc.rect_to_quad(Rect)
+        self._addAnnotation(pdfdoc.HighlightAnnotation(Rect, contents, QuadPoints, Color, **kw), name, addtopage)
+
     def inkAnnotation(self, contents, InkList=None, Rect=None, addtopage=1, name=None, relative=0, **kw):
         raise NotImplementedError
         "Experimental"
