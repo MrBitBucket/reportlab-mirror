@@ -1733,11 +1733,11 @@ class HighlightAnnotation(Annotation):
         Quad = d["QuadPoints"]
         Color = d["C"]
         if not isinstance(Rect, str):
-            d["Rect"] = PDFArray(Rect)
+            d["Rect"] = PDFArray(Rect).format(d, IND=" ")
         if not isinstance(Quad, str):
-            d["QuadPoints"] = PDFArray(Quad)
+            d["QuadPoints"] = PDFArray(Quad).format(d, IND=" ")
         if not isinstance(Color, str):
-            d["C"] = PDFArray(Color)
+            d["C"] = PDFArray(Color).format(d, IND=" ")
         d["Contents"] = PDFString(d["Contents"], escape)
         return d
 
