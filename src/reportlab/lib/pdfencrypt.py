@@ -559,6 +559,7 @@ See PdfEncryptIntro.pdf for more information.
 
         binaryrequired = ('-p', 'printable', '-m', 'modifiable', 'copypastable', '-c', 'annotatable', '-a')
 
+        print repr(argv)
         for thisarg in arglist:
             if thisarg[0] in argv:
                 pos = argv.index(thisarg[0])
@@ -569,17 +570,20 @@ See PdfEncryptIntro.pdf for more information.
                     #except:
                         #raise "Unable to set %s." % thisarg[4]
                 try:
+                    print 'len(argv)=%d pos=%d argv[%s]=%r' % (len(argv),pos,pos+1,argv[pos+1])
                     if argv[pos+1] not in known_modes:
                         if thisarg[0] in binaryrequired:
-                            exec(thisarg[1] +' = int(argv[pos+1])')
+                            exec(thisarg[1] +' = int(argv[pos+1])',locals())
                         else:
-                            exec(thisarg[1] +' = argv[pos+1]')
+                            exec(thisarg[1] +' = argv[pos+1]',locals())
                         if verbose:
                             print "%s set to: '%s'." % (thisarg[3], argv[pos+1])
                         argv.remove(argv[pos+1])
                         argv.remove(thisarg[0])
                 except:
-                    raise "Unable to set %s." % thisarg[3]
+                    import traceback
+                    traceback.print_exc()
+                    raise ValueError("Unable to set %s." % thisarg[3])
 
         if verbose>4:
             #useful if feeling paranoid and need to double check things at this point...
