@@ -45,8 +45,6 @@ class LinkTestCase(unittest.TestCase):
         #Page 1
         c.setFont("Courier", 10)
         markPage(c)
-        c.highlightAnnotation('annotation 0',[inch,inch,2*inch,2*inch])
-        c.highlightAnnotation('annotation 1',[2*inch,3*inch,3*inch,3.5*inch])
 
         c.bookmarkPage("P1")
         c.addOutlineEntry("Page 1","P1")
