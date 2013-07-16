@@ -1757,7 +1757,7 @@ def rect_to_quad(Rect):
     Utility method to convert a Rect to a QuadPoint
     """
     return [Rect[0], Rect[1], Rect[2], Rect[1],
-            Rect[0], Rect[3], Rect[2], Rect[3]]
+            Rect[2], Rect[3], Rect[0], Rect[3]]
 
 # skipping names tree
 # skipping actions
