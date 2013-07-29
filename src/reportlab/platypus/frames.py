@@ -153,6 +153,8 @@ class Frame:
             if not self._atTop:
                 s =flowable.getSpaceBefore()
                 if self._oASpace:
+                    if getattr(flowable,'_SPACETRANSFER',False):
+                        s = self._prevASpace
                     s = max(s-self._prevASpace,0)
             h = y - p - s
             if h>0:
@@ -176,18 +178,23 @@ class Frame:
                 if fbg:
                     fbgl, fbgr, fbgc = fbg[-1]
                     fbw = self._width-fbgl-fbgr
-                    fbh = h+s
+                    fbh = y + h + s
+                    fby = max(p,y-s)
+                    fbh = max(0,fbh-fby)
                     if abs(fbw)>_FUZZ and abs(fbh)>_FUZZ:
                         canv.saveState()
                         canv.setFillColor(fbgc)
-                        canv.rect(self._x1+fbgl,y-s,fbw,fbh,stroke=0,fill=1)
+                        canv.rect(self._x1+fbgl,fby,fbw,fbh,stroke=0,fill=1)
                         canv.restoreState()
 
                 flowable.drawOn(canv, self._x + self._leftExtraIndent, y, _sW=aW-w)
                 flowable.canv=canv
                 if self._debug: logger.debug('drew %s' % flowable.identity())
                 y -= s
-                if self._oASpace: self._prevASpace = s
+                if self._oASpace:
+                    if getattr(flowable,'_SPACETRANSFER',False):
+                        s = self._prevASpace
+                    self._prevASpace = s
                 if y!=self._y: self._atTop = 0
                 self._y = y
                 return 1
@@ -219,11 +226,12 @@ class Frame:
                     delattr(flowable,a)
         return r
 
+
     def drawBoundary(self,canv):
         "draw the frame boundary as a rectangle (primarily for debugging)."
-        from reportlab.lib.colors import Color, CMYKColor, toColor
+        from reportlab.lib.colors import Color, toColor
         sb = self.showBoundary
-        ss = type(sb) in (type(''),type(()),type([])) or isinstance(sb,Color)
+        ss = isinstance(sb,(str,tuple,list)) or isinstance(sb,Color)
         w = -1
         if ss:
             c = toColor(sb,self)

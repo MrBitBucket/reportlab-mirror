@@ -588,12 +588,18 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
             H += h
             if not atTop:
                 h = f.getSpaceBefore()
-                if mergeSpace: h = max(h-pS,0)
+                if mergeSpace:
+                    if getattr(f,'_SPACETRANSFER',False):
+                        h = pS
+                    h = max(h-pS,0)
                 H += h
             else:
                 if obj is not None: obj._spaceBefore = f.getSpaceBefore()
                 atTop = 0
-            pS = f.getSpaceAfter()
+            s = f.getSpaceAfter()
+            if getattr(f,'_SPACETRANSFER',False):
+                s = pS
+            pS = s
             H += pS
         if obj is not None: obj._spaceAfter = pS
         return W, H-pS
@@ -835,6 +841,7 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
         '''we simulate being added to a frame'''
         from doctemplate import ActionFlowable, Indenter
         x0 = x
+        y0 = y
         pS = 0
         if aW is None: aW = self.width
         aW *= scale
@@ -842,6 +849,7 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
             content = self._content
         x = self._hAlignAdjust(x,_sW*scale)
         y += self.height*scale
+        yt = y
         frame = getattr(self,'_frame',None)
         for c in content:
             if not ignoreContainerActions and isinstance(c,ActionFlowable):
@@ -853,22 +861,30 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
                 continue
             w, h = c.wrapOn(canv,aW,0xfffffff)
             if (w<_FUZZ or h<_FUZZ) and not getattr(c,'_ZEROSIZE',None): continue
-            if c is not content[0]: h += max(c.getSpaceBefore()-pS,0)
+            if yt!=y:
+                s = c.getSpaceBefore()
+                if not getattr(c,'_SPACETRANSFER',False):
+                    h += max(s-pS,0)
             y -= h
             fbg = getattr(frame,'_frameBGs',None)
-            pS = c.getSpaceAfter()
+            s = c.getSpaceAfter()
+            if getattr(c,'_SPACETRANSFER',False):
+                s = pS
+            pS = s
             if fbg:
                 fbgl, fbgr, fbgc = fbg[-1]
                 fbw = scale*(frame._width-fbgl-fbgr)
-                fbh = h+pS
+                fbh = y + h + pS
+                fby = max(y0,y-pS)
+                fbh = max(0,fbh-fby)
                 if abs(fbw)>_FUZZ and abs(fbh)>_FUZZ:
                     canv.saveState()
                     canv.setFillColor(fbgc)
-                    canv.rect(x0+scale*(fbgl-frame._leftPadding)-0.1,y-pS-0.1,fbw+0.2,fbh+0.2,stroke=0,fill=1)
+                    canv.rect(x0+scale*(fbgl-frame._leftPadding)-0.1,fby-0.1,fbw+0.2,fbh+0.2,stroke=0,fill=1)
                     canv.restoreState()
             c._frame = frame
             c.drawOn(canv,x,y,_sW=aW-w)
-            if c is not content[-1]:
+            if c is not content[-1] and not getattr(c,'_SPACETRANSFER',None):
                 y -= pS
             del c._frame
 
@@ -1278,6 +1294,7 @@ class ImageAndFlowables(_Container,Flowable):
 class AnchorFlowable(Spacer):
     '''create a bookmark in the pdf'''
     _ZEROSIZE=1
+    _SPACETRANSFER = True
     def __init__(self,name):
         Spacer.__init__(self,0,0)
         self._name = name
@@ -1312,6 +1329,7 @@ class FrameBG(AnchorFlowable):
         frame = getattr(self,'_frame',None)
         if frame is None: return
         if self.start:
+            w = getattr(frame,'_lineWidth',0)
             frame._frameBGs.append((self.left,self.right,self.color))
         elif frame._frameBGs:
             frame._frameBGs.pop()
