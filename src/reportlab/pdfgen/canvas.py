@@ -356,7 +356,7 @@ class Canvas(textobject._PDFColorSetter):
         self._lineCap = 0
         self._lineJoin = 0
         self._lineDash = None  #not done
-        self._lineWidth = 0
+        self._lineWidth = 1
         self._mitreLimit = 0
 
         self._fillColorObj = self._strokeColorObj = rl_config.canvas_baseColor or (0,0,0)
