@@ -12,7 +12,7 @@ vertical versions.
 import copy
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isString,\
+from reportlab.lib.validators import isNumber, isNumberOrNone, isColor, isColorOrNone, isString,\
             isListOfStrings, SequenceOf, isBoolean, isNoneOrShape, isStringOrNone,\
             NoneOr, isListOfNumbersOrNone, EitherOr, OneOf
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
@@ -35,6 +35,7 @@ class BarChartProperties(PropHolder):
         symbol = AttrMapValue(None, desc='A widget to be used instead of a normal bar.',advancedUsage=1),
         name = AttrMapValue(isString, desc='Text to be associated with a bar (eg seriesname)'),
         swatchMarker = AttrMapValue(NoneOr(isSymbol), desc="None or makeMarker('Diamond') ...",advancedUsage=1),
+        minDimen = AttrMapValue(isNumberOrNone, desc='minimum width/height that will be drawn.'),
         )
 
     def __init__(self):
@@ -535,6 +536,7 @@ class BarChart(PlotArea):
         bars = self.bars
         br = getattr(self,'barRecord',None)
         BP = self._barPositions
+        flipXY = self._flipXY
 
         catNAL = self.categoryNALabel
         catNNA = {}
@@ -579,6 +581,18 @@ class BarChart(PlotArea):
                 elif hasattr(self.bars, 'symbol'):
                     symbol = self.bars.symbol
 
+                minDimen=getattr(style,'minDimen',None)
+                if minDimen:
+                    if flipXY:
+                        if width<0:
+                            width = min(-style.minDimen,width)
+                        else:
+                            width = max(style.minDimen,width)
+                    else:
+                        if height<0:
+                            height = min(-style.minDimen,height)
+                        else:
+                            height = max(style.minDimen,height)
                 if symbol:
                     symbol.x = x
                     symbol.y = y
