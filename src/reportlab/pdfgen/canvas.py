@@ -367,13 +367,10 @@ class Canvas(textobject._PDFColorSetter):
         self._extgstate = self._extgstate.pushCopy()
 
     def pop_state_stack(self):
-        state = self.state_stack[-1]
-        del self.state_stack[-1]
-        d = self.__dict__
-        d.update(state)
+        self.__dict__.update(self.state_stack.pop())
 
     STATE_ATTRIBUTES = """_x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
-     _fillMode _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
+     _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
      _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorObj
      _strokeColorObj _extgstate""".split()
     STATE_RANGE = list(range(len(STATE_ATTRIBUTES)))
