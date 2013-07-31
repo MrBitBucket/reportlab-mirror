@@ -1,7 +1,11 @@
 #Copyright ReportLab Europe Ltd. 2000-2012
 #see license.txt for license details
 __version__=''' $Id$ '''
-import os, sys, glob, configparser, shutil
+import os, sys, glob, shutil
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 import functools
 isPython3 = sys.version_info[0]==3
 platform = sys.platform
