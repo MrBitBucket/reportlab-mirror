@@ -6,7 +6,7 @@ __doc__='Test script for reportlab.tables'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import os,unittest
-from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle
+from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle, FrameBG
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch, cm
@@ -16,7 +16,7 @@ from reportlab.graphics.shapes import Drawing, _DrawingEditorMixin
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 
 styleSheet = getSampleStyleSheet()
-    
+
 def getTable():
     t = Table((('','North','South','East','West'),
              ('Quarter 1',100,200,300,400),
@@ -50,6 +50,7 @@ def run():
     styNormal = styleSheet['Normal']
     styBackground = ParagraphStyle('background', parent=styNormal, backColor=colors.pink)
     styH1 = styleSheet['Heading1']
+    lst.append(FrameBG(color=colors.red))
     lst.append(Paragraph("First, a test of how tables align their content...", styH1))
     lst.append(Paragraph("""Generated with version %s""" % Version,
                         styNormal))
@@ -57,6 +58,7 @@ def run():
                          text differently to cells with Paragraphs using the
                          same font.  Hopefully now they are back on the same baseline""",
                         styNormal))
+    lst.append(FrameBG(color=colors.blue))
     ts1 = TableStyle([
                 ('ALIGN', (0,0), (-1,0), 'RIGHT'),
                 ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
@@ -75,8 +77,10 @@ def run():
         ])
     t1.setStyle(ts1)
     lst.append(t1)
+    lst.append(FrameBG(start=False))
     lst.append(Spacer(0,10))
     lst.append(Paragraph("Now we make a table with just one cell containing a string...note how the text sits low", styNormal))
+    lst.append(FrameBG(start=False))
     
     tsGrid = TableStyle([
                 ('GRID', (0,0), (-1,-1), 0.25, colors.black),

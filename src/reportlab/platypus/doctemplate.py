@@ -496,6 +496,7 @@ class BaseDocTemplate:
         #context sensitive margins - set by story, not from outside
         self._leftExtraIndent = 0.0
         self._rightExtraIndent = 0.0
+        self._frameBGs = []
 
         self._calc()
         self.afterInit()
@@ -561,6 +562,7 @@ class BaseDocTemplate:
         self._removeVars(('page','frame'))
         self._leftExtraIndent = self.frame._leftExtraIndent
         self._rightExtraIndent = self.frame._rightExtraIndent
+        self._frameBGs = self.frame._frameBGs
         #detect infinite loops...
         if self._curPageFlowableCount == 0:
             self._emptyPages += 1
@@ -613,6 +615,7 @@ class BaseDocTemplate:
                 self.frame.drawBoundary(self.canv)
         f._leftExtraIndent = self._leftExtraIndent
         f._rightExtraIndent = self._rightExtraIndent
+        f._frameBGs = self._frameBGs
 
     def handle_frameEnd(self,resume=0):
         ''' Handles the semantics of the end of a frame. This includes the selection of
@@ -621,6 +624,7 @@ class BaseDocTemplate:
         self._removeVars(('frame',))
         self._leftExtraIndent = self.frame._leftExtraIndent
         self._rightExtraIndent = self.frame._rightExtraIndent
+        self._frameBGs = self.frame._frameBGs
 
         f = self.frame
         if hasattr(self,'_nextFrameIndex'):
