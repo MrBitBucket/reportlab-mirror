@@ -1,4 +1,8 @@
 #include "Python.h"
+#if PY_MAJOR_VERSION >= 3
+#	define isPy3
+#endif
+
 #ifndef PyMem_New
 	/*Niki Spahiev <niki@vintech.bg> suggests this is required for 1.5.2*/
 #	define PyMem_New(type, n) ( (type *) PyMem_Malloc((n) * sizeof(type)) )
@@ -6,6 +10,7 @@
 #include <string.h>
 #include "libart_lgpl/libart.h"
 #include "gt1/gt1-parset1.h"
+#include "gt1/gt1-misc.h"
 
 #if defined(macintosh)
 #	include <extras.h>
@@ -13,33 +18,52 @@
 #endif
 
 
-#define VERSION "1.09"
-#define MODULE "_renderPM"
-static PyObject *moduleError;
-static PyObject *_version;
+#define VERSION "2.00"
+#define MODULENAME "_renderPM"
+#ifdef isPy3
+#	define PyInt_FromLong	PyLong_FromLong
+#	define staticforward static
+#	define statichere static
+PyObject *RLPy_FindMethod(PyMethodDef *ml, PyObject *self, const char* name){
+	for(;ml->ml_name!=NULL;ml++)
+		if(name[0]==ml->ml_name[0] && strcmp(name+1,ml->ml_name+1)==0) return PyCFunction_New(ml, self);
+	return NULL;
+	}
+#define Py_FindMethod RLPy_FindMethod
+#else
+#   include "bytesobject.h"
+#	ifndef PyVarObject_HEAD_INIT
+#		define PyVarObject_HEAD_INIT(type, size) \
+        	PyObject_HEAD_INIT(type) size,
+#	endif
+#	ifndef Py_TYPE
+#		define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
+#	endif
+#	define PyBytes_AS_STRING	PyString_AS_STRING
+#	define PyBytes_AsString	PyString_AsString
+#	define PyBytes_GET_SIZE 	PyString_GET_SIZE
+#endif
+
 #ifndef LIBART_VERSION
 #	define LIBART_VERSION "?.?.?"
 #endif
-static PyObject *_libart_version;
-static char *moduleDoc =
+PyDoc_STRVAR(__DOC__,
 "Helper extension module for renderPM.\n\
 \n\
 Interface summary:\n\
 \n\
-	import _render\n\
-	gstate(width,height[,depth=3,bg=0xffffff])		#create an initialised graphics state\n\
-	makeT1Font(fontName,pfbPath,names[,reader])		#make a T1 font\n\
-	delCache()										#delete all font info\n\
-	pil2pict(cols,rows,datastr,palette) return PICT version of im as a string\n"
+	import _renderPM\n\
+	gstate(width,height[,depth=3,bg=0xffffff]) #create an initialised graphics state\n\
+	makeT1Font(fontName,pfbPath,names[,reader])	#make a T1 font\n\
+	delCache() #delete all T1 font info\n\
+	pil2pict(cols,rows,datastr,palette) hreturn PICT version of im as bytes\n"
 #ifdef	RENDERPM_FT
 "    ft_get_face(fontName) --> ft_face instance\n"
 #endif
 "\n\
-	Error			# module level error\n\
-	error			# alias for Error\n\
 	_libart_version	# base library version string\n\
 	_version		# module version string\n\
-";
+");
 
 #if PY_VERSION_HEX < 0x01060000
 #	define PyObject_DEL(op) PyMem_DEL((op))
@@ -159,7 +183,7 @@ static py_FT_FontObject *_get_ft_face(char *fontName)
 	_data = PyObject_GetAttrString(face,"_ttf_data");
 	Py_DECREF(face);
 	if(!_data) goto RET;
-	error = FT_New_Memory_Face(ft_library, PyString_AsString(_data), PyString_GET_SIZE(_data), 0, &ft_face->face);
+	error = FT_New_Memory_Face(ft_library, (unsigned char *)PyBytes_AsString(_data), PyBytes_GET_SIZE(_data), 0, &ft_face->face);
 	Py_DECREF(_data);
 	if(error){
 		PyErr_Format(PyExc_IOError, "FT_New_Memory_Face(%s) Failed!", fontName);
@@ -197,19 +221,11 @@ static void py_FT_font_dealloc(py_FT_FontObject* self)
     PyObject_DEL(self);
 }
 
-static PyMethodDef font_methods[] = {
-    {NULL, NULL}
-};
-
 static PyObject*  py_FT_font_getattr(py_FT_FontObject* self, char* name)
 {
-    PyObject* res = Py_FindMethod(font_methods, (PyObject*) self, name);
-    if (res) return res;
-    PyErr_Clear();
-
     /* attributes */
-    if (!strcmp(name, "family")) return PyString_FromString(self->face->family_name);
-    if (!strcmp(name, "style")) return PyString_FromString(self->face->style_name);
+    if (!strcmp(name, "family")) return PyUnicode_FromString(self->face->family_name);
+    if (!strcmp(name, "style")) return PyUnicode_FromString(self->face->style_name);
     if (!strcmp(name, "ascent")) return PyInt_FromLong(PIXEL(self->face->size->metrics.ascender));
     if (!strcmp(name, "descent")) return PyInt_FromLong(-PIXEL(self->face->size->metrics.descender));
     if (!strcmp(name, "num_glyphs")) return PyInt_FromLong(self->face->num_glyphs);
@@ -219,8 +235,8 @@ static PyObject*  py_FT_font_getattr(py_FT_FontObject* self, char* name)
 }
 
 statichere PyTypeObject py_FT_Font_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0, "FT_Font", sizeof(py_FT_FontObject), 0,
+    PyVarObject_HEAD_INIT(NULL,0)
+    "FT_Font", sizeof(py_FT_FontObject), 0,
     /* methods */
     (destructor)py_FT_font_dealloc, /* tp_dealloc */
     0, /* tp_print */
@@ -329,7 +345,6 @@ static ArtBpath notdefPath[6]={
 		{ART_LINETO,0.0,0.0,0.0,0.0,726.0,0.0},
 		{ART_END,0.0,0.0,0.0,0.0,0.0,0.0},
 		};
-static int notdefPathLen=5;
 
 #ifdef	ROBIN_DEBUG
 #define	GFMT	"%.17g"
@@ -432,7 +447,7 @@ static	PyObject*	gstate_moveToClosed(gstateObject* self, PyObject* args)
 static	gstateObject*	_gstate_pathLenCheck(gstateObject* self)
 {
 	if(!self->pathLen){
-		PyErr_SetString(moduleError, "path must begin with a moveTo");
+		PyErr_SetString(PyExc_ValueError, "_renderPM._gstate_pathLenCheck: path must begin with a moveTo");
 		return NULL;
 		}
 	return self;
@@ -492,13 +507,13 @@ static	PyObject*	gstate_pathClose(gstateObject* self, PyObject* args)
 			break;
 			}
 		else if(c==ART_MOVETO){
-			PyErr_SetString(moduleError, "path already closed");
+			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_pathClose: path already closed");
 			return NULL;
 			}
 		}
 
 	if(q<p){
-		PyErr_SetString(moduleError, "bpath has no MOVETO");
+		PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_pathClose: bpath has no MOVETO");
 		return NULL;
 		}
 
@@ -813,7 +828,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 	_ft_outliner_user_t _ft_data;
 #endif
 	if(!font){
-		PyErr_SetString(moduleError, "No font set!");
+		PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: No font set!");
 		return NULL;
 		}
 	if(!PyArg_ParseTuple(args,"dds#:drawString", &x, &y, &text, &textlen)) return NULL;
@@ -900,7 +915,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 static PyObject* _fmtPathElement(ArtBpath *p, char* name, int n)
 {
 	PyObject	*P = PyTuple_New(n+1);
-	PyTuple_SET_ITEM(P, 0, PyString_FromString(name));
+	PyTuple_SET_ITEM(P, 0, PyUnicode_FromString(name));
 	if(n==6){
 		PyTuple_SET_ITEM(P, 1, PyFloat_FromDouble(p->x1));
 		PyTuple_SET_ITEM(P, 2, PyFloat_FromDouble(p->y1));
@@ -919,7 +934,7 @@ static PyObject* _fmtPathElement(ArtBpath *p, char* name, int n)
 static PyObject* _fmtVPathElement(ArtVpath *p, char* name, int n)
 {
 	PyObject	*P = PyTuple_New(n+1);
-	PyTuple_SET_ITEM(P, 0, PyString_FromString(name));
+	PyTuple_SET_ITEM(P, 0, PyUnicode_FromString(name));
 	PyTuple_SET_ITEM(P, 1, PyFloat_FromDouble(p->x));
 	PyTuple_SET_ITEM(P, 2, PyFloat_FromDouble(p->y));
 	return P;
@@ -945,6 +960,8 @@ static PyObject* _get_gstatePath(int n, ArtBpath* path)
 				break;
 			case ART_CURVETO:
 				e = _fmtPathElement(p,"curveTo",6);
+				break;
+			case ART_END:
 				break;
 			}
 		PyTuple_SET_ITEM(P, i, e);
@@ -975,6 +992,9 @@ static PyObject* _get_gstateVPath(gstateObject *self)
 			case ART_LINETO:
 				e = _fmtVPathElement(v,"lineTo",2);
 				break;
+			case ART_CURVETO:
+			case ART_END:
+				break;
 			}
 		PyTuple_SET_ITEM(P, i, e);
 		v++;
@@ -999,7 +1019,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 	_ft_outliner_user_t _ft_data;
 #endif
 	if(!font){
-		PyErr_SetString(moduleError, "No font set!");
+		PyErr_SetString(PyExc_ValueError, "_renderPM.gstate__stringPath: No font set!");
 		return NULL;
 		}
 	if(!PyArg_ParseTuple(args,"s#|dd:_stringPath", &text, &n, &x, &y)) return NULL;
@@ -1081,13 +1101,13 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 	PyObject *fontNameObj;
 
 	if(!PyArg_ParseTuple(args,"Od:setFont", &fontNameObj, &fontSize)) return NULL;
-	fontName = PyString_AsString(fontNameObj);
+	fontName = PyBytes_AsString(fontNameObj);
 	if(!fontName){
-		PyErr_SetString(moduleError, "Invalid fontName");
+		PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_setFont: Invalid fontName");
 		return NULL;
 		}
 	if(fontSize<0){
-		PyErr_SetString(moduleError, "Invalid fontSize");
+		PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_setFont: Invalid fontSize");
 		return NULL;
 		}
 	f=gt1_get_encoded_font(fontName);
@@ -1116,7 +1136,7 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 		return Py_None;
 		}
 
-	PyErr_SetString(moduleError, "Can't find font!");
+	PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_setFont: Can't find font!");
 	return NULL;
 }
 
@@ -1367,12 +1387,12 @@ static PyObject* _get_gstateFontNameI(gstateObject *self)
 				strcat(name," ");
 				strcat(name,ft_f->style_name);
 				}
-			r = PyString_FromString(name);
+			r = PyUnicode_FromString(name);
 			free(name);
 			return r;
 			}
 #endif
-		return PyString_FromString(gt1_encoded_font_name(f));
+		return PyUnicode_FromString(gt1_encoded_font_name(f));
 		}
 	Py_INCREF(Py_None);
 	return Py_None;
@@ -1431,8 +1451,8 @@ static PyObject* gstate_getattr(gstateObject *self, char *name)
 	else if(!strcmp(name,"pixBuf")){
 		pixBufT* p = self->pixBuf;
 		int	nw = p->width*p->nchan;
-		PyObject *v = PyString_FromStringAndSize((char *)p->buf, p->height*nw);
-		char	*r1 = PyString_AS_STRING(v);
+		PyObject *v = PyBytes_FromStringAndSize((char *)p->buf, p->height*nw);
+		char	*r1 = PyBytes_AS_STRING(v);
 		char	*r2 = r1 + (p->height-1)*p->rowstride;
 		while(r1<r2){
 			int	i;
@@ -1493,30 +1513,7 @@ static	void gstateFree(gstateObject* self)
 	PyObject_DEL(self);
 }
 
-static PyTypeObject gstateType = {
-	PyObject_HEAD_INIT(0)
-	0,								/*ob_size*/
-	"gstate",						/*tp_name*/
-	sizeof(gstateObject),			/*tp_basicsize*/
-	0,								/*tp_itemsize*/
-	/* methods */
-	(destructor)gstateFree,			/*tp_dealloc*/
-	(printfunc)0,					/*tp_print*/
-	(getattrfunc)gstate_getattr,	/*tp_getattr*/
-	(setattrfunc)gstate_setattr,	/*tp_setattr*/
-	(cmpfunc)0,						/*tp_compare*/
-	(reprfunc)0,					/*tp_repr*/
-	0,								/*tp_as_number*/
-	0,								/*tp_as_sequence*/
-	0,								/*tp_as_mapping*/
-	(hashfunc)0,					/*tp_hash*/
-	(ternaryfunc)0,					/*tp_call*/
-	(reprfunc)0,					/*tp_str*/
-
-	/* Space for future expansion */
-	0L,0L,0L,0L,
-	/* Documentation string */
-	"gstate instance\n\
+#define gstate__DOC__ "gstate instance\n\
 \n\
 gstates have the following methods\n\
  clipPathClear() clear clipPath\n\
@@ -1557,6 +1554,54 @@ path		readonly tuple describing the path\n\
 pathLen		int readonly number of path segments\n\
 pixBuf		str readonly the pixBuf\n\
 "
+static PyTypeObject gstateType = {
+	PyVarObject_HEAD_INIT(NULL,0)
+	"gstate",						/*tp_name*/
+	sizeof(gstateObject),			/*tp_basicsize*/
+	0,								/*tp_itemsize*/
+	/* methods */
+	(destructor)gstateFree,			/*tp_dealloc*/
+	(printfunc)0,					/*tp_print*/
+	(getattrfunc)gstate_getattr,	/*tp_getattr*/
+	(setattrfunc)gstate_setattr,	/*tp_setattr*/
+	0,								/*tp_compare in 2.x reserved in 3.x*/
+	(reprfunc)0,					/*tp_repr*/
+	0,								/*tp_as_number*/
+	0,								/*tp_as_sequence*/
+	0,								/*tp_as_mapping*/
+	(hashfunc)0,					/*tp_hash*/
+	(ternaryfunc)0,					/*tp_call*/
+	(reprfunc)0,					/*tp_str*/
+	0L,
+	0L,
+	0L,
+	0L,
+	gstate__DOC__,
+
+    0L,								/*tp_traverse call function for all accessible objects*/
+    0L,								/*tp_clear delete references to contained objects */
+    0L,								/*tp_richcompare rich comparisons */
+    0L,								/*tp_weaklistoffset weak reference enabler */
+    0L,								/*tp_iter*/
+    0L,								/*tp_iternext*/
+    0L,								/*tp_methods*/
+    0L,								/*tp_members*/
+    0L,								/*tp_getset*/
+    0L,								/*tp_base*/
+    0L,								/*tp_dict*/
+    0L, 							/*tp_descr_get*/
+    0L,								/*tp_descr_set*/
+    0L,								/*tp_dictoffset*/
+    0L,								/*tp_init*/
+    0L,								/*tp_alloc*/
+    0L,								/*tp_new*/
+    0L,								/*tp_free Low-level free-memory routine */
+    0L,								/*tp_is_gc For PyObject_IS_GC */
+    0L,								/*tp_bases*/
+    0L,								/*tp_mro method resolution order */
+    0L,								/*tp_cache*/
+    0L,								/*tp_subclasses*/
+    0L								/*tp_weaklist*/
 };
 
 
@@ -1573,7 +1618,7 @@ static	gstateObject* gstate(PyObject* module, PyObject* args, PyObject* keywds)
 	if(!PyArg_ParseTupleAndKeywords(args,keywds,"ii|iO:gstate",kwlist,&w,&h,&d,&pbg)) return NULL;
 	if(pbg){
 		if(!_set_gstateColorX(pbg,&bg)){
-			PyErr_SetString(moduleError, "invalid value for bg");
+			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate: invalid value for bg");
 			return NULL;
 			}
 		}
@@ -1582,7 +1627,7 @@ static	gstateObject* gstate(PyObject* module, PyObject* args, PyObject* keywds)
 		self->pixBuf = pixBufAlloc(w,h,d,bg);
 		self->path = art_new(ArtBpath,m);
 		if(!self->pixBuf){
-			PyErr_SetString(moduleError, "no memory");
+			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate: no memory");
 			gstateFree(self);
 			self = NULL;
 			}
@@ -1616,11 +1661,12 @@ static	char* my_pfb_reader(void *data, const char *filename, int *psize)
 	result = PyEval_CallObject(reader, arglist);
 	Py_DECREF(arglist);
 	if(result){
-		if(PyString_Check(result)){
-			char	*pystr = PyString_AS_STRING(result);
-			int		size = PyString_GET_SIZE(result);
+		/*the file should have been read as binary*/
+		if(PyBytes_Check(result)){
+			char	*pystr = PyBytes_AS_STRING(result);
+			int		size = PyBytes_GET_SIZE(result);
 			*psize = size;
-			memcpy(pfb=PyMem_Malloc(size),pystr,size);
+			memcpy(pfb=gt1_alloc(size),pystr,size);
 			}
 		Py_DECREF(result);
 		}
@@ -1632,7 +1678,7 @@ static	PyObject*	makeT1Font(PyObject* self, PyObject *args, PyObject *kw)
 	char	*name, *pfbPath, **names;
 	size_t	N, i;
 	int		ok;
-	PyObject	*L, *reader=NULL;
+	PyObject	*L, *reader=NULL, *u;
 	char	*s, *_notdef = ".notdef";
 	static char *kwlist[] = {"name", "pfbPath", "encoding", "reader", NULL};
 	if(!PyArg_ParseTupleAndKeywords(args,kw,"ssO|O:makeT1Font", kwlist, &name, &pfbPath, &L, &reader)) return NULL;
@@ -1644,7 +1690,7 @@ static	PyObject*	makeT1Font(PyObject* self, PyObject *args, PyObject *kw)
 			}
 		}
 	if(!PySequence_Check(L)){
-		PyErr_SetString(moduleError, "names should be a sequence object returning strings");
+		PyErr_SetString(PyExc_ValueError, "_renderPM.makeT1Font: names should be a sequence object returning strings");
 		return NULL;
 		}
 	N = PySequence_Length(L);
@@ -1654,11 +1700,24 @@ static	PyObject*	makeT1Font(PyObject* self, PyObject *args, PyObject *kw)
 		if(v==Py_None){
 			s = _notdef;
 			}
-		else if(PyString_Check(v)){
-			s = strdup(PyString_AsString(v));
+		else if(PyBytes_Check(v)){
+			s = strdup(PyBytes_AsString(v));
+			}
+		else if(PyUnicode_Check(v)){
+			u = PyUnicode_AsUTF8String(v);
+			if(!u){
+				PyErr_SetString(PyExc_ValueError, "_renderPM.makeT1Font: unicode name could not be converted to utf8");
+				Py_DECREF(u);
+				Py_DECREF(v);
+				break;
+				}
+			else{
+				s = strdup(PyBytes_AsString(u));
+				Py_DECREF(u);
+				}
 			}
 		else {
-			PyErr_SetString(moduleError, "names should all be strings");
+			PyErr_SetString(PyExc_ValueError, "_renderPM.makeT1Font: names should all be strings");
 			Py_DECREF(v);
 			break;
 			}
@@ -1674,7 +1733,7 @@ static	PyObject*	makeT1Font(PyObject* self, PyObject *args, PyObject *kw)
 			rfunc.reader = my_pfb_reader;
 			}
 		if(!gt1_create_encoded_font(name,pfbPath,names,N,prfunc)){
-			PyErr_SetString(moduleError, "can't make font");
+			PyErr_SetString(PyExc_ValueError, "_renderPM.makeT1Font: can't make font");
 			ok = 0;
 			}
 		}
@@ -1927,17 +1986,17 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 	lpos = (obs->p-obs->buf) - HEADER_SIZE;
 	obs->p = obs->buf + HEADER_SIZE;
 	pict_putShort(obs, (short)(lpos & 0xffff));
-	result = PyString_FromStringAndSize((const char *)obs->buf,len);
+	result = PyBytes_FromStringAndSize((const char *)obs->buf,len);
 	free(obs->buf);
 	return result;
 }
 
 
-static struct PyMethodDef moduleMethods[] = {
+static struct PyMethodDef _methods[] = {
 	{"gstate", (PyCFunction)gstate, METH_VARARGS|METH_KEYWORDS, "gstate(width,height[,depth=3][,bg=0xffffff]) create an initialised graphics state"},
 	{"makeT1Font", (PyCFunction)makeT1Font, METH_VARARGS|METH_KEYWORDS, "makeT1Font(fontName,pfbPath,names)"},
 	{"delCache", (PyCFunction)delCache, METH_VARARGS, "delCache()"},
-	{"pil2pict", (PyCFunction)pil2pict, METH_VARARGS, "pil2pict(cols,rows,datastr,palette) return PICT version of im as a string"},
+	{"pil2pict", (PyCFunction)pil2pict, METH_VARARGS, "pil2pict(cols,rows,datastr,palette) return PICT version of im as bytes"},
 #ifdef	RENDERPM_FT
     {"ft_get_face", (PyCFunction)ft_get_face, METH_VARARGS|METH_KEYWORDS,"ft_get_face(fontName) --> ft_face instance"},
 	{"parse_utf8", (PyCFunction)parse_utf8, METH_VARARGS, "parse_utf8(utf8_string) return UCS list"},
@@ -1948,32 +2007,68 @@ static struct PyMethodDef moduleMethods[] = {
 #ifdef DYNAMIC_ENDIANNESS
 extern void (*libart_set_DYNAMIC_BIGENDIAN(void));
 #endif
+
+/*Initialization function for the module*/
+#ifdef isPy3
+static struct PyModuleDef moduleDef = {
+	PyModuleDef_HEAD_INIT,
+	MODULENAME,
+	__DOC__,
+	-1,
+	_methods,
+	NULL,
+	NULL,
+	NULL,
+	NULL
+	};
+
+PyMODINIT_FUNC PyInit__renderPM(void)
+#define OK_RET m
+#define ERR_RET NULL
+#define CREATE_MODULE() PyModule_Create(&moduleDef)
+#else
 void init_renderPM(void)
+#define OK_RET
+#define ERR_RET
+#define CREATE_MODULE() Py_InitModule(MODULENAME, _methods)
+#endif
 {
-	PyObject *m, *d;
+	PyObject *m=NULL, *obj=NULL;
 
 	/*set up the types by hand*/
-	gstateType.ob_type = &PyType_Type;
+	if(PyType_Ready(&gstateType)<0)goto err;
 #ifdef	RENDERPM_FT
-    py_FT_Font_Type.ob_type = &PyType_Type;
+    if(PyType_Ready(&py_FT_Font_Type)<0)goto err;
 #endif
 
 	/* Create the module and add the functions */
-	m = Py_InitModule(MODULE, moduleMethods);
+	m = CREATE_MODULE();
+    if(!m)goto err;
 
 	/* Add some symbolic constants to the module */
-	d = PyModule_GetDict(m);
-	_version = PyString_FromString(VERSION);
-	PyDict_SetItemString(d, "_version", _version );
-	_libart_version = PyString_FromString(LIBART_VERSION);
-	PyDict_SetItemString(d, "_libart_version", _libart_version );
-	moduleError = PyErr_NewException(MODULE ".Error",NULL,NULL);
-	PyDict_SetItemString(d, "Error", moduleError);
+	obj = PyUnicode_FromString(VERSION);
+	if(!obj)goto err;
+	PyModule_AddObject(m, "_version", obj);
+
+	obj = PyUnicode_FromString(LIBART_VERSION);
+	if(!obj)goto err;
+	PyModule_AddObject(m, "_libart_version", obj);
 
 	/*add in the docstring*/
-	PyDict_SetItemString(d, "__doc__",	PyString_FromString(moduleDoc));
-	PyDict_SetItemString(d, "__file__", PyString_FromString(__FILE__));
+	obj = PyUnicode_FromString(__FILE__);
+	if(!obj)goto err;
+	PyModule_AddObject(m, "__file__", obj);
+#ifndef isPy3
+	obj = PyUnicode_FromString(__DOC__);
+	if(!obj)goto err;
+	PyModule_AddObject(m, "__doc__", obj);/*add in the docstring*/
+#endif
 #ifdef DYNAMIC_ENDIANNESS
 	libart_set_DYNAMIC_BIGENDIAN();
 #endif
+	return OK_RET;
+err:
+	Py_XDECREF(obj);
+	Py_XDECREF(m);
+	return ERR_RET;
 }
