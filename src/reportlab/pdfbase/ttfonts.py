@@ -62,8 +62,9 @@ class TTFError(pdfdoc.PDFError):
     pass
 
 
-def SUBSETN(n,table=string.maketrans('0123456789','ABCDEFGHIJ')):
-    return ('%6.6d'%n).translate(table)
+def SUBSETN(n):
+    z = ord('0')
+    return ''.join(['ABCDEFGHIJ'[c-z] for c in bytes('%6.6d'%n,'ASCII')])
 #
 # Helpers
 #

@@ -25,7 +25,7 @@ class RenderPMError(Exception):
 import string, os, sys
 
 try:
-    import _renderPM
+    from reportlab.graphics import _renderPM
 except ImportError as errMsg:
     raise ImportError("No module named _renderPM\n" + \
         (str(errMsg)!='No module named _renderPM' and "it may be the wrong version or badly installed!" or

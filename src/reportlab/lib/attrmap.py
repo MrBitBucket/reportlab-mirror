@@ -70,22 +70,18 @@ class AttrMap(dict):
         data = {}
         if BASE:
             if isinstance(BASE,AttrMap):
-                data = BASE.data                        #they used BASECLASS._attrMap
+                data = BASE
             else:
                 if not isSeq(BASE): BASE = (BASE,)
                 for B in BASE:
                     if hasattr(B,'_attrMap'):
-                        data.update(getattr(B._attrMap,'data',{}))
+                        data.update(B._attrMap)
                     else:
-                        raise ValueError('BASE=%s has wrong kind of value' % str(B))
+                        raise ValueError('BASE=%s has wrong kind of value' % repr(B))
 
         dict.__init__(self,data)
         self.remove(UNWANTED)
-        self.data.update(kw)
-
-    def update(self,kw):
-        if isinstance(kw,AttrMap): kw = kw.data
-        self.data.update(kw)
+        self.update(kw)
 
     def remove(self,unwanted):
         for k in unwanted:
