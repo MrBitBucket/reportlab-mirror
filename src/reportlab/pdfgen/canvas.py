@@ -1830,9 +1830,9 @@ class Canvas(textobject._PDFColorSetter):
         from reportlab.pdfbase.pdfdoc import PDFPageLabel
         PL.addPageLabel(pageNum,PDFPageLabel(style,start,prefix))
 
-if _instanceEscapePDF:
-    import new
-    Canvas._escape = new.instancemethod(_instanceEscapePDF,None,Canvas)
+#if _instanceEscapePDF:
+#   import new
+#   Canvas._escape = new.instancemethod(_instanceEscapePDF,None,Canvas)
 
 if __name__ == '__main__':
     print('For test scripts, look in tests')

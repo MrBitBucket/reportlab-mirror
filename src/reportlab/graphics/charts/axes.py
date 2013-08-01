@@ -33,7 +33,7 @@ the former axes in its own coordinate system.
 
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
-                                        isString, EitherOr, Validator, _SequenceTypes, NoneOr, isInstanceOf, \
+                                        isString, EitherOr, Validator, NoneOr, isInstanceOf, \
                                         isNormalDate
 from reportlab.lib.attrmap import *
 from reportlab.lib import normalDate
@@ -43,6 +43,7 @@ from reportlab.graphics.charts.textlabels import Label, PMVLabel
 from reportlab.graphics.charts.utils import nextRoundNumber
 from reportlab.graphics.widgets.grids import ShadedRect
 from reportlab.lib.colors import Color
+from reportlab.lib.utils import isSeq
 import copy
 try:
     reduce  # Python 2.x
@@ -51,7 +52,7 @@ except NameError:
 
 # Helpers.
 def _findMinMaxValue(V, x, default, func, special=None):
-    if isinstance(V[0][0],_SequenceTypes):
+    if isSeq(V[0][0]):
         if special:
             f=lambda T,x=x,special=special,func=func: special(T,x,func)
         else:
@@ -1177,10 +1178,10 @@ class ValueAxis(_AxisG):
         abf = self.avoidBoundFrac
         do_rr = not getattr(self,'valueSteps',None)
         do_abf = abf and do_rr
-        if not isinstance(abf,_SequenceTypes):
+        if not isSeq(abf):
             abf = abf, abf
         abfiz = getattr(self,'abf_ignore_zero', False)
-        if not isinstance(abfiz,_SequenceTypes):
+        if not isSeq(abfiz):
             abfiz = abfiz, abfiz
         do_rr = rangeRound is not 'none' and do_rr
         if do_rr:
@@ -1192,7 +1193,7 @@ class ValueAxis(_AxisG):
         abS = self.avoidBoundSpace
         do_abs = abS
         if do_abs:
-            if not isinstance(abS,_SequenceTypes):
+            if not isSeq(abS):
                 abS = abS, abS
         aL = float(self._length)
 
@@ -1391,8 +1392,8 @@ class ValueAxis(_AxisG):
                         t = tick*scl
                     else:
                         t = tick
-                    if type(f) is str: txt = f % t
-                    elif isinstance(f,_SequenceTypes):
+                    if isinstance(f, str): txt = f % t
+                    elif isSeq(f):
                         #it's a list, use as many items as we get
                         if i < len(f):
                             txt = f[i]
@@ -1549,7 +1550,7 @@ class _isListOfDaysAndMonths(Validator):
     for recurring dates.
     """
     def test(self,x):
-        if isinstance(x,_SequenceTypes):
+        if isSeq(x):
             answer = True
             for element in x:
                 try:
@@ -1939,7 +1940,7 @@ class AdjYValueAxis(YValueAxis):
         abf = self.avoidBoundFrac
         if abf:
             i1 = (T[1]-T[0])
-            if not isinstance(abf,_SequenceTypes):
+            if not isSeq(abf):
                 i0 = i1 = i1*abf
             else:
                 i0 = i1*abf[0]
@@ -1966,7 +1967,7 @@ class AdjYValueAxis(YValueAxis):
             self._valueMin = self._valueMin - m
 
         if self.leftAxisSkipLL0:
-            if isinstance(self.leftAxisSkipLL0,_SequenceTypes):
+            if isSeq(self.leftAxisSkipLL0):
                 for x in self.leftAxisSkipLL0:
                     try:
                         L[x] = ''

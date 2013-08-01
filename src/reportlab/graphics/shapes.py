@@ -7,7 +7,6 @@ __doc__='''Core of the graphics library - defines Drawing and Shapes'''
 
 import string, os, sys
 from math import pi, cos, sin, tan, sqrt
-from types import FloatType, IntType, ListType, TupleType, StringType, InstanceType
 from pprint import pprint
 
 from reportlab.platypus import Flowable
@@ -15,6 +14,7 @@ from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName 
 from reportlab.lib import logger
 from reportlab.lib import colors
 from reportlab.lib.validators import *
+from reportlab.lib.utils import isSeq
 isOpacity = NoneOr(isNumberInRange(0,1))
 from reportlab.lib.attrmap import *
 from reportlab.lib.utils import fp_str
@@ -273,7 +273,7 @@ def getPathBounds(points):
 def getPointsBounds(pointList):
     "Helper function for list of points"
     first = pointList[0]
-    if type(first) in (ListType, TupleType):
+    if isSeq(first):
         xs = [xy[0] for xy in pointList]
         ys = [xy[1] for xy in pointList]
         return (min(xs), min(ys), max(xs), max(ys))
@@ -564,36 +564,33 @@ def _addObjImport(obj,I,n=None):
 
 def _repr(self,I=None):
     '''return a repr style string with named fixed args first, then keywords'''
-    if type(self) is InstanceType:
-        if self is EmptyClipPath:
-            _addObjImport(self,I,'EmptyClipPath')
-            return 'EmptyClipPath'
-        if I: _addObjImport(self,I)
-        if isinstance(self,Shape):
-            from inspect import getargs
-            args, varargs, varkw = getargs(self.__init__.__func__.__code__)
-            P = self.getProperties()
-            s = self.__class__.__name__+'('
-            for n in args[1:]:
-                v = P[n]
-                del P[n]
-                s = s + '%s,' % _repr(v,I)
-            for n,v in P.items():
-                v = P[n]
-                s = s + '%s=%s,' % (n, _repr(v,I))
-            return s[:-1]+')'
-        else:
-            return repr(self)
-    elif type(self) is FloatType:
+    if isinstance(self,float):
         return fp_str(self)
-    elif type(self) in (ListType,TupleType):
+    elif isSeq(self):
         s = ''
         for v in self:
             s = s + '%s,' % _repr(v,I)
-        if type(self) is ListType:
+        if isisntance(self,list):
             return '[%s]' % s[:-1]
         else:
             return '(%s%s)' % (s[:-1],len(self)==1 and ',' or '')
+    elif self is EmptyClipPath:
+        if I: _addObjImport(self,I,'EmptyClipPath')
+        return 'EmptyClipPath'
+    elif isinstance(self,Shape):
+        if I: _addObjImport(self,I)
+        from inspect import getargs
+        args, varargs, varkw = getargs(self.__init__.__func__.__code__)
+        P = self.getProperties()
+        s = self.__class__.__name__+'('
+        for n in args[1:]:
+            v = P[n]
+            del P[n]
+            s = s + '%s,' % _repr(v,I)
+        for n,v in P.items():
+            v = P[n]
+            s = s + '%s=%s,' % (n, _repr(v,I))
+        return s[:-1]+')'
     else:
         return repr(self)
 
@@ -1085,7 +1082,7 @@ def definePath(pathSegs=[],isClipPath=0, dx=0, dy=0, **kw):
     O = []
     P = []
     for seg in pathSegs:
-        if type(seg) not in [ListType,TupleType]:
+        if not isSeq(seg):
             opName = seg
             args = []
         else:
@@ -1334,7 +1331,7 @@ class PolyLine(LineShape):
         points = points or []
         lenPoints = len(points)
         if lenPoints:
-            if type(points[0]) in (ListType,TupleType):
+            if isSeq(points[0]):
                 L = []
                 for (x,y) in points:
                     L.append(x)

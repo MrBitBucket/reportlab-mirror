@@ -28,7 +28,8 @@ class Rect(SolidShape):
 
 
 '''
-from reportlab.lib.validators import isAnything, _SequenceTypes, DerivedValue
+from reportlab.lib.validators import isAnything, DerivedValue
+from reportlab.lib.utils import isSeq
 from reportlab import rl_config
 
 class CallableValue:
@@ -71,7 +72,7 @@ class AttrMap(dict):
             if isinstance(BASE,AttrMap):
                 data = BASE.data                        #they used BASECLASS._attrMap
             else:
-                if type(BASE) not in (type(()),type([])): BASE = (BASE,)
+                if not isSeq(BASE): BASE = (BASE,)
                 for B in BASE:
                     if hasattr(B,'_attrMap'):
                         data.update(getattr(B._attrMap,'data',{}))
@@ -156,11 +157,11 @@ def addProxyAttribute(src,name,validate=None,desc=None,initial=None,dst=None):
     #sanity
     assert hasattr(src,'_attrMap'), 'src object has no _attrMap'
     A, oA = _privateAttrMap(src,1)
-    if type(dst) not in _SequenceTypes: dst = dst,
+    if not isSeq(dst): dst = dst,
     D = []
     DV = []
     for d in dst:
-        if type(d) in _SequenceTypes:
+        if isSeq(d):
             d, e = d[0], d[1:]
         obj, attr = _findObjectAndAttr(src,d)
         if obj:

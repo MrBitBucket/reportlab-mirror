@@ -7,9 +7,6 @@ __doc__="""Standard verifying functions used by attrmap."""
 import string, sys, codecs
 from reportlab.lib.utils import isSeq, isStr, isUnicode
 from reportlab.lib import colors
-if sys.hexversion<0x2030000:
-    True = 1
-    False = 0
 
 class Percentage(float):
     pass
@@ -41,14 +38,9 @@ class _isNothing(Validator):
         return False
 
 class _isBoolean(Validator):
-    if sys.hexversion>=0x2030000:
-        def test(self,x):
-            if type(x) in (IntType,BooleanType): return x in (0,1)
-            return self.normalizeTest(x)
-    else:
-        def test(self,x):
-            if type(x) is IntType: return x in (0,1)
-            return self.normalizeTest(x)
+    def test(self,x):
+        if isinstance(int,bool): return x in (0,1)
+        return self.normalizeTest(x)
 
     def normalize(self,x):
         if x in (0,1): return x
@@ -66,7 +58,7 @@ class _isString(Validator):
 
 class _isCodec(Validator):
     def test(self,x):
-        if type(x) not in (StringType, UnicodeType):
+        if not isStr(x):
             return False
         try:
             a,b,c,d = codecs.lookup(x)
@@ -76,7 +68,7 @@ class _isCodec(Validator):
 
 class _isNumber(Validator):
     def test(self,x):
-        if isinstance(x,(float,int): return True
+        if isinstance(x,(float,int)): return True
         return self.normalizeTest(x)
 
     def normalize(self,x):
@@ -87,7 +79,7 @@ class _isNumber(Validator):
 
 class _isInt(Validator):
     def test(self,x):
-        if type(x) not in (IntType,StringType): return False
+        if not isintance(x,int) and not isStr(x): return False
         return self.normalizeTest(x)
 
     def normalize(self,x):
@@ -206,7 +198,7 @@ class OneOf(Validator):
     (1,1,0)
     """
     def __init__(self, enum,*args):
-        if type(enum) in [ListType,TupleType]:
+        if isSeq(enum):
             if args!=():
                 raise ValueError("Either all singleton args or a single sequence argument")
             self._enum = tuple(enum)+args
@@ -278,12 +270,9 @@ class matchesPattern(Validator):
         self._pattern = re.compile(pattern)
 
     def test(self,x):
+        x = str(x)
         print('testing %s against %s' % (x, self._pattern))
-        if type(x) is StringType:
-            text = x
-        else:
-            text = str(x)
-        return (self._pattern.match(text) != None)
+        return (self._pattern.match(x) != None)
 
 class DerivedValue:
     """This is used for magic values which work themselves out.
