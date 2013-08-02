@@ -281,7 +281,11 @@ PyObject *_fp_str(PyObject *module, PyObject *args)
 			pB = pB + strlen(pB);
 			}
 		*pB = 0;
+#ifdef isPy3
+		retVal = PyUnicode_FromString(buf);
+#else
 		retVal = PyBytes_FromString(buf);
+#endif
 		free(buf);
 		return retVal;
 		}

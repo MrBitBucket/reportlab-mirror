@@ -53,7 +53,7 @@ Canvas and TextObject have special support for dynamic fonts.
 
 import string
 from struct import pack, unpack, error as structError
-from reportlab.lib.utils import getBytesIO
+from reportlab.lib.utils import getBytesIO, isPy3
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
 
@@ -114,12 +114,9 @@ def _set_ushort(stream, offset, value):
     return splice(stream, offset, pack(">H", value))
 
 try:
-    import _rl_accel
+    from reportlab.lib import _rl_accel
 except ImportError:
-    try:
-        from reportlab.lib import _rl_accel
-    except ImportError:
-        _rl_accel = None
+    _rl_accel = None
 
 try:
     hex32 = _rl_accel.hex32
@@ -304,10 +301,24 @@ class TTFontParser:
         self._pos = self.get_table_pos(tag)[0] + offset_in_table
         return self._pos
 
-    def read_tag(self):
-        "Read a 4-character tag"
-        self._pos += 4
-        return self._ttf_data[self._pos - 4:self._pos]
+    if isPy3:
+        def read_tag(self):
+            "Read a 4-character tag"
+            self._pos += 4
+            return str(self._ttf_data[self._pos - 4:self._pos],'utf8')
+
+        def get_chunk(self, pos, length):
+            "Return a chunk of raw data at given position"
+            return str(self._ttf_data[pos:pos+length],'utf8')
+    else:
+        def read_tag(self):
+            "Read a 4-character tag"
+            self._pos += 4
+            return self._ttf_data[self._pos - 4:self._pos]
+
+        def get_chunk(self, pos, length):
+            "Return a chunk of raw data at given position"
+            return self._ttf_data[pos:pos+length]
 
     def read_ushort(self):
         "Reads an unsigned short"
@@ -334,10 +345,6 @@ class TTFontParser:
     def get_ulong(self, pos):
         "Return an unsigned long at given position"
         return unpack('>L',self._ttf_data[pos:pos+4])[0]
-
-    def get_chunk(self, pos, length):
-        "Return a chunk of raw data at given position"
-        return self._ttf_data[pos:pos+length]
 
     def get_table(self, tag):
         "Return the given TTF table"

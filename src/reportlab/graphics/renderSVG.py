@@ -17,7 +17,7 @@ from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer,
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
-from reportlab.lib.utils import getBytesIO, RLString
+from reportlab.lib.utils import getBytesIO, RLString, isPy3
 
 from xml.dom import getDOMImplementation
 
@@ -96,8 +96,8 @@ def transformNode(doc, newTag, node=None, **attrDict):
 class EncodedWriter(list):
     '''
     EncodedWriter(encoding) assumes .write will be called with
-    either unicode or utf8 encoded strings.  it will accumulate
-    strings encoded as the specified encoding.
+    either trnicode or utf8 encoded bytes. it will accumulate
+    unicode
     '''
     BOMS =  {
         'utf-32':codecs.BOM_UTF32,
@@ -113,22 +113,18 @@ class EncodedWriter(list):
         if bom and '16' in encoding or '32' in encoding:
             self.write(self.BOMS[encoding])
 
-    def write(self,s):
-        if isinstance(s,str):
-            s = s.encode(self.encoding)
-        elif isinstance(s,str):
+    def write(self,u):
+        if isinstance(u,bytes):
             try:
-                 u = s.decode('utf-8')
+                 u = u.decode('utf-8')
             except:
                 et, ev, tb = sys.exc_info()
                 ev = str(ev)
                 del et, tb
-                raise ValueError("String %r not encoded as 'utf-8'\nerror=%s" % (s,ev))
-            if self.encoding!='utf-8':
-                s = u.decode(self.encoding)
-        else:
-            raise ValueError("EncodedWriter.write(%r) argument should be 'utf-8' string or unicode" % s)
-        self.append(s)
+                raise ValueError("String %r not encoded as 'utf-8'\nerror=%s" % (u,ev))
+        elif not isinstance(u,str):
+            raise ValueError("EncodedWriter.write(%r) argument should be 'utf-8' bytes or str" % u)
+        self.append(u)
 
     def getvalue(self):
         r = ''.join(self)
@@ -242,10 +238,14 @@ class SVGCanvas:
         writer = EncodedWriter(self.encoding,bom=self.bom)
         self.doc.writexml(writer,addindent="\t",newl="\n",encoding=self.encoding)
 
-        if type(fn) in str:
-            f = open(fn, 'w')
-        else:
+        if hasattr(fn,'write'):
             f = fn
+        else:
+            if isPy3:
+                f = open(fn, 'w',encoding=self.encoding)
+            else:
+                f = open(fn, 'w')
+
         svg = writer.getvalue()
         exd = self.extraXmlDecl
         if exd:

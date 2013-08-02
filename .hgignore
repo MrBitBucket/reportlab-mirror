@@ -43,6 +43,7 @@ src/reportlab/fonts/*.afm
 src/reportlab/fonts/*.ttf
 src/reportlab/graphics/barcode/*.pdf
 src/reportlab/graphics/barcode/test_cbcim.*
+src/reportlab/graphics/pmout
 tools/docco/*.pdf
 tests/test_*.pdf
 tests/test_*.svg

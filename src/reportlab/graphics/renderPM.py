@@ -22,7 +22,7 @@ from reportlab import rl_config
 class RenderPMError(Exception):
     pass
 
-import string, os, sys
+import os, sys
 
 try:
     from reportlab.graphics import _renderPM
@@ -216,15 +216,12 @@ class _PMRenderer(Renderer):
 def _setFont(gs,fontName,fontSize):
     try:
         gs.setFont(fontName,fontSize)
-    except _renderPM.Error as errMsg:
-        if errMsg.args[0]!="Can't find font!": raise
+    except ValueError as e:
+        if not e.args[0].endswith("Can't find font!"): raise
         #here's where we try to add a font to the canvas
         try:
             f = getFont(fontName)
-            if _renderPM._version<='0.98':  #added reader arg in 0.99
-                _renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector)
-            else:
-                _renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector,open_and_read)
+            _renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector,open_and_read)
         except:
             s1, s2 = list(map(str,sys.exc_info()[:2]))
             raise RenderPMError("Can't setFont(%s) missing the T1 files?\nOriginally %s: %s" % (fontName,s1,s2))
@@ -246,7 +243,7 @@ def _saveAsPICT(im,fn,fmt,transparent=None):
     #s = _renderPM.pil2pict(cols,rows,im.tostring(),im.im.getpalette(),transparent is not None and Color2Hex(transparent) or -1)
     s = _renderPM.pil2pict(cols,rows,im.tostring(),im.im.getpalette())
     if not hasattr(fn,'write'):
-        open(os.path.splitext(fn)[0]+'.'+string.lower(fmt),'wb').write(s)
+        open(os.path.splitext(fn)[0]+'.'+fmt.lower(),'wb').write(s)
         if os.name=='mac':
             from reportlab.lib.utils import markfilename
             markfilename(fn,ext='PICT')
@@ -299,7 +296,7 @@ class PMCanvas:
         preConvertCB=configPIL.pop('preConvertCB')
         if preConvertCB:
             im = preConvertCB(im)
-        fmt = string.upper(fmt)
+        fmt = fmt.upper()
         if fmt in ('GIF',):
             im = _convert2pilp(im)
         elif fmt in ('TIFF','TIFFP','TIFFL','TIF','TIFF1'):
@@ -511,7 +508,7 @@ class PMCanvas:
                     fc = f
                 gs.drawString(x,y,t)
                 if i!=nm1:
-                    x += wscale*sum(map(f.widths.__getitem__,list(map(ord,t))))
+                    x += wscale*sum(map(f.widths.__getitem__,t))
             if font!=fc:
                 _setFont(gs,fontName,fontSize)
 
@@ -709,7 +706,7 @@ def test(verbose=True):
 
         for k in E:
             if k in ['gif','png','jpg','pct']:
-                html.append('<p>%s format</p>\n' % string.upper(k))
+                html.append('<p>%s format</p>\n' % k.upper())
             try:
                 filename = '%s.%s' % (fnRoot, ext(k))
                 fullpath = os.path.join('pmout', filename)
@@ -733,7 +730,7 @@ def test(verbose=True):
                 print('Problem drawing %s file'%k)
                 raise
         if os.environ.get('RL_NOEPSPREVIEW','0')=='1': drawing.__dict__['preview'] = 0
-        drawing.save(formats=['eps','pdf'],outDir='pmout',fnRoot=fnRoot)
+        #drawing.save(formats=['eps','pdf'],outDir='pmout',fnRoot=fnRoot)
     html.append(htmlBottom)
     htmlFileName = os.path.join('pmout', 'index.html')
     open(htmlFileName, 'w').writelines(html)

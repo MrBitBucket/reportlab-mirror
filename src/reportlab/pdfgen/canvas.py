@@ -398,9 +398,8 @@ class Canvas(textobject._PDFColorSetter):
                 P('BT %s 12 Tf 14.4 TL ET' % self._doc.getInternalFontName(self._fontname))
         self._preamble = ' '.join(P.__self__)
 
-    if not _instanceEscapePDF:
-        def _escape(self, s):
-            return _escapePDF(s)
+    def _escape(self, s):
+        return _escapePDF(s)
 
     #info functions - non-standard
     def setAuthor(self, author):

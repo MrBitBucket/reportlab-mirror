@@ -10,7 +10,7 @@ import sys
 import os
 import binascii
 from reportlab import rl_config
-from reportlab.lib.utils import getBytesIO, ImageReader, isStr, isUnicode, isPython3
+from reportlab.lib.utils import getBytesIO, ImageReader, isStr, isUnicode, isPy3
 
 LINEEND = '\015\012'
 
@@ -226,7 +226,7 @@ if 1: # for testing always define this
         whole_word_count, remainder_size = divmod(len(input), 4)
         cut = 4 * whole_word_count
         body, lastbit = input[0:cut], input[cut:]
-        if isPython3 and isStr(lastbit):
+        if isPy3 and isStr(lastbit):
             lastbit = lastbit.encode('utf-8')
 
         out = [].append

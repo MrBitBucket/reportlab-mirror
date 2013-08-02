@@ -21,7 +21,7 @@ trap attempts to access them and do it on first access.
 import string, os, sys
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
-from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines, findInPaths, isSeq, isStr, isUnicode, isPython3
+from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines, findInPaths, isSeq, isStr, isUnicode, isPy3
 from reportlab.rl_config import defaultEncoding, T1SearchPath
 from . import rl_codecs
 _notdefChar = b'n'
@@ -435,7 +435,7 @@ PFB_ASCII=chr(1)
 PFB_BINARY=chr(2)
 PFB_EOF=chr(3)
 
-if isPython3:
+if isPy3:
     def _pfbCheck(p,d,m,fn):
         if chr(d[p])!=PFB_MARKER or chr(d[p+1])!=m:
             raise ValueError('Bad pfb file\'%s\' expected chr(%d)chr(%d) at char %d, got chr(%d)chr(%d)' % (fn,ord(PFB_MARKER),ord(m),p,d[p],d[p+1]))

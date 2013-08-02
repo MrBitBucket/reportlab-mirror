@@ -12,7 +12,7 @@ Progress Reports:
 import string
 from types import *
 from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor, black, white, _CMYK_black, _CMYK_white
-from reportlab.lib.utils import fp_str, isStr, isPython3
+from reportlab.lib.utils import fp_str, isStr, isPy3
 from reportlab.pdfbase import pdfmetrics
 
 class _PDFColorSetter:
@@ -383,7 +383,7 @@ class PDFTextObject(_PDFColorSetter):
         else:
             #convert to T1  coding
             fc = font
-            if not isPython3 and not isinstance(text,unicode):
+            if not isPy3 and not isinstance(text,unicode):
                 try:
                     text = text.decode('utf8')
                 except UnicodeDecodeError as e:

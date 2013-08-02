@@ -4,14 +4,12 @@
 __version__=''' $Id$ '''
 __doc__="""Render drawing objects in Postscript"""
 
-import string, types
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth, unicode2T1 # for font info
-from reportlab.lib.utils import fp_str, getBytesIO
+from reportlab.lib.utils import fp_str, getBytesIO, isPy3
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS
 import math
-from types import StringType
 from operator import getitem
 from reportlab import rl_config
 _ESCAPEDICT={}
@@ -25,6 +23,8 @@ for c in range(256):
     del c
 
 def _escape_and_limit(s):
+    if isPy3 and not isinstance(s,str):
+        s = s.decode('utf8')
     R = []
     aR = R.append
     n = 0
@@ -133,7 +133,7 @@ class PSCanvas:
                 C.append('WinAnsiEncoding /%s /%s RE' % (fontName, fontName))    
         if C:
             C.insert(0,PS_WinAnsiEncoding)
-            self.code.insert(1, string.join(C, self._sep))
+            self.code.insert(1, self._sep.join(C))
 
     def save(self,f=None):
         if not hasattr(f,'write'):
@@ -151,7 +151,7 @@ class PSCanvas:
 ''' % (self.width,self.height))
 
         self._t1_re_encode()
-        file.write(string.join(self.code,self._sep))
+        file.write(self._sep.join(self.code))
         if file is not f:
             file.close()
             from reportlab.lib.utils import markfilename
@@ -190,7 +190,7 @@ class PSCanvas:
             self.code_append('[%s %s] 0 %s' % (array, phase, psoperation))
         elif isinstance(array,(tuple,list)):
             assert phase >= 0, "phase is a length in user space"
-            textarray = string.join(map(str, array))
+            textarray = ' '.join(map(str, array))
             self.code_append('[%s] %s %s' % (textarray, phase, psoperation))
 
     def setStrokeColor(self, color):

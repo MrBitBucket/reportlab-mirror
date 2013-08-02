@@ -20,7 +20,7 @@ else:
     def _digester(s):
         return join(["%02x" % ord(x) for x in md5(s).digest()], '')
 
-isPython3 = sys.version_info[0]==3
+isPy3 = sys.version_info[0]==3
 
 def isFunction(v):
     return type(v) == type(isFunction)
@@ -38,7 +38,7 @@ def isModule(v):
 def isSeq(v,_st=(tuple,list)):
     return isinstance(v,_st)
 
-if isPython3:
+if isPy3:
     def UniChr(v):
         return chr(v)
 
@@ -679,7 +679,7 @@ class ImageReader(object):
                     palette = palette.palette
                 except:
                     palette = palette.data
-                if isPython3:
+                if isPy3:
                     return palette[transparency:transparency+3]
                 else:
                     return [ord(c) for c in palette[transparency:transparency+3]]
@@ -1133,7 +1133,7 @@ def annotateException(msg,enc='utf8'):
             e = i
             break
     if e>=0:
-        if not isPython3:
+        if not isPy3:
             if isinstance(a,unicode):
                 if not isinstance(msg,unicode):
                     msg=msg.decode(enc)

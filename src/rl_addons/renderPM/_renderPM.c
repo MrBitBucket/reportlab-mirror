@@ -1098,17 +1098,24 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 	Gt1EncodedFont*	f;
 	double	fontSize, fontEMSize;
 	int		ft_font;
-	PyObject *fontNameObj;
+	PyObject *fontNameObj,*b=NULL;
 
 	if(!PyArg_ParseTuple(args,"Od:setFont", &fontNameObj, &fontSize)) return NULL;
-	fontName = PyBytes_AsString(fontNameObj);
+	if(PyUnicode_Check(fontNameObj)){
+		b=PyUnicode_AsUTF8String(fontNameObj);
+		if(!b) goto err;
+		fontName = PyBytes_AsString(b);
+		}
+	else{
+		fontName = PyBytes_AsString(fontNameObj);
+		}
 	if(!fontName){
 		PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_setFont: Invalid fontName");
-		return NULL;
+		goto err;
 		}
 	if(fontSize<0){
 		PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_setFont: Invalid fontSize");
-		return NULL;
+		goto err;
 		}
 	f=gt1_get_encoded_font(fontName);
 	if(f){
@@ -1137,6 +1144,8 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 		}
 
 	PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_setFont: Can't find font!");
+err:
+	Py_XDECREF(b);
 	return NULL;
 }
 
