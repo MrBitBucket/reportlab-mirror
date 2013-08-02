@@ -11,7 +11,6 @@ Progress Reports:
 
 """
 
-import string
 from reportlab.pdfgen import pdfgeom
 from reportlab.lib.utils import fp_str
 
@@ -42,7 +41,7 @@ class PDFPathObject:
 
     def getCode(self):
         "pack onto one line; used internally"
-        return string.join(self._code, ' ')
+        return ' '.join(self._code)
 
     def moveTo(self, x, y):
         self._code_append('%s m' % fp_str(x,y))

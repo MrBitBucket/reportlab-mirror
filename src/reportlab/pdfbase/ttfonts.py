@@ -51,7 +51,6 @@ Oh, and that 14 up there is font size.)
 Canvas and TextObject have special support for dynamic fonts.
 """
 
-import string
 from struct import pack, unpack, error as structError
 from reportlab.lib.utils import getBytesIO, isPy3
 from reportlab.pdfbase import pdfmetrics, pdfdoc
@@ -101,7 +100,7 @@ def makeToUnicodeCMap(fontname, subset):
         "end",
         "end"
         ]
-    return string.join(cmap, "\n")
+    return '\n'.join(cmap)
 
 def splice(stream, offset, value):
     """Splices the given value into stream at the given offset and
@@ -361,7 +360,7 @@ class TTFontMaker:
     def add(self, tag, data):
         "Adds a table to the TTF file."
         if tag == 'head':
-            data = splice(data, 8, '\0\0\0\0')
+            data = splice(data, 8, b'\0\0\0\0')
         self.tables[tag] = data
 
     def makeStream(self):
@@ -386,18 +385,19 @@ class TTFontMaker:
         tables = list(self.tables.items())
         tables.sort()     # XXX is this the correct order?
         offset = 12 + numTables * 16
+        wStr = lambda x:write(bytes(tag,'utf8')) if isPy3 else write
         for tag, data in tables:
             if tag == 'head':
                 head_start = offset
             checksum = calcChecksum(data)
-            write(tag)
+            wStr(tag)
             write(pack(">LLL", checksum, offset, len(data)))
             paddedLength = (len(data)+3)&~3
             offset = offset + paddedLength
 
         # Table data
         for tag, data in tables:
-            data += "\0\0\0"
+            data += b"\0\0\0"
             write(data[:len(data)&~3])
 
         checksum = calcChecksum(stm.getvalue())
@@ -797,7 +797,7 @@ class TTFontFile(TTFontParser):
                 pass
 
         # post - PostScript
-        post = "\x00\x03\x00\x00" + self.get_table('post')[4:16] + "\x00" * 16
+        post = b"\x00\x03\x00\x00" + self.get_table('post')[4:16] + b"\x00" * 16
         output.add('post', post)
 
         # hhea - Horizontal Header
@@ -869,10 +869,10 @@ class TTFontFile(TTFontParser):
             pos = pos + glyphLen
             if pos % 4 != 0:
                 padding = 4 - pos % 4
-                glyf.append('\0' * padding)
+                glyf.append(b'\0' * padding)
                 pos = pos + padding
         offsets.append(pos)
-        output.add('glyf', string.join(glyf, ""))
+        output.add('glyf', b''.join(glyf))
 
         # loca - Index to location
         loca = []

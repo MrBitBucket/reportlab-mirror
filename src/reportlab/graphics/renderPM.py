@@ -731,6 +731,7 @@ def test(verbose=True):
                 raise
         if os.environ.get('RL_NOEPSPREVIEW','0')=='1': drawing.__dict__['preview'] = 0
         #drawing.save(formats=['eps','pdf'],outDir='pmout',fnRoot=fnRoot)
+        drawing.save(formats=['pdf'],outDir='pmout',fnRoot=fnRoot)
     html.append(htmlBottom)
     htmlFileName = os.path.join('pmout', 'index.html')
     open(htmlFileName, 'w').writelines(html)
