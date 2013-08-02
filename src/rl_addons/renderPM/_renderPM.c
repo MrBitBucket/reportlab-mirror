@@ -1130,6 +1130,7 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 		}
 #endif
 	if(f){
+		Py_XDECREF(b);
 		self->font = f;
 		self->fontSize = fontSize;
 		if(self->fontNameObj) Py_DECREF(self->fontNameObj);
