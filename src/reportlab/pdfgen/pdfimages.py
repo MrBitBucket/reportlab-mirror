@@ -96,11 +96,21 @@ class PDFImage:
         zlib = import_zlib()
         if not zlib: return
 
+        bpc = 8
         # Use the colorSpace in the image
         if image.mode == 'CMYK':
             myimage = image
             colorSpace = 'DeviceCMYK'
             bpp = 4
+        elif image.mode == '1':
+            myimage = image
+            colorSpace = 'DeviceGray'
+            bpp = 1
+            bpc = 1
+        elif image.mode == 'L':
+            myimage = image
+            colorSpace = 'DeviceGray'
+            bpp = 1
         else:
             myimage = image.convert('RGB')
             colorSpace = 'RGB'
@@ -109,11 +119,12 @@ class PDFImage:
 
         # this describes what is in the image itself
         # *NB* according to the spec you can only use the short form in inline images
-        imagedata=['BI /W %d /H %d /BPC 8 /CS /%s /F [%s/Fl] ID' % (imgwidth, imgheight,colorSpace, rl_config.useA85 and '/A85 ' or '')]
+        imagedata=['BI /W %d /H %d /BPC %d /CS /%s /F [%s/Fl] ID' % (imgwidth, imgheight, bpc, colorSpace, rl_config.useA85 and '/A85 ' or '')]
 
         #use a flate filter and, optionally, Ascii Base 85 to compress
         raw = myimage.tostring()
-        assert len(raw) == imgwidth*imgheight*bpp, "Wrong amount of data for image"
+        rowstride = (imgwidth*bpc*bpp+7)/8
+        assert len(raw) == rowstride*imgheight, "Wrong amount of data for image"
         data = zlib.compress(raw)    #this bit is very fast...
         if rl_config.useA85:
             data = pdfutils._AsciiBase85Encode(data) #...sadly this may not be
