@@ -804,7 +804,10 @@ class ImageReader(object):
                 try:
                     palette = palette.palette
                 except:
-                    palette = palette.data
+                    try:
+                        palette = palette.data
+                    except:
+                        return None
                 if isPy3:
                     return palette[transparency:transparency+3]
                 else:
