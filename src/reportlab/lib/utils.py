@@ -672,7 +672,10 @@ class ImageReader(object):
                 try:
                     palette = palette.palette
                 except:
-                    palette = palette.data
+                    try:
+                        palette = palette.data
+                    except:
+                        return None
                 return map(ord, palette[transparency:transparency+3])
             else:
                 return None
