@@ -680,8 +680,10 @@ cost to performance.""")
         from reportlab.lib.testutils import testsFolder
         gif = os.path.join(testsFolder,'pythonpowered.gif')
         c.drawInlineImage(gif,2*inch, 7*inch)
+        c.drawInlineImage(os.path.join(testsFolder,'pythonpowered-gs.gif'),4*inch, 7.5*inch)
     else:
         c.rect(2*inch, 7*inch, 110, 44)
+        c.rect(4*inch, 7*inch, 110, 44)
 
     c.line(1.5*inch, 7*inch, 4*inch, 7*inch)
     c.line(2*inch, 6.5*inch, 2*inch, 8*inch)

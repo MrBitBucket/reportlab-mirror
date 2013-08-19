@@ -13,8 +13,8 @@ from reportlab.lib.pagesizes import A4
 
 
 IMAGES = []
-IMAGENAME = 'cs_logo.gif'
 IMAGENAME = 'pythonpowered.gif'
+GSIMAGE = 'pythonpowered-gs.gif'
 
 
 class ImageTestCase(unittest.TestCase):
@@ -31,6 +31,7 @@ class ImageTestCase(unittest.TestCase):
             d.add(img)
         outPath = outputfile("test_graphics_images.pdf")
         renderPDF.drawToFile(d, outPath) #, '')
+        print outPath
         assert os.path.exists(outPath) == 1
 
 
@@ -76,8 +77,16 @@ class ImageTestCase(unittest.TestCase):
         d.rotate(45)
         IMAGES.append(d)
 
-        IMAGES.append(None) # used to indicate last test
 
+    def test4(self):
+        "Test convert a greyscale bitmap file as Image shape into a tmp. PDF file."
+
+        d = Drawing(110, 44)
+        img = Image(0, 0, 110, 44, GSIMAGE)
+        d.add(img)
+        d.translate(0,2*72)
+        IMAGES.append(d)
+        IMAGES.append(None) # used to indicate last test
 
 def makeSuite():
     return makeSuiteForClasses(ImageTestCase)
