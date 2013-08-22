@@ -697,6 +697,17 @@ def test(verbose=True):
             argv.remove(a)
         E = (','.join([a[6:] for a in E])).split(',')
 
+    errs = []
+    import StringIO, traceback
+    from xml.sax.saxutils import escape
+    def handleError(name,fmt):
+        msg = 'Problem drawing %s fmt=%s file'%(name,fmt)
+        print msg
+        errs.append('<br/><h2 style="color:red">%s</h2>' % msg)
+        buf = StringIO.StringIO()
+        traceback.print_exc(file=buf)
+        errs.append('<pre>%s</pre>' % escape(buf.getvalue()))
+
     #print in a loop, with their doc strings
     for (drawing, docstring, name) in getAllTestDrawings(doTTF=hasattr(_renderPM,'ft_get_face')):
         i = names[name] = names.setdefault(name,0)+1
@@ -730,10 +741,18 @@ def test(verbose=True):
                     html.append('<a href="%s">SVG</a><br>\n' % filename)
                 if verbose: print 'wrote',fullpath
             except AttributeError:
-                print 'Problem drawing %s file'%k
-                raise
+                handleError(name,k)
         if os.environ.get('RL_NOEPSPREVIEW','0')=='1': drawing.__dict__['preview'] = 0
-        drawing.save(formats=['eps','pdf'],outDir='pmout',fnRoot=fnRoot)
+        for k in ('eps', 'pdf'):
+            try:
+                drawing.save(formats=[k],outDir='pmout',fnRoot=fnRoot)
+            except:
+                handleError(name,k)
+
+    if errs:
+        html[0] = html[0].replace('</h1>',' <a href="#errors" style="color: red">(errors)</a></h1>')
+        html.append('<a name="errors"/>')
+        html.extend(errs)
     html.append(htmlBottom)
     htmlFileName = os.path.join('pmout', 'index.html')
     open(htmlFileName, 'w').writelines(html)
