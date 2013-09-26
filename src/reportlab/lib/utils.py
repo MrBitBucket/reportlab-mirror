@@ -1118,7 +1118,7 @@ def findInPaths(fn,paths,isfile=True,fail=False):
 
 def annotateException(msg,enc='utf8'):
     '''add msg to the args of an existing exception'''
-    if not msg: rise
+    if not msg: raise
     t,v,b=sys.exc_info()
     if not hasattr(v,'args'): raise
     e = -1
