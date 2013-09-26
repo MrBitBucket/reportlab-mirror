@@ -489,8 +489,13 @@ def _fragWordIter(w):
         if hasattr(f,'cbDefn'):
             yield f, getattr(f,'width'), s
         elif s:
-            for c in s:
-                yield f, stringWidth(c,f.fontName, f.fontSize), c
+            if isinstance(s,str):
+                s = s.decode('utf8')    #only encoding allowed
+                for c in s:
+                    yield f, stringWidth(c,f.fontName, f.fontSize), c.encode('utf8')
+            else:
+                for c in s:
+                    yield f, stringWidth(c,f.fontName, f.fontSize), c
         else:
             yield f, 0, s
 
