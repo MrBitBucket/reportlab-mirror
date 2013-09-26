@@ -562,19 +562,34 @@ def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding):
     R = []
     maxlineno = len(maxWidths)-1
     lineWidth = 0
-    wordText = ''
-    for c in w:
-        cw = stringWidth(c,fontName,fontSize,encoding)
-        newLineWidth = lineWidth+cw
-        if newLineWidth>maxWidth:
-            R.append(_SplitText(wordText))
-            lineno += 1
-            maxWidth = maxWidths[min(maxlineno,lineno)]
-            newLineWidth = cw
-            wordText = ''
-        wordText += c
-        lineWidth = newLineWidth
-    R.append(_SplitText(wordText))
+    wordText = u''
+    if isinstance(w,str):
+        w = w.decode('utf8')
+        for c in w:
+            cw = stringWidth(c,fontName,fontSize,encoding)
+            newLineWidth = lineWidth+cw
+            if newLineWidth>maxWidth:
+                R.append(_SplitText(wordText.encode(encoding)))
+                lineno += 1
+                maxWidth = maxWidths[min(maxlineno,lineno)]
+                newLineWidth = cw
+                wordText = u''
+            wordText += c
+            lineWidth = newLineWidth
+        R.append(_SplitText(wordText.encode(encoding)))
+    else:
+        for c in w:
+            cw = stringWidth(c,fontName,fontSize,encoding)
+            newLineWidth = lineWidth+cw
+            if newLineWidth>maxWidth:
+                R.append(_SplitText(wordText))
+                lineno += 1
+                maxWidth = maxWidths[min(maxlineno,lineno)]
+                newLineWidth = cw
+                wordText = u''
+            wordText += c
+            lineWidth = newLineWidth
+        R.append(_SplitText(wordText))
     return R
 
 def _split_blParaSimple(blPara,start,stop):
