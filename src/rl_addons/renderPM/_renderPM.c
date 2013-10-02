@@ -47,6 +47,11 @@ PyObject *RLPy_FindMethod(PyMethodDef *ml, PyObject *self, const char* name){
 #ifndef LIBART_VERSION
 #	define LIBART_VERSION "?.?.?"
 #endif
+#ifdef	RENDERPM_FT
+#	define _FT_DOC "    ft_get_face(fontName) --> ft_face instance\n"
+#else
+#	define _FT_DOC ""
+#endif
 PyDoc_STRVAR(__DOC__,
 "Helper extension module for renderPM.\n\
 \n\
@@ -56,10 +61,8 @@ Interface summary:\n\
 	gstate(width,height[,depth=3,bg=0xffffff]) #create an initialised graphics state\n\
 	makeT1Font(fontName,pfbPath,names[,reader])	#make a T1 font\n\
 	delCache() #delete all T1 font info\n\
-	pil2pict(cols,rows,datastr,palette) hreturn PICT version of im as bytes\n"
-#ifdef	RENDERPM_FT
-"    ft_get_face(fontName) --> ft_face instance\n"
-#endif
+	pil2pict(cols,rows,datastr,palette) return PICT version of im as bytes\n"
+_FT_DOC
 "\n\
 	_libart_version	# base library version string\n\
 	_version		# module version string\n\
