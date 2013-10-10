@@ -664,10 +664,8 @@ class ParaParser:
             A['_selfClosingTag'] = 'anchor'
         else:
             href = A.get('href','').strip()
-            if not href:
-                self._syntax_error('<a> tag must have non-blank name or href attribute')
             A['link'] = href    #convert to our link form
-            A.pop('href')
+            A.pop('href',None)
         self._push(**A)
 
     def end_a(self):
@@ -1005,7 +1003,7 @@ class ParaParser:
                 j = attrMap[k]
                 func = j[1]
                 try:
-                    A[j[0]] = (func is None) and v or func(v)
+                    A[j[0]] = v if func is None else func(v)
                 except:
                     self._syntax_error('%s: invalid value %s'%(k,v))
             else:
