@@ -42,9 +42,18 @@ struct module_state	{
 #else
 	static struct module_state _state;
 #	include "bytesobject.h"
+#	ifndef PyVarObject_HEAD_INIT
+#		define PyVarObject_HEAD_INIT(type, size) \
+        	PyObject_HEAD_INIT(type) size,
+#	endif
+#	ifndef Py_TYPE
+#		define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
+#	endif
+#	define PyBytes_AS_STRING	PyString_AS_STRING
+#	define PyBytes_AsString		PyString_AsString
+#	define PyBytes_GET_SIZE 	PyString_GET_SIZE
 #	define GETSTATE(m) (&_state)
 #endif
-
 
 #define a85_0		   1L
 #define a85_1		   85L
@@ -121,7 +130,7 @@ PyObject *_a85_encode(PyObject *module, PyObject *args)
 
 	buf[k++] = '~';
 	buf[k++] = '>';
-	retVal = PyBytes_FromStringAndSize(buf, k);
+	retVal = PyUnicode_FromStringAndSize(buf, k);
 	free(buf);
 	return retVal;
 }
@@ -192,7 +201,7 @@ PyObject *_a85_decode(PyObject *module, PyObject *args)
 				}
 			}
 		}
-	retVal = PyBytes_FromStringAndSize((const char*)buf, k);
+	retVal = PyUnicode_FromStringAndSize((const char*)buf, k);
 	free(buf);
 	free(tmp);
 	return retVal;
@@ -317,7 +326,11 @@ static PyObject *_escapePDF(unsigned char* text, int textlen)
 			out[j++] = c;
 			}
 		}
+#ifdef isPy3
+	ret = PyUnicode_FromStringAndSize((const char *)out,j);
+#else
 	ret = PyBytes_FromStringAndSize((const char *)out,j);
+#endif
 	PyMem_Free(out);
 	return ret;
 }
@@ -355,7 +368,11 @@ static PyObject *_sameFrag(PyObject *module, PyObject* args)
 		fa = PyObject_GetAttrString(f,*p);
 		ga = PyObject_GetAttrString(g,*p);
 		if(fa && ga){
+#ifdef	isPy3
 			t = PyObject_RichCompareBool(fa,ga,Py_NE);
+#else
+			t = PyObject_Compare(fa,ga);
+#endif
 			Py_DECREF(fa);
 			Py_DECREF(ga);
 			if(PyErr_Occurred()) goto L1;
@@ -411,8 +428,7 @@ static PyObject *ttfonts_add32(PyObject *module, PyObject* args)
 {
 	unsigned long x, y;
 	if(!PyArg_ParseTuple(args, "kk:add32", &x, &y)) return NULL;
-	x += y;
-	return PyLong_FromUnsignedLong(x&0xFFFFFFFFU);
+	return PyLong_FromUnsignedLong((x+y)&0xFFFFFFFFU);
 }
 
 static PyObject *hex32(PyObject *module, PyObject* args)
@@ -515,7 +531,11 @@ static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 	enc = _o2;
 	_o2 = NULL;
 
+#ifdef isPy3
 	encStr = PyUnicode_AsUTF8(enc);
+#else
+	encStr = PyBytes_AsString(enc);
+#endif
 	if(PyErr_Occurred()) ERROR_EXIT();
 	if(strstr(encStr,"UCS-2")) encStr = "UTF16";
 
@@ -1132,6 +1152,32 @@ static PyTypeObject BoxList_type = {
 };
 #endif
 
+#ifdef	HAVE_BOX
+#define _BOX__DOC__ \
+	"\tBox(width,character=None) creates a Knuth character Box with the specified width.\n" \
+	"\tGlue(width,stretch,shrink) creates a Knuth glue Box with the specified width, stretch and shrink.\n" \
+	"\tPenalty(width,penalty,flagged=0) creates a Knuth penalty Box with the specified width and penalty.\n" \
+	"\tBoxList() creates a knuth box list.\n"
+#endif
+
+PyDoc_STRVAR(__DOC__,
+"_rl_accel contains various accelerated utilities\n\
+\n\
+\tescapePDF makes a string safe for PDF\n\
+\t_instanceEscapePDF method equivalent of escapePDF\n\
+\n\
+\t_AsciiBase85Encode does what is says\n\
+\t_AsciiBase85Decode does what is says\n\
+\n\
+\tfp_str converts numeric arguments to a single blank separated string\n\
+\tcalcChecksum calculate checksums for TTFs (legacy)\n\
+\tadd32 32 bit unsigned addition (legacy)\n\
+\thex32 32 bit unsigned to 0X8.8X string\n\
+\t_instanceStringWidthU version2 Font instance stringWidth\n\
+\t_instanceStringWidthTTF version2 TTFont instance stringWidth\n\
+\tunicode2T1 version2 pdfmetrics.unicode2T1\n"
+_BOX__DOC__
+);
 
 static struct PyMethodDef _methods[] = {
 	{"_AsciiBase85Encode", _a85_encode, METH_VARARGS, "_AsciiBase85Encode(\".....\") return encoded string"},
@@ -1173,28 +1219,7 @@ static int _clear(PyObject *m) {
 static struct PyModuleDef moduledef = {
 	PyModuleDef_HEAD_INIT,
 	"_rl_accel",
-"_rl_accel contains various accelerated utilities\n\
-\n\
-\tescapePDF makes a string safe for PDF\n\
-\t_instanceEscapePDF method equivalent of escapePDF\n\
-\n\
-\t_AsciiBase85Encode does what is says\n\
-\t_AsciiBase85Decode does what is says\n\
-\n\
-\tfp_str converts numeric arguments to a single blank separated string\n"
-"\tcalcChecksum calculate checksums for TTFs (returns long)\n"
-"\tadd32 32 bit unsigned addition (returns long)\n"
-"\thex32 32 bit unsigned to 0X8.8X string\n"
-"\t_instanceStringWidthU version2 Font instance stringWidth\n\
-\t_instanceStringWidthTTF version2 TTFont instance stringWidth\n\
-\tunicode2T1 version2 pdfmetrics.unicode2T1\n"
-#ifdef	HAVE_BOX
-"\tBox(width,character=None) creates a Knuth character Box with the specified width.\n"
-"\tGlue(width,stretch,shrink) creates a Knuth glue Box with the specified width, stretch and shrink.\n"
-"\tPenalty(width,penalty,flagged=0) creates a Knuth penalty Box with the specified width and penalty.\n"
-"\tBoxList() creates a knuth box list.\n"
-#endif
-	,
+	__DOC__,
 	sizeof(struct module_state),
 	_methods,
 	NULL,
@@ -1214,7 +1239,7 @@ void init_rl_accel(void)
 #ifdef isPy3
 	module = PyModule_Create(&moduledef);
 #else
-	module = Py_InitModule3("_rl_accel", _methods,__doc__);
+	module = Py_InitModule3("_rl_accel", _methods,__DOC__);
 #endif
 	if(!module) goto err;
 	st=GETSTATE(module);
