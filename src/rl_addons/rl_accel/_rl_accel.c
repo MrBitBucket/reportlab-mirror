@@ -344,23 +344,13 @@ static PyObject *escapePDF(PyObject *module, PyObject* args)
 	return _escapePDF(text,textLen);
 }
 
-static PyObject *_instanceEscapePDF(PyObject *module, PyObject* args)
-{
-	PyObject		*self;
-	unsigned char	*text;
-	int				textLen;
-
-	if (!PyArg_ParseTuple(args, "Os#:_instanceEscapePDF", &self, &text, &textLen)) return NULL;
-	return _escapePDF(text,textLen);
-}
-
-static PyObject *_sameFrag(PyObject *module, PyObject* args)
+static PyObject *sameFrag(PyObject *module, PyObject* args)
 {
 	PyObject *f, *g;
 	static char *names[] = {"fontName", "fontSize", "textColor", "rise", "underline", "strike", "link", "backColor", NULL};
 	int	r=0, t;
 	char **p;
-	if (!PyArg_ParseTuple(args, "OO:_sameFrag", &f, &g)) return NULL;
+	if (!PyArg_ParseTuple(args, "OO:sameFrag", &f, &g)) return NULL;
 	if(PyObject_HasAttrString(f,"cbDefn")||PyObject_HasAttrString(g,"cbDefn")
 		|| PyObject_HasAttrString(f,"lineBreak")||PyObject_HasAttrString(g,"lineBreak")) goto L0;
 	for(p=names;*p;p++){
@@ -642,7 +632,7 @@ L_OK:
 	Py_DECREF(fonts);
 	return res;
 }
-static PyObject *_instanceStringWidthU(PyObject *module, PyObject *args, PyObject *kwds)
+static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObject *kwds)
 {
 	PyObject *L=0, *t=0, *f=0, *self, *text, *size, *res,
 				*encoding = 0, *_o1 = 0, *_o2 = 0, *_o3 = 0;
@@ -737,7 +727,7 @@ static PyObject *_instanceStringWidthU(PyObject *module, PyObject *args, PyObjec
 	Py_DECREF(_o1);
 	goto L_OK;
 L_ERR:
-	ADD_TB(module,"_instanceStringWidthU");
+	ADD_TB(module,"instanceStringWidthU");
 	Py_XDECREF(_o1);
 	Py_XDECREF(_o2);
 	Py_XDECREF(_o3);
@@ -752,7 +742,7 @@ L_OK:
 	Py_DECREF(encoding);
 	return res;
 }
-static PyObject *_instanceStringWidthTTF(PyObject *module, PyObject *args, PyObject *kwds)
+static PyObject *instanceStringWidthTTF(PyObject *module, PyObject *args, PyObject *kwds)
 {
 	PyObject *self, *text, *size, *res,
 				*encoding = 0, *_o1=NULL, *_o2=NULL, *_o3=NULL;
@@ -820,7 +810,7 @@ static PyObject *_instanceStringWidthTTF(PyObject *module, PyObject *args, PyObj
 	Py_DECREF(_o1);
 	goto L_OK;
 L_ERR:
-	ADD_TB(module,"_instanceStringWidthTTF");
+	ADD_TB(module,"instanceStringWidthTTF");
 	Py_XDECREF(_o1);
 	Py_XDECREF(_o2);
 	Py_XDECREF(_o3);
@@ -1164,34 +1154,32 @@ PyDoc_STRVAR(__DOC__,
 "_rl_accel contains various accelerated utilities\n\
 \n\
 \tescapePDF makes a string safe for PDF\n\
-\t_instanceEscapePDF method equivalent of escapePDF\n\
 \n\
-\t_AsciiBase85Encode does what is says\n\
-\t_AsciiBase85Decode does what is says\n\
+\tasciiBase85Encode does what is says\n\
+\tasciiBase85Decode does what is says\n\
 \n\
 \tfp_str converts numeric arguments to a single blank separated string\n\
 \tcalcChecksum calculate checksums for TTFs (legacy)\n\
 \tadd32 32 bit unsigned addition (legacy)\n\
 \thex32 32 bit unsigned to 0X8.8X string\n\
-\t_instanceStringWidthU version2 Font instance stringWidth\n\
-\t_instanceStringWidthTTF version2 TTFont instance stringWidth\n\
+\tinstanceStringWidthT1 version2 Font instance stringWidth\n\
+\tinstanceStringWidthTTF version2 TTFont instance stringWidth\n\
 \tunicode2T1 version2 pdfmetrics.unicode2T1\n"
 _BOX__DOC__
 );
 
 static struct PyMethodDef _methods[] = {
-	{"_AsciiBase85Encode", _a85_encode, METH_VARARGS, "_AsciiBase85Encode(\".....\") return encoded string"},
-	{"_AsciiBase85Decode", _a85_decode, METH_VARARGS, "_AsciiBase85Decode(\".....\") return decoded string"},
+	{"asciiBase85Encode", _a85_encode, METH_VARARGS, "asciiBase85Encode(\".....\") return encoded string"},
+	{"asciiBase85Decode", _a85_decode, METH_VARARGS, "asciiBase85Decode(\".....\") return decoded string"},
 	{"escapePDF", escapePDF, METH_VARARGS, "escapePDF(s) return PDF safed string"},
-	{"_instanceEscapePDF", _instanceEscapePDF, METH_VARARGS, "_instanceEscapePDF(s) return PDF safed string"},
 	{"fp_str", _fp_str, METH_VARARGS, "fp_str(a0, a1,...) convert numerics to blank separated string"},
-	{"_sameFrag", _sameFrag, 1, "_sameFrag(f,g) return 1 if fragments have same style"},
+	{"sameFrag", sameFrag, 1, "sameFrag(f,g) return 1 if fragments have same style"},
 	{"calcChecksum", ttfonts_calcChecksum, METH_VARARGS, "calcChecksum(string) calculate checksums for TTFs (returns long)"},
 	{"add32", ttfonts_add32, METH_VARARGS, "add32(x,y)  32 bit unsigned x+y (returns long)"},
 	{"hex32", hex32, METH_VARARGS, "hex32(x)  32 bit unsigned-->0X8.8X string"},
 	{"unicode2T1", (PyCFunction)unicode2T1, METH_VARARGS|METH_KEYWORDS, "return a list of (font,string) pairs representing the unicode text"},
-	{"_instanceStringWidthU", (PyCFunction)_instanceStringWidthU, METH_VARARGS|METH_KEYWORDS, "Font.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
-	{"_instanceStringWidthTTF", (PyCFunction)_instanceStringWidthTTF, METH_VARARGS|METH_KEYWORDS, "TTFont.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
+	{"instanceStringWidthT1", (PyCFunction)instanceStringWidthT1, METH_VARARGS|METH_KEYWORDS, "Font.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
+	{"instanceStringWidthTTF", (PyCFunction)instanceStringWidthTTF, METH_VARARGS|METH_KEYWORDS, "TTFont.stringWidth(self,text,fontName,fontSize,encoding='utf8') --> width"},
 #ifdef	HAVE_BOX
 	{"Box",	(PyCFunction)Box,	METH_VARARGS|METH_KEYWORDS, "Box(width,character=None) create a Knuth Box instance"},
 	{"Glue", (PyCFunction)Glue,	METH_VARARGS|METH_KEYWORDS, "Glue(width,stretch,shrink) create a Knuth Glue instance"},
