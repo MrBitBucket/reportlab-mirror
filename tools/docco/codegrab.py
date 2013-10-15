@@ -29,7 +29,7 @@ def getObjectsDefinedIn(modulename, directory=None):
 
     #might be a package.  If so, check the top level
     #package is there, then recalculate the path needed
-    words = string.split(modulename, '.')
+    words = modulename.split('.')
     if len(words) > 1:
         packagename = words[0]
         packagefound = imp.find_module(packagename, searchpath)
@@ -52,7 +52,7 @@ def getObjectsDefinedIn(modulename, directory=None):
 
     #grab the code too, minus trailing newlines
     lines = open(pathname, 'r').readlines()
-    lines = list(map(string.rstrip, lines))
+    lines = list(map(str.rstrip, lines))
 
     result = Struct()
     result.functions = []
@@ -121,7 +121,7 @@ def getObjectsDefinedIn(modulename, directory=None):
                         meth.proto = getFunctionPrototype(value2, lines)
                         if name2!=key2:
                             meth.doc = 'pointer to '+name2
-                            meth.proto = string.replace(meth.proto,name2,key2)
+                            meth.proto = meth.proto.replace(name2,key2)
                         else:
                             if value2.__doc__:
                                 meth.doc = dedent(value2.__doc__)
@@ -157,16 +157,16 @@ def getFunctionPrototype(f, lines):
             lineNo = lineNo + 1
 
     usefulLines = lines[firstLineNo:lineNo+1]
-    return string.join(usefulLines, '\n')
+    return '\n'.join(usefulLines)
 
 
 def dedent(comment):
     """Attempts to dedent the lines to the edge. Looks at no.
     of leading spaces in line 2, and removes up to that number
     of blanks from other lines."""
-    commentLines = string.split(comment, '\n')
+    commentLines = comment.split('\n')
     if len(commentLines) < 2:
-        cleaned = list(map(string.lstrip, commentLines))
+        cleaned = list(map(str.lstrip, commentLines))
     else:
         spc = 0
         for char in commentLines[1]:
@@ -181,7 +181,7 @@ def dedent(comment):
                 if line[0] in string.whitespace:
                     line = line[1:]
             cleaned.append(line)
-    return string.join(cleaned, '\n')
+    return '\n'.join(cleaned)
 
 
 
