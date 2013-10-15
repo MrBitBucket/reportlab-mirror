@@ -52,8 +52,9 @@ def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
         modname = os.path.splitext(os.path.basename(filename))[0]
         if modname not in exclude:
             try:
-                exec('import %s as module' % modname)
-                allTests.addTest(module.makeSuite())
+                ns ={}
+                exec('import %s as module' % modname,ns)
+                allTests.addTest(ns['module'].makeSuite())
             except:
                 tt, tv, tb = sys.exc_info()[:]
                 nonImportable.append((filename,traceback.format_exception(tt,tv,tb)))
@@ -61,7 +62,6 @@ def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
     del sys.path[0]
 
     return allTests
-
 
 def main(pattern='test_*.py'):
     try:
