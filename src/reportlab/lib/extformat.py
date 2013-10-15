@@ -2,7 +2,13 @@
 #see license.txt for license details
 __version__='''$Id$'''
 __doc__='''Apparently not used anywhere, purpose unknown!'''
-from tokenize import tokenprog
+try:
+	from tokenize import tokenprog
+except ImportError:
+	from tokenize import Token
+	import re
+	tokenprog = re.compile(Token)
+	del Token, re
 import sys
 
 def _matchorfail(text, pos):
