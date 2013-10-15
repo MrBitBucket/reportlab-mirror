@@ -23,6 +23,7 @@ from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines, findInPaths, isSeq, isStr, isUnicode, isPy3
 from reportlab.rl_config import defaultEncoding, T1SearchPath
+from reportlab.lib.rl_accel import unicode2T1, instanceStringWidthT1
 from . import rl_codecs
 _notdefChar = b'n'
 
@@ -34,10 +35,6 @@ _typefaces = {}
 _encodings = {}
 _fonts = {}
 
-try:
-    from reportlab.lib._rl_accel import unicode2T1
-except ImportError:
-    from reportlab.lib.rl_accel import unicode2T1
 
 class FontError(Exception):
     pass
@@ -329,11 +326,6 @@ class Encoding:
 #for encName in standardEncodings:
 #    registerEncoding(Encoding(encName))
 
-
-try:
-    from reportlab.lib._rl_accel import _instanceStringWidthU
-except ImportError:
-    from reportlab.lib.rl_accel import _instanceStringWidthU
 
 standardT1SubstitutionFonts = []
 class Font:
@@ -710,7 +702,7 @@ def getRegisteredFontNames():
 
 def stringWidth(text, fontName, fontSize, encoding='utf8'):
     """Compute width of string in points;
-    not accelerated as fast enough because of _instanceStringWidthU"""
+    not accelerated as fast enough because of instanceStringWidthT1/TTF"""
     return getFont(fontName).stringWidth(text, fontSize, encoding=encoding)
 
 def dumpFontData():

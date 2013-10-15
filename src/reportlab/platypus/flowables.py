@@ -27,7 +27,7 @@ higher level components).
 import os
 from copy import deepcopy, copy
 from reportlab.lib.colors import red, gray, lightgrey
-from reportlab.lib.utils import fp_str
+from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 from reportlab.lib.styles import _baseFontName
 from reportlab.pdfbase import pdfutils

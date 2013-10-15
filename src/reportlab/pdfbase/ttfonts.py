@@ -55,6 +55,7 @@ from struct import pack, unpack, error as structError
 from reportlab.lib.utils import getBytesIO, isPy3
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
+from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF
 
 class TTFError(pdfdoc.PDFError):
     "TrueType font exception"
@@ -111,30 +112,6 @@ def _set_ushort(stream, offset, value):
     """Writes the given unsigned short value into stream at the given
     offset and returns the resulting stream (the original is unchanged)"""
     return splice(stream, offset, pack(">H", value))
-
-try:
-    from reportlab.lib import _rl_accel
-except ImportError:
-    _rl_accel = None
-
-try:
-    hex32 = _rl_accel.hex32
-except:
-    def hex32(i):
-        return '0X%8.8X' % (int(i)&0xFFFFFFFF)
-try:
-    add32 = _rl_accel.add32
-    calcChecksum = _rl_accel.calcChecksum
-except:
-    def add32(x, y):
-        "Calculate (x + y) modulo 2**32"
-        return (x+y) & 0xFFFFFFFF
-
-    def calcChecksum(data):
-        """Calculates TTF-style checksums"""
-        if len(data)&3: data = data + (4-(len(data)&3))*"\0"
-        return sum(unpack(">%dl" % (len(data)>>2), data)) & 0xFFFFFFFF
-del _rl_accel
 #
 # TrueType font handling
 #
@@ -1022,14 +999,8 @@ class TTFont:
             asciiReadable = rl_config.ttfAsciiReadable
         self._asciiReadable = asciiReadable
 
-    def _py_stringWidth(self, text, size, encoding='utf-8'):
-        "Calculate text width"
-        if not isinstance(text,str):
-            text = str(text, encoding or 'utf-8')   # encoding defaults to utf-8
-        g = self.face.charWidths.get
-        dw = self.face.defaultWidth
-        return 0.001*size*sum([g(ord(u),dw) for u in text])
-    stringWidth = _py_stringWidth
+    def stringWidth(self,text,size,encoding):
+        return instanceStringWidthTTF(self,text,size,encoding)
 
     def _assignState(self,doc,asciiReadable=None,namePrefix=None):
         '''convenience function for those wishing to roll their own state properties'''
@@ -1140,9 +1111,3 @@ class TTFont:
             fontDict = doc.idToObject['BasicFonts'].dict
             fontDict[internalName] = pdfFont
         del self.state[doc]
-try:
-    from _rl_accel import _instanceStringWidthTTF
-    import new
-    TTFont.stringWidth = new.instancemethod(_instanceStringWidthTTF,None,TTFont)
-except ImportError:
-    pass

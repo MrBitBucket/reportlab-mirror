@@ -40,7 +40,7 @@ Traceback (most recent call last):
 ValueError: css color 'pcmyka(100,0,0,0)' has wrong number of components
 '''
 import math, re
-from reportlab.lib.utils import fp_str
+from reportlab.lib.rl_accel import fp_str
 import collections
 
 class Color:

@@ -19,6 +19,7 @@ from reportlab.lib.abag import ABag
 from reportlab.rl_config import platypus_link_underline
 from reportlab import rl_config
 from reportlab.lib.utils import isUnicode, isStr
+from reportlab.lib.rl_accel import sameFrag
 import re
 
 #on UTF8 branch, split and strip must be unicode-safe!
@@ -395,21 +396,6 @@ def _justifyDrawParaLineX( tx, offset, line, last=0):
     else:
         _putFragLine(offset, tx, line, last, 'justify') #no space modification
     setXPos(tx,-offset)
-
-try:
-    from _rl_accel import _sameFrag
-except ImportError:
-    try:
-        from reportlab.lib._rl_accel import _sameFrag
-    except ImportError:
-        #if you modify this you need to modify _rl_accel RGB
-        def _sameFrag(f,g):
-            'returns 1 if two ParaFrags map out the same'
-            if (hasattr(f,'cbDefn') or hasattr(g,'cbDefn')
-                    or hasattr(f,'lineBreak') or hasattr(g,'lineBreak')): return 0
-            for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline', 'strike', 'link', "backColor"):
-                if getattr(f,a,None)!=getattr(g,a,None): return 0
-            return 1
 
 def _getFragWords(frags,maxWidth=None):
     ''' given a Parafrag list return a list of fragwords
@@ -845,7 +831,7 @@ def makeCJKParaLine(U,maxWidth,widthUsed,extraSpace,lineBreak,calcBounds):
         maxSize = max(maxSize,fontSize)
         maxAscent = max(maxAscent,ascent)
         minDescent = min(minDescent,descent)
-        if not _sameFrag(f0,f):
+        if not sameFrag(f0,f):
             f0=f0.clone()
             f0.text = ''.join(CW)
             words.append(f0)
@@ -1339,7 +1325,7 @@ class Paragraph(Flowable):
                         g = f.clone()
                         words = [g]
                         g.text = nText
-                    elif not _sameFrag(g,f):
+                    elif not sameFrag(g,f):
                         if currentWidth>0 and ((nText!='' and nText[0]!=' ') or hasattr(f,'cbDefn')):
                             if hasattr(g,'cbDefn'):
                                 i = len(words)-1

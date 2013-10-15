@@ -21,7 +21,8 @@ from reportlab.platypus.flowables import Flowable, Preformatted, Spacer
 from reportlab import rl_config
 from reportlab.lib.styles import PropertySet, ParagraphStyle, _baseFontName
 from reportlab.lib import colors
-from reportlab.lib.utils import fp_str, annotateException, IdentStr, flatten
+from reportlab.lib.utils import annotateException, IdentStr, flatten
+from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.abag import ABag as CellFrame
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.doctemplate import Indenter

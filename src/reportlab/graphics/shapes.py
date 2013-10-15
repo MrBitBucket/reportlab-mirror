@@ -17,7 +17,7 @@ from reportlab.lib.validators import *
 from reportlab.lib.utils import isSeq
 isOpacity = NoneOr(isNumberInRange(0,1))
 from reportlab.lib.attrmap import *
-from reportlab.lib.utils import fp_str
+from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.fonts import tt2ps
 _baseGFontNameB = tt2ps(_baseGFontName,1,0)

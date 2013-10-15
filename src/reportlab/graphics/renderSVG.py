@@ -11,7 +11,7 @@ import math, types, sys, os, codecs
 from operator import getitem
 
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
-from reportlab.lib.utils import fp_str
+from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode

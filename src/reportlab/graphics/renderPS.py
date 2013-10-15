@@ -5,7 +5,8 @@ __version__=''' $Id$ '''
 __doc__="""Render drawing objects in Postscript"""
 
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth, unicode2T1 # for font info
-from reportlab.lib.utils import fp_str, getBytesIO, isPy3
+from reportlab.lib.utils import getBytesIO, isPy3
+from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS

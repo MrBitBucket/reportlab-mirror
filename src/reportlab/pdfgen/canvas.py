@@ -22,7 +22,8 @@ from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.colors import black, _chooseEnforceColorSpace, Color, CMYKColor, toColor
-from reportlab.lib.utils import import_zlib, ImageReader, fp_str, isSeq, isStr, isUnicode, _digester
+from reportlab.lib.utils import import_zlib, ImageReader, isSeq, isStr, isUnicode, _digester
+from reportlab.lib.rl_accel import fp_str, escapePDF
 from reportlab.lib.boxstuff import aspectRatioFix
 
 digitPat = re.compile('\d')  #used in decimal alignment
@@ -48,9 +49,6 @@ PATH_OPS = {(0, 0, FILL_EVEN_ODD) : 'n',  #no op
             (1, 1, FILL_EVEN_ODD) : 'B*',  #Stroke and Fill
             (1, 1, FILL_NON_ZERO) : 'B',  #Stroke and Fill
             }
-
-_escapePDF = pdfutils._escape
-_instanceEscapePDF = pdfutils._instanceEscapePDF
 
 def _annFormat(D,color,thickness,dashArray,hradius=0,vradius=0):
     from reportlab.pdfbase.pdfdoc import PDFArray, PDFDictionary
@@ -399,7 +397,7 @@ class Canvas(textobject._PDFColorSetter):
         self._preamble = ' '.join(P.__self__)
 
     def _escape(self, s):
-        return _escapePDF(s)
+        return escapePDF(s)
 
     #info functions - non-standard
     def setAuthor(self, author):
@@ -1828,10 +1826,6 @@ class Canvas(textobject._PDFColorSetter):
 
         from reportlab.pdfbase.pdfdoc import PDFPageLabel
         PL.addPageLabel(pageNum,PDFPageLabel(style,start,prefix))
-
-#if _instanceEscapePDF:
-#   import new
-#   Canvas._escape = new.instancemethod(_instanceEscapePDF,None,Canvas)
 
 if __name__ == '__main__':
     print('For test scripts, look in tests')

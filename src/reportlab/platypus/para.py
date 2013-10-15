@@ -59,7 +59,7 @@ ALSO the following additional internal paragraph markup tags are supported
 
 """
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.lib.utils import fp_str
+from reportlab.lib.rl_accel import fp_str
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib import colors
 from types import StringType, UnicodeType, InstanceType, TupleType, ListType, FloatType

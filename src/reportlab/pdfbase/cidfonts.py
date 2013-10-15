@@ -9,8 +9,6 @@ This defines classes to represent CID fonts.  They know how to calculate
 their own width and how to write themselves into PDF files."""
 
 import os
-from types import ListType, TupleType, DictType
-from string import find, split, strip
 import marshal
 import time
 try:
@@ -24,9 +22,9 @@ from reportlab.pdfbase._cidfontdata import allowedTypeFaces, allowedEncodings, C
      defaultUnicodeEncodings, widthsByUnichar
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfdoc
-from reportlab.pdfbase.pdfutils import _escape
+from reportlab.lib.rl_accel import escapePDF
 from reportlab.rl_config import CMapSearchPath
-
+from reportlab.lib.utils import isSeq
 
 #quick hackery for 2.0 release.  Now we always do unicode, and have built in
 #the CMAP data, any code to load CMap files is not needed.
@@ -44,12 +42,12 @@ def findCMapFile(name):
 
 def structToPDF(structure):
     "Converts deeply nested structure to PDFdoc dictionary/array objects"
-    if type(structure) is DictType:
+    if isinstance(structure,dict):
         newDict = {}
         for k, v in structure.items():
             newDict[k] = structToPDF(v)
         return pdfdoc.PDFDictionary(newDict)
-    elif type(structure) in (ListType, TupleType):
+    elif isSeq(structure):
         newList = []
         for elem in structure:
             newList.append(structToPDF(elem))
@@ -107,13 +105,13 @@ class CIDEncoding(pdfmetrics.Encoding):
         self._mapFileHash = self._hash(rawdata)
         #if it contains the token 'usecmap', parse the other
         #cmap file first....
-        usecmap_pos = find(rawdata, 'usecmap')
+        usecmap_pos = rawdata.find('usecmap')
         if  usecmap_pos > -1:
             #they tell us to look in another file
             #for the code space ranges. The one
             # to use will be the previous word.
             chunk = rawdata[0:usecmap_pos]
-            words = split(chunk)
+            words = chunk.split()
             otherCMAPName = words[-1]
             #print 'referred to another CMAP %s' % otherCMAPName
             self.parseCMAPFile(otherCMAPName)
@@ -121,7 +119,7 @@ class CIDEncoding(pdfmetrics.Encoding):
             # override some settings
 
 
-        words = split(rawdata)
+        words = rawdata.split()
         while words != []:
             if words[0] == 'begincodespacerange':
                 words = words[1:]
@@ -278,7 +276,7 @@ class CIDTypeFace(pdfmetrics.TypeFace):
         widths = {}
         while data:
             start, data = data[0], data[1:]
-            if type(data[0]) in (ListType, TupleType):
+            if isSeq(data[0]):
                 items, data = data[0], data[1:]
                 for offset in range(len(items)):
                     widths[start + offset] = items[offset]
@@ -317,7 +315,7 @@ class CIDFont(pdfmetrics.Font):
         self.substitutionFonts = []
 
     def formatForPdf(self, text):
-        encoded = _escape(text)
+        encoded = escapePDF(text)
         #print 'encoded CIDFont:', encoded
         return encoded
 
@@ -424,11 +422,11 @@ class UnicodeCIDFont(CIDFont):
         if type(text) is not str:
             text = text.decode('utf8')
         utfText = utf_16_be_encode(text)[0]
-        encoded = _escape(utfText)
+        encoded = escapePDF(utfText)
         #print '  encoded:',encoded
         return encoded
         #
-        #result = _escape(encoded)
+        #result = escapePDF(encoded)
         #print '    -> %s' % repr(result)
         #return result
 

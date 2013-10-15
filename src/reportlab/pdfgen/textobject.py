@@ -12,7 +12,8 @@ Progress Reports:
 import string
 from types import *
 from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor, black, white, _CMYK_black, _CMYK_white
-from reportlab.lib.utils import fp_str, isStr, isPy3
+from reportlab.lib.utils import isStr, isPy3
+from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase import pdfmetrics
 
 class _PDFColorSetter:

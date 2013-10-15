@@ -11,8 +11,8 @@ import reportlab
 from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
-from reportlab.lib.utils import fp_str, getBytesIO, isStr
-from reportlab.lib.utils import import_zlib, haveImages
+from reportlab.lib.utils import import_zlib, haveImages, getBytesIO, isStr
+from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.boxstuff import aspectRatioFix
 
 

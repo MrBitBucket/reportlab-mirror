@@ -18,7 +18,8 @@ import string, types, binascii, codecs
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
 from reportlab import rl_config
-from reportlab.lib.utils import import_zlib, open_for_read, fp_str, makeFileName, isSeq, isBytes, isUnicode, _digester
+from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester
+from reportlab.lib.rl_accel import escapePDF, fp_str, asciiBase85Encode, asciiBase85Decode
 from reportlab.pdfbase import pdfmetrics
 from hashlib import md5
 
@@ -635,7 +636,7 @@ class PDFString:
             escape = 1
         if escape:
             try:
-                es = "(%s)" % pdfutils._escape(s)
+                es = "(%s)" % escapePDF(s)
             except:
                 raise ValueError("cannot escape %s %s" % (s, repr(s)))
             if escape&2:
@@ -646,7 +647,7 @@ class PDFString:
         else:
             return b'(' + s + b')'
     def __str__(self):
-        return "(%s)" % pdfutils._escape(self.s)
+        return "(%s)" % escapePDF(self.s)
 
 def PDFName(data,lo=chr(0x21),hi=chr(0x7e)):
     # might need to change this to class for encryption
@@ -770,14 +771,13 @@ PDFZCompress = PDFStreamFilterZCompress()
 class PDFStreamFilterBase85Encode:
     pdfname = "ASCII85Decode"
     def encode(self, text):
-        from .pdfutils import _AsciiBase85Encode, _wrap
-        text = _AsciiBase85Encode(text)
+        from .pdfutils import _wrap
+        text = asciiBase85Encode(text)
         if rl_config.wrapA85:
             text = _wrap(text)
         return text
     def decode(self, text):
-        from .pdfutils import _AsciiBase85Decode
-        return _AsciiBase85Decode(text)
+        return asciiBase85Decode(text)
 
 # need only one of these too
 PDFBase85Encode = PDFStreamFilterBase85Encode()
@@ -2196,7 +2196,7 @@ class PDFImageXObject:
             self._dotrans = 1
         self.streamContent = imageFile.read()
         if rl_config.useA85:
-            self.streamContent = pdfutils._AsciiBase85Encode(self.streamContent)
+            self.streamContent = asciiBase85Encode(self.streamContent)
             self._filters = 'ASCII85Decode','DCTDecode' #'A85','DCT'
         else:
             self._filters = 'DCTDecode', #'DCT'
@@ -2245,7 +2245,7 @@ class PDFImageXObject:
             #assert len(raw) == self.width*self.height, "Wrong amount of data for image expected %sx%s=%s got %s" % (self.width,self.height,self.width*self.height,len(raw))
             self.streamContent = zlib.compress(raw)
             if rl_config.useA85:
-                self.streamContent = pdfutils._AsciiBase85Encode(self.streamContent)
+                self.streamContent = asciiBase85Encode(self.streamContent)
                 self._filters = 'ASCII85Decode','FlateDecode' #'A85','Fl'
             else:
                 self._filters = 'FlateDecode', #'Fl'

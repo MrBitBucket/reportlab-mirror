@@ -10,7 +10,7 @@ import pickle
 from io import BytesIO
 import hashlib
 from reportlab.lib.logger import warnOnce
-from .rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
+from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
 
 if sys.hexversion >= 0x02000000:
     def _digester(s):
@@ -251,14 +251,6 @@ def isCompactDistro():
 def isSourceDistro():
     '''return truth if a source file system distribution'''
     return _isFSSD
-
-try:
-    #raise ImportError
-    ### NOTE!  FP_STR SHOULD PROBABLY ALWAYS DO A PYTHON STR() CONVERSION ON ARGS
-    ### IN CASE THEY ARE "LAZY OBJECTS".  ACCELLERATOR DOESN'T DO THIS (YET)
-    from reportlab.lib._rl_accel import fp_str  # specific
-except ImportError:
-    from reportlab.lib.rl_accel import fp_str   # specific
 
 def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
