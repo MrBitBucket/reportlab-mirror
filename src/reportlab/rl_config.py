@@ -72,6 +72,7 @@ T1SearchPath =  (
                 '%(REPORTLAB_DIR)s/../fonts',           #special
                 '%(REPORTLAB_DIR)s/../../fonts',        #special
                 '%(HOME)s/fonts',                       #special
+                '/code/fid-sfr/fonts',
                  )
 
 # places to look for TT Font information
@@ -90,6 +91,7 @@ TTFSearchPath = (
                 '/Library/Fonts',
                 '/Network/Library/Fonts',
                 '/System/Library/Fonts',
+                '/code/fid-sfr/fonts',
                 )
 
 # places to look for CMap files - should ideally merge with above
@@ -204,7 +206,8 @@ ttfAsciiReadable'''.split()
         for p in _SAVED[name]:
             d = (p % D).replace('/',os.sep)
             if rl_isdir(d): P.append(d)
-        _setOpt(name,P)
+        _setOpt(name,os.pathsep.join(P),lambda x:x.split(os.pathsep))
+        globals()[name] = filter(rl_isdir,globals()[name])
 
     for k in V[3:]:
         v = _SAVED[k]
