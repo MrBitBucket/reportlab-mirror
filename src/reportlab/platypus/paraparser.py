@@ -16,9 +16,7 @@ except:
 import unicodedata
 import reportlab.lib.sequencer
 from reportlab.lib.abag import ABag
-from reportlab.lib.utils import ImageReader
-
-from reportlab.lib import xmllib
+from reportlab.lib.utils import ImageReader, isPy3, annotateException
 
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
@@ -218,9 +216,7 @@ _addAttributeNames(_linkAttrMap)
 
 def _applyAttributes(obj, attr):
     for k, v in attr.items():
-        if isisntance(v,(list,tuple)) and v[0]=='relative':
-            #AR 20/5/2000 - remove 1.5.2-ism
-            #v = v[1]+getattr(obj,k,0)
+        if isinstance(v,(list,tuple)) and v[0]=='relative':
             if hasattr(obj, k):
                 v = v[1]+getattr(obj,k)
             else:
@@ -231,259 +227,258 @@ def _applyAttributes(obj, attr):
 #with additions suggested by Christoph Zwerschke who also suggested the
 #numeric entity names that follow.
 greeks = {
-    'Aacute': '\xc3\x81',
-    'aacute': '\xc3\xa1',
-    'Acirc': '\xc3\x82',
-    'acirc': '\xc3\xa2',
-    'acute': '\xc2\xb4',
-    'AElig': '\xc3\x86',
-    'aelig': '\xc3\xa6',
-    'Agrave': '\xc3\x80',
-    'agrave': '\xc3\xa0',
-    'alefsym': '\xe2\x84\xb5',
-    'Alpha': '\xce\x91',
-    'alpha': '\xce\xb1',
-    'and': '\xe2\x88\xa7',
-    'ang': '\xe2\x88\xa0',
-    'Aring': '\xc3\x85',
-    'aring': '\xc3\xa5',
-    'asymp': '\xe2\x89\x88',
-    'Atilde': '\xc3\x83',
-    'atilde': '\xc3\xa3',
-    'Auml': '\xc3\x84',
-    'auml': '\xc3\xa4',
-    'bdquo': '\xe2\x80\x9e',
-    'Beta': '\xce\x92',
-    'beta': '\xce\xb2',
-    'brvbar': '\xc2\xa6',
-    'bull': '\xe2\x80\xa2',
-    'cap': '\xe2\x88\xa9',
-    'Ccedil': '\xc3\x87',
-    'ccedil': '\xc3\xa7',
-    'cedil': '\xc2\xb8',
-    'cent': '\xc2\xa2',
-    'Chi': '\xce\xa7',
-    'chi': '\xcf\x87',
-    'circ': '\xcb\x86',
-    'clubs': '\xe2\x99\xa3',
-    'cong': '\xe2\x89\x85',
-    'copy': '\xc2\xa9',
-    'crarr': '\xe2\x86\xb5',
-    'cup': '\xe2\x88\xaa',
-    'curren': '\xc2\xa4',
-    'dagger': '\xe2\x80\xa0',
-    'Dagger': '\xe2\x80\xa1',
-    'darr': '\xe2\x86\x93',
-    'dArr': '\xe2\x87\x93',
-    'deg': '\xc2\xb0',
-    'delta': '\xce\xb4',
-    'Delta': '\xe2\x88\x86',
-    'diams': '\xe2\x99\xa6',
-    'divide': '\xc3\xb7',
-    'Eacute': '\xc3\x89',
-    'eacute': '\xc3\xa9',
-    'Ecirc': '\xc3\x8a',
-    'ecirc': '\xc3\xaa',
-    'Egrave': '\xc3\x88',
-    'egrave': '\xc3\xa8',
-    'empty': '\xe2\x88\x85',
-    'emsp': '\xe2\x80\x83',
-    'ensp': '\xe2\x80\x82',
-    'Epsilon': '\xce\x95',
-    'epsilon': '\xce\xb5',
-    'epsiv': '\xce\xb5',
-    'equiv': '\xe2\x89\xa1',
-    'Eta': '\xce\x97',
-    'eta': '\xce\xb7',
-    'ETH': '\xc3\x90',
-    'eth': '\xc3\xb0',
-    'Euml': '\xc3\x8b',
-    'euml': '\xc3\xab',
-    'euro': '\xe2\x82\xac',
-    'exist': '\xe2\x88\x83',
-    'fnof': '\xc6\x92',
-    'forall': '\xe2\x88\x80',
-    'frac12': '\xc2\xbd',
-    'frac14': '\xc2\xbc',
-    'frac34': '\xc2\xbe',
-    'frasl': '\xe2\x81\x84',
-    'Gamma': '\xce\x93',
-    'gamma': '\xce\xb3',
-    'ge': '\xe2\x89\xa5',
-    'harr': '\xe2\x86\x94',
-    'hArr': '\xe2\x87\x94',
-    'hearts': '\xe2\x99\xa5',
-    'hellip': '\xe2\x80\xa6',
-    'Iacute': '\xc3\x8d',
-    'iacute': '\xc3\xad',
-    'Icirc': '\xc3\x8e',
-    'icirc': '\xc3\xae',
-    'iexcl': '\xc2\xa1',
-    'Igrave': '\xc3\x8c',
-    'igrave': '\xc3\xac',
-    'image': '\xe2\x84\x91',
-    'infin': '\xe2\x88\x9e',
-    'int': '\xe2\x88\xab',
-    'Iota': '\xce\x99',
-    'iota': '\xce\xb9',
-    'iquest': '\xc2\xbf',
-    'isin': '\xe2\x88\x88',
-    'Iuml': '\xc3\x8f',
-    'iuml': '\xc3\xaf',
-    'Kappa': '\xce\x9a',
-    'kappa': '\xce\xba',
-    'Lambda': '\xce\x9b',
-    'lambda': '\xce\xbb',
-    'lang': '\xe2\x8c\xa9',
-    'laquo': '\xc2\xab',
-    'larr': '\xe2\x86\x90',
-    'lArr': '\xe2\x87\x90',
-    'lceil': '\xef\xa3\xae',
-    'ldquo': '\xe2\x80\x9c',
-    'le': '\xe2\x89\xa4',
-    'lfloor': '\xef\xa3\xb0',
-    'lowast': '\xe2\x88\x97',
-    'loz': '\xe2\x97\x8a',
-    'lrm': '\xe2\x80\x8e',
-    'lsaquo': '\xe2\x80\xb9',
-    'lsquo': '\xe2\x80\x98',
-    'macr': '\xc2\xaf',
-    'mdash': '\xe2\x80\x94',
-    'micro': '\xc2\xb5',
-    'middot': '\xc2\xb7',
-    'minus': '\xe2\x88\x92',
-    'mu': '\xc2\xb5',
-    'Mu': '\xce\x9c',
-    'nabla': '\xe2\x88\x87',
-    'nbsp': '\xc2\xa0',
-    'ndash': '\xe2\x80\x93',
-    'ne': '\xe2\x89\xa0',
-    'ni': '\xe2\x88\x8b',
-    'notin': '\xe2\x88\x89',
-    'not': '\xc2\xac',
-    'nsub': '\xe2\x8a\x84',
-    'Ntilde': '\xc3\x91',
-    'ntilde': '\xc3\xb1',
-    'Nu': '\xce\x9d',
-    'nu': '\xce\xbd',
-    'Oacute': '\xc3\x93',
-    'oacute': '\xc3\xb3',
-    'Ocirc': '\xc3\x94',
-    'ocirc': '\xc3\xb4',
-    'OElig': '\xc5\x92',
-    'oelig': '\xc5\x93',
-    'Ograve': '\xc3\x92',
-    'ograve': '\xc3\xb2',
-    'oline': '\xef\xa3\xa5',
-    'omega': '\xcf\x89',
-    'Omega': '\xe2\x84\xa6',
-    'Omicron': '\xce\x9f',
-    'omicron': '\xce\xbf',
-    'oplus': '\xe2\x8a\x95',
-    'ordf': '\xc2\xaa',
-    'ordm': '\xc2\xba',
-    'or': '\xe2\x88\xa8',
-    'Oslash': '\xc3\x98',
-    'oslash': '\xc3\xb8',
-    'Otilde': '\xc3\x95',
-    'otilde': '\xc3\xb5',
-    'otimes': '\xe2\x8a\x97',
-    'Ouml': '\xc3\x96',
-    'ouml': '\xc3\xb6',
-    'para': '\xc2\xb6',
-    'part': '\xe2\x88\x82',
-    'permil': '\xe2\x80\xb0',
-    'perp': '\xe2\x8a\xa5',
-    'phis': '\xcf\x86',
-    'Phi': '\xce\xa6',
-    'phi': '\xcf\x95',
-    'piv': '\xcf\x96',
-    'Pi': '\xce\xa0',
-    'pi': '\xcf\x80',
-    'plusmn': '\xc2\xb1',
-    'pound': '\xc2\xa3',
-    'prime': '\xe2\x80\xb2',
-    'Prime': '\xe2\x80\xb3',
-    'prod': '\xe2\x88\x8f',
-    'prop': '\xe2\x88\x9d',
-    'Psi': '\xce\xa8',
-    'psi': '\xcf\x88',
-    'radic': '\xe2\x88\x9a',
-    'rang': '\xe2\x8c\xaa',
-    'raquo': '\xc2\xbb',
-    'rarr': '\xe2\x86\x92',
-    'rArr': '\xe2\x87\x92',
-    'rceil': '\xef\xa3\xb9',
-    'rdquo': '\xe2\x80\x9d',
-    'real': '\xe2\x84\x9c',
-    'reg': '\xc2\xae',
-    'rfloor': '\xef\xa3\xbb',
-    'Rho': '\xce\xa1',
-    'rho': '\xcf\x81',
-    'rlm': '\xe2\x80\x8f',
-    'rsaquo': '\xe2\x80\xba',
-    'rsquo': '\xe2\x80\x99',
-    'sbquo': '\xe2\x80\x9a',
-    'Scaron': '\xc5\xa0',
-    'scaron': '\xc5\xa1',
-    'sdot': '\xe2\x8b\x85',
-    'sect': '\xc2\xa7',
-    'shy': '\xc2\xad',
-    'sigmaf': '\xcf\x82',
-    'sigmav': '\xcf\x82',
-    'Sigma': '\xce\xa3',
-    'sigma': '\xcf\x83',
-    'sim': '\xe2\x88\xbc',
-    'spades': '\xe2\x99\xa0',
-    'sube': '\xe2\x8a\x86',
-    'sub': '\xe2\x8a\x82',
-    'sum': '\xe2\x88\x91',
-    'sup1': '\xc2\xb9',
-    'sup2': '\xc2\xb2',
-    'sup3': '\xc2\xb3',
-    'supe': '\xe2\x8a\x87',
-    'sup': '\xe2\x8a\x83',
-    'szlig': '\xc3\x9f',
-    'Tau': '\xce\xa4',
-    'tau': '\xcf\x84',
-    'there4': '\xe2\x88\xb4',
-    'thetasym': '\xcf\x91',
-    'thetav': '\xcf\x91',
-    'Theta': '\xce\x98',
-    'theta': '\xce\xb8',
-    'thinsp': '\xe2\x80\x89',
-    'THORN': '\xc3\x9e',
-    'thorn': '\xc3\xbe',
-    'tilde': '\xcb\x9c',
-    'times': '\xc3\x97',
-    'trade': '\xef\xa3\xaa',
-    'Uacute': '\xc3\x9a',
-    'uacute': '\xc3\xba',
-    'uarr': '\xe2\x86\x91',
-    'uArr': '\xe2\x87\x91',
-    'Ucirc': '\xc3\x9b',
-    'ucirc': '\xc3\xbb',
-    'Ugrave': '\xc3\x99',
-    'ugrave': '\xc3\xb9',
-    'uml': '\xc2\xa8',
-    'upsih': '\xcf\x92',
-    'Upsilon': '\xce\xa5',
-    'upsilon': '\xcf\x85',
-    'Uuml': '\xc3\x9c',
-    'uuml': '\xc3\xbc',
-    'weierp': '\xe2\x84\x98',
-    'Xi': '\xce\x9e',
-    'xi': '\xce\xbe',
-    'Yacute': '\xc3\x9d',
-    'yacute': '\xc3\xbd',
-    'yen': '\xc2\xa5',
-    'yuml': '\xc3\xbf',
-    'Yuml': '\xc5\xb8',
-    'Zeta': '\xce\x96',
-    'zeta': '\xce\xb6',
-    'zwj': '\xe2\x80\x8d',
-    'zwnj': '\xe2\x80\x8c',
-
+    'Aacute': b'\xc3\x81',
+    'aacute': b'\xc3\xa1',
+    'Acirc': b'\xc3\x82',
+    'acirc': b'\xc3\xa2',
+    'acute': b'\xc2\xb4',
+    'AElig': b'\xc3\x86',
+    'aelig': b'\xc3\xa6',
+    'Agrave': b'\xc3\x80',
+    'agrave': b'\xc3\xa0',
+    'alefsym': b'\xe2\x84\xb5',
+    'Alpha': b'\xce\x91',
+    'alpha': b'\xce\xb1',
+    'and': b'\xe2\x88\xa7',
+    'ang': b'\xe2\x88\xa0',
+    'Aring': b'\xc3\x85',
+    'aring': b'\xc3\xa5',
+    'asymp': b'\xe2\x89\x88',
+    'Atilde': b'\xc3\x83',
+    'atilde': b'\xc3\xa3',
+    'Auml': b'\xc3\x84',
+    'auml': b'\xc3\xa4',
+    'bdquo': b'\xe2\x80\x9e',
+    'Beta': b'\xce\x92',
+    'beta': b'\xce\xb2',
+    'brvbar': b'\xc2\xa6',
+    'bull': b'\xe2\x80\xa2',
+    'cap': b'\xe2\x88\xa9',
+    'Ccedil': b'\xc3\x87',
+    'ccedil': b'\xc3\xa7',
+    'cedil': b'\xc2\xb8',
+    'cent': b'\xc2\xa2',
+    'Chi': b'\xce\xa7',
+    'chi': b'\xcf\x87',
+    'circ': b'\xcb\x86',
+    'clubs': b'\xe2\x99\xa3',
+    'cong': b'\xe2\x89\x85',
+    'copy': b'\xc2\xa9',
+    'crarr': b'\xe2\x86\xb5',
+    'cup': b'\xe2\x88\xaa',
+    'curren': b'\xc2\xa4',
+    'dagger': b'\xe2\x80\xa0',
+    'Dagger': b'\xe2\x80\xa1',
+    'darr': b'\xe2\x86\x93',
+    'dArr': b'\xe2\x87\x93',
+    'deg': b'\xc2\xb0',
+    'delta': b'\xce\xb4',
+    'Delta': b'\xe2\x88\x86',
+    'diams': b'\xe2\x99\xa6',
+    'divide': b'\xc3\xb7',
+    'Eacute': b'\xc3\x89',
+    'eacute': b'\xc3\xa9',
+    'Ecirc': b'\xc3\x8a',
+    'ecirc': b'\xc3\xaa',
+    'Egrave': b'\xc3\x88',
+    'egrave': b'\xc3\xa8',
+    'empty': b'\xe2\x88\x85',
+    'emsp': b'\xe2\x80\x83',
+    'ensp': b'\xe2\x80\x82',
+    'Epsilon': b'\xce\x95',
+    'epsilon': b'\xce\xb5',
+    'epsiv': b'\xce\xb5',
+    'equiv': b'\xe2\x89\xa1',
+    'Eta': b'\xce\x97',
+    'eta': b'\xce\xb7',
+    'ETH': b'\xc3\x90',
+    'eth': b'\xc3\xb0',
+    'Euml': b'\xc3\x8b',
+    'euml': b'\xc3\xab',
+    'euro': b'\xe2\x82\xac',
+    'exist': b'\xe2\x88\x83',
+    'fnof': b'\xc6\x92',
+    'forall': b'\xe2\x88\x80',
+    'frac12': b'\xc2\xbd',
+    'frac14': b'\xc2\xbc',
+    'frac34': b'\xc2\xbe',
+    'frasl': b'\xe2\x81\x84',
+    'Gamma': b'\xce\x93',
+    'gamma': b'\xce\xb3',
+    'ge': b'\xe2\x89\xa5',
+    'harr': b'\xe2\x86\x94',
+    'hArr': b'\xe2\x87\x94',
+    'hearts': b'\xe2\x99\xa5',
+    'hellip': b'\xe2\x80\xa6',
+    'Iacute': b'\xc3\x8d',
+    'iacute': b'\xc3\xad',
+    'Icirc': b'\xc3\x8e',
+    'icirc': b'\xc3\xae',
+    'iexcl': b'\xc2\xa1',
+    'Igrave': b'\xc3\x8c',
+    'igrave': b'\xc3\xac',
+    'image': b'\xe2\x84\x91',
+    'infin': b'\xe2\x88\x9e',
+    'int': b'\xe2\x88\xab',
+    'Iota': b'\xce\x99',
+    'iota': b'\xce\xb9',
+    'iquest': b'\xc2\xbf',
+    'isin': b'\xe2\x88\x88',
+    'Iuml': b'\xc3\x8f',
+    'iuml': b'\xc3\xaf',
+    'Kappa': b'\xce\x9a',
+    'kappa': b'\xce\xba',
+    'Lambda': b'\xce\x9b',
+    'lambda': b'\xce\xbb',
+    'lang': b'\xe2\x8c\xa9',
+    'laquo': b'\xc2\xab',
+    'larr': b'\xe2\x86\x90',
+    'lArr': b'\xe2\x87\x90',
+    'lceil': b'\xef\xa3\xae',
+    'ldquo': b'\xe2\x80\x9c',
+    'le': b'\xe2\x89\xa4',
+    'lfloor': b'\xef\xa3\xb0',
+    'lowast': b'\xe2\x88\x97',
+    'loz': b'\xe2\x97\x8a',
+    'lrm': b'\xe2\x80\x8e',
+    'lsaquo': b'\xe2\x80\xb9',
+    'lsquo': b'\xe2\x80\x98',
+    'macr': b'\xc2\xaf',
+    'mdash': b'\xe2\x80\x94',
+    'micro': b'\xc2\xb5',
+    'middot': b'\xc2\xb7',
+    'minus': b'\xe2\x88\x92',
+    'mu': b'\xc2\xb5',
+    'Mu': b'\xce\x9c',
+    'nabla': b'\xe2\x88\x87',
+    'nbsp': b'\xc2\xa0',
+    'ndash': b'\xe2\x80\x93',
+    'ne': b'\xe2\x89\xa0',
+    'ni': b'\xe2\x88\x8b',
+    'notin': b'\xe2\x88\x89',
+    'not': b'\xc2\xac',
+    'nsub': b'\xe2\x8a\x84',
+    'Ntilde': b'\xc3\x91',
+    'ntilde': b'\xc3\xb1',
+    'Nu': b'\xce\x9d',
+    'nu': b'\xce\xbd',
+    'Oacute': b'\xc3\x93',
+    'oacute': b'\xc3\xb3',
+    'Ocirc': b'\xc3\x94',
+    'ocirc': b'\xc3\xb4',
+    'OElig': b'\xc5\x92',
+    'oelig': b'\xc5\x93',
+    'Ograve': b'\xc3\x92',
+    'ograve': b'\xc3\xb2',
+    'oline': b'\xef\xa3\xa5',
+    'omega': b'\xcf\x89',
+    'Omega': b'\xe2\x84\xa6',
+    'Omicron': b'\xce\x9f',
+    'omicron': b'\xce\xbf',
+    'oplus': b'\xe2\x8a\x95',
+    'ordf': b'\xc2\xaa',
+    'ordm': b'\xc2\xba',
+    'or': b'\xe2\x88\xa8',
+    'Oslash': b'\xc3\x98',
+    'oslash': b'\xc3\xb8',
+    'Otilde': b'\xc3\x95',
+    'otilde': b'\xc3\xb5',
+    'otimes': b'\xe2\x8a\x97',
+    'Ouml': b'\xc3\x96',
+    'ouml': b'\xc3\xb6',
+    'para': b'\xc2\xb6',
+    'part': b'\xe2\x88\x82',
+    'permil': b'\xe2\x80\xb0',
+    'perp': b'\xe2\x8a\xa5',
+    'phis': b'\xcf\x86',
+    'Phi': b'\xce\xa6',
+    'phi': b'\xcf\x95',
+    'piv': b'\xcf\x96',
+    'Pi': b'\xce\xa0',
+    'pi': b'\xcf\x80',
+    'plusmn': b'\xc2\xb1',
+    'pound': b'\xc2\xa3',
+    'prime': b'\xe2\x80\xb2',
+    'Prime': b'\xe2\x80\xb3',
+    'prod': b'\xe2\x88\x8f',
+    'prop': b'\xe2\x88\x9d',
+    'Psi': b'\xce\xa8',
+    'psi': b'\xcf\x88',
+    'radic': b'\xe2\x88\x9a',
+    'rang': b'\xe2\x8c\xaa',
+    'raquo': b'\xc2\xbb',
+    'rarr': b'\xe2\x86\x92',
+    'rArr': b'\xe2\x87\x92',
+    'rceil': b'\xef\xa3\xb9',
+    'rdquo': b'\xe2\x80\x9d',
+    'real': b'\xe2\x84\x9c',
+    'reg': b'\xc2\xae',
+    'rfloor': b'\xef\xa3\xbb',
+    'Rho': b'\xce\xa1',
+    'rho': b'\xcf\x81',
+    'rlm': b'\xe2\x80\x8f',
+    'rsaquo': b'\xe2\x80\xba',
+    'rsquo': b'\xe2\x80\x99',
+    'sbquo': b'\xe2\x80\x9a',
+    'Scaron': b'\xc5\xa0',
+    'scaron': b'\xc5\xa1',
+    'sdot': b'\xe2\x8b\x85',
+    'sect': b'\xc2\xa7',
+    'shy': b'\xc2\xad',
+    'sigmaf': b'\xcf\x82',
+    'sigmav': b'\xcf\x82',
+    'Sigma': b'\xce\xa3',
+    'sigma': b'\xcf\x83',
+    'sim': b'\xe2\x88\xbc',
+    'spades': b'\xe2\x99\xa0',
+    'sube': b'\xe2\x8a\x86',
+    'sub': b'\xe2\x8a\x82',
+    'sum': b'\xe2\x88\x91',
+    'sup1': b'\xc2\xb9',
+    'sup2': b'\xc2\xb2',
+    'sup3': b'\xc2\xb3',
+    'supe': b'\xe2\x8a\x87',
+    'sup': b'\xe2\x8a\x83',
+    'szlig': b'\xc3\x9f',
+    'Tau': b'\xce\xa4',
+    'tau': b'\xcf\x84',
+    'there4': b'\xe2\x88\xb4',
+    'thetasym': b'\xcf\x91',
+    'thetav': b'\xcf\x91',
+    'Theta': b'\xce\x98',
+    'theta': b'\xce\xb8',
+    'thinsp': b'\xe2\x80\x89',
+    'THORN': b'\xc3\x9e',
+    'thorn': b'\xc3\xbe',
+    'tilde': b'\xcb\x9c',
+    'times': b'\xc3\x97',
+    'trade': b'\xef\xa3\xaa',
+    'Uacute': b'\xc3\x9a',
+    'uacute': b'\xc3\xba',
+    'uarr': b'\xe2\x86\x91',
+    'uArr': b'\xe2\x87\x91',
+    'Ucirc': b'\xc3\x9b',
+    'ucirc': b'\xc3\xbb',
+    'Ugrave': b'\xc3\x99',
+    'ugrave': b'\xc3\xb9',
+    'uml': b'\xc2\xa8',
+    'upsih': b'\xcf\x92',
+    'Upsilon': b'\xce\xa5',
+    'upsilon': b'\xcf\x85',
+    'Uuml': b'\xc3\x9c',
+    'uuml': b'\xc3\xbc',
+    'weierp': b'\xe2\x84\x98',
+    'Xi': b'\xce\x9e',
+    'xi': b'\xce\xbe',
+    'Yacute': b'\xc3\x9d',
+    'yacute': b'\xc3\xbd',
+    'yen': b'\xc2\xa5',
+    'yuml': b'\xc3\xbf',
+    'Yuml': b'\xc5\xb8',
+    'Zeta': b'\xce\x96',
+    'zeta': b'\xce\xb6',
+    'zwj': b'\xe2\x80\x8d',
+    'zwnj': b'\xe2\x80\x8c',
     }
 
 #------------------------------------------------------------------------
@@ -509,9 +504,32 @@ def _greekConvert(data):
             if not v:
                 u = '\0'
             else:
-                u = chr(v).encode('utf8')
+                if isPy3:
+                    u = chr(v)
+                else:
+                    u = chr(v).encode('utf8')
             _greek2Utf8[chr(k)] = u
     return ''.join(map(_greek2Utf8.__getitem__,data))
+
+
+def ugeCB(name):
+    '''undefined general entity handler'''
+    try:
+        return greeks[name]
+    except:
+        return ('&#38;'+name+';').encode('utf8')
+
+try:
+    import pyRXPU
+    def makeParser():
+        return pyRXPU.Parser(
+            ErrorOnUnquotedAttributeValues=0,
+            Validate=0,
+            srcName='Paragraph text',
+            ugeCB = ugeCB,
+            )
+except ImportError:
+    raise ImportError("pyRXPU not importable Alternate parser not yet implemented")
 
 #------------------------------------------------------------------
 # !!! NOTE !!! THIS TEXT IS NOW REPLICATED IN PARAGRAPH.PY !!!
@@ -555,7 +573,7 @@ def _greekConvert(data):
 #
 # It will also be able to handle any MathML specified Greek characters.
 #------------------------------------------------------------------
-class ParaParser(xmllib.XMLParser):
+class ParaParser:
 
     #----------------------------------------------------------
     # First we will define all of the xml tag handler functions.
@@ -713,12 +731,6 @@ class ParaParser(xmllib.XMLParser):
             self.unknown_charref(name)
             return
         self.handle_data(chr(n).encode('utf8'))
-
-    def handle_entityref(self,name):
-        if name in greeks:
-            self.handle_data(greeks[name])
-        else:
-            xmllib.XMLParser.handle_entityref(self,name)
 
     def syntax_error(self,lineno,message):
         self._syntax_error(message)
@@ -995,7 +1007,6 @@ class ParaParser(xmllib.XMLParser):
 
     def __init__(self,verbose=0):
         self.caseSensitive = 0
-        xmllib.XMLParser.__init__(self,verbose=verbose)
 
     def _iReset(self):
         self.fragList = []
@@ -1003,7 +1014,6 @@ class ParaParser(xmllib.XMLParser):
 
     def _reset(self, style):
         '''reset the parser'''
-        xmllib.XMLParser.reset(self)
 
         # initialize list of string segments to empty
         self.errors = []
@@ -1063,24 +1073,17 @@ class ParaParser(xmllib.XMLParser):
         If errors occur None will be returned and the
         self.errors holds a list of the error messages.
         """
-        # AR 20040612 - when we feed Unicode strings in, sgmlop
-        # tries to coerce to ASCII.  Must intercept, coerce to
-        # any 8-bit encoding which defines most of 256 points,
-        # and revert at end.  Yuk.  Preliminary step prior to
-        # removal of parser altogether.
-        enc = self._enc = 'utf8' #our legacy default
-        self._UNI = isinstance(text,str)
-        if self._UNI:
-            text = text.encode(enc)
-
         self._setup_for_parse(style)
-        # the xmlparser requires that all text be surrounded by xml
-        # tags, therefore we must throw some unused flags around the
-        # given string
         if not(len(text)>=6 and text[0]=='<' and _re_para.match(text)):
             text = "<para>"+text+"</para>"
-        self.feed(text)
-        self.close()    # force parsing to complete
+        try:
+            tt = makeParser()(text)
+        except Exception as exc:
+            if isPy3:
+                raise exc.__class__('paragraph text %s caused exception\n%s' % (ascii(text),str(exc))) from exc
+            else:
+                annotateException('paragraph text %s caused exception' % ascii(text))
+        self._tt_start(tt)
         return self._complete_parse()
 
     def _complete_parse(self):
@@ -1094,18 +1097,9 @@ class ParaParser(xmllib.XMLParser):
         else:
             fragList = bFragList = None
 
-        if self._UNI:
-            #reconvert to unicode
-            if fragList:
-                for frag in fragList:
-                    frag.text = str(frag.text, self._enc)
-            if bFragList:
-                for frag in bFragList:
-                    frag.text = str(frag.text, self._enc)
-
         return style, fragList, bFragList
 
-    def _tt_parse(self,tt):
+    def _tt_handle(self,tt):
         tag = tt[0]
         try:
             start = getattr(self,'start_'+tag)
@@ -1120,11 +1114,14 @@ class ParaParser(xmllib.XMLParser):
                 M[isinstance(c,(list,tuple))](c)
         end()
 
+    def _tt_start(self,tt):
+        self._tt_handlers = self.handle_data,self._tt_handle
+        self._tt_handle(tt)
+
     def tt_parse(self,tt,style):
         '''parse from tupletree form'''
         self._setup_for_parse(style)
-        self._tt_handlers = self.handle_data,self._tt_parse
-        self._tt_parse(tt)
+        self._tt_start(tt)
         return self._complete_parse()
 
     def findSpanStyle(self,style):
