@@ -6,9 +6,7 @@ __version__='''$Id: test_platypus_indents.py 3660 2010-02-08 18:17:33Z damian $'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os, random
-from string import split, strip, join, whitespace
 from operator import truth
-from types import StringType, ListType
 import unittest
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.paraparser import ParaParser
@@ -85,7 +83,7 @@ class WrappingTestCase(unittest.TestCase):
         story.append(Paragraph('This is an attempt to break long URLs sanely.  Here is a file name: <font face="Courier">C:\\Windows\\System32\\Drivers\\etc\\hosts</font>.  ', bt))
         
 
-        story.append(Paragraph('This paragraph has a URL (basically, a word) too long to fit on one line, so it just overflows. http://some-really-long-site.somewhere-verbose.com/webthingies/framework/xc4987236hgsdlkafh/foo?format=dingbats&content=rubbish. Ideally, we would wrap it in the middle.', bt))
+        story.append(Paragraph('This paragraph has a URL (basically, a word) too long to fit on one line, so it just overflows. http://some-really-long-site.somewhere-verbose.com/webthingies/framework/xc4987236hgsdlkafh/foo?format=dingbats&amp;content=rubbish. Ideally, we would wrap it in the middle.', bt))
 
 
         

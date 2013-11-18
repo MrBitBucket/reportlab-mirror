@@ -355,7 +355,7 @@ class Font:
         self._notdefFont = name=='ZapfDingbats' and self or _notdefFont
 
     def stringWidth(self, text, size, encoding='utf8'):
-        return _instanceStringWidthU(self, text, size, encoding=encoding)
+        return instanceStringWidthT1(self, text, size, encoding=encoding)
 
     def __repr__(self):
         return "<%s %s>" % (self.__class__.__name__, self.face.name)

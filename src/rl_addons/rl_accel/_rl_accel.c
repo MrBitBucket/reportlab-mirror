@@ -727,7 +727,7 @@ static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObjec
 	Py_DECREF(_o1);
 	goto L_OK;
 L_ERR:
-	ADD_TB(module,"instanceStringWidthU");
+	ADD_TB(module,"instanceStringWidthT1");
 	Py_XDECREF(_o1);
 	Py_XDECREF(_o2);
 	Py_XDECREF(_o3);
