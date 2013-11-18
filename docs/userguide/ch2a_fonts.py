@@ -327,7 +327,7 @@ from reportlab.pdfbase.pdfmetrics import registerFontFamily
 registerFontFamily('Vera',normal='Vera',bold='VeraBd',italic='VeraIt',boldItalic='VeraBI')
 
 disc("""Before using the TT Fonts in Platypus we should add a mapping from the family name to the
-individual font names that describe the behaviour under the $<b>$ and $<i>$ attributes.""")
+individual font names that describe the behaviour under the $&lt;b&gt;$ and $&lt;i&gt;$ attributes.""")
 
 eg("""
 from reportlab.pdfbase.pdfmetrics import registerFontFamily

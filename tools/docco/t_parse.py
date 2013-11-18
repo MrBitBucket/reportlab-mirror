@@ -80,8 +80,7 @@ Template directives:
 """
 
 import re, string
-from types import StringType
-from string import find
+from reportlab.lib.utils import ascii_letters
 
 #
 # template parsing
@@ -114,7 +113,7 @@ class Template:
        # compile the regular expressions if needed
        self.marker_dict = marker_dict = {}
        for mark, rgex in marker_to_regex_dict.items():
-           if type(rgex) == StringType:
+           if isinstance(rgex,str):
               rgex = re.compile(rgex)
            marker_dict[mark] = rgex
        # determine the parse sequence
@@ -158,7 +157,7 @@ class Template:
        self.parse_seq = parse_seq
        self.ndirectives = ndirectives
 
-   def PARSE(self, str, start=0):
+   def PARSE(self, s, start=0):
        ndirectives = self.ndirectives
        wild_card = self.wild_card
        single_char = self.char
@@ -173,7 +172,7 @@ class Template:
            (indicator, data) = parse_seq[parse_index]
            # is it a literal indicator?
            if indicator is None:
-              if find(str, data, currentindex) != currentindex:
+              if s.find(data, currentindex) != currentindex:
                  raise ValueError("literal not found at "+repr((currentindex,data)))
               currentindex = currentindex + len(data)
            else:
@@ -182,19 +181,19 @@ class Template:
               if indicator == wild_card:
                  # if it is the last directive then it matches the rest of the string
                  if parse_index == lparse_seq:
-                    last = len(str)
+                    last = len(s)
                  # otherwise must look at next directive to find end of wildcard
                  else:
                     # next directive must be re or literal
                     (nextindicator, nextdata) = parse_seq[parse_index+1]
                     if nextindicator is None:
                        # search for literal
-                       last = find(str, nextdata, currentindex)
+                       last = s.find(nextdata, currentindex)
                        if last<currentindex:
                           raise ValueError("couldn't terminate wild with lit "+repr(currentindex))
                     else:
                        # data is a re, search for it
-                       last = nextdata.search(str, currentindex)
+                       last = nextdata.search(s, currentindex)
                        if last<currentindex:
                           raise ValueError("couldn't terminate wild with re "+repr(currentindex))
               elif indicator == single_char:
@@ -202,11 +201,11 @@ class Template:
                  last = currentindex + data
               else:
                  # other directives are always regular expressions
-                 last = data.match(str, currentindex) + currentindex
+                 last = data.match(s, currentindex) + currentindex
                  if last<currentindex:
                     raise ValueError("couldn't match re at "+repr(currentindex))
-              #print "accepting", str[currentindex:last]
-              result[current_directive_index] = str[currentindex:last]
+              #print("accepting", s[currentindex:last])
+              result[current_directive_index] = s[currentindex:last]
               current_directive_index = current_directive_index+1
               currentindex = last
        # sanity check
@@ -216,7 +215,7 @@ class Template:
 
 # some useful regular expressions
 USERNAMEREGEX = \
-  "["+string.letters+"]["+string.letters+string.digits+"_]*"
+  "["+ascii_letters+"]["+ascii_letters+string.digits+"_]*"
 STRINGLITREGEX = "'[^\n']*'"
 SIMPLEINTREGEX = "["+string.digits+"]+"
 id = re.compile(USERNAMEREGEX)

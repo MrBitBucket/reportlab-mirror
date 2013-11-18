@@ -46,7 +46,6 @@ def quickfix(text):
        format the arg as replaceable.  The escape sequence for literal
        $ is $\\$ (^ is ^\\^.
     """
-    from string import join
     for (template,subst) in [(QFcodetemplate, codesubst), (QFreptemplate, QFsubst)]:
         fragment = text
         parts = []
@@ -65,7 +64,7 @@ def quickfix(text):
                     fragment = fragment[index:]
         except ValueError:
             parts.append(fragment)
-        text = join(parts, "")
+        text = ''.join(parts)
     return text
 #print quickfix("$testing$ testing $one$ ^two^ $three(^four^)$")
 
@@ -126,7 +125,7 @@ def disc(text, klass=Paragraph, style=discussiontextstyle):
 def restartList():
     getSequencer().reset('list1')
 
-def list(text, doBullet=1):
+def list1(text, doBullet=1):
     text=quickfix(text)
     if doBullet:
         text='<bullet><seq id="list1"/>.</bullet>'+text
@@ -311,7 +310,7 @@ class ParaBox(figures.Figure):
         for key, value in style.__dict__.items():
             lines.append('%s = %s' % (key, value))
         lines.sort()
-        return string.join(lines, '\n')
+        return '\n'.join(lines)
 
     def drawFigure(self):
 
@@ -349,7 +348,7 @@ class ParaBox(figures.Figure):
         for key, value in style.__dict__.items():
             if key not in ('name','parent'):
                 lines.append('%s = %s' % (key, value))
-        return string.join(lines, '\n')
+        return '\n'.join(lines)
 
 
 class ParaBox2(figures.Figure):
