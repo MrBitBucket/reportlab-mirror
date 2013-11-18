@@ -7,7 +7,7 @@ try:
 except ImportError:
     import ConfigParser as configparser
 import functools
-isPython3 = sys.version_info[0]==3
+isPy3 = sys.version_info[0]==3
 platform = sys.platform
 pjoin = os.path.join
 abspath = os.path.abspath
@@ -223,7 +223,11 @@ reportlab_files= [
         ]
 
 def get_fonts(PACKAGE_DIR, reportlab_files):
-    import sys, os, os.path, urllib.request, urllib.error, urllib.parse, zipfile, io
+    import sys, os, os.path, zipfile, io
+    if isPy3:
+        import urllib.request as ureq
+    else:
+        import urllib2 as ureq
     rl_dir = PACKAGE_DIR['reportlab']
     if not [x for x in reportlab_files if not os.path.isfile(pjoin(rl_dir,x))]:
         infoline("Standard T1 font curves already downloaded")
@@ -231,7 +235,7 @@ def get_fonts(PACKAGE_DIR, reportlab_files):
     try:
         infoline("Downloading standard T1 font curves")
 
-        remotehandle = urllib.request.urlopen("http://www.reportlab.com/ftp/pfbfer-20070710.zip")
+        remotehandle = ureq.urlopen("http://www.reportlab.com/ftp/pfbfer-20070710.zip")
         zipdata = io.BytesIO(remotehandle.read())
         remotehandle.close()
         archive = zipfile.ZipFile(zipdata)
@@ -287,7 +291,7 @@ def main():
                             libraries=[], # libraries to link against
                             ),
                         ]
-        if not isPython3:
+        if not isPy3:
             EXT_MODULES += [
                     Extension( 'reportlab.lib.sgmlop',
                             [pjoin(RL_ACCEL,'sgmlop.c')],
