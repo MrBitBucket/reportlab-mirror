@@ -53,6 +53,7 @@ if isPy3:
 
     def isClass(v):
         return isinstance(v, type)
+    from string import ascii_letters
 else:
     def UniChr(v):
         return unichr(v)
@@ -69,6 +70,10 @@ else:
     def isClass(v):
         import types
         return isinstance(v, types.ClassType)
+    from string import letters as ascii_letters
+    from future_builtins import ascii
+    import __builtin__
+    __builtin__.ascii = ascii
 
 
 def _findFiles(dirList,ext='.ttf'):
@@ -1141,7 +1146,10 @@ def annotateException(msg,enc='utf8'):
     else:
         A.append(msg)
     v.args = tuple(A)
-    raise t(v).with_traceback(b)
+    if isPy3:
+        raise t(v).with_traceback(b)
+    else:
+        raise (t,v,b)
     
 def escapeOnce(data):
     """Ensure XML output is escaped just once, irrespective of input
