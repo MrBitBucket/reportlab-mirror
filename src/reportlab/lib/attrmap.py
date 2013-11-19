@@ -74,10 +74,11 @@ class AttrMap(dict):
             else:
                 if not isSeq(BASE): BASE = (BASE,)
                 for B in BASE:
-                    if hasattr(B,'_attrMap'):
-                        data.update(B._attrMap)
+                    am = getattr(B,'_attrMap',self)
+                    if am is not self:
+                        if am: data.update(am)
                     else:
-                        raise ValueError('BASE=%s has wrong kind of value' % repr(B))
+                        raise ValueError('BASE=%s has wrong kind of value' % ascii(B))
 
         dict.__init__(self,data)
         self.remove(UNWANTED)
