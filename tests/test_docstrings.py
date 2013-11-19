@@ -11,9 +11,16 @@ are skipped.
 """
 from reportlab.lib.testutils import setOutDir,SecureTestCase, GlobDirectoryWalker, outputfile, printLocation
 setOutDir(__name__)
-import os, sys, glob, re, unittest
-from types import ModuleType, ClassType, MethodType, FunctionType
+import os, sys, glob, re, unittest, inspect
 import reportlab
+
+def typ2is(typ):
+    return getattr(inspect,'is'+typ)
+
+def obj2typ(obj):
+    for typ in ('function','module','class','method'):
+        if typ2is(typ)(obj): return typ
+    return None
 
 def getModuleObjects(folder, rootName, typ, pattern='*.py'):
     "Get a list of all objects defined *somewhere* in a package."
@@ -56,7 +63,7 @@ def getModuleObjects(folder, rootName, typ, pattern='*.py'):
             modContentNames = dir(module)
 
             # Handle modules.
-            if typ == ModuleType:
+            if typ=='module':
                 if module.__name__.find('reportlab') > -1:
                     objects.append((mName, module))
                     continue
@@ -64,19 +71,19 @@ def getModuleObjects(folder, rootName, typ, pattern='*.py'):
             for n in modContentNames:
                 obj = eval(mName + '.' + n)
                 # Handle functions and classes.
-                if typ in (FunctionType, ClassType):
-                    if type(obj) == typ and obj not in lookup:
-                        if typ == ClassType:
+                if typ in ('function','module'):
+                    if obj2typ(obj) == typ and obj not in lookup:
+                        if typ == 'class':
                             if obj.__module__.find(rootName) != 0:
                                 continue
                         objects.append((mName, obj))
                         lookup[obj] = 1
                 # Handle methods.
-                elif typ == MethodType:
-                    if type(obj) == ClassType:
+                elif typ == 'method':
+                    if obj2typ(obj) == 'class':
                         for m in dir(obj):
                             a = getattr(obj, m)
-                            if type(a) == typ and a not in lookup:
+                            if obj2typ(a) == typ and a not in lookup:
                                 if a.__self__.__class__.__module__.find(rootName) != 0:
                                     continue
                                 cName = obj.__name__
@@ -97,13 +104,14 @@ class DocstringTestCase(SecureTestCase):
         cwd = os.getcwd()
         from reportlab.lib.testutils import RL_HOME
         objects = getModuleObjects(RL_HOME, 'reportlab', objType)
-        objects.sort()
+        if objType!='function':
+            objects.sort()
         os.chdir(cwd)
 
-        expl = {FunctionType:'functions',
-                ClassType:'classes',
-                MethodType:'methods',
-                ModuleType:'modules'}[objType]
+        expl = {'function':'functions',
+                'class':'classes',
+                'method':'methods',
+                'module':'modules'}[objType]
 
         path = outputfile("test_docstrings-%s.log" % expl)
         file = open(path, 'w')
@@ -112,20 +120,20 @@ class DocstringTestCase(SecureTestCase):
 
         lines = []
         for name, obj in objects:
-            if objType == MethodType:
+            if objType == 'method':
                 n = obj.__name__
                 # Skip names with leading and trailing double underscores.
                 if p.match(n):
                     continue
 
-            if objType == FunctionType:
+            if objType == 'function':
                 if not obj.__doc__ or len(obj.__doc__) == 0:
                     lines.append("%s.%s\n" % (name, obj.__name__))
             else:
                 if not obj.__doc__ or len(obj.__doc__) == 0:
-                    if objType == ClassType:
+                    if objType == 'class':
                         lines.append("%s.%s\n" % (obj.__module__, obj.__name__))
-                    elif objType == MethodType:
+                    elif objType == 'method':
                         lines.append("%s.%s\n" % (obj.__self__.__class__, obj.__name__))
                     else:
                         lines.append("%s\n" % (obj.__name__))
@@ -138,19 +146,19 @@ class DocstringTestCase(SecureTestCase):
 
     def test0(self):
         "Test if functions have a doc string."
-        self._writeLogFile(FunctionType)
+        self._writeLogFile('function')
 
     def test1(self):
         "Test if classes have a doc string."
-        self._writeLogFile(ClassType)
+        self._writeLogFile('class')
 
     def test2(self):
         "Test if methods have a doc string."
-        self._writeLogFile(MethodType)
+        self._writeLogFile('method')
 
     def test3(self):
         "Test if modules have a doc string."
-        self._writeLogFile(ModuleType)
+        self._writeLogFile('module')
 
 def makeSuite():
     suite = unittest.TestSuite()
