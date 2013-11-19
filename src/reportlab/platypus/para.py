@@ -562,7 +562,7 @@ class paragraphEngine:
                 thefloats = 0.0
                 index = index+1
                 nexte = line[index]
-                while index<maxindex and isinstance((nexte,(float,str)):
+                while index<maxindex and isinstance(nexte,(float,str)):
                     # switch to expandable space if appropriate
                     if isinstance(nexte,float):
                         if thefloats<0 and nexte>0:
