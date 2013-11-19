@@ -1,21 +1,19 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2013
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/widgets/markers.py
 
 __version__=''' $Id$ '''
 __doc__="""This modules defines a collection of markers used in charts.
 """
 
-from types import FunctionType, ClassType
 from reportlab.graphics.shapes import Rect, Line, Circle, Polygon, Drawing, Group
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace
 from reportlab.graphics.widgetbase import Widget
 from reportlab.lib.validators import isNumber, isColorOrNone, OneOf, Validator
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.lib.colors import black
+from reportlab.lib.utils import isFunction, isClass
 from reportlab.graphics.widgets.flags import Flag
 from math import sin, cos, pi
-import copy, new
 _toradians = pi/180.0
 
 class Marker(Widget):
@@ -59,8 +57,10 @@ class Marker(Widget):
             arrowHeight = 1.875,
             )
 
-    def clone(self):
-        return new.instance(self.__class__,self.__dict__.copy())
+    def clone(self,**kwds):
+        n = self.__class__(**self.__dict__)
+        if kwds: n.__dict__.update(kwds)
+        return n
 
     def _Smiley(self):
         x, y = self.x+self.dx, self.y+self.dy
@@ -201,9 +201,9 @@ class Marker(Widget):
         return m
 
 def uSymbol2Symbol(uSymbol,x,y,color):
-    if type(uSymbol) == FunctionType:
+    if isFunction(uSymbol):
         symbol = uSymbol(x, y, 5, color)
-    elif type(uSymbol) == ClassType and issubclass(uSymbol,Widget):
+    elif isClass(uSymbol) and issubclass(uSymbol,Widget):
         size = 10.
         symbol = uSymbol()
         symbol.x = x - (size/2)
