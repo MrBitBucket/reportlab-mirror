@@ -74,7 +74,7 @@ class AsciiFileTestCase(unittest.TestCase):
             nonAscii = [c for c in fileContent if ord(c)>127]
             nonAscii = unique(nonAscii)
 
-            truncPath = path[string.find(path, 'reportlab'):]
+            truncPath = path[path.find('reportlab'):]
             args = (truncPath, repr(list(map(ord, nonAscii))))
             msg = "File %s contains characters: %s." % args
 ##            if nonAscii:
@@ -93,11 +93,11 @@ class FilenameTestCase(unittest.TestCase):
 
         for path in allPyFiles:
             #hack - exclude barcode extensions from this test
-            if string.find(path, 'barcode'):
+            if path.find('barcode'):
                 pass
             else:
                 basename = os.path.splitext(path)[0]
-                truncPath = path[string.find(path, 'reportlab'):]
+                truncPath = path[path.find('reportlab'):]
                 msg = "Filename %s contains trailing digits." % truncPath
                 assert basename[-1] not in string.digits, msg
 

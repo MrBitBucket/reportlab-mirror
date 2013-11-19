@@ -11,18 +11,12 @@ are skipped.
 """
 from reportlab.lib.testutils import setOutDir,SecureTestCase, GlobDirectoryWalker, outputfile, printLocation
 setOutDir(__name__)
-import os, sys, glob, string, re, unittest
+import os, sys, glob, re, unittest
 from types import ModuleType, ClassType, MethodType, FunctionType
 import reportlab
 
 def getModuleObjects(folder, rootName, typ, pattern='*.py'):
     "Get a list of all objects defined *somewhere* in a package."
-
-    # Define some abbreviations.
-    find = string.find
-    split = string.split
-    replace = string.replace
-
     objects = []
     lookup = {}
     for file in GlobDirectoryWalker(folder, pattern):
@@ -40,8 +34,8 @@ def getModuleObjects(folder, rootName, typ, pattern='*.py'):
         os.chdir(folder)
 
         modName = os.path.splitext(os.path.basename(file))[0]
-        prefix = folder[find(folder, rootName):]
-        prefix = replace(prefix, os.sep, '.')
+        prefix = folder[folder.find(rootName):]
+        prefix = prefix.replace(os.sep,'.')
         mName = prefix + '.' + modName
 
         try:
@@ -54,8 +48,8 @@ def getModuleObjects(folder, rootName, typ, pattern='*.py'):
 
         # Get the 'real' (leaf) module
         # (__import__ loads only the top-level one).
-        if find(mName, '.') != -1:
-            for part in split(mName, '.')[1:]:
+        if mName.find('.') != -1:
+            for part in mName.split('.')[1:]:
                 module = getattr(module, part)
 
             # Find the objects in the module's content.
@@ -63,7 +57,7 @@ def getModuleObjects(folder, rootName, typ, pattern='*.py'):
 
             # Handle modules.
             if typ == ModuleType:
-                if find(module.__name__, 'reportlab') > -1:
+                if module.__name__.find('reportlab') > -1:
                     objects.append((mName, module))
                     continue
 
@@ -73,7 +67,7 @@ def getModuleObjects(folder, rootName, typ, pattern='*.py'):
                 if typ in (FunctionType, ClassType):
                     if type(obj) == typ and obj not in lookup:
                         if typ == ClassType:
-                            if find(obj.__module__, rootName) != 0:
+                            if obj.__module__.find(rootName) != 0:
                                 continue
                         objects.append((mName, obj))
                         lookup[obj] = 1
@@ -83,7 +77,7 @@ def getModuleObjects(folder, rootName, typ, pattern='*.py'):
                         for m in dir(obj):
                             a = getattr(obj, m)
                             if type(a) == typ and a not in lookup:
-                                if find(a.__self__.__class__.__module__, rootName) != 0:
+                                if a.__self__.__class__.__module__.find(rootName) != 0:
                                     continue
                                 cName = obj.__name__
                                 objects.append((mName, a))

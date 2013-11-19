@@ -4,8 +4,6 @@
 __version__=''' $Id$ '''
 __doc__='''Base class for user-defined graphical widgets'''
 
-import string
-
 from reportlab.graphics import shapes
 from reportlab import rl_config
 from reportlab.lib import colors
@@ -99,7 +97,7 @@ class PropHolder:
 
         childPropDicts = {}
         for name, value in propDict.items():
-            parts = string.split(name, '.', 1)
+            parts = name.split('.', 1)
             if len(parts) == 1:
                 #simple attribute, set it now
                 setattr(self, name, value)

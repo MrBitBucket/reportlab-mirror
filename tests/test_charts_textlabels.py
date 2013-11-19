@@ -86,7 +86,7 @@ class LabelTestCase(unittest.TestCase):
         drawings = []
 
         for boxAnchors in ('sw se nw ne', 'w e n s', 'c'):
-            boxAnchors = string.split(boxAnchors, ' ')
+            boxAnchors = boxAnchors.split(' ')
 
             # Create drawing.
             d = Drawing(w, h)

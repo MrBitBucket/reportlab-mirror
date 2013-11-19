@@ -6,7 +6,7 @@ __version__=''' $Id$ '''
 #tests and documents new low-level canvas
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import os, string
+import os
 import unittest
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
@@ -106,9 +106,9 @@ class DocBlock:
 
     def _getHeight(self):
         "splits into lines"
-        self.comment1lines = string.split(self.comment1, '\n')
-        self.codelines = string.split(self.code, '\n')
-        self.comment2lines = string.split(self.comment2, '\n')
+        self.comment1lines = self.comment1.split('\n')
+        self.codelines = self.code.split('\n')
+        self.comment2lines = self.comment2.split('\n')
         textheight = (len(self.comment1lines) +
                 len(self.code) +
                 len(self.comment2lines) +

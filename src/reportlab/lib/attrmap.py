@@ -131,7 +131,7 @@ def _privateAttrMap(obj,ret=0):
 def _findObjectAndAttr(src, P):
     '''Locate the object src.P for P a string, return parent and name of attribute
     '''
-    P = string.split(P, '.')
+    P = P.split('.')
     if len(P) == 0:
         return None, None
     else:

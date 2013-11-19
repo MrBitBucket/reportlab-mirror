@@ -33,9 +33,7 @@ Type the following for usage info:
 __version__ = '0.8'
 
 
-import sys, os, re, types, string, getopt, copy, time
-from string import find, join, split, replace, expandtabs, rstrip
-
+import sys, os, re, types, getopt, copy, time
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch, cm
@@ -74,7 +72,7 @@ def mainPageFrame(canvas, doc):
         canvas.setFont('Times-Roman', 12)
         canvas.drawString(4 * inch, cm, "%d" % pageNumber)
         if hasattr(canvas, 'headerLine'): # hackish
-            headerline = string.join(canvas.headerLine, ' \215 ') # bullet
+            headerline = , ' \215 '.join(canvas.headerLine) # bullet
             canvas.drawString(2*cm, A4[1]-1.75*cm, headerline)
 
     canvas.setFont('Times-Roman', 8)
@@ -154,9 +152,7 @@ class MyTemplate(BaseDocTemplate):
 
 def htmlescape(text):
     "Escape special HTML characters, namely &, <, >."
-    return replace(replace(replace(text, '&', '&amp;'),
-                                         '<', '&lt;'),
-                                         '>', '&gt;')
+    return text.replace('&','&amp;').replace('<','&lt;').replace('>','&gt;')
 
 def htmlrepr(object):
     return htmlescape(repr(object))
@@ -173,13 +169,13 @@ def getdoc(object):
             result = inspect.getcomments(object)
         except:
             pass
-    return result and rstrip(result) + '\n' or ''
+    return result and result.rstrip() + '\n' or ''
 
 
 def reduceDocStringLength(docStr):
     "Return first line of a multiline string."
 
-    return split(docStr, '\n')[0]
+    return docStr.split('\n')[0]
 
 
 ####################################################################
@@ -193,7 +189,7 @@ def makeHtmlSection(text, bgcolor='#FFA0FF'):
 
     This is usually a header for all classes or functions.
 u    """
-    text = htmlescape(expandtabs(text))
+    text = htmlescape(text.expandtabs())
     result = []
     result.append("""<TABLE WIDTH="100\%" BORDER="0">""")
     result.append("""<TR><TD BGCOLOR="%s" VALIGN="CENTER">""" % bgcolor)
@@ -201,7 +197,7 @@ u    """
     result.append("""</TD></TR></TABLE>""")
     result.append('')
 
-    return join(result, '\n')
+    return '\n'.join(result)
 
 
 def makeHtmlSubSection(text, bgcolor='#AAA0FF'):
@@ -209,7 +205,7 @@ def makeHtmlSubSection(text, bgcolor='#AAA0FF'):
 
     This is usually a class or function name.
     """
-    text = htmlescape(expandtabs(text))
+    text = htmlescape(text.expandtabs())
     result = []
     result.append("""<TABLE WIDTH="100\%" BORDER="0">""")
     result.append("""<TR><TD BGCOLOR="%s" VALIGN="CENTER">""" % bgcolor)
@@ -217,7 +213,7 @@ def makeHtmlSubSection(text, bgcolor='#AAA0FF'):
     result.append("""</TD></TR></TABLE>""")
     result.append('')
 
-    return join(result, '\n')
+    return '\n'.join(result)
 
 
 def makeHtmlInlineImage(text):
@@ -613,7 +609,7 @@ class AsciiDocBuilder0(DocBuilder0):
 
         if bases:
             bases = [b.__name__ for b in bases] # hack
-            append('%s%s(%s)' % (lev*label, name, join(bases, ', ')))
+            append('%s%s(%s)' % (lev*label, name, ', '.join(bases)))
         else:
             append('%s%s' % (lev*label, name))
         return
@@ -696,7 +692,7 @@ class HtmlDocBuilder0(DocBuilder0):
 
         self.outLines.append("""<H1>%s</H1>""" % name)
         self.outLines.append('')
-        for line in split(doc, '\n'):
+        for line in doc.split('\n'):
             self.outLines.append("""<FONT SIZE="-1">%s</FONT>""" % htmlescape(line))
             self.outLines.append('<BR>')
         self.outLines.append('')
@@ -721,10 +717,10 @@ class HtmlDocBuilder0(DocBuilder0):
 
         if bases:
             bases = [b.__name__ for b in bases] # hack
-            self.outLines.append(makeHtmlSubSection('%s(%s)' % (name, join(bases, ', '))))
+            self.outLines.append(makeHtmlSubSection('%s(%s)' % (name, ', '.join(bases))))
         else:
             self.outLines.append(makeHtmlSubSection('%s' % name))
-        for line in split(doc, '\n'):
+        for line in doc.split('\n'):
             self.outLines.append("""<FONT SIZE="-1">%s</FONT>""" % htmlescape(line))
             self.outLines.append('<BR>')
 
@@ -750,7 +746,7 @@ class HtmlDocBuilder0(DocBuilder0):
         append = self.outLines.append
         append("""<DL><DL><DT><TT><STRONG>%s</STRONG>%s</TT></DT>""" % (name, sig))
         append('')
-        for line in split(doc, '\n'):
+        for line in doc.split('\n'):
             append("""<DD><FONT SIZE="-1">%s</FONT></DD>""" % htmlescape(line))
             append('<BR>')
         append('</DL></DL>')
@@ -876,7 +872,7 @@ class PdfDocBuilder0(DocBuilder0):
         story = self.story
         if bases:
             bases = [b.__name__ for b in bases] # hack
-            story.append(Paragraph('%s(%s)' % (name, join(bases, ', ')), self.makeHeadingStyle(self.indentLevel, 'class')))
+            story.append(Paragraph('%s(%s)' % (name,', '.join(bases)), self.makeHeadingStyle(self.indentLevel, 'class')))
         else:
             story.append(Paragraph(name, self.makeHeadingStyle(self.indentLevel, 'class')))
 
@@ -960,7 +956,7 @@ class UmlPdfDocBuilder0(PdfDocBuilder0):
 
         if bases:
             bases = [b.__name__ for b in bases] # hack
-            self.classCompartment = '%s(%s)' % (name, join(bases, ', '))
+            self.classCompartment = '%s(%s)' % (name, ', '.join(bases))
         else:
             self.classCompartment = name
 
@@ -1182,7 +1178,7 @@ def documentPackage0(pathOrName, builder, opts={}):
         package = __import__(name)
         # Some special care needed for dotted names.
         if '.' in name:
-            subname = 'package' + name[find(name, '.'):]
+            subname = 'package' + name[name.find('.'):]
             package = eval(subname)
         path = os.path.dirname(package.__file__)
 

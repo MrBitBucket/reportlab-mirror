@@ -9,7 +9,7 @@ can always be imported, and so that individual tests need to import
 nothing more than "reportlab.whatever..."
 """
 
-import sys, os, string, fnmatch, copy, re
+import sys, os, fnmatch, copy, re
 from configparser import ConfigParser
 import unittest
 
@@ -106,7 +106,6 @@ def getCVSEntries(folder, files=1, folders=0):
     """
 
     join = os.path.join
-    split = string.split
 
     # If CVS subfolder doesn't exist return empty list.
     try:
@@ -119,7 +118,7 @@ def getCVSEntries(folder, files=1, folders=0):
     for line in f.readlines():
         if folders and line[0] == 'D' \
            or files and line[0] != 'D':
-            entry = split(line, '/')[1]
+            entry = line.split('/')[1]
             if entry:
                 allEntries.append(join(folder, entry))
 
@@ -139,7 +138,7 @@ class ExtConfigParser(ConfigParser):
 
         # This seems to allow for newlines inside values
         # of the config file, but be careful!!
-        val = string.replace(value, '\n', '')
+        val = value.replace('\n', '')
 
         if self.pat.match(val):
             return eval(val)

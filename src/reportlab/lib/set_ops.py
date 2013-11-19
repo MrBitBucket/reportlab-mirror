@@ -6,7 +6,6 @@ __version__=''' $Id$ '''
 __doc__="""From before Python had a Set class..."""
 
 import types
-import string
 
 def __set_coerce(t, S):
     if t is list:
@@ -14,7 +13,7 @@ def __set_coerce(t, S):
     elif t is tuple:
         return tuple(S)
     elif t is bytes:
-        return string.join(S, '')
+        return ''.join(S)
     return S
 
 def unique(seq):

@@ -32,7 +32,6 @@
 
 from reportlab.lib.units import inch
 from .common import MultiWidthBarcode
-import string
 
 _patterns = {
   '0' : ('AcAaAb', 0),  '1' : ('AaAbAc', 1),  '2' : ('AaAcAb', 2),
@@ -108,7 +107,7 @@ def _encode93(str):
 
     s.reverse()
 
-    return string.join(s, '')
+    return ''.join(s)
 
 class _Code93Base(MultiWidthBarcode):
     barWidth = inch * 0.0075
@@ -184,9 +183,7 @@ class Standard93(_Code93Base):
     def validate(self):
         vval = ""
         self.valid = 1
-        for c in self.value:
-            if c in string.lowercase:
-                c = string.upper(c)
+        for c in self.value.upper():
             if c not in _patterns:
                 self.valid = 0
                 continue

@@ -9,7 +9,6 @@ To be sure we can accurately represent characters in various encodings
 and fonts, we need some routines to display all those characters.
 These are defined herein.  The idea is to include flowable, drawable
 and graphic objects for single and multi-byte fonts. """
-import string
 import codecs
 
 from reportlab.pdfgen.canvas import Canvas
@@ -207,12 +206,12 @@ class KutenRowCodeChart(CodeChartBase):
     def makeRow(self, row):
         """Works out the character values for this kuten row"""
         cells = []
-        if string.find(self.encodingName, 'EUC') > -1:
+        if self.encodingName.find('EUC') > -1:
             # it is an EUC family encoding.
             for col in range(1, 95):
                 ch = chr(row + 160) + chr(col+160)
                 cells.append(ch)
-##        elif string.find(self.encodingName, 'GB') > -1:
+##        elif self.encodingName.find('GB') > -1:
 ##            # it is an EUC family encoding.
 ##            for col in range(1, 95):
 ##                ch = chr(row + 160) + chr(col+160)
@@ -224,7 +223,7 @@ class KutenRowCodeChart(CodeChartBase):
         self.drawLabels(topLeft= 'R%d' % self.row)
 
         # work out which characters we need for the row
-        #assert string.find(self.encodingName, 'EUC') > -1, 'Only handles EUC encoding today, you gave me %s!' % self.encodingName
+        #assert self.encodingName.find('EUC') > -1, 'Only handles EUC encoding today, you gave me %s!' % self.encodingName
 
         # pad out by 1 to match Ken Lunde's tables
         charList = [None] + self.makeRow(self.row)
@@ -262,7 +261,7 @@ class Big5CodeChart(CodeChartBase):
         """Works out the character values for this Big5 row.
         Rows start at 0xA1"""
         cells = []
-        if string.find(self.encodingName, 'B5') > -1:
+        if self.encodingName.find('B5') > -1:
             # big 5, different row size
             for y in [4,5,6,7,10,11,12,13,14,15]:
                 for x in range(16):

@@ -13,7 +13,7 @@ and drawn into.
 """
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import string, copy, sys, os
+import copy, sys, os
 from reportlab.pdfgen import canvas
 from reportlab import platypus
 from reportlab.platypus import BaseDocTemplate, PageTemplate, Flowable, FrameBreak
@@ -71,20 +71,20 @@ def getParagraphs(textBlock):
     """Within the script, it is useful to whack out a page in triple
     quotes containing separate paragraphs. This breaks one into its
     constituent paragraphs, using blank lines as the delimiter."""
-    lines = string.split(textBlock, '\n')
+    lines = textBlock.split('\n')
     paras = []
     currentPara = []
     for line in lines:
-        if len(string.strip(line)) == 0:
+        if len(line.strip()) == 0:
             #blank, add it
             if currentPara != []:
-                paras.append(string.join(currentPara, '\n'))
+                paras.append('\n'.join(currentPara))
                 currentPara = []
         else:
             currentPara.append(line)
     #...and the last one
     if currentPara != []:
-        paras.append(string.join(currentPara, '\n'))
+        paras.append('\n'.join(currentPara))
 
     return paras
 

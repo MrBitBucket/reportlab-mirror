@@ -12,7 +12,7 @@
 #
 #
 
-import string, io
+import io
 try :
     from Shared.reportlab.platypus.paragraph import Paragraph
     from Shared.reportlab.platypus.doctemplate import *
@@ -123,10 +123,10 @@ class MyPDFDoc :
 
     def escapexml(self, s) :
         """Escape some xml entities."""
-        s = string.strip(s)
-        s = string.replace(s, "&", "&amp;")
-        s = string.replace(s, "<", "&lt;")
-        return string.replace(s, ">", "&gt;")
+        s = s.strip()
+        s = s.replace("&", "&amp;")
+        s = s.replace("<", "&lt;")
+        return s.replace(">", "&gt;")
 
 def rlzope(self) :
     """A sample external method to show people how to use ReportLab from within Zope."""

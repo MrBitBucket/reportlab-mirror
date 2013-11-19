@@ -1,9 +1,6 @@
 __doc__="""helper for importing pdf structures into a ReportLab generated document
 """
 from reportlab.pdfbase.pdfdoc import format
-
-import string
-
 class PDFPattern:
     __PDFObject__ = True
     __RefOnly__ = 1
@@ -54,6 +51,6 @@ class PDFPattern:
                     L.append(format(value, document))
                 else:
                     L.append( str(value) )
-        return string.join(L, "")
+        return "".join(L)
 
 

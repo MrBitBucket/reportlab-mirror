@@ -6,7 +6,6 @@ Serif Regular and is covered under the license in ../fonts/bitstream-vera-licens
 """
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, NearTestCase
 setOutDir(__name__)
-import string
 from io import StringIO
 import unittest
 from reportlab.pdfgen.canvas import Canvas
@@ -252,16 +251,16 @@ class TTFontTestCase(NearTestCase):
         "Tests TTFont.splitString"
         doc = PDFDocument()
         font = TTFont("Vera", "Vera.ttf")
-        text = string.join(list(map(utf8, range(0, 511))), "")
-        allchars = string.join(list(map(chr, range(0, 256))), "")
+        text = "".join(list(map(utf8, range(0, 511))))
+        allchars = "".join(list(map(chr, range(0, 256))))
         nospace = allchars[:32] + allchars[33:]
         chunks = [(0, allchars), (1, nospace)]
         self.assertEquals(font.splitString(text, doc), chunks)
         # Do it twice
         self.assertEquals(font.splitString(text, doc), chunks)
 
-        text = string.join(list(map(utf8, list(range(510, -1, -1)))), "")
-        allchars = string.join(list(map(chr, list(range(255, -1, -1)))), "")
+        text = "".join(list(map(utf8, list(range(510, -1, -1)))))
+        allchars = "".join(list(map(chr, list(range(255, -1, -1)))))
         nospace = allchars[:223] + allchars[224:]
         chunks = [(1, nospace), (0, allchars)]
         self.assertEquals(font.splitString(text, doc), chunks)
@@ -273,7 +272,7 @@ class TTFontTestCase(NearTestCase):
 
         doc = PDFDocument()
         font = TTFont("Vera", "Vera.ttf")
-        text = string.join(list(map(utf8, list(range(512, -1, -1)))), "")
+        text = "".join(list(map(utf8, list(range(512, -1, -1)))))
         chunks = font.splitString(text, doc)
         state = font.state[doc]
         self.assertEquals(state.assignments[32], 32)
@@ -285,7 +284,7 @@ class TTFontTestCase(NearTestCase):
         doc = PDFDocument()
         font = TTFont("Vera", "Vera.ttf")
         # Actually generate some subsets
-        text = string.join(list(map(utf8, list(range(0, 513)))), "")
+        text = "".join(list(map(utf8, list(range(0, 513)))))
         font.splitString(text, doc)
         self.assertRaises(IndexError, font.getSubsetInternalName, -1, doc)
         self.assertRaises(IndexError, font.getSubsetInternalName, 3, doc)

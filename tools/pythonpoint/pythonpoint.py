@@ -71,7 +71,7 @@ Recently added features are:
 - add pyRXP support (TODO)
 """
 __version__='''$Id$'''
-import os, sys, imp, string, pprint, getopt, glob
+import os, sys, imp, pprint, getopt, glob
 
 from reportlab import rl_config
 from reportlab.lib import styles
@@ -666,13 +666,13 @@ class PPTable:
 
     def parseData(self):
         """Try to make sense of the table data!"""
-        rawdata = string.strip(string.join(self.rawBlocks, ''))
-        lines = string.split(rawdata, self.rowDelim)
+        rawdata = ''.join(self.rawBlocks).strip()
+        lines = rawdata.split(self.rowDelim)
         #clean up...
-        lines = list(map(string.strip, lines))
+        lines = [line.strip() for line in lines]
         self.data = []
         for line in lines:
-            cells = string.split(line, self.fieldDelim)
+            cells = line.split(self.fieldDelim)
             self.data.append(cells)
 
         #get the width list if not given
@@ -872,10 +872,10 @@ class PPString:
         We want to throw away
         tabs, newlines and so on, and only accept embedded string
         like '\n'"""
-        lines = string.split(self.text, '\n')
+        lines = self.text.split('\n')
         newtext = []
         for line in lines:
-            newtext.append(string.strip(line))
+            newtext.append(line.strip())
         #accept all the '\n' as newlines
 
         self.text = newtext
@@ -899,7 +899,7 @@ class PPString:
 
         if self.color is None:
             return
-        lines = string.split(string.strip(drawText), '\\n')
+        lines = drawText.strip().split('\\n')
         canv.saveState()
 
         canv.setFont(self.font, self.size)
@@ -1043,7 +1043,7 @@ def handleOptions():
     args = [x for x in args if x and x[0]=='-'] + [x for x in args if not x or x[0]!='-']
     try:
         shortOpts = 'hnvsx'
-        longOpts = string.split('cols= outdir= handout help notes printout verbose silent nofx')
+        longOpts = 'cols= outdir= handout help notes printout verbose silent nofx'.split()
         optList, args = getopt.getopt(args, shortOpts, longOpts)
     except getopt.error as msg:
         options['help'] = 1

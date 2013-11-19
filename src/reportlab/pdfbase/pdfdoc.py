@@ -14,7 +14,7 @@ The classes within this generally mirror structures in the PDF file
 and are not part of any public interface.  Instead, canvas and font
 classes are made available elsewhere for users to manipulate.
 """
-import string, types, binascii, codecs
+import types, binascii, codecs
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
 from reportlab import rl_config
@@ -843,7 +843,7 @@ def teststream(content=None):
     if content is None:
         content = teststreamcontent
     content = content.strip()
-    content = string.replace(content, "\n", LINEEND) + LINEEND
+    content = content.replace("\n", LINEEND) + LINEEND
     S = PDFStream(content = content,
                     filters=rl_config.useA85 and [PDFBase85Encode,PDFZCompress] or [PDFZCompress])
     # nothing else needed...
@@ -2010,34 +2010,30 @@ class PDFType1Font:
 
 class PDFTrueTypeFont(PDFType1Font):
     Subtype = "TrueType"
-    #local_attributes = string.split("FirstChar LastChar Widths Encoding ToUnicode FontDescriptor") #same
+    #local_attributes = "FirstChar LastChar Widths Encoding ToUnicode FontDescriptor".split() #same
 
 ##class PDFMMType1Font(PDFType1Font):
 ##    Subtype = "MMType1"
 ##
 ##class PDFType3Font(PDFType1Font):
 ##    Subtype = "Type3"
-##    local_attributes = string.split(
-##        "FirstChar LastChar Widths CharProcs FontBBox FontMatrix Resources Encoding")
+##    local_attributes = "FirstChar LastChar Widths CharProcs FontBBox FontMatrix Resources Encoding".split()
 ##
 ##class PDFType0Font(PDFType1Font):
 ##    Subtype = "Type0"
-##    local_attributes = string.split(
-##        "DescendantFonts Encoding")
+##    local_attributes = "DescendantFonts Encoding".split(
 ##
 ##class PDFCIDFontType0(PDFType1Font):
 ##    Subtype = "CIDFontType0"
-##    local_attributes = string.split(
-##        "CIDSystemInfo FontDescriptor DW W DW2 W2 Registry Ordering Supplement")
+##    local_attributes = "CIDSystemInfo FontDescriptor DW W DW2 W2 Registry Ordering Supplement".split()
 ##
 ##class PDFCIDFontType0(PDFType1Font):
 ##    Subtype = "CIDFontType2"
-##    local_attributes = string.split(
-##        "BaseFont CIDToGIDMap CIDSystemInfo FontDescriptor DW W DW2 W2")
+##    local_attributes = "BaseFont CIDToGIDMap CIDSystemInfo FontDescriptor DW W DW2 W2".split()
 ##
 ##class PDFEncoding(PDFType1Font):
 ##    Type = "Encoding"
-##    name_attributes = string.split("Type BaseEncoding")
+##    name_attributes = "Type BaseEncoding".split()
 ##    # these attributes are assumed to already be of the right type
 ##    local_attributes = ["Differences"]
 ##
@@ -2206,7 +2202,7 @@ class PDFImageXObject:
     def loadImageFromRaw(self,source):
         IMG=[]
         imagedata = pdfutils.makeRawImage(source,IMG=IMG)
-        words = string.split(imagedata[1])
+        words = imagedata[1].split()
         self.width = int(words[1])
         self.height = int(words[3])
         self.colorSpace = {'/RGB':'DeviceRGB', '/G':'DeviceGray', '/CMYK':'DeviceCMYK'}[words[7]]

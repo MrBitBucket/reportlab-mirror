@@ -10,8 +10,7 @@ __version__ = '0.8'
 
 import sys
 sys.path.insert(0, '.')
-import os, re, types, string, getopt, pickle, copy, time, pprint, traceback
-from string import find, join, split, replace, expandtabs, rstrip
+import os, re, types, getopt, pickle, copy, time, pprint, traceback
 import reportlab
 from reportlab import rl_config
 
@@ -74,7 +73,7 @@ def mainPageFrame(canvas, doc):
         canvas.setFont('Times-Roman', 12)
         canvas.drawString(4 * inch, cm, "%d" % pageNumber)
         if hasattr(canvas, 'headerLine'): # hackish
-            headerline = string.join(canvas.headerLine, ' \xc2\x8d ')
+            headerline = ' \xc2\x8d '.join(canvas.headerLine)
             canvas.drawString(2*cm, A4[1]-1.75*cm, headerline)
 
     canvas.setFont('Times-Roman', 8)
@@ -353,10 +352,9 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
 
 
     def beginFunctions(self, names):
-        srch = string.join(names, ' ')
-        if string.find(string.join(names, ' '), ' sample') > -1:
+        srch = ' '.join(names)
+        if ' '.join(names).find(' sample') > -1:
             PdfDocBuilder0.beginFunctions(self, names)
-
 
     # Skip non-sample functions.
     def beginFunction(self, name, doc, sig):
@@ -473,14 +471,14 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             f = getBytesIO()
             pprint.pprint(value, f)
             value = f.getvalue()[:-1]
-            valueLines = string.split(value, '\n')
+            valueLines = value.split('\n')
             for i in range(1, len(valueLines)):
                 valueLines[i] = ' '*(len(key)+3) + valueLines[i]
-            value = string.join(valueLines, '\n')
+            value = '\n'.join(valueLines)
 
             lines.append('%s = %s' % (key, value))
 
-        text = join(lines, '\n')
+        text = '\n'.join(lines)
         self.story.append(Paragraph("<i>Properties of Example Widget</i>", self.bt))
         self.story.append(Paragraph("", self.bt))
         self.story.append(Preformatted(text, self.code))
@@ -549,7 +547,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
 
 
     def beginFunctions(self, names):
-        if string.find(string.join(names, ' '), ' sample') > -1:
+        if ' '.join(names).find(' sample') > -1:
             HtmlDocBuilder0.beginFunctions(self, names)
 
 
@@ -657,13 +655,13 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             f = getBytesIO()
             pprint.pprint(value, f)
             value = f.getvalue()[:-1]
-            valueLines = string.split(value, '\n')
+            valueLines = value.split('\n')
             for i in range(1, len(valueLines)):
                 valueLines[i] = ' '*(len(key)+3) + valueLines[i]
-            value = string.join(valueLines, '\n')
+            value = '\n'.join(valueLines)
 
             lines.append('%s = %s' % (key, value))
-        text = join(lines, '\n')
+        text = '\n'.join(lines)
         self.outLines.append('<H3>Properties of Example Widget</H3>')
         self.outLines.append('<PRE>%s</PRE>' % text)
         self.outLines.append('')
@@ -717,7 +715,7 @@ class PlatypusDocBuilder0(DocBuilder0):
         story = self.story
         if bases:
             bases = [b.__name__ for b in bases] # hack
-            story.append(Paragraph('%s(%s)' % (name, join(bases, ', ')), bt))
+            story.append(Paragraph('%s(%s)' % (name, ', '.join(bases)), bt))
         else:
             story.append(Paragraph(name, bt))
 
@@ -885,7 +883,7 @@ def documentPackage0(pathOrName, builder, opts={}):
         package = __import__(name)
         # Some special care needed for dotted names.
         if '.' in name:
-            subname = 'package' + name[find(name, '.'):]
+            subname = 'package' + name[namefind('.'):]
             package = eval(subname)
         path = os.path.dirname(package.__file__)
 

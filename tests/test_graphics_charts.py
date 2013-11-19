@@ -79,7 +79,7 @@ def sample1bar(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     bc.categoryAxis.labels.dy = -2
     bc.categoryAxis.labels.angle = 30
 
-    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+    catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split( ' ')
     catNames = [n+'-99' for n in catNames]
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
@@ -113,7 +113,7 @@ def sample1line(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     bc.categoryAxis.labels.dy = -2
     bc.categoryAxis.labels.angle = 30
 
-    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+    catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split(' ')
     catNames = [n+'-99' for n in catNames]
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)

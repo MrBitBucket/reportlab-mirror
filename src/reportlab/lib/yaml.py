@@ -39,9 +39,7 @@ dot endPre
 """
 __version__=''' $Id$ '''
 
-
 import sys
-import string
 
 #modes:
 PLAIN = 1
@@ -78,7 +76,7 @@ class BaseParser:
 
     def parseText(self, textBlock):
         "Parses the a possible multi-line text block"
-        lines = string.split(textBlock, '\n')
+        lines = textBlock.split('\n')
         for line in lines:
             self.readLine(line)
         self.endPara()
@@ -87,7 +85,7 @@ class BaseParser:
     def readLine(self, line):
         #this is the inner loop
         self._lineNo = self._lineNo + 1
-        stripped = string.lstrip(line)
+        stripped = line.lstrip()
         if len(stripped) == 0:
             if self._mode == PLAIN:
                 self.endPara()
@@ -96,7 +94,7 @@ class BaseParser:
         elif line[0]=='.':
             # we have a command of some kind
             self.endPara()
-            words = string.split(stripped[1:])
+            words = stripped[1:].split()
             cmd, args = words[0], words[1:]
 
             #is it a parser method?
@@ -112,7 +110,7 @@ class BaseParser:
                 # assume it is a paragraph style -
                 # becomes the formatter's problem
                 self.endPara()  #end the last one
-                words = string.split(stripped, ' ', 1)
+                words = stripped.split(' ', 1)
                 assert len(words)==2, "Style %s but no data at line %d" % (words[0], self._lineNo)
                 (styletag, data) = words
                 self._style = styletag[1:]
@@ -124,12 +122,12 @@ class BaseParser:
     def endPara(self):
         #ends the current paragraph, or preformatted block
 
-        text = string.join(self._buf, ' ')
+        text = ' '.join(self._buf)
         if text:
             if self._mode == PREFORMATTED:
                 #item 3 is list of lines
                 self._results.append(('PREFORMATTED', self._style,
-                                 string.join(self._buf,'\n')))
+                                 '\n'.join(self._buf)))
             else:
                 self._results.append(('PARAGRAPH', self._style, text))
         self._buf = []

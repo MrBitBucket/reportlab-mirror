@@ -6,7 +6,6 @@ __version__='''$Id: test_platypus_indents.py 3660 2010-02-08 18:17:33Z damian $'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os, random
-from string import split, strip, join, whitespace
 from operator import truth
 from types import StringType, ListType
 import unittest
@@ -101,7 +100,6 @@ and add a '>' to the start of the following line.
 __version__=''' $Id: xpreformatted.py 3866 2011-06-27 13:08:20Z rgbecker $ '''
 __doc__='''A 'rich preformatted text' widget allowing internal markup'''
 
-import string
 from types import StringType, ListType
 from reportlab.lib import PyFontify
 from paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, ParaLines, _getFragWords, stringWidth, _sameFrag, getAscentDescent, imgVRange, imgNormV
@@ -110,7 +108,7 @@ from flowables import _dedenter
 class XPreformatted(Paragraph):
     def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, dedent=0):
         self.caseSensitive = caseSensitive
-        cleaner = lambda text, dedent=dedent: string.join(_dedenter(text or '',dedent),'\\n')
+        cleaner = lambda text, dedent=dedent: ,'\\n'.join(_dedenter(text or '',dedent))
         self._setup(text, style, bulletText, frags, cleaner)
 
     def breakLines(self, width):
@@ -138,12 +136,12 @@ class XPreformatted(Paragraph):
                 fontName = f.fontName
                 ascent, descent = getAscentDescent(fontName,fontSize)
                 kind = 0
-                L=string.split(f.text, '\\n')
+                L=f.text.split('\\n')
                 for l in L:
                     currentWidth = stringWidth(l,fontName,fontSize)
                     requiredWidth = max(currentWidth,requiredWidth)
                     extraSpace = maxWidth-currentWidth
-                    lines.append((extraSpace,string.split(l,' '),currentWidth))
+                    lines.append((extraSpace,l.split(' '),currentWidth))
                     lineno = lineno+1
                     maxWidth = lineno&lt;len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
                 blPara = f.clone(kind=kind, lines=lines,ascent=ascent,descent=descent,fontSize=fontSize)

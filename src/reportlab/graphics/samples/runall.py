@@ -2,7 +2,6 @@
 # makes a PDF sample for eaxh existing chart type
 import sys
 import glob
-import string
 import inspect
 import types
 
@@ -18,13 +17,13 @@ def getclass(f):
     return moduleClasses(__import__(f))
 
 def run(format, VERBOSE=0):
-    formats = string.split(format, ',')
+    formats = format.split( ',')
     for i in range(0, len(formats)):
-        formats[i] == string.lower(string.strip(formats[i]))
+        formats[i] == formats[i].strip().lower()
     allfiles = glob.glob('*.py')
     allfiles.sort()
     for fn in allfiles:
-        f = string.split(fn, '.')[0]
+        f = fn.split('.')[0]
         c = getclass(f)
         if c != None:
             print(c.__name__)
