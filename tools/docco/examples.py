@@ -514,7 +514,7 @@ def customfont1(canvas):
     import reportlab.rl_config
     reportlab.rl_config.warnOnMissingFontGlyphs = 0
 
-    import rl_doc_utils
+    from . import rl_doc_utils
     from reportlab.pdfbase import pdfmetrics
     afmFile, pfbFile = rl_doc_utils.getJustFontPaths()
     justFace = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
@@ -742,7 +742,7 @@ def variousshapes(canvas):
     from reportlab.lib.units import inch
     inch = int(inch)
     canvas.setStrokeGray(0.5)
-    canvas.grid(range(0,11*inch/2,inch/2), range(0,7*inch/2,inch/2))
+    canvas.grid(range(0,int(11*inch/2),int(inch/2)), range(0,int(7*inch/2),int(inch/2)))
     canvas.setLineWidth(4)
     canvas.setStrokeColorRGB(0, 0.2, 0.7)
     canvas.setFillColorRGB(1, 0.6, 0.8)
