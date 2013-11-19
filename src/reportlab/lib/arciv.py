@@ -4,7 +4,6 @@
 Arciv Stream  ciphering
 '''
 __version__=''' $Id$ '''
-from types import StringType
 class ArcIV:
 	'''
 	performs 'ArcIV' Stream Encryption of S using key
@@ -44,7 +43,7 @@ class ArcIV:
 		'''
 		sbox, i, j = self._sbox, self._i, self._j
 
-		C = type(B) is StringType and list(map(ord,B)) or B[:]
+		C = isinstance(B,str) and list(map(ord,B)) or B[:]
 		n = len(C)
 		p = 0
 		while p<n:

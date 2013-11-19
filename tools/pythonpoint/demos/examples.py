@@ -783,9 +783,8 @@ class PingoIllust:
 # D = dir()
 g = globals()
 Dprime = {}
-from types import StringType
 for a,b in g.items()):
-    if a[:4]=="test" and type(b) is StringType:
+    if a[:4]=="test" and isinstance(b,str):
         #print 'for', a
         #print b
         b = b.strip()

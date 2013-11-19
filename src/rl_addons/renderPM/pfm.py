@@ -1,5 +1,4 @@
 import struct
-from types import StringType
 class _BUILDER:
 	'''Virtual base helper class for structured file scanning'''
 	def _get_struct_fmt(self,info):
@@ -24,7 +23,7 @@ class _BUILDER:
 	def _attr_names(self,*I):
 		A = []
 		for i in I:
-			if type(i) is StringType:
+			if isinstance(i,str):
 				A.append(i)
 			else:
 				A.extend([x[1] for x in i])
@@ -90,7 +89,7 @@ class KernTrack:
 class PFM(_BUILDER):
 	def __init__(self,fn=None):
 		if fn:
-			if type(fn) is StringType:
+			if isinstance(fn,str):
 				f = open(fn,'rb')
 			else:
 				f = fn

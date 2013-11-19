@@ -109,9 +109,9 @@ def preProcessImages(spec):
     to save huge amounts of time when repeatedly building image
     documents."""
 
-    import types, glob
+    import glob
 
-    if type(spec) is types.StringType:
+    if isinstance(spec,str):
         filelist = glob.glob(spec)
     else:  #list or tuple OK
         filelist = spec

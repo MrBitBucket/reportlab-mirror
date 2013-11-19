@@ -16,7 +16,7 @@ class Logger:
 
     def add(self,fp):
         '''add the file/string fp to the destinations'''
-        if type(fp) is StringType:
+        if isinstance(fp,str):
             if fp in self._fns: return
             fp = open(fn,'wb')
             self._fns[fn] = fp
@@ -24,7 +24,7 @@ class Logger:
 
     def remove(self,fp):
         '''remove the file/string fp from the destinations'''
-        if type(fp) is StringType:
+        if isinstance(fp,str):
             if fp not in self._fns: return
             fn = fp
             fp = self._fns[fn]

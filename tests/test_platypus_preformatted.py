@@ -7,7 +7,6 @@ from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, p
 setOutDir(__name__)
 import sys, os, random
 from operator import truth
-from types import StringType, ListType
 import unittest
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.paraparser import ParaParser
@@ -100,7 +99,6 @@ and add a '>' to the start of the following line.
 __version__=''' $Id: xpreformatted.py 3866 2011-06-27 13:08:20Z rgbecker $ '''
 __doc__='''A 'rich preformatted text' widget allowing internal markup'''
 
-from types import StringType, ListType
 from reportlab.lib import PyFontify
 from paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, ParaLines, _getFragWords, stringWidth, _sameFrag, getAscentDescent, imgVRange, imgNormV
 from flowables import _dedenter
@@ -112,7 +110,7 @@ class XPreformatted(Paragraph):
         self._setup(text, style, bulletText, frags, cleaner)
 
     def breakLines(self, width):
-        if type(width) != ListType: maxWidths = [width]
+        if isinstance(width,list): maxWidths = [width]
         else: maxWidths = width
         lines = []
         lineno = 0

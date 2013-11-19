@@ -7,7 +7,6 @@ __version__=''' $Id'''
 __doc__="""Tests of intra-paragraph parsing behaviour in Platypus."""
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile
 setOutDir(__name__)
-from types import TupleType, ListType, StringType, UnicodeType
 from pprint import pprint as pp
 import unittest
 from reportlab.platypus import cleanBlockQuotedText
@@ -33,7 +32,7 @@ class ParaParserTestCase(unittest.TestCase):
     def testPlain(self):
         txt = "Hello World"
         stuff = ParaParser().parse(txt, self.style)
-        assert type(stuff) is TupleType
+        assert isinstance(stuff,tuple)
         assert len(stuff) == 3
         assert  stuff[1][0].text == 'Hello World'
 
@@ -77,7 +76,7 @@ class ParaParserTestCase(unittest.TestCase):
         "See if simple unicode goes through"
         txt = "Hello World"
         stuff = ParaParser().parse(txt, self.style)
-        assert type(stuff) is TupleType
+        assert isinstance(stuff,tuple)
         assert len(stuff) == 3
         assert  stuff[1][0].text == 'Hello World'
 

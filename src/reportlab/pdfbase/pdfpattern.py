@@ -19,14 +19,12 @@ class PDFPattern:
         """
         self.pattern = pattern_sequence
         self.arguments = keywordargs
-        from types import StringType, InstanceType
-        toptypes = (StringType, InstanceType)
         for x in pattern_sequence:
-            if type(x) not in toptypes:
+            if not isinstance(x,str) and not hasattr(x,'format'):
                 if len(x)!=1:
-                    raise ValueError("sequence elts must be strings or singletons containing strings: "+repr(x))
-                if type(x[0]) is not StringType:
-                    raise ValueError("Singletons must contain strings or instances only: "+repr(x[0]))
+                    raise ValueError("sequence elts must be strings or singletons containing strings: "+ascii(x))
+                if not isinstance(x[0],str):
+                    raise ValueError("Singletons must contain strings or instances only: "+ascii(x[0]))
     def __setitem__(self, item, value):
         self.arguments[item] = value
     def __getitem__(self, item):
@@ -34,23 +32,20 @@ class PDFPattern:
     def format(self, document):
         L = []
         arguments = self.arguments
-        from types import StringType, InstanceType
         for x in self.pattern:
-            tx = type(x)
-            if tx is StringType:
+            if isinstance(x,str):
                 L.append(x)
-            elif tx is InstanceType:
-                L.append( x.format(document) )
+            elif hasattr(x,'format'):
+                L.append(x.format(document) )
             else:
                 name = x[0]
                 value = arguments.get(name, None)
                 if value is None:
-                    raise ValueError("%s value not defined" % repr(name))
-                if type(value) is InstanceType:
-                    #L.append( value.format(document) )
-                    L.append(format(value, document))
+                    raise ValueError("%s value not defined" % ascii(name))
+                if isinstance(value,str):
+                    L.append(value)
                 else:
-                    L.append( str(value) )
+                    L.append(value.formatformat(document))
         return "".join(L)
 
 

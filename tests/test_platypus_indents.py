@@ -8,7 +8,6 @@ setOutDir(__name__)
 import sys, os, random
 from string import split, strip, join, whitespace
 from operator import truth
-from types import StringType, ListType
 import unittest
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.paraparser import ParaParser

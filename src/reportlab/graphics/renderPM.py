@@ -287,8 +287,8 @@ class PMCanvas:
     def saveToFile(self,fn,fmt=None):
         im = self.toPIL()
         if fmt is None:
-            if type(fn) is not StringType:
-                raise ValueError("Invalid type '%s' for fn when fmt is None" % type(fn))
+            if not isinstance(fn,str):
+                raise ValueError("Invalid value '%s' for fn when fmt is None" % ascii(fn))
             fmt = os.path.splitext(fn)[1]
             if fmt.startswith('.'): fmt = fmt[1:]
         configPIL = self.configPIL or {}
@@ -333,9 +333,9 @@ class PMCanvas:
                 T = 768*[0]
                 for o, c in zip((0,256,512), tc.bitmap_rgb()):
                     T[o+c] = 255
-                #if type(fn) is type(''): ImageChops.invert(im.point(T).convert('L').point(255*[0]+[255])).save(fn+'_mask.gif','GIF')
+                #if isinstance(fn,str): ImageChops.invert(im.point(T).convert('L').point(255*[0]+[255])).save(fn+'_mask.gif','GIF')
                 im = Image.merge('RGBA', im.split()+(ImageChops.invert(im.point(T).convert('L').point(255*[0]+[255])),))
-                #if type(fn) is type(''): im.save(fn+'_masked.gif','GIF')
+                #if isinstance(fn,str): im.save(fn+'_masked.gif','GIF')
             for a,d in ('resolution',self._dpi),('resolution unit','inch'):
                 configPIL[a] = configPIL.get(a,d)
         configPIL.setdefault('chops_invert',0)

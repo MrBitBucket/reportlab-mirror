@@ -83,9 +83,8 @@ def makesubsection(canvas, title, horizontal):
 
 
 #def newsubsection(name):
-#    from types import TupleType
 #    thissection = outlinenametree[-1]
-#    if type(thissection) is not TupleType:
+#    if not isinstance(thissection,tuple):
 #        subsectionlist = []
 #        thissection = outlinenametree[-1] = (thissection, subsectionlist)
 #    else:

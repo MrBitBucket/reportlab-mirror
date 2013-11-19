@@ -191,7 +191,7 @@ class LinePlot(AbstractLineChart):
             line = []
             for colNo in range(len(self.data[rowNo])):
                 datum = self.data[rowNo][colNo] # x,y value
-                if type(datum[0]) == type(''):
+                if isinstance(datum[0],str):
                     x = self.xValueAxis.scale(mktime(mkTimeTuple(datum[0])))
                 else:
                     x = self.xValueAxis.scale(datum[0])
@@ -207,7 +207,7 @@ class LinePlot(AbstractLineChart):
 
         if labelFmt is None:
             labelText = None
-        elif type(labelFmt) is StringType:
+        elif isinstance(labelFmt,str):
             if labelFmt == 'values':
                 labelText = self.lineLabelArray[rowNo][colNo]
             else:
@@ -218,7 +218,7 @@ class LinePlot(AbstractLineChart):
             else:
                 labelText = labelFmt(self,rowNo,colNo,x,y)
         else:
-            raise ValueError("Unknown formatter type %s, expected string or function"%labelFmt)
+            raise ValueError("Unknown formatter type %s, expected string or function"% labelFmt)
 
         if labelText:
             label = self.lineLabels[(rowNo, colNo)]
@@ -821,7 +821,7 @@ class SplitLinePlot(AreaLinePlot):
 
 def _maxWidth(T, fontName, fontSize):
     '''return max stringWidth for the list of strings T'''
-    if type(T) not in (type(()),type([])): T = (T,)
+    if not isinstance(T,(tuple,list)): T = (T,)
     T = [_f for _f in T if _f]
     return T and max(list(map(lambda t,sW=stringWidth,fN=fontName, fS=fontSize: sW(t,fN,fS),T))) or 0
 

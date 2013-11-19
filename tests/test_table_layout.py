@@ -11,7 +11,6 @@ from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.flowables import PageBreak
 import os
 import unittest
-from types import TupleType, ListType, StringType
 
 class TableTestCase(unittest.TestCase):
 

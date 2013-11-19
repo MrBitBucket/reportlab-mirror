@@ -62,7 +62,6 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.rl_accel import fp_str
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib import colors
-from types import StringType, UnicodeType, InstanceType, TupleType, ListType, FloatType
 from reportlab.lib.styles import _baseFontName
 
 # SET THIS TO CAUSE A VIEWING BUG WITH ACROREAD 3 (for at least one input)
@@ -275,11 +274,10 @@ class paragraphEngine:
         while not done and cursor<maxcursor:
             opcode = program[cursor]
             #if debug: print "opcode", cursor, opcode
-            topcode = type(opcode)
-            if topcode in (StringType, UnicodeType, InstanceType):
+            if isinstance(opcode,str) or hasattr(opcode,'width'):
                 lastneedspace = needspace
                 needspace = 0
-                if topcode is InstanceType:
+                if hasattr(opcode,'width'):
                     justStrings = 0
                     width = opcode.width(self)
                     needspace = 0
@@ -319,7 +317,7 @@ class paragraphEngine:
                     #print line
                     #stop
                 first = 0
-            elif topcode is FloatType:
+            elif isinstance(opcode,float):
                 justStrings = 0
                 aopcode = abs(opcode) # negative means non expanding
                 if aopcode>TOOSMALLSPACE:
@@ -332,7 +330,7 @@ class paragraphEngine:
                             currentLength = nextLength
                             line.append(opcode)
                     first = 0
-            elif topcode is  TupleType:
+            elif isinstance(opcode,tuple):
                 justStrings = 0
                 indicator = opcode[0]
                 #line.append(opcode)
@@ -349,7 +347,7 @@ class paragraphEngine:
                     oldcolor = self.fontColor
                     (i, colorname) = opcode
                     #print "opcode", opcode
-                    if type(colorname) in (StringType, UnicodeType):
+                    if isinstance(colorname,str):
                         color = self.fontColor = getattr(colors, colorname)
                     else:
                         color = self.fontColor = colorname # assume its something sensible :)
@@ -364,7 +362,7 @@ class paragraphEngine:
                     # change font size
                     (i, fontsize) = opcode
                     size = abs(float(fontsize))
-                    if type(fontsize) in (StringType, UnicodeType):
+                    if isinstance(fontsize,str):
                         if fontsize[:1]=="+":
                             fontSize = self.fontSize = self.fontSize + size
                         elif fontsize[:1]=="-":
@@ -484,8 +482,7 @@ class paragraphEngine:
         result = []
         first = 1
         for e in line:
-            te = type(e)
-            if first and (te in (StringType, UnicodeType, InstanceType)):
+            if first and (isinstance(e,str) or hasattr(e,'width')):
                 result.append(shift)
                 first = 0
             result.append(e)
@@ -497,10 +494,9 @@ class paragraphEngine:
         spacecount = 0
         visible = 0
         for e in line:
-            te = type(e)
-            if te is FloatType and e>TOOSMALLSPACE and visible:
+            if isinstance(e,float) and e>TOOSMALLSPACE and visible:
                 spacecount = spacecount+1
-            elif te in (StringType, UnicodeType, InstanceType):
+            elif first and (isinstance(e,str) or hasattr(e,'width')):
                 visible = 1
         #if debug: print "diff is", diff, "wordcount", wordcount #; die
         if spacecount<1:
@@ -516,11 +512,10 @@ class paragraphEngine:
         nline = len(line)
         while cursor<nline:
             e = line[cursor]
-            te = type(e)
             result.append(e)
-            if (te in (StringType, UnicodeType, InstanceType)):
+            if first and (isinstance(e,str) or hasattr(e,'width')):
                 visible = 1
-            elif te is FloatType and e>TOOSMALLSPACE and visible:
+            elif isinstance(e,float) and e>TOOSMALLSPACE and visible:
                 expanded = e+shift
                 result[-1] = expanded
             cursor = cursor+1
@@ -536,14 +531,13 @@ class paragraphEngine:
 ##                    while insertplace>0 and not done:
 ##                        beforeplace = insertplace-1
 ##                        beforething = result[beforeplace]
-##                        thingtype = type(beforething)
-##                        if thingtype is TupleType:
+##                        if isinstance(beforething,tuple):
 ##                            indicator = beforething[0]
 ##                            if indicator=="endLineOperation":
 ##                                done = 1
 ##                            elif debug:
 ##                                print "adding shift before", beforething
-##                        elif thingtype is FloatType:
+##                       elif isinstance(beforething,float):
 ##                            myshift = myshift + beforething
 ##                            del result[beforeplace]
 ##                        else:
@@ -562,28 +556,25 @@ class paragraphEngine:
         maxindex = len(line)
         while index<maxindex:
             e = line[index]
-            te = type(e)
-            if te in (StringType, UnicodeType) and index<maxindex-1:
+            if isinstance(e,str) and index<maxindex-1:
                 # collect strings and floats
                 thestrings = [e]
                 thefloats = 0.0
                 index = index+1
                 nexte = line[index]
-                tnexte = type(nexte)
-                while index<maxindex and (tnexte in (FloatType, StringType, UnicodeType)):
+                while index<maxindex and isinstance((nexte,(float,str)):
                     # switch to expandable space if appropriate
-                    if tnexte is FloatType:
+                    if isinstance(nexte,float):
                         if thefloats<0 and nexte>0:
                             thefloats = -thefloats
                         if nexte<0 and thefloats>0:
                             nexte = -nexte
                         thefloats = thefloats + nexte
-                    elif tnexte in (StringType, UnicodeType):
+                    elif isinstance(nexte,str):
                         thestrings.append(nexte)
                     index = index+1
                     if index<maxindex:
                         nexte = line[index]
-                        tnexte = type(nexte)
                 # wrap up the result
                 s = ' '.join(thestrings)
                 result.append(s)
@@ -602,7 +593,7 @@ class paragraphEngine:
         result = []
         last = 0
         for e in line:
-            if type(e) is FloatType:
+            if isinstance(e,float):
                 # switch to expandable space if appropriate
                 if last<0 and e>0:
                     last = -last
@@ -621,10 +612,9 @@ class paragraphEngine:
 ##        done = 0
 ##        while count>0 and not done:
 ##            e = result[count]
-##            te = type(e)
-##            if te is StringType or te is InstanceType or te is TupleType:
+##            if hasattr(e,'width') or isinstance(e,str):
 ##                done = 1
-##            elif te is FloatType:
+##            elif isinstance(e,float):
 ##                del result[count]
 ##            count = count-1
         # move end operations left and start operations left up to visibles
@@ -638,23 +628,21 @@ class paragraphEngine:
                 this = result[index]
                 next = result[nextindex]
                 doswap = 0
-                tthis = type(this)
-                tnext = type(next)
                 # don't swap visibles
-                if tthis in (StringType, UnicodeType) or \
-                   tnext in (StringType, UnicodeType) or \
-                   this is InstanceType or tnext is InstanceType:
+                if isinstance(this,str) or \
+                   isinstance(next,str) or \
+                   hasattr(this,'width') or hasattr(next,'width'):
                     doswap = 0
                 # only swap two tuples if the second one is an end operation and the first is something else
-                elif tthis is TupleType:
+                elif isintance(this,tuple):
                     thisindicator = this[0]
-                    if tnext is TupleType:
+                    if isinstance(next,tuple):
                         nextindicator = next[0]
                         doswap = 0
                         if (nextindicator=="endLineOperation" and thisindicator!="endLineOperation"
                             and thisindicator!="lineOperation"):
                             doswap = 1 # swap nonend!=end
-                    elif tnext==FloatType:
+                    elif isinstance(next,float):
                         if thisindicator=="lineOperation":
                             doswap = 1 # begin != space
                 if doswap:
@@ -680,8 +668,7 @@ class paragraphEngine:
         thislinerightIndent = self.rightIndent
         indented = 0
         for opcode in program:
-            topcode = type(opcode)
-            if topcode in (StringType, UnicodeType, InstanceType):
+            if isinstance(opcode,str)  or hasattr(opcode,'width'):
                 if not indented:
                     if abs(thislineindent)>TOOSMALLSPACE:
                         #if debug: print "INDENTING", thislineindent
@@ -697,19 +684,19 @@ class paragraphEngine:
                     font = self.fontName
                     size = self.fontSize
                     textobject.setFont(font, size)
-                if topcode in (StringType, UnicodeType):
+                if isinstance(opcode,str):
                     textobject.textOut(opcode)
                 else:
                     # drawable thing
                     opcode.execute(self, textobject, canvas)
-            elif topcode is FloatType:
+            elif isinstance(opcode,float):
                 # use abs value (ignore expandable marking)
                 opcode = abs(opcode)
                 if opcode>TOOSMALLSPACE:
                     #textobject.moveCursor(opcode, 0)
                     code.append('%s Td' % fp_str(opcode, 0))
                     self.x = self.x + opcode
-            elif topcode is TupleType:
+            elif isinstance(opcode,tuple):
                 indicator = opcode[0]
                 if indicator=="nextLine":
                     # advance to nextLine
@@ -730,7 +717,7 @@ class paragraphEngine:
                     oldcolor = self.fontColor
                     (i, colorname) = opcode
                     #print "opcode", opcode
-                    if type(colorname) in (StringType, UnicodeType):
+                    if isinstance(colorname,str):
                         color = self.fontColor = getattr(colors, colorname)
                     else:
                         color = self.fontColor = colorname # assume its something sensible :)
@@ -751,7 +738,7 @@ class paragraphEngine:
                     # change font size
                     (i, fontsize) = opcode
                     size = abs(float(fontsize))
-                    if type(fontsize) in (StringType, UnicodeType):
+                    if isinstance(fontsize,str):
                         if fontsize[:1]=="+":
                             fontSize = self.fontSize = self.fontSize + size
                         elif fontsize[:1]=="-":
@@ -844,7 +831,7 @@ def stringLine(line, length):
 
     strings = []
     for x in line:
-        if type(x) in (StringType, UnicodeType):
+        if isinstance(x,str):
             strings.append(x)
     text = ' '.join(strings)
     result = [text, float(length)]
@@ -858,7 +845,7 @@ def simpleJustifyAlign(line, currentLength, maxLength):
 
     strings = []
     for x in line[:-1]:
-        if type(x) in (StringType, UnicodeType):
+        if isinstance(x,str):
             strings.append(x)
     nspaces = len(strings)-1
     slack = maxLength-currentLength
@@ -1407,8 +1394,7 @@ class Para(Flowable):
             count = 0
             for x in program:
                 count = count+1
-                tx = type(x)
-                if tx in (StringType, UnicodeType, InstanceType):
+                if isinstance(x,str) or hasattr(x,'width'):
                     break
             program.insert( count, ("indent", -style.firstLineIndent ) ) # defaults to end if no visibles
         #print "="*8, id(self), "program is"
@@ -1421,7 +1407,7 @@ class Para(Flowable):
 ##        for x in program:
 ##            if dump:
 ##                print "dump:", x
-##            if type(x) is TupleType:
+##            if isinstance(x,tuple):
 ##                i = x[0]
 ##                if i=="push":
 ##                    stackcount = stackcount+1
@@ -1461,10 +1447,8 @@ class Para(Flowable):
         program.append( ("pop",) )
 
     def compileComponent(self, parsedText, program):
-        import types
-        ttext = type(parsedText)
         #program = self.program
-        if ttext in (StringType, UnicodeType):
+        if isinstance(parsedText,str):
             # handle special characters here...
             # short cut
             if parsedText:
@@ -1473,10 +1457,10 @@ class Para(Flowable):
                     program.append(" ") # contract whitespace to single space
                 else:
                     handleSpecialCharacters(self, parsedText, program)
-        elif ttext is ListType:
+        elif isinstance(parsedText,list):
             for e in parsedText:
                 self.compileComponent(e, program)
-        elif ttext is TupleType:
+        elif isinstance(parsedText,tuple):
             (tagname, attdict, content, extra) = parsedText
             if not attdict:
                 attdict = {}
@@ -1570,11 +1554,10 @@ class Para(Flowable):
         bulletmaker = bulletMaker(tagname, atts, self.context)
         # now do each element as a separate paragraph
         for e in content:
-            te = type(e)
-            if te in (StringType, UnicodeType):
+            if isinstance(e,str):
                 if e.strip():
                     raise ValueError("don't expect CDATA between list elements")
-            elif te is TupleType:
+            elif isinstance(e,tuple):
                 (tagname, attdict1, content1, extra) = e
                 if tagname!="li":
                     raise ValueError("don't expect %s inside list" % repr(tagname))
@@ -1601,15 +1584,14 @@ class Para(Flowable):
         while contentcopy:
             e = contentcopy[0]
             del contentcopy[0]
-            te = type(e)
-            if te in (StringType, UnicodeType):
+            if isinstance(e,str):
                 if e.strip():
                     raise ValueError("don't expect CDATA between list elements")
                 elif not contentcopy:
                     break # done at ending whitespace
                 else:
                     continue # ignore intermediate whitespace
-            elif te is TupleType:
+            elif isinstance(e,tuple):
                 (tagname, attdict1, content1, extra) = e
                 if tagname!="dd" and tagname!="dt":
                     raise ValueError("don't expect %s here inside list, expect 'dd' or 'dt'" % \
@@ -1721,7 +1703,7 @@ class Para(Flowable):
 
     def compile_bullet(self, attdict, content, extra, program):
         ### eventually should allow things like images and graphics in bullets too XXXX
-        if len(content)!=1 or type(content[0]) not in (StringType, UnicodeType):
+        if len(content)!=1 or not isinstance(content[0],str):
             raise ValueError("content for bullet must be a single string")
         text = content[0]
         self.do_bullet(text, program)
@@ -1962,11 +1944,10 @@ def EmbedInRml2pdf():
             mystyle.addAttributes(attdict)
             bulletText = attdict.get("bulletText", None)
             # can we use the fast implementation?
-            import types
             result = None
             if not bulletText and len(content)==1:
                 text = content[0]
-                if type(text) in (StringType, UnicodeType) and "&" not in text:
+                if isinstance(text,str) and "&" not in text:
                     result = FastPara(mystyle, text)
             if result is None:
                 result = Para(mystyle, content, context=context, bulletText=bulletText) # possible ref loop on context, break later

@@ -1007,28 +1007,15 @@ class LegendedPie(Pie):
             if self.legend_data != None:
                 ldf = self.legend_data[f]
                 lNF = self.legendNumberFormat
-                from types import StringType
                 if ldf is None or lNF is None:
                     pass
-                elif type(lNF) is StringType:
+                elif isinstance(lNF,str):
                     ldf = lNF % ldf
                 elif hasattr(lNF,'__call__'):
                     ldf = lNF(ldf)
                 else:
-                    p = self.legend_names[f]
-                if self.legend_data != None:
-                    ldf = self.legend_data[f]
-                    lNF = self.legendNumberFormat
-                    if ldf is None or lNF is None:
-                        pass
-                    elif type(lNF) is StringType:
-                        ldf = lNF % ldf
-                    elif hasattr(lNF,'__call__'):
-                        ldf = lNF(ldf)
-                    else:
-                        msg = "Unknown formatter type %s, expected string or function" % self.legendNumberFormat
-                        raise Exception(msg)
-                    self._legend2.colorNamePairs.append((None,ldf))
+                    raise ValueError("Unknown formatter type %s, expected string or function" % ascii(self.legendNumberFormat))
+                self._legend2.colorNamePairs.append((None,ldf))
         p = Pie.draw(self)
         if self.drawLegend:
             p.add(self.legend1)
