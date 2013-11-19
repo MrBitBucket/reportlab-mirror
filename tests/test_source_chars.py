@@ -8,7 +8,6 @@ setOutDir(__name__)
 from reportlab.lib.testutils import RL_HOME,testsFolder
 __version__=''' $Id$ '''
 import os, sys, glob, re
-from types import ModuleType, ClassType, MethodType, FunctionType
 import reportlab
 import unittest
 from reportlab.lib.utils import open_and_read
