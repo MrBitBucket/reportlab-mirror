@@ -223,8 +223,7 @@ def uSymbol2Symbol(uSymbol,x,y,color):
 
 class _isSymbol(Validator):
     def test(self,x):
-        return hasattr(x,'__call__') or isinstance(x,Marker) or isinstance(x,Flag) \
-                or (type(x)==ClassType and issubclass(x,Widget))
+        return hasattr(x,'__call__') or isinstance(x,Marker) or isinstance(x,Flag) or issubclass(x,Widget)
 
 isSymbol = _isSymbol()
 
