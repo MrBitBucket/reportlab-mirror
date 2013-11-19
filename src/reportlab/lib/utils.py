@@ -8,17 +8,13 @@ import os, sys, imp, time
 import base64
 import pickle
 from io import BytesIO
-import hashlib
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
 
-if sys.hexversion >= 0x02000000:
-    def _digester(s):
-        return md5(s).hexdigest()
-else:
-    # hexdigest not available in 1.5
-    def _digester(s):
-        return join(["%02x" % ord(x) for x in md5(s).digest()], '')
+try:
+    from hashlib import md5
+except ImportError:
+    import md5
 
 isPy3 = sys.version_info[0]==3
 
@@ -39,6 +35,9 @@ def isSeq(v,_st=(tuple,list)):
     return isinstance(v,_st)
 
 if isPy3:
+    def _digester(s):
+        return md5(s if isBytes(s) else s.encode('utf8')).hexdigest()
+
     def UniChr(v):
         return chr(v)
 
@@ -54,7 +53,15 @@ if isPy3:
     def isClass(v):
         return isinstance(v, type)
     from string import ascii_letters
+    int2byte = lambda x: bytes([x])
 else:
+    if sys.hexversion >= 0x02000000:
+        def _digester(s):
+            return md5(s).hexdigest()
+    else:
+        # hexdigest not available in 1.5
+        def _digester(s):
+            return join(["%02x" % ord(x) for x in md5(s).digest()], '')
     def UniChr(v):
         return unichr(v)
 
@@ -74,6 +81,7 @@ else:
     from future_builtins import ascii
     import __builtin__
     __builtin__.ascii = ascii
+    int2byte = chr
 
 
 def _findFiles(dirList,ext='.ttf'):
@@ -562,7 +570,7 @@ class ImageReader(object):
                         if not self._cache:
                             from rl_config import register_reset
                             register_reset(self._cache.clear)
-                        data=self._cache.setdefault(md5(data).digest(),data)
+                        data=self._cache.setdefault(_digester(data),data)
                     self.fp=getBytesIO(data)
                 elif imageReaderFlags==-1 and isinstance(fileName,str):
                     #try Ralf Schmitt's re-opening technique of avoiding too many open files
