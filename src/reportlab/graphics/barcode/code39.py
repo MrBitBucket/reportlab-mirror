@@ -59,7 +59,8 @@ _patterns = {
     '+':    ("bSbsbSbSb", 41),      '%': ("bsbSbSbSb", 42)
     }
 
-_stdchrs = string.digits + string.uppercase + "-. $/+%"
+from reportlab.lib.utils import ascii_uppercase, ascii_lowercase
+_stdchrs = string.digits + ascii_uppercase + "-. $/+%"
 
 _extended = {
     '\0':   "%U",    '\01':  "$A",    '\02':  "$B",    '\03':  "$C",
@@ -88,7 +89,7 @@ _extended = {
     }
 
 
-_extchrs = _stdchrs + string.lowercase + \
+_extchrs = _stdchrs + ascii_lowercase + \
     "\000\001\002\003\004\005\006\007\010\011\012\013\014\015\016\017" + \
     "\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037" + \
     "*!'#&\"(),:;<=>?@[\\]^_`{|}~\177"
@@ -192,7 +193,7 @@ class Standard39(_Code39Base):
         vval = [].append
         self.valid = 1
         for c in self.value:
-            if c in string.lowercase:
+            if c in ascii_lowercase:
                 c = string.upper(c)
             if c not in _stdchrs:
                 self.valid = 0

@@ -52,7 +52,7 @@ if isPy3:
 
     def isClass(v):
         return isinstance(v, type)
-    from string import ascii_letters
+    from string import ascii_letters, ascii_uppercase, ascii_lowercase
     int2byte = lambda x: bytes([x])
 else:
     if sys.hexversion >= 0x02000000:
@@ -77,7 +77,7 @@ else:
     def isClass(v):
         import types
         return isinstance(v, types.ClassType)
-    from string import letters as ascii_letters
+    from string import letters as ascii_letters, uppercase as ascii_uppercase, lowercase as ascii_lowercase
     from future_builtins import ascii
     import __builtin__
     __builtin__.ascii = ascii
