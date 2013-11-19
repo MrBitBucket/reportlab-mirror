@@ -8,7 +8,7 @@ pythonpoint.py.
 """
 
 import string, imp, sys, os, copy
-from reportlab.lib.utils import isSeqType
+from reportlab.lib.utils import isSeq
 from reportlab.lib import xmllib
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -325,7 +325,7 @@ class PPMLParser(xmllib.XMLParser):
         #makes it the current style sheet.
         path = self._arg('stylesheet',args,'path')
         if path=='None': path = []
-        if not isSeqType(path): path = [path]
+        if not isSeq(path): path = [path]
         path.append('styles')
         path.append(os.getcwd())
         modulename = self._arg('stylesheet', args, 'module')

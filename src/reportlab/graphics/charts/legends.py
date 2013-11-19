@@ -17,7 +17,7 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropH
 from reportlab.graphics.shapes import Drawing, Group, String, Rect, Line, STATE_DEFAULTS
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
-from reportlab.lib.utils import isSeqType, find_locals
+from reportlab.lib.utils import isSeq, find_locals
 from reportlab.graphics.shapes import _baseGFontName
 from functools import reduce
 
@@ -40,20 +40,20 @@ def _objStr(s):
         return str(s)
 
 def _getStr(s):
-    if isSeqType(s):
+    if isSeq(s):
         return list(map(_getStr,s))
     else:
         return _objStr(s)
 
 def _getLines(s):
-    if isSeqType(s):
+    if isSeq(s):
         return tuple([(x or '').split('\n') for x in s])
     else:
         return (s or '').split('\n')
 
 def _getLineCount(s):
     T = _getLines(s)
-    if isSeqType(s):
+    if isSeq(s):
         return max([len(x) for x in T])
     else:
         return len(T)
@@ -61,7 +61,7 @@ def _getLineCount(s):
 def _getWidths(i,s, fontName, fontSize, subCols):
     S = []
     aS = S.append
-    if isSeqType(s):
+    if isSeq(s):
         for j,t in enumerate(s):
             sc = subCols[j,i]
             fN = getattr(sc,'fontName',fontName)
@@ -402,7 +402,7 @@ class Legend(Widget):
                 xn = thisx
             else:
                 raise ValueError("bad alignment")
-            if not isSeqType(name):
+            if not isSeq(name):
                 T = [T]
             yd = y
             for k,lines in enumerate(T):
