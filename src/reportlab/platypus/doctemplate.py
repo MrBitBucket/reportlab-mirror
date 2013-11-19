@@ -642,7 +642,7 @@ class BaseDocTemplate:
 
     def handle_nextPageTemplate(self,pt):
         '''On endPage change to the page template with name or index pt'''
-        if isinstance(pt,''):
+        if isinstance(pt,str):
             if hasattr(self, '_nextPageTemplateCycle'): del self._nextPageTemplateCycle
             for t in self.pageTemplates:
                 if t.id == pt:
