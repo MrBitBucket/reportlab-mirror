@@ -22,7 +22,7 @@ from reportlab.lib.utils import isUnicode, isStr
 from reportlab.lib.rl_accel import sameFrag
 import re
 
-#on UTF8 branch, split and strip must be unicode-safe!
+#on UTF8/py33 branch, split and strip must be unicode-safe!
 #thanks to Dirk Holtwick for helpful discussions/insight
 #on this one
 _wsc = ''.join((
@@ -62,9 +62,7 @@ _wsc_re_split=re.compile('[%s]+'% re.escape(_wsc)).split
 def split(text, delim=None):
     if not isUnicode(text): text = text.decode('utf8')
     if delim is not None and not isUnicode(delim): delim = delim.decode('utf8')
-    if delim is None and '\xa0' in text:
-        return [uword.encode('utf8') for uword in _wsc_re_split(text)]
-    return [uword for uword in text.split(delim)]
+    return [uword for uword in (_wsc_re_split(text) if delim is None and '\xa0' in text else text.split(delim))]
 
 def strip(text):
     if not isUnicode(text): text = text.decode('utf8')
@@ -686,8 +684,6 @@ def _do_under_line(i, t_off, ws, tx, lm=-0.125):
 
 _scheme_re = re.compile('^[a-zA-Z][-+a-zA-Z0-9]+$')
 def _doLink(tx,link,rect):
-    if isinstance(link,str):
-        link = link.encode('utf8')
     parts = link.split(':',1)
     scheme = len(parts)==2 and parts[0].lower() or ''
     if _scheme_re.match(scheme) and scheme!='document':
@@ -777,13 +773,12 @@ def textTransformFrags(frags,style):
         n = len(frags)
         if n==1:
             #single fragment the easy case
-            frags[0].text = tt(frags[0].text.decode('utf8')).encode('utf8')
+            frags[0].text = tt(frags[0].text)
         elif tt is str.title:
             pb = True
             for f in frags:
-                t = f.text
-                if not t: continue
-                u = t.decode('utf8')
+                u = f.text
+                if not u: continue
                 if u.startswith(' ') or pb:
                     u = tt(u)
                 else:
@@ -791,12 +786,12 @@ def textTransformFrags(frags,style):
                     if i>=0:
                         u = u[:i]+tt(u[i:])
                 pb = u.endswith(' ')
-                f.text = u.encode('utf8')
+                f.text = u
         else:
             for f in frags:
-                t = f.text
-                if not t: continue
-                f.text = tt(t.decode('utf8')).encode('utf8')
+                u = f.text
+                if not u: continue
+                f.text = tt(u)
 
 class cjkU(str):
     '''simple class to hold the frag corresponding to a str'''
@@ -986,7 +981,6 @@ class Paragraph(Flowable):
     def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, encoding='utf8'):
         self.caseSensitive = caseSensitive
         self.encoding = encoding
-
         self._setup(text, style, bulletText or getattr(style,'bulletText',None), frags, cleanBlockQuotedText)
 
 
