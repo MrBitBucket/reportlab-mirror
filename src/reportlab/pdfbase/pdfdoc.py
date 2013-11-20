@@ -100,8 +100,6 @@ def format(element, document, toplevel=0):
         #use a controlled number formatting routine
         #instead of str, so Jython/Python etc do not differ
         return fp_str(element)
-    #elif isinstance(element,bytes):
-    #   return element.decode('utf8')
     else:
         return str(element)
 
