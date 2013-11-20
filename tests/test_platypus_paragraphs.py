@@ -6,7 +6,6 @@ __version__=''' $Id$ '''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os, unittest
-from string import split, strip, join, whitespace
 from operator import truth
 from reportlab.pdfbase.pdfmetrics import stringWidth, registerFont, registerFontFamily
 from reportlab.pdfbase.ttfonts import TTFont
@@ -578,7 +577,7 @@ phonemic and morphological analysis.'''
             elif mode==4:
                 text = text.replace('English ','English&nbsp;').replace('quite ','quite&nbsp;')
                 text = text.replace(' methodological','&nbsp;methodological').replace(' impose','&nbsp;impose')
-                a(Paragraph('Justified paragraph in normal font & some hard spaces',style=normal))
+                a(Paragraph('Justified paragraph in normal font &amp; some hard spaces',style=normal))
             else:
                 a(Paragraph('Justified paragraph in normal font',style=normal))
 
