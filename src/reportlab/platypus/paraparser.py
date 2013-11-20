@@ -495,7 +495,8 @@ def _greekConvert(data):
     if not _greek2Utf8:
         from reportlab.pdfbase.rl_codecs import RL_Codecs
         import codecs
-        dm = decoding_map = codecs.make_identity_dict(range(32,256))
+        #our decoding map
+        dm = codecs.make_identity_dict(range(32,256))
         for k in range(0,32):
             dm[k] = None
         dm.update(RL_Codecs._RL_Codecs__rl_codecs_data['symbol'][0])
