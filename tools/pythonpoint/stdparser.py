@@ -444,9 +444,9 @@ class PPMLParser(xmllib.XMLParser):
         bt = self._arg('para',args,'bullettext')
         if bt == '':
             if self._curPara.style == 'Bullet':
-                bt = '\xe2\x80\xa2'  # Symbol Font bullet character, reasonable default
+                bt = '\u2022'  # Symbol Font bullet character, reasonable default
             elif self._curPara.style == 'Bullet2':
-                bt = '\xe2\x80\xa2'  # second-level bullet
+                bt = '\u2022'  # second-level bullet
             else:
                 bt = None
 

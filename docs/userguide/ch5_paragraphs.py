@@ -371,7 +371,7 @@ disc("""The &lt;bullet&gt; tag is only allowed once in a given paragraph and its
 overrides the implied bullet style and ^bulletText^ specified in the  ^Paragraph^
 creation.
 """)
-parabox("""<bullet>\xe2\x80\xa2</bullet>this is a bullet point.  Spam
+parabox("""<bullet>\u2022</bullet>this is a bullet point.  Spam
 spam spam spam spam spam spam spam spam spam spam spam
 spam spam spam spam spam spam spam spam spam spam """,
         styleSheet['Bullet'],

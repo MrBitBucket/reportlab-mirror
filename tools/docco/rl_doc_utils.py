@@ -133,7 +133,7 @@ def list1(text, doBullet=1):
     getStory().append(P)
 
 def bullet(text):
-    text='<bullet><font name="Symbol">\xe2\x80\xa2</font></bullet>' + quickfix(text)
+    text='<bullet><font name="Symbol">\u2022</font></bullet>' + quickfix(text)
     P = Paragraph(text, BU)
     getStory().append(P)
 
