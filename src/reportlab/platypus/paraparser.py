@@ -750,15 +750,15 @@ class ParaParser:
             if 'code' in attr:
                 self._syntax_error('<unichar/> invalid with both name and code attributes')
             try:
-                v = unicodedata.lookup(attr['name']).encode('utf8')
+                v = unicodedata.lookup(attr['name'])
             except KeyError:
-                self._syntax_error('<unichar/> invalid name attribute\n"%s"' % name)
+                self._syntax_error('<unichar/> invalid name attribute\n"%s"' % ascii(name))
                 v = '\0'
         elif 'code' in attr:
             try:
-                v = chr(int(eval(attr['code']))).encode('utf8')
+                v = chr(int(eval(attr['code'])))
             except:
-                self._syntax_error('<unichar/> invalid code attribute %s' % attr['code'])
+                self._syntax_error('<unichar/> invalid code attribute %s' % ascii(attr['code']))
                 v = '\0'
         else:
             v = None
