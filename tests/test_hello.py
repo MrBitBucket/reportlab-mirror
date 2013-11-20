@@ -10,6 +10,7 @@ from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, p
 setOutDir(__name__)
 import unittest
 from reportlab.pdfgen.canvas import Canvas
+from reportlab.platypus.paraparser import _greekConvert
 
 class HelloTestCase(unittest.TestCase):
     "Simplest test that makes PDF"
@@ -21,7 +22,8 @@ class HelloTestCase(unittest.TestCase):
         #Subject with Arabic magic
         c.setSubject('\u0643\u0644\u0627\u0645 \u0639\u0631\u0628\u064a')
         c.setFont('Helvetica-Bold', 36)
-        c.drawString(100,700, 'Hello World')
+        c.drawString(100,700, 'Hello World!')
+        c.drawString(100,700-36*1.2, _greekConvert('Hello Brave New World')+'!')
         c.save()
 
     def test_rl_config_reset(self):
