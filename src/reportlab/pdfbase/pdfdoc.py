@@ -34,10 +34,12 @@ if platform[:4] == 'java' and version_info[:2] == (2, 1):
         return list(map(f, sequence))
 
 def utf8str(x):
-    if isinstance(x,str):
+    if isUnicode(x):
         return x.encode('utf8')
+    elif isBytes(x):
+        return x
     else:
-        return str(x)
+        return utf8str(str(x))
 
 class PDFError(Exception):
     pass
@@ -98,6 +100,8 @@ def format(element, document, toplevel=0):
         #use a controlled number formatting routine
         #instead of str, so Jython/Python etc do not differ
         return fp_str(element)
+    #elif isinstance(element,bytes):
+    #   return element.decode('utf8')
     else:
         return str(element)
 
@@ -160,11 +164,8 @@ class PDFDocument:
             cat = _getTimeStamp()
         else:
             cat = 946684800.0
-        cat = repr(cat)
-        import sys
-        if sys.version_info[0] == 3:
-            cat = bytes(repr(cat), 'utf-8')
-        sig.update(cat) # initialize with timestamp digest
+        cat = ascii(cat)
+        sig.update(utf8str(cat)) # initialize with timestamp digest
         # mapping of internal identifier ("Page001") to PDF objectnumber and generation number (34, 0)
         self.idToObjectNumberAndVersion = {}
         # mapping of internal identifier ("Page001") to PDF object (PDFPage instance)
@@ -912,24 +913,25 @@ class PDFObjectReference:
         except:
             raise KeyError("forward reference to %s not resolved upon final formatting" % repr(self.name))
 
-### chapter 5
-# Following Ken Lunde's advice and the PDF spec, this includes
-# some high-order bytes.  I chose the characters for Tokyo
-# in Shift-JIS encoding, as these cannot be mistaken for
-# any other encoding, and we'll be able to tell if something
-# has run our PDF files through a dodgy Unicode conversion.
-PDFHeader = (
-"%%PDF-%s.%s"+LINEEND+
-"%%\223\214\213\236 ReportLab Generated PDF document http://www.reportlab.com"+LINEEND)
-
 class PDFFile:
     __PDFObject__ = True
     ### just accumulates strings: keeps track of current offset
     def __init__(self,pdfVersion=PDF_VERSION_DEFAULT):
         self.strings = []
         self.write = self.strings.append
-        self.offset = 0
-        self.add(PDFHeader % pdfVersion)
+        ### chapter 5
+        # Following Ken Lunde's advice and the PDF spec, this includes
+        # some high-order bytes.  I chose the characters for Tokyo
+        # in Shift-JIS encoding, as these cannot be mistaken for
+        # any other encoding, and we'll be able to tell if something
+        # has run our PDF files through a dodgy Unicode conversion.
+        self._header = (b''.join((
+            bytes("%%PDF-%s.%s" % pdfVersion,'utf-8'),
+            bytes(LINEEND+'%','utf-8'),
+            b'\223\214\213\236',
+            bytes(" ReportLab Generated PDF document http://www.reportlab.com"+LINEEND,'utf-8'),
+            )))
+        self.offset = len(self._header)
 
     def closeOrReset(self):
         pass
@@ -940,9 +942,10 @@ class PDFFile:
         self.offset = result+len(s)
         self.write(s)
         return result
+
     def format(self, document):
         strings = map(str, self.strings) # final conversion, in case of lazy objects
-        return "".join(strings)
+        return self._header + b''.join(utf8str(s) for s in strings)
 
 XREFFMT = '%0.10d %0.5d n'
 
