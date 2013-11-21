@@ -43,3 +43,18 @@ def getMonitor():
     import reportlab.monitor
     mon = reportlab.monitor.ReportLabToolkitMonitor()
     return mon
+
+#define these early in reportlab's life
+isPy3 = sys.version_info[0]==3
+if isPy3:
+    def cmp(a,b):
+        return -1 if a<b else (1 if a>b else 0)
+
+    import builtins
+    builtins.cmp = cmp
+    del cmp, builtins
+else:
+    from future_builtins import ascii
+    import __builtin__
+    __builtin__.ascii = ascii
+    del ascii, __builtins__

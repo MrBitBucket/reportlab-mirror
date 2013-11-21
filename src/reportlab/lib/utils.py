@@ -7,6 +7,7 @@ __doc__='''Gazillions of miscellaneous internal utility functions'''
 import os, sys, imp, time
 import base64
 import pickle
+from reportlab import isPy3
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
 
@@ -14,8 +15,6 @@ try:
     from hashlib import md5
 except ImportError:
     import md5
-
-isPy3 = sys.version_info[0]==3
 
 def isFunction(v):
     return type(v) == type(isFunction)
@@ -68,13 +67,6 @@ if isPy3:
             return x
         else:
             return str(x).encode(enc)
-
-    def cmp(a,b):
-        return -1 if a<b else (1 if a>b else 0)
-
-    import builtins
-    builtins.cmp = cmp
-    del builtins
 else:
     if sys.hexversion >= 0x02000000:
         def _digester(s):
@@ -98,10 +90,6 @@ else:
     def isClass(v):
         import types
         return isinstance(v, types.ClassType)
-    from string import letters as ascii_letters, uppercase as ascii_uppercase, lowercase as ascii_lowercase
-    from future_builtins import ascii
-    import __builtin__
-    __builtin__.ascii = ascii
     int2byte = chr
     from StringIO import StringIO
 
@@ -118,7 +106,7 @@ else:
             return x
         else:
             return str(x).encode(enc)
-    del __builtins__
+    from string import letters as ascii_letters, uppercase as ascii_uppercase, lowercase as ascii_lowercase
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
