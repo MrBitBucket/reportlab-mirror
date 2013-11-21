@@ -68,6 +68,13 @@ if isPy3:
             return x
         else:
             return str(x).encode(enc)
+
+    def cmp(a,b):
+        return -1 if a<b else (1 if a>b else 0)
+
+    import builtins
+    builtins.cmp = cmp
+    del builtins
 else:
     if sys.hexversion >= 0x02000000:
         def _digester(s):
@@ -111,6 +118,7 @@ else:
             return x
         else:
             return str(x).encode(enc)
+    del __builtins__
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
