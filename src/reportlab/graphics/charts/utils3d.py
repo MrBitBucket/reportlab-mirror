@@ -176,8 +176,8 @@ class _Segment:
             t = o.s,o.i,x,y
             if t not in I:  I.append(t)
 
-def _segCmp(a,b):
-    return cmp((a.x0,a.x1,a.y0,a.y1,a.s,a.i),(b.x0,b.x1,b.y0,b.y1,b.s,b.i))
+def _segKey(a):
+    return (a.x0,a.x1,a.y0,a.y1,a.s,a.i)
 
 def find_intersections(data,small=0):
     '''
@@ -207,7 +207,7 @@ def find_intersections(data,small=0):
         for i in range(1,n):
             seg = _Segment(s,i,data)
             if seg.a+abs(seg.b)>=small: a(seg)
-    S.sort(_segCmp)
+    S.sort(key=_segKey)
     I = []
     n = len(S)
     for i in range(0,n-1):

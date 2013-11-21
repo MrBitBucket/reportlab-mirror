@@ -139,9 +139,6 @@ class _rl_dir_info:
         except:
             return None
 
-def _cmp_rl_ccode_dirs(a,b):
-    return cmp(_rl_dir_info(b),_rl_dir_info(a))
-
 def _find_rl_ccode(dn='rl_accel',cn='_rl_accel.c'):
     '''locate where the accelerator code lives'''
     _ = []
@@ -164,7 +161,7 @@ def _find_rl_ccode(dn='rl_accel',cn='_rl_accel.c'):
     if _:
         _ = filter(_rl_dir_info(cn),_)
         if len(_):
-            _.sort(_cmp_rl_ccode_dirs)
+            _.sort(key=_rl_dir_info)
             return abspath(_[0])
     return None
 

@@ -398,9 +398,9 @@ class HorizontalLineChart(LineChart):
         for a in getattr(self,'annotations',()): g.add(a(self,cA.scale,vA.scale))
         return g
 
-def _cmpFakeItem(a,b):
+def _fakeItemKey(a):
     '''t, z0, z1, x, y = a[:5]'''
-    return cmp((-a[1],a[3],a[0],-a[4]),(-b[1],b[3],b[0],-b[4]))
+    return (-a[1],a[3],a[0],-a[4])
 
 class _FakeGroup:
     def __init__(self):
@@ -413,7 +413,7 @@ class _FakeGroup:
         return self._data
 
     def sort(self):
-        self._data.sort(_cmpFakeItem)
+        self._data.sort(key=_fakeItemKey)
         #for t in self._data: print t
 
 class HorizontalLineChart3D(HorizontalLineChart):

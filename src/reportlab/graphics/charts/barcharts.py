@@ -9,7 +9,7 @@ vertical versions.
 
 """
 
-import copy
+import copy, functools
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isNumberOrNone, isColor, isColorOrNone, isString,\
@@ -805,7 +805,7 @@ class HorizontalBarChart(BarChart):
 class _FakeGroup:
     def __init__(self, cmp=None):
         self._data = []
-        self._cmp = cmp
+        self._key = functools.cmp_to_key(cmp)
 
     def add(self,what):
         self._data.append(what)
@@ -814,7 +814,7 @@ class _FakeGroup:
         return self._data
 
     def sort(self):
-        self._data.sort(self._cmp)
+        self._data.sort(key=self._key)
 
 class BarChart3D(BarChart):
     _attrMap = AttrMap(BASE=BarChart,
