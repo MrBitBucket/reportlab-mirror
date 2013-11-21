@@ -58,7 +58,7 @@ class ColorTestCase(unittest.TestCase):
                   'red', 'RED', '0xFF0000', '0xff0000']
 
         for thing in allRed:
-            assert colors.toColor(thing) == colors.red
+            assert colors.toColor(thing) == colors.red,"colors.toColor(%s)-->%s != colors.red(%s)" % (ascii(thing),ascii(colors.toColor(thing)),colors.red)
 
 
     def test3(self):

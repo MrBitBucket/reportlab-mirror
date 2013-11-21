@@ -5,7 +5,7 @@ __version__=''' $Id$ '''
 __doc__='''Defines standard colour-handling classes and colour names.
 
 We define standard classes to hold colours in two models:  RGB and CMYK.
-These can be constructed from several popular formats.  We also include
+rhese can be constructed from several popular formats.  We also include
 
 - pre-built colour objects for the HTML standard colours
 
@@ -39,7 +39,8 @@ Traceback (most recent call last):
     ....
 ValueError: css color 'pcmyka(100,0,0,0)' has wrong number of components
 '''
-import math, re
+import math, re, functools
+from reportlab import isPy3
 from reportlab.lib.rl_accel import fp_str
 import collections
 
@@ -57,25 +58,38 @@ class Color:
     def __repr__(self):
         return "Color(%s)" % fp_str(*(self.red, self.green, self.blue,self.alpha)).replace(' ',',')
 
-    def __hash__(self):
-        return hash((self.red, self.green, self.blue, self.alpha))
-
-    def __cmp__(self,other):
+    @property
+    def __key__(self):
         '''simple comparison by component; cmyk != color ever
         >>> cmp(Color(0,0,0),None)
         -1
         >>> cmp(Color(0,0,0),black)
         0
         >>> cmp(Color(0,0,0),CMYKColor(0,0,0,1)),Color(0,0,0).rgba()==CMYKColor(0,0,0,1).rgba()
-        (-1, True)
+        (1, True)
         '''
-        if isinstance(other,CMYKColor) or not isinstance(other,Color): return -1
+        return self.red, self.green, self.blue, self.alpha
+
+    def __hash__(self):
+        return hash(self.__key__)
+
+    def __comparable__(self,other):
+        return not isinstance(other,CMYKColor) and isinstance(other,Color)
+
+    def __lt__(self,other):
+        if not self.__comparable__(other): return True
         try:
-            return cmp((self.red, self.green, self.blue, self.alpha),
-                    (other.red, other.green, other.blue, other.alpha))
+            return self.__key__ < other.__key__
         except:
-            return -1
-        return 0
+            pass
+        return True
+
+    def __eq__(self,other):
+        if not self.__comparable__(other): return False
+        try:
+            return self.__key__ == other.__key__
+        except:
+            return False
 
     def rgb(self):
         "Returns a three-tuple of components"
@@ -131,7 +145,7 @@ class Color:
     @property
     def normalizedAlpha(self):
         return self.alpha
-
+if isPy3: Color = functools.total_ordering(Color)
 
 class CMYKColor(Color):
     """This represents colors using the CMYK (cyan, magenta, yellow, black)
@@ -195,10 +209,8 @@ class CMYKColor(Color):
         if reverse: L.reverse()
         return L
 
-    def __hash__(self):
-        return hash( (self.cyan, self.magenta, self.yellow, self.black, self.density, self.spotName, self.alpha) )
-
-    def __cmp__(self,other):
+    @property
+    def __key__(self):
         """obvious way to compare colours
         Comparing across the two color models is of limited use.
         >>> cmp(CMYKColor(0,0,0,1),None)
@@ -210,14 +222,10 @@ class CMYKColor(Color):
         >>> cmp(CMYKColor(0,0,0,1),Color(0,0,1)),Color(0,0,0).rgba()==CMYKColor(0,0,0,1).rgba()
         (-1, True)
         """
-        if not isinstance(other, CMYKColor): return -1
-        try:
-            return cmp(
-                (self.cyan, self.magenta, self.yellow, self.black, self.density, self.alpha, self.spotName),
-                (other.cyan, other.magenta, other.yellow, other.black, other.density, other.alpha, other.spotName))
-        except: # or just return 'not equal' if not a color
-            return -1
-        return 0
+        return self.cyan, self.magenta, self.yellow, self.black, self.density, self.spotName, self.alpha
+
+    def __comparable__(self,other):
+        return isinstance(other,CMYKColor)
 
     def cmyk(self):
         "Returns a tuple of four color components - syntactic sugar"
