@@ -7,7 +7,6 @@ __doc__='''Gazillions of miscellaneous internal utility functions'''
 import os, sys, imp, time
 import base64
 import pickle
-from io import BytesIO
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
 
@@ -54,6 +53,21 @@ if isPy3:
         return isinstance(v, type)
     from string import ascii_letters, ascii_uppercase, ascii_lowercase
     int2byte = lambda x: bytes([x])
+
+    from io import BytesIO
+    def getBytesIO(buf=None):
+        '''unified StringIO instance interface'''
+        if buf:
+            return BytesIO(buf)
+        return BytesIO()
+
+    def bytestr(x,enc='utf8'):
+        if isinstance(x,str):
+            return x.encode(enc)
+        elif isinstance(x,bytes):
+            return x
+        else:
+            return str(x).encode(enc)
 else:
     if sys.hexversion >= 0x02000000:
         def _digester(s):
@@ -82,7 +96,21 @@ else:
     import __builtin__
     __builtin__.ascii = ascii
     int2byte = chr
+    from StringIO import StringIO
 
+    def getBytesIO(buf=None):
+        '''unified StringIO instance interface'''
+        if buf:
+            return StringIO(buf)
+        return StringIO()
+
+    def bytestr(x,enc='utf8'):
+        if isinstance(x,unicode):
+            return x.encode(enc)
+        elif isinstance(x,str):
+            return x
+        else:
+            return str(x).encode(enc)
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
@@ -355,12 +383,6 @@ else:
         except ImportError:
             Image = None
     haveImages = Image is not None
-
-def getBytesIO(buf=None):
-    '''unified StringIO instance interface'''
-    if buf:
-        return BytesIO(buf)
-    return BytesIO()
 
 class ArgvDictValue:
     '''A type to allow clients of getArgvDict to specify a conversion function'''

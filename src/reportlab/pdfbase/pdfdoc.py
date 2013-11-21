@@ -18,7 +18,7 @@ import types, binascii, codecs
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfutils import LINEEND # this constant needed in both
 from reportlab import rl_config
-from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester, isStr
+from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester, isStr, bytestr
 from reportlab.lib.rl_accel import escapePDF, fp_str, asciiBase85Encode, asciiBase85Decode
 from reportlab.pdfbase import pdfmetrics
 from hashlib import md5
@@ -32,14 +32,6 @@ if platform[:4] == 'java' and version_info[:2] == (2, 1):
         def f(x):
             return x
         return list(map(f, sequence))
-
-def utf8str(x):
-    if isUnicode(x):
-        return x.encode('utf8')
-    elif isBytes(x):
-        return x
-    else:
-        return utf8str(str(x))
 
 class PDFError(Exception):
     pass
@@ -163,7 +155,7 @@ class PDFDocument:
         else:
             cat = 946684800.0
         cat = ascii(cat)
-        sig.update(utf8str(cat)) # initialize with timestamp digest
+        sig.update(bytestr(cat)) # initialize with timestamp digest
         # mapping of internal identifier ("Page001") to PDF objectnumber and generation number (34, 0)
         self.idToObjectNumberAndVersion = {}
         # mapping of internal identifier ("Page001") to PDF object (PDFPage instance)
@@ -204,7 +196,7 @@ class PDFDocument:
     def updateSignature(self, thing):
         "add information to the signature"
         if self._ID: return # but not if its used already!
-        self.signature.update(utf8str(thing))
+        self.signature.update(bytestr(thing))
 
     def ID(self):
         "A unique fingerprint for the file (unless in invariant mode)"
@@ -943,7 +935,7 @@ class PDFFile:
 
     def format(self, document):
         strings = map(str, self.strings) # final conversion, in case of lazy objects
-        return self._header + b''.join(utf8str(s) for s in strings)
+        return self._header + b''.join(bytestr(s) for s in strings)
 
 XREFFMT = '%0.10d %0.5d n'
 
@@ -1544,7 +1536,7 @@ class PDFOutlines:
             try:
                 [(Title, Dest)] = list(leafdict.items())
             except:
-                raise ValueError("bad outline leaf dictionary, should have one entry "+utf8str(elt))
+                raise ValueError("bad outline leaf dictionary, should have one entry "+bytestr(elt))
             eltobj.Title = destinationnamestotitles[Title]
             eltobj.Dest = Dest
             if isinstance(elt,tuple) and Dest in closedict:
@@ -1588,7 +1580,7 @@ class PDFInfo:
     def digest(self, md5object):
         # add self information to signature
         for x in (self.title, self.author, self.subject, self.keywords):
-            md5object.update(utf8str(x))
+            md5object.update(bytestr(x))
 
     def format(self, document):
         D = {}
