@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2013
 #see license.txt for license details
 """Tests for the reportlab.lib.sequencer module.
 """
@@ -27,7 +27,7 @@ class SequencerTestCase(unittest.TestCase):
         seq = Sequencer()
 
         for i in range(1, 101):
-            n = next(seq)
+            n = seq.next()
             msg = 'Sequence value is not correct!'
             assert seq._this() == n, msg
 
@@ -39,7 +39,7 @@ class SequencerTestCase(unittest.TestCase):
         start = seq._this()
 
         for i in range(1, 101):
-            n = next(seq)
+            n = seq.next()
 
         seq.reset()
 
