@@ -24,7 +24,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfdoc
 from reportlab.lib.rl_accel import escapePDF
 from reportlab.rl_config import CMapSearchPath
-from reportlab.lib.utils import isSeq
+from reportlab.lib.utils import isSeq, isBytes
 
 #quick hackery for 2.0 release.  Now we always do unicode, and have built in
 #the CMAP data, any code to load CMap files is not needed.
@@ -433,7 +433,7 @@ class UnicodeCIDFont(CIDFont):
 
     def stringWidth(self, text, size, encoding=None):
         "Just ensure we do width test on characters, not bytes..."
-        if type(text) is type(''):
+        if isBytes(text):
             text = text.decode('utf8')
 
         widths = self.unicodeWidths
