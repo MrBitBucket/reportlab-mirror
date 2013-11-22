@@ -7,17 +7,19 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfutils
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.rl_accel import escapePDF
+from reportlab.lib.utils import isUnicode
 from reportlab.graphics.shapes import Drawing, String, Ellipse
 import re
 import codecs
 textPat = re.compile(r'\([^(]*\)')
 
 #test sentences
-testCp1252 = 'copyright %s trademark %s registered %s ReportLab! Ol%s!' % (chr(169), chr(153),chr(174), chr(0xe9))
+testCp1252 = b'copyright \xa9 trademark \x99 registered \xae ReportLab! Ol\xe9!'
 testUni = str(testCp1252, 'cp1252')
 testUTF8 = testUni.encode('utf-8')
 # expected result is octal-escaped text in the PDF
-expectedCp1252 = pdfutils._escape(testCp1252)
+expectedCp1252 = escapePDF(testCp1252)
 
 def extractText(pdfOps):
     """Utility to rip out the PDF text within a block of PDF operators.
@@ -84,7 +86,8 @@ class TextEncodingTestCase(NearTestCase):
         self.assertNear(pdfmetrics.stringWidth(testUni, 'Vera', 10),279.809570313)
 
     def testUtf8FileName(self):
-        fn=outputfile('test_pdfbase_utf8_filename').decode('utf8')
+        fn=outputfile('test_pdfbase_utf8_filename')
+        if not isUnicode(fn): fn = fn.decode('utf8')
         fn += u'_portr\xe4t.pdf'
         c = Canvas(fn)
         c.drawString(100,700, u'Filename='+fn)
