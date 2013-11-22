@@ -4,7 +4,7 @@
 __version__=''' $Id$ '''
 __doc__="""Standard verifying functions used by attrmap."""
 
-import string, sys, codecs
+import sys, codecs
 from reportlab.lib.utils import isSeq, isStr, isUnicode
 from reportlab.lib import colors
 
@@ -45,12 +45,12 @@ class _isBoolean(Validator):
     def normalize(self,x):
         if x in (0,1): return x
         try:
-            S = string.upper(x)
+            S = x.upper()
         except:
-            raise ValueError('Must be boolean')
+            raise ValueError('Must be boolean not %s' % ascii(s))
         if S in ('YES','TRUE'): return True
         if S in ('NO','FALSE',None): return False
-        raise ValueError('Must be boolean')
+        raise ValueError('Must be boolean not %s' % ascii(s))
 
 class _isString(Validator):
     def test(self,x):
@@ -79,7 +79,7 @@ class _isNumber(Validator):
 
 class _isInt(Validator):
     def test(self,x):
-        if not isintance(x,int) and not isStr(x): return False
+        if not isinstance(x,int) and not isStr(x): return False
         return self.normalizeTest(x)
 
     def normalize(self,x):
