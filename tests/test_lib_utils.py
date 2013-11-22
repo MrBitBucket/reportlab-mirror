@@ -125,25 +125,21 @@ class ImporterTestCase(unittest.TestCase):
         try:
             m1 = recursiveImport('reportlab.pdfgen.brush')
             self.fail("Imported a nonexistent module")
-        except ImportError, e:
-            self.assertEquals(e.message, "Could not import 'reportlab.pdfgen.brush'")
+        except ImportError as e:
+            self.assertEquals(str(e),"Could not import 'reportlab.pdfgen.brush'")
             
         try:
             m1 = recursiveImport('totally.non.existent')
             self.fail("Imported a nonexistent module")
-        except ImportError, e:
-            self.assertEquals(e.message, "Could not import 'totally.non.existent'")
+        except ImportError as e:
+            self.assertEquals(str(e), "Could not import 'totally.non.existent'")
 
         try:
             #import a module in the 'tests' directory with a bug
             m1 = recursiveImport('unimportable')
             self.fail("Imported a buggy module")
-        except ImportError, e:
-            self.assert_('integer division or modulo by zero' in e.message)
-
-
-
-
+        except ImportError as e:
+            self.assert_(reportlab.isPy3 and 'division by zero' or 'integer division or modulo by zero' in str(e))
 
 def makeSuite():
     return makeSuiteForClasses(ImporterTestCase)

@@ -292,7 +292,7 @@ def isSourceDistro():
 def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
     normalize = lambda x: os.path.normcase(os.path.abspath(os.path.normpath(x)))
-    path = map(normalize,sys.path)
+    path = [normalize(p) for p in sys.path]
     if baseDir:
         if not isSeq(baseDir):
             tp = [baseDir]
@@ -319,20 +319,23 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     #make import errors a bit more informative
     opath = sys.path
     try:
-        sys.path = path
-        exec('import %s\nm = %s\n' % (modulename,modulename),locals())
+        try:
+            sys.path = path
+            NS = {}
+            exec('import %s as m' % modulename,NS)
+            return NS['m']
+        except ImportError:
+            sys.path = opath
+            msg = "Could not import '%s'" % modulename
+            if baseDir:
+                msg = msg + " under %s" % baseDir
+            raise ImportError(msg)
+        except:
+            e = sys.exc_info()
+            msg = "Exception raised while importing '%s': %s" % (modulename, e[1])
+            raise ImportError(msg)
+    finally:
         sys.path = opath
-        return m
-    except ImportError:
-        sys.path = opath
-        msg = "Could not import '%s'" % modulename
-        if baseDir:
-            msg = msg + " under %s" % baseDir
-        raise ImportError(msg)
-    except:
-        e = sys.exc_info()
-        msg = "Exception raised while importing '%s': %s" % (modulename, e[1])
-        raise ImportError(msg)
 
 def recursiveGetAttr(obj, name):
     "Can call down into e.g. object1.object2[4].attr"
