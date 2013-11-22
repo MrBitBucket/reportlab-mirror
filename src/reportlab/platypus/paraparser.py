@@ -522,13 +522,18 @@ def ugeCB(name):
 
 try:
     import pyRXPU
-    def makeParser():
-        return pyRXPU.Parser(
-            ErrorOnUnquotedAttributeValues=0,
-            Validate=0,
-            srcName='Paragraph text',
-            ugeCB = ugeCB,
+    _TRMAP = dict(
+            caseInsensitive='CaseInsensitive',
             )
+    def makeParser(**kwds):
+        d = dict(ErrorOnUnquotedAttributeValues=0,
+                Validate=0,srcName='Paragraph text',
+                ugeCB = ugeCB,
+                )
+        for k in kwds:
+            if k in _TRMAP:
+                d[_TRMAP[k]] = kwds[k]
+        return pyRXPU.Parser(**d)
 except ImportError:
     raise ImportError("pyRXPU not importable Alternate parser not yet implemented")
 
@@ -975,6 +980,10 @@ class ParaParser:
         self._pop()
     end_index=end_seq
 
+    def start_unknown(self,attr):
+        pass
+    end_unknown=end_seq
+
     #---------------------------------------------------------------
     def _push(self,**attr):
         frag = copy.copy(self._stack[-1])
@@ -1006,8 +1015,10 @@ class ParaParser:
 
     #----------------------------------------------------------------
 
-    def __init__(self,verbose=0):
-        self.caseSensitive = 0
+    def __init__(self,verbose=0, caseSensitive=0, ignoreUnknownTags=1):
+        self.verbose = verbose
+        self.caseSensitive = caseSensitive
+        self.ignoreUnknownTags = ignoreUnknownTags
 
     def _iReset(self):
         self.fragList = []
@@ -1078,7 +1089,7 @@ class ParaParser:
         if not(len(text)>=6 and text[0]=='<' and _re_para.match(text)):
             text = "<para>"+text+"</para>"
         try:
-            tt = makeParser()(text)
+            tt = makeParser(caseInsensitive=not self.caseSensitive)(text)
         except Exception as exc:
             if isPy3:
                 raise exc.__class__('paragraph text %s caused exception\n%s' % (ascii(text),str(exc))) from exc
@@ -1106,7 +1117,10 @@ class ParaParser:
             start = getattr(self,'start_'+tag)
             end = getattr(self,'end_'+tag)
         except AttributeError:
-            raise ValueError('Invalid tag "%s"' % tag)
+            if not self.ignoreUnknownTags:
+                raise ValueError('Invalid tag "%s"' % tag)
+            start = self.start_unknown
+            end = self.end_unknown
         start(tt[1] or {})
         C = tt[2]
         if C:
