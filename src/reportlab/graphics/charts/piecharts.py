@@ -398,7 +398,7 @@ def _fPLSide(l,width,side=None):
 
 #key functions
 def _fPLCF(a,b): 
-    return cmp(b._origdata['smid'],a._origdata['smid']))
+    return cmp(b._origdata['smid'],a._origdata['smid'])
 _fPLCF = functools.cmp_to_key(_fPLCF)
 
 def _arcCF(a):
