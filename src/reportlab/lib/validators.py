@@ -5,7 +5,7 @@ __version__=''' $Id$ '''
 __doc__="""Standard verifying functions used by attrmap."""
 
 import sys, codecs
-from reportlab.lib.utils import isSeq, isStr, isUnicode
+from reportlab.lib.utils import isSeq, isBytes, isStr, isPy3
 from reportlab.lib import colors
 
 class Percentage(float):
@@ -82,8 +82,12 @@ class _isInt(Validator):
         if not isinstance(x,int) and not isStr(x): return False
         return self.normalizeTest(x)
 
-    def normalize(self,x):
-        return int(x)
+    if not isPy3:
+        def normalize(self,x):
+            return int(x)
+    else:
+        def normalize(self,x):
+            return int(x.decode('utf8') if isBytes(x) else x)
 
 class _isNumberOrNone(_isNumber):
     def test(self,x):

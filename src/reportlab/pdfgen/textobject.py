@@ -12,7 +12,7 @@ Progress Reports:
 import string
 from types import *
 from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor, black, white, _CMYK_black, _CMYK_white
-from reportlab.lib.utils import isBytes, isStr
+from reportlab.lib.utils import isBytes, isStr, asUnicode
 from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase import pdfmetrics
 
@@ -433,7 +433,7 @@ class PDFTextObject(_PDFColorSetter):
         off each line and from the beginning; set trim=0 to preserve
         whitespace."""
         if isStr(stuff):
-            lines = '\n'.split(stuff.strip())
+            lines = '\n'.split(asUnicode(stuff).strip())
             if trim==1:
                 lines = [s.strip() for s in lines]
         elif isinstance(stuff,(tuple,list)):

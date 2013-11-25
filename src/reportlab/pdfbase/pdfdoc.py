@@ -1449,6 +1449,7 @@ class PDFOutlines:
         destinationstotitles = self.destinationstotitles
         closedict = self.closedict
         if isStr(object):
+            if not isUnicode(object): object = object.decode('utf8')
             destination = canvas._bookmarkReference(object)
             title = object
             if object in destinationnamestotitles:

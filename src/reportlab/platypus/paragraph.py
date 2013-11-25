@@ -18,7 +18,7 @@ from copy import deepcopy
 from reportlab.lib.abag import ABag
 from reportlab.rl_config import platypus_link_underline
 from reportlab import rl_config
-from reportlab.lib.utils import isUnicode, isStr
+from reportlab.lib.utils import isBytes
 from reportlab.lib.rl_accel import sameFrag
 import re
 
@@ -60,12 +60,12 @@ _wsc = ''.join((
 _wsc_re_split=re.compile('[%s]+'% re.escape(_wsc)).split
 
 def split(text, delim=None):
-    if not isUnicode(text): text = text.decode('utf8')
-    if delim is not None and not isUnicode(delim): delim = delim.decode('utf8')
+    if isBytes(text): text = text.decode('utf8')
+    if delim is not None and isBytes(delim): delim = delim.decode('utf8')
     return [uword for uword in (_wsc_re_split(text) if delim is None and '\xa0' in text else text.split(delim))]
 
 def strip(text):
-    if not isUnicode(text): text = text.decode('utf8')
+    if isBytes(text): text = text.decode('utf8')
     return text.strip(_wsc)
 
 class ParaLines(ABag):
@@ -125,8 +125,8 @@ def _rightDrawParaLine( tx, offset, extraspace, words, last=0):
     return m
 
 def _nbspCount(w):
-    if isStr(str):
-        return w.count('\xc2\xa0')
+    if isBytes(str):
+        return w.count(b'\xc2\xa0')
     else:
         return w.count('\xa0')
 

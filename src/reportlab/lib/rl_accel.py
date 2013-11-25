@@ -28,7 +28,7 @@ for fn in __all__:
         _py_funcs[fn] = None
 
 if _py_funcs:
-    from reportlab.lib.utils import isUnicode, isSeq
+    from reportlab.lib.utils import isBytes, isUnicode, isSeq, isPy3
     from math import log
 
 if 'fp_str' in _py_funcs:
@@ -153,12 +153,11 @@ if 'asciiBase85Encode' in _py_funcs:
         This is a compact encoding used for binary data within
         a PDF file.  Four bytes of binary data become five bytes of
         ASCII.  This is the default method used for encoding images."""
+        doOrd = isPy3 and isUnicode(input)
         # special rules apply if not a multiple of four bytes.
         whole_word_count, remainder_size = divmod(len(input), 4)
         cut = 4 * whole_word_count
         body, lastbit = input[0:cut], input[cut:]
-        if isPy3 and isStr(lastbit):
-            lastbit = lastbit.encode('utf-8')
 
         out = [].append
         for i in range(whole_word_count):
@@ -167,10 +166,11 @@ if 'asciiBase85Encode' in _py_funcs:
             b2 = body[offset+1]
             b3 = body[offset+2]
             b4 = body[offset+3]
-            if isStr(b1): b1 = ord(b1)
-            if isStr(b2): b2 = ord(b2)
-            if isStr(b3): b3 = ord(b3)
-            if isStr(b4): b4 = ord(b4)
+            if doOrd:
+                b1 = ord(b1)
+                b2 = ord(b2)
+                b3 = ord(b3)
+                b4 = ord(b4)
 
             if b1<128:
                 num = (((((b1<<8)|b2)<<8)|b3)<<8)|b4
@@ -205,10 +205,11 @@ if 'asciiBase85Encode' in _py_funcs:
             b2 = lastbit[1]
             b3 = lastbit[2]
             b4 = lastbit[3]
-            if isStr(b1): b1 = ord(b1)
-            if isStr(b2): b2 = ord(b2)
-            if isStr(b3): b3 = ord(b3)
-            if isStr(b4): b4 = ord(b4)
+            if doOrd:
+                b1 = ord(b1)
+                b2 = ord(b2)
+                b3 = ord(b3)
+                b4 = ord(b4)
 
             num = 16777216 * b1 + 65536 * b2 + 256 * b3 + b4
 

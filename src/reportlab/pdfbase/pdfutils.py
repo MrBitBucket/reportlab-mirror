@@ -10,7 +10,7 @@ import sys
 import os
 import binascii
 from reportlab import rl_config
-from reportlab.lib.utils import getBytesIO, ImageReader, isStr, isUnicode, isPy3
+from reportlab.lib.utils import getBytesIO, ImageReader, isUnicode, isPy3
 from reportlab.lib._rl_accel import asciiBase85Encode, asciiBase85Decode
 
 LINEEND = '\015\012'
@@ -180,7 +180,7 @@ def _AsciiHexDecode(input):
     Not used except to provide a test of the inverse function."""
 
     #strip out all whitespace
-    if not isStr(input):
+    if not isUnicode(input):
         input = input.decode('utf-8')
     stripped = ''.join(input.split())
     assert stripped[-1] == '>', 'Invalid terminator for Ascii Hex Stream'
