@@ -32,15 +32,30 @@ def isModule(v):
 def isSeq(v,_st=(tuple,list)):
     return isinstance(v,_st)
 
+def isNative(v):
+    return isinstance(v, str)
+
+def asUnicode(v):
+    return v if isinstance(v,unicode) else v.decode('utf8')
+
+#isStr is supposed to be for arbitrary stringType
+#isBytes for bytes strings only
+#isUnicode for proper unicode
 if isPy3:
     def _digester(s):
         return md5(s if isBytes(s) else s.encode('utf8')).hexdigest()
+
+    def asBytes(v):
+        return v if isinstance(v,bytes) else v.encode('utf8')
+
+    def asNative(v):
+        return asUnicode(v)
 
     def UniChr(v):
         return chr(v)
 
     def isStr(v):
-        return isinstance(v, str)
+        return isinstance(v, (str,bytes))
 
     def isBytes(v):
         return isinstance(v, bytes)
@@ -75,6 +90,13 @@ else:
         # hexdigest not available in 1.5
         def _digester(s):
             return join(["%02x" % ord(x) for x in md5(s).digest()], '')
+
+    def asBytes(v):
+        return v if isinstance(v,str) else v.encode('utf8')
+
+    def asNative(v):
+        return asBytes(v)
+
     def UniChr(v):
         return unichr(v)
 
