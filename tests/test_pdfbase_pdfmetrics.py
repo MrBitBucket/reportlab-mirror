@@ -15,6 +15,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase import _fontdata
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib import colors
+from reportlab.lib.utils import isPy3
 
 verbose = 0
 fontNamesToTest = _fontdata.standardFonts #[0:12]  #leaves out Symbol and Dingbats for now
@@ -53,7 +54,11 @@ def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
         glyphName = glyphNames[i]
         if glyphName is not None:
             canv.setFont('Helvetica', 10)
-            text = str(chr(i),encName).encode('utf8')*30
+            if isPy3:
+                text = bytes([i]).decode(encName)*30
+            else:
+                text = str(chr(i),encName).encode('utf8')*30
+
             try:
                 w = canv.stringWidth(text, fontName, 10)
                 canv.drawString(80, y, '%03d   %s w=%3d' % (i, glyphName, int((w/3.)*10)))
@@ -62,7 +67,7 @@ def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
 
                 # now work out width and put a red marker next to the end.
                 canv.setFillColor(colors.red)
-                canv.rect(200 + w, y-1, 5, 10, stroke=0, fill=1)
+                canv.rect(200 + w, y-1, 1, 10, stroke=0, fill=1)
                 canv.setFillColor(colors.black)
             except KeyError:
                 canv.drawString(200, y, 'Could not find glyph named "%s"' % glyphName)
