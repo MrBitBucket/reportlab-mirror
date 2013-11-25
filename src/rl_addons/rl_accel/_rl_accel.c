@@ -521,11 +521,17 @@ static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 	enc = _o2;
 	_o2 = NULL;
 
-#ifdef isPy3
-	encStr = PyUnicode_AsUTF8(enc);
-#else
-	encStr = PyBytes_AsString(enc);
-#endif
+	if(PyUnicode_Check(enc)){
+		encStr = PyUnicode_AsUTF8(enc);
+		}
+	else if(PyBytes_Check(enc)){
+		encStr = PyBytes_AsString(enc);
+		}
+	else{
+		PyErr_SetString(PyExc_ValueError,"font.encName is not bytes or unicode");
+		Py_DECREF(enc);
+		ERROR_EXIT();
+		}
 	if(PyErr_Occurred()) ERROR_EXIT();
 	if(strstr(encStr,"UCS-2")) encStr = "UTF16";
 
@@ -542,7 +548,6 @@ static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 			}
 		else{
 			Py_XDECREF(_o1); _o1 = NULL;
-
 			if(!PyErr_ExceptionMatches(PyExc_UnicodeEncodeError)) ERROR_EXIT();
 			_o1 = _GetExcValue(); if(!_o1) ERROR_EXIT();
 			PyErr_Clear();
@@ -550,13 +555,13 @@ static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 			Py_DECREF(_o1);
 			_o1 = PySequence_GetSlice(_o2, 2, 4); if(!_o1) ERROR_EXIT();
 			Py_DECREF(_o2);
-				_o2 = PySequence_GetItem(_o1, 0); if(!_o2) ERROR_EXIT();
-				i = PyLong_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
-				Py_DECREF(_o2);
+			_o2 = PySequence_GetItem(_o1, 0); if(!_o2) ERROR_EXIT();
+			i = PyLong_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
+			Py_DECREF(_o2);
 
-				_o2 = PySequence_GetItem(_o1, 1); if(!_o1) ERROR_EXIT();
-				j = PyLong_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
-				Py_DECREF(_o2);
+			_o2 = PySequence_GetItem(_o1, 1); if(!_o1) ERROR_EXIT();
+			j = PyLong_AsLong(_o2); if(PyErr_Occurred()) ERROR_EXIT();
+			Py_DECREF(_o2);
 
 			Py_DECREF(_o1); _o2 = _o1 = 0;
 
