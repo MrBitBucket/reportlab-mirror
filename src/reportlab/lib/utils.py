@@ -51,8 +51,10 @@ if isPy3:
     def asNative(v):
         return asUnicode(v)
 
-    def UniChr(v):
-        return chr(v)
+    UniChr = chr
+
+    def int2Byte(i):
+        return bytes([i])
 
     def isStr(v):
         return isinstance(v, (str,bytes))
@@ -129,6 +131,9 @@ else:
         else:
             return str(x).encode(enc)
     from string import letters as ascii_letters, uppercase as ascii_uppercase, lowercase as ascii_lowercase
+
+    def int2Byte(i):
+        return chr(i)
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
