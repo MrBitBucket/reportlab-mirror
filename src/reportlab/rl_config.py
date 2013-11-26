@@ -46,7 +46,7 @@ paraFontSizeHeightOffset=   1                       #if true paragraphs start at
 canvas_baseColor=           None                    #initialize the canvas fill and stroke colors if this is set
 ignoreContainerActions=     1                       #if true then action flowables in flowable _Containers will be ignored
 ttfAsciiReadable=           1                       #smaller subsets when set to 0
-pdfVerticalSpace=           1                       #use more carriage returns in pdfcodc etc etc
+pdfMultiLine=               1                       #use more lines in pdf etc
 pdfComments=                1                       #put in pdf comments
 
 # places to look for T1Font information
@@ -179,7 +179,7 @@ paraFontSizeHeightOffset
 canvas_baseColor
 ignoreContainerActions
 ttfAsciiReadable
-pdfVerticalSpace
+pdfMultiLine
 pdfComments'''.split()
     import os, sys
     global sys_version, _unset_
