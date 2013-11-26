@@ -52,7 +52,7 @@ Canvas and TextObject have special support for dynamic fonts.
 """
 
 from struct import pack, unpack, error as structError
-from reportlab.lib.utils import getBytesIO, isPy3
+from reportlab.lib.utils import getBytesIO, isPy3, bytestr, isUnicode
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
 from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF
@@ -62,20 +62,16 @@ class TTFError(pdfdoc.PDFError):
     pass
 
 
-def SUBSETN(n):
-    z = ord('0')
-    return ''.join(['ABCDEFGHIJ'[c-z] for c in bytes('%6.6d'%n,'ASCII')])
+if isPy3:
+    def SUBSETN(n,table=bytes.maketrans(b'0123456789',b'ABCDEFGIJK')):
+        return bytes('%6.6d'%n,'ASCII').translate(table)
+else:
+    import string
+    def SUBSETN(n,table=string.maketrans(b'0123456789',b'ABCDEFGIJK'),translate=string.translate):
+        return translate('%6.6d'%n,table)
 #
 # Helpers
 #
-
-from codecs import utf_8_encode, utf_8_decode, latin_1_decode
-parse_utf8=lambda x, decode=utf_8_decode: list(map(ord,decode(x)[0]))
-parse_latin1 = lambda x, decode=latin_1_decode: list(map(ord,decode(x)[0]))
-def latin1_to_utf8(text):
-    "helper to convert when needed from latin input"
-    return utf_8_encode(latin_1_decode(text)[0])[0]
-
 def makeToUnicodeCMap(fontname, subset):
     """Creates a ToUnicode CMap for a given subset.  See Adobe
     _PDF_Reference (ISBN 0-201-75839-3) for more information."""
@@ -168,7 +164,7 @@ class TTFontParser:
         else:
             if self.validate: self.checksumFile()
             self.readTableDirectory()
-            self.subfontNameX = ''
+            self.subfontNameX = b''
 
     def readTTCHeader(self):
         self.ttcVersion = self.read_ulong()
@@ -192,7 +188,7 @@ class TTFontParser:
         self.seek(pos)
         self.readHeader()
         self.readTableDirectory()
-        self.subfontNameX = '-'+str(subfontIndex)
+        self.subfontNameX = bytestr('-'+str(subfontIndex))
 
     def readTableDirectory(self):
         try:
@@ -285,7 +281,7 @@ class TTFontParser:
 
         def get_chunk(self, pos, length):
             "Return a chunk of raw data at given position"
-            return str(self._ttf_data[pos:pos+length],'utf8')
+            return bytes(self._ttf_data[pos:pos+length])
     else:
         def read_tag(self):
             "Read a 4-character tag"
@@ -470,12 +466,12 @@ class TTFontFile(TTFontParser):
                 nameCount -= 1
                 if nameCount==0: break
         if names[6] is not None:
-            psName = names[6].replace(" ", "-")  #Dinu Gherman's fix for font names with spaces
+            psName = names[6].replace(b" ", b"-")  #Dinu Gherman's fix for font names with spaces
         elif names[4] is not None:
-            psName = names[4].replace(" ", "-")
+            psName = names[4].replace(b" ", b"-")
         # Fine, one last try before we bail.
         elif names[1] is not None:
-            psName = names[1].replace(" ", "-")
+            psName = names[1].replace(b" ", b"-")
         else:
             psName = None
 
@@ -483,9 +479,9 @@ class TTFontFile(TTFontParser):
         if not psName:
             raise TTFError("Could not find PostScript font name")
         for c in psName:
-            oc = ord(c)
-            if oc>126 or c in ' [](){}<>/%':
-                raise TTFError("psName=%r contains invalid character '%s' ie U+%04X" % (psName,c,ord(c)))
+            oc = c
+            if oc>126 or c in b' [](){}<>/%':
+                raise TTFError("psName=%r contains invalid character '%s' ie U+%04X" % (psName,c,c))
         self.name = psName
         self.familyName = names[1] or psName
         self.styleName = names[2] or 'Regular'
@@ -999,7 +995,7 @@ class TTFont:
             asciiReadable = rl_config.ttfAsciiReadable
         self._asciiReadable = asciiReadable
 
-    def stringWidth(self,text,size,encoding):
+    def stringWidth(self,text,size,encoding='utf8'):
         return instanceStringWidthTTF(self,text,size,encoding)
 
     def _assignState(self,doc,asciiReadable=None,namePrefix=None):
@@ -1025,8 +1021,8 @@ class TTFont:
         curSet = -1
         cur = []
         results = []
-        if not isinstance(text,str):
-            text = str(text, encoding or 'utf-8')   # encoding defaults to utf-8
+        if not isUnicode(text):
+            text = text.decode('utf-8')     # encoding defaults to utf-8
         assignments = state.assignments
         subsets = state.subsets
         for code in map(ord,text):
@@ -1050,12 +1046,12 @@ class TTFont:
                     subsets[0][n] = code
             if (n >> 8) != curSet:
                 if cur:
-                    results.append((curSet, ''.join(map(chr,cur))))
+                    results.append((curSet,bytes(cur) if isPy3 else ''.join(chr(c) for c in cur)))
                 curSet = (n >> 8)
                 cur = []
             cur.append(n & 0xFF)
         if cur:
-            results.append((curSet,''.join(map(chr,cur))))
+            results.append((curSet,bytes(cur) if isPy3 else ''.join(chr(c) for c in cur)))
         return results
 
     def getSubsetInternalName(self, subset, doc):
@@ -1085,7 +1081,7 @@ class TTFont:
         state.frozen = 1
         for n,subset in enumerate(state.subsets):
             internalName = self.getSubsetInternalName(n, doc)[1:]
-            baseFontName = "%s+%s%s" % (SUBSETN(n),self.face.name,self.face.subfontNameX)
+            baseFontName = (b''.join((SUBSETN(n),b'+',self.face.name,self.face.subfontNameX))).decode('pdfdoc')
 
             pdfFont = pdfdoc.PDFTrueTypeFont()
             pdfFont.__Comment__ = 'Font %s subset %d' % (self.fontName, n)
