@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2013
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/rl_config.py
 __version__=''' $Id$ '''
@@ -46,6 +46,8 @@ paraFontSizeHeightOffset=   1                       #if true paragraphs start at
 canvas_baseColor=           None                    #initialize the canvas fill and stroke colors if this is set
 ignoreContainerActions=     1                       #if true then action flowables in flowable _Containers will be ignored
 ttfAsciiReadable=           1                       #smaller subsets when set to 0
+pdfVerticalSpace=           1                       #use more carriage returns in pdfcodc etc etc
+pdfComments=                1                       #put in pdf comments
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -176,7 +178,9 @@ imageReaderFlags
 paraFontSizeHeightOffset
 canvas_baseColor
 ignoreContainerActions
-ttfAsciiReadable'''.split()
+ttfAsciiReadable
+pdfVerticalSpace
+pdfComments'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage
