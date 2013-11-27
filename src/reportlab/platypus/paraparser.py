@@ -16,8 +16,7 @@ except:
 import unicodedata
 import reportlab.lib.sequencer
 from reportlab.lib.abag import ABag
-from reportlab.lib.utils import ImageReader, isPy3, annotateException
-
+from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -972,7 +971,7 @@ class ParaParser:
                 offset = int(offset)
             except:
                 raise ValueError('index tag offset is %r not an int' % offset)
-        defn.label = base64.encodestring(pickle.dumps((label,format,offset))).strip()
+        defn.label = encode_label((label,format,offset))
         defn.name = name
         defn.kind='index'
         self._push(cbDefn=defn)
