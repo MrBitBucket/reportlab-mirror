@@ -334,7 +334,7 @@ disc("""
 creates a document template suitable for creating a basic document. It comes with quite a lot
 of internal machinery, but no default page templates. The required $filename$ can be a string,
 the name of a file to  receive the created <b>PDF</b> document; alternatively it
-can be an object which has a $write$ method such as a $StringIO$ or $file$ or $socket$.
+can be an object which has a $write$ method such as a $BytesIO$ or $file$ or $socket$.
 """)
 
 disc("""
