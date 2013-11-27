@@ -648,7 +648,8 @@ def getEncoding(encName):
 
 def findFontAndRegister(fontName):
     '''search for and register a font given its name'''
-    assert type(fontName) is str
+    fontName = str(fontName)
+    assert type(fontName) is str, 'fontName=%s is not required type str' % ascii(fontName)
     #it might have a font-specific encoding e.g. Symbol
     # or Dingbats.  If not, take the default.
     face = getTypeFace(fontName)
