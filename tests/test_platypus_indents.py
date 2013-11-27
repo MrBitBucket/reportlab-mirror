@@ -6,7 +6,6 @@ __version__='''$Id$'''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os, random
-from string import split, strip, join, whitespace
 from operator import truth
 import unittest
 from reportlab.pdfbase.pdfmetrics import stringWidth
