@@ -35,19 +35,11 @@ from reportlab.platypus.frames import Frame
 from reportlab.rl_config import defaultPageSize, verbose
 import reportlab.lib.sequencer
 from reportlab.pdfgen import canvas
-from reportlab.lib.utils import isSeq
+from reportlab.lib.utils import isSeq, encode_label, decode_label
 try:
     set
 except NameError:
     from sets import Set as set
-
-from base64 import encodestring, decodestring
-try:
-    import pickle as pickle
-except ImportError:
-    import pickle
-dumps = pickle.dumps
-loads = pickle.loads
 
 import sys
 import logging
@@ -332,10 +324,10 @@ class PageAccumulator:
         self.data.append(args)
 
     def onDrawText(self,*args):
-        return '<onDraw name="%s" label="%s" />' % (self.name,encodestring(dumps(args)).strip())
+        return '<onDraw name="%s" label="%s" />' % (self.name,encode_label(args))
 
     def __call__(self,canv,kind,label):
-        self.add(*loads(decodestring(label)))
+        self.add(*decode_label(label))
 
     def attachToPageTemplate(self,pt):
         if pt.onPage:
@@ -374,7 +366,7 @@ class PageAccumulator:
         pass
 
     def onDrawStr(self,value,*args):
-        return onDrawStr(value,self,encodestring(dumps(args)).strip())
+        return onDrawStr(value,self,encode_label(args))
 
 class BaseDocTemplate:
     """

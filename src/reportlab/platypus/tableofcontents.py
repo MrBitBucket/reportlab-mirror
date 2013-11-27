@@ -46,7 +46,7 @@ epsilon.
 
 from reportlab.lib import enums
 from reportlab.lib.units import cm
-from reportlab.lib.utils import commasplit, escapeOnce
+from reportlab.lib.utils import commasplit, escapeOnce, encode_label, decode_label
 from reportlab.lib.styles import ParagraphStyle, _baseFontName
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable
@@ -54,13 +54,6 @@ from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.flowables import Spacer, Flowable
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
-from base64 import encodestring, decodestring
-try:
-    import pickle as pickle
-except ImportError:
-    import pickle
-dumps = pickle.dumps
-loads = pickle.loads
 
 def unquote(txt):
     from xml.sax.saxutils import unescape
@@ -353,7 +346,7 @@ class SimpleIndex(IndexingFlowable):
 
     def __call__(self,canv,kind,label):
         try:
-            terms, format, offset = loads(decodestring(label))
+            terms, format, offset = decode_label(label)
         except:
             terms = label
             format = offset = None
@@ -435,7 +428,7 @@ class SimpleIndex(IndexingFlowable):
         def drawIndexEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
             style = self.getLevelStyle(leveloffset)
-            pages = loads(decodestring(label))
+            pages = decode_label(label)
             drawPageNumbers(canvas, style, pages, availWidth, availHeight, self.dot)
         self.canv.drawIndexEntryEnd = drawIndexEntryEnd
 
@@ -464,7 +457,7 @@ class SimpleIndex(IndexingFlowable):
             if diff:
                 lastTexts = texts
                 texts = texts[i:]
-            label = encodestring(dumps(list(pageNumbers))).strip()
+            label = encode_label(list(pageNumbers))
             texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (texts[-1], label)
             for text in texts:
                 #Platypus and RML differ on how parsed XML attributes are escaped.  

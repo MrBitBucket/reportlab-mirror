@@ -5,8 +5,11 @@ __version__=''' $Id$ '''
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
 import os, sys, imp, time
-import base64
-import pickle
+from base64 import decodestring as base64_decodestring, encodestring as base64_encodestring
+try:
+    from cPickle import dumps as pickle_dumps, loads as pickle_loads, dump as pickle_dump, load as pickle_load
+except ImportError:
+    from pickle import dumps as pickle_dumps, loads as pickle_loads, dump as pickle_dump, load as pickle_load
 from reportlab import isPy3
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
@@ -84,6 +87,12 @@ if isPy3:
             return x
         else:
             return str(x).encode(enc)
+
+    def encode_label(args):
+        return base64_encodestring(pickle_dumps(args)).strip().decode('latin1')
+
+    def decode_label(label):
+        return pickle_loads(base64_decodestring(label.encode('latin1')))
 else:
     if sys.hexversion >= 0x02000000:
         def _digester(s):
@@ -137,6 +146,12 @@ else:
 
     def int2Byte(i):
         return chr(i)
+
+    def encode_label(args):
+        return base64_encodestring(pickle_dumps(args)).strip()
+
+    def decode_label(label):
+        return pickle_loads(base64_decodestring(label))
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
@@ -886,17 +901,17 @@ class DebugMemo:
     def _dump(self,f):
         try:
             pos=f.tell()
-            pickle.dump(self.store,f)
+            pickle_dump(self.store,f)
         except:
             S=self.store.copy()
             ff=getBytesIO()
             for k,v in S.items():
                 try:
-                    pickle.dump({k:v},ff)
+                    pickle_dump({k:v},ff)
                 except:
                     S[k] = '<unpicklable object %r>' % v
             f.seek(pos,0)
-            pickle.dump(S,f)
+            pickle_dump(S,f)
 
     def dump(self):
         f = open(self.fn,'wb')
@@ -911,7 +926,7 @@ class DebugMemo:
         return f.getvalue()
 
     def _load(self,f):
-        self.store = pickle.load(f)
+        self.store = pickle_load(f)
 
     def load(self):
         f = open(self.fn,'rb')
@@ -1250,18 +1265,6 @@ def escapeOnce(data):
     data = data.replace("&amp;gt;", "&gt;")
     data = data.replace("&amp;lt;", "&lt;")
     return data
-
-def encode_label(args):
-    s = base64.encodestring(pickle.dumps(args)).strip()
-    if not isStr(s):
-        s = s.decode('utf-8')
-    return s
-
-def decode_label(label):
-    if isUnicode(label):
-        label = label.encode('utf-8')
-    v = pickle.loads(base64.decodestring(label))
-    return v
     
 class IdentStr(str):
     '''useful for identifying things that get split'''
