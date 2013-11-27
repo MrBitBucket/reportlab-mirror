@@ -304,10 +304,11 @@ class SimpleIndex(IndexingFlowable):
 
     def getFormatFunc(self,format):
         try:
-            exec('from reportlab.lib.sequencer import _format_%s as formatFunc' % format, locals())
+            D = {}
+            exec('from reportlab.lib.sequencer import _format_%s as formatFunc' % format, D)
+            return D['formatFunc']
         except ImportError:
             raise ValueError('Unknown format %r' % format)
-        return formatFunc
 
     def setup(self, style=None, dot=None, tableStyle=None, headers=True, name=None, format='123', offset=0):
         """
