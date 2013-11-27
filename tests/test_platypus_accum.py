@@ -73,7 +73,6 @@ def textAccum1():
     doc.build(story)
 
 
-textAccum2()
 class TablesTestCase(unittest.TestCase):
     "Make documents with tables"
 
@@ -81,7 +80,7 @@ class TablesTestCase(unittest.TestCase):
         textAccum1()
 
     def test2(self):
-        textAccum1()
+        textAccum2()
 
 def makeSuite():
     return makeSuiteForClasses(TablesTestCase)
