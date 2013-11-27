@@ -831,7 +831,6 @@ n 72.00 72.00 432.00 648.00 re B*
 class PDFArray:
     __PDFObject__ = True
     multiline = True
-    _ZLIST = list(9*b' ')+[b'\r\n']
     def __init__(self, sequence):
         self.sequence = list(sequence)
     def References(self, document):
