@@ -845,9 +845,10 @@ class PDFArray:
             n=len(L)
             if n>10:
                 # break up every 10 elements anyway
-                m,r = divmod(n,10)
-                L = b''.join([l+z for l,z in zip(L,m*self._ZLIST+r*b' ')])
-                L = L.strip()
+                t=L.insert
+                for i in reversed(range(10, n, 10)):
+                    t(i,b'\r\n ')
+                L = b' '.join(L)
             else:
                 L = b' '.join(L)
         return b'[ ' + L + b' ]'
