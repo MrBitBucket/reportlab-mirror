@@ -16,7 +16,6 @@ classes are made available elsewhere for users to manipulate.
 """
 import types, binascii, codecs
 from reportlab.pdfbase import pdfutils
-from reportlab.pdfbase.pdfutils import LINEEND  # this constant needed in both
 from reportlab import rl_config
 from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester, isStr, bytestr, isPy3
 from reportlab.lib.rl_accel import escapePDF, fp_str, asciiBase85Encode, asciiBase85Decode
@@ -52,10 +51,7 @@ BasicFonts = "BasicFonts"
 # name for the pages object
 Pages = "Pages"
 
-### generic utilities
 
-# for % substitutions
-LINEENDDICT = {"LINEEND": LINEEND, "PERCENT": "%"}
 PDF_VERSION_DEFAULT = (1, 3)
 PDF_SUPPORT_VERSION = dict(     #map keyword to min version that supports it
     transparency = (1, 4),
@@ -67,7 +63,6 @@ if isPy3:
 else:
     def pdfdocEnc(x):
         return x.encode('extpdfdoc') if isinstance(x,unicode) else x
-
 
 def format(element, document, toplevel=0):
     """Indirection step for formatting.
@@ -82,7 +77,7 @@ def format(element, document, toplevel=0):
         else:
             f = element.format(document)
             if not rl_config.invariant and rl_config.pdfComments and hasattr(element, __Comment__):
-                f = pdfdocEnc("%s%s%s" % ("% ", element.__Comment__, LINEEND))+f
+                f = pdfdocEnc("%% %s\r\n" % element.__Comment__)+f
             return f
     elif type(element) in (float, int):
         #use a controlled number formatting routine
@@ -428,8 +423,8 @@ class PDFDocument:
                     try:
                         classname = obj.__class__.__name__
                     except:
-                        classname = repr(obj)
-                    File.add("%% %s: class %s %s" % (repr(id), classname[:50], LINEEND))
+                        classname = ascii(obj)
+                    File.add("%% %s: class %s \r\n" % (ascii(id), classname[:50]))
                 offset = File.add(IOf)
                 idToOf[id] = offset
                 ids.append(id)
@@ -667,7 +662,7 @@ class PDFDictionary:
         return a in self.dict
     def Reference(self, name, document):
         self.dict[name] = document.Reference(self.dict[name])
-    def format(self, document,IND=pdfdocEnc(LINEEND+' ')):
+    def format(self, document,IND=b'\r\n '):
         dict = self.dict
         try:
             keys = list(dict.keys())
@@ -681,8 +676,8 @@ class PDFDictionary:
         else:
             # break up every 6 elements anyway
             t=L.insert
-            for i in range(6, len(L), 6):
-                t(i,LINEEND)
+            for i in reversed(range(6, len(L), 6)):
+                t(i,b'\r\n ')
             L = b" ".join(L)
         return b'<< '+L+b' >>'
 
@@ -812,15 +807,8 @@ class PDFStream:
         # "stream encoding is done after all filters have been applied"
         content = document.encrypt.encode(content)
         fc = format(content, document)
-        #print "type(content)", type(content), len(content), type(self.dictionary)
-        lc = len(content)
-        #if fc!=content: burp
-        # set dictionary length parameter
-        dictionary["Length"] = lc
+        dictionary["Length"] = len(content)
         fd = format(dictionary, document)
-        sdict = LINEENDDICT.copy()
-        sdict["dictionary"] = fd
-        sdict["content"] = fc
         return fd+b'\r\nstream\r\n'+fc+b'endstream\r\n'
 
 def teststream(content=None):
@@ -828,7 +816,7 @@ def teststream(content=None):
     if content is None:
         content = teststreamcontent
     content = content.strip()
-    content = content.replace("\n", LINEEND) + LINEEND
+    content = content.replace("\n", '\n\r') + '\n\r'
     S = PDFStream(content = content,
                     filters=rl_config.useA85 and [PDFBase85Encode,PDFZCompress] or [PDFZCompress])
     # nothing else needed...
@@ -843,13 +831,13 @@ n 72.00 72.00 432.00 648.00 re B*
 class PDFArray:
     __PDFObject__ = True
     multiline = True
-    _ZLIST = list(9*b' ')+[pdfdocEnc(LINEEND)]
+    _ZLIST = list(9*b' ')+[b'\r\n']
     def __init__(self, sequence):
         self.sequence = list(sequence)
     def References(self, document):
         """make all objects in sequence references"""
         self.sequence = list(map(document.Reference, self.sequence))
-    def format(self, document, IND=pdfdocEnc(LINEEND+' ')):
+    def format(self, document, IND=b'\r\n '):
         L = [format(e, document) for e in self.sequence]
         if self.multiline and rl_config.pdfMultiLine:
             L = IND.join(L)
@@ -867,7 +855,6 @@ class PDFArray:
 class PDFArrayCompact(PDFArray):
     multiline=False
 
-INDIRECTOBFMT = "%(n)s %(v)s obj%(LINEEND)s%(content)s%(CLINEEND)sendobj%(LINEEND)s"
 class PDFIndirectObject:
     __PDFObject__ = True
     __RefOnly__ = 1
@@ -880,7 +867,7 @@ class PDFIndirectObject:
         # set encryption parameters
         document.encrypt.register(n, v)
         fcontent = format(self.content, document, toplevel=1)   # yes this is at top level
-        return (pdfdocEnc("%s %s obj%s"%(n,v,LINEEND))
+        return (pdfdocEnc("%s %s obj\r\n"%(n,v))
                 +fcontent+ (b'' if fcontent.endswith(b'\r\n') else b'\r\n')
                 +b'endobj\r\n')
 
@@ -907,12 +894,9 @@ class PDFFile:
         # in Shift-JIS encoding, as these cannot be mistaken for
         # any other encoding, and we'll be able to tell if something
         # has run our PDF files through a dodgy Unicode conversion.
-        self.add(b''.join((
-            pdfdocEnc("%%PDF-%s.%s" % pdfVersion),
-            pdfdocEnc(LINEEND+'%'),
-            b'\223\214\213\236',
-            pdfdocEnc(" ReportLab Generated PDF document http://www.reportlab.com"+LINEEND),
-            )))
+        self.add((pdfdocEnc("%%PDF-%s.%s" % pdfVersion) +
+            b'\r\n%\223\214\213\236 ReportLab Generated PDF document http://www.reportlab.com\r\n'
+            ))
 
     def closeOrReset(self):
         pass
@@ -964,15 +948,9 @@ class PDFCrossReferenceSubsection:
         # now add the initial line
         firstline = "%s %s" % (firstentrynumber, nentries)
         entries.insert(0, firstline)
-        # make sure it ends with a LINEEND
+        # make sure it ends with \r\n
         entries.append("")
-        if LINEEND=="\n" or LINEEND=="\r":
-            reflineend = " "+LINEEND # as per spec
-        elif LINEEND=="\r\n":
-            reflineend = LINEEND
-        else:
-            raise ValueError("bad end of line! %s" % repr(LINEEND))
-        return pdfdocEnc(LINEEND.join(entries))
+        return pdfdocEnc('\r\n'.join(entries))
 
 class PDFCrossReferenceTable:
     __PDFObject__ = True
@@ -1138,7 +1116,7 @@ class PDFPage(PDFCatalog):
         if self.Override_default_compilation:
             raise ValueError("overridden! must set stream explicitly")
         if isSeq(code):
-            code = LINEEND.join(code)+LINEEND
+            code = '\r\n'.join(code)+'\r\n'
         self.stream = code
 
     def setPageTransition(self, tranDict):
@@ -1319,7 +1297,7 @@ DUMMYOUTLINE = """
 class PDFOutlines0:
     __PDFObject__ = True
     __Comment__ = "TEST OUTLINE!"
-    text = DUMMYOUTLINE.replace("\n", LINEEND)
+    text = DUMMYOUTLINE.replace("\n", '\r\n')
     __RefOnly__ = 1
     def format(self, document):
         return pdfdocEnc(self.text)
@@ -1716,11 +1694,11 @@ class HighlightAnnotation(Annotation):
         Quad = d["QuadPoints"]
         Color = d["C"]
         if not isinstance(Rect, str):
-            d["Rect"] = PDFArray(Rect).format(d, IND=" ")
+            d["Rect"] = PDFArray(Rect).format(d, IND=b" ")
         if not isinstance(Quad, str):
-            d["QuadPoints"] = PDFArray(Quad).format(d, IND=" ")
+            d["QuadPoints"] = PDFArray(Quad).format(d, IND=b" ")
         if not isinstance(Color, str):
-            d["C"] = PDFArray(Color).format(d, IND=" ")
+            d["C"] = PDFArray(Color).format(d, IND=b" ")
         d["Contents"] = PDFString(d["Contents"], escape)
         return d
 
@@ -2040,8 +2018,8 @@ class PDFFormXObject:
 
     def setStreamList(self, data):
         if isSeq(data):
-            data = LINEEND.join(data)
-        self.stream = data
+            data = '\r\n'.join(data)
+        self.stream = pdfdocEnc(data)
 
     def BBoxList(self):
         "get the declared bounding box for the form as a list"

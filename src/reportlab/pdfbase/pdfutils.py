@@ -13,8 +13,6 @@ from reportlab import rl_config
 from reportlab.lib.utils import getBytesIO, ImageReader, isUnicode, isPy3
 from reportlab.lib._rl_accel import asciiBase85Encode, asciiBase85Decode
 
-LINEEND = '\015\012'
-
 def _chunker(src,dst=[],chunkSize=60):
     for i in range(0,len(src),chunkSize):
         dst.append(src[i:i+chunkSize])
@@ -83,7 +81,7 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
     if filename==cachedname:
         if cachedImageExists(filename):
             from reportlab.lib.utils import open_for_read
-            if returnInMemory: return filter(None,open_for_read(cachedname).read().split(LINEEND))
+            if returnInMemory: return filter(None,open_for_read(cachedname).read().split('\r\n'))
         else:
             raise IOError('No such cached image %s' % filename)
     else:
@@ -95,7 +93,7 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
 
         #save it to a file
         f = open(cachedname,'wb')
-        f.write(LINEEND.join(code)+LINEEND)
+        f.write('\r\n'.join(code)+'\r\n')
         f.close()
         if rl_config.verbose:
             print('cached image as %s' % cachedname)
@@ -148,7 +146,7 @@ def cachedImageExists(filename):
 #
 ##############################################################
 
-def _normalizeLineEnds(text,desired=LINEEND,unlikely='\x00\x01\x02\x03'):
+def _normalizeLineEnds(text,desired='\r\n',unlikely='\x00\x01\x02\x03'):
     """Normalizes different line end character(s).
 
     Ensures all instances of CR, LF and CRLF end up as
@@ -190,7 +188,7 @@ def _AsciiHexDecode(input):
     return ''.join([chr(int(stripped[i:i+2],16)) for i in range(0,len(stripped),2)])
         
 def _wrap(input, columns=60):
-    "Wraps input at a given column size by inserting LINEEND characters."
+    "Wraps input at a given column size by inserting \r\n characters."
     output = []
     length = len(input)
     i = 0
@@ -202,7 +200,7 @@ def _wrap(input, columns=60):
     #avoid HP printer problem
     if len(output[-1])==1:
         output[-2:] = [output[-2][:-1],output[-2][-1]+output[-1]]
-    return LINEEND.join(output)
+    return '\r\n'.join(output)
 
 
 #########################################################################
