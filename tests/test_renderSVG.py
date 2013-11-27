@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import sys, string
+import sys
 from xml.dom import minidom
 from xml.sax._exceptions import SAXReaderNotAvailable
 import unittest
@@ -57,8 +57,8 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         fg = svg.getElementsByTagName('g')[0]           # flipping group
         dg = fg.getElementsByTagName('g')[0]            # diagram group
         textChildren = dg.getElementsByTagName('text')  # text nodes
-        t0 = string.strip(textChildren[0].childNodes[0].nodeValue)
-        t1 = string.strip(textChildren[1].childNodes[0].nodeValue)
+        t0 = textChildren[0].childNodes[0].nodeValue.strip()
+        t1 = textChildren[1].childNodes[0].nodeValue.strip()
         assert t0 == 'foo'
         assert t1 == 'bar'
 
@@ -83,8 +83,8 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         dg = fg.getElementsByTagName('g')[0]            # diagram group
         g = dg.getElementsByTagName('g')[0]             # custom group
         textChildren = g.getElementsByTagName('text')   # text nodes
-        t0 = string.strip(textChildren[0].childNodes[0].nodeValue)
-        t1 = string.strip(textChildren[1].childNodes[0].nodeValue)
+        t0 = textChildren[0].childNodes[0].nodeValue.strip()
+        t1 = textChildren[1].childNodes[0].nodeValue.strip()
 
         assert t0 == 'foo'
         assert t1 == 'bar'
@@ -112,8 +112,8 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         dg = fg.getElementsByTagName('g')[0]            # diagram group
         g = dg.getElementsByTagName('g')[0]             # custom group
         textChildren = g.getElementsByTagName('text')   # text nodes
-        t0 = string.strip(textChildren[0].childNodes[0].nodeValue)
-        t1 = string.strip(textChildren[1].childNodes[0].nodeValue)
+        t0 = textChildren[0].childNodes[0].nodeValue.strip()
+        t1 = textChildren[1].childNodes[0].nodeValue.strip()
 
         assert t0 == 'foo'
         assert t1 == 'bar'
@@ -193,8 +193,8 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         fg = svg.getElementsByTagName('g')[0]           # flipping group
         dg = fg.getElementsByTagName('g')[0]            # diagram group
         textChildren = dg.getElementsByTagName('text')  # text nodes
-        t0 = string.strip(textChildren[0].childNodes[0].nodeValue)
-        t1 = string.strip(textChildren[1].childNodes[0].nodeValue)
+        t0 = textChildren[0].childNodes[0].nodeValue.strip()
+        t1 = textChildren[1].childNodes[0].nodeValue.strip()
         assert t0 == 'foo'+specialChar
         assert t1 == 'bar'
 
