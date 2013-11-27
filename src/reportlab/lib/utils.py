@@ -35,9 +35,6 @@ def isSeq(v,_st=(tuple,list)):
 def isNative(v):
     return isinstance(v, str)
 
-def asUnicode(v):
-    return v if isinstance(v,unicode) else v.decode('utf8')
-
 #isStr is supposed to be for arbitrary stringType
 #isBytes for bytes strings only
 #isUnicode for proper unicode
@@ -47,6 +44,9 @@ if isPy3:
 
     def asBytes(v):
         return v if isinstance(v,bytes) else v.encode('utf8')
+
+    def asUnicode(v):
+        return v if isinstance(v,str) else v.decode('utf8')
 
     def asNative(v):
         return asUnicode(v)
@@ -110,6 +110,9 @@ else:
 
     def isUnicode(v):
         return isinstance(v, unicode)
+
+    def asUnicode(v):
+        return v if isinstance(v,unicode) else v.decode('utf8')
 
     def isClass(v):
         import types
@@ -1077,16 +1080,30 @@ def escapeTextOnce(text):
     text = text.replace('&amp;lt;', '&lt;')
     return text
 
-def fileName2Utf8(fn):
-    '''attempt to convert a filename to utf8'''
-    from reportlab.rl_config import fsEncodings
-    for enc in fsEncodings:
-        try:
-            return fn.decode(enc).encode('utf8')
-        except:
-            pass
-    raise ValueError('cannot convert %r to utf8' % fn)
-
+if isPy3:
+    def fileName2FSEnc(fn):
+        if isUnicode(fn):
+            return  fn
+        else:
+            for enc in fsEncodings:
+                try:
+                    return fn.decode(enc)
+                except:
+                    pass
+        raise ValueError('cannot convert %r to filesystem encoding' % fn)
+else:
+    def fileName2FSEnc(fn):
+        '''attempt to convert a filename to utf8'''
+        from reportlab.rl_config import fsEncodings
+        if isUnicode(fn):
+            return asBytes(fn)
+        else:
+            for enc in fsEncodings:
+                try:
+                    return fn.decode(enc).encode('utf8')
+                except:
+                    pass
+        raise ValueError('cannot convert %r to utf8 for file path name' % fn)
 
 import itertools
 def prev_this_next(items):
