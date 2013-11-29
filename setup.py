@@ -285,6 +285,8 @@ def main():
                             define_macros=[],
                             library_dirs=[],
                             libraries=[], # libraries to link against
+                            #extra_compile_args=['/Zi'],
+                            #extra_link_args=['/DEBUG'],
                             ),
                         ]
         if not isPy3:
@@ -417,8 +419,9 @@ def main():
                                         # libraries to link against
                                         libraries=FT_LIB,
                                         #extra_objects=['gt1.lib','libart.lib',],
-                                        #extra_compile_args=['/Z7'],
                                         extra_link_args=[]
+                                        #extra_compile_args=['/Zi'],
+                                        #extra_link_args=['/DEBUG'],
                                         ),
                             ]
         infoline('################################################')
