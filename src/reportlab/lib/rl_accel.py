@@ -24,12 +24,14 @@ for fn in __all__:
     try:
         exec('from reportlab.lib._rl_accel import %s as f' % fn)
         _c_funcs[fn] = f
+        if testing: _py_funcs[fn] = None
     except ImportError:
         _py_funcs[fn] = None
 
 if _py_funcs:
-    from reportlab.lib.utils import isBytes, isUnicode, isSeq, isPy3
+    from reportlab.lib.utils import isBytes, isUnicode, isSeq, isPy3, rawBytes
     from math import log
+    from struct import unpack
 
 if 'fp_str' in _py_funcs:
     _log_10 = lambda x,log=log,_log_e_10=log(10.0): log(x)/_log_e_10
@@ -92,10 +94,16 @@ if 'unicode2T1' in _py_funcs:
     _py_funcs['unicode2T1'] = unicode2T1
 
 if 'instanceStringWidthT1' in _py_funcs:
-    def _instanceStringWidthT1(self, text, size, encoding='utf8'):
-        """This is the "purist" approach to width"""
-        if not isUnicode(text): text = text.decode(encoding)
-        return sum([sum(map(f.widths.__getitem__,list(map(ord,t)))) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
+    if isPy3:
+        def instanceStringWidthT1(self, text, size, encoding='utf8'):
+            """This is the "purist" approach to width"""
+            if not isUnicode(text): text = text.decode(encoding)
+            return sum([sum(map(f.widths.__getitem__,t)) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
+    else:
+        def instanceStringWidthT1(self, text, size, encoding='utf8'):
+            """This is the "purist" approach to width"""
+            if not isUnicode(text): text = text.decode(encoding)
+            return sum([sum(map(f.widths.__getitem__,list(map(ord,t)))) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
     _py_funcs['instanceStringWidthT1'] = instanceStringWidthT1
 
 if 'instanceStringWidthTTF' in _py_funcs:
@@ -122,6 +130,7 @@ if 'add32' in _py_funcs:
 if 'calcChecksum' in _py_funcs:
     def calcChecksum(data):
         """Calculates TTF-style checksums"""
+        data = rawBytes(data)
         if len(data)&3: data = data + (4-(len(data)&3))*"\0"
         return sum(unpack(">%dl" % (len(data)>>2), data)) & 0xFFFFFFFF
     _py_funcs['calcChecksum'] = calcChecksum
@@ -199,8 +208,7 @@ if 'asciiBase85Encode' in _py_funcs:
 
         #encode however many bytes we have as usual
         if remainder_size > 0:
-            while len(lastbit) < 4:
-                lastbit = lastbit + b'\000'
+            lastbit += (4-len(lastbit))*('\0' if doOrd else b'\000')
             b1 = lastbit[0]
             b2 = lastbit[1]
             b3 = lastbit[2]
