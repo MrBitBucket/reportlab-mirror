@@ -658,9 +658,9 @@ static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObjec
 		encoding = _o1;
 		_o1 = NULL;
 		}
-	L = Py_None; Py_INCREF(Py_None);
-	t = Py_None; Py_INCREF(Py_None);
-	f = Py_None; Py_INCREF(Py_None);
+	L = NULL;
+	t = NULL;
+	f = NULL;
 
 	if(!PyUnicode_Check(text)){
 		_o1 = _GetAttrString(text, "decode"); if(!_o1) ERROR_EXIT();
@@ -689,7 +689,6 @@ static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObjec
 	_o1 = NULL;
 	_o2 = unicode2T1(module,_o3,NULL); if(!_o2) ERROR_EXIT();
 	Py_DECREF(_o3); _o3 = NULL;
-	Py_DECREF(L);
 	L = _o2;
 	_o2 = NULL;
 
@@ -700,6 +699,7 @@ static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObjec
 		Py_INCREF(_o1);
 
 		_o2 = PySequence_GetItem(_o1, 0); if(!_o2) ERROR_EXIT();
+		Py_XDECREF(f);
 		f = _o2;
 		_o2 = NULL;
 
@@ -709,7 +709,7 @@ static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObjec
 		_o2 = NULL;
 
 		_o2 = PySequence_GetItem(_o1, 1); if(!_o2) ERROR_EXIT();
-		Py_DECREF(t);
+		Py_XDECREF(t);
 		t = _o2;
 		Py_DECREF(_o1);
 		_o1 = _o2 = NULL;
