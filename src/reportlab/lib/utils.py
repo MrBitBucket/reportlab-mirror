@@ -38,6 +38,9 @@ def isSeq(v,_st=(tuple,list)):
 def isNative(v):
     return isinstance(v, str)
 
+def char2int(c):
+    return ord(asUnicode(c))
+
 #isStr is supposed to be for arbitrary stringType
 #isBytes for bytes strings only
 #isUnicode for proper unicode
@@ -93,6 +96,14 @@ if isPy3:
 
     def decode_label(label):
         return pickle_loads(base64_decodestring(label.encode('latin1')))
+
+    def rawUnicode(s):
+        '''converts first 256 unicodes 1-1'''
+        return s.decode('latin1') if not isinstance(s,str) else s
+
+    def rawBytes(s):
+        '''converts first 256 unicodes 1-1'''
+        return s.encode('latin1') if isinstance(s,str) else s
 else:
     if sys.hexversion >= 0x02000000:
         def _digester(s):
@@ -152,6 +163,14 @@ else:
 
     def decode_label(label):
         return pickle_loads(base64_decodestring(label))
+
+    def rawUnicode(s):
+        '''converts first 256 unicodes 1-1'''
+        return s.decode('latin1') if not isinstance(s,unicode) else s
+
+    def rawBytes(s):
+        '''converts first 256 unicodes 1-1'''
+        return s.encode('latin1') if isinstance(s,unicode) else s
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
