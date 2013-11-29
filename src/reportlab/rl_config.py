@@ -48,6 +48,7 @@ ignoreContainerActions=     1                       #if true then action flowabl
 ttfAsciiReadable=           1                       #smaller subsets when set to 0
 pdfMultiLine=               0                       #use more lines in pdf etc
 pdfComments=                0                       #put in pdf comments
+debug=                      0                       #for debugging code
 
 # places to look for T1Font information
 T1SearchPath =  (
@@ -180,7 +181,8 @@ canvas_baseColor
 ignoreContainerActions
 ttfAsciiReadable
 pdfMultiLine
-pdfComments'''.split()
+pdfComments
+debug'''.split()
     import os, sys
     global sys_version, _unset_
     sys_version = sys.version.split()[0]        #strip off the other garbage
