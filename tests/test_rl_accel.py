@@ -72,9 +72,7 @@ class RlAccelTestCase(unittest.TestCase):
         t1fn = 'Times-Roman'
         registerFont(TTFont(ttfn, "Vera.ttf"))
         ttf = getFont(ttfn)
-        ttfFuncs = getFuncs('instanceStringWidthTTF')
         t1f = getFont(t1fn)
-        t1Funcs = getFuncs('instanceStringWidthT1')
         testCp1252 = b'copyright \xa9 trademark \x99 registered \xae ReportLab! Ol\xe9!'
         enc='cp1252'
         senc = 'utf8'
@@ -82,19 +80,22 @@ class RlAccelTestCase(unittest.TestCase):
         utext = b'ABCDEF\xce\x91\xce\xb2G'.decode(senc)
         fontSize = 12
         defns="ttfn t1fn ttf t1f testCp1252 enc senc ts utext fontSize ttf.face ttf.face.charWidths ttf.face.defaultWidth t1f.widths t1f.encName t1f.substitutionFonts _fonts"
-        rcv = getrc(defns)
-        def tfunc(f,ts,fontSize,enc,funcs):
-            w1 = f.stringWidth(ts,fontSize,enc)
-            w2 = funcs[1][0](f,ts,fontSize,enc)
+        import sys
+        def tfunc(f,ts,fontSize,enc,funcs,i):
+            w1 = funcs[i][0](f,ts,fontSize,enc)
+            w2 = funcs[1][0](f,ts,fontSize,enc) #python version
             assert abs(w1-w2)<1e-10,"f(%r).stringWidthU(%r,%s,%r)-->%r != f._py_stringWidth(...)-->%r" % (f,ts,fontSize,enc,w1,w2)
-        tfunc(t1f,testCp1252,fontSize,enc,t1Funcs)
-        tfunc(t1f,ts,fontSize,senc,t1Funcs)
-        tfunc(t1f,utext,fontSize,senc,t1Funcs)
-        tfunc(ttf,ts,fontSize,senc,ttfFuncs)
-        tfunc(ttf,testCp1252,fontSize,enc,ttfFuncs)
-        tfunc(ttf,utext,fontSize,senc,ttfFuncs)
-        rcc = checkrc(defns,rcv)
-        assert not rcc, "rc diffs (%s)" % rcc
+        for font,fontType in ((t1f,'T1'),(ttf,'TTF')):
+            funcs = getFuncs('instanceStringWidth'+fontType)
+            for i,kind in enumerate(('c','py')):
+                for j in (0,1): #we run twice to allow the refcounts to stabilize
+                    if j: rcv = getrc(defns)
+                    tfunc(font,testCp1252,fontSize,enc,funcs,i)
+                    tfunc(font,ts,fontSize,senc,funcs,i)
+                    tfunc(font,utext,fontSize,senc,funcs,i)
+                    if j:
+                        rcc = checkrc(defns,rcv)
+                        assert not rcc, "%s %s refcount diffs (%s)" % (fontType,kind,rcc)
 
     def test_unicode2T1(self):
         from reportlab.pdfbase.pdfmetrics import getFont, _fonts
@@ -115,7 +116,7 @@ class RlAccelTestCase(unittest.TestCase):
             tfunc(t1f,testCp1252,func,kind)
             tfunc(t1f,utext,func,kind)
             rcc = checkrc(defns,rcv)
-            assert not rcc, "%s rc diffs (%s)" % rcc
+            assert not rcc, "%s refcount diffs (%s)" % (kind,rcc)
 
     def test_sameFrag(self):
         class ABag:
