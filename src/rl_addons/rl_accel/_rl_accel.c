@@ -642,37 +642,38 @@ static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObjec
 	PyObject *L=0, *t=0, *f=0, *self, *text, *size, *res,
 				*encoding = 0, *_o1 = 0, *_o2 = 0, *_o3 = 0;
 	unsigned char *b;
+	const char *encStr;
 	int n, m, i, j, s, _i1;
 	static char *argnames[]={"self","text","size","encoding",0};
-	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &self, &text, &size, &_o1)) return 0;
-	Py_INCREF(self);
+	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &self, &text, &size, &encoding)) return 0;
 	Py_INCREF(text);
-	Py_INCREF(size);
-	if(_o1){
-		encoding = _o1;
-		_o1 = NULL;
-		Py_INCREF(encoding);
+	if(!encoding) encStr="utf8";
+	else if(PyUnicode_Check(encoding)){
+		encStr = PyUnicode_AsUTF8(encoding);
+		}
+	else if(PyBytes_Check(encoding)){
+		encStr = PyBytes_AS_STRING(encoding);
 		}
 	else{
-		_o1 = PyBytes_FromString("utf8"); if(!_o1) ERROR_EXIT();
-		encoding = _o1;
-		_o1 = NULL;
+		PyErr_SetString(GETSTATE(module)->error, "invalid type for encoding");
+		ERROR_EXIT();
 		}
 	L = NULL;
 	t = NULL;
 	f = NULL;
 
 	if(!PyUnicode_Check(text)){
-		_o1 = _GetAttrString(text, "decode"); if(!_o1) ERROR_EXIT();
-		_o3 = PyTuple_New(1); if(!_o3) ERROR_EXIT();
-		Py_INCREF(encoding);
-		PyTuple_SET_ITEM(_o3, 0, encoding);
-		_o2 = PyObject_CallObject(_o1, _o3); if(!_o2) ERROR_EXIT();
-		Py_DECREF(_o1);
-		Py_DECREF(_o3); _o1 = _o3 = NULL;
-		Py_DECREF(text);
-		text = _o2;
-		_o2 = NULL;
+		if(PyBytes_Check(text)){
+			_o1=PyUnicode_Decode(PyBytes_AS_STRING(text), PyBytes_GET_SIZE(text), encStr,"strict");
+			if(!_o1) ERROR_EXIT();
+			Py_DECREF(text);
+			text = _o1;
+			_o1 = NULL;
+			}
+		else{
+			PyErr_SetString(GETSTATE(module)->error, "invalid type for text");
+			ERROR_EXIT();
+			}
 		}
 
 	_o3 = PyList_New(1); if(!_o3) ERROR_EXIT();
@@ -741,10 +742,7 @@ L_OK:
 	Py_XDECREF(L);
 	Py_XDECREF(t);
 	Py_XDECREF(f);
-	Py_DECREF(self);
 	Py_DECREF(text);
-	Py_DECREF(size);
-	Py_DECREF(encoding);
 	return res;
 }
 static PyObject *instanceStringWidthTTF(PyObject *module, PyObject *args, PyObject *kwds)
