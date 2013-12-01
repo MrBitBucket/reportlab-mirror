@@ -104,6 +104,9 @@ if isPy3:
     def rawBytes(s):
         '''converts first 256 unicodes 1-1'''
         return s.encode('latin1') if isinstance(s,str) else s
+    import builtins
+    rl_exec = getattr(builtins,'exec')
+    del builtins
 else:
     if sys.hexversion >= 0x02000000:
         def _digester(s):
@@ -171,6 +174,17 @@ else:
     def rawBytes(s):
         '''converts first 256 unicodes 1-1'''
         return s.encode('latin1') if isinstance(s,unicode) else s
+
+    def rl_exec(obj, G=None, L=None):
+        if G is None:
+            frame = sys._getframe(1)
+            G = frame.f_globals
+            if L is None:
+                L = frame.f_locals
+            del frame
+        elif L is None:
+            L = G
+        exec("""exec obj in G, L""")
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
@@ -386,7 +400,7 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
         try:
             sys.path = path
             NS = {}
-            exec('import %s as m' % modulename,NS)
+            rl_exec('import %s as m' % modulename,NS)
             return NS['m']
         except ImportError:
             sys.path = opath
