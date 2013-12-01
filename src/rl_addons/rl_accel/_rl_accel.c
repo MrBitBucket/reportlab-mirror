@@ -491,7 +491,7 @@ bad:
 static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 {
 	long		i, j, _i1, _i2;
-	PyObject	*R, *font, *enc, *res, *utext=NULL, *fonts=NULL,
+	PyObject	*R, *font, *res, *utext=NULL, *fonts=NULL,
 				*_o1 = NULL, *_o2 = NULL, *_o3 = NULL;
 	static char *argnames[] = {"utext","fonts",NULL};
 	char		*encStr;
@@ -500,7 +500,6 @@ static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 	Py_INCREF(fonts);
 	R = Py_None; Py_INCREF(Py_None);
 	font = Py_None; Py_INCREF(Py_None);
-	enc = Py_None; Py_INCREF(Py_None);
 
 
 	_o2 = PyList_New(0); if(!_o2) ERROR_EXIT();
@@ -517,22 +516,31 @@ static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 	_o1 = _o2 = NULL;
 
 	_o2 = _GetAttrString(font, "encName"); if(!_o2) ERROR_EXIT();
-	Py_DECREF(enc);
-	enc = _o2;
-	_o2 = NULL;
 
-	if(PyUnicode_Check(enc)){
-		encStr = PyUnicode_AsUTF8(enc);
+	if(PyUnicode_Check(_o2)){
+#ifdef	isPy3
+		encStr = PyUnicode_AsUTF8(_o2);
+#else
+		_o1 = PyUnicode_AsUTF8String(_o2);
+		if(!_o1){
+			PyErr_SetString(PyExc_ValueError,"font.encName not UTF8 encoded bytes");
+			ERROR_EXIT();
+			}
+		encStr = PyBytes_AsString(_o1);
+		Py_DECREF(_o1);
+		_o1 = NULL;
+#endif
 		}
-	else if(PyBytes_Check(enc)){
-		encStr = PyBytes_AsString(enc);
+	else if(PyBytes_Check(_o2)){
+		encStr = PyBytes_AsString(_o2);
 		}
 	else{
 		PyErr_SetString(PyExc_ValueError,"font.encName is not bytes or unicode");
-		Py_DECREF(enc);
 		ERROR_EXIT();
 		}
 	if(PyErr_Occurred()) ERROR_EXIT();
+	Py_DECREF(_o2);
+	_o2 = NULL;
 	if(strstr(encStr,"UCS-2")) encStr = "UTF16";
 
 	while((_i1=PyObject_IsTrue(utext))>0){
@@ -632,7 +640,6 @@ L_ERR:
 L_OK:
 	Py_DECREF(R);
 	Py_DECREF(font);
-	Py_DECREF(enc);
 	Py_DECREF(utext);
 	Py_DECREF(fonts);
 	return res;
@@ -649,7 +656,18 @@ static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObjec
 	Py_INCREF(text);
 	if(!encoding) encStr="utf8";
 	else if(PyUnicode_Check(encoding)){
+#ifdef	isPy3
 		encStr = PyUnicode_AsUTF8(encoding);
+#else
+		_o1 = PyUnicode_AsUTF8String(encoding);
+		if(!_o1){
+			PyErr_SetString(PyExc_ValueError,"encoding not UTF8 encoded bytes");
+			ERROR_EXIT();
+			}
+		encStr = PyBytes_AsString(_o1);
+		Py_DECREF(_o1);
+		_o1 = NULL;
+#endif
 		}
 	else if(PyBytes_Check(encoding)){
 		encStr = PyBytes_AS_STRING(encoding);
