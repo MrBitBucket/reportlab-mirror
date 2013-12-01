@@ -13,7 +13,10 @@ nothing more than "reportlab.whatever..."
 """
 
 import sys, os, fnmatch, copy, re
-from configparser import ConfigParser
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
 import unittest
 
 # Helper functions.
