@@ -38,9 +38,6 @@ def isSeq(v,_st=(tuple,list)):
 def isNative(v):
     return isinstance(v, str)
 
-def char2int(c):
-    return ord(asUnicode(c))
-
 #isStr is supposed to be for arbitrary stringType
 #isBytes for bytes strings only
 #isUnicode for proper unicode
@@ -107,6 +104,8 @@ if isPy3:
     import builtins
     rl_exec = getattr(builtins,'exec')
     del builtins
+    def char2int(s):
+        return  s if isinstance(s,int) else ord(s if isinstance(s,str) else s.decode('latin1'))
 else:
     if sys.hexversion >= 0x02000000:
         def _digester(s):
@@ -185,6 +184,8 @@ else:
         elif L is None:
             L = G
         exec("""exec obj in G, L""")
+
+    char2int = ord
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
