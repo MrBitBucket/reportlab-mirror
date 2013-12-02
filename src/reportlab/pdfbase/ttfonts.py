@@ -52,7 +52,7 @@ Canvas and TextObject have special support for dynamic fonts.
 """
 
 from struct import pack, unpack, error as structError
-from reportlab.lib.utils import getBytesIO, isPy3, bytestr, isUnicode
+from reportlab.lib.utils import getBytesIO, isPy3, bytestr, isUnicode, char2int
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
 from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF
@@ -479,9 +479,8 @@ class TTFontFile(TTFontParser):
         if not psName:
             raise TTFError("Could not find PostScript font name")
         for c in psName:
-            oc = c
-            if oc>126 or c in b' [](){}<>/%':
-                raise TTFError("psName=%r contains invalid character '%s' ie U+%04X" % (psName,c,c))
+            if char2int(c)>126 or c in b' [](){}<>/%':
+                raise TTFError("psName=%r contains invalid character %s" % (psName,ascii(c)))
         self.name = psName
         self.familyName = names[1] or psName
         self.styleName = names[2] or 'Regular'
