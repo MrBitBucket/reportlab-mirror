@@ -81,10 +81,11 @@ class RlAccelTestCase(unittest.TestCase):
         fontSize = 12
         defns="ttfn t1fn ttf t1f testCp1252 enc senc ts utext fontSize ttf.face ttf.face.charWidths ttf.face.defaultWidth t1f.widths t1f.encName t1f.substitutionFonts _fonts"
         import sys
+        F = []
         def tfunc(f,ts,fontSize,enc,funcs,i):
             w1 = funcs[i][0](f,ts,fontSize,enc)
             w2 = funcs[1][0](f,ts,fontSize,enc) #python version
-            assert abs(w1-w2)<1e-10,"f(%r).stringWidthU(%r,%s,%r)-->%r != f._py_stringWidth(...)-->%r" % (f,ts,fontSize,enc,w1,w2)
+            if abs(w1-w2)>=1e-10: F.append("stringWidth%s(%r,%r,%s,%r)-->%r != f._py_stringWidth(...)-->%r" % (fontType,f,ts,fontSize,enc,w1,w2))
         for font,fontType in ((t1f,'T1'),(ttf,'TTF')):
             funcs = getFuncs('instanceStringWidth'+fontType)
             for i,kind in enumerate(('c','py')):
@@ -95,7 +96,8 @@ class RlAccelTestCase(unittest.TestCase):
                     tfunc(font,utext,fontSize,senc,funcs,i)
                     if j:
                         rcc = checkrc(defns,rcv)
-                        assert not rcc, "%s %s refcount diffs (%s)" % (fontType,kind,rcc)
+                        if rcc: F.append("%s %s refcount diffs (%s)" % (fontType,kind,rcc))
+        assert not F,"instanceStringWidth failures\n\t%s" % '\n\t'.join(F)
 
     def test_unicode2T1(self):
         from reportlab.pdfbase.pdfmetrics import getFont, _fonts
@@ -111,12 +113,14 @@ class RlAccelTestCase(unittest.TestCase):
             w2 = FUNCS[1][0](ts,[f]+f.substitutionFonts)
             assert w1==w2,"%s unicode2T1 %r != %r" % (kind,w1,w2)
         defns="t1fn t1f testCp1252 enc senc utext t1f.widths t1f.encName t1f.substitutionFonts _fonts"
+        F = []
         for func,kind in FUNCS:
             rcv = getrc(defns)
             tfunc(t1f,testCp1252,func,kind)
             tfunc(t1f,utext,func,kind)
             rcc = checkrc(defns,rcv)
-            assert not rcc, "%s refcount diffs (%s)" % (kind,rcc)
+            if rcc: F.append("%s refcount diffs (%s)" % (kind,rcc))
+        assert not F,"test_unicode2T1 failures\n\t%s" % '\n\t'.join(F)
 
     def test_sameFrag(self):
         class ABag:
