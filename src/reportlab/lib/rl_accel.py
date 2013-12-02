@@ -109,8 +109,8 @@ if 'instanceStringWidthT1' in _py_funcs:
 if 'instanceStringWidthTTF' in _py_funcs:
     def instanceStringWidthTTF(self, text, size, encoding='utf-8'):
         "Calculate text width"
-        if not isinstance(text,str):
-            text = str(text, encoding or 'utf-8')   # encoding defaults to utf-8
+        if not isUnicode(text):
+            text = text.decode(encoding or 'utf-8')
         g = self.face.charWidths.get
         dw = self.face.defaultWidth
         return 0.001*size*sum([g(ord(u),dw) for u in text])
