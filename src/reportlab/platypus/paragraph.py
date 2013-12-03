@@ -128,7 +128,7 @@ def _nbspCount(w):
     if isBytes(str):
         return w.count(b'\xc2\xa0')
     else:
-        return w.count('\xa0')
+        return w.count(u'\xa0')
 
 def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,offset)
