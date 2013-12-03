@@ -262,10 +262,18 @@ def main():
         os.system("%s runAll.py" % sys.executable)
         return
 
+    debug_compile_args = []
+    debug_link_args = []
+    if os.environ.get('RL_DEBUG','0')=='1':
+        if sys.platform == 'win32':
+            debug_compile_args=['/Zi']
+            debug_link_args=['/DEBUG']
+
     SPECIAL_PACKAGE_DATA = {}
     RL_ACCEL = _find_rl_ccode('rl_accel','_rl_accel.c')
     LIBRARIES=[]
     EXT_MODULES = []
+    
     if not RL_ACCEL:
         infoline( '***************************************************')
         infoline( '*No rl_accel code found, you can obtain it at     *')
@@ -285,8 +293,8 @@ def main():
                             define_macros=[],
                             library_dirs=[],
                             libraries=[], # libraries to link against
-                            #extra_compile_args=['/Zi'],
-                            #extra_link_args=['/DEBUG'],
+                            extra_compile_args=debug_compile_args,
+                            extra_link_args=debug_link_args,
                             ),
                         ]
         if not isPy3:
@@ -410,6 +418,7 @@ def main():
             infoline('# If you need truetype support in renderPM')
             infoline('# You may need to edit setup.cfg (win32)')
             infoline('# or edit this file to access the library if it is installed')
+
         EXT_MODULES +=  [Extension( 'reportlab.graphics._renderPM',
                                         SOURCES,
                                         include_dirs=[RENDERPM,LIBART_DIR,GT1_DIR]+FT_INC_DIR,
@@ -418,10 +427,8 @@ def main():
 
                                         # libraries to link against
                                         libraries=FT_LIB,
-                                        #extra_objects=['gt1.lib','libart.lib',],
-                                        extra_link_args=[]
-                                        #extra_compile_args=['/Zi'],
-                                        #extra_link_args=['/DEBUG'],
+                                        extra_compile_args=debug_compile_args,
+                                        extra_link_args=debug_link_args,
                                         ),
                             ]
         infoline('################################################')
