@@ -79,7 +79,7 @@ class AsciiFileTestCase(unittest.TestCase):
             msg = "File %s contains characters: %s." % args
 ##            if nonAscii:
 ##                print msg
-            assert nonAscii == '', msg
+            assert not nonAscii, msg
 
 
 class FilenameTestCase(unittest.TestCase):
