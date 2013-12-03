@@ -711,11 +711,8 @@ class TestXMLParser(XMLParser):
         if not attrs:
             print('start tag: <' + tag + '>')
         else:
-            w = sys.stdout.write
-            w('start tag: <' + tag)
-            for name, value in attrs.items():
-                w(name + '=' + '"' + value + '"')
-            print('>')
+            a = ' '.join("%s=%s" % (name,ascii(value)) for name, value in attrs.items())
+            print('start tag: <%s%s>' % (tag,a if a else ''))
 
     def unknown_endtag(self, tag):
         self.flush()
