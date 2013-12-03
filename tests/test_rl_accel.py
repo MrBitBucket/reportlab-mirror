@@ -89,12 +89,12 @@ class RlAccelTestCase(unittest.TestCase):
         for font,fontType in ((t1f,'T1'),(ttf,'TTF')):
             funcs = getFuncs('instanceStringWidth'+fontType)
             for i,kind in enumerate(('c','py')):
-                for j in (0,1): #we run twice to allow the refcounts to stabilize
+                for j in (3,2,1,0): #we run several times to allow the refcounts to stabilize
                     if j: rcv = getrc(defns)
                     tfunc(font,testCp1252,fontSize,enc,funcs,i)
                     tfunc(font,ts,fontSize,senc,funcs,i)
                     tfunc(font,utext,fontSize,senc,funcs,i)
-                    if j:
+                    if not j:
                         rcc = checkrc(defns,rcv)
                         if rcc: F.append("%s %s refcount diffs (%s)" % (fontType,kind,rcc))
         assert not F,"instanceStringWidth failures\n\t%s" % '\n\t'.join(F)
