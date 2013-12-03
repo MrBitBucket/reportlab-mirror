@@ -318,15 +318,15 @@ def test():
         print('\t%s' % familyName)
 
     print()
-    print('fonts called Vera:', end=' ')
+    outw = sys.stdout.write
+    outw('fonts called Vera:')
     for font in ff.getFontsInFamily('Bitstream Vera Sans'):
-        print('\t%s' % font.name)
-
+        outw(' %s' % font.name)
     print()
-    print('Bold fonts\n\t')
+    outw('Bold fonts\n\t')
     for font in ff.getFontsWithAttributes(isBold=True, isItalic=False):
-        print(font.fullName, end=' ')
-
+        outw(font.fullName+' ')
+    print()
     print('family report')
     print(ff.getFamilyXmlReport())
 

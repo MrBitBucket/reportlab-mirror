@@ -1427,17 +1427,17 @@ def test():
     r = Rect(10,10,200,50)
     import pprint
     pp = pprint.pprint
-    print('a Rectangle:')
+    w = sys.stdout.write
+    w('a Rectangle: ')
     pp(r.getProperties())
-    print()
-    print('verifying...', end=' ')
+    w('\nverifying...')
     r.verify()
-    print('OK')
+    w(' OK\n')
     #print 'setting rect.z = "spam"'
     #r.z = 'spam'
-    print('deleting rect.width')
+    w('deleting rect.width ')
     del r.width
-    print('verifying...', end=' ')
+    w('verifying...')
     r.verify()
 
 

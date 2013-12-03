@@ -289,9 +289,7 @@ def test():
     print('Defining a custom format with french words:')
     s.registerFormat('french', format_french)
     s.setFormat('FrenchList', 'french')
-    print('   ', end=' ')
-    for i in range(1,6):
-        print(s.nextf('FrenchList'), end=' ')
+    print('   ' +(' '.join(str(s.nextf('FrenchList')) for i in range(1,6))))
     print()
     print('Chaining H1 and H2 - H2 goes back to one when H1 increases')
     s.chain('H1','H2')

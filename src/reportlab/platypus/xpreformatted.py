@@ -251,13 +251,14 @@ if __name__=='__main__':    #NORUNTESTS
         print('\n############dumpXPreforemattedLines(%s)' % str(P))
         lines = P.blPara.lines
         n =len(lines)
+        outw=sys.stdout.write
         for l in range(n):
             line = lines[l]
             words = line.words
             nwords = len(words)
-            print('line%d: %d(%d)\n  ' % (l,nwords,line.wordCount), end=' ')
+            outw('line%d: %d(%d)\n  ' % (l,nwords,line.wordCount))
             for w in range(nwords):
-                print("%d:'%s'"%(w,words[w].text), end=' ')
+                outw(" %d:'%s'"%(w,words[w].text))
             print()
 
     def dumpXPreformattedFrags(P):
@@ -267,14 +268,15 @@ if __name__=='__main__':    #NORUNTESTS
         for l in range(n):
             print("frag%d: '%s'" % (l, frags[l].text))
 
+        outw=sys.stdout.write
         l = 0
         for L in _getFragLines(frags):
             n=0
             for W in _getFragWords(L,360):
-                print("frag%d.%d: size=%d" % (l, n, W[0]), end=' ')
+                outw("frag%d.%d: size=%d" % (l, n, W[0]))
                 n = n + 1
                 for w in W[1:]:
-                    print("'%s'" % w[1], end=' ')
+                    outw(" '%s'" % w[1])
                 print()
             l = l + 1
 

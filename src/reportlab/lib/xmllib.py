@@ -7,7 +7,7 @@ __doc__='''From before xmllib was in the Python standard library.
 
 Probably ought to be removed'''
 
-import re
+import sys, re
 
 try:
     import sgmlop   # this works for both builtin on the path or relative
@@ -711,9 +711,10 @@ class TestXMLParser(XMLParser):
         if not attrs:
             print('start tag: <' + tag + '>')
         else:
-            print('start tag: <' + tag, end=' ')
+            w = sys.stdout.write
+            w('start tag: <' + tag)
             for name, value in attrs.items():
-                print(name + '=' + '"' + value + '"', end=' ')
+                w(name + '=' + '"' + value + '"')
             print('>')
 
     def unknown_endtag(self, tag):
