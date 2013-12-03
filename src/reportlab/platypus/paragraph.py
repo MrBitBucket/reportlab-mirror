@@ -62,7 +62,7 @@ _wsc_re_split=re.compile('[%s]+'% re.escape(_wsc)).split
 def split(text, delim=None):
     if isBytes(text): text = text.decode('utf8')
     if delim is not None and isBytes(delim): delim = delim.decode('utf8')
-    return [uword for uword in (_wsc_re_split(text) if delim is None and '\xa0' in text else text.split(delim))]
+    return [uword for uword in (_wsc_re_split(text) if delim is None and u'\xa0' in text else text.split(delim))]
 
 def strip(text):
     if isBytes(text): text = text.decode('utf8')
@@ -1697,6 +1697,7 @@ if __name__=='__main__':    #NORUNTESTS
     def dumpParagraphLines(P):
         print('dumpParagraphLines(<Paragraph @ %d>)' % id(P))
         lines = P.blPara.lines
+        outw = sys.stdout.write
         for l,line in enumerate(lines):
             line = lines[l]
             if hasattr(line,'words'):
@@ -1704,9 +1705,9 @@ if __name__=='__main__':    #NORUNTESTS
             else:
                 words = line[1]
             nwords = len(words)
-            print('line%d: %d(%s)\n  ' % (l,nwords,str(getattr(line,'wordCount','Unknown'))), end=' ')
+            outw('line%d: %d(%s)\n  ' % (l,nwords,str(getattr(line,'wordCount','Unknown'))))
             for w in range(nwords):
-                print("%d:'%s'"%(w,getattr(words[w],'text',words[w])), end=' ')
+                outw(" %d:'%s'"%(w,getattr(words[w],'text',words[w])))
             print()
 
     def fragDump(w):
@@ -1723,13 +1724,14 @@ if __name__=='__main__':    #NORUNTESTS
         for l in range(n):
             print("frag%d: '%s' %s" % (l, frags[l].text,' '.join(['%s=%s' % (k,getattr(frags[l],k)) for k in frags[l].__dict__ if k!=text])))
 
+        outw = sys.stdout.write
         l = 0
         cum = 0
         for W in _getFragWords(frags,360):
             cum += W[0]
-            print("fragword%d: cum=%3d size=%d" % (l, cum, W[0]), end=' ')
+            outw("fragword%d: cum=%3d size=%d" % (l, cum, W[0]))
             for w in W[1:]:
-                print('(%s)' % fragDump(w), end=' ')
+                outw(' (%s)' % fragDump(w))
             print()
             l += 1
 
