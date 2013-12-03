@@ -162,7 +162,7 @@ if 'asciiBase85Encode' in _py_funcs:
         This is a compact encoding used for binary data within
         a PDF file.  Four bytes of binary data become five bytes of
         ASCII.  This is the default method used for encoding images."""
-        doOrd = isPy3 and isUnicode(input) or not isPy3
+        doOrd =  not isPy3 or isUnicode(input)
         # special rules apply if not a multiple of four bytes.
         whole_word_count, remainder_size = divmod(len(input), 4)
         cut = 4 * whole_word_count
