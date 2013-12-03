@@ -1089,11 +1089,8 @@ class ParaParser:
             text = "<para>"+text+"</para>"
         try:
             tt = makeParser(caseInsensitive=not self.caseSensitive)(text)
-        except Exception as exc:
-            if isPy3:
-                raise exc.__class__('paragraph text %s caused exception\n%s' % (ascii(text),str(exc))) from exc
-            else:
-                annotateException('paragraph text %s caused exception' % ascii(text))
+        except:
+            annotateException('paragraph text %s caused exception' % ascii(text))
         self._tt_start(tt)
         return self._complete_parse()
 
@@ -1155,7 +1152,7 @@ if __name__=='__main__':
         else:
             print('ParaStyle', l.fontName,l.fontSize,l.textColor)
             for l in rv:
-                print(l.fontName,l.fontSize,l.textColor,l.bold, l.rise, '|%s|'%l.text[:25], end=' ')
+                sys.stdout.write(l.fontName,l.fontSize,l.textColor,l.bold, l.rise, '|%s|'%l.text[:25])
                 if hasattr(l,'cbDefn'):
                     print('cbDefn',getattr(l.cbDefn,'name',''),getattr(l.cbDefn,'label',''),l.cbDefn.kind)
                 else: print()
