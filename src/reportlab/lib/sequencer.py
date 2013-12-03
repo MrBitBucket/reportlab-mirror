@@ -77,7 +77,7 @@ class _Counter:
         else:
             self._value = self._base
 
-    def __next__(self):
+    def next(self):
         self._value += 1
         v = self._value
         for counter in self._resets:
@@ -87,9 +87,15 @@ class _Counter:
     def _this(self):
         return self._value
 
-    def nextf(self):
-        """Returns next value formatted"""
-        return self._formatter(next(self))
+    if isPy3:
+        __next__ = next
+        def nextf(self):
+            """Returns next value formatted"""
+            return self._formatter(next(self))
+    else:
+        def nextf(self):
+            """Returns next value formatted"""
+            return self._formatter(self.__next__())
 
     def thisf(self):
         return self._formatter(self._this())
@@ -181,7 +187,7 @@ class Sequencer:
             increments it by one.  New counters start at one."""
             if not counter:
                 counter = self._defaultCounter
-            return next(self._getCounter(counter))
+            return self._getCounter(counter).next()
 
     def thisf(self, counter=None):
         if not counter:
