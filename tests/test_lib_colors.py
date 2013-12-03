@@ -55,7 +55,7 @@ class ColorTestCase(unittest.TestCase):
         "Test toColor function on half a dozen ways to say 'red'."
 
         allRed = [colors.red, [1, 0, 0], (1, 0, 0),
-                  'red', 'RED', '0xFF0000', '0xff0000']
+                  'red', 'RED', '0xFF0000', '0xff0000','rgb(255,0,0)']
 
         for thing in allRed:
             assert colors.toColor(thing) == colors.red,"colors.toColor(%s)-->%s != colors.red(%s)" % (ascii(thing),ascii(colors.toColor(thing)),colors.red)

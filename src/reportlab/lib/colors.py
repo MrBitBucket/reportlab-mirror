@@ -42,6 +42,7 @@ ValueError: css color 'pcmyka(100,0,0,0)' has wrong number of components
 import math, re, functools
 from reportlab import isPy3
 from reportlab.lib.rl_accel import fp_str
+from reportlab.lib.utils import asNative, isStr
 import collections
 
 class Color:
@@ -848,7 +849,8 @@ class toColor:
             assert 3<=len(arg)<=4, 'Can only convert 3 and 4 sequences to color'
             assert 0<=min(arg) and max(arg)<=1
             return len(arg)==3 and Color(arg[0],arg[1],arg[2]) or CMYKColor(arg[0],arg[1],arg[2],arg[3])
-        elif isinstance(arg,str):
+        elif isStr(arg):
+            arg = asNative(arg)
             C = cssParse(arg)
             if C: return C
             if arg in self.extraColorsNS: return self.extraColorsNS[arg]
