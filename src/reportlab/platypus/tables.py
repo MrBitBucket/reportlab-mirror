@@ -21,7 +21,7 @@ from reportlab.platypus.flowables import Flowable, Preformatted, Spacer
 from reportlab import rl_config
 from reportlab.lib.styles import PropertySet, ParagraphStyle, _baseFontName
 from reportlab.lib import colors
-from reportlab.lib.utils import annotateException, IdentStr, flatten
+from reportlab.lib.utils import annotateException, IdentStr, flatten, isStr, asNative
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.abag import ABag as CellFrame
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -305,8 +305,8 @@ class Table(Flowable):
         def normCell(stuff):
             if stuff is None:
                 return ''
-            elif isinstance(stuff,str):
-                return stuff.encode('utf8')
+            elif isStr(stuff):
+                return asNative(stuff)
             else:
                 return stuff
         outData = []
