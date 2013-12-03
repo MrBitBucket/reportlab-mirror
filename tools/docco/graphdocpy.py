@@ -11,21 +11,21 @@ __version__ = '0.8'
 import sys
 sys.path.insert(0, '.')
 import os, re, types, getopt, pickle, copy, time, pprint, traceback
-import reportlab
+from reportlab import isPy3
 from reportlab import rl_config
 
-from .docpy import PackageSkeleton0, ModuleSkeleton0
-from .docpy import DocBuilder0, PdfDocBuilder0, HtmlDocBuilder0
-from .docpy import htmlescape, htmlrepr, defaultformat, \
+from docpy import PackageSkeleton0, ModuleSkeleton0
+from docpy import DocBuilder0, PdfDocBuilder0, HtmlDocBuilder0
+from docpy import htmlescape, htmlrepr, defaultformat, \
      getdoc, reduceDocStringLength
-from .docpy import makeHtmlSection, makeHtmlSubSection, \
+from docpy import makeHtmlSection, makeHtmlSubSection, \
      makeHtmlInlineImage
 
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
-from reportlab.lib.utils import getBytesIO
+from reportlab.lib.utils import getStringIO
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen import canvas
 from reportlab.platypus.flowables import Flowable, Spacer
@@ -444,7 +444,6 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
             else:
                 pass
 
-
     def _showWidgetDemoCode(self, widget):
         """Show a demo code of the widget."""
         # Heading
@@ -466,7 +465,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         for key in keys:
             value = props[key]
 
-            f = getBytesIO()
+            f = getStringIO()
             pprint.pprint(value, f)
             value = f.getvalue()[:-1]
             valueLines = value.split('\n')
@@ -650,7 +649,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             value = props[key]
 
             # Method 3
-            f = getBytesIO()
+            f = getStringIO()
             pprint.pprint(value, f)
             value = f.getvalue()[:-1]
             valueLines = value.split('\n')
@@ -881,14 +880,18 @@ def documentPackage0(pathOrName, builder, opts={}):
         package = __import__(name)
         # Some special care needed for dotted names.
         if '.' in name:
-            subname = 'package' + name[namefind('.'):]
+            subname = 'package' + name[name.find('.'):]
             package = eval(subname)
         path = os.path.dirname(package.__file__)
 
     cwd = os.getcwd()
     os.chdir(path)
     builder.beginPackage(name)
-    os.path.walk(path, _packageWalkCallback, (builder, opts))
+    if isPy3:
+        for dirpath, dirnames, filenames in os.walk(path):
+            _packageWalkCallback((builder, opts), dirpath, dirnames + filenames)
+    else:
+        os.path.walk(path, _packageWalkCallback, (builder, opts))
     builder.endPackage(name)
     os.chdir(cwd)
 

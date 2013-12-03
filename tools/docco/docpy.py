@@ -34,6 +34,7 @@ __version__ = '0.8'
 
 
 import sys, os, re, types, getopt, copy, time
+from reportlab import isPy3
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch, cm
@@ -72,7 +73,7 @@ def mainPageFrame(canvas, doc):
         canvas.setFont('Times-Roman', 12)
         canvas.drawString(4 * inch, cm, "%d" % pageNumber)
         if hasattr(canvas, 'headerLine'): # hackish
-            headerline = , ' \215 '.join(canvas.headerLine) # bullet
+            headerline = ' \215 '.join(canvas.headerLine) # bullet
             canvas.drawString(2*cm, A4[1]-1.75*cm, headerline)
 
     canvas.setFont('Times-Roman', 8)
@@ -1184,7 +1185,11 @@ def documentPackage0(pathOrName, builder, opts={}):
 
     cwd = os.getcwd()
     builder.beginPackage(name)
-    os.path.walk(path, _packageWalkCallback, (builder, opts))
+    if isPy3:
+        for dirpath, dirnames, filenames in os.walk(path):
+            _packageWalkCallback((builder, opts), dirpath, dirnames + filenames)
+    else:
+        os.path.walk(path, _packageWalkCallback, (builder, opts))
     builder.endPackage(name)
     os.chdir(cwd)
 
