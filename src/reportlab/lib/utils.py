@@ -73,12 +73,18 @@ if isPy3:
     from string import ascii_letters, ascii_uppercase, ascii_lowercase
     int2byte = lambda x: bytes([x])
 
-    from io import BytesIO
+    from io import BytesIO, StringIO
     def getBytesIO(buf=None):
         '''unified StringIO instance interface'''
         if buf:
             return BytesIO(buf)
         return BytesIO()
+
+    def getStringIO(buf=None):
+        '''unified StringIO instance interface'''
+        if buf:
+            return StringIO(buf)
+        return StringIO()
 
     def bytestr(x,enc='utf8'):
         if isinstance(x,str):
@@ -147,6 +153,7 @@ else:
         if buf:
             return StringIO(buf)
         return StringIO()
+    getStringIO = getBytesIO
 
     def bytestr(x,enc='utf8'):
         if isinstance(x,unicode):
