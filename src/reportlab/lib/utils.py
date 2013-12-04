@@ -112,6 +112,11 @@ if isPy3:
     del builtins
     def char2int(s):
         return  s if isinstance(s,int) else ord(s if isinstance(s,str) else s.decode('latin1'))
+    def rl_reraise(t, v, b=None):
+        if v.__traceback__ is not b:
+            raise v.with_traceback(b)
+        raise v
+
 else:
     if sys.hexversion >= 0x02000000:
         def _digester(s):
@@ -191,6 +196,7 @@ else:
         elif L is None:
             L = G
         exec("""exec obj in G, L""")
+    rl_exec("""def rl_reraise(t, v, b=None):\n\traise t, v, b\n""")
 
     char2int = ord
 
@@ -1249,7 +1255,7 @@ def findInPaths(fn,paths,isfile=True,fail=False):
 
 def annotateException(msg,enc='utf8'):
     '''add msg to the args of an existing exception'''
-    if not msg: rise
+    if not msg: raise
     t,v,b=sys.exc_info()
     if not hasattr(v,'args'): raise
     e = -1
@@ -1260,11 +1266,11 @@ def annotateException(msg,enc='utf8'):
             break
     if e>=0:
         if not isPy3:
-            if isinstance(a,unicode):
-                if not isinstance(msg,unicode):
+            if isUnicode(a):
+                if not isUnicode(msg):
                     msg=msg.decode(enc)
             else:
-                if isinstance(msg,unicode):
+                if isUnicode(msg):
                     msg=msg.encode(enc)
                 else:
                     msg = str(msg)
@@ -1275,11 +1281,8 @@ def annotateException(msg,enc='utf8'):
     else:
         A.append(msg)
     v.args = tuple(A)
-    if isPy3:
-        raise t(v).with_traceback(b)
-    else:
-        raise (t,v,b)
-    
+    rl_reraise(t,v,b)
+
 def escapeOnce(data):
     """Ensure XML output is escaped just once, irrespective of input
 
