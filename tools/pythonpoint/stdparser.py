@@ -15,6 +15,7 @@ from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import recursiveImport
 from tools.pythonpoint import pythonpoint
 from reportlab.platypus import figures
+from reportlab.lib.utils import asNative
 
 
 def getModule(modulename,fromPath='tools.pythonpoint.styles'):
@@ -246,6 +247,7 @@ class PPMLParser(xmllib.XMLParser):
         #the only data should be paragraph text, preformatted para
         #text, 'string text' for a fixed string on the page,
         #or table data
+        data = asNative(data)
         if self._curPara:
             self._curPara.rawtext = self._curPara.rawtext + data
         elif self._curPrefmt:
