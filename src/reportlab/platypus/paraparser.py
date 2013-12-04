@@ -16,7 +16,7 @@ except:
 import unicodedata
 import reportlab.lib.sequencer
 from reportlab.lib.abag import ABag
-from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label
+from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -1085,8 +1085,9 @@ class ParaParser:
         self.errors holds a list of the error messages.
         """
         self._setup_for_parse(style)
+        text = asUnicode(text)
         if not(len(text)>=6 and text[0]=='<' and _re_para.match(text)):
-            text = "<para>"+text+"</para>"
+            text = u"<para>"+text+u"</para>"
         try:
             tt = makeParser(caseInsensitive=not self.caseSensitive)(text)
         except:
