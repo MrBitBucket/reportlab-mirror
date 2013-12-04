@@ -1,5 +1,5 @@
 #!/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2013
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/randomtext.py
 
@@ -364,8 +364,8 @@ if __name__=='__main__':
         try:
             print(randomText(theme,sentences))
         except:
-            print("Usage: randomtext.py [theme [#sentences]]", file=sys.stderr)
-            print(" theme in chomsky|STARTUP|COMPUTERS|BLAH|BUZZWORD|STARTREK|PRINTING|PYTHON", file=sys.stderr)
+            sys.stderr.write("Usage: randomtext.py [theme [#sentences]]\n")
+            sys.stderr.write(" theme in chomsky|STARTUP|COMPUTERS|BLAH|BUZZWORD|STARTREK|PRINTING|PYTHON")
             raise
     else:
         print(chomsky(5))
