@@ -507,7 +507,7 @@ def _greekConvert(data):
                 if isPy3:
                     u = chr(v)
                 else:
-                    u = chr(v).encode('utf8')
+                    u = unichr(v).encode('utf8')
             _greek2Utf8[chr(k)] = u
     return ''.join(map(_greek2Utf8.__getitem__,data))
 
