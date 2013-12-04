@@ -62,9 +62,9 @@ class ParaParserTestCase(unittest.TestCase):
 
     def testEntity(self):
         "Numeric entities should be unescaped by parser"
-        txt = "Hello &#169; copyright"
+        txt = b"Hello &#169; copyright"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals([x.text for x in fragList], ['Hello ','\xc2\xa9',' copyright'])
+        self.assertEquals([x.text for x in fragList], [u'Hello \xa9 copyright'])
 
     def testEscaped(self):
         "Escaped high-bit stuff should go straight through"
@@ -90,11 +90,11 @@ class ParaParserTestCase(unittest.TestCase):
         "Numeric entities should be unescaped by parser"
         txt = "Hello &#169; copyright"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals([x.text for x in fragList], ['Hello ','\xa9',' copyright'])
+        self.assertEquals([x.text for x in fragList], ['Hello \xa9 copyright'])
 
     def testEscapedUnicode(self):
         "Escaped high-bit stuff should go straight through"
-        txt = "Hello \xa9 copyright"
+        txt = u"Hello \xa9 copyright"
         fragList = ParaParser().parse(txt, self.style)[1]
         assert fragList[0].text == txt
 
@@ -105,13 +105,19 @@ class ParaParserTestCase(unittest.TestCase):
         self.assertEquals(fragList[1].lineBreak, True)
 
     def testNakedAmpersands(self):
-        txt = "1 & 2"
-        parser = ParaParser()
-        parser.caseSensitive = True
-        frags = ParaParser().parse(txt, self.style)[1]
-        #print 'parsed OK, frags=', frags
+        import pyRXPU
         from reportlab.platypus.paragraph import Paragraph
-        p = Paragraph(txt, self.style)
+        def func():
+            txt = "1 & 2"
+            parser = ParaParser()
+            parser.caseSensitive = True
+            frags = ParaParser().parse(txt, self.style)[1]
+            #print 'parsed OK, frags=', frags
+            Paragraph(txt, self.style),
+        self.assertRaises(
+                pyRXPU.error,
+                func,
+                )
 
 def makeSuite():
     return makeSuiteForClasses(ParaParserTestCase)

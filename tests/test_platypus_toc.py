@@ -25,6 +25,7 @@ from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate
 from reportlab.platypus import tableofcontents, PageBreak
 from reportlab.lib import randomtext
+from xml.sax.saxutils import escape as xmlEscape
 
 
 def myMainPageFrame(canvas, doc):
@@ -164,7 +165,7 @@ class TocTestCase(unittest.TestCase):
             story.append(Paragraph('HEADER, LEVEL %d' % i,
                                    headerLevelStyles[i]))
             #now put some body stuff in.
-            txt = randomtext.randomText(randomtext.PYTHON, 5)
+            txt = xmlEscape(randomtext.randomText(randomtext.PYTHON, 5))
             para = Paragraph(txt, makeBodyStyle())
             story.append(para)
 
@@ -203,7 +204,7 @@ class TocTestCase(unittest.TestCase):
                                    headerStyle))
             #now put some lengthy body stuff in.  
             for paras in range(random.randint(1,3)):
-                txt = randomtext.randomText(randomtext.PYTHON, 5)
+                txt = xmlEscape(randomtext.randomText(randomtext.PYTHON, 5))
                 para = Paragraph(txt, makeBodyStyle())
                 story.append(para)
 
@@ -334,7 +335,7 @@ class TocTestCase(unittest.TestCase):
         for i in range(chapters):
             S.append(PageBreak())
             S.append(HParagraph(i,'This is chapter %d' % (i+1), headerStyle))
-            txt = randomtext.randomText(RT[i*13 % len(RT)], 15)
+            txt = xmlEscape(randomtext.randomText(RT[i*13 % len(RT)], 15))
             para = Paragraph(txt, makeBodyStyle())
             S.append(para)
 
