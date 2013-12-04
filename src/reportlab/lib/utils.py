@@ -79,6 +79,7 @@ if isPy3:
         if buf:
             return BytesIO(buf)
         return BytesIO()
+    _bytesIOType = BytesIO 
 
     def getStringIO(buf=None):
         '''unified StringIO instance interface'''
@@ -159,6 +160,7 @@ else:
             return StringIO(buf)
         return StringIO()
     getStringIO = getBytesIO
+    _bytesIOType = StringIO 
 
     def bytestr(x,enc='utf8'):
         if isinstance(x,unicode):
@@ -671,7 +673,7 @@ class ImageReader(object):
             try:
                 from reportlab.rl_config import imageReaderFlags
                 self.fp = open_for_read(fileName,'b')
-                if isinstance(self.fp,BytesIO): imageReaderFlags=0 #avoid messing with already internal files
+                if isinstance(self.fp,_bytesIOType): imageReaderFlags=0 #avoid messing with already internal files
                 if imageReaderFlags>0:  #interning
                     data = self.fp.read()
                     if imageReaderFlags&2:  #autoclose
