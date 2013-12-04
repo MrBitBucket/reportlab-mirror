@@ -152,10 +152,16 @@ padding = """
 28 BF 4E 5E 4E 75 8A 41 64 00 4E 56 FF FA 01 08
 2E 2E 00 B6 D0 68 3E 80 2F 0C A9 FE 64 53 69 7A
 """
-def xorKey(num,key):
-    "xor's each byte of the key with the number, which is <256"
-    if num==0: return key
-    return bytes(num^k for k in key)
+if isPy3:
+    def xorKey(num,key):
+        "xor's each byte of the key with the number, which is <256"
+        if num==0: return key
+        return bytes(num^k for k in key)
+else:
+    def xorKey(num,key):
+        "xor's each bytes of the key with the number, which is <256"
+        if num==0: return key
+        return ''.join(chr(num^ord(k)) for k in key)
 
 def hexText(text):
     "a legitimate way to show strings in PDF"
