@@ -83,12 +83,12 @@ class _Counter:
         for counter in self._resets:
             counter.reset()
         return v
+    __next__ = next
 
     def _this(self):
         return self._value
 
     if isPy3:
-        __next__ = next
         def nextf(self):
             """Returns next value formatted"""
             return self._formatter(next(self))
