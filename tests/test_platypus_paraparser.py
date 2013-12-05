@@ -5,7 +5,7 @@
 #$Header$
 __version__=''' $Id'''
 __doc__="""Tests of intra-paragraph parsing behaviour in Platypus."""
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, equalStrings
 setOutDir(__name__)
 from pprint import pprint as pp
 import unittest
@@ -70,7 +70,7 @@ class ParaParserTestCase(unittest.TestCase):
         "Escaped high-bit stuff should go straight through"
         txt = "Hello \xc2\xa9 copyright"
         fragList = ParaParser().parse(txt, self.style)[1]
-        assert fragList[0].text == txt
+        assert equalStrings(fragList[0].text,txt)
 
     def testPlainUnicode(self):
         "See if simple unicode goes through"
