@@ -365,7 +365,7 @@ if __name__=='__main__':
             print(randomText(theme,sentences))
         except:
             sys.stderr.write("Usage: randomtext.py [theme [#sentences]]\n")
-            sys.stderr.write(" theme in chomsky|STARTUP|COMPUTERS|BLAH|BUZZWORD|STARTREK|PRINTING|PYTHON")
+            sys.stderr.write(" theme in chomsky|STARTUP|COMPUTERS|BLAH|BUZZWORD|STARTREK|PRINTING|PYTHON\n")
             raise
     else:
         print(chomsky(5))
