@@ -13,6 +13,7 @@ from reportlab.lib.testutils import setOutDir,SecureTestCase, GlobDirectoryWalke
 setOutDir(__name__)
 import os, sys, glob, re, unittest, inspect
 import reportlab
+isPy3= reportlab.isPy3
 
 def typ2is(typ):
     return getattr(inspect,'is'+typ)
@@ -21,6 +22,16 @@ def obj2typ(obj):
     for typ in ('function','module','class','method'):
         if typ2is(typ)(obj): return typ
     return None
+
+def getClass(obj):
+    try:
+        return obj.__self__.__class__
+    except:
+        try:
+            return obj.im_class
+        except:
+            return None
+
 
 def getModuleObjects(folder, rootName, typ, pattern='*.py'):
     "Get a list of all objects defined *somewhere* in a package."
@@ -82,9 +93,11 @@ def getModuleObjects(folder, rootName, typ, pattern='*.py'):
                 elif typ == 'method':
                     if obj2typ(obj) == 'class':
                         for m in dir(obj):
+                            if not isPy3 and m=='__abstractmethods__': continue
                             a = getattr(obj, m)
                             if obj2typ(a) == typ and a not in lookup:
-                                if a.__self__.__class__.__module__.find(rootName) != 0:
+                                klass = getClass(a)
+                                if not klass or klass.__module__.find(rootName) != 0:
                                     continue
                                 cName = obj.__name__
                                 objects.append((mName, a))
