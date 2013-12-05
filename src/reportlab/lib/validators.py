@@ -54,7 +54,7 @@ class _isBoolean(Validator):
 
 class _isString(Validator):
     def test(self,x):
-        return isinstance(x,(str,bytes))
+        return isStr(x)
 
 class _isCodec(Validator):
     def test(self,x):
