@@ -5,7 +5,7 @@ Arciv Stream  ciphering
 '''
 __all__='''ArcIV encode decode'''.split()
 __version__=''' 1.0 '''
-from reportlab.lib.utils import bytestr, isPy3
+from reportlab.lib.utils import isUnicode, isPy3
 class ArcIV:
 	'''
 	performs 'ArcIV' Stream Encryption of S using key
@@ -23,7 +23,7 @@ class ArcIV:
 		#Initialize private key, k With the values of the key mod 256.
 		#and sbox With numbers 0 - 255. Then compute sbox
 		key = self._key
-		if isPy3 and isinstance(key,str): key = bytestr(key)
+		if isUnicode(key): key = key.encode('utf8')
 		sbox = list(range(256))
 		k = list(range(256))
 		lk = len(key)
@@ -51,9 +51,11 @@ class ArcIV:
 		sbox, i, j = self._sbox, self._i, self._j
 
 		if isPy3:
-			C = list(bytestr(B)) if isinstance(B,str) else (list(B) if isinstance(B,bytes) else B[:])
+			C = list(B.encode('utf8')) if isinstance(B,str) else (list(B) if isinstance(B,bytes) else B[:])
+		elif isinstance(B,basestring):
+			C = list(map(ord,B.encode('utf8') if isinstance(B,unicode) else B))
 		else:
-			C = isinstance(B,str) and list(map(ord,B)) or B[:]
+			C = B[:]
 		n = len(C)
 		p = 0
 		while p<n:
