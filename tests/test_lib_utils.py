@@ -32,6 +32,8 @@ class ImporterTestCase(unittest.TestCase):
         s = repr(int(time())) + repr(self.count)
         self.__class__.count += 1
         self._tempdir = get_rl_tempdir('reportlab_test','tmp_%s' % s)
+        if not os.path.isdir(self._tempdir):
+            os.makedirs(self._tempdir,0o700)
         _testmodulename = os.path.join(self._tempdir,'test_module_%s.py' % s)
         f = open(_testmodulename,'w')
         f.write('__all__=[]\n')
