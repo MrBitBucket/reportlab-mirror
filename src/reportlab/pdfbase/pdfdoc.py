@@ -215,7 +215,7 @@ class PDFDocument:
             f = open(filename, "wb")
         data = self.GetPDFData(canvas)
         if isUnicode(data):
-            data = data.encode('utf8')
+            data = data.encode('latin1')
         f.write(data)
         if myfile:
             f.close()
