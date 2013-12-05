@@ -45,11 +45,11 @@ if isPy3:
     def _digester(s):
         return md5(s if isBytes(s) else s.encode('utf8')).hexdigest()
 
-    def asBytes(v):
-        return v if isinstance(v,bytes) else v.encode('utf8')
+    def asBytes(v,enc='utf8'):
+        return v if isinstance(v,bytes) else v.encode(enc)
 
-    def asUnicode(v):
-        return v if isinstance(v,str) else v.decode('utf8')
+    def asUnicode(v,enc='utf8'):
+        return v if isinstance(v,str) else v.decode(enc)
 
     def asNative(v):
         return asUnicode(v)
@@ -127,8 +127,8 @@ else:
         def _digester(s):
             return join(["%02x" % ord(x) for x in md5(s).digest()], '')
 
-    def asBytes(v):
-        return v if isinstance(v,str) else v.encode('utf8')
+    def asBytes(v,enc='utf8'):
+        return v if isinstance(v,str) else v.encode(enc)
 
     def asNative(v):
         return asBytes(v)
@@ -145,8 +145,8 @@ else:
     def isUnicode(v):
         return isinstance(v, unicode)
 
-    def asUnicode(v):
-        return v if isinstance(v,unicode) else v.decode('utf8')
+    def asUnicode(v,enc='utf8'):
+        return v if isinstance(v,unicode) else v.decode(enc)
 
     def isClass(v):
         import types
