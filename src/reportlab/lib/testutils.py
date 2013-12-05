@@ -336,3 +336,5 @@ class ScriptThatMakesFileTest(unittest.TestCase):
         status = p.close()
         assert os.path.isfile(self.outFileName), "File %s not created!" % self.outFileName
 
+def equalStrings(a,b,enc='utf8'):
+    return a==b if type(a)==type(b) else asUnicode(a,enc)==asUnicode(b,enc)
