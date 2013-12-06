@@ -57,7 +57,7 @@ def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
             if isPy3:
                 text = bytes([i]).decode(encName)*30
             else:
-                text = str(chr(i),encName).encode('utf8')*30
+                text = chr(i).decode(encName).encode('utf8')*30
 
             try:
                 w = canv.stringWidth(text, fontName, 10)

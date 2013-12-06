@@ -25,8 +25,8 @@ class PdfdocTestCase(NearTestCase):
         self.assertEquals(pdfdoc.PDFString(b'Hello\xc2\xa2World',0).format(self.doc),b'(Hello\xa2World)')
         self.assertEquals(pdfdoc.PDFString(b'Hello\xc2\xa0World',0).format(self.doc),b'(\xfe\xff\x00H\x00e\x00l\x00l\x00o\x00\xa0\x00W\x00o\x00r\x00l\x00d)')
         self.assertEquals(pdfdoc.PDFString(b'Hello\xc2\xa0World',1).format(self.doc),b'(\\376\\377\\000H\\000e\\000l\\000l\\000o\\000\\240\\000W\\000o\\000r\\000l\\000d)')
-        self.assertEquals(pdfdoc.PDFString('Hello\xa0World'.encode('utf8'),1).format(self.doc),b'(\\376\\377\\000H\\000e\\000l\\000l\\000o\\000\\240\\000W\\000o\\000r\\000l\\000d)')
-        self.assertEquals(pdfdoc.PDFString('Hello\xa0World'.encode('utf8'),0).format(self.doc),b'(\xfe\xff\x00H\x00e\x00l\x00l\x00o\x00\xa0\x00W\x00o\x00r\x00l\x00d)')
+        self.assertEquals(pdfdoc.PDFString(u'Hello\xa0World'.encode('utf8'),1).format(self.doc),b'(\\376\\377\\000H\\000e\\000l\\000l\\000o\\000\\240\\000W\\000o\\000r\\000l\\000d)')
+        self.assertEquals(pdfdoc.PDFString(u'Hello\xa0World'.encode('utf8'),0).format(self.doc),b'(\xfe\xff\x00H\x00e\x00l\x00l\x00o\x00\xa0\x00W\x00o\x00r\x00l\x00d)')
 
     def testPDFArray(self):
         self.assertEquals(pdfdoc.PDFArray([1,2,3,4]).format(self.doc),b'[ 1 2 3 4 ]')
