@@ -18,7 +18,7 @@ from copy import deepcopy
 from reportlab.lib.abag import ABag
 from reportlab.rl_config import platypus_link_underline
 from reportlab import rl_config
-from reportlab.lib.utils import isBytes
+from reportlab.lib.utils import isBytes, unicodeT, bytesT, strTypes
 from reportlab.lib.rl_accel import sameFrag
 import re
 
@@ -125,7 +125,7 @@ def _rightDrawParaLine( tx, offset, extraspace, words, last=0):
     return m
 
 def _nbspCount(w):
-    if isBytes(str):
+    if isBytes(w):
         return w.count(b'\xc2\xa0')
     else:
         return w.count(u'\xa0')
@@ -587,7 +587,7 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style):
     tx2 = canvas.beginText(style.bulletIndent, cur_y+getattr(style,"bulletOffsetY",0))
     tx2.setFont(style.bulletFontName, style.bulletFontSize)
     tx2.setFillColor(hasattr(style,'bulletColor') and style.bulletColor or style.textColor)
-    if isinstance(bulletText,str):
+    if isinstance(bulletText,strTypes):
         tx2.textOut(bulletText)
     else:
         for f in bulletText:
@@ -606,7 +606,7 @@ def _handleBulletWidth(bulletText,style,maxWidths):
     '''work out bullet width and adjust maxWidths[0] if neccessary
     '''
     if bulletText:
-        if isinstance(bulletText,str):
+        if isinstance(bulletText,strTypes):
             bulletWidth = stringWidth( bulletText, style.bulletFontName, style.bulletFontSize)
         else:
             #it's a list of fragments
@@ -761,11 +761,11 @@ def textTransformFrags(frags,style):
     if tt:
         tt=tt.lower()
         if tt=='lowercase':
-            tt = str.lower
+            tt = unicodeT.lower
         elif tt=='uppercase':
-            tt = str.upper
+            tt = unicodeT.upper
         elif  tt=='capitalize':
-            tt = str.title
+            tt = unicodeT.title
         elif tt=='none':
             return
         else:
@@ -774,18 +774,18 @@ def textTransformFrags(frags,style):
         if n==1:
             #single fragment the easy case
             frags[0].text = tt(frags[0].text)
-        elif tt is str.title:
+        elif tt is unicodeT.title:
             pb = True
             for f in frags:
                 u = f.text
                 if not u: continue
-                if u.startswith(' ') or pb:
+                if u.startswith(u' ') or pb:
                     u = tt(u)
                 else:
-                    i = u.find(' ')
+                    i = u.find(u' ')
                     if i>=0:
                         u = u[:i]+tt(u[i:])
-                pb = u.endswith(' ')
+                pb = u.endswith(u' ')
                 f.text = u
         else:
             for f in frags:
@@ -793,10 +793,10 @@ def textTransformFrags(frags,style):
                 if not u: continue
                 f.text = tt(u)
 
-class cjkU(str):
+class cjkU(unicodeT):
     '''simple class to hold the frag corresponding to a str'''
     def __new__(cls,value,frag,encoding):
-        self = str.__new__(cls,value)
+        self = unicodeT.__new__(cls,value)
         self._frag = frag
         if hasattr(frag,'cbDefn'):
             w = getattr(frag.cbDefn,'width',0)
@@ -828,14 +828,14 @@ def makeCJKParaLine(U,maxWidth,widthUsed,extraSpace,lineBreak,calcBounds):
         minDescent = min(minDescent,descent)
         if not sameFrag(f0,f):
             f0=f0.clone()
-            f0.text = ''.join(CW)
+            f0.text = u''.join(CW)
             words.append(f0)
             CW = []
             f0 = f
         CW.append(u)
     if CW:
         f0=f0.clone()
-        f0.text = ''.join(CW)
+        f0.text = u''.join(CW)
         words.append(f0)
     return FragLine(kind=1,extraSpace=extraSpace,wordCount=1,words=words[1:],fontSize=maxSize,ascent=maxAscent,descent=minDescent,maxWidth=maxWidth,currentWidth=widthUsed,lineBreak=lineBreak)
 
@@ -845,7 +845,7 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
     U = []  #get a list of single glyphs with their widths etc etc
     for f in frags:
         text = f.text
-        if not isinstance(text,str):
+        if isBytes(text):
             text = text.decode(encoding)
         if text:
             U.extend([cjkU(t,f,encoding) for t in text])
