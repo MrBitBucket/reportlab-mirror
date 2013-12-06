@@ -419,7 +419,7 @@ class UnicodeCIDFont(CIDFont):
         #these ones should be encoded asUTF16 minus the BOM
         from codecs import utf_16_be_encode
         #print 'formatting %s: %s' % (type(text), repr(text))
-        if type(text) is not str:
+        if isBytes(text):
             text = text.decode('utf8')
         utfText = utf_16_be_encode(text)[0]
         encoded = escapePDF(utfText)
