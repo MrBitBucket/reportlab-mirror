@@ -14,14 +14,25 @@ setOutDir(__name__)
 import os, sys, glob, re, unittest, inspect
 import reportlab
 isPy3= reportlab.isPy3
+from reportlab.lib.utils import rl_exec
 
 def typ2is(typ):
     return getattr(inspect,'is'+typ)
+
+_typ2key={
+        'module':lambda x: (x[0],getattr(x[1],'__name__',''),getattr(x[1],'__path__',getattr(x,'__file__',''))),
+        'class':lambda x: (x[0],getattr(x[1],'__name__',''),getattr(x[1],'__module__','')),
+        'method':lambda x: (x[0],getattr(x[1],'__name__',''),getattr(x[1],'__module__','')),
+        'function':lambda x: (x[0],getattr(x[1],'__name__',''),x[1].__code__.co_filename),
+        }
+def typ2key(typ):
+    return _typ2key[typ]
 
 def obj2typ(obj):
     for typ in ('function','module','class','method'):
         if typ2is(typ)(obj): return typ
     return None
+
 
 def getClass(obj):
     try:
@@ -32,99 +43,106 @@ def getClass(obj):
         except:
             return None
 
+from pkgutil import iter_modules
+def walk_packages_ex(path=None, prefix='', onerror=None, cond=None):
+    def seen(p, m={}):
+        if p in m:
+            return True
+        m[p] = True
 
-def getModuleObjects(folder, rootName, typ, pattern='*.py'):
+    for importer, name, ispkg in iter_modules(path, prefix):
+        if cond and not cond(importer,name,ispkg): continue
+        yield importer, name, ispkg
+
+        if ispkg:
+            try:
+                __import__(name)
+            except ImportError:
+                if onerror is not None:
+                    onerror(name)
+            except Exception:
+                if onerror is not None:
+                    onerror(name)
+                else:
+                    raise
+            else:
+                path = getattr(sys.modules[name], '__path__', None) or []
+
+                # don't traverse path items we've seen before
+                path = [p for p in path if not seen(p)]
+
+                for item in walk_packages_ex(path, name+'.', onerror, cond):
+                    yield item
+
+def rl_module(i,name,pkg):
+    return name=='reportlab' or name.startswith('reportlab.')
+
+rl_modules = None
+def getRLModules():
     "Get a list of all objects defined *somewhere* in a package."
-    objects = []
-    lookup = {}
-    for file in GlobDirectoryWalker(folder, pattern):
-        folder = os.path.dirname(file)
+    global rl_modules
+    if rl_modules is None:
+        rl_modules = []
+        for _,name,_ in walk_packages_ex(cond=rl_module):
+            rl_modules.append(name)
+    return rl_modules
 
-        if os.path.basename(file) == '__init__.py':
-            continue
-
-##        if os.path.exists(os.path.join(folder, '__init__.py')):
-####            print 'skipping', os.path.join(folder, '__init__.py')
-##            continue
-
-        sys.path.insert(0, folder)
-        cwd = os.getcwd()
-        os.chdir(folder)
-
-        modName = os.path.splitext(os.path.basename(file))[0]
-        prefix = folder[folder.find(rootName):]
-        prefix = prefix.replace(os.sep,'.')
-        mName = prefix + '.' + modName
-
+def getObjects(objects,lookup,mName,modBn,tobj):
+    ttyp = obj2typ(tobj)
+    for n in dir(tobj):
+        obj = getattr(tobj,n,None)
         try:
-            module = __import__(mName)
-        except ImportError:
-            # Restore sys.path and working directory.
-            os.chdir(cwd)
-            del sys.path[0]
+            if obj in lookup: continue
+        except:
             continue
+        typ = obj2typ(obj)
+        if typ in ('function','method'):
+            if os.path.splitext(obj.__code__.co_filename)[0]==modBn:
+                lookup[obj] = 1
+                objects.setdefault(typ if typ=='function' and ttyp=='module' else 'method',[]).append((mName,obj))
+        elif typ=='class':
+            if obj.__module__==mName:
+                lookup[obj] = 1
+                objects.setdefault(typ,[]).append((mName,obj))
+                getObjects(objects,lookup,mName,modBn,obj)
 
-        # Get the 'real' (leaf) module
-        # (__import__ loads only the top-level one).
-        if mName.find('.') != -1:
-            for part in mName.split('.')[1:]:
-                module = getattr(module, part)
+def getModuleObjects(modules):
+    objects = {}
+    lookup = {}
+    for mName in modules:
+        try:
+            NS = {}
+            rl_exec("import %s as module" % mName,NS)
+        except ImportError:
+            continue
+        else:
+            module = NS['module']
+        if module in lookup: continue
 
-            # Find the objects in the module's content.
-            modContentNames = dir(module)
-
-            # Handle modules.
-            if typ=='module':
-                if module.__name__.find('reportlab') > -1:
-                    objects.append((mName, module))
-                    continue
-
-            for n in modContentNames:
-                obj = eval(mName + '.' + n)
-                # Handle functions and classes.
-                if typ in ('function','module'):
-                    if obj2typ(obj) == typ and obj not in lookup:
-                        if typ == 'class':
-                            if obj.__module__.find(rootName) != 0:
-                                continue
-                        objects.append((mName, obj))
-                        lookup[obj] = 1
-                # Handle methods.
-                elif typ == 'method':
-                    if obj2typ(obj) == 'class':
-                        for m in dir(obj):
-                            if not isPy3 and m=='__abstractmethods__': continue
-                            a = getattr(obj, m)
-                            if obj2typ(a) == typ and a not in lookup:
-                                klass = getClass(a)
-                                if not klass or klass.__module__.find(rootName) != 0:
-                                    continue
-                                cName = obj.__name__
-                                objects.append((mName, a))
-                                lookup[a] = 1
-
-        # Restore sys.path and working directory.
-        os.chdir(cwd)
-        del sys.path[0]
+        lookup[module] = 1
+        objects.setdefault('module',[]).append((mName, module))
+        modBn = os.path.splitext(module.__file__)[0]
+        getObjects(objects,lookup,mName,modBn,module)
     return objects
 
 class DocstringTestCase(SecureTestCase):
     "Testing if objects in the ReportLab package have docstrings."
 
-    def _writeLogFile(self, objType):
+    def setUp(self):
+        SecureTestCase.setUp(self)
+        self.modules = getRLModules()
+        self.objects = getModuleObjects(self.modules)
+
+    def _writeLogFile(self, typ):
         "Write log file for different kind of documentable objects."
 
-        cwd = os.getcwd()
-        from reportlab.lib.testutils import RL_HOME
-        objects = getModuleObjects(RL_HOME, 'reportlab', objType)
-        if objType!='function':
-            objects.sort()
-        os.chdir(cwd)
+        objects = self.objects.get(typ,[])
+        objects.sort(key=typ2key(typ))
 
         expl = {'function':'functions',
                 'class':'classes',
                 'method':'methods',
-                'module':'modules'}[objType]
+                'module':'modules'}[typ]
 
         path = outputfile("test_docstrings-%s.log" % expl)
         file = open(path, 'w')
@@ -133,21 +151,30 @@ class DocstringTestCase(SecureTestCase):
 
         lines = []
         for name, obj in objects:
-            if objType == 'method':
+            if typ == 'method':
                 n = obj.__name__
                 # Skip names with leading and trailing double underscores.
                 if p.match(n):
                     continue
 
-            if objType == 'function':
+            if typ == 'function':
                 if not obj.__doc__ or len(obj.__doc__) == 0:
                     lines.append("%s.%s\n" % (name, obj.__name__))
             else:
                 if not obj.__doc__ or len(obj.__doc__) == 0:
-                    if objType == 'class':
-                        lines.append("%s.%s\n" % (obj.__module__, obj.__name__))
-                    elif objType == 'method':
-                        lines.append("%s.%s\n" % (obj.__self__.__class__, obj.__name__))
+                    if typ == 'class':
+                        lines.append("%s.%s\n" % (obj.__module__, getattr(obj,'__qualname__',obj.__name__)))
+                    elif typ == 'method':
+                        klass = getattr(obj,'__self__',None)
+                        if klass is not None:
+                            klass = getattr(klass,'__class__',None)
+                        if klass:
+                            lines.append("%s.%s\n" % (klass.__name__, obj.__name__))
+                        else:
+                            if isPy3:
+                                lines.append("%s\n" % (obj.__qualname__))
+                            else:
+                                lines.append("%s\n" % (obj.__name__))
                     else:
                         lines.append("%s\n" % (obj.__name__))
 
