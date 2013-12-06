@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2013
 #see license.txt for license details
 import __main__
 __main__._rl_testing=True
@@ -12,7 +12,7 @@ can always be imported, and so that individual tests need to import
 nothing more than "reportlab.whatever..."
 """
 
-import sys, os, fnmatch, copy, re
+import sys, os, fnmatch, re
 try:
     from configparser import ConfigParser
 except ImportError:
@@ -278,14 +278,11 @@ class SecureTestCase(unittest.TestCase):
 
     def setUp(self):
         "Remember sys.path and current working directory."
-
-        self._initialPath = copy.copy(sys.path)
+        self._initialPath = sys.path[:]
         self._initialWorkDir = os.getcwd()
-
 
     def tearDown(self):
         "Restore previous sys.path and working directory."
-
         sys.path = self._initialPath
         os.chdir(self._initialWorkDir)
 
