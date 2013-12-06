@@ -157,24 +157,15 @@ class DocstringTestCase(SecureTestCase):
                 if p.match(n):
                     continue
 
-            if typ == 'function':
-                if not obj.__doc__ or len(obj.__doc__) == 0:
+            if not obj.__doc__ or len(obj.__doc__) == 0:
+                if typ == 'function':
                     lines.append("%s.%s\n" % (name, obj.__name__))
-            else:
-                if not obj.__doc__ or len(obj.__doc__) == 0:
-                    if typ == 'class':
+                elif typ == 'class':
                         lines.append("%s.%s\n" % (obj.__module__, getattr(obj,'__qualname__',obj.__name__)))
-                    elif typ == 'method':
-                        klass = getattr(obj,'__self__',None)
-                        if klass is not None:
-                            klass = getattr(klass,'__class__',None)
-                        if klass:
-                            lines.append("%s.%s\n" % (klass.__name__, obj.__name__))
-                        else:
-                            if isPy3:
-                                lines.append("%s\n" % (obj.__qualname__))
-                            else:
-                                lines.append("%s\n" % (obj.__name__))
+                else:
+                    qname = getattr(self,'__qualname__',None)
+                    if qname:
+                        lines.append("%s\n" % (obj.__qualname__))
                     else:
                         lines.append("%s\n" % (obj.__name__))
 
