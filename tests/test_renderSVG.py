@@ -178,7 +178,7 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         "Test character encoding."
 
         path = outputfile("test_renderSVG_simple_test4.svg")
-        specialChar = '\u2019'
+        specialChar = u'\u2019'
 
         d = Drawing(200, 100)
         d.add(String(0, 0, "foo"+specialChar))
@@ -195,7 +195,7 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         textChildren = dg.getElementsByTagName('text')  # text nodes
         t0 = textChildren[0].childNodes[0].nodeValue.strip()
         t1 = textChildren[1].childNodes[0].nodeValue.strip()
-        assert t0 == 'foo'+specialChar
+        assert t0 == 'foo'+specialChar, "%s should equal %s" % (ascii(t0),ascii('foo'+specialChar))
         assert t1 == 'bar'
 
     def tearDown(self):

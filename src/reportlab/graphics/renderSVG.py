@@ -17,7 +17,7 @@ from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer,
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
-from reportlab.lib.utils import getBytesIO, RLString, isPy3
+from reportlab.lib.utils import getBytesIO, RLString, isPy3, isUnicode, isBytes
 
 from xml.dom import getDOMImplementation
 
@@ -96,7 +96,7 @@ def transformNode(doc, newTag, node=None, **attrDict):
 class EncodedWriter(list):
     '''
     EncodedWriter(encoding) assumes .write will be called with
-    either trnicode or utf8 encoded bytes. it will accumulate
+    either unicode or utf8 encoded bytes. it will accumulate
     unicode
     '''
     BOMS =  {
@@ -114,7 +114,7 @@ class EncodedWriter(list):
             self.write(self.BOMS[encoding])
 
     def write(self,u):
-        if isinstance(u,bytes):
+        if isBytes(u):
             try:
                  u = u.decode('utf-8')
             except:
@@ -122,8 +122,8 @@ class EncodedWriter(list):
                 ev = str(ev)
                 del et, tb
                 raise ValueError("String %r not encoded as 'utf-8'\nerror=%s" % (u,ev))
-        elif not isinstance(u,str):
-            raise ValueError("EncodedWriter.write(%r) argument should be 'utf-8' bytes or str" % u)
+        elif not isUnicode(u):
+            raise ValueError("EncodedWriter.write(%s) argument should be 'utf-8' bytes or str" % ascii(u))
         self.append(u)
 
     def getvalue(self):
@@ -250,7 +250,7 @@ class SVGCanvas:
         exd = self.extraXmlDecl
         if exd:
             svg = svg.replace('?>','?>'+exd)
-        f.write(svg)
+        f.write(svg if isPy3 else svg.encode(self.encoding))
         if f is not fn:
             f.close()
 
