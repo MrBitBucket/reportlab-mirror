@@ -39,7 +39,7 @@ class CHSFontTests(unittest.TestCase):
         c.drawString(100,680, 'Short sample: "China - Zhang Ziyi"  (famous actress)')
         # the two typefaces
 
-        hBoxText('\u4e2d\u56fd - \u7ae0\u5b50\u6021',
+        hBoxText(u'\u4e2d\u56fd - \u7ae0\u5b50\u6021',
                  c,
                  100,
                  660,

@@ -49,7 +49,7 @@ class CHTFontTests(unittest.TestCase):
         c.setFont('Helvetica', 10)
         c.drawString(100,680, 'Short sample: "Taiwan  -  Ang Lee" (movie director)')
 
-        hBoxText('\u81fa\u7063  -  \u674e\u5b89' , c, 100, 600, 'MSung-Light')
+        hBoxText(u'\u81fa\u7063 - \u674e\u5b89' , c, 100, 600, 'MSung-Light')
 
 
 ##        #hBoxText(message3 + ' MHei-Medium', c, 100, 580, 'MHei-Medium', enc)

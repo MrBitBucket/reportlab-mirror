@@ -42,10 +42,10 @@ class JapaneseFontTests(unittest.TestCase):
         pdfmetrics.registerFont(UnicodeCIDFont('HeiseiMin-W3'))
 
         
-        msg = '\u6771\u4EAC : Unicode font, unicode input'
+        msg = u'\u6771\u4EAC : Unicode font, unicode input'
         self.hDraw(c, msg, 'HeiseiMin-W3', 100, 600)
 
-        msg = '\u6771\u4EAC : Unicode font, utf8 input'.encode('utf8')
+        msg = u'\u6771\u4EAC : Unicode font, utf8 input'.encode('utf8')
         self.hDraw(c, msg, 'HeiseiMin-W3', 100, 575)
 
 
@@ -108,8 +108,8 @@ class JapaneseFontTests(unittest.TestCase):
 
         c.setFont('Helvetica', 30)
         c.drawString(100,700, 'Japanese TrueType Font Support')
-        msg = '\u6771\u4EAC : Unicode font'.encode('utf8')
-        msg2 = 'utf8 input 0123456789 ABCDEF'.encode('utf8')
+        msg = u'\u6771\u4EAC : Unicode font'.encode('utf8')
+        msg2 = u'utf8 input 0123456789 ABCDEF'.encode('utf8')
         from reportlab.pdfbase.ttfonts import TTFont
         try:
             msmincho = TTFont('MS Mincho','msmincho.ttc',subfontIndex=0,asciiReadable=0)
@@ -147,7 +147,7 @@ class JapaneseFontTests(unittest.TestCase):
                 c.drawString(100,470, msg2)
                 c.drawString(100,440, fn)
             #test a paragraph with CJK and <br/> tags
-            u = '''<font color=red>\u30ac\u30c8\u30a6\u30a3\u30c3</font><br/><font color=blue>\u30af\u7a7a\u6e2f\u3068\u9023\u7d61\u901a</font><br/>\u8def\u3067\u76f4\u7d50\u3055\u308c\u3066\u3044\u308b\u552f<br/>\u4e00\u306e\u30db\u30c6\u30eb\u3067\u3042\u308b\u5f53\u30db\u30c6\u30eb\u306f\u3001\u8857\u306e\u4e2d\u5fc3\u90e8\u304b\u308930\u5206\u306e\u5834\u6240\u306b\u3054\u3056\u3044\u307e\u3059\u3002\u5168\u5ba2\u5ba4\u306b\u9ad8\u901f\u30a4\u30f3\u30bf\u30fc\u30cd\u30c3\u30c8<br/>\u74b0\u5883\u3092\u5b8c\u5099\u3057\u3066\u304a\u308a\u307e\u3059\u3002\u30d5\u30a1\u30df\u30ea\u30fc\u30eb\u30fc\u30e0\u306f5\u540d\u69d8\u307e\u3067\u304a\u6cca\u308a\u3044\u305f\u3060\u3051\u307e\u3059\u3002\u307e\u305f\u3001\u30a8\u30b0\u30bc\u30af\u30c6\u30a3\u30d6\u30eb\u30fc\u30e0\u306e\u304a\u5ba2\u69d8\u306f\u3001\u30a8\u30b0\u30bc\u30af\u30c6\u30a3\u30d6\u30e9\u30a6\u30f3\u30b8\u3092\u3054\u5229\u7528\u3044\u305f\u3060\u3051\u307e\u3059\u3002\u4e8b\u524d\u306b\u3054\u4e88\u7d04\u3044\u305f\u3060\u3051\u308b\u30bf\u30a4\u30e0\u30c8\u30a5\u30d5\u30e9\u30a4\u30fb\u30d1\u30c3\u30b1\u30fc\u30b8\u306b\u306f\u3001\u7a7a\u6e2f\u306e\u99d0\u8eca\u6599\u91d1\u304c\u542b\u307e\u308c\u3066\u304a\u308a\u307e\u3059\u3002'''
+            u = u'''<font color=red>\u30ac\u30c8\u30a6\u30a3\u30c3</font><br/><font color=blue>\u30af\u7a7a\u6e2f\u3068\u9023\u7d61\u901a</font><br/>\u8def\u3067\u76f4\u7d50\u3055\u308c\u3066\u3044\u308b\u552f<br/>\u4e00\u306e\u30db\u30c6\u30eb\u3067\u3042\u308b\u5f53\u30db\u30c6\u30eb\u306f\u3001\u8857\u306e\u4e2d\u5fc3\u90e8\u304b\u308930\u5206\u306e\u5834\u6240\u306b\u3054\u3056\u3044\u307e\u3059\u3002\u5168\u5ba2\u5ba4\u306b\u9ad8\u901f\u30a4\u30f3\u30bf\u30fc\u30cd\u30c3\u30c8<br/>\u74b0\u5883\u3092\u5b8c\u5099\u3057\u3066\u304a\u308a\u307e\u3059\u3002\u30d5\u30a1\u30df\u30ea\u30fc\u30eb\u30fc\u30e0\u306f5\u540d\u69d8\u307e\u3067\u304a\u6cca\u308a\u3044\u305f\u3060\u3051\u307e\u3059\u3002\u307e\u305f\u3001\u30a8\u30b0\u30bc\u30af\u30c6\u30a3\u30d6\u30eb\u30fc\u30e0\u306e\u304a\u5ba2\u69d8\u306f\u3001\u30a8\u30b0\u30bc\u30af\u30c6\u30a3\u30d6\u30e9\u30a6\u30f3\u30b8\u3092\u3054\u5229\u7528\u3044\u305f\u3060\u3051\u307e\u3059\u3002\u4e8b\u524d\u306b\u3054\u4e88\u7d04\u3044\u305f\u3060\u3051\u308b\u30bf\u30a4\u30e0\u30c8\u30a5\u30d5\u30e9\u30a4\u30fb\u30d1\u30c3\u30b1\u30fc\u30b8\u306b\u306f\u3001\u7a7a\u6e2f\u306e\u99d0\u8eca\u6599\u91d1\u304c\u542b\u307e\u308c\u3066\u304a\u308a\u307e\u3059\u3002'''
             jPara = Paragraph(u, jStyle)
             jPara.wrap(300, 500)
             jPara.drawOn(c, 100, 300)
@@ -261,7 +261,7 @@ class JapaneseFontTests(unittest.TestCase):
             c.drawString(70, y, group)
             y -= 20
             c.setFont('Helvetica',10)
-            c.drawString(70, y, ' '.join([repr(x)[4:-1] for x in group]))
+            c.drawString(70, y, ' '.join([ascii(x)[4:-1] for x in group]))
             c.setFont('HeiseiMin-W3', 14)
             y -= 20
 
@@ -274,14 +274,14 @@ class JapaneseFontTests(unittest.TestCase):
             c.drawString(70, y, group)
             y -= 20
             c.setFont('Helvetica',10)
-            c.drawString(70, y, ' '.join([repr(x)[2:] for x in group]))
+            c.drawString(70, y, ' '.join([ascii(x)[2:] for x in group]))
             c.setFont('HeiseiMin-W3', 14)
             y -= 20
 
         c.showPage()
 
         #utf8 encoded paragraph
-        sample2_uni = '''\u30ac\u30c8\u30a6\u30a3\u30c3\u30af\u7a7a\u6e2f\u3068\u9023\u7d61\u901a
+        sample2_uni = u'''\u30ac\u30c8\u30a6\u30a3\u30c3\u30af\u7a7a\u6e2f\u3068\u9023\u7d61\u901a
         \u8def\u3067\u76f4\u7d50\u3055\u308c\u3066\u3044\u308b\u552f\u4e00\u306e\u30db\u30c6\u30eb
         \u3067\u3042\u308b\u5f53\u30db\u30c6\u30eb\u306f\u3001\u8857\u306e\u4e2d\u5fc3\u90e8\u304b
         \u308930\u5206\u306e\u5834\u6240\u306b\u3054\u3056\u3044\u307e\u3059\u3002\u5168\u5ba2\u5ba4
@@ -295,7 +295,7 @@ class JapaneseFontTests(unittest.TestCase):
         \u30fb\u30d1\u30c3\u30b1\u30fc\u30b8\u306b\u306f\u3001\u7a7a\u6e2f\u306e\u99d0\u8eca\u6599
         \u91d1\u304c\u542b\u307e\u308c\u3066\u304a\u308a\u307e\u3059\u3002'''
 
-        oneline_uni = ''.join(sample2_uni.split())
+        oneline_uni = u''.join(sample2_uni.split())
         sample2_utf8 = oneline_uni.encode('utf8')
 
         from reportlab.platypus import Paragraph
