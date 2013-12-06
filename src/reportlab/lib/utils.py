@@ -42,6 +42,9 @@ def isNative(v):
 #isBytes for bytes strings only
 #isUnicode for proper unicode
 if isPy3:
+    bytesT = bytes
+    unicodeT = str
+    strTypes = (str,bytes)
     def _digester(s):
         return md5(s if isBytes(s) else s.encode('utf8')).hexdigest()
 
@@ -119,6 +122,9 @@ if isPy3:
         raise v
 
 else:
+    bytesT = str
+    unicodeT = unicode
+    strTypes = basestring
     if sys.hexversion >= 0x02000000:
         def _digester(s):
             return md5(s).hexdigest()
