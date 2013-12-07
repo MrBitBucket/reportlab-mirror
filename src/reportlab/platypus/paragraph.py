@@ -473,6 +473,8 @@ def _fragWordIter(w):
         if hasattr(f,'cbDefn'):
             yield f, getattr(f,'width'), s
         elif s:
+            if isBytes(s):
+                s = s.decode('utf8')    #only encoding allowed
             for c in s:
                 yield f, stringWidth(c,f.fontName, f.fontSize), c
         else:
