@@ -543,7 +543,9 @@ def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding):
     R = []
     maxlineno = len(maxWidths)-1
     lineWidth = 0
-    wordText = ''
+    wordText = u''
+    if isBytes(w):
+        w = w.decode('utf8')
     for c in w:
         cw = stringWidth(c,fontName,fontSize,encoding)
         newLineWidth = lineWidth+cw
