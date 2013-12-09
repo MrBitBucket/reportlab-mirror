@@ -66,7 +66,7 @@ def _startUp():
                 d = (p % D).replace('/',os.sep)
                 if rl_isdir(d): P.append(d)
             _setOpt(k,os.pathsep.join(P),lambda x:x.split(os.pathsep))
-            globals()[k] = filter(rl_isdir,globals()[k])
+            globals()[k] = list(filter(rl_isdir,globals()[k]))
         else:
             v = _SAVED[k]
             if isinstance(v,(int,float)): conv = type(v)
