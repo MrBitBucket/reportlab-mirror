@@ -341,7 +341,8 @@ class TTFontMaker:
         stm = getBytesIO()
         write = stm.write
 
-        numTables = len(self.tables)
+        tables = self.tables
+        numTables = len(tables)
         searchRange = 1
         entrySelector = 0
         while searchRange * 2 <= numTables:
@@ -355,11 +356,10 @@ class TTFontMaker:
                                  entrySelector, rangeShift))
 
         # Table directory
-        tables = list(self.tables.items())
-        tables.sort()     # XXX is this the correct order?
         offset = 12 + numTables * 16
-        wStr = lambda x:write(bytes(tag,'utf8')) if isPy3 else write
-        for tag, data in tables:
+        wStr = (lambda x:write(bytes(tag,'latin1'))) if isPy3 else write
+        tables_items = list(sorted(tables.items()))
+        for tag, data in tables_items:
             if tag == 'head':
                 head_start = offset
             checksum = calcChecksum(data)
@@ -369,7 +369,7 @@ class TTFontMaker:
             offset = offset + paddedLength
 
         # Table data
-        for tag, data in tables:
+        for tag, data in tables_items:
             data += b"\0\0\0"
             write(data[:len(data)&~3])
 
