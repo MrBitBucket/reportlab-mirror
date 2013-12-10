@@ -759,7 +759,8 @@ class ParaParser:
                 v = '\0'
         elif 'code' in attr:
             try:
-                v = chr(int(eval(attr['code'])))
+                v = int(eval(attr['code']))
+                v = chr(v) if isPy3 else unichr(v)
             except:
                 self._syntax_error('<unichar/> invalid code attribute %s' % ascii(attr['code']))
                 v = '\0'
