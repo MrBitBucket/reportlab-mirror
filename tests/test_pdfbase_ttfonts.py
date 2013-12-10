@@ -276,10 +276,10 @@ class TTFontTestCase(NearTestCase):
             font = TTFont("Vera", "Vera.ttf")
             self.assertEquals(font.splitString('hello ', doc1), [(0, b'hello ')])
             self.assertEquals(font.splitString('hello ', doc2), [(0, b'hello ')])
-            self.assertEquals(font.splitString('\u0410\u0411'.encode('UTF-8'), doc1), [(0, b'\x80\x81')])
-            self.assertEquals(font.splitString('\u0412'.encode('UTF-8'), doc2), [(0, b'\x80')])
+            self.assertEquals(font.splitString(u'\u0410\u0411'.encode('UTF-8'), doc1), [(0, b'\x80\x81')])
+            self.assertEquals(font.splitString(u'\u0412'.encode('UTF-8'), doc2), [(0, b'\x80')])
             font.addObjects(doc1)
-            self.assertEquals(font.splitString('\u0413'.encode('UTF-8'), doc2), [(0, b'\x81')])
+            self.assertEquals(font.splitString(u'\u0413'.encode('UTF-8'), doc2), [(0, b'\x81')])
             font.addObjects(doc2)
         finally:
             rl_config.ttfAsciiReadable = ttfAsciiReadable
