@@ -8,7 +8,7 @@ pythonpoint.py.
 """
 
 import string, imp, sys, os, copy
-from reportlab.lib.utils import isSeq
+from reportlab.lib.utils import isSeq, UniChr
 from reportlab.lib import xmllib
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -811,4 +811,4 @@ class PPMLParser(xmllib.XMLParser):
         except ValueError:
             self.unknown_charref(name)
             return
-        self.handle_data(chr(n).encode('utf8'))
+        self.handle_data(UniChr(n).encode('utf8'))
