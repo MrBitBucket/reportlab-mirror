@@ -18,6 +18,7 @@ try:
 except ImportError:
     from ConfigParser import ConfigParser
 import unittest
+from reportlab.lib.utils import isCompactDistro, __loader__, rl_isdir, asUnicode
 
 # Helper functions.
 def isWritable(D):
@@ -166,7 +167,6 @@ class GlobDirectoryWalker:
             self.stack = [directory]
             self.files = []
         else:
-            from reportlab.lib.utils import isCompactDistro, __loader__, rl_isdir
             if not isCompactDistro() or not __loader__ or not rl_isdir(directory):
                 raise ValueError('"%s" is not a directory' % directory)
             self.directory = directory[len(__loader__.archive)+len(os.sep):]
