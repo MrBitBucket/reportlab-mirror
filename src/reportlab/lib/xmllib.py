@@ -675,36 +675,36 @@ class TestXMLParser(XMLParser):
 
     def handle_data(self, data):
         self.testdata = self.testdata + data
-        if len(repr(self.testdata)) >= 70:
+        if len(ascii(self.testdata)) >= 70:
             self.flush()
 
     def flush(self):
         data = self.testdata
         if data:
             self.testdata = ""
-            print('data:', repr(data))
+            print('data: %s' % ascii(data))
 
     def handle_cdata(self, data):
         self.flush()
-        print('cdata:', repr(data))
+        print('cdata: %s'%ascii(data))
 
     def handle_proc(self, name, data):
         self.flush()
-        print('processing:',name,repr(data))
+        print('processing: %s %s' % (name,ascii(data)))
 
     def handle_special(self, data):
         self.flush()
-        print('special:',repr(data))
+        print('special:' % ascii(data))
 
     def handle_comment(self, data):
         self.flush()
-        r = repr(data)
+        r = ascii(data)
         if len(r) > 68:
             r = r[:32] + '...' + r[-32:]
-        print('comment:', r)
+        print('comment: %s' % r)
 
     def syntax_error(self, lineno, message):
-        print('error at line %d:' % lineno, message)
+        print('error at line %d: %s' % (lineno, message))
 
     def unknown_starttag(self, tag, attrs):
         self.flush()
@@ -712,7 +712,7 @@ class TestXMLParser(XMLParser):
             print('start tag: <' + tag + '>')
         else:
             a = ' '.join("%s=%s" % (name,ascii(value)) for name, value in attrs.items())
-            print('start tag: <%s%s>' % (tag,a if a else ''))
+            print('start tag: <%s%s>' % (tag,(' '+a) if a else ''))
 
     def unknown_endtag(self, tag):
         self.flush()
