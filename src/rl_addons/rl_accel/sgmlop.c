@@ -51,6 +51,19 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.  */
 
 #include "Python.h"
+#if PY_MAJOR_VERSION >= 3
+#	define isPy3
+#	define PY2(X)
+#	define PY3(X) X
+#else
+#	define	PyUnicode_FromStringAndSize(s,l) PyUnicode_DecodeUTF8(s, l, NULL)
+#	define PY2(X) X
+#	define PY3(X)
+#endif
+#ifdef RL_DEBUG
+#	undef RL_DEBUG
+#	define RL_DEBUG(a) fprintf(stderr,"sgmlop.c:%03d %s",__LINE__,a)
+#endif
 #if PY_VERSION_HEX < 0x02050000
 #	define Py_ssize_t int
 #	define lenfunc inquiry
@@ -74,6 +87,19 @@
 #define ISALNUM isalnum
 #define ISSPACE isspace
 #define TOLOWER tolower
+#endif
+#ifdef isPy3
+static PyObject *Py_FindMethod(PyMethodDef *ml, PyObject *self, const char* name){
+	for(;ml->ml_name!=NULL;ml++)
+		if(name[0]==ml->ml_name[0] && strcmp(name+1,ml->ml_name+1)==0) return PyCFunction_New(ml, self);
+	return NULL;
+	}
+#else
+#   include "bytesobject.h"
+#	ifndef PyVarObject_HEAD_INIT
+#		define PyVarObject_HEAD_INIT(type, size) \
+        	PyObject_HEAD_INIT(type) size,
+#	endif
 #endif
 
 #if 0
@@ -100,6 +126,7 @@ typedef struct {
 
     /* mode flags */
     int xml; /* 0=sgml/html 1=xml */
+	int	returnUnicode;	/*return unicode*/
 
     /* state attributes */
     int feed;
@@ -124,11 +151,11 @@ typedef struct {
 
 } FastParserObject;
 
-staticforward PyTypeObject FastParser_Type;
+static PyTypeObject FastParser_Type;
 
 /* forward declarations */
 static int fastfeed(FastParserObject* self);
-static PyObject* attrparse(const CHAR_T *p, int len, int xml);
+static PyObject* attrparse(int uniconv, const CHAR_T *p, int len, int xml);
 
 
 /* -------------------------------------------------------------------- */
@@ -144,6 +171,7 @@ _sgmlop_new(int xml)
         return NULL;
 
     self->xml = xml;
+	self->returnUnicode = 1;
 
     self->feed = 0;
     self->shorttag = 0;
@@ -169,7 +197,7 @@ _sgmlop_new(int xml)
 static PyObject*
 _sgmlop_sgmlparser(PyObject* self, PyObject* args)
 {
-    if (!PyArg_NoArgs(args))
+    if (!PyArg_ParseTuple(args, ":SGMLParser"))
         return NULL;
 
     return _sgmlop_new(0);
@@ -178,7 +206,7 @@ _sgmlop_sgmlparser(PyObject* self, PyObject* args)
 static PyObject*
 _sgmlop_xmlparser(PyObject* self, PyObject* args)
 {
-    if (!PyArg_NoArgs(args))
+    if (!PyArg_ParseTuple(args, ":XMLParser"))
         return NULL;
 
     return _sgmlop_new(1);
@@ -298,41 +326,54 @@ feed(FastParserObject* self, char* string, int stringlen, int last)
     return Py_BuildValue("i", self->bufferlen);
 }
 
-static PyObject*
-_sgmlop_feed(FastParserObject* self, PyObject* args)
-{
+static PyObject* _feed(FastParserObject* self, PyObject* args, int last, const char *fmt){
     /* feed a chunk of data to the parser */
 
-    char* string;
-    int stringlen;
-    if (!PyArg_ParseTuple(args, "t#", &string, &stringlen))
-        return NULL;
-
-    return feed(self, string, stringlen, 0);
+    char*		string;
+    Py_ssize_t	stringlen;
+	PyObject	*obj, *utf8=NULL, *r=NULL;
+    if (!PyArg_ParseTuple(args, fmt, &obj)) return NULL;
+	if(PyUnicode_Check(obj)){
+#ifdef	isPy3
+		if(!(string = PyUnicode_AsUTF8AndSize(obj,&stringlen))) return NULL;
+#else
+		utf8 = PyUnicode_AsUTF8String(obj);
+		if(!utf8){
+			PyErr_SetString(PyExc_ValueError,"argument not UTF8 encoded bytes");
+			return NULL;
+			}
+		if(PyBytes_AsStringAndSize(utf8,&string,&stringlen)==-1) goto exit;
+#endif
+		}
+	else if(PyBytes_Check(obj)){
+		if(PyBytes_AsStringAndSize(obj,&string,&stringlen)==-1) goto exit;
+		}
+	else{
+		PyErr_SetString(PyExc_ValueError,"argument not unicode or UTF8 encoded bytes");
+		}
+    r = feed(self, string, stringlen, last);
+exit:
+	Py_XDECREF(utf8);
+	return r;
 }
+static PyObject* _sgmlop_feed(FastParserObject* self, PyObject* args){
+    /* feed a chunk of data to the parser */
+	return _feed(self, args, 0, "O:feed");
+	}
 
 static PyObject*
 _sgmlop_close(FastParserObject* self, PyObject* args)
 {
     /* flush parser buffers */
-
-    if (!PyArg_NoArgs(args))
+    if (!PyArg_ParseTuple(args, ":close"))
         return NULL;
-
     return feed(self, "", 0, 1);
 }
 
 static PyObject*
 _sgmlop_parse(FastParserObject* self, PyObject* args)
 {
-    /* feed a single chunk of data to the parser */
-
-    char* string;
-    int stringlen;
-    if (!PyArg_ParseTuple(args, "t#", &string, &stringlen))
-        return NULL;
-
-    return feed(self, string, stringlen, 1);
+	return _feed(self, args, 1, "O:parse");
 }
 
 
@@ -341,24 +382,40 @@ _sgmlop_parse(FastParserObject* self, PyObject* args)
 
 static PyMethodDef _sgmlop_methods[] = {
     /* register callbacks */
-    {"register", (PyCFunction) _sgmlop_register, 1},
+    {"register", (PyCFunction) _sgmlop_register, METH_VARARGS},
     /* incremental parsing */
-    {"feed", (PyCFunction) _sgmlop_feed, 1},
-    {"close", (PyCFunction) _sgmlop_close, 0},
+    {"feed", (PyCFunction) _sgmlop_feed, METH_VARARGS},
+    {"close", (PyCFunction) _sgmlop_close, METH_VARARGS},
     /* one-shot parsing */
-    {"parse", (PyCFunction) _sgmlop_parse, 1},
+    {"parse", (PyCFunction) _sgmlop_parse, METH_VARARGS},
     {NULL, NULL}
 };
 
 static PyObject*
 _sgmlop_getattr(FastParserObject* self, char* name)
 {
+	if(!strcmp(name,"returnUnicode")) return PyBool_FromLong(self->returnUnicode);
     return Py_FindMethod(_sgmlop_methods, (PyObject*) self, name);
 }
 
-statichere PyTypeObject FastParser_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0, /* ob_size */
+static int _sgmlop_setattr(FastParserObject* self, char* name, PyObject *value)
+{
+	int i=0;
+	if(!strcmp(name,"returnUnicode")){
+		i = PyObject_IsTrue(value);
+		if(i<0) return i;
+		self->returnUnicode=i;
+		i = 0;
+		}
+	else{
+		PyErr_Format(PyExc_ValueError,"cannot setattr %s perhaps register should be used",name);
+		i = -1;
+		}
+	return i;
+}
+
+static PyTypeObject FastParser_Type = {
+    PyVarObject_HEAD_INIT(NULL,0)
     "FastParser", /* tp_name */
     sizeof(FastParserObject), /* tp_size */
     0, /* tp_itemsize */
@@ -366,28 +423,56 @@ statichere PyTypeObject FastParser_Type = {
     (destructor)_sgmlop_dealloc, /* tp_dealloc */
     0, /* tp_print */
     (getattrfunc)_sgmlop_getattr, /* tp_getattr */
-    0 /* tp_setattr */
+	(setattrfunc)_sgmlop_setattr	/*tp_setattr*/
 };
 
 /* ==================================================================== */
 /* python module interface */
-
 static PyMethodDef _functions[] = {
-    {"SGMLParser", _sgmlop_sgmlparser, 0},
-    {"XMLParser", _sgmlop_xmlparser, 0},
+    {"SGMLParser", _sgmlop_sgmlparser, METH_VARARGS},
+    {"XMLParser", _sgmlop_xmlparser, METH_VARARGS},
     {NULL, NULL}
 };
 
-void
-#ifdef WIN32
-__declspec(dllexport)
-#endif
-initsgmlop()
-{
-    /* Patch object type */
-    FastParser_Type.ob_type = &PyType_Type;
+#ifdef isPy3
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "sgmlop",
+    0, /* module doc */
+    -1,
+    _functions,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
 
-    Py_InitModule("sgmlop", _functions);
+PyMODINIT_FUNC PyInit_sgmlop(void)
+#else
+void initsgmlop()
+#endif
+{
+	PyObject	*module=NULL;
+#ifdef isPy3
+	module = PyModule_Create(&moduledef);
+#else
+	module = Py_InitModule3("sgmlop", _functions,NULL);
+#endif
+	if(!module) goto err;
+#ifdef isPy3
+	if(PyType_Ready(&FastParser_Type)<0) goto err;
+	return module;
+#else
+    FastParser_Type.ob_type = &PyType_Type; /* Patch object type */
+	return;
+#endif
+err:/*Check for errors*/
+#ifdef isPy3
+	Py_XDECREF(module);
+	return NULL;
+#else
+	if (PyErr_Occurred()) Py_FatalError("can't initialize module sgmlop");
+#endif
 }
 
 /* -------------------------------------------------------------------- */
@@ -416,8 +501,36 @@ fastfeed(FastParserObject* self)
     CHAR_T *end; /* tail */
     CHAR_T *p, *q, *s; /* scanning pointers */
     CHAR_T *b, *t, *e; /* token start/end */
+	char	*fmtS, *fmtSS, *fmtSO;
+	PyObject* res;
 
-    int token;
+    int token, returnUnicode=self->returnUnicode;
+#ifdef	isPy3
+	if(returnUnicode){
+		fmtS="s#"; 
+		fmtSS="s#s#";
+		fmtSO="s#O";
+		}
+	else{
+		fmtS="y#"; 
+		fmtSS="y#y#";
+		fmtSO="y#O";
+		}
+#else
+	int		uniconv=0;
+	PyObject	*_o1, *_o2;
+	if(returnUnicode){
+		fmtS="O"; 
+		fmtSS="OO";
+		fmtSO="OO";
+		uniconv=1;
+		}
+	else{
+		fmtS="s#"; 
+		fmtSS="s#s#";
+		fmtSO="s#O";
+		}
+#endif
 
     s = q = p = (CHAR_T*) self->buffer;
     end = (CHAR_T*) (self->buffer + self->bufferlen);
@@ -649,9 +762,19 @@ fastfeed(FastParserObject* self)
 
         if (q != s && self->handle_data) {
             /* flush any raw data before this tag */
-            PyObject* res;
-            res = PyObject_CallFunction(self->handle_data,
-                                        "s#", s, q-s);
+#ifndef	isPy3
+			if(uniconv){
+				_o1=PyUnicode_DecodeUTF8(s, q-s,NULL);
+				if(!_o1) return -1; 
+            	res = PyObject_CallFunction(self->handle_data, fmtS, _o1);
+				Py_DECREF(_o1);
+				}
+			else{
+#endif
+            	res = PyObject_CallFunction(self->handle_data, fmtS, s, q-s);
+#ifndef isPy3
+				}
+#endif
             if (!res)
                 return -1;
             Py_DECREF(res);
@@ -661,70 +784,143 @@ fastfeed(FastParserObject* self)
         if (token & TAG) {
             if (token == TAG_END) {
                 if (self->finish_endtag) {
-                    PyObject* res;
-                    res = PyObject_CallFunction(self->finish_endtag,
-                                                "s#", b, t-b);
-                    if (!res)
-                        return -1;
+#ifndef	isPy3
+				if(uniconv){
+					_o1=PyUnicode_DecodeUTF8(b, t-b,NULL);
+					if(!_o1) return -1; 
+            		res = PyObject_CallFunction(self->finish_endtag, fmtS, _o1);
+					Py_DECREF(_o1);
+					}
+				else{
+#endif
+                    res = PyObject_CallFunction(self->finish_endtag, fmtS, b, t-b);
+#ifndef isPy3
+				}
+#endif
+                    if (!res) return -1;
                     Py_DECREF(res);
                 }
             } else if (token == DIRECTIVE || token == DOCTYPE) {
                 if (self->handle_special) {
-                    PyObject* res;
-                    res = PyObject_CallFunction(self->handle_special,
-                                                "s#", b, e-b);
-                    if (!res)
-                        return -1;
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_special, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                    res = PyObject_CallFunction(self->handle_special, fmtS, b, e-b);
+#ifndef isPy3
+				}
+#endif
+                    if (!res) return -1;
                     Py_DECREF(res);
                 }
             } else if (token == PI) {
                 if (self->handle_proc) {
-                    PyObject* res;
                     int len = t-b;
                     while (ISSPACE(*t))
                         t++;
-                    res = PyObject_CallFunction(self->handle_proc,
-                                                "s#s#", b, len, t, e-t);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, len,NULL);
+						if(!_o1) return -1; 
+						_o2=PyUnicode_DecodeUTF8(t, e-t,NULL);
+						if(!_o2){
+							Py_DECREF(_o1);
+							return -1;
+							}
+            			res = PyObject_CallFunction(self->handle_proc, fmtSS, _o1, _o2);
+						Py_DECREF(_o2);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                    res = PyObject_CallFunction(self->handle_proc, fmtSS, b, len, t, e-t);
+#ifndef isPy3
+				}
+#endif
                     if (!res)
                         return -1;
                     Py_DECREF(res);
                 }
             } else if (self->finish_starttag) {
-                PyObject* res;
                 PyObject* attr;
                 int len = t-b;
                 while (ISSPACE(*t))
                     t++;
-                attr = attrparse(t, e-t, self->xml);
+                attr = attrparse(returnUnicode, t, e-t, self->xml);
                 if (!attr)
                     return -1;
-                res = PyObject_CallFunction(self->finish_starttag,
-                                            "s#O", b, len, attr);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, len,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->finish_starttag, fmtSO, _o1, attr);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                res = PyObject_CallFunction(self->finish_starttag, fmtSO, b, len, attr);
+#ifndef isPy3
+				}
+#endif
                 Py_DECREF(attr);
                 if (!res)
                     return -1;
                 Py_DECREF(res);
                 if (token == TAG_EMPTY && self->finish_endtag) {
-                    res = PyObject_CallFunction(self->finish_endtag,
-                                                "s#", b, len);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, len,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->finish_endtag, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                    res = PyObject_CallFunction(self->finish_endtag, fmtS, b, len);
+#ifndef isPy3
+				}
+#endif
                     if (!res)
                         return -1;
                     Py_DECREF(res);
                 }
             }
         } else if (token == ENTITYREF && self->handle_entityref) {
-            PyObject* res;
-            res = PyObject_CallFunction(self->handle_entityref,
-                                        "s#", b, e-b);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_entityref, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+            res = PyObject_CallFunction(self->handle_entityref, fmtS, b, e-b);
+#ifndef isPy3
+				}
+#endif
             if (!res)
                 return -1;
             Py_DECREF(res);
         } else if (token == CHARREF && (self->handle_charref ||
                                         self->handle_data)) {
-            PyObject* res;
-            if (self->handle_charref)
-                res = PyObject_CallFunction(self->handle_charref,
-                                            "s#", b, e-b);
+            if (self->handle_charref)PY2({)
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_charref, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                res = PyObject_CallFunction(self->handle_charref, fmtS, b, e-b);
+				PY2(}})
             else {
                 /* fallback: handle charref's as data */
                 /* FIXME: hexadecimal charrefs? */
@@ -733,30 +929,72 @@ fastfeed(FastParserObject* self)
                 ch = 0;
                 for (p = b; p < e; p++)
                     ch = ch*10 + *p - '0';
-                res = PyObject_CallFunction(self->handle_data,
-                                            "s#", &ch, sizeof(CHAR_T));
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(&ch, sizeof(CHAR_T),NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_data, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                res = PyObject_CallFunction(self->handle_data, fmtS, &ch, sizeof(CHAR_T));
+#ifndef isPy3
+				}
+#endif
             }
             if (!res)
                 return -1;
             Py_DECREF(res);
         } else if (token == CDATA && (self->handle_cdata ||
                                       self->handle_data)) {
-            PyObject* res;
             if (self->handle_cdata) {
-                    res = PyObject_CallFunction(self->handle_cdata,
-                                                "s#", b, e-b);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_cdata, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                    res = PyObject_CallFunction(self->handle_cdata, fmtS, b, e-b);
+#ifndef isPy3
+				}
+#endif
             } else {
                 /* fallback: handle cdata as plain data */
-                res = PyObject_CallFunction(self->handle_data,
-                                            "s#", b, e-b);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_data, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                res = PyObject_CallFunction(self->handle_data, fmtS, b, e-b);
+#ifndef isPy3
+				}
+#endif
             }
             if (!res)
                 return -1;
             Py_DECREF(res);
         } else if (token == COMMENT && self->handle_comment) {
-            PyObject* res;
-            res = PyObject_CallFunction(self->handle_comment,
-                                        "s#", b, e-b);
+#ifndef	isPy3
+			if(uniconv){
+				_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+				if(!_o1) return -1; 
+           			res = PyObject_CallFunction(self->handle_comment, fmtS, _o1);
+					Py_DECREF(_o1);
+					}
+				else{
+#endif
+            		res = PyObject_CallFunction(self->handle_comment, fmtS, b, e-b);
+#ifndef isPy3
+				}
+#endif
             if (!res)
                 return -1;
             Py_DECREF(res);
@@ -768,9 +1006,19 @@ fastfeed(FastParserObject* self)
 
   eol: /* end of line */
     if (q != s && self->handle_data) {
-        PyObject* res;
-        res = PyObject_CallFunction(self->handle_data,
-                                    "s#", s, q-s);
+#ifndef	isPy3
+		if(uniconv){
+			_o1=PyUnicode_DecodeUTF8(s, q-s,NULL);
+			if(!_o1) return -1; 
+         	res = PyObject_CallFunction(self->handle_data, fmtS, _o1);
+			Py_DECREF(_o1);
+			}
+		else{
+#endif
+        	res = PyObject_CallFunction(self->handle_data, fmtS, s, q-s);
+#ifndef isPy3
+				}
+#endif
         if (!res)
             return -1;
         Py_DECREF(res);
@@ -781,7 +1029,7 @@ fastfeed(FastParserObject* self)
 }
 
 static PyObject*
-attrparse(const CHAR_T* p, int len, int xml)
+attrparse(int uniconv, const CHAR_T* p, int len, int xml)
 {
     PyObject* attrs;
     PyObject* key = NULL;
@@ -807,8 +1055,8 @@ attrparse(const CHAR_T* p, int len, int xml)
         while (p < end && *p != '=' && !ISSPACE(*p))
             p++;
 
-        key = PyString_FromStringAndSize(q, p-q);
-        if (key == NULL)
+       	key = uniconv? PyUnicode_FromStringAndSize(q, p-q):PyBytes_FromStringAndSize(q, p-q);
+        if(!key)
             goto err;
 
         while (p < end && ISSPACE(*p))
@@ -834,14 +1082,15 @@ attrparse(const CHAR_T* p, int len, int xml)
                 p++;
                 while (p < end && *p != *q)
                     p++;
-                value = PyString_FromStringAndSize(q+1, p-q-1);
+               	value = uniconv?PyUnicode_FromStringAndSize(q+1, p-q-1):PyBytes_FromStringAndSize(q+1, p-q-1);
+				if(!value)goto err;
                 if (p < end && *p == *q)
                     p++;
             } else {
                 while (p < end && !ISSPACE(*p))
                     p++;
-                value = PyString_FromStringAndSize(q, p-q);
-            }
+               	value = uniconv?PyUnicode_FromStringAndSize(q, p-q):PyBytes_FromStringAndSize(q, p-q);
+            	}
 
             if (value == NULL)
                 goto err;
