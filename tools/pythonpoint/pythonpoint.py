@@ -77,7 +77,7 @@ from reportlab import rl_config
 from reportlab.lib import styles
 from reportlab.lib import colors
 from reportlab.lib.units import cm
-from reportlab.lib.utils import getBytesIO
+from reportlab.lib.utils import getBytesIO, isStr
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
@@ -203,9 +203,10 @@ def registerFont0(sourceFile, name, path):
 def checkColor(col):
     "Converts a color name to an RGB tuple, if possible."
 
-    if type(col) == type('') and col in dir(colors):
-        col = getattr(colors, col)
-        col = (col.red, col.green, col.blue)
+    if isStr(col):
+        if col in dir(colors):
+            col = getattr(colors, col)
+            col = (col.red, col.green, col.blue)
 
     return col
 

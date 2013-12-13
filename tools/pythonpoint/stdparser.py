@@ -8,7 +8,7 @@ pythonpoint.py.
 """
 
 import string, imp, sys, os, copy
-from reportlab.lib.utils import isSeq, UniChr
+from reportlab.lib.utils import isSeq, UniChr, isPy3
 from reportlab.lib import xmllib
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -212,6 +212,11 @@ class PPMLParser(xmllib.XMLParser):
         self._curSubject = None
         self.fx = 1
         xmllib.XMLParser.__init__(self)
+        if not isPy3:
+            try:
+                self.parser.returnUnicode = False
+            except:
+                pass
 
     def _arg(self,tag,args,name):
         "What's this for???"
@@ -304,7 +309,6 @@ class PPMLParser(xmllib.XMLParser):
     def start_title(self, args):
         self._curTitle = ''
 
-
     def end_title(self):
         self._curPres.title = self._curTitle
         self._curTitle = None
@@ -354,7 +358,6 @@ class PPMLParser(xmllib.XMLParser):
 
     def end_section(self):
         self._curSection = None
-
 
     def start_slide(self, args):
         s = pythonpoint.PPSlide()
