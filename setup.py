@@ -264,16 +264,21 @@ def main():
 
     debug_compile_args = []
     debug_link_args = []
-    if os.environ.get('RL_DEBUG','0')=='1':
+    debug_macros = []
+    debug = int(os.environ.get('RL_DEBUG','0'))
+    if debug:
         if sys.platform == 'win32':
             debug_compile_args=['/Zi']
             debug_link_args=['/DEBUG']
+            if debug>1:
+                debug_macros.extend([('RL_DEBUG',debug), ('ROBIN_DEBUG',None)])
+
 
     SPECIAL_PACKAGE_DATA = {}
     RL_ACCEL = _find_rl_ccode('rl_accel','_rl_accel.c')
     LIBRARIES=[]
     EXT_MODULES = []
-    
+
     if not RL_ACCEL:
         infoline( '***************************************************')
         infoline( '*No rl_accel code found, you can obtain it at     *')
@@ -290,32 +295,38 @@ def main():
                     Extension( 'reportlab.lib._rl_accel',
                                 [pjoin(RL_ACCEL,'_rl_accel.c')],
                                 include_dirs=[],
-                            define_macros=[],
+                            define_macros=[]+debug_macros,
                             library_dirs=[],
                             libraries=[], # libraries to link against
                             extra_compile_args=debug_compile_args,
                             extra_link_args=debug_link_args,
                             ),
                         ]
+        EXT_MODULES += [
+                Extension( 'reportlab.lib.sgmlop',
+                        [pjoin(RL_ACCEL,'sgmlop.c')],
+                        include_dirs=[],
+                        define_macros=[]+debug_macros,
+                        library_dirs=[],
+                        libraries=[], # libraries to link against
+                        extra_compile_args=debug_compile_args,
+                        extra_link_args=debug_link_args,
+                        ),
+                    ]
         if not isPy3:
             EXT_MODULES += [
-                    Extension( 'reportlab.lib.sgmlop',
-                            [pjoin(RL_ACCEL,'sgmlop.c')],
-                            include_dirs=[],
-                            define_macros=[],
-                            library_dirs=[],
-                            libraries=[], # libraries to link against
-                            ),
                     Extension( 'reportlab.lib.pyHnj',
                             [pjoin(RL_ACCEL,'pyHnjmodule.c'),
-                             pjoin(RL_ACCEL,'hyphen.c'),
-                             pjoin(RL_ACCEL,'hnjalloc.c')],
+                            pjoin(RL_ACCEL,'hyphen.c'),
+                            pjoin(RL_ACCEL,'hnjalloc.c')],
                             include_dirs=[],
-                            define_macros=[],
+                            define_macros=[]+debug_macros,
                             library_dirs=[],
                             libraries=[], # libraries to link against
+                            extra_compile_args=debug_compile_args,
+                            extra_link_args=debug_link_args,
                             ),
-                    ]
+                        ]
     RENDERPM = _find_rl_ccode('renderPM','_renderPM.c')
     if not RENDERPM:
         infoline( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
@@ -328,8 +339,6 @@ def main():
         infoline( '#extensions from %r'%RENDERPM)
         LIBART_DIR=pjoin(RENDERPM,'libart_lgpl')
         GT1_DIR=pjoin(RENDERPM,'gt1')
-        MACROS=[('ROBIN_DEBUG',None)]
-        MACROS=[]
         def libart_version():
             K = ('LIBART_MAJOR_VERSION','LIBART_MINOR_VERSION','LIBART_MICRO_VERSION')
             D = {}
@@ -378,8 +387,8 @@ def main():
                 FT_LIB_DIR = [dirname(FT_LIB)]
                 FT_INC_DIR = [FT_INC_DIR or pjoin(dirname(FT_LIB_DIR[0]),'include')]
                 FT_LIB_PATH = FT_LIB
-                FT_LIB = [os.path.splitext(os.path.basename(FT_LIB))[0]]                
-                if isdir(FT_INC_DIR[0]):                   
+                FT_LIB = [os.path.splitext(os.path.basename(FT_LIB))[0]]
+                if isdir(FT_INC_DIR[0]):
                     infoline('# installing with freetype %r' % FT_LIB_PATH)
                 else:
                     infoline('# freetype2 include folder %r not found' % FT_INC_DIR[0])
@@ -422,7 +431,7 @@ def main():
         EXT_MODULES +=  [Extension( 'reportlab.graphics._renderPM',
                                         SOURCES,
                                         include_dirs=[RENDERPM,LIBART_DIR,GT1_DIR]+FT_INC_DIR,
-                                        define_macros=FT_MACROS+[('LIBART_COMPILATION',None)]+MACROS+[('LIBART_VERSION',LIBART_VERSION)],
+                                        define_macros=FT_MACROS+[('LIBART_COMPILATION',None)]+debug_macros+[('LIBART_VERSION',LIBART_VERSION)],
                                         library_dirs=[]+FT_LIB_DIR,
 
                                         # libraries to link against
@@ -477,7 +486,6 @@ def main():
         for dst in SPECIAL_PACKAGE_DATA.values():
             os.remove(pjoin(PACKAGE_DIR['reportlab'],dst))
             reportlab_files.remove(dst)
-
 
 if __name__=='__main__':
     main()

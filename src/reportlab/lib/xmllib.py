@@ -10,9 +10,14 @@ Probably ought to be removed'''
 import sys, re
 
 try:
-    import sgmlop   # this works for both builtin on the path or relative
+    from reportlab.lib import sgmlop    # this works for both builtin on the path or relative
 except ImportError:
     sgmlop = None
+
+try:
+    ascii
+except:
+    ascii = repr
 
 # standard entity defs
 
@@ -711,8 +716,8 @@ class TestXMLParser(XMLParser):
         if not attrs:
             print('start tag: <' + tag + '>')
         else:
-            a = ' '.join("%s=%s" % (name,ascii(value)) for name, value in attrs.items())
-            print('start tag: <%s%s>' % (tag,(' '+a) if a else ''))
+            a = ' '.join("%s=%s" % (ascii(name),ascii(value)) for name, value in attrs.items())
+            print('start tag: <%s%s>' % (ascii(tag),(' '+a) if a else ''))
 
     def unknown_endtag(self, tag):
         self.flush()
@@ -743,17 +748,17 @@ def test(args = None):
         klass = TestXMLParser
 
     if args:
-        file = args[0]
+        fn = args[0]
     else:
-        file = 'test.xml'
+        fn = 'test.xml'
 
-    if file == '-':
+    if fn == '-':
         f = sys.stdin
     else:
         try:
-            f = open(file, 'r')
+            f = open(fn, 'r')
         except IOError as msg:
-            print(file, ":", msg)
+            print(fn, ":", msg)
             sys.exit(1)
 
     data = f.read()
@@ -764,7 +769,6 @@ def test(args = None):
     for c in data:
         x.feed(c)
     x.close()
-
 
 if __name__ == '__main__': #NO_REPORTLAB_TEST
     test()

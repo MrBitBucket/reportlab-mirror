@@ -4,11 +4,10 @@
  *
  * The sgmlop accelerator module
  *
- * This module provides a FastSGMLParser type, which is designed to
+ * This module provides a FastParser type, which is designed to
  * speed up the standard sgmllib and xmllib modules.  The parser can
  * be configured to support either basic SGML (enough of it to process
- * HTML documents, at least) or XML.  This module also provides an
- * Element type, useful for fast but simple DOM implementations.
+ * HTML documents, at least) or XML.
  *
  * History:
  * 1998-04-04 fl  Created (for coreXML)
@@ -26,14 +25,14 @@
  *
  * Copyright (c) 1998-2000 by Secret Labs AB
  * Copyright (c) 1998-2000 by Fredrik Lundh
- * 
+ *
  * fredrik@pythonware.com
  * http://www.pythonware.com
  *
  * By obtaining, using, and/or copying this software and/or its
  * associated documentation, you agree that you have read, understood,
  * and will comply with the following terms and conditions:
- * 
+ *
  * Permission to use, copy, modify, and distribute this software and its
  * associated documentation for any purpose and without fee is hereby
  * granted, provided that the above copyright notice appears in all
@@ -42,7 +41,7 @@
  * AB or the author not be used in advertising or publicity pertaining to
  * distribution of the software without specific, written prior
  * permission.
- * 
+ *
  * SECRET LABS AB AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH REGARD TO
  * THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
  * FITNESS.  IN NO EVENT SHALL SECRET LABS AB OR THE AUTHOR BE LIABLE FOR
@@ -52,6 +51,19 @@
  * OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.  */
 
 #include "Python.h"
+#if PY_MAJOR_VERSION >= 3
+#	define isPy3
+#	define PY2(X)
+#	define PY3(X) X
+#else
+#	define	PyUnicode_FromStringAndSize(s,l) PyUnicode_DecodeUTF8(s, l, NULL)
+#	define PY2(X) X
+#	define PY3(X)
+#endif
+#ifdef RL_DEBUG
+#	undef RL_DEBUG
+#	define RL_DEBUG(a) fprintf(stderr,"sgmlop.c:%03d %s",__LINE__,a)
+#endif
 #if PY_VERSION_HEX < 0x02050000
 #	define Py_ssize_t int
 #	define lenfunc inquiry
@@ -75,6 +87,19 @@
 #define ISALNUM isalnum
 #define ISSPACE isspace
 #define TOLOWER tolower
+#endif
+#ifdef isPy3
+static PyObject *Py_FindMethod(PyMethodDef *ml, PyObject *self, const char* name){
+	for(;ml->ml_name!=NULL;ml++)
+		if(name[0]==ml->ml_name[0] && strcmp(name+1,ml->ml_name+1)==0) return PyCFunction_New(ml, self);
+	return NULL;
+	}
+#else
+#   include "bytesobject.h"
+#	ifndef PyVarObject_HEAD_INIT
+#		define PyVarObject_HEAD_INIT(type, size) \
+        	PyObject_HEAD_INIT(type) size,
+#	endif
 #endif
 
 #if 0
@@ -101,6 +126,7 @@ typedef struct {
 
     /* mode flags */
     int xml; /* 0=sgml/html 1=xml */
+	int	returnUnicode;	/*return unicode*/
 
     /* state attributes */
     int feed;
@@ -123,13 +149,13 @@ typedef struct {
     PyObject* handle_cdata;
     PyObject* handle_comment;
 
-} FastSGMLParserObject;
+} FastParserObject;
 
-staticforward PyTypeObject FastSGMLParser_Type;
+static PyTypeObject FastParser_Type;
 
 /* forward declarations */
-static int fastfeed(FastSGMLParserObject* self);
-static PyObject* attrparse(const CHAR_T *p, int len, int xml);
+static int fastfeed(FastParserObject* self);
+static PyObject* attrparse(int uniconv, const CHAR_T *p, int len, int xml);
 
 
 /* -------------------------------------------------------------------- */
@@ -138,13 +164,14 @@ static PyObject* attrparse(const CHAR_T *p, int len, int xml);
 static PyObject*
 _sgmlop_new(int xml)
 {
-    FastSGMLParserObject* self;
+    FastParserObject* self;
 
-    self = PyObject_NEW(FastSGMLParserObject, &FastSGMLParser_Type);
+    self = PyObject_NEW(FastParserObject, &FastParser_Type);
     if (self == NULL)
         return NULL;
 
     self->xml = xml;
+	self->returnUnicode = 1;
 
     self->feed = 0;
     self->shorttag = 0;
@@ -170,7 +197,7 @@ _sgmlop_new(int xml)
 static PyObject*
 _sgmlop_sgmlparser(PyObject* self, PyObject* args)
 {
-    if (!PyArg_NoArgs(args))
+    if (!PyArg_ParseTuple(args, ":SGMLParser"))
         return NULL;
 
     return _sgmlop_new(0);
@@ -179,14 +206,14 @@ _sgmlop_sgmlparser(PyObject* self, PyObject* args)
 static PyObject*
 _sgmlop_xmlparser(PyObject* self, PyObject* args)
 {
-    if (!PyArg_NoArgs(args))
+    if (!PyArg_ParseTuple(args, ":XMLParser"))
         return NULL;
 
     return _sgmlop_new(1);
 }
 
 static void
-_sgmlop_dealloc(FastSGMLParserObject* self)
+_sgmlop_dealloc(FastParserObject* self)
 {
     if (self->buffer)
         free(self->buffer);
@@ -207,7 +234,7 @@ _sgmlop_dealloc(FastSGMLParserObject* self)
     self->member = PyObject_GetAttrString(item, name);
 
 static PyObject*
-_sgmlop_register(FastSGMLParserObject* self, PyObject* args)
+_sgmlop_register(FastParserObject* self, PyObject* args)
 {
     /* register a callback object */
     PyObject* item;
@@ -236,7 +263,7 @@ _sgmlop_register(FastSGMLParserObject* self, PyObject* args)
    possible, and keeps the rest in a local buffer. */
 
 static PyObject*
-feed(FastSGMLParserObject* self, char* string, int stringlen, int last)
+feed(FastParserObject* self, char* string, int stringlen, int last)
 {
     /* common subroutine for SGMLParser.feed and SGMLParser.close */
 
@@ -299,41 +326,54 @@ feed(FastSGMLParserObject* self, char* string, int stringlen, int last)
     return Py_BuildValue("i", self->bufferlen);
 }
 
-static PyObject*
-_sgmlop_feed(FastSGMLParserObject* self, PyObject* args)
-{
+static PyObject* _feed(FastParserObject* self, PyObject* args, int last, const char *fmt){
     /* feed a chunk of data to the parser */
 
-    char* string;
-    int stringlen;
-    if (!PyArg_ParseTuple(args, "t#", &string, &stringlen))
-        return NULL;
-
-    return feed(self, string, stringlen, 0);
+    char*		string;
+    Py_ssize_t	stringlen;
+	PyObject	*obj, *utf8=NULL, *r=NULL;
+    if (!PyArg_ParseTuple(args, fmt, &obj)) return NULL;
+	if(PyUnicode_Check(obj)){
+#ifdef	isPy3
+		if(!(string = PyUnicode_AsUTF8AndSize(obj,&stringlen))) return NULL;
+#else
+		utf8 = PyUnicode_AsUTF8String(obj);
+		if(!utf8){
+			PyErr_SetString(PyExc_ValueError,"argument not UTF8 encoded bytes");
+			return NULL;
+			}
+		if(PyBytes_AsStringAndSize(utf8,&string,&stringlen)==-1) goto exit;
+#endif
+		}
+	else if(PyBytes_Check(obj)){
+		if(PyBytes_AsStringAndSize(obj,&string,&stringlen)==-1) goto exit;
+		}
+	else{
+		PyErr_SetString(PyExc_ValueError,"argument not unicode or UTF8 encoded bytes");
+		}
+    r = feed(self, string, stringlen, last);
+exit:
+	Py_XDECREF(utf8);
+	return r;
 }
+static PyObject* _sgmlop_feed(FastParserObject* self, PyObject* args){
+    /* feed a chunk of data to the parser */
+	return _feed(self, args, 0, "O:feed");
+	}
 
 static PyObject*
-_sgmlop_close(FastSGMLParserObject* self, PyObject* args)
+_sgmlop_close(FastParserObject* self, PyObject* args)
 {
     /* flush parser buffers */
-
-    if (!PyArg_NoArgs(args))
+    if (!PyArg_ParseTuple(args, ":close"))
         return NULL;
-
     return feed(self, "", 0, 1);
 }
 
 static PyObject*
-_sgmlop_parse(FastSGMLParserObject* self, PyObject* args)
+_sgmlop_parse(FastParserObject* self, PyObject* args)
 {
-    /* feed a single chunk of data to the parser */
-
-    char* string;
-    int stringlen;
-    if (!PyArg_ParseTuple(args, "t#", &string, &stringlen))
-        return NULL;
-
-    return feed(self, string, stringlen, 1);
+	return _feed(self, args, 1, "O:parse");
 }
 
 
@@ -342,524 +382,97 @@ _sgmlop_parse(FastSGMLParserObject* self, PyObject* args)
 
 static PyMethodDef _sgmlop_methods[] = {
     /* register callbacks */
-    {"register", (PyCFunction) _sgmlop_register, 1},
+    {"register", (PyCFunction) _sgmlop_register, METH_VARARGS},
     /* incremental parsing */
-    {"feed", (PyCFunction) _sgmlop_feed, 1},
-    {"close", (PyCFunction) _sgmlop_close, 0},
+    {"feed", (PyCFunction) _sgmlop_feed, METH_VARARGS},
+    {"close", (PyCFunction) _sgmlop_close, METH_VARARGS},
     /* one-shot parsing */
-    {"parse", (PyCFunction) _sgmlop_parse, 1},
+    {"parse", (PyCFunction) _sgmlop_parse, METH_VARARGS},
     {NULL, NULL}
 };
 
-static PyObject*  
-_sgmlop_getattr(FastSGMLParserObject* self, char* name)
+static PyObject*
+_sgmlop_getattr(FastParserObject* self, char* name)
 {
+	if(!strcmp(name,"returnUnicode")) return PyBool_FromLong(self->returnUnicode);
     return Py_FindMethod(_sgmlop_methods, (PyObject*) self, name);
 }
 
-statichere PyTypeObject FastSGMLParser_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0, /* ob_size */
-    "FastSGMLParser", /* tp_name */
-    sizeof(FastSGMLParserObject), /* tp_size */
+static int _sgmlop_setattr(FastParserObject* self, char* name, PyObject *value)
+{
+	int i=0;
+	if(!strcmp(name,"returnUnicode")){
+		i = PyObject_IsTrue(value);
+		if(i<0) return i;
+		self->returnUnicode=i;
+		i = 0;
+		}
+	else{
+		PyErr_Format(PyExc_ValueError,"cannot setattr %s perhaps register should be used",name);
+		i = -1;
+		}
+	return i;
+}
+
+static PyTypeObject FastParser_Type = {
+    PyVarObject_HEAD_INIT(NULL,0)
+    "FastParser", /* tp_name */
+    sizeof(FastParserObject), /* tp_size */
     0, /* tp_itemsize */
     /* methods */
     (destructor)_sgmlop_dealloc, /* tp_dealloc */
     0, /* tp_print */
     (getattrfunc)_sgmlop_getattr, /* tp_getattr */
-    0 /* tp_setattr */
+	(setattrfunc)_sgmlop_setattr	/*tp_setattr*/
 };
-
-/* ====================================================================
-/* element data type */
-
-typedef struct {
-    PyObject_HEAD
-
-    /* an element has the following attributes: */
-    PyObject* parent; /* back link (None for the root node) */
-    PyObject* tag; /* element tag (a string) */
-    PyObject* attrib; /* attributes (a dictionary object) */
-    PyObject* text; /* text before first child */
-    PyObject* suffix; /* text after this element, in parent */
-
-    /* in addition, it can hold any number of child nodes: */
-    int child_count; /* actual items */
-    int child_total; /* allocated items */
-    PyObject* *children;
-
-    /* Note: the suffix attribute holds textual data that belongs to
-       the parent.  on other words, each element represents the
-       following XML snippet:
-
-           "<tag attributes> text children </name> suffix"
-
-       */
-
-} ElementObject;
-
-staticforward PyTypeObject Element_Type;
-
-/* -------------------------------------------------------------------- */
-/* element constructor and destructor */
-
-static PyObject*
-element_new(PyObject* _self, PyObject* args)
-{
-    ElementObject* self;
-
-    PyObject* parent;
-    PyObject* tag;
-    PyObject* attrib = Py_None;
-    PyObject* text = Py_None;
-    PyObject* suffix = Py_None;
-    if (!PyArg_ParseTuple(args, "OO|OOO", &parent, &tag,
-                          &attrib, &text, &suffix))
-        return NULL;
-
-    if (parent != Py_None && parent->ob_type != &Element_Type) {
-        PyErr_SetString(PyExc_TypeError, "parent must be Element or None");
-        return NULL;
-    }
-
-    self = PyObject_NEW(ElementObject, &Element_Type);
-    if (self == NULL)
-        return NULL;
-
-    Py_INCREF(parent);
-    self->parent = parent;
-
-    Py_INCREF(tag);
-    self->tag = tag;
-
-    Py_INCREF(attrib);
-    self->attrib = attrib;
-
-    Py_INCREF(text);
-    self->text = text;
-
-    Py_INCREF(suffix);
-    self->suffix = suffix;
-
-    self->child_count = 0;
-    self->child_total = 0;
-    self->children = NULL;
-
-    ALLOC(sizeof(ElementObject), "create element");
-
-    return (PyObject*) self;
-}
-
-static void
-element_dealloc(ElementObject* self)
-{
-    int i;
-
-    /* FIXME: the parent attribute means that a tree will contain
-       circular references.  this will be fixed ("how?" is the big
-       question...) */
-
-    if (self->children) {
-        for (i = 0; i < self->child_count; i++)
-            Py_DECREF(self->children[i]);
-        free(self->children);
-    }
-
-    /* break the backlink */
-    Py_DECREF(self->parent);
-
-    /* discard attributes */
-    Py_DECREF(self->tag);
-    Py_XDECREF(self->attrib);
-    Py_XDECREF(self->text);
-    Py_XDECREF(self->suffix);
-
-    RELEASE(sizeof(ElementObject), "destroy element");
-
-    PyObject_FREE(self);
-}
-
-/* -------------------------------------------------------------------- */
-/* methods (in alphabetical order) */
-
-static PyObject*
-element_append(ElementObject* self, PyObject* args)
-{
-    int total;
-    
-    PyObject* element;
-    if (!PyArg_ParseTuple(args, "O!", &Element_Type, &element))
-        return NULL;
-
-    if (!self->children) {
-        total = 10;
-        self->children = malloc(total * sizeof(PyObject*));
-        self->child_total = total;
-    } else if (self->child_count >= self->child_total) {
-        total = self->child_total + 10;
-        self->children = realloc(self->children, total * sizeof(PyObject*));
-        self->child_total = total;
-    }
-    if (!self->children) {
-        PyErr_NoMemory();
-        return NULL;
-    }
-
-    Py_INCREF(element);
-    self->children[self->child_count++] = element;
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject*
-element_destroy(ElementObject* self, PyObject* args)
-{
-    int i;
-    PyObject* res;
-    
-    if (!PyArg_NoArgs(args))
-        return NULL;
-
-    /* break the backlink */
-    if (self->parent != Py_None) {
-        Py_DECREF(self->parent);
-        self->parent = Py_None;
-        Py_INCREF(self->parent);
-    }
-
-    /* destroy element children */
-    if (self->children) {
-        for (i = 0; i < self->child_count; i++) {
-            res = element_destroy((ElementObject*) self->children[i], args);
-            Py_DECREF(res);
-            Py_DECREF(self->children[i]);
-        }
-        self->child_count = 0;
-    }
-
-    /* leave the rest to the garbage collector... */
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-element_get(ElementObject* self, PyObject* args)
-{
-    PyObject* value;
-
-    PyObject* key;
-    PyObject* default_value = Py_None;
-    if (!PyArg_ParseTuple(args, "O|O", &key, &default_value))
-        return NULL;
-
-    value = PyDict_GetItem(self->attrib, key);
-    if (!value) {
-        value = default_value;
-        PyErr_Clear();
-    }
-
-    Py_INCREF(value);
-    return value;
-}
-
-static PyObject*
-element_getitem(ElementObject* self, Py_ssize_t index)
-{
-    if (index < 0 || index >= self->child_count) {
-        PyErr_SetString(PyExc_IndexError, "child index out of range");
-        return NULL;
-    }
-
-    Py_INCREF(self->children[index]);
-    return self->children[index];
-}
-
-static Py_ssize_t
-element_length(ElementObject* self)
-{
-    return self->child_count;
-}
-
-static PyObject*
-element_repr(ElementObject* self)
-{
-    char buf[300];
-    if (PyString_Check(self->tag))
-        sprintf(
-            buf, "<Element object '%.256s' at %lx>",
-            PyString_AsString(self->tag),
-            (long) self
-            );
-    else
-        sprintf(
-            buf, "<Element object at %lx>",
-            (long) self
-            );
-
-    return PyString_FromString(buf);
-}
-
-/* -------------------------------------------------------------------- */
-/* type descriptor */
-
-static PyMethodDef element_methods[] = {
-    {"get", (PyCFunction) element_get, 1},
-    {"append", (PyCFunction) element_append, 1},
-    {"destroy", (PyCFunction) element_destroy, 0},
-    {NULL, NULL}
-};
-
-static PyObject*  
-element_getattr(ElementObject* self, char* name)
-{
-    PyObject* res;
-
-    res = Py_FindMethod(element_methods, (PyObject*) self, name);
-    if (res)
-	return res;
-
-    PyErr_Clear();
-
-    if (strcmp(name, "tag") == 0)
-	res = self->tag;
-    else if (strcmp(name, "text") == 0)
-	res = self->text;
-    else if (strcmp(name, "suffix") == 0)
-        res = self->suffix;
-    else if (strcmp(name, "attrib") == 0)
-	res = self->attrib;
-    else if (strcmp(name, "parent") == 0)
-	res = self->parent;
-    else {
-        PyErr_SetString(PyExc_AttributeError, name);
-        return NULL;
-    }
-
-    Py_INCREF(res);
-    return res;
-}
-
-static int
-element_setattr(ElementObject *self, const char* name, PyObject* value)
-{
-    if (value == NULL) {
-        PyErr_SetString(PyExc_AttributeError,
-                        "can't delete element attributes");
-        return -1;
-    }
-
-    if (strcmp(name, "text") == 0) {
-
-        Py_DECREF(self->text);
-        self->text = value;
-        Py_INCREF(self->text);
-
-    } else if (strcmp(name, "suffix") == 0) {
-
-        Py_DECREF(self->suffix);
-        self->suffix = value;
-        Py_INCREF(self->suffix);
-
-    } else if (strcmp(name, "attrib") == 0) {
-
-        Py_DECREF(self->attrib);
-        self->attrib = value;
-        Py_INCREF(self->attrib);
-
-    } else {
-
-        PyErr_SetString(PyExc_AttributeError, name);
-        return -1;
-
-    }
-
-    return 0;
-}
-
-static PySequenceMethods element_as_sequence = {
-    (lenfunc) element_length, /* sq_length */
-    0, /* sq_concat */
-    0, /* sq_repeat */
-    (ssizeargfunc) element_getitem, /* sq_item */
-    0, /* sq_slice */
-    0, /* sq_ass_item */
-    0, /* sq_ass_slice */
-};
-
-statichere PyTypeObject Element_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0, /* ob_size */
-    "Element", /* tp_name */
-    sizeof(ElementObject), /*tp_size*/
-    0, /* tp_itemsize */
-    /* methods */
-    (destructor)element_dealloc, /* tp_dealloc */
-    0, /* tp_print */
-    (getattrfunc)element_getattr, /* tp_getattr */
-    (setattrfunc)element_setattr, /* tp_setattr */
-    0, /* tp_compare */
-    (reprfunc)element_repr, /* tp_repr */
-    0, /* tp_as_number */
-    &element_as_sequence, /* tp_as_sequence */
-    0 /* tp_as_mapping */
-};
-
-
-/* ====================================================================
-/* tree builder (not yet implemented) */
-
-typedef struct {
-    PyObject_HEAD
-
-    PyObject* root; /* root node (first created node) */
-
-    PyObject* this; /* current node */
-    PyObject* last; /* most recently created node */
-    PyObject* data; /* data collector */
-
-} TreeBuilderObject;
-
-staticforward PyTypeObject TreeBuilder_Type;
-
-/* -------------------------------------------------------------------- */
-/* constructor and destructor */
-
-static PyObject*
-treebuilder_new(PyObject* _self, PyObject* args)
-{
-    TreeBuilderObject* self;
-
-    /* no arguments */
-    if (!PyArg_NoArgs(args))
-        return NULL;
-
-    self = PyObject_NEW(TreeBuilderObject, &TreeBuilder_Type);
-    if (self == NULL)
-        return NULL;
-
-    Py_INCREF(Py_None);
-    self->root = Py_None;
-
-    self->this = NULL;
-    self->last = NULL;
-    self->data = NULL;
-
-    return (PyObject*) self;
-}
-
-static void
-treebuilder_dealloc(TreeBuilderObject* self)
-{
-    Py_XDECREF(self->data);
-    Py_XDECREF(self->last);
-    Py_XDECREF(self->this);
-    Py_DECREF(self->root);
-    PyObject_FREE(self);
-}
-
-/* -------------------------------------------------------------------- */
-/* methods (in alphabetical order) */
-
-static PyObject*
-treebuilder_start(TreeBuilderObject* self, PyObject* args)
-{
-    PyObject* tag;
-    PyObject* attrib = Py_None;
-    if (!PyArg_ParseTuple(args, "O|O", &tag, &attrib))
-        return NULL;
-
-    /* create a new node */
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject*
-treebuilder_end(TreeBuilderObject* self, PyObject* args)
-{
-    PyObject* tag;
-    if (!PyArg_ParseTuple(args, "O", &tag))
-        return NULL;
-
-    /* end current node */
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-static PyObject *
-treebuilder_data(TreeBuilderObject* self, PyObject* args)
-{
-    PyObject* data;
-    if (!PyArg_ParseTuple(args, "O", &data))
-        return NULL;
-
-    /* add data to collector */
-
-    Py_INCREF(Py_None);
-    return Py_None;
-}
-
-/* -------------------------------------------------------------------- */
-/* type descriptor */
-
-static PyMethodDef treebuilder_methods[] = {
-    {"data", (PyCFunction) treebuilder_data, 1},
-    {"start", (PyCFunction) treebuilder_start, 1},
-    {"end", (PyCFunction) treebuilder_end, 1},
-    {NULL, NULL}
-};
-
-static PyObject*  
-treebuilder_getattr(ElementObject* self, char* name)
-{
-    return Py_FindMethod(treebuilder_methods, (PyObject*) self, name);
-}
-
-statichere PyTypeObject TreeBuilder_Type = {
-    PyObject_HEAD_INIT(NULL)
-    0, /* ob_size */
-    "TreeBuilder", /* tp_name */
-    sizeof(TreeBuilderObject), /*tp_size*/
-    0, /* tp_itemsize */
-    /* methods */
-    (destructor)treebuilder_dealloc, /* tp_dealloc */
-    0, /* tp_print */
-    (getattrfunc)treebuilder_getattr, /* tp_getattr */
-    0, /* tp_setattr */
-    0, /* tp_compare */
-    0, /* tp_repr */
-    0, /* tp_as_number */
-    0, /* tp_as_sequence */
-    0 /* tp_as_mapping */
-};
-
 
 /* ==================================================================== */
 /* python module interface */
-
 static PyMethodDef _functions[] = {
-    {"SGMLParser", _sgmlop_sgmlparser, 0},
-    {"XMLParser", _sgmlop_xmlparser, 0},
-    {"Element", element_new, 1},
-    {"TreeBuilder", treebuilder_new, 0},
+    {"SGMLParser", _sgmlop_sgmlparser, METH_VARARGS},
+    {"XMLParser", _sgmlop_xmlparser, METH_VARARGS},
     {NULL, NULL}
 };
 
-void
-#ifdef WIN32
-__declspec(dllexport)
-#endif
-initsgmlop()
-{
-    /* Patch object type */
-    FastSGMLParser_Type.ob_type =
-    Element_Type.ob_type =
-    TreeBuilder_Type.ob_type = &PyType_Type;
+#ifdef isPy3
+static struct PyModuleDef moduledef = {
+    PyModuleDef_HEAD_INIT,
+    "sgmlop",
+    0, /* module doc */
+    -1,
+    _functions,
+    NULL,
+    NULL,
+    NULL,
+    NULL
+};
 
-    Py_InitModule("sgmlop", _functions);
+PyMODINIT_FUNC PyInit_sgmlop(void)
+#else
+void initsgmlop()
+#endif
+{
+	PyObject	*module=NULL;
+#ifdef isPy3
+	module = PyModule_Create(&moduledef);
+#else
+	module = Py_InitModule3("sgmlop", _functions,NULL);
+#endif
+	if(!module) goto err;
+#ifdef isPy3
+	if(PyType_Ready(&FastParser_Type)<0) goto err;
+	return module;
+#else
+    FastParser_Type.ob_type = &PyType_Type; /* Patch object type */
+	return;
+#endif
+err:/*Check for errors*/
+#ifdef isPy3
+	Py_XDECREF(module);
+	return NULL;
+#else
+	if (PyErr_Occurred()) Py_FatalError("can't initialize module sgmlop");
+#endif
 }
 
 /* -------------------------------------------------------------------- */
@@ -883,13 +496,41 @@ initsgmlop()
 #define COMMENT 0x800
 
 static int
-fastfeed(FastSGMLParserObject* self)
+fastfeed(FastParserObject* self)
 {
     CHAR_T *end; /* tail */
     CHAR_T *p, *q, *s; /* scanning pointers */
     CHAR_T *b, *t, *e; /* token start/end */
+	char	*fmtS, *fmtSS, *fmtSO;
+	PyObject* res;
 
-    int token;
+    int token, returnUnicode=self->returnUnicode;
+#ifdef	isPy3
+	if(returnUnicode){
+		fmtS="s#"; 
+		fmtSS="s#s#";
+		fmtSO="s#O";
+		}
+	else{
+		fmtS="y#"; 
+		fmtSS="y#y#";
+		fmtSO="y#O";
+		}
+#else
+	int		uniconv=0;
+	PyObject	*_o1, *_o2;
+	if(returnUnicode){
+		fmtS="O"; 
+		fmtSS="OO";
+		fmtSO="OO";
+		uniconv=1;
+		}
+	else{
+		fmtS="s#"; 
+		fmtSS="s#s#";
+		fmtSO="s#O";
+		}
+#endif
 
     s = q = p = (CHAR_T*) self->buffer;
     end = (CHAR_T*) (self->buffer + self->bufferlen);
@@ -1121,9 +762,19 @@ fastfeed(FastSGMLParserObject* self)
 
         if (q != s && self->handle_data) {
             /* flush any raw data before this tag */
-            PyObject* res;
-            res = PyObject_CallFunction(self->handle_data,
-                                        "s#", s, q-s);
+#ifndef	isPy3
+			if(uniconv){
+				_o1=PyUnicode_DecodeUTF8(s, q-s,NULL);
+				if(!_o1) return -1; 
+            	res = PyObject_CallFunction(self->handle_data, fmtS, _o1);
+				Py_DECREF(_o1);
+				}
+			else{
+#endif
+            	res = PyObject_CallFunction(self->handle_data, fmtS, s, q-s);
+#ifndef isPy3
+				}
+#endif
             if (!res)
                 return -1;
             Py_DECREF(res);
@@ -1133,70 +784,143 @@ fastfeed(FastSGMLParserObject* self)
         if (token & TAG) {
             if (token == TAG_END) {
                 if (self->finish_endtag) {
-                    PyObject* res;
-                    res = PyObject_CallFunction(self->finish_endtag,
-                                                "s#", b, t-b);
-                    if (!res)
-                        return -1;
+#ifndef	isPy3
+				if(uniconv){
+					_o1=PyUnicode_DecodeUTF8(b, t-b,NULL);
+					if(!_o1) return -1; 
+            		res = PyObject_CallFunction(self->finish_endtag, fmtS, _o1);
+					Py_DECREF(_o1);
+					}
+				else{
+#endif
+                    res = PyObject_CallFunction(self->finish_endtag, fmtS, b, t-b);
+#ifndef isPy3
+				}
+#endif
+                    if (!res) return -1;
                     Py_DECREF(res);
                 }
             } else if (token == DIRECTIVE || token == DOCTYPE) {
                 if (self->handle_special) {
-                    PyObject* res;
-                    res = PyObject_CallFunction(self->handle_special,
-                                                "s#", b, e-b);
-                    if (!res)
-                        return -1;
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_special, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                    res = PyObject_CallFunction(self->handle_special, fmtS, b, e-b);
+#ifndef isPy3
+				}
+#endif
+                    if (!res) return -1;
                     Py_DECREF(res);
                 }
             } else if (token == PI) {
                 if (self->handle_proc) {
-                    PyObject* res;
                     int len = t-b;
                     while (ISSPACE(*t))
                         t++;
-                    res = PyObject_CallFunction(self->handle_proc,
-                                                "s#s#", b, len, t, e-t);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, len,NULL);
+						if(!_o1) return -1; 
+						_o2=PyUnicode_DecodeUTF8(t, e-t,NULL);
+						if(!_o2){
+							Py_DECREF(_o1);
+							return -1;
+							}
+            			res = PyObject_CallFunction(self->handle_proc, fmtSS, _o1, _o2);
+						Py_DECREF(_o2);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                    res = PyObject_CallFunction(self->handle_proc, fmtSS, b, len, t, e-t);
+#ifndef isPy3
+				}
+#endif
                     if (!res)
                         return -1;
                     Py_DECREF(res);
                 }
             } else if (self->finish_starttag) {
-                PyObject* res;
                 PyObject* attr;
                 int len = t-b;
                 while (ISSPACE(*t))
                     t++;
-                attr = attrparse(t, e-t, self->xml);
+                attr = attrparse(returnUnicode, t, e-t, self->xml);
                 if (!attr)
                     return -1;
-                res = PyObject_CallFunction(self->finish_starttag,
-                                            "s#O", b, len, attr);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, len,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->finish_starttag, fmtSO, _o1, attr);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                res = PyObject_CallFunction(self->finish_starttag, fmtSO, b, len, attr);
+#ifndef isPy3
+				}
+#endif
                 Py_DECREF(attr);
                 if (!res)
                     return -1;
                 Py_DECREF(res);
                 if (token == TAG_EMPTY && self->finish_endtag) {
-                    res = PyObject_CallFunction(self->finish_endtag,
-                                                "s#", b, len);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, len,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->finish_endtag, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                    res = PyObject_CallFunction(self->finish_endtag, fmtS, b, len);
+#ifndef isPy3
+				}
+#endif
                     if (!res)
                         return -1;
                     Py_DECREF(res);
                 }
             }
         } else if (token == ENTITYREF && self->handle_entityref) {
-            PyObject* res;
-            res = PyObject_CallFunction(self->handle_entityref,
-                                        "s#", b, e-b);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_entityref, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+            res = PyObject_CallFunction(self->handle_entityref, fmtS, b, e-b);
+#ifndef isPy3
+				}
+#endif
             if (!res)
                 return -1;
             Py_DECREF(res);
         } else if (token == CHARREF && (self->handle_charref ||
                                         self->handle_data)) {
-            PyObject* res;
-            if (self->handle_charref)
-                res = PyObject_CallFunction(self->handle_charref,
-                                            "s#", b, e-b);
+            if (self->handle_charref)PY2({)
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_charref, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                res = PyObject_CallFunction(self->handle_charref, fmtS, b, e-b);
+				PY2(}})
             else {
                 /* fallback: handle charref's as data */
                 /* FIXME: hexadecimal charrefs? */
@@ -1205,44 +929,96 @@ fastfeed(FastSGMLParserObject* self)
                 ch = 0;
                 for (p = b; p < e; p++)
                     ch = ch*10 + *p - '0';
-                res = PyObject_CallFunction(self->handle_data,
-                                            "s#", &ch, sizeof(CHAR_T));
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(&ch, sizeof(CHAR_T),NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_data, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                res = PyObject_CallFunction(self->handle_data, fmtS, &ch, sizeof(CHAR_T));
+#ifndef isPy3
+				}
+#endif
             }
             if (!res)
                 return -1;
             Py_DECREF(res);
         } else if (token == CDATA && (self->handle_cdata ||
                                       self->handle_data)) {
-            PyObject* res;
             if (self->handle_cdata) {
-                    res = PyObject_CallFunction(self->handle_cdata,
-                                                "s#", b, e-b);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_cdata, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                    res = PyObject_CallFunction(self->handle_cdata, fmtS, b, e-b);
+#ifndef isPy3
+				}
+#endif
             } else {
                 /* fallback: handle cdata as plain data */
-                res = PyObject_CallFunction(self->handle_data,
-                                            "s#", b, e-b);
+#ifndef	isPy3
+					if(uniconv){
+						_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+						if(!_o1) return -1; 
+            			res = PyObject_CallFunction(self->handle_data, fmtS, _o1);
+						Py_DECREF(_o1);
+						}
+					else{
+#endif
+                res = PyObject_CallFunction(self->handle_data, fmtS, b, e-b);
+#ifndef isPy3
+				}
+#endif
             }
             if (!res)
                 return -1;
             Py_DECREF(res);
         } else if (token == COMMENT && self->handle_comment) {
-            PyObject* res;
-            res = PyObject_CallFunction(self->handle_comment,
-                                        "s#", b, e-b);
+#ifndef	isPy3
+			if(uniconv){
+				_o1=PyUnicode_DecodeUTF8(b, e-b,NULL);
+				if(!_o1) return -1; 
+           			res = PyObject_CallFunction(self->handle_comment, fmtS, _o1);
+					Py_DECREF(_o1);
+					}
+				else{
+#endif
+            		res = PyObject_CallFunction(self->handle_comment, fmtS, b, e-b);
+#ifndef isPy3
+				}
+#endif
             if (!res)
                 return -1;
             Py_DECREF(res);
         }
-        
+
         q = p; /* start of token */
         s = p; /* start of span */
     }
 
   eol: /* end of line */
     if (q != s && self->handle_data) {
-        PyObject* res;
-        res = PyObject_CallFunction(self->handle_data,
-                                    "s#", s, q-s);
+#ifndef	isPy3
+		if(uniconv){
+			_o1=PyUnicode_DecodeUTF8(s, q-s,NULL);
+			if(!_o1) return -1; 
+         	res = PyObject_CallFunction(self->handle_data, fmtS, _o1);
+			Py_DECREF(_o1);
+			}
+		else{
+#endif
+        	res = PyObject_CallFunction(self->handle_data, fmtS, s, q-s);
+#ifndef isPy3
+				}
+#endif
         if (!res)
             return -1;
         Py_DECREF(res);
@@ -1253,7 +1029,7 @@ fastfeed(FastSGMLParserObject* self)
 }
 
 static PyObject*
-attrparse(const CHAR_T* p, int len, int xml)
+attrparse(int uniconv, const CHAR_T* p, int len, int xml)
 {
     PyObject* attrs;
     PyObject* key = NULL;
@@ -1279,8 +1055,8 @@ attrparse(const CHAR_T* p, int len, int xml)
         while (p < end && *p != '=' && !ISSPACE(*p))
             p++;
 
-        key = PyString_FromStringAndSize(q, p-q);
-        if (key == NULL)
+       	key = uniconv? PyUnicode_FromStringAndSize(q, p-q):PyBytes_FromStringAndSize(q, p-q);
+        if(!key)
             goto err;
 
         while (p < end && ISSPACE(*p))
@@ -1306,14 +1082,15 @@ attrparse(const CHAR_T* p, int len, int xml)
                 p++;
                 while (p < end && *p != *q)
                     p++;
-                value = PyString_FromStringAndSize(q+1, p-q-1);
+               	value = uniconv?PyUnicode_FromStringAndSize(q+1, p-q-1):PyBytes_FromStringAndSize(q+1, p-q-1);
+				if(!value)goto err;
                 if (p < end && *p == *q)
                     p++;
             } else {
                 while (p < end && !ISSPACE(*p))
                     p++;
-                value = PyString_FromStringAndSize(q, p-q);
-            }
+               	value = uniconv?PyUnicode_FromStringAndSize(q, p-q):PyBytes_FromStringAndSize(q, p-q);
+            	}
 
             if (value == NULL)
                 goto err;
@@ -1350,7 +1127,7 @@ attrparse(const CHAR_T* p, int len, int xml)
 
         key = NULL;
         value = NULL;
-        
+
     }
 
     return attrs;
