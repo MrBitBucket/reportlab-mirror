@@ -9,7 +9,6 @@ Probably ought to be removed'''
 
 import re
 import string
-import weakref
 
 try:
     import sgmlop   # this works for both builtin on the path or relative
@@ -499,7 +498,7 @@ class FastXMLParser:
         self.lineno = 1
         self.parser = sgmlop.XMLParser()
         self.feed = self.parser.feed
-        self.parser.register(weakref.proxy(self))
+        self.parser.register(self)
 
     # For derived classes only -- enter literal mode (CDATA) till EOF
     def setnomoretags(self):
@@ -518,12 +517,13 @@ class FastXMLParser:
 
     # Interface -- handle the remaining data
     def close(self):
-        try:
-            self.parser.close()
-        finally:
-            self.feed = None
-            del self.parser
-            self.parser = None
+        if self.parser:
+            try:
+                self.parser.close()
+            finally:
+                self.feed = None
+                del self.parser
+                self.parser = None
 
     # Interface -- translate references
     def translate_references(self, data):
