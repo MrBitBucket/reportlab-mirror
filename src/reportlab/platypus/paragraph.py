@@ -1045,8 +1045,8 @@ class Paragraph(Flowable):
             try:
                 _parser.caseSensitive = self.caseSensitive
                 style, frags, bulletTextFrags = _parser.parse(text,style)
-            except:
-                if _parser.parse:
+            finally:
+                if _parser.parser:
                     _parser.close()
             if frags is None:
                 raise ValueError("xml parser error (%s) in paragraph beginning\n'%s'"\
