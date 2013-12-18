@@ -521,10 +521,13 @@ class FastXMLParser:
 
     # Interface -- handle the remaining data
     def close(self):
-        try:
-            self.parser.close()
-        finally:
-            self.parser = None
+        if self.parser:
+            try:
+                self.parser.close()
+            finally:
+                self.feed = None
+                del self.parser
+                self.parser = None
 
     # Interface -- translate references
     def translate_references(self, data):
