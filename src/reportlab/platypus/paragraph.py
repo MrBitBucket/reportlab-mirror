@@ -1038,12 +1038,16 @@ class Paragraph(Flowable):
         #This used to be a global parser to save overhead.
         #In the interests of thread safety it is being instantiated per paragraph.
         #On the next release, we'll replace with a cElementTree parser
-        _parser = ParaParser()
 
         if frags is None:
             text = cleaner(text)
-            _parser.caseSensitive = self.caseSensitive
-            style, frags, bulletTextFrags = _parser.parse(text,style)
+            _parser = ParaParser()
+            try:
+                _parser.caseSensitive = self.caseSensitive
+                style, frags, bulletTextFrags = _parser.parse(text,style)
+            except:
+                if _parser.parse:
+                    _parser.close()
             if frags is None:
                 raise ValueError("xml parser error (%s) in paragraph beginning\n'%s'"\
                     % (_parser.errors[0],text[:min(30,len(text))]))

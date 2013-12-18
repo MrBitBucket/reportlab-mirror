@@ -1078,8 +1078,10 @@ class ParaParser(xmllib.XMLParser):
         # given string
         if not(len(text)>=6 and text[0]=='<' and _re_para.match(text)):
             text = "<para>"+text+"</para>"
-        self.feed(text)
-        self.close()    # force parsing to complete
+        try:
+            self.feed(text)
+        finally:
+            self.close()    # force parsing to complete
         return self._complete_parse()
 
     def _complete_parse(self):
