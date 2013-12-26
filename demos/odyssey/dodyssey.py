@@ -219,8 +219,8 @@ def parseOdyssey(fn):
     print("saving to PDF took %.4f seconds" %(t7-t6))
     print("Total run took %.4f seconds"%(t7-t0))
 
-    import md5
-    print('file digest: %s' % md5.md5(open('dodyssey.pdf','rb').read()).hexdigest())
+    import hashlib
+    print('file digest: %s' % hashlib.md5(open('dodyssey.pdf','rb').read()).hexdigest())
 
 def run():
     for fn in ('odyssey.full.txt','odyssey.txt'):
