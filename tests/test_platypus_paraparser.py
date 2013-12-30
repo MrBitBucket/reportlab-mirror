@@ -104,20 +104,20 @@ class ParaParserTestCase(unittest.TestCase):
         self.assertEquals([x.text for x in fragList], ['Hello ','',' World'])
         self.assertEquals(fragList[1].lineBreak, True)
 
-    def testNakedAmpersands(self):
-        import pyRXPU
-        from reportlab.platypus.paragraph import Paragraph
-        def func():
-            txt = "1 & 2"
-            parser = ParaParser()
-            parser.caseSensitive = True
-            frags = ParaParser().parse(txt, self.style)[1]
-            #print 'parsed OK, frags=', frags
-            Paragraph(txt, self.style),
-        self.assertRaises(
-                pyRXPU.error,
-                func,
-                )
+    #def testNakedAmpersands(self):
+        #We no longer require this error to be raised when using html.parser
+        # import pyRXPU
+        # from reportlab.platypus.paragraph import Paragraph
+        # def func():
+        #     txt = "1 & 2"
+        #     parser = ParaParser()
+        #     parser.caseSensitive = True
+        #     frags = ParaParser().parse(txt, self.style)[1]
+        #     Paragraph(txt, self.style),
+        # self.assertRaises(
+        #         pyRXPU.error,
+        #         func,
+        #         )
 
 def makeSuite():
     return makeSuiteForClasses(ParaParserTestCase)

@@ -9,12 +9,18 @@ import sys
 import os
 import copy
 import base64
+from pprint import pprint as pp
+
 try:
     import pickle as pickle
 except:
     import pickle
 import unicodedata
 import reportlab.lib.sequencer
+
+from html.parser import HTMLParser
+from html.entities import name2codepoint
+
 from reportlab.lib.abag import ABag
 from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode
 from reportlab.lib.colors import toColor, white, black, red, Color
@@ -578,7 +584,7 @@ except ImportError:
 #
 # It will also be able to handle any MathML specified Greek characters.
 #------------------------------------------------------------------
-class ParaParser:
+class ParaParser(HTMLParser):
 
     #----------------------------------------------------------
     # First we will define all of the xml tag handler functions.
@@ -733,7 +739,7 @@ class ParaParser:
         except ValueError:
             self.unknown_charref(name)
             return
-        self.handle_data(chr(n).encode('utf8'))
+        self.handle_data(chr(n))   #.encode('utf8'))
 
     def syntax_error(self,lineno,message):
         self._syntax_error(message)
@@ -798,15 +804,18 @@ class ParaParser:
     end_span = end_font
 
     def start_br(self, attr):
-        #just do the trick to make sure there is no content
         self._push(_selfClosingTag='br',lineBreak=True,text='')
-
+        
     def end_br(self):
+        #print('\nend_br called, %d frags in list' % len(self.fragList))
         frag = self._stack[-1]
         assert frag._selfClosingTag=='br' and frag.lineBreak,'Parser failure in <br/>'
         del frag._selfClosingTag
+        self._handled_text = False
         self.handle_data('')
         self._pop()
+        
+
 
     def _initial_frag(self,attr,attrMap,bullet=0):
         style = self._style
@@ -1014,11 +1023,13 @@ class ParaParser:
     #----------------------------------------------------------------
 
     def __init__(self,verbose=0, caseSensitive=0, ignoreUnknownTags=1):
+        HTMLParser.__init__(self)
         self.verbose = verbose
         self.caseSensitive = caseSensitive
         self.ignoreUnknownTags = ignoreUnknownTags
 
     def _iReset(self):
+        self._handled_text = False
         self.fragList = []
         if hasattr(self, 'bFragList'): delattr(self,'bFragList')
 
@@ -1033,6 +1044,19 @@ class ParaParser:
     #----------------------------------------------------------------
     def handle_data(self,data):
         "Creates an intermediate representation of string segments."
+
+        #The old parser would only 'see' a string after all entities had
+        #been processed.  Thus, 'Hello &trade; World' would emerge as one
+        #fragment.    HTMLParser processes these separately.  We want to ensure
+        #that successive calls like this are concatenated, to prevent too many
+        #fragments being created.
+
+        #print("\n called handle_data('%s')" % data)
+        #print('handle_data("%s")' % data)
+        if self._handled_text:
+            #print('handle_more_data("%s")' % data)
+            self.handle_more_data(data)
+            return
 
         frag = copy.copy(self._stack[-1])
         if hasattr(frag,'cbDefn'):
@@ -1070,6 +1094,12 @@ class ParaParser:
         else:
             self.fragList.append(frag)
 
+        #Set this if we just processed sme text, but not if it was a br tag.
+        #Ugly, but seems necessary to get pyRXP and HTMLParser working the
+        #same way.
+        if not hasattr(frag, 'lineBreak'):
+            self._handled_text = True
+
     def handle_cdata(self,data):
         self.handle_data(data)
 
@@ -1077,7 +1107,9 @@ class ParaParser:
         self._seq = reportlab.lib.sequencer.getSequencer()
         self._reset(style)  # reinitialise the parser
 
-    def parse(self, text, style):
+
+
+    def old_parse(self, text, style):
         """Given a formatted string will return a list of
         ParaFrag objects with their calculated widths.
         If errors occur None will be returned and the
@@ -1089,12 +1121,16 @@ class ParaParser:
             text = u"<para>"+text+u"</para>"
         try:
             tt = makeParser(caseInsensitive=not self.caseSensitive)(text)
+
+            #from pprint import pprint
+            #pprint(tt)
         except:
             annotateException('paragraph text %s caused exception' % ascii(text))
         self._tt_start(tt)
         return self._complete_parse()
 
     def _complete_parse(self):
+        "Reset after parsing, to be ready for next paragraph"
         del self._seq
         style = self._style
         del self._style
@@ -1108,6 +1144,11 @@ class ParaParser:
         return style, fragList, bFragList
 
     def _tt_handle(self,tt):
+        "Iterate through a pre-parsed tuple tree (e.g. from pyRXP)"
+        #import pprint
+        #pprint.pprint(tt)
+        #find the corresponding start_tagname and end_tagname methods.
+        #These must be defined.
         tag = tt[0]
         try:
             start = getattr(self,'start_'+tag)
@@ -1117,13 +1158,21 @@ class ParaParser:
                 raise ValueError('Invalid tag "%s"' % tag)
             start = self.start_unknown
             end = self.end_unknown
+
+        #call the start_tagname method
         start(tt[1] or {})
+        self._handled_text = False
+        #if tree node has any children, they will either be further nodes,
+        #or text.  Accordingly, call either this function, or handle_data.
         C = tt[2]
         if C:
             M = self._tt_handlers
             for c in C:
                 M[isinstance(c,(list,tuple))](c)
+
+        #call the end_tagname method
         end()
+        self._handled_text = False
 
     def _tt_start(self,tt):
         self._tt_handlers = self.handle_data,self._tt_handle
@@ -1137,6 +1186,93 @@ class ParaParser:
 
     def findSpanStyle(self,style):
         raise ValueError('findSpanStyle not implemented in this parser')
+
+
+
+    #New methods to supprt HTML parser
+    def new_parse(self, text, style):
+        "attempt replacement for parse"
+        self._setup_for_parse(style)
+        text = asUnicode(text)
+        if not(len(text)>=6 and text[0]=='<' and _re_para.match(text)):
+            text = u"<para>"+text+u"</para>"
+        self.feed(text)
+        return self._complete_parse()
+
+    def handle_starttag(self, tag, attrs):
+        "Called by HTMLParser when a tag starts"
+
+        #tuple tree parser used to expect a dict.  HTML parser
+        #gives list of two-element tuples
+        if isinstance(attrs, list):
+            d = {}
+            for (k,  v) in attrs:
+                d[k] = v
+            attrs = d
+
+        if tag not in ['br']:
+            self._handled_text = False
+        try:
+            start = getattr(self,'start_'+tag)
+        except AttributeError:
+            if not self.ignoreUnknownTags:
+                raise ValueError('Invalid tag "%s"' % tag)
+            start = self.start_unknown
+        #call it
+        start(attrs or {})
+        
+    def handle_endtag(self, tag):
+        "Called by HTMLParser when a tag ends"
+        if tag not in ['br']:
+            self._handled_text = False
+        #find the existing end_tagname method
+        try:
+            end = getattr(self,'end_'+tag)
+        except AttributeError:
+            if not self.ignoreUnknownTags:
+                raise ValueError('Invalid tag "%s"' % tag)
+            end = self.end_unknown
+        #call it
+        end()
+
+    
+
+    def handle_entityref(self, name):
+        "Handles a named entity.  "
+        #print('handle_entityref called for "%s"' % name)
+        #The old parser saw these automatically resolved, so
+        #just tack it onto the current fragment.
+        resolved = chr(name2codepoint[name])
+        if self._handled_text:
+            self.fragList[-1].text += resolved
+        else:
+            self.handle_data(resolved)
+        
+    def handle_more_data(self, data):
+        """We call this when we get successive text chunks
+
+        This is to ensure that successive strings with no
+        formatting changes are concatenated.
+        """
+        frag = self._stack[-1]
+        if hasattr(frag,'isBullet'):
+            last = self.bFragList[-1]
+        else:
+            last = self.fragList[-1]
+        last.text += data
+
+
+
+
+        #frag.text += resolved
+        
+    def parse(self, text, style):
+        if os.environ.get('HTMLPARSE', '0') == '1':
+            return self.new_parse(text, style)
+        else:
+            return self.old_parse(text, style)
+
+
 
 if __name__=='__main__':
     from reportlab.platypus import cleanBlockQuotedText
