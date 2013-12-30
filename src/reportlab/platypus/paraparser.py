@@ -18,15 +18,19 @@ except:
 import unicodedata
 import reportlab.lib.sequencer
 
-from html.parser import HTMLParser
-from html.entities import name2codepoint
-
 from reportlab.lib.abag import ABag
 from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.units import inch,mm,cm,pica
+if isPy3:
+    from html.parser import HTMLParser
+    from html.entities import name2codepoint
+else:
+    from HTMLParser import HTMLParser
+    from htmlentitydefs import name2codepoint
+
 _re_para = re.compile(r'^\s*<\s*para(?:\s+|>|/>)')
 
 sizeDelta = 2       # amount to reduce font size by for super and sub script
