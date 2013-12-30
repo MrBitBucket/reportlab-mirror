@@ -19,7 +19,7 @@ import unicodedata
 import reportlab.lib.sequencer
 
 from reportlab.lib.abag import ABag
-from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode
+from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode, UniChr
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -743,7 +743,7 @@ class ParaParser(HTMLParser):
         except ValueError:
             self.unknown_charref(name)
             return
-        self.handle_data(chr(n))   #.encode('utf8'))
+        self.handle_data(UniChr(n))   #.encode('utf8'))
 
     def syntax_error(self,lineno,message):
         self._syntax_error(message)
@@ -1246,7 +1246,7 @@ class ParaParser(HTMLParser):
         #print('handle_entityref called for "%s"' % name)
         #The old parser saw these automatically resolved, so
         #just tack it onto the current fragment.
-        resolved = chr(name2codepoint[name])
+        resolved = UniChr(name2codepoint[name])
         if self._handled_text:
             self.fragList[-1].text += resolved
         else:
@@ -1265,11 +1265,6 @@ class ParaParser(HTMLParser):
             last = self.fragList[-1]
         last.text += data
 
-
-
-
-        #frag.text += resolved
-        
     def parse(self, text, style):
         if os.environ.get('HTMLPARSE', '0') == '1':
             return self.new_parse(text, style)
