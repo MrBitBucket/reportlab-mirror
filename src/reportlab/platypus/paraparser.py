@@ -39,7 +39,6 @@ superFraction = 0.5 # fraction of font size that a super script should be raised
 
 DEFAULT_INDEX_NAME='_indexAdd'
 
-
 def _convnum(s, unit=1, allowRelative=True):
     if s[0] in ('+','-') and allowRelative:
         try:
@@ -236,259 +235,264 @@ def _applyAttributes(obj, attr):
 #with additions suggested by Christoph Zwerschke who also suggested the
 #numeric entity names that follow.
 greeks = {
-    'Aacute': b'\xc3\x81',
-    'aacute': b'\xc3\xa1',
-    'Acirc': b'\xc3\x82',
-    'acirc': b'\xc3\xa2',
-    'acute': b'\xc2\xb4',
-    'AElig': b'\xc3\x86',
-    'aelig': b'\xc3\xa6',
-    'Agrave': b'\xc3\x80',
-    'agrave': b'\xc3\xa0',
-    'alefsym': b'\xe2\x84\xb5',
-    'Alpha': b'\xce\x91',
-    'alpha': b'\xce\xb1',
-    'and': b'\xe2\x88\xa7',
-    'ang': b'\xe2\x88\xa0',
-    'Aring': b'\xc3\x85',
-    'aring': b'\xc3\xa5',
-    'asymp': b'\xe2\x89\x88',
-    'Atilde': b'\xc3\x83',
-    'atilde': b'\xc3\xa3',
-    'Auml': b'\xc3\x84',
-    'auml': b'\xc3\xa4',
-    'bdquo': b'\xe2\x80\x9e',
-    'Beta': b'\xce\x92',
-    'beta': b'\xce\xb2',
-    'brvbar': b'\xc2\xa6',
-    'bull': b'\xe2\x80\xa2',
-    'cap': b'\xe2\x88\xa9',
-    'Ccedil': b'\xc3\x87',
-    'ccedil': b'\xc3\xa7',
-    'cedil': b'\xc2\xb8',
-    'cent': b'\xc2\xa2',
-    'Chi': b'\xce\xa7',
-    'chi': b'\xcf\x87',
-    'circ': b'\xcb\x86',
-    'clubs': b'\xe2\x99\xa3',
-    'cong': b'\xe2\x89\x85',
-    'copy': b'\xc2\xa9',
-    'crarr': b'\xe2\x86\xb5',
-    'cup': b'\xe2\x88\xaa',
-    'curren': b'\xc2\xa4',
-    'dagger': b'\xe2\x80\xa0',
-    'Dagger': b'\xe2\x80\xa1',
-    'darr': b'\xe2\x86\x93',
-    'dArr': b'\xe2\x87\x93',
-    'deg': b'\xc2\xb0',
-    'delta': b'\xce\xb4',
-    'Delta': b'\xe2\x88\x86',
-    'diams': b'\xe2\x99\xa6',
-    'divide': b'\xc3\xb7',
-    'Eacute': b'\xc3\x89',
-    'eacute': b'\xc3\xa9',
-    'Ecirc': b'\xc3\x8a',
-    'ecirc': b'\xc3\xaa',
-    'Egrave': b'\xc3\x88',
-    'egrave': b'\xc3\xa8',
-    'empty': b'\xe2\x88\x85',
-    'emsp': b'\xe2\x80\x83',
-    'ensp': b'\xe2\x80\x82',
-    'Epsilon': b'\xce\x95',
-    'epsilon': b'\xce\xb5',
-    'epsiv': b'\xce\xb5',
-    'equiv': b'\xe2\x89\xa1',
-    'Eta': b'\xce\x97',
-    'eta': b'\xce\xb7',
-    'ETH': b'\xc3\x90',
-    'eth': b'\xc3\xb0',
-    'Euml': b'\xc3\x8b',
-    'euml': b'\xc3\xab',
-    'euro': b'\xe2\x82\xac',
-    'exist': b'\xe2\x88\x83',
-    'fnof': b'\xc6\x92',
-    'forall': b'\xe2\x88\x80',
-    'frac12': b'\xc2\xbd',
-    'frac14': b'\xc2\xbc',
-    'frac34': b'\xc2\xbe',
-    'frasl': b'\xe2\x81\x84',
-    'Gamma': b'\xce\x93',
-    'gamma': b'\xce\xb3',
-    'ge': b'\xe2\x89\xa5',
-    'harr': b'\xe2\x86\x94',
-    'hArr': b'\xe2\x87\x94',
-    'hearts': b'\xe2\x99\xa5',
-    'hellip': b'\xe2\x80\xa6',
-    'Iacute': b'\xc3\x8d',
-    'iacute': b'\xc3\xad',
-    'Icirc': b'\xc3\x8e',
-    'icirc': b'\xc3\xae',
-    'iexcl': b'\xc2\xa1',
-    'Igrave': b'\xc3\x8c',
-    'igrave': b'\xc3\xac',
-    'image': b'\xe2\x84\x91',
-    'infin': b'\xe2\x88\x9e',
-    'int': b'\xe2\x88\xab',
-    'Iota': b'\xce\x99',
-    'iota': b'\xce\xb9',
-    'iquest': b'\xc2\xbf',
-    'isin': b'\xe2\x88\x88',
-    'Iuml': b'\xc3\x8f',
-    'iuml': b'\xc3\xaf',
-    'Kappa': b'\xce\x9a',
-    'kappa': b'\xce\xba',
-    'Lambda': b'\xce\x9b',
-    'lambda': b'\xce\xbb',
-    'lang': b'\xe2\x8c\xa9',
-    'laquo': b'\xc2\xab',
-    'larr': b'\xe2\x86\x90',
-    'lArr': b'\xe2\x87\x90',
-    'lceil': b'\xef\xa3\xae',
-    'ldquo': b'\xe2\x80\x9c',
-    'le': b'\xe2\x89\xa4',
-    'lfloor': b'\xef\xa3\xb0',
-    'lowast': b'\xe2\x88\x97',
-    'loz': b'\xe2\x97\x8a',
-    'lrm': b'\xe2\x80\x8e',
-    'lsaquo': b'\xe2\x80\xb9',
-    'lsquo': b'\xe2\x80\x98',
-    'macr': b'\xc2\xaf',
-    'mdash': b'\xe2\x80\x94',
-    'micro': b'\xc2\xb5',
-    'middot': b'\xc2\xb7',
-    'minus': b'\xe2\x88\x92',
-    'mu': b'\xc2\xb5',
-    'Mu': b'\xce\x9c',
-    'nabla': b'\xe2\x88\x87',
-    'nbsp': b'\xc2\xa0',
-    'ndash': b'\xe2\x80\x93',
-    'ne': b'\xe2\x89\xa0',
-    'ni': b'\xe2\x88\x8b',
-    'notin': b'\xe2\x88\x89',
-    'not': b'\xc2\xac',
-    'nsub': b'\xe2\x8a\x84',
-    'Ntilde': b'\xc3\x91',
-    'ntilde': b'\xc3\xb1',
-    'Nu': b'\xce\x9d',
-    'nu': b'\xce\xbd',
-    'Oacute': b'\xc3\x93',
-    'oacute': b'\xc3\xb3',
-    'Ocirc': b'\xc3\x94',
-    'ocirc': b'\xc3\xb4',
-    'OElig': b'\xc5\x92',
-    'oelig': b'\xc5\x93',
-    'Ograve': b'\xc3\x92',
-    'ograve': b'\xc3\xb2',
-    'oline': b'\xef\xa3\xa5',
-    'omega': b'\xcf\x89',
-    'Omega': b'\xe2\x84\xa6',
-    'Omicron': b'\xce\x9f',
-    'omicron': b'\xce\xbf',
-    'oplus': b'\xe2\x8a\x95',
-    'ordf': b'\xc2\xaa',
-    'ordm': b'\xc2\xba',
-    'or': b'\xe2\x88\xa8',
-    'Oslash': b'\xc3\x98',
-    'oslash': b'\xc3\xb8',
-    'Otilde': b'\xc3\x95',
-    'otilde': b'\xc3\xb5',
-    'otimes': b'\xe2\x8a\x97',
-    'Ouml': b'\xc3\x96',
-    'ouml': b'\xc3\xb6',
-    'para': b'\xc2\xb6',
-    'part': b'\xe2\x88\x82',
-    'permil': b'\xe2\x80\xb0',
-    'perp': b'\xe2\x8a\xa5',
-    'phis': b'\xcf\x86',
-    'Phi': b'\xce\xa6',
-    'phi': b'\xcf\x95',
-    'piv': b'\xcf\x96',
-    'Pi': b'\xce\xa0',
-    'pi': b'\xcf\x80',
-    'plusmn': b'\xc2\xb1',
-    'pound': b'\xc2\xa3',
-    'prime': b'\xe2\x80\xb2',
-    'Prime': b'\xe2\x80\xb3',
-    'prod': b'\xe2\x88\x8f',
-    'prop': b'\xe2\x88\x9d',
-    'Psi': b'\xce\xa8',
-    'psi': b'\xcf\x88',
-    'radic': b'\xe2\x88\x9a',
-    'rang': b'\xe2\x8c\xaa',
-    'raquo': b'\xc2\xbb',
-    'rarr': b'\xe2\x86\x92',
-    'rArr': b'\xe2\x87\x92',
-    'rceil': b'\xef\xa3\xb9',
-    'rdquo': b'\xe2\x80\x9d',
-    'real': b'\xe2\x84\x9c',
-    'reg': b'\xc2\xae',
-    'rfloor': b'\xef\xa3\xbb',
-    'Rho': b'\xce\xa1',
-    'rho': b'\xcf\x81',
-    'rlm': b'\xe2\x80\x8f',
-    'rsaquo': b'\xe2\x80\xba',
-    'rsquo': b'\xe2\x80\x99',
-    'sbquo': b'\xe2\x80\x9a',
-    'Scaron': b'\xc5\xa0',
-    'scaron': b'\xc5\xa1',
-    'sdot': b'\xe2\x8b\x85',
-    'sect': b'\xc2\xa7',
-    'shy': b'\xc2\xad',
-    'sigmaf': b'\xcf\x82',
-    'sigmav': b'\xcf\x82',
-    'Sigma': b'\xce\xa3',
-    'sigma': b'\xcf\x83',
-    'sim': b'\xe2\x88\xbc',
-    'spades': b'\xe2\x99\xa0',
-    'sube': b'\xe2\x8a\x86',
-    'sub': b'\xe2\x8a\x82',
-    'sum': b'\xe2\x88\x91',
-    'sup1': b'\xc2\xb9',
-    'sup2': b'\xc2\xb2',
-    'sup3': b'\xc2\xb3',
-    'supe': b'\xe2\x8a\x87',
-    'sup': b'\xe2\x8a\x83',
-    'szlig': b'\xc3\x9f',
-    'Tau': b'\xce\xa4',
-    'tau': b'\xcf\x84',
-    'there4': b'\xe2\x88\xb4',
-    'thetasym': b'\xcf\x91',
-    'thetav': b'\xcf\x91',
-    'Theta': b'\xce\x98',
-    'theta': b'\xce\xb8',
-    'thinsp': b'\xe2\x80\x89',
-    'THORN': b'\xc3\x9e',
-    'thorn': b'\xc3\xbe',
-    'tilde': b'\xcb\x9c',
-    'times': b'\xc3\x97',
-    'trade': b'\xef\xa3\xaa',
-    'Uacute': b'\xc3\x9a',
-    'uacute': b'\xc3\xba',
-    'uarr': b'\xe2\x86\x91',
-    'uArr': b'\xe2\x87\x91',
-    'Ucirc': b'\xc3\x9b',
-    'ucirc': b'\xc3\xbb',
-    'Ugrave': b'\xc3\x99',
-    'ugrave': b'\xc3\xb9',
-    'uml': b'\xc2\xa8',
-    'upsih': b'\xcf\x92',
-    'Upsilon': b'\xce\xa5',
-    'upsilon': b'\xcf\x85',
-    'Uuml': b'\xc3\x9c',
-    'uuml': b'\xc3\xbc',
-    'weierp': b'\xe2\x84\x98',
-    'Xi': b'\xce\x9e',
-    'xi': b'\xce\xbe',
-    'Yacute': b'\xc3\x9d',
-    'yacute': b'\xc3\xbd',
-    'yen': b'\xc2\xa5',
-    'yuml': b'\xc3\xbf',
-    'Yuml': b'\xc5\xb8',
-    'Zeta': b'\xce\x96',
-    'zeta': b'\xce\xb6',
-    'zwj': b'\xe2\x80\x8d',
-    'zwnj': b'\xe2\x80\x8c',
+    'Aacute': u'\xc1',
+    'aacute': u'\xe1',
+    'Acirc': u'\xc2',
+    'acirc': u'\xe2',
+    'acute': u'\xb4',
+    'AElig': u'\xc6',
+    'aelig': u'\xe6',
+    'Agrave': u'\xc0',
+    'agrave': u'\xe0',
+    'alefsym': u'\u2135',
+    'Alpha': u'\u0391',
+    'alpha': u'\u03b1',
+    'and': u'\u2227',
+    'ang': u'\u2220',
+    'Aring': u'\xc5',
+    'aring': u'\xe5',
+    'asymp': u'\u2248',
+    'Atilde': u'\xc3',
+    'atilde': u'\xe3',
+    'Auml': u'\xc4',
+    'auml': u'\xe4',
+    'bdquo': u'\u201e',
+    'Beta': u'\u0392',
+    'beta': u'\u03b2',
+    'brvbar': u'\xa6',
+    'bull': u'\u2022',
+    'cap': u'\u2229',
+    'Ccedil': u'\xc7',
+    'ccedil': u'\xe7',
+    'cedil': u'\xb8',
+    'cent': u'\xa2',
+    'Chi': u'\u03a7',
+    'chi': u'\u03c7',
+    'circ': u'\u02c6',
+    'clubs': u'\u2663',
+    'cong': u'\u2245',
+    'copy': u'\xa9',
+    'crarr': u'\u21b5',
+    'cup': u'\u222a',
+    'curren': u'\xa4',
+    'dagger': u'\u2020',
+    'Dagger': u'\u2021',
+    'darr': u'\u2193',
+    'dArr': u'\u21d3',
+    'deg': u'\xb0',
+    'delta': u'\u03b4',
+    'Delta': u'\u2206',
+    'diams': u'\u2666',
+    'divide': u'\xf7',
+    'Eacute': u'\xc9',
+    'eacute': u'\xe9',
+    'Ecirc': u'\xca',
+    'ecirc': u'\xea',
+    'Egrave': u'\xc8',
+    'egrave': u'\xe8',
+    'empty': u'\u2205',
+    'emsp': u'\u2003',
+    'ensp': u'\u2002',
+    'Epsilon': u'\u0395',
+    'epsilon': u'\u03b5',
+    'epsiv': u'\u03b5',
+    'equiv': u'\u2261',
+    'Eta': u'\u0397',
+    'eta': u'\u03b7',
+    'ETH': u'\xd0',
+    'eth': u'\xf0',
+    'Euml': u'\xcb',
+    'euml': u'\xeb',
+    'euro': u'\u20ac',
+    'exist': u'\u2203',
+    'fnof': u'\u0192',
+    'forall': u'\u2200',
+    'frac12': u'\xbd',
+    'frac14': u'\xbc',
+    'frac34': u'\xbe',
+    'frasl': u'\u2044',
+    'Gamma': u'\u0393',
+    'gamma': u'\u03b3',
+    'ge': u'\u2265',
+    'harr': u'\u2194',
+    'hArr': u'\u21d4',
+    'hearts': u'\u2665',
+    'hellip': u'\u2026',
+    'Iacute': u'\xcd',
+    'iacute': u'\xed',
+    'Icirc': u'\xce',
+    'icirc': u'\xee',
+    'iexcl': u'\xa1',
+    'Igrave': u'\xcc',
+    'igrave': u'\xec',
+    'image': u'\u2111',
+    'infin': u'\u221e',
+    'int': u'\u222b',
+    'Iota': u'\u0399',
+    'iota': u'\u03b9',
+    'iquest': u'\xbf',
+    'isin': u'\u2208',
+    'Iuml': u'\xcf',
+    'iuml': u'\xef',
+    'Kappa': u'\u039a',
+    'kappa': u'\u03ba',
+    'Lambda': u'\u039b',
+    'lambda': u'\u03bb',
+    'lang': u'\u2329',
+    'laquo': u'\xab',
+    'larr': u'\u2190',
+    'lArr': u'\u21d0',
+    'lceil': u'\uf8ee',
+    'ldquo': u'\u201c',
+    'le': u'\u2264',
+    'lfloor': u'\uf8f0',
+    'lowast': u'\u2217',
+    'loz': u'\u25ca',
+    'lrm': u'\u200e',
+    'lsaquo': u'\u2039',
+    'lsquo': u'\u2018',
+    'macr': u'\xaf',
+    'mdash': u'\u2014',
+    'micro': u'\xb5',
+    'middot': u'\xb7',
+    'minus': u'\u2212',
+    'mu': u'\xb5',
+    'Mu': u'\u039c',
+    'nabla': u'\u2207',
+    'nbsp': u'\xa0',
+    'ndash': u'\u2013',
+    'ne': u'\u2260',
+    'ni': u'\u220b',
+    'notin': u'\u2209',
+    'not': u'\xac',
+    'nsub': u'\u2284',
+    'Ntilde': u'\xd1',
+    'ntilde': u'\xf1',
+    'Nu': u'\u039d',
+    'nu': u'\u03bd',
+    'Oacute': u'\xd3',
+    'oacute': u'\xf3',
+    'Ocirc': u'\xd4',
+    'ocirc': u'\xf4',
+    'OElig': u'\u0152',
+    'oelig': u'\u0153',
+    'Ograve': u'\xd2',
+    'ograve': u'\xf2',
+    'oline': u'\uf8e5',
+    'omega': u'\u03c9',
+    'Omega': u'\u2126',
+    'Omicron': u'\u039f',
+    'omicron': u'\u03bf',
+    'oplus': u'\u2295',
+    'ordf': u'\xaa',
+    'ordm': u'\xba',
+    'or': u'\u2228',
+    'Oslash': u'\xd8',
+    'oslash': u'\xf8',
+    'Otilde': u'\xd5',
+    'otilde': u'\xf5',
+    'otimes': u'\u2297',
+    'Ouml': u'\xd6',
+    'ouml': u'\xf6',
+    'para': u'\xb6',
+    'part': u'\u2202',
+    'permil': u'\u2030',
+    'perp': u'\u22a5',
+    'phis': u'\u03c6',
+    'Phi': u'\u03a6',
+    'phi': u'\u03d5',
+    'piv': u'\u03d6',
+    'Pi': u'\u03a0',
+    'pi': u'\u03c0',
+    'plusmn': u'\xb1',
+    'pound': u'\xa3',
+    'prime': u'\u2032',
+    'Prime': u'\u2033',
+    'prod': u'\u220f',
+    'prop': u'\u221d',
+    'Psi': u'\u03a8',
+    'psi': u'\u03c8',
+    'radic': u'\u221a',
+    'rang': u'\u232a',
+    'raquo': u'\xbb',
+    'rarr': u'\u2192',
+    'rArr': u'\u21d2',
+    'rceil': u'\uf8f9',
+    'rdquo': u'\u201d',
+    'real': u'\u211c',
+    'reg': u'\xae',
+    'rfloor': u'\uf8fb',
+    'Rho': u'\u03a1',
+    'rho': u'\u03c1',
+    'rlm': u'\u200f',
+    'rsaquo': u'\u203a',
+    'rsquo': u'\u2019',
+    'sbquo': u'\u201a',
+    'Scaron': u'\u0160',
+    'scaron': u'\u0161',
+    'sdot': u'\u22c5',
+    'sect': u'\xa7',
+    'shy': u'\xad',
+    'sigmaf': u'\u03c2',
+    'sigmav': u'\u03c2',
+    'Sigma': u'\u03a3',
+    'sigma': u'\u03c3',
+    'sim': u'\u223c',
+    'spades': u'\u2660',
+    'sube': u'\u2286',
+    'sub': u'\u2282',
+    'sum': u'\u2211',
+    'sup1': u'\xb9',
+    'sup2': u'\xb2',
+    'sup3': u'\xb3',
+    'supe': u'\u2287',
+    'sup': u'\u2283',
+    'szlig': u'\xdf',
+    'Tau': u'\u03a4',
+    'tau': u'\u03c4',
+    'there4': u'\u2234',
+    'thetasym': u'\u03d1',
+    'thetav': u'\u03d1',
+    'Theta': u'\u0398',
+    'theta': u'\u03b8',
+    'thinsp': u'\u2009',
+    'THORN': u'\xde',
+    'thorn': u'\xfe',
+    'tilde': u'\u02dc',
+    'times': u'\xd7',
+    'trade': u'\uf8ea',
+    'Uacute': u'\xda',
+    'uacute': u'\xfa',
+    'uarr': u'\u2191',
+    'uArr': u'\u21d1',
+    'Ucirc': u'\xdb',
+    'ucirc': u'\xfb',
+    'Ugrave': u'\xd9',
+    'ugrave': u'\xf9',
+    'uml': u'\xa8',
+    'upsih': u'\u03d2',
+    'Upsilon': u'\u03a5',
+    'upsilon': u'\u03c5',
+    'Uuml': u'\xdc',
+    'uuml': u'\xfc',
+    'weierp': u'\u2118',
+    'Xi': u'\u039e',
+    'xi': u'\u03be',
+    'Yacute': u'\xdd',
+    'yacute': u'\xfd',
+    'yen': u'\xa5',
+    'yuml': u'\xff',
+    'Yuml': u'\u0178',
+    'Zeta': u'\u0396',
+    'zeta': u'\u03b6',
+    'zwj': u'\u200d',
+    'zwnj': u'\u200c',
     }
+
+known_entities = dict([(k,UniChr(v)) for k,v in name2codepoint.items()])
+for k in greeks:
+    if k not in known_entities:
+        known_entities[k] = greeks[k]
 
 #------------------------------------------------------------------------
 class ParaFrag(ABag):
@@ -496,7 +500,6 @@ class ParaFrag(ABag):
     segments as they are being parsed by the XMLParser.
     fontname, fontSize, rise, textColor, cbDefn
     """
-
 
 _greek2Utf8=None
 def _greekConvert(data):
@@ -520,31 +523,6 @@ def _greekConvert(data):
                     u = unichr(v).encode('utf8')
             _greek2Utf8[chr(k)] = u
     return ''.join(map(_greek2Utf8.__getitem__,data))
-
-
-def ugeCB(name):
-    '''undefined general entity handler'''
-    try:
-        return greeks[name]
-    except:
-        return ('&#38;'+name+';').encode('utf8')
-
-try:
-    import pyRXPU
-    _TRMAP = dict(
-            caseInsensitive='CaseInsensitive',
-            )
-    def makeParser(**kwds):
-        d = dict(ErrorOnUnquotedAttributeValues=0,
-                Validate=0,srcName='Paragraph text',
-                ugeCB = ugeCB,
-                )
-        for k in kwds:
-            if k in _TRMAP:
-                d[_TRMAP[k]] = kwds[k]
-        return pyRXPU.Parser(**d)
-except ImportError:
-    raise ImportError("pyRXPU not importable Alternate parser not yet implemented")
 
 #------------------------------------------------------------------
 # !!! NOTE !!! THIS TEXT IS NOW REPLICATED IN PARAGRAPH.PY !!!
@@ -815,11 +793,8 @@ class ParaParser(HTMLParser):
         frag = self._stack[-1]
         assert frag._selfClosingTag=='br' and frag.lineBreak,'Parser failure in <br/>'
         del frag._selfClosingTag
-        self._handled_text = False
         self.handle_data('')
         self._pop()
-        
-
 
     def _initial_frag(self,attr,attrMap,bullet=0):
         style = self._style
@@ -1033,13 +1008,13 @@ class ParaParser(HTMLParser):
         self.ignoreUnknownTags = ignoreUnknownTags
 
     def _iReset(self):
-        self._handled_text = False
         self.fragList = []
         if hasattr(self, 'bFragList'): delattr(self,'bFragList')
 
     def _reset(self, style):
         '''reset the parser'''
 
+        HTMLParser.reset(self)
         # initialize list of string segments to empty
         self.errors = []
         self._style = style
@@ -1054,13 +1029,6 @@ class ParaParser(HTMLParser):
         #fragment.    HTMLParser processes these separately.  We want to ensure
         #that successive calls like this are concatenated, to prevent too many
         #fragments being created.
-
-        #print("\n called handle_data('%s')" % data)
-        #print('handle_data("%s")' % data)
-        if self._handled_text:
-            #print('handle_more_data("%s")' % data)
-            self.handle_more_data(data)
-            return
 
         frag = copy.copy(self._stack[-1])
         if hasattr(frag,'cbDefn'):
@@ -1098,40 +1066,12 @@ class ParaParser(HTMLParser):
         else:
             self.fragList.append(frag)
 
-        #Set this if we just processed sme text, but not if it was a br tag.
-        #Ugly, but seems necessary to get pyRXP and HTMLParser working the
-        #same way.
-        if not hasattr(frag, 'lineBreak'):
-            self._handled_text = True
-
     def handle_cdata(self,data):
         self.handle_data(data)
 
     def _setup_for_parse(self,style):
         self._seq = reportlab.lib.sequencer.getSequencer()
         self._reset(style)  # reinitialise the parser
-
-
-
-    def old_parse(self, text, style):
-        """Given a formatted string will return a list of
-        ParaFrag objects with their calculated widths.
-        If errors occur None will be returned and the
-        self.errors holds a list of the error messages.
-        """
-        self._setup_for_parse(style)
-        text = asUnicode(text)
-        if not(len(text)>=6 and text[0]=='<' and _re_para.match(text)):
-            text = u"<para>"+text+u"</para>"
-        try:
-            tt = makeParser(caseInsensitive=not self.caseSensitive)(text)
-
-            #from pprint import pprint
-            #pprint(tt)
-        except:
-            annotateException('paragraph text %s caused exception' % ascii(text))
-        self._tt_start(tt)
-        return self._complete_parse()
 
     def _complete_parse(self):
         "Reset after parsing, to be ready for next paragraph"
@@ -1165,7 +1105,6 @@ class ParaParser(HTMLParser):
 
         #call the start_tagname method
         start(tt[1] or {})
-        self._handled_text = False
         #if tree node has any children, they will either be further nodes,
         #or text.  Accordingly, call either this function, or handle_data.
         C = tt[2]
@@ -1176,7 +1115,6 @@ class ParaParser(HTMLParser):
 
         #call the end_tagname method
         end()
-        self._handled_text = False
 
     def _tt_start(self,tt):
         self._tt_handlers = self.handle_data,self._tt_handle
@@ -1191,16 +1129,17 @@ class ParaParser(HTMLParser):
     def findSpanStyle(self,style):
         raise ValueError('findSpanStyle not implemented in this parser')
 
-
-
-    #New methods to supprt HTML parser
-    def new_parse(self, text, style):
+    #HTMLParser interface
+    def parse(self, text, style):
         "attempt replacement for parse"
         self._setup_for_parse(style)
         text = asUnicode(text)
         if not(len(text)>=6 and text[0]=='<' and _re_para.match(text)):
             text = u"<para>"+text+u"</para>"
-        self.feed(text)
+        try:
+            self.feed(text)
+        except:
+            annotateException('paragraph text %s caused exception' % ascii(text))
         return self._complete_parse()
 
     def handle_starttag(self, tag, attrs):
@@ -1213,9 +1152,7 @@ class ParaParser(HTMLParser):
             for (k,  v) in attrs:
                 d[k] = v
             attrs = d
-
-        if tag not in ['br']:
-            self._handled_text = False
+        if not self.caseSensitive: tag = tag.lower()
         try:
             start = getattr(self,'start_'+tag)
         except AttributeError:
@@ -1227,9 +1164,8 @@ class ParaParser(HTMLParser):
         
     def handle_endtag(self, tag):
         "Called by HTMLParser when a tag ends"
-        if tag not in ['br']:
-            self._handled_text = False
         #find the existing end_tagname method
+        if not self.caseSensitive: tag = tag.lower()
         try:
             end = getattr(self,'end_'+tag)
         except AttributeError:
@@ -1239,39 +1175,13 @@ class ParaParser(HTMLParser):
         #call it
         end()
 
-    
-
     def handle_entityref(self, name):
         "Handles a named entity.  "
-        #print('handle_entityref called for "%s"' % name)
-        #The old parser saw these automatically resolved, so
-        #just tack it onto the current fragment.
-        resolved = UniChr(name2codepoint[name])
-        if self._handled_text:
-            self.fragList[-1].text += resolved
-        else:
-            self.handle_data(resolved)
-        
-    def handle_more_data(self, data):
-        """We call this when we get successive text chunks
-
-        This is to ensure that successive strings with no
-        formatting changes are concatenated.
-        """
-        frag = self._stack[-1]
-        if hasattr(frag,'isBullet'):
-            last = self.bFragList[-1]
-        else:
-            last = self.fragList[-1]
-        last.text += data
-
-    def parse(self, text, style):
-        if os.environ.get('HTMLPARSE', '0') == '1':
-            return self.new_parse(text, style)
-        else:
-            return self.old_parse(text, style)
-
-
+        try:
+            v = UniChr(known_entities[name])
+        except:
+            v = u'&amp;%s;' % name
+        self.handle_data(v)
 
 if __name__=='__main__':
     from reportlab.platypus import cleanBlockQuotedText
