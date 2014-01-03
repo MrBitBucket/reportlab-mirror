@@ -4,7 +4,6 @@ The file __BUILD.dsw is suitable for VC++ 6.0; th dsp files are
 for individual projects. At present these are
 
 	_rl_accel.dsp (.c)
-	sgmlop.dsp (.c)
 	pyHnj.dsp
 
 for unix the Setup.in and generic Makefile.pre.in are included.

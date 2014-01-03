@@ -286,7 +286,7 @@ def main():
         infoline( '***************************************************')
     else:
         infoline( '################################################')
-        infoline( '#Attempting install of _rl_accel, sgmlop & pyHnj')
+        infoline( '#Attempting install of _rl_accel & pyHnj')
         infoline( '#extensions from %r'%RL_ACCEL)
         infoline( '################################################')
         fn = pjoin(RL_ACCEL,'hyphen.mashed')
@@ -302,17 +302,6 @@ def main():
                             extra_link_args=debug_link_args,
                             ),
                         ]
-        EXT_MODULES += [
-                Extension( 'reportlab.lib.sgmlop',
-                        [pjoin(RL_ACCEL,'sgmlop.c')],
-                        include_dirs=[],
-                        define_macros=[]+debug_macros,
-                        library_dirs=[],
-                        libraries=[], # libraries to link against
-                        extra_compile_args=debug_compile_args,
-                        extra_link_args=debug_link_args,
-                        ),
-                    ]
         if not isPy3:
             EXT_MODULES += [
                     Extension( 'reportlab.lib.pyHnj',
