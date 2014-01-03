@@ -497,7 +497,7 @@ for k in greeks:
 #------------------------------------------------------------------------
 class ParaFrag(ABag):
     """class ParaFrag contains the intermediate representation of string
-    segments as they are being parsed by the XMLParser.
+    segments as they are being parsed by the ParaParser.
     fontname, fontSize, rise, textColor, cbDefn
     """
 
