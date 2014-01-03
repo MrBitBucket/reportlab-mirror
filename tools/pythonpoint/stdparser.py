@@ -9,10 +9,10 @@ pythonpoint.py.
 
 import string, imp, sys, os, copy
 from reportlab.lib.utils import isSeq, UniChr, isPy3
-from reportlab.lib import xmllib
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import recursiveImport
+from reportlab.platypus.paraparser import HTMLParser, known_entities
 from tools.pythonpoint import pythonpoint
 from reportlab.platypus import figures
 from reportlab.lib.utils import asNative
@@ -39,7 +39,7 @@ def getModule(modulename,fromPath='tools.pythonpoint.styles'):
             return eval(modulename)
 
 
-class PPMLParser(xmllib.XMLParser):
+class PPMLParser(HTMLParser):
     attributes = {
         #this defines the available attributes for all objects,
         #and their default values.  Although these don't have to
@@ -193,7 +193,9 @@ class PPMLParser(xmllib.XMLParser):
             }
         }
 
-    def __init__(self):
+    def __init__(self,verbose=0, caseSensitive=0, ignoreUnknownTags=1):
+        self.caseSensitive = caseSensitive
+        self.ignoreUnknownTags = ignoreUnknownTags
         self.presentations = []
         #yes, I know a generic stack would be easier...
         #still, testing if we are 'in' something gives
@@ -211,7 +213,7 @@ class PPMLParser(xmllib.XMLParser):
         self._curAuthor = None
         self._curSubject = None
         self.fx = 1
-        xmllib.XMLParser.__init__(self)
+        HTMLParser.__init__(self)
         if not isPy3:
             try:
                 self.parser.returnUnicode = False
@@ -815,3 +817,50 @@ class PPMLParser(xmllib.XMLParser):
             self.unknown_charref(name)
             return
         self.handle_data(UniChr(n).encode('utf8'))
+
+    #HTMLParser interface
+    def handle_starttag(self, tag, attrs):
+        "Called by HTMLParser when a tag starts"
+
+        #tuple tree parser used to expect a dict.  HTML parser
+        #gives list of two-element tuples
+        if isinstance(attrs, list):
+            d = {}
+            for (k,  v) in attrs:
+                d[k] = v
+            attrs = d
+        if not self.caseSensitive: tag = tag.lower()
+        try:
+            start = getattr(self,'start_'+tag)
+        except AttributeError:
+            if not self.ignoreUnknownTags:
+                raise ValueError('Invalid tag "%s"' % tag)
+            start = self.start_unknown
+        #call it
+        start(attrs or {})
+        
+    def handle_endtag(self, tag):
+        "Called by HTMLParser when a tag ends"
+        #find the existing end_tagname method
+        if not self.caseSensitive: tag = tag.lower()
+        try:
+            end = getattr(self,'end_'+tag)
+        except AttributeError:
+            if not self.ignoreUnknownTags:
+                raise ValueError('Invalid tag "%s"' % tag)
+            end = self.end_unknown
+        #call it
+        end()
+
+    def handle_entityref(self, name):
+        "Handles a named entity.  "
+        try:
+            v = UniChr(known_entities[name])
+        except:
+            v = u'&amp;%s;' % name
+        self.handle_data(v)
+
+    def start_unknown(self,attr):
+        pass
+    def end_unknown(self):
+        pass
