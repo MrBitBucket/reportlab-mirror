@@ -208,6 +208,15 @@ else:
 
     char2int = ord
 
+def zipImported(ldr=None):
+    try:
+        if not ldr:
+            ldr = sys._getframe(1).f_globals['__loader__']
+        from zipimport import zipimporter
+        return ldr if isinstance(ldr,zipimporter) else None
+    except:
+        return None
+
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
     from os import listdir
