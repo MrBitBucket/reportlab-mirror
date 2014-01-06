@@ -199,11 +199,11 @@ class Flag(_Symbol):
         fx.y = 0
         D.add(fx)
         labelFontSize = 10
-        D.add(String(fx.x+(fx.size/2),(fx.y-(1.2*labelFontSize)),
+        D.add(String(fx.x+(fx.size/2.0),(fx.y-(1.2*labelFontSize)),
                             name, fillColor=colors.black, textAnchor='middle',
                             fontSize=labelFontSize))
-        labelFontSize = int(fx.size/4)
-        D.add(String(fx.x+(fx.size),(fx.y+((fx.size/2))),
+        labelFontSize = int(fx.size/4.0)
+        D.add(String(fx.x+(fx.size),(fx.y+((fx.size/2.0))),
                             "SAMPLE", fillColor=colors.gold, textAnchor='middle',
                             fontSize=labelFontSize, fontName="Helvetica-Bold"))
         return D
@@ -215,10 +215,10 @@ class Flag(_Symbol):
         g.add(Rect(0, 0, w, s, fillColor = colors.navy, strokeColor = colors.black, strokeWidth=0))
         g.add(Polygon([0,0, s*.225,0, w,s*(1-.1125), w,s, w-s*.225,s, 0, s*.1125], fillColor = colors.mintcream, strokeColor=None, strokeWidth=0))
         g.add(Polygon([0,s*(1-.1125), 0, s, s*.225,s, w, s*.1125, w,0, w-s*.225,0], fillColor = colors.mintcream, strokeColor=None, strokeWidth=0))
-        g.add(Polygon([0, s-(s/15), (s-((s/10)*4)), (s*0.65), (s-(s/10)*3), (s*0.65), 0, s], fillColor = colors.red, strokeColor = None, strokeWidth=0))
-        g.add(Polygon([0, 0, (s-((s/10)*3)), (s*0.35), (s-((s/10)*2)), (s*0.35), (s/10), 0], fillColor = colors.red, strokeColor = None, strokeWidth=0))
-        g.add(Polygon([w, s, (s+((s/10)*3)), (s*0.65), (s+((s/10)*2)), (s*0.65), w-(s/10), s], fillColor = colors.red, strokeColor = None, strokeWidth=0))
-        g.add(Polygon([w, (s/15), (s+((s/10)*4)), (s*0.35), (s+((s/10)*3)), (s*0.35), w, 0], fillColor = colors.red, strokeColor = None, strokeWidth=0))
+        g.add(Polygon([0, s-(s/15.0), (s-((s/10.0)*4)), (s*0.65), (s-(s/10.0)*3), (s*0.65), 0, s], fillColor = colors.red, strokeColor = None, strokeWidth=0))
+        g.add(Polygon([0, 0, (s-((s/10.0)*3)), (s*0.35), (s-((s/10.0)*2)), (s*0.35), (s/10.0), 0], fillColor = colors.red, strokeColor = None, strokeWidth=0))
+        g.add(Polygon([w, s, (s+((s/10.0)*3)), (s*0.65), (s+((s/10.0)*2)), (s*0.65), w-(s/10.0), s], fillColor = colors.red, strokeColor = None, strokeWidth=0))
+        g.add(Polygon([w, (s/15.0), (s+((s/10.0)*4)), (s*0.35), (s+((s/10.0)*3)), (s*0.35), w, 0], fillColor = colors.red, strokeColor = None, strokeWidth=0))
         g.add(Rect(((s*0.42)*2), 0, width=(0.16*s)*2, height=s, fillColor = colors.mintcream, strokeColor = None, strokeWidth=0))
         g.add(Rect(0, (s*0.35), width=w, height=s*0.3, fillColor = colors.mintcream, strokeColor = None, strokeWidth=0))
         g.add(Rect(((s*0.45)*2), 0, width=(0.1*s)*2, height=s, fillColor = colors.red, strokeColor = None, strokeWidth=0))
@@ -247,14 +247,14 @@ class Flag(_Symbol):
         g.add(bluebox)
 
         lss = s*0.045
-        lss2 = lss/2
-        s9 = s/9
-        s7 = s/7
+        lss2 = lss/2.0
+        s9 = s/9.0
+        s7 = s/7.0
         for starxcounter in range(5):
             for starycounter in range(4):
                 ls = Star()
                 ls.size = lss
-                ls.x = 0-s/22+lss/2+s7+starxcounter*s7
+                ls.x = 0-s/22.0+lss/2.0+s7+starxcounter*s7
                 ls.fillColor = colors.mintcream
                 ls.y = s-(starycounter+1)*s9+lss2
                 g.add(ls)
@@ -263,9 +263,9 @@ class Flag(_Symbol):
             for starycounter in range(5):
                 ls = Star()
                 ls.size = lss
-                ls.x = 0-(s/22)+lss/2+s/14+starxcounter*s7
+                ls.x = 0-(s/22.0)+lss/2.0+s/14.0+starxcounter*s7
                 ls.fillColor = colors.mintcream
-                ls.y = s-(starycounter+1)*s9+(s/18)+lss2
+                ls.y = s-(starycounter+1)*s9+(s/18.0)+lss2
                 g.add(ls)
         return g
 
@@ -332,7 +332,7 @@ class Flag(_Symbol):
         self._width = w = s*1.5
         g.add(Rect(0, 0, w, s, fillColor=colors.red, strokeColor=None, strokeWidth=0))
 
-        def addStar(x,y,size,angle,g=g,w=s/20,x0=0,y0=s/2):
+        def addStar(x,y,size,angle,g=g,w=s/20.0,x0=0,y0=s/2.0):
             s = Star()
             s.fillColor=colors.yellow
             s.angle = angle
@@ -353,20 +353,20 @@ class Flag(_Symbol):
         g = Group()
 
         for i in range(5):
-            stripe = Rect(0, i*s/5, width=s*2, height=s/5,
+            stripe = Rect(0, i*s/5.0, width=s*2, height=s/5.0,
                 fillColor = [colors.darkblue, colors.mintcream][i%2],
                 strokeColor = None,
                 strokeWidth=0)
             g.add(stripe)
 
-        redwedge = Polygon(points = [ 0, 0, 4*s/5, (s/2), 0, s],
+        redwedge = Polygon(points = [ 0, 0, 4*s/5.0, (s/2.0), 0, s],
                     fillColor = colors.red, strokeColor = None, strokeWidth=0)
         g.add(redwedge)
 
         star = Star()
-        star.x = 2.5*s/10
-        star.y = s/2
-        star.size = 3*s/10
+        star.x = 2.5*s/10.0
+        star.y = s/2.0
+        star.size = 3*s/10.0
         star.fillColor = colors.white
         g.add(star)
 
@@ -387,11 +387,11 @@ class Flag(_Symbol):
             fillColor = colors.red, strokeColor = colors.black, strokeWidth=0)
         g.add(box)
 
-        whitebox1 = Rect(((s/5)*2), 0, width=s/6, height=s,
+        whitebox1 = Rect(((s/5.0)*2), 0, width=s/6.0, height=s,
             fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
         g.add(whitebox1)
 
-        whitebox2 = Rect(0, ((s/2)-(s/12)), width=w, height=s/6,
+        whitebox2 = Rect(0, ((s/2.0)-(s/12.0)), width=w, height=s/6.0,
             fillColor = colors.mintcream, strokeColor = None, strokeWidth=0)
         g.add(whitebox2)
         return g
@@ -507,8 +507,8 @@ class Flag(_Symbol):
         s = _size
         g = Group()
         g.add(Rect(0,0,s*2,s,fillColor=colors.forestgreen,strokeColor=None, strokeWidth=0))
-        g.add(Rect((2*s)/3, 0, width=(s*4)/3, height=s, fillColor = colors.mintcream, strokeColor = None, strokeWidth=0))
-        g.add(Rect((4*s)/3, 0, width=(s*2)/3, height=s, fillColor = colors.red, strokeColor = None, strokeWidth=0))
+        g.add(Rect((2*s)/3.0, 0, width=(s*4)/3.0, height=s, fillColor = colors.mintcream, strokeColor = None, strokeWidth=0))
+        g.add(Rect((4*s)/3.0, 0, width=(s*2)/3.0, height=s, fillColor = colors.red, strokeColor = None, strokeWidth=0))
         return g
 
     def _Flag_Japan(self):
@@ -516,7 +516,7 @@ class Flag(_Symbol):
         g = Group()
         w = self._width = s*1.5
         g.add(Rect(0,0,w,s,fillColor=colors.mintcream,strokeColor=None, strokeWidth=0))
-        g.add(Circle(cx=w/2,cy=s/2,r=0.3*w,fillColor=colors.red,strokeColor=None, strokeWidth=0))
+        g.add(Circle(cx=w/2.0,cy=s/2.0,r=0.3*w,fillColor=colors.red,strokeColor=None, strokeWidth=0))
         return g
 
     def _Flag_Luxembourg(self):
@@ -560,7 +560,7 @@ class Flag(_Symbol):
         s = _size
         g = Group()
         w = self._width = s*1.5
-        t = s/3
+        t = s/3.0
         g.add(Rect(0, 0, width=w, height=t, fillColor = colors.red, strokeColor = None, strokeWidth=0))
         g.add(Rect(0, t, width=w, height=t, fillColor = colors.blue, strokeColor = None, strokeWidth=0))
         g.add(Rect(0, 2*t, width=w, height=t, fillColor = colors.mintcream, strokeColor = None, strokeWidth=0))
@@ -571,7 +571,7 @@ class Flag(_Symbol):
         g = Group()
         w = self._width = s*1.5
         g.add(Rect(0, 0, width=w, height=s, fillColor = colors.red, strokeColor = None, strokeWidth=0))
-        g.add(Rect(0, (s/4), width=w, height=s/2, fillColor = colors.yellow, strokeColor = None, strokeWidth=0))
+        g.add(Rect(0, (s/4.0), width=w, height=s/2.0, fillColor = colors.yellow, strokeColor = None, strokeWidth=0))
         return g
 
     def _Flag_Sweden(self):
@@ -582,11 +582,11 @@ class Flag(_Symbol):
             fillColor = colors.dodgerblue, strokeColor = colors.black, strokeWidth=0)
         g.add(box)
 
-        box1 = Rect(((s/5)*2), 0, width=s/6, height=s,
+        box1 = Rect(((s/5.0)*2), 0, width=s/6.0, height=s,
                 fillColor = colors.gold, strokeColor = None, strokeWidth=0)
         g.add(box1)
 
-        box2 = Rect(0, ((s/2)-(s/12)), width=self._width, height=s/6,
+        box2 = Rect(0, ((s/2.0)-(s/12.0)), width=self._width, height=s/6.0,
             fillColor = colors.gold,
             strokeColor = None,
             strokeWidth=0)
@@ -632,13 +632,13 @@ class Flag(_Symbol):
             strokeWidth=0)
         g.add(box)
 
-        redbox = Rect(0, 0, width=s*2, height=s/2,
+        redbox = Rect(0, 0, width=s*2, height=s/2.0,
             fillColor = colors.red,
             strokeColor = None,
             strokeWidth=0)
         g.add(redbox)
 
-        bluewedge = Polygon(points = [ 0, 0, s, (s/2), 0, s],
+        bluewedge = Polygon(points = [ 0, 0, s, (s/2.0), 0, s],
                     fillColor = colors.darkblue, strokeColor = None, strokeWidth=0)
         g.add(bluewedge)
         return g
@@ -646,25 +646,25 @@ class Flag(_Symbol):
     def _Flag_Palestine(self):
         s = _size
         g = Group()
-        box = Rect(0, s/3, s*2, s/3,
+        box = Rect(0, s/3.0, s*2, s/3.0,
             fillColor = colors.mintcream,
                         strokeColor = None,
             strokeWidth=0)
         g.add(box)
 
-        greenbox = Rect(0, 0, width=s*2, height=s/3,
+        greenbox = Rect(0, 0, width=s*2, height=s/3.0,
             fillColor = colors.limegreen,
             strokeColor = None,
             strokeWidth=0)
         g.add(greenbox)
 
-        blackbox = Rect(0, 2*s/3, width=s*2, height=s/3,
+        blackbox = Rect(0, 2*s/3.0, width=s*2, height=s/3.0,
             fillColor = colors.black,
             strokeColor = None,
             strokeWidth=0)
         g.add(blackbox)
 
-        redwedge = Polygon(points = [ 0, 0, 2*s/3, (s/2), 0, s],
+        redwedge = Polygon(points = [ 0, 0, 2*s/3.0, (s/2.0), 0, s],
                     fillColor = colors.red, strokeColor = None, strokeWidth=0)
         g.add(redwedge)
         return g
@@ -679,13 +679,13 @@ class Flag(_Symbol):
             strokeWidth=0)
         g.add(box)
 
-        whitecircle = Circle(cx=((s*0.35)*2), cy=s/2, r=s*0.3,
+        whitecircle = Circle(cx=((s*0.35)*2), cy=s/2.0, r=s*0.3,
             fillColor = colors.mintcream,
             strokeColor = None,
             strokeWidth=0)
         g.add(whitecircle)
 
-        redcircle = Circle(cx=((s*0.39)*2), cy=s/2, r=s*0.24,
+        redcircle = Circle(cx=((s*0.39)*2), cy=s/2.0, r=s*0.24,
             fillColor = colors.red,
             strokeColor = None,
             strokeWidth=0)
@@ -693,8 +693,8 @@ class Flag(_Symbol):
 
         ws = Star()
         ws.angle = 15
-        ws.size = s/5
-        ws.x = (s*0.5)*2+ws.size/2
+        ws.size = s/5.0
+        ws.x = (s*0.5)*2+ws.size/2.0
         ws.y = (s*0.5)
         ws.fillColor = colors.mintcream
         ws.strokeColor = None
@@ -707,10 +707,10 @@ class Flag(_Symbol):
         self._width = s
 
         g.add(Rect(0, 0, s, s, fillColor = colors.red, strokeColor = colors.black, strokeWidth=0))
-        g.add(Line((s/2), (s/5.5), (s/2), (s-(s/5.5)),
-            fillColor = colors.mintcream, strokeColor = colors.mintcream, strokeWidth=(s/5)))
-        g.add(Line((s/5.5), (s/2), (s-(s/5.5)), (s/2),
-            fillColor = colors.mintcream, strokeColor = colors.mintcream, strokeWidth=s/5))
+        g.add(Line((s/2.0), (s/5.5), (s/2), (s-(s/5.5)),
+            fillColor = colors.mintcream, strokeColor = colors.mintcream, strokeWidth=(s/5.0)))
+        g.add(Line((s/5.5), (s/2.0), (s-(s/5.5)), (s/2.0),
+            fillColor = colors.mintcream, strokeColor = colors.mintcream, strokeWidth=s/5.0))
         return g
 
     def _Flag_EU(self):
@@ -719,9 +719,9 @@ class Flag(_Symbol):
         w = self._width = 1.5*s
 
         g.add(Rect(0, 0, w, s, fillColor = colors.darkblue, strokeColor = None, strokeWidth=0))
-        centerx=w/2
-        centery=s/2
-        radius=s/3
+        centerx=w/2.0
+        centery=s/2.0
+        radius=s/3.0
         yradius = radius
         xradius = radius
         nStars = 12
@@ -731,7 +731,7 @@ class Flag(_Symbol):
             gs = Star()
             gs.x=cos(rad)*radius+centerx
             gs.y=sin(rad)*radius+centery
-            gs.size=s/10
+            gs.size=s/10.0
             gs.fillColor=colors.gold
             g.add(gs)
         return g
@@ -740,33 +740,33 @@ class Flag(_Symbol):
         s = _size  # abbreviate as we will use this a lot
         g = Group()
 
-        m = s/14
+        m = s/14.0
         self._width = w = (m * 20)
 
         def addStar(x,y,size, g=g, w=w, s=s, m=m):
             st = Star()
             st.fillColor=colors.mintcream
             st.size = size*m
-            st.x = (w/2) + (x * (0.35 * m))
-            st.y = (s/2) + (y * (0.35 * m))
+            st.x = (w/2.0) + (x * (0.35 * m))
+            st.y = (s/2.0) + (y * (0.35 * m))
             g.add(st)
 
         g.add(Rect(0, 0, w, s, fillColor = colors.green, strokeColor = None, strokeWidth=0))
-        g.add(Polygon(points = [ 1.7*m, (s/2), (w/2), s-(1.7*m), w-(1.7*m),(s/2),(w/2), 1.7*m],
+        g.add(Polygon(points = [ 1.7*m, (s/2.0), (w/2.0), s-(1.7*m), w-(1.7*m),(s/2.0),(w/2.0), 1.7*m],
                       fillColor = colors.yellow, strokeColor = None, strokeWidth=0))
-        g.add(Circle(cx=w/2, cy=s/2, r=3.5*m,
+        g.add(Circle(cx=w/2.0, cy=s/2.0, r=3.5*m,
                      fillColor=colors.blue,strokeColor=None, strokeWidth=0))
-        g.add(Wedge((w/2)-(2*m), 0, 8.5*m, 50, 98.1, 8.5*m,
+        g.add(Wedge((w/2.0)-(2*m), 0, 8.5*m, 50, 98.1, 8.5*m,
                     fillColor=colors.mintcream,strokeColor=None, strokeWidth=0))
-        g.add(Wedge((w/2), (s/2), 3.501*m, 156, 352, 3.501*m,
+        g.add(Wedge((w/2.0), (s/2.0), 3.501*m, 156, 352, 3.501*m,
                     fillColor=colors.mintcream,strokeColor=None, strokeWidth=0))
-        g.add(Wedge((w/2)-(2*m), 0, 8*m, 48.1, 100, 8*m,
+        g.add(Wedge((w/2.0)-(2*m), 0, 8*m, 48.1, 100, 8*m,
                     fillColor=colors.blue,strokeColor=None, strokeWidth=0))
-        g.add(Rect(0, 0, w, (s/4) + 1.7*m,
+        g.add(Rect(0, 0, w, (s/4.0) + 1.7*m,
                    fillColor = colors.green, strokeColor = None, strokeWidth=0))
-        g.add(Polygon(points = [ 1.7*m,(s/2), (w/2),s/2 - 2*m,  w-(1.7*m),(s/2) , (w/2),1.7*m],
+        g.add(Polygon(points = [ 1.7*m,(s/2.0), (w/2.0),s/2.0 - 2*m,    w-(1.7*m),(s/2.0) , (w/2.0),1.7*m],
                       fillColor = colors.yellow, strokeColor = None, strokeWidth=0))
-        g.add(Wedge(w/2, s/2, 3.502*m, 166, 342.1, 3.502*m,
+        g.add(Wedge(w/2.0, s/2.0, 3.502*m, 166, 342.1, 3.502*m,
                     fillColor=colors.blue,strokeColor=None, strokeWidth=0))
 
         addStar(3.2,3.5,0.3)
@@ -800,7 +800,7 @@ class Flag(_Symbol):
         nTmp = len(sTmp)
         delta = 0.850848010347/nTmp
         radius = 7.9 *m
-        centerx = (w/2)-(2*m)
+        centerx = (w/2.0)-(2*m)
         centery = 0
         for i in range(nTmp):
             rad = 2*pi - i*delta -4.60766922527
@@ -867,7 +867,7 @@ def test():
         flag.x = X[i%2]
         flag.y = y
         D.add(flag)
-        D.add(String(flag.x+(flag.size/2),(flag.y-(1.2*labelFontSize)),
+        D.add(String(flag.x+(flag.size/2.0),(flag.y-(1.2*labelFontSize)),
                 name, fillColor=colors.black, textAnchor='middle', fontSize=labelFontSize))
         if i%2: y = y - 125
         if (i%2 and y<0) or name==flags[-1]:

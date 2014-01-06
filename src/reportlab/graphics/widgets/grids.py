@@ -374,7 +374,7 @@ class ShadedRect(Widget):
         numShades = self.numShades
         if self.cylinderMode:
             if not numShades%2: numShades = numShades+1
-            halfNumShades = (numShades-1)/2 + 1
+            halfNumShades = int((numShades-1)/2) + 1
         num = float(numShades) # must make it float!
         vertical = self.orientation == 'vertical'
         if vertical:
