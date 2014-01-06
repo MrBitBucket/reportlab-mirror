@@ -73,6 +73,10 @@ if isPy3:
 
     def isClass(v):
         return isinstance(v, type)
+
+    def instantiated(v):
+        return not isinstance(v,type)
+
     from string import ascii_letters, ascii_uppercase, ascii_lowercase
     int2byte = lambda x: bytes([x])
 
@@ -154,9 +158,13 @@ else:
     def asUnicode(v,enc='utf8'):
         return v if isinstance(v,unicode) else v.decode(enc)
 
+    import types
     def isClass(v):
-        import types
-        return isinstance(v, types.ClassType)
+        return isinstance(v,(types.ClassType,type))
+
+    def instantiated(v):
+        return not isinstance(v,type) and hasattr(v,'__class__')
+
     int2byte = chr
     from StringIO import StringIO
 
