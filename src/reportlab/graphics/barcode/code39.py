@@ -32,7 +32,7 @@
 
 from reportlab.lib.units import inch
 from .common import Barcode
-import string
+from string import digits as string_digits
 
 _patterns = {
     '0':    ("bsbSBsBsb", 0),       '1': ("BsbSbsbsB", 1),
@@ -60,7 +60,7 @@ _patterns = {
     }
 
 from reportlab.lib.utils import ascii_uppercase, ascii_lowercase
-_stdchrs = string.digits + ascii_uppercase + "-. $/+%"
+_stdchrs = string_digits + ascii_uppercase + "-. $/+%"
 
 _extended = {
     '\0':   "%U",    '\01':  "$A",    '\02':  "$B",    '\03':  "$C",
@@ -139,7 +139,7 @@ class Standard39(_Code39Base):
     """
     Options that may be passed to constructor:
 
-        value (int, or numeric string. required.):
+        value (int, or numeric string required.):
             The value to encode.
 
         barWidth (float, default .0075):
@@ -194,7 +194,7 @@ class Standard39(_Code39Base):
         self.valid = 1
         for c in self.value:
             if c in ascii_lowercase:
-                c = string.upper(c)
+                c = c.upper()
             if c not in _stdchrs:
                 self.valid = 0
                 continue

@@ -34,8 +34,8 @@ class USPS_4State(Barcode):
 
     def __init__(self,value='01234567094987654321',routing='',**kwd):
         self._init()
-        self.tracking = value
-        self.routing = routing
+        self._tracking = value
+        self._routing = routing
         self._setKeywords(**kwd)
 
     def _init(self):

@@ -32,7 +32,7 @@
 
 from reportlab.lib.units import inch
 from .common import Barcode
-import string
+from string import digits as string_digits, whitespace as string_whitespace
 
 _fim_patterns = {
     'A' : "||  |  ||",
@@ -106,7 +106,7 @@ class FIM(Barcode):
         self.valid = 1
         self.validated = ''
         for c in self.value:
-            if c in string.whitespace:
+            if c in string_whitespace:
                 continue
             elif c in "abcdABCD":
                 self.validated = self.validated + c.upper()
@@ -172,9 +172,9 @@ class POSTNET(Barcode):
         self.valid = 1
         count = 0
         for c in self.value:
-            if c in (string.whitespace + '-'):
+            if c in (string_whitespace + '-'):
                 pass
-            elif c in string.digits:
+            elif c in string_digits:
                 count = count + 1
                 if count == 6:
                     self.validated = self.validated + '-'
@@ -191,7 +191,7 @@ class POSTNET(Barcode):
         self.encoded = "S"
         check = 0
         for c in self.validated:
-            if c in string.digits:
+            if c in string_digits:
                 self.encoded = self.encoded + c
                 check = check + int(c)
             elif c == '-':

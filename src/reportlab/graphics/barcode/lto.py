@@ -1,11 +1,11 @@
 # (c) 2008 Jerome Alet - <alet@librelogiciel.com>
 # Licensing terms : ReportLab's license.
 
-import string
-
 from .code39 import Standard39
 from reportlab.lib import colors
 from reportlab.lib.units import cm
+from string import digits as string_digits
+from reportlab.lib.utils import ascii_uppercase
 
 class BaseLTOLabel(Standard39) :
     """
@@ -44,7 +44,7 @@ class BaseLTOLabel(Standard39) :
         self.height = max(availheight, self.CODEBARHEIGHT)
         self.border = border
         if (len(subtype) != 1) \
-            or (subtype not in string.ascii_uppercase + string.digits) :
+            or (subtype not in ascii_uppercase + string_digits) :
             raise ValueError("Invalid subtype '%s'" % subtype)
         if ((not number) and (len(prefix) > 6)) \
            or not prefix.isalnum() :
