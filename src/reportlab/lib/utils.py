@@ -78,7 +78,6 @@ if isPy3:
         return not isinstance(v,type)
 
     from string import ascii_letters, ascii_uppercase, ascii_lowercase
-    int2byte = lambda x: bytes([x])
 
     from io import BytesIO, StringIO
     def getBytesIO(buf=None):
@@ -165,9 +164,9 @@ else:
     def instantiated(v):
         return not isinstance(v,type) and hasattr(v,'__class__')
 
-    int2byte = chr
-    from StringIO import StringIO
+    int2Byte = chr
 
+    from StringIO import StringIO
     def getBytesIO(buf=None):
         '''unified StringIO instance interface'''
         if buf:
@@ -184,9 +183,6 @@ else:
         else:
             return str(x).encode(enc)
     from string import letters as ascii_letters, uppercase as ascii_uppercase, lowercase as ascii_lowercase
-
-    def int2Byte(i):
-        return chr(i)
 
     def encode_label(args):
         return base64_encodestring(pickle_dumps(args)).strip()

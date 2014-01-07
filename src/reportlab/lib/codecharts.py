@@ -17,7 +17,7 @@ from reportlab.pdfbase import pdfmetrics, cidfonts
 from reportlab.graphics.shapes import Drawing, Group, String, Circle, Rect
 from reportlab.graphics.widgetbase import Widget
 from reportlab.lib import colors
-from reportlab.lib.utils import int2byte
+from reportlab.lib.utils import int2Byte
 
 adobe2codec = {
     'WinAnsiEncoding':'winansi',
@@ -150,7 +150,7 @@ class SingleByteEncodingChart(CodeChartBase):
 
     def draw(self):
         self.drawLabels()
-        charList = [None] * 32 + list(map(int2byte, list(range(32, 256))))
+        charList = [None] * 32 + list(map(int2Byte, list(range(32, 256))))
 
         #we need to convert these to Unicode, since ReportLab
         #2.0 can only draw in Unicode.
@@ -210,12 +210,12 @@ class KutenRowCodeChart(CodeChartBase):
         if self.encodingName.find('EUC') > -1:
             # it is an EUC family encoding.
             for col in range(1, 95):
-                ch = int2byte(row + 160) + int2byte(col+160)
+                ch = int2Byte(row + 160) + int2Byte(col+160)
                 cells.append(ch)
 ##        elif self.encodingName.find('GB') > -1:
 ##            # it is an EUC family encoding.
 ##            for col in range(1, 95):
-##                ch = int2byte(row + 160) + int2byte(col+160)
+##                ch = int2Byte(row + 160) + int2Byte(col+160)
         else:
             cells.append([None] * 94)
         return cells
@@ -267,7 +267,7 @@ class Big5CodeChart(CodeChartBase):
             for y in [4,5,6,7,10,11,12,13,14,15]:
                 for x in range(16):
                     col = y*16+x
-                    ch = int2byte(row) + int2byte(col)
+                    ch = int2Byte(row) + int2Byte(col)
                     cells.append(ch)
 
         else:
@@ -321,7 +321,7 @@ class CodeWidget(Widget):
                 charValue = y * 16 + x
                 if charValue > 32:
                     s = String(self.x + x * dx,
-                               self.y + (self.height - y*dy), int2byte(charValue))
+                               self.y + (self.height - y*dy), int2Byte(charValue))
                     g.add(s)
         return g
 
