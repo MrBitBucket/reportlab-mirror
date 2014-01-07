@@ -19,6 +19,7 @@ __all__= (
 from reportlab.lib.validators import isInt, isNumber, isColor, isString, isColorOrNone, OneOf, isBoolean, EitherOr, isNumberOrNone
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.lib.colors import black
+from reportlab.lib.utils import rl_exec
 from reportlab.graphics.shapes import Line, Rect, Group, NotImplementedError, String
 from reportlab.graphics.charts.areas import PlotArea
 
@@ -58,16 +59,13 @@ class _BarcodeWidget(PlotArea):
     barStrokeColor = None
     barStrokeWidth = 0
     _BCC = None
-    def __init__(self,BCC=None,_value='',**kw):
-        self._BCC = BCC
-        class Combiner(self.__class__,BCC):
-            __name__ = self.__class__.__name__
-        self.__class__ = Combiner
+    def __init__(self,_value='',**kw):
         PlotArea.__init__(self)
-        del self.width, self.height
+        del self.__dict__['width']
+        del self.__dict__['height']
         self.x = self.y = 0
         kw.setdefault('value',_value)
-        BCC.__init__(self,**kw)
+        self._BCC.__init__(self,**kw)
 
     def rect(self,x,y,w,h,**kw):
         self._Gadd(Rect(self.x+x,self.y+y,w,h,
@@ -87,24 +85,40 @@ class _BarcodeWidget(PlotArea):
         self._Gadd(String(self.x+x,self.y+y,text,fontName=fontName,fontSize=fontSize,
                             textAnchor=anchor,fillColor=self.textColor))
 
-class BarcodeI2of5(_BarcodeWidget):
+def _BCW(name, WKlass, doc, codeName,attrMap,mod,value,**kwds):
+    """factory for Barcode Widgets"""
+    _pre_init = kwds.pop('_pre_init','')
+    _methods = kwds.pop('_methods','')
+    ns = vars().copy()
+    code = 'from %s import %s' % (mod,codeName)
+    rl_exec(code,ns)
+    ns['WKlass'] = WKlass.__name__
+    ns['_BarcodeWidget'] = _BarcodeWidget
+    code = '''class %(name)s(%(WKlass)s,%(codeName)s):
+\t_BCC = %(codeName)s
+\tcodeName = %(codeName)r
+\tdef __init__(self,**kw):%(_pre_init)s
+\t\t_BarcodeWidget.__init__(self,%(value)r,**kw)%(_methods)s''' % ns
+    ns[WKlass.__name__] = WKlass
+    rl_exec(code,ns)
+    Klass = ns[name]
+    if attrMap: Klass._attrMap = attrMap
+    if doc: Klass.__doc__ = doc
+    for k, v in kwds.items():
+        setattr(Klass,k,v)
+    return Klass
+
+BarcodeI2of5 = _BCW('BarcodeI2of5',
+        _BarcodeWidget,
     """Interleaved 2 of 5 is used in distribution and warehouse industries.
 
     It encodes an even-numbered sequence of numeric digits. There is an optional
     module 10 check digit; if including this, the total length must be odd so that
     it becomes even after including the check digit.  Otherwise the length must be
     even. Since the check digit is optional, our library does not check it.
-    """
-
-    _tests = [
-        '12',
-        '1234',
-        '123456',
-        '12345678',
-        '1234567890'
-        ]
-    codeName = "I2of5"
-    _attrMap = AttrMap(BASE=_BarcodeWidget,
+    """,
+    "I2of5",
+    AttrMap(BASE=_BarcodeWidget,
         barWidth = AttrMapValue(isNumber,'''(float, default .0075):
             X-Dimension, or width of the smallest element
             Minumum is .0075 inch (7.5 mils).'''),
@@ -139,161 +153,178 @@ class BarcodeI2of5(_BarcodeWidget):
         fontSize = AttrMapValue(isNumber, desc='human readable font size'),
         humanReadable = AttrMapValue(isBoolean, desc='if human readable'),
         stop = AttrMapValue(isBoolean, desc='if we use start/stop symbols (default 1)'),
-        )
-    _bcTransMap = {}
-
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.common import I2of5
-        _BarcodeWidget.__init__(self,I2of5,1234,**kw)
-
-class BarcodeCode128(BarcodeI2of5):
-    """Code 128 encodes any number of characters in the ASCII character set.
-    """
+        ),
+    'reportlab.graphics.barcode.common',
+    1234,
+    _bcTransMap = {},
     _tests = [
-        'ReportLab Rocks!'
-        ]
-    codeName = "Code128"
-    _attrMap = AttrMap(BASE=BarcodeI2of5,UNWANTED=('bearers','checksum','ratio','checksum','stop'))
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.code128 import Code128
-        _BarcodeWidget.__init__(self,Code128,"AB-12345678",**kw)
-
-class BarcodeStandard93(BarcodeCode128):
-    """This is a compressed form of Code 39"""
-    codeName = "Standard93"
-    _attrMap = AttrMap(BASE=BarcodeCode128,
-        stop = AttrMapValue(isBoolean, desc='if we use start/stop symbols (default 1)'),
+        '12',
+        '1234',
+        '123456',
+        '12345678',
+        '1234567890'
+        ],
         )
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.code93 import Standard93
-        _BarcodeWidget.__init__(self,Standard93,"CODE 93",**kw)
 
-class BarcodeExtended93(BarcodeStandard93):
-    """This is a compressed form of Code 39, allowing the full ASCII charset"""
-    codeName = "Extended93"
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.code93 import Extended93
-        _BarcodeWidget.__init__(self,Extended93,"L@@K! Code 93 ;-)",**kw)
+BarcodeCode128 = _BCW('BarcodeCode128',
+                BarcodeI2of5,
+                """Code 128 encodes any number of characters in the ASCII character set.""",
+                "Code128",
+                AttrMap(BASE=BarcodeI2of5,UNWANTED=('bearers','checksum','ratio','checksum','stop')),
+                'reportlab.graphics.barcode.code128',
+                "AB-12345678",
+                _tests = ['ReportLab Rocks!'],
+                )
 
-class BarcodeStandard39(BarcodeI2of5):
-    """Code39 is widely used in non-retail, especially US defence and health.
-    Allowed characters are 0-9, A-Z (caps only), space, and -.$/+%*.
-    """
+BarcodeStandard93=_BCW('BarcodeStandard93',
+                        BarcodeCode128,
+                        """This is a compressed form of Code 39""",
+                        "Standard93",
+                        AttrMap(BASE=BarcodeCode128,
+                                stop = AttrMapValue(isBoolean, desc='if we use start/stop symbols (default 1)'),
+                                ),
+                        'reportlab.graphics.barcode.code93',
+                        "CODE 93",
+                        )
 
-    codeName = "Standard39"
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.code39 import Standard39
-        _BarcodeWidget.__init__(self,Standard39,"A012345B%R",**kw)
+BarcodeExtended93=_BCW('BarcodeExtended93',
+                        BarcodeStandard93,
+                        """This is a compressed form of Code 39, allowing the full ASCII charset""",
+                        "Extended93",
+                        None,
+                        'reportlab.graphics.barcode.code93',
+                        "L@@K! Code 93 ;-)",
+                        )
 
-class BarcodeExtended39(BarcodeI2of5):
-    """Extended 39 encodes the full ASCII character set by encoding
-    characters as pairs of Code 39 characters; $, /, % and + are used as
-    shift characters."""
+BarcodeStandard39=_BCW('BarcodeStandard39',
+                        BarcodeI2of5,
+                        """Code39 is widely used in non-retail, especially US defence and health.
+                        Allowed characters are 0-9, A-Z (caps only), space, and -.$/+%*.""",
+                        "Standard39",
+                        None,
+                        'reportlab.graphics.barcode.code39',
+                        "A012345B%R",
+                        )
 
-    codeName = "Extended39"
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.code39 import Extended39
-        _BarcodeWidget.__init__(self,Extended39,"A012345B}",**kw)
+BarcodeExtended39=_BCW('BarcodeExtended39',
+                        BarcodeI2of5,
+                        """Extended 39 encodes the full ASCII character set by encoding
+                        characters as pairs of Code 39 characters; $, /, % and + are used as
+                        shift characters.""",
+                        "Extended39",
+                        None,
+                        'reportlab.graphics.barcode.code39',
+                        "A012345B}",
+                        )
 
-class BarcodeMSI(BarcodeI2of5):
-    """MSI is used for inventory control in retail applications.
+BarcodeMSI=_BCW('BarcodeMSI',
+                BarcodeI2of5,
+                """MSI is used for inventory control in retail applications.
 
-    There are several methods for calculating check digits so we
-    do not implement one.
-    """
-    codeName = "MSI"
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.common import MSI
-        _BarcodeWidget.__init__(self,MSI,1234,**kw)
+                There are several methods for calculating check digits so we
+                do not implement one.
+                """,
+                "MSI",
+                None,
+                'reportlab.graphics.barcode.common',
+                1234,
+                )
 
-class BarcodeCodabar(BarcodeI2of5):
-    """Used in blood banks, photo labs and FedEx labels.
-    Encodes 0-9, -$:/.+, and four start/stop characters A-D.
-    """
-    codeName = "Codabar"
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.common import Codabar
-        _BarcodeWidget.__init__(self,Codabar,"A012345B",**kw)
+BarcodeCodabar=_BCW('BarcodeCodabar',
+                    BarcodeI2of5,
+                    """Used in blood banks, photo labs and FedEx labels.
+                    Encodes 0-9, -$:/.+, and four start/stop characters A-D.""",
+                    "Codabar",
+                    None,
+                    'reportlab.graphics.barcode.common',
+                    "A012345B",
+                    )
 
-class BarcodeCode11(BarcodeI2of5):
-    """Used mostly for labelling telecommunications equipment.
-    It encodes numeric digits.
-    """
-    codeName = "Code11"
-    _attrMap = AttrMap(BASE=BarcodeI2of5,
-        checksum = AttrMapValue(isInt,'''(integer, default 2):
-            Whether to compute and include the check digit(s).
-            (0 none, 1 1-digit, 2 2-digit, -1 auto, default -1):
-            How many checksum digits to include. -1 ("auto") means
-            1 if the number of digits is 10 or less, else 2.'''),
-            )
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.common import Code11
-        _BarcodeWidget.__init__(self,Code11,"01234545634563",**kw)
+BarcodeCode11=_BCW('BarcodeCode11',
+                    _BarcodeWidget,
+                    """Used mostly for labelling telecommunications equipment.
+                    It encodes numeric digits.""",
+                    'Code11',
+                    AttrMap(BASE=BarcodeI2of5,
+                        checksum = AttrMapValue(isInt,'''(integer, default 2):
+                            Whether to compute and include the check digit(s).
+                            (0 none, 1 1-digit, 2 2-digit, -1 auto, default -1):
+                            How many checksum digits to include. -1 ("auto") means
+                            1 if the number of digits is 10 or less, else 2.'''),
+                            ),
+                    'reportlab.graphics.barcode.common',
+                    "01234545634563",
+                    )
 
-class BarcodeFIM(_BarcodeWidget):
-    """
-    FIM was developed as part of the POSTNET barcoding system. FIM (Face Identification Marking) is used by the cancelling machines to sort mail according to whether or not they have bar code and their postage requirements. There are four types of FIM called FIM A, FIM B, FIM C, and FIM D.
+BarcodeFIM=_BCW('BarcodeFIM',
+                _BarcodeWidget,
+                """
+                FIM was developed as part of the POSTNET barcoding system.
+                FIM (Face Identification Marking) is used by the cancelling machines
+                to sort mail according to whether or not they have bar code
+                and their postage requirements. There are four types of FIM
+                called FIM A, FIM B, FIM C, and FIM D.
 
-    The four FIM types have the following meanings:
-        FIM A- Postage required pre-barcoded
-        FIM B - Postage pre-paid, no bar code exists
-        FIM C- Postage prepaid prebarcoded
-        FIM D- Postage required, no bar code exists
-    """
-    codeName = "FIM"
-    _attrMap = AttrMap(BASE=_BarcodeWidget,
-        barWidth = AttrMapValue(isNumber,'''(float, default 1/32in): the bar width.'''),
-        spaceWidth = AttrMapValue(isNumber,'''(float or None, default 1/16in):
-            width of intercharacter gap. None means "use barWidth".'''),
-        barHeight = AttrMapValue(isNumber,'''(float, default 5/8in): The bar height.'''),
-        quiet = AttrMapValue(isBoolean,'''(bool, default 0):
-            Whether to include quiet zones in the symbol.'''),
-        lquiet = AttrMapValue(isNumber,'''(float, default: 15/32in):
-            Quiet zone size to left of code, if quiet is true.'''),
-        rquiet = AttrMapValue(isNumber,'''(float, default 1/4in):
-            Quiet zone size to right left of code, if quiet is true.'''),
-        fontName = AttrMapValue(isString, desc='human readable font'),
-        fontSize = AttrMapValue(isNumber, desc='human readable font size'),
-        humanReadable = AttrMapValue(isBoolean, desc='if human readable'),
-        )
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.usps import FIM
-        _BarcodeWidget.__init__(self,FIM,"A",**kw)
+                The four FIM types have the following meanings:
+                    FIM A- Postage required pre-barcoded
+                    FIM B - Postage pre-paid, no bar code exists
+                    FIM C- Postage prepaid prebarcoded
+                    FIM D- Postage required, no bar code exists""",
+                "FIM",
+                AttrMap(BASE=_BarcodeWidget,
+                    barWidth = AttrMapValue(isNumber,'''(float, default 1/32in): the bar width.'''),
+                    spaceWidth = AttrMapValue(isNumber,'''(float or None, default 1/16in):
+                        width of intercharacter gap. None means "use barWidth".'''),
+                    barHeight = AttrMapValue(isNumber,'''(float, default 5/8in): The bar height.'''),
+                    quiet = AttrMapValue(isBoolean,'''(bool, default 0):
+                        Whether to include quiet zones in the symbol.'''),
+                    lquiet = AttrMapValue(isNumber,'''(float, default: 15/32in):
+                        Quiet zone size to left of code, if quiet is true.'''),
+                    rquiet = AttrMapValue(isNumber,'''(float, default 1/4in):
+                        Quiet zone size to right left of code, if quiet is true.'''),
+                    fontName = AttrMapValue(isString, desc='human readable font'),
+                    fontSize = AttrMapValue(isNumber, desc='human readable font size'),
+                    humanReadable = AttrMapValue(isBoolean, desc='if human readable'),
+                    ),
+                'reportlab.graphics.barcode.usps',
+                "A",
+                )
 
-class BarcodePOSTNET(_BarcodeWidget):
-    codeName = "POSTNET"
-    _attrMap = AttrMap(BASE=_BarcodeWidget,
-        barWidth = AttrMapValue(isNumber,'''(float, default 0.018*in): the bar width.'''),
-        spaceWidth = AttrMapValue(isNumber,'''(float or None, default 0.0275in): width of intercharacter gap.'''),
-        shortHeight = AttrMapValue(isNumber,'''(float, default 0.05in): The short bar height.'''),
-        barHeight = AttrMapValue(isNumber,'''(float, default 0.125in): The full bar height.'''),
-        fontName = AttrMapValue(isString, desc='human readable font'),
-        fontSize = AttrMapValue(isNumber, desc='human readable font size'),
-        humanReadable = AttrMapValue(isBoolean, desc='if human readable'),
-        )
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.usps import POSTNET
-        _BarcodeWidget.__init__(self,POSTNET,"78247-1043",**kw)
+BarcodePOSTNET=_BCW('BarcodePOSTNET',
+                    _BarcodeWidget,
+                    '',
+                    "POSTNET",
+                    AttrMap(BASE=_BarcodeWidget,
+                            barWidth = AttrMapValue(isNumber,'''(float, default 0.018*in): the bar width.'''),
+                            spaceWidth = AttrMapValue(isNumber,'''(float or None, default 0.0275in): width of intercharacter gap.'''),
+                            shortHeight = AttrMapValue(isNumber,'''(float, default 0.05in): The short bar height.'''),
+                            barHeight = AttrMapValue(isNumber,'''(float, default 0.125in): The full bar height.'''),
+                            fontName = AttrMapValue(isString, desc='human readable font'),
+                            fontSize = AttrMapValue(isNumber, desc='human readable font size'),
+                            humanReadable = AttrMapValue(isBoolean, desc='if human readable'),
+                            ),
+                    'reportlab.graphics.barcode.usps',
+                    "78247-1043",
+                    )
 
-class BarcodeUSPS_4State(_BarcodeWidget):
-    codeName = "USPS_4State"
-    _attrMap = AttrMap(BASE=_BarcodeWidget,
-        widthSize = AttrMapValue(isNumber,'''(float, default 1): the bar width size adjustment between 0 and 1.'''),
-        heightSize = AttrMapValue(isNumber,'''(float, default 1): the bar height size adjustment between 0 and 1.'''),
-        fontName = AttrMapValue(isString, desc='human readable font'),
-        fontSize = AttrMapValue(isNumber, desc='human readable font size'),
-        tracking = AttrMapValue(isString, desc='tracking data'),
-        routing = AttrMapValue(isString, desc='routing data'),
-        humanReadable = AttrMapValue(isBoolean, desc='if human readable'),
-        )
-    def __init__(self,**kw):
-        from reportlab.graphics.barcode.usps4s import USPS_4State
-        kw.setdefault('routing','01234567891')
-        _BarcodeWidget.__init__(self,USPS_4State,'01234567094987654321',**kw)
-
-    def annotate(self,x,y,text,fontName,fontSize,anchor='middle'):
-        _BarcodeWidget.annotate(self,x,y,text,fontName,fontSize,anchor='start')
+BarcodeUSPS_4State=_BCW('BarcodeUSPS_4State',
+                        _BarcodeWidget,
+                        '',
+                        "USPS_4State",
+                        AttrMap(BASE=_BarcodeWidget,
+                            widthSize = AttrMapValue(isNumber,'''(float, default 1): the bar width size adjustment between 0 and 1.'''),
+                            heightSize = AttrMapValue(isNumber,'''(float, default 1): the bar height size adjustment between 0 and 1.'''),
+                            fontName = AttrMapValue(isString, desc='human readable font'),
+                            fontSize = AttrMapValue(isNumber, desc='human readable font size'),
+                            tracking = AttrMapValue(isString, desc='tracking data'),
+                            routing = AttrMapValue(isString, desc='routing data'),
+                            humanReadable = AttrMapValue(isBoolean, desc='if human readable'),
+                            ),
+                        'reportlab.graphics.barcode.usps4s',
+                        '01234567094987654321',
+                        _pre_init="\n\t\tkw.setdefault('routing','01234567891')\n",
+                        _methods = "\n\tdef annotate(self,x,y,text,fontName,fontSize,anchor='middle'):\n\t\t_BarcodeWidget.annotate(self,x,y,text,fontName,fontSize,anchor='start')\n"
+                        )
 
 if __name__=='__main__':
     import os, sys, glob
