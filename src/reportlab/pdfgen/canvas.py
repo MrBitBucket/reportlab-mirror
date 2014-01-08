@@ -757,7 +757,7 @@ class Canvas(textobject._PDFColorSetter):
         elif fit == "FitBV":
             dest.fitbv(left)
         else:
-            raise "Unknown Fit type %s" % (fit,)
+            raise ValueError("Unknown Fit type %s" % ascii(fit))
 
         dest.setPage(pageref)
         return dest

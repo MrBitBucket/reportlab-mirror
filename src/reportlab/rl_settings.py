@@ -5,6 +5,7 @@
 to override these drop a module rl_local_settings.py parallel to this file or
 anywhere on the path.
 '''
+import os, sys
 __version__=''' $Id$ '''
 __all__=tuple('''allowTableBoundsErrors
 shapeChecking
@@ -163,3 +164,11 @@ CMapSearchPath = (
                   '%(REPORTLAB_DIR)s/../../fonts/CMap', #special
                   '%(HOME)s/fonts/CMap',                #special
                   )
+
+if sys.platform.startswith('linux'):
+    for root, dirs, files in os.walk('/usr/share/fonts/Type1'):
+        if not files: continue
+        T1SearchPath = T1SearchPath+(root,)
+    for root, dirs, files in os.walk('/usr/share/fonts/TTF'):
+        if not files: continue
+        TTFSearchPath = TTFSearchPath+(root,)

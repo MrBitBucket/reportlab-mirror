@@ -158,8 +158,7 @@ static char *keyStrings[] = {
  *  reads all tokens until the next end-of-line.
  */
  
-static char *token(stream)
-  FILE *stream;
+static char *token(FILE *stream)
 {
     int ch, idx;
 
@@ -194,8 +193,7 @@ static char *token(stream)
  *  more than one word (like Comment lines and FullName).
  */
 
-static char *linetoken(stream)
-  FILE *stream;
+static char *linetoken(FILE *stream)
 {
     int ch, idx;
 
@@ -227,8 +225,7 @@ static char *linetoken(stream)
  *  The algorithm is a standard Knuth binary search.
  */
 
-static enum parseKey recognize(ident)
-  register char *ident;
+static enum parseKey recognize(register char *ident)
 {
     int lower = 0, upper = (int) NOPE, midpoint, cmpvalue;
     BOOL found = FALSE;
@@ -270,9 +267,7 @@ static enum parseKey recognize(ident)
  *  parseFile to determine if there is more file to parse.
  */
  
-static BOOL parseGlobals(fp, gfi)
-  FILE *fp;
-  register GlobalFontInfo *gfi;
+static BOOL parseGlobals(FILE *fp, register GlobalFontInfo *gfi)
 {  
     BOOL cont = TRUE, save = (gfi != NULL);
     int error = AFM_ok;
@@ -438,9 +433,7 @@ static BOOL parseGlobals(fp, gfi)
  *  file is reset to be where it was upon entering this function.
  */
  
-static int initializeArray(fp, cwi)
-  FILE *fp;
-  register int *cwi;
+static int initializeArray(FILE *fp, register int *cwi)
 {  
     BOOL cont = TRUE, found = FALSE;
     long opos = ftell(fp);
@@ -522,9 +515,7 @@ static int initializeArray(fp, cwi)
  *  parseFile to determine if there is more file to parse.
  */
  
-static int parseCharWidths(fp, cwi)
-  FILE *fp;
-  register int *cwi;
+static int parseCharWidths(FILE *fp, register int *cwi)
 {  
     BOOL cont = TRUE, save = (cwi != NULL);
     int pos = 0, error = AFM_ok;
@@ -623,9 +614,7 @@ static int parseCharWidths(fp, cwi)
  *  parseFile to determine if there is more file to parse.
  */
  
-static int parseCharMetrics(fp, fi)
-  FILE *fp;
-  register Font_Info *fi;
+static int parseCharMetrics(FILE *fp, register Font_Info *fi)
 {  
     BOOL cont = TRUE, firstTime = TRUE;
     int error = AFM_ok, count = 0;
@@ -734,9 +723,7 @@ static int parseCharMetrics(fp, fi)
  *  parseFile to determine if there is more file to parse.
  */
  
-static int parseTrackKernData(fp, fi)
-  FILE *fp;
-  register Font_Info *fi;
+static int parseTrackKernData(FILE *fp, register Font_Info *fi)
 {  
     BOOL cont = TRUE, save = (fi->tkd != NULL);
     int pos = 0, error = AFM_ok, tcount = 0;
@@ -838,9 +825,7 @@ static int parseTrackKernData(fp, fi)
  *  parseFile to determine if there is more file to parse.
  */
  
-static int parsePairKernData(fp, fi)
-  FILE *fp;
-  register Font_Info *fi;
+static int parsePairKernData(FILE *fp, register Font_Info *fi)
 {  
     BOOL cont = TRUE, save = (fi->pkd != NULL);
     int pos = 0, error = AFM_ok, pcount = 0;
@@ -964,9 +949,7 @@ static int parsePairKernData(fp, fi)
  *  parseFile to determine if there is more file to parse.
  */
  
-static int parseCompCharData(fp, fi)
-  FILE *fp;
-  register Font_Info *fi;
+static int parseCompCharData(FILE *fp, register Font_Info *fi)
 {  
     BOOL cont = TRUE, firstTime = TRUE, save = (fi->ccd != NULL);
     int pos = 0, j = 0, error = AFM_ok, ccount = 0, pcount = 0;
@@ -1099,10 +1082,7 @@ static int parseCompCharData(fp, fi)
  *  pointer upon return of this function is undefined.
  */
 
-extern int parseFile (fp, fi, flags)
-  FILE *fp;
-  Font_Info **fi;
-  FLAGS flags;
+extern int parseFile (FILE *fp, Font_Info **fi, FLAGS flags)
 {
     
     int code = AFM_ok; 	/* return code from each of the parsing routines */

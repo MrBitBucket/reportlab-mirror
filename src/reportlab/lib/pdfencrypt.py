@@ -547,11 +547,8 @@ See PdfEncryptIntro.pdf for more information.
             if thisarg[0] in argv:
                 pos = argv.index(thisarg[0])
                 if thisarg[0] in binaryrequired:
-                    #try:
                     if argv[pos+1] not in ('1', '0'):
-                        raise "%s value must be either '1' or '0'!" % thisarg[1]
-                    #except:
-                        #raise "Unable to set %s." % thisarg[4]
+                        raise ValueError("%s value must be either '1' or '0'!" % thisarg[1])
                 try:
                     if argv[pos+1] not in known_modes:
                         if thisarg[0] in binaryrequired:
@@ -595,7 +592,7 @@ See PdfEncryptIntro.pdf for more information.
             print("wrote output file '%s'(%s bytes)\n  owner password is '%s'\n  user password is '%s'" % (SAVEFILE, filesize, OWNER, USER))
 
         if len(argv)>0:
-            raise "\nUnrecognised arguments : %s\nknown arguments are:\n%s" % (str(argv)[1:-1], known_modes)
+            raise valueError("\nUnrecognised arguments : %s\nknown arguments are:\n%s" % (str(argv)[1:-1], known_modes))
     else:
         print(usage)
 

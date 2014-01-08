@@ -709,7 +709,7 @@ class PPSpacer:
 ##class PPDrawingElement:
 ##    """Base class for something which you draw directly on the page."""
 ##    def drawOn(self, canv):
-##        raise "NotImplementedError", "Abstract base class!"
+##        raise NotImplementedError("Abstract base class!")
 
 
 class PPFixedImage:
