@@ -4,7 +4,7 @@
 __version__=''' $Id$ '''
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
-import os, sys, imp, time
+import os, sys, imp, time, types
 from base64 import decodestring as base64_decodestring, encodestring as base64_encodestring
 try:
     from cPickle import dumps as pickle_dumps, loads as pickle_loads, dump as pickle_dump, load as pickle_load
@@ -74,6 +74,14 @@ if isPy3:
     def isClass(v):
         return isinstance(v, type)
 
+    def isNonPrimitiveInstance(x):
+        return not isinstance(x,(float,int,type,tuple,list,dict,str,bytes,complex,bool,slice,
+            types.FunctionType,types.LambdaType,types.CodeType,
+            types.MappingProxyType,types.SimpleNamespace,
+            types.GeneratorType,types.MethodType,types.BuiltinFunctionType,
+            types.BuiltinMethodType,types.ModuleType,types.TracebackType,
+            types.FrameType,types.GetSetDescriptorType,types.MemberDescriptorType))
+
     def instantiated(v):
         return not isinstance(v,type)
 
@@ -116,6 +124,7 @@ if isPy3:
         return s.encode('latin1') if isinstance(s,str) else s
     import builtins
     rl_exec = getattr(builtins,'exec')
+    builtins.xrange = range
     del builtins
     def char2int(s):
         return  s if isinstance(s,int) else ord(s if isinstance(s,str) else s.decode('latin1'))
@@ -157,9 +166,17 @@ else:
     def asUnicode(v,enc='utf8'):
         return v if isinstance(v,unicode) else v.decode(enc)
 
-    import types
     def isClass(v):
         return isinstance(v,(types.ClassType,type))
+
+    def isNonPrimitiveInstance(x):
+        return isinstance(x,types.InstanceType) or not isinstance(x,(float,int,long,type,tuple,list,dict,bool,unicode,str,buffer,complex,slice,
+                    types.FunctionType,types.LambdaType,types.CodeType,types.GeneratorType,
+                    types.ClassType,types.UnboundMethodType,types.MethodType,types.BuiltinFunctionType,
+                    types.BuiltinMethodType,types.ModuleType,types.FileType,types.XRangeType,
+                    types.TracebackType,types.FrameType,types.EllipsisType,types.DictProxyType,
+                    types.NotImplementedType,types.GetSetDescriptorType,types.MemberDescriptorType
+                    ))
 
     def instantiated(v):
         return not isinstance(v,type) and hasattr(v,'__class__')
