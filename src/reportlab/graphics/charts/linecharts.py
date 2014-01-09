@@ -467,7 +467,7 @@ class HorizontalLineChart3D(HorizontalLineChart):
         theta_x = self.theta_x
         theta_y = self.theta_y
         F = _FakeGroup()
-        from .utils3d import _make_3d_line_info
+        from reportlab.graphics.charts.utils3d import _make_3d_line_info
         tileWidth = getattr(self,'_3d_tilewidth',None)
         if not tileWidth and self.categoryAxis.style!='parallel_3d': tileWidth = 1
 

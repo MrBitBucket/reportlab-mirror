@@ -504,7 +504,7 @@ def test():
     d = shapes.Drawing(400, 200)
     tc = TwoCircles()
     d.add(tc)
-    from . import renderPDF
+    from reportlab.graphics import renderPDF
     renderPDF.drawToFile(d, 'sample_widget.pdf', 'A Sample Widget')
     print('saved sample_widget.pdf')
 

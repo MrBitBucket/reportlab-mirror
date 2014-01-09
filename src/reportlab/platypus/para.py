@@ -1973,7 +1973,7 @@ def EmbedInRml2pdf():
     Controller["title"] = theParaMapper
 
 def handleSpecialCharacters(engine, text, program=None):
-    from .paraparser import greeks
+    from reportlab.platypus.paraparser import greeks
     from string import whitespace
     standard={'lt':'<', 'gt':'>', 'amp':'&'}
     # add space prefix if space here

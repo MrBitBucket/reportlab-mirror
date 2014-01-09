@@ -384,7 +384,7 @@ def getDrawing10():
 
     return D
 
-from .widgets.signsandsymbols import SmileyFace
+from reportlab.graphics.widgets.signsandsymbols import SmileyFace
 def getDrawing11():
     '''test of anchoring'''
     def makeSmiley(x, y, size, color):

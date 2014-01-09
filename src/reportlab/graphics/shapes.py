@@ -671,7 +671,7 @@ class Drawing(Group, Flowable):
         """This is used by the Platypus framework to let the document
         draw itself in a story.  It is specific to PDF and should not
         be used directly."""
-        from . import renderPDF
+        from reportlab.graphics import renderPDF
         renderPDF.draw(self, self.canv, 0, 0, showBoundary=showBoundary)
 
     def wrap(self, availWidth, availHeight):

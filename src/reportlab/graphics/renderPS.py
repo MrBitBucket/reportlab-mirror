@@ -674,7 +674,7 @@ class PSCanvas:
     from reportlab.graphics import renderPS
     renderPS.draw(drawing, canvas, x, y)
 Execute the script to see some test drawings."""
-from .shapes import *
+from reportlab.graphics.shapes import *
 
 # hack so we only get warnings once each
 #warnOnce = WarnOnce()
@@ -897,7 +897,7 @@ def test(outdir='epsout'):
     if not os.path.isdir(outdir):
         os.mkdir(outdir)
     #grab all drawings from the test module
-    from . import testshapes
+    from reportlab.graphics import testshapes
     drawings = []
 
     for funcname in dir(testshapes):

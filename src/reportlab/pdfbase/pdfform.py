@@ -120,7 +120,7 @@ def test1():
 
 #==========================end of public interfaces
 
-from .pdfpattern import PDFPattern
+from reportlab.pdfbase.pdfpattern import PDFPattern
 
 def getForm(canvas):
     "get form from canvas, create the form if needed"

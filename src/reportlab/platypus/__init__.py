@@ -13,4 +13,4 @@ from reportlab.platypus.tables import Table, TableStyle, CellStyle, LongTable
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate import BaseDocTemplate, NextPageTemplate, PageTemplate, ActionFlowable, \
                         SimpleDocTemplate, FrameBreak, PageBegin, Indenter, NotAtTopPageBreak
-from .xpreformatted import XPreformatted
+from reportlab.platypus.xpreformatted import XPreformatted

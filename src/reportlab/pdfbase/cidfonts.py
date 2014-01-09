@@ -508,7 +508,7 @@ def test():
 
 if __name__=='__main__':
     import doctest
-    from . import cidfonts
+    from reportlab.pdfbase import cidfonts
     doctest.testmod(cidfonts)
     #test()
 

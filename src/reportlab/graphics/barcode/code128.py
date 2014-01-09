@@ -31,7 +31,7 @@
 #
 
 from reportlab.lib.units import inch
-from .common import MultiWidthBarcode
+from reportlab.graphics.barcode.common import MultiWidthBarcode
 from string import digits
 
 _patterns = {

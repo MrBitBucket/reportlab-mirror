@@ -4,7 +4,7 @@ __version__=''' $Id$ '''
 __all__ = ('USPS_4State',)
 
 from reportlab.lib.colors import black
-from .common import Barcode
+from reportlab.graphics.barcode.common import Barcode
 
 class USPS_4State(Barcode):
     ''' USPS 4-State OneView (TM) barcode. All info from USPS-B-3200A

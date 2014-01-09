@@ -886,7 +886,7 @@ class BarChart3D(BarChart):
         g.add((1,z0,z1,x,y,width,height,rowNo,colNo))
 
     def makeBars(self):
-        from .utils3d import _draw_3d_bar
+        from reportlab.graphics.charts.utils3d import _draw_3d_bar
         fg = _FakeGroup(cmp=self._cmpZ)
         self._makeBars(fg,fg)
         fg.sort()

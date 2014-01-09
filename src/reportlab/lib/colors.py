@@ -713,7 +713,7 @@ def getAllNamedColors():
     # uses a singleton for efficiency
     global _namedColors
     if _namedColors is not None: return _namedColors
-    from . import colors
+    from reportlab.lib import colors
     _namedColors = {}
     for name, value in colors.__dict__.items():
         if isinstance(value, Color):

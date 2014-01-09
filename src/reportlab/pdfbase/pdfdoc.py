@@ -377,7 +377,7 @@ class PDFDocument:
     def getAvailableFonts(self):
         fontnames = list(self.fontMapping.keys())
         # the standard 14 are also always available! (even if not initialized yet)
-        from . import _fontdata
+        from reportlab.pdfbase import _fontdata
         for name in _fontdata.standardFonts:
             if name not in fontnames:
                 fontnames.append(name)
@@ -757,7 +757,7 @@ PDFZCompress = PDFStreamFilterZCompress()
 class PDFStreamFilterBase85Encode:
     pdfname = "ASCII85Decode"
     def encode(self, text):
-        from .pdfutils import _wrap
+        from reportlab.pdfbase.pdfutils import _wrap
         text = asciiBase85Encode(text)
         if rl_config.wrapA85:
             text = _wrap(text)

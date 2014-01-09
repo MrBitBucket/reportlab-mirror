@@ -30,7 +30,7 @@ from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, PolyL
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.charts.legends import _objStr
-from .piecharts import WedgeLabel
+from reportlab.graphics.charts.piecharts import WedgeLabel
 from reportlab.graphics.widgets.markers import makeMarker, uSymbol2Symbol, isSymbol
 
 class StrandProperty(PropHolder):

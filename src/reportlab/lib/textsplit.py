@@ -237,5 +237,5 @@ def cjkwrap(text, width, encoding="utf8"):
 
 if __name__=='__main__':
     import doctest
-    from . import textsplit
+    from reportlab.lib import textsplit
     doctest.testmod(textsplit)

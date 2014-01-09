@@ -31,7 +31,7 @@
 #
 
 from reportlab.lib.units import inch
-from .common import Barcode
+from reportlab.graphics.barcode.common import Barcode
 from string import digits as string_digits, whitespace as string_whitespace
 
 _fim_patterns = {

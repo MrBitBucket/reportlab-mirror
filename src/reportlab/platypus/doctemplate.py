@@ -195,7 +195,7 @@ PageBegin = LCActionFlowable('pageBegin')
 
 def _evalMeasurement(n):
     if isinstance(n,str):
-        from .paraparser import _num
+        from reportlab.platypus.paraparser import _num
         n = _num(n)
         if isSeq(n): n = n[1]
     return n
@@ -1193,7 +1193,7 @@ if __name__ == '__main__':
         objects_to_draw = []
         from reportlab.lib.styles import ParagraphStyle
         #from paragraph import Paragraph
-        from .doctemplate import SimpleDocTemplate
+        from reportlab.platypus.doctemplate import SimpleDocTemplate
 
         #need a style
         normal = ParagraphStyle('normal')

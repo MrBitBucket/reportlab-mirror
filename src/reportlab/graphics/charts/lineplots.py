@@ -71,7 +71,7 @@ class ShadedPolyFiller(Filler,ShadedPolygon):
 class PolyFiller(Filler,Polygon):
     pass
 
-from .linecharts import AbstractLineChart
+from reportlab.graphics.charts.linecharts import AbstractLineChart
 class LinePlot(AbstractLineChart):
     """Line plot with multiple lines.
 
@@ -474,10 +474,10 @@ class LinePlot3D(LinePlot):
         _zadjust = self._zadjust
         theta_x = self.theta_x
         theta_y = self.theta_y
-        from .linecharts import _FakeGroup
+        from reportlab.graphics.charts.linecharts import _FakeGroup
         F = _FakeGroup()
 
-        from .utils3d import _make_3d_line_info, find_intersections
+        from reportlab.graphics.charts.utils3d import _make_3d_line_info, find_intersections
         if self.xValueAxis.style!='parallel_3d':
             tileWidth = getattr(self,'_3d_tilewidth',1)
             if getattr(self,'_find_intersections',None):

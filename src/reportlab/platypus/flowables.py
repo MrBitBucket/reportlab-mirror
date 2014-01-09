@@ -546,7 +546,7 @@ class CondPageBreak(Spacer):
         if availHeight<self.height:
             f = self._doctemplateAttr('frame')
             if not f: return availWidth, availHeight
-            from .doctemplate import FrameBreak
+            from reportlab.platypus.doctemplate import FrameBreak
             f.add_generated_content(FrameBreak)
         return 0, 0
 
@@ -607,7 +607,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
 def _flowableSublist(V):
     "if it isn't a list or tuple, wrap it in a list"
     if not isinstance(V,(list,tuple)): V = V is not None and [V] or []
-    from .doctemplate import LCActionFlowable
+    from reportlab.platypus.doctemplate import LCActionFlowable
     assert not [x for x in V if isinstance(x,LCActionFlowable)],'LCActionFlowables not allowed in sublists'
     return V
 
@@ -657,10 +657,10 @@ class KeepTogether(_ContainerSpace,Flowable):
         C1 = (self._H0>aH) or C0 and atTop
         if C0 or C1:
             if C0:
-                from .doctemplate import FrameBreak
+                from reportlab.platypus.doctemplate import FrameBreak
                 A = FrameBreak
             else:
-                from .doctemplate import NullActionFlowable
+                from reportlab.platypus.doctemplate import NullActionFlowable
                 A = NullActionFlowable
             S.insert(0,A())
         return S
@@ -836,7 +836,7 @@ def cdeepcopy(obj):
 class _Container(_ContainerSpace):  #Abstract some common container like behaviour
     def drawOn(self, canv, x, y, _sW=0, scale=1.0, content=None, aW=None):
         '''we simulate being added to a frame'''
-        from .doctemplate import ActionFlowable, Indenter
+        from reportlab.platypus.doctemplate import ActionFlowable, Indenter
         x0 = x
         y0 = y
         pS = 0
@@ -1057,7 +1057,7 @@ class KeepInFrame(_Container,Flowable):
                 getattr(self,'maxHeight','')and (' maxHeight=%s' % fp_str(getattr(self,'maxHeight')))or '')
 
     def wrap(self,availWidth,availHeight):
-        from .doctemplate import LayoutError
+        from reportlab.platypus.doctemplate import LayoutError
         mode = self.mode
         maxWidth = float(min(self.maxWidth or availWidth,availWidth))
         maxHeight = float(min(self.maxHeight or availHeight,availHeight))
@@ -1268,7 +1268,7 @@ class ImageAndFlowables(_Container,Flowable):
                 return W, availHeight, F[:i],F[i:]
             H += h
             if H>availHeight:
-                from .paragraph import Paragraph
+                from reportlab.platypus.paragraph import Paragraph
                 aH = availHeight-(H-h)
                 if isinstance(f,(Paragraph,Preformatted)):
                     leading = f.style.leading

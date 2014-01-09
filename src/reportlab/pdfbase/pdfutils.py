@@ -217,7 +217,7 @@ def readJPEGInfo(image):
     "Read width, height and number of components from open JPEG file."
 
     import struct
-    from .pdfdoc import PDFError
+    from reportlab.pdfbase.pdfdoc import PDFError
 
     #Acceptable JPEG Markers:
     #  SROF0=baseline, SOF1=extended sequential or SOF2=progressive
