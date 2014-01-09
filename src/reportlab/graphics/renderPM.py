@@ -700,7 +700,7 @@ def test(outDir='pmout', shout=False):
     from xml.sax.saxutils import escape
     def handleError(name,fmt):
         msg = 'Problem drawing %s fmt=%s file'%(name,fmt)
-        print(msg)
+        if shout or verbose>2: print(msg)
         errs.append('<br/><h2 style="color:red">%s</h2>' % msg)
         buf = getStringIO()
         traceback.print_exc(file=buf)
