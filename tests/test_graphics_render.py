@@ -6,6 +6,7 @@ Tests for renderers
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import unittest, os, sys, glob
+from reportlab.lib.utils import isPy3
 
 class RenderTestCase(unittest.TestCase):
     "Test renderPS classes."
@@ -18,14 +19,15 @@ class RenderTestCase(unittest.TestCase):
         for x in glob.glob(os.path.join(outDir,'*')):
             os.remove(x)
 
-    def test0(self):
-        from reportlab.graphics.renderPS import test
-        assert test(self.outDir) is None
+    if isPy3:
+        def test0(self):
+            from reportlab.graphics.renderPS import test
+            assert test(self.outDir) is None
+        def test2(self):
+            from reportlab.graphics.renderPM import test
+            assert test(self.outDir) is None
     def test1(self):
         from reportlab.graphics.renderPDF import test
-        assert test(self.outDir) is None
-    def test2(self):
-        from reportlab.graphics.renderPM import test
         assert test(self.outDir) is None
 
 def makeSuite():
