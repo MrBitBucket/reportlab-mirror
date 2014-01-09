@@ -58,3 +58,4 @@ syntax: regexp
 ^tests/test_renderSVG_output\.html
 ^tests/test_source_chars\.txt
 ^tests/barcode-out
+^tests/render-out

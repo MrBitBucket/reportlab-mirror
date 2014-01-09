@@ -664,7 +664,7 @@ def drawToString(d,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=
 
 save = drawToFile
 
-def test(verbose=True):
+def test(outDir='pmout', shout=False):
     def ext(x):
         if x=='tiff': x='tif'
         return x
@@ -672,10 +672,11 @@ def test(verbose=True):
     #make a page of links in HTML to assist viewing.
     import os
     from reportlab.graphics import testshapes
+    from reportlab.rl_config import verbose
     getAllTestDrawings = testshapes.getAllTestDrawings
     drawings = []
-    if not os.path.isdir('pmout'):
-        os.mkdir('pmout')
+    if not os.path.isdir(outDir):
+        os.mkdir(outDir)
     htmlTop = """<html><head><title>renderPM output results</title></head>
     <body>
     <h1>renderPM results of output</h1>
@@ -720,14 +721,14 @@ def test(verbose=True):
                 html.append('<p>%s format</p>\n' % k.upper())
             try:
                 filename = '%s.%s' % (fnRoot, ext(k))
-                fullpath = os.path.join('pmout', filename)
+                fullpath = os.path.join(outDir, filename)
                 if os.path.isfile(fullpath):
                     os.remove(fullpath)
                 if k=='pct':
                     from reportlab.lib.colors import white
                     drawToFile(drawing,fullpath,fmt=k,configPIL={'transparent':white})
                 elif k in ['py','svg']:
-                    drawing.save(formats=['py','svg'],outDir='pmout',fnRoot=fnRoot)
+                    drawing.save(formats=['py','svg'],outDir=outDir,fnRoot=fnRoot)
                 else:
                     drawToFile(drawing,fullpath,fmt=k)
                 if k in ['gif','png','jpg']:
@@ -736,13 +737,13 @@ def test(verbose=True):
                     html.append('<a href="%s">python source</a><br>\n' % filename)
                 elif k=='svg':
                     html.append('<a href="%s">SVG</a><br>\n' % filename)
-                if verbose: print('wrote',fullpath)
+                if shout or verbose>2: print('wrote %s'%ascii(fullpath))
             except AttributeError:
                 handleError(name,k)
         if os.environ.get('RL_NOEPSPREVIEW','0')=='1': drawing.__dict__['preview'] = 0
         for k in ('eps', 'pdf'):
             try:
-                drawing.save(formats=[k],outDir='pmout',fnRoot=fnRoot)
+                drawing.save(formats=[k],outDir=outDir,fnRoot=fnRoot)
             except:
                 handleError(name,k)
 
@@ -751,12 +752,12 @@ def test(verbose=True):
         html.append('<a name="errors"/>')
         html.extend(errs)
     html.append(htmlBottom)
-    htmlFileName = os.path.join('pmout', 'index.html')
+    htmlFileName = os.path.join(outDir, 'pm-index.html')
     open(htmlFileName, 'w').writelines(html)
     if sys.platform=='mac':
         from reportlab.lib.utils import markfilename
         markfilename(htmlFileName,ext='HTML')
-    if verbose: print('wrote %s' % htmlFileName)
+    if shout or verbose>2: print('wrote %s' % htmlFileName)
 
 if __name__=='__main__':
-    test()
+    test(shout=True)

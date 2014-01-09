@@ -313,9 +313,14 @@ def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1):
 #   Routine to draw them comes at the end.
 #
 #########################################################
-def test():
+def test(outDir='pdfout',shout=False):
     from reportlab.graphics.shapes import _baseGFontName, _baseGFontNameBI
-    c = Canvas('renderPDF.pdf')
+    from reportlab.rl_config import verbose
+    import os
+    if not os.path.isdir(outDir):
+        os.mkdir(outDir)
+    fn = os.path.join(outDir,'renderPDF.pdf')
+    c = Canvas(fn)
     c.setFont(_baseGFontName, 36)
     c.drawString(80, 750, 'Graphics Test')
 
@@ -356,7 +361,8 @@ def test():
     if y!=740: c.showPage()
 
     c.save()
-    print('saved renderPDF.pdf')
+    if shout or verbose>2:
+        print('saved %s' % ascii(fn))
 
 ##def testFlowable():
 ##    """Makes a platypus document"""
@@ -385,5 +391,11 @@ def test():
 ##    print 'saves test_flowable.pdf'
 
 if __name__=='__main__':
-    test()
+    test(shout=True)
+    import sys
+    if len(sys.argv)>1:
+        outdir = sys.argv[1]
+    else:
+        outdir = 'pdfout'
+    test(outdir,shout=True)
     #testFlowable()
