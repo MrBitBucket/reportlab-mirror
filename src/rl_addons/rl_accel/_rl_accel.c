@@ -36,6 +36,9 @@ struct module_state	{
 	PyObject *moduleVersion;
 	PyObject *error;
 	int moduleLineno;
+#ifndef isPy3
+	PyObject *module;
+#endif
 	};
 #ifdef isPy3
 #	define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
@@ -466,8 +469,12 @@ static void _add_TB(PyObject *module,char *funcname)
 	PyObject *py_globals = NULL;
 	PyCodeObject *py_code = NULL;
 	PyFrameObject *py_frame = NULL;
-	
+
+#ifdef isPy3
 	py_globals = PyModule_GetDict(module);
+#else
+	py_globals = PyModule_GetDict(GETSTATE(module)->module);
+#endif
 	if(!py_globals) goto bad;
 	py_code = PyCode_NewEmpty(
 						__FILE__,		/*PyObject *filename,*/
@@ -1257,6 +1264,9 @@ void init_rl_accel(void)
 	if(!st->error) goto err;
 	st->moduleVersion = PyBytes_FromString(VERSION);
 	if(!st->moduleVersion)goto err;
+#ifndef isPy3
+	st->module = module;
+#endif
 	PyModule_AddObject(module, "error", st->error);
 	PyModule_AddObject(module, "version", st->moduleVersion );
 
