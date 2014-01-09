@@ -2,6 +2,21 @@
 #see license.txt for license details
 __version__=''' $Id$ '''
 import os, sys, glob, shutil
+def specialOption(n):
+    v = False
+    while n in sys.argv:
+        v = True
+        sys.argv.remove(n)
+    return v
+
+#defaults for these options may be configured in local-setup.cfg
+#[OPTIONS]
+#no-download-t1-files=yes
+#ignore-system-libart=yes
+# if used on command line the config values are not used
+dlt1 = not specialOption('--no-download-t1-files')
+isla = specialOption('--ignore-system-libart')
+
 try:
     import configparser
 except ImportError:
@@ -77,7 +92,7 @@ class config:
     def __init__(self):
         try:
             self.parser = configparser.RawConfigParser()
-            self.parser.read(pjoin(pkgDir,'setup.cfg'))
+            self.parser.read([pjoin(pkgDir,'setup.cfg'),pjoin(pkgDir,'local-setup.cfg')])
         except:
             self.parser = None
 
@@ -87,6 +102,13 @@ class config:
         except:
             return default
 config = config()
+
+if dlt1:
+    #not set on command line so try for config value
+    dlt1 = not config('OPTIONS','no-download-t1-files','0').lower() in ('1','true','yes')
+if not isla:
+    #not set on command line so try for config value
+    isla = config('OPTIONS','ignore-system-libart','0').lower() in ('1','true','yes')
 
 #this code from /FBot's PIL setup.py
 def aDir(P, d, x=None):
@@ -228,6 +250,9 @@ def get_fonts(PACKAGE_DIR, reportlab_files):
     if not [x for x in reportlab_files if not os.path.isfile(pjoin(rl_dir,x))]:
         infoline("Standard T1 font curves already downloaded")
         return
+    elif not dlt1:
+        infoline('not downloading T1 font curve files')
+        return
     try:
         infoline("Downloading standard T1 font curves")
 
@@ -326,19 +351,30 @@ def main():
         infoline( '################################################')
         infoline( '#Attempting install of _renderPM')
         infoline( '#extensions from %r'%RENDERPM)
-        LIBART_DIR=pjoin(RENDERPM,'libart_lgpl')
         GT1_DIR=pjoin(RENDERPM,'gt1')
-        def libart_version():
-            K = ('LIBART_MAJOR_VERSION','LIBART_MINOR_VERSION','LIBART_MICRO_VERSION')
-            D = {}
-            for l in open(pjoin(LIBART_DIR,'configure.in'),'r').readlines():
-                l = l.strip().split('=')
-                if len(l)>1 and l[0].strip() in K:
-                    D[l[0].strip()] = l[1].strip()
-                    if len(D)==3: break
-            return (sys.platform == 'win32' and '\\"%s\\"' or '"%s"') % '.'.join(map(lambda k,D=D: D.get(k,'?'),K))
-        LIBART_VERSION = libart_version()
-        SOURCES=[pjoin(RENDERPM,'_renderPM.c'),
+
+        #check for an installed libart
+        if isla:
+            LIBART_INC=None
+        else:
+            LIBART_INC = list(sorted(glob.glob('/usr/include/libart-*/libart_lgpl/libart-features.h')))
+        if LIBART_INC:
+            def installed_libart_version(fn):
+                for l in open(fn, 'r').readlines():
+                    if l.startswith('#define LIBART_VERSION'):
+                        v = l[:-1].split(' ')[-1]
+                        return v
+                return '"0.0.0"'
+            LIBART_INC = LIBART_INC[-1]
+            LIBART_VERSION = installed_libart_version(LIBART_INC)
+            LIBART_INC = os.path.dirname(LIBART_INC)
+            LIBART_SOURCES=[]
+            LIBART_LIB = ['art_lgpl_2']
+            infoline('will use installed libart %s' % LIBART_VERSION.replace('"',''))
+        else:
+            LIBART_DIR = LIBART_INC = pjoin(RENDERPM,'libart_lgpl')
+            LIBART_LIB = []
+            LIBART_SOURCES=[
                     pjoin(LIBART_DIR,'art_vpath_bpath.c'),
                     pjoin(LIBART_DIR,'art_rgb_pixbuf_affine.c'),
                     pjoin(LIBART_DIR,'art_rgb_svp.c'),
@@ -357,11 +393,25 @@ def main():
                     pjoin(LIBART_DIR,'art_svp_intersect.c'),
                     pjoin(LIBART_DIR,'art_svp_render_aa.c'),
                     pjoin(LIBART_DIR,'art_misc.c'),
+                    ]
+            def libart_version():
+                K = ('LIBART_MAJOR_VERSION','LIBART_MINOR_VERSION','LIBART_MICRO_VERSION')
+                D = {}
+                for l in open(pjoin(LIBART_DIR,'configure.in'),'r').readlines():
+                    l = l.strip().split('=')
+                    if len(l)>1 and l[0].strip() in K:
+                        D[l[0].strip()] = l[1].strip()
+                        if len(D)==3: break
+                return (sys.platform == 'win32' and '\\"%s\\"' or '"%s"') % '.'.join(map(lambda k,D=D: D.get(k,'?'),K))
+            LIBART_VERSION = libart_version()
+            infoline('will use package libart %s' % LIBART_VERSION.replace('"',''))
+
+        SOURCES=[pjoin(RENDERPM,'_renderPM.c'),
                     pjoin(GT1_DIR,'gt1-parset1.c'),
                     pjoin(GT1_DIR,'gt1-dict.c'),
                     pjoin(GT1_DIR,'gt1-namecontext.c'),
                     pjoin(GT1_DIR,'gt1-region.c'),
-                    ]
+                    ]+LIBART_SOURCES
 
         if platform=='win32':
             FT_LIB=os.environ.get('FT_LIB','')
@@ -385,8 +435,12 @@ def main():
             else:
                 FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
         else:
-            FT_LIB_DIR=config('FREETYPE','lib')
-            FT_INC_DIR=config('FREETYPE','inc')
+            if os.path.isdir('/usr/include/freetype2'):
+                FT_LIB_DIR = []
+                FT_INC_DIR = ['/usr/include/freetype2']
+            else:
+                FT_LIB_DIR=config('FREETYPE','lib')
+                FT_INC_DIR=config('FREETYPE','inc')
             I,L=inc_lib_dirs()
             ftv = None
             for d in I:
@@ -419,12 +473,12 @@ def main():
 
         EXT_MODULES +=  [Extension( 'reportlab.graphics._renderPM',
                                         SOURCES,
-                                        include_dirs=[RENDERPM,LIBART_DIR,GT1_DIR]+FT_INC_DIR,
+                                        include_dirs=[RENDERPM,LIBART_INC,GT1_DIR]+FT_INC_DIR,
                                         define_macros=FT_MACROS+[('LIBART_COMPILATION',None)]+debug_macros+[('LIBART_VERSION',LIBART_VERSION)],
                                         library_dirs=[]+FT_LIB_DIR,
 
                                         # libraries to link against
-                                        libraries=FT_LIB,
+                                        libraries=FT_LIB+LIBART_LIB,
                                         extra_compile_args=debug_compile_args,
                                         extra_link_args=debug_link_args,
                                         ),
