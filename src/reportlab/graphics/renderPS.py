@@ -5,7 +5,7 @@ __version__=''' $Id$ '''
 __doc__="""Render drawing objects in Postscript"""
 
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth, unicode2T1 # for font info
-from reportlab.lib.utils import getBytesIO, getStringIO, asBytes, char2int, rawBytes, asNative
+from reportlab.lib.utils import getBytesIO, getStringIO, asBytes, char2int, rawBytes, asNative, isUnicode
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
@@ -29,7 +29,7 @@ def _escape_and_limit(s):
     aR = R.append
     n = 0
     for c in s:
-        c = _ESCAPEDICT[c]
+        c = _ESCAPEDICT[char2int(c)]
         aR(c)
         n += len(c)
         if n>=200:
@@ -243,7 +243,7 @@ class PSCanvas:
         fontSize = self._fontSize
         fontsUsed = self._fontsUsed
         escape = self._escape
-        if not isinstance(s,str):
+        if not isUnicode(s):
             try:
                 s = s.decode('utf8')
             except UnicodeDecodeError as e:
