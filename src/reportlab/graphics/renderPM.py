@@ -16,7 +16,7 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.renderbase import StateTracker, getStateDelta, renderScaledDrawing
 from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1
 from math import sin, cos, pi, ceil
-from reportlab.lib.utils import getStringIO, getBytesIO, open_and_read
+from reportlab.lib.utils import getStringIO, getBytesIO, open_and_read, isUnicode
 from reportlab import rl_config
 
 class RenderPMError(Exception):
@@ -490,7 +490,7 @@ class PMCanvas:
             gs.drawString(x,y,text)
         else:
             fc = font
-            if not isinstance(text,str):
+            if not isUnicode(text):
                 try:
                     text = text.decode('utf8')
                 except UnicodeDecodeError as e:
@@ -500,7 +500,6 @@ class PMCanvas:
             FT = unicode2T1(text,[font]+font.substitutionFonts)
             n = len(FT)
             nm1 = n-1
-            wscale = 0.001*fontSize
             for i in range(n):
                 f, t = FT[i]
                 if f!=fc:
@@ -508,7 +507,7 @@ class PMCanvas:
                     fc = f
                 gs.drawString(x,y,t)
                 if i!=nm1:
-                    x += wscale*sum(map(f.widths.__getitem__,t))
+                    x += f.stringWidth(t.decode(f.encName),fontSize)
             if font!=fc:
                 _setFont(gs,fontName,fontSize)
 
