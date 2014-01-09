@@ -19,16 +19,16 @@ class RenderTestCase(unittest.TestCase):
         for x in glob.glob(os.path.join(outDir,'*')):
             os.remove(x)
 
-    if isPy3:
-        def test0(self):
-            from reportlab.graphics.renderPS import test
-            assert test(self.outDir) is None
-        def test2(self):
-            from reportlab.graphics.renderPM import test
-            assert test(self.outDir) is None
+    def test0(self):
+        from reportlab.graphics.renderPS import test
+        assert test(self.outDir) is None
     def test1(self):
         from reportlab.graphics.renderPDF import test
         assert test(self.outDir) is None
+    if isPy3:
+        def test2(self):
+            from reportlab.graphics.renderPM import test
+            assert test(self.outDir) is None
 
 def makeSuite():
     return makeSuiteForClasses(RenderTestCase)
