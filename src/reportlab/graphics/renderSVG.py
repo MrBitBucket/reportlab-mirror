@@ -13,6 +13,7 @@ from operator import getitem
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.colors import black
+from reportlab.lib.utils import asNative
 from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
@@ -439,6 +440,7 @@ class SVGCanvas:
         self.currGroup.appendChild(rect)
 
     def drawString(self, s, x, y, angle=0, link_info=None,**_svgAttrs):
+        s = asNative(s)
         if self.verbose: print("+++ SVGCanvas.drawString")
 
         if self._fillColor != None:
@@ -879,11 +881,11 @@ class _SVGRenderer(Renderer):
                 fontsize = delta.get('fontSize', self._canvas._fontSize)
                 self._canvas.setFont(fontname, fontsize)
 
-def test0(outdir='svgout'):
+def test(outDir='out-svg'):
     # print all drawings and their doc strings from the test
     # file
-    if not os.path.isdir(outdir):
-        os.mkdir(outdir)
+    if not os.path.isdir(outDir):
+        os.mkdir(outDir)
     #grab all drawings from the test module
     from reportlab.graphics import testshapes
     drawings = []
@@ -896,30 +898,24 @@ def test0(outdir='svgout'):
             docstring = eval('testshapes.' + funcname + '.__doc__')
             drawings.append((drawing, docstring))
 
-    # return
 
     i = 0
     for (d, docstring) in drawings:
-        filename = outdir + os.sep + 'renderSVG_%d.svg' % i
+        filename = os.path.join(outDir,'renderSVG_%d.svg' % i)
         drawToFile(d, filename)
-        # print 'saved', filename
         i += 1
 
-def test1():
     from reportlab.graphics.testshapes import getDrawing01
     d = getDrawing01()
-    drawToFile(d, "svgout/test.svg")
+    drawToFile(d, os.path.join(outDir,"test.svg"))
 
-def test2():
     from reportlab.lib.corp import RL_CorpLogo
     from reportlab.graphics.shapes import Drawing
 
     rl = RL_CorpLogo()
     d = Drawing(rl.width,rl.height)
     d.add(rl)
-    drawToFile(d, "svgout/corplogo.svg")
+    drawToFile(d, os.path.join(outDir,"corplogo.svg"))
 
 if __name__=='__main__':
-    test0()
-    test1()
-    test2()
+    test()
