@@ -25,10 +25,14 @@ class RenderTestCase(unittest.TestCase):
     def test1(self):
         from reportlab.graphics.renderPDF import test
         assert test(self.outDir) is None
-    if isPy3:
-        def test2(self):
-            from reportlab.graphics.renderPM import test
-            assert test(self.outDir) is None
+
+    def test2(self):
+        from reportlab.graphics.renderPM import test
+        assert test(self.outDir) is None
+
+    def test3(self):
+        from reportlab.graphics.renderSVG import test
+        assert test(self.outDir) is None
 
 def makeSuite():
     return makeSuiteForClasses(RenderTestCase)
