@@ -39,9 +39,6 @@ PyObject *RLPy_FindMethod(PyMethodDef *ml, PyObject *self, const char* name){
 #	ifndef Py_TYPE
 #		define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
 #	endif
-#	define PyBytes_AS_STRING	PyString_AS_STRING
-#	define PyBytes_AsString	PyString_AsString
-#	define PyBytes_GET_SIZE 	PyString_GET_SIZE
 #endif
 
 #ifndef LIBART_VERSION
@@ -824,25 +821,52 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 	int		c, textlen, i;
 	ArtBpath	*saved_path, *path;
 	void	*font = self->font;
+	PyObject	*textObj, *obj0;
 #ifdef	RENDERPM_FT
 	int				ft_font = self->ft_font;
 	Py_UNICODE		*utext;
-	PyObject		*unicode;
 	_ft_outliner_user_t _ft_data;
 #endif
 	if(!font){
 		PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: No font set!");
 		return NULL;
 		}
-	if(!PyArg_ParseTuple(args,"dds#:drawString", &x, &y, &text, &textlen)) return NULL;
+	if(!PyArg_ParseTuple(args,"ddO:drawString", &x, &y, &textObj)) return NULL;
 #ifdef	RENDERPM_FT
 	if(ft_font){
-		unicode = PyUnicode_DecodeUTF8(text, textlen,NULL);
-		if(!unicode) return NULL;
-		textlen = PyUnicode_GetSize(unicode);
-		utext = PyUnicode_AsUnicode(unicode);
+		/*we need unicode*/
+		if(PyUnicode_Check(textObj)){
+			obj0 = textObj;
+			}
+		else if(PyBytes_Check(textObj)){
+			text = PyBytes_AsString(textObj);
+			textlen = PyBytes_GET_SIZE(textObj);
+			obj0 = PyUnicode_DecodeUTF8(text, textlen,NULL);
+			if(!obj0) return NULL;
+			}
+		else{
+L0:			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: text must be bytes/unicode!");
+			return NULL;
+			}
+		textlen = PyUnicode_GetSize(obj0);
+		utext = PyUnicode_AsUnicode(obj0);
 		_ft_data.pathMax = 0;
 		_ft_data.path = NULL;
+		}
+	else {
+#endif
+		/*we need bytes*/
+		if(PyUnicode_Check(textObj)){
+			obj0 = PyUnicode_AsUTF8String(textObj);
+			if(!obj0) return NULL;
+			}
+		else if(PyBytes_Check(textObj)){
+			obj0 = textObj;
+			}
+		else goto L0;
+		text = PyBytes_AsString(obj0);
+		textlen = PyBytes_GET_SIZE(obj0);
+#ifdef	RENDERPM_FT
 		}
 #endif
 
@@ -904,6 +928,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 		trans[4] = w;	/*units are em units right?*/
 		art_affine_multiply(self->ctm, trans, self->ctm);
 		}
+	if(textObj!=obj0) Py_DECREF(obj0);
 #ifdef	RENDERPM_FT
 	if(ft_font) art_free(_ft_data.path);
 #endif
@@ -1013,33 +1038,60 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 	char*	text;
 	PyObject *P, *p;
 	ArtBpath	*path, *pp;
-	int		n, i, c;
+	int		textlen, i, c;
 	void	*font = self->font;
+	PyObject	*textObj, *obj0;
 #ifdef	RENDERPM_FT
 	int				ft_font = self->ft_font;
 	Py_UNICODE		*utext;
-	PyObject		*unicode;
 	_ft_outliner_user_t _ft_data;
 #endif
 	if(!font){
 		PyErr_SetString(PyExc_ValueError, "_renderPM.gstate__stringPath: No font set!");
 		return NULL;
 		}
-	if(!PyArg_ParseTuple(args,"s#|dd:_stringPath", &text, &n, &x, &y)) return NULL;
+	if(!PyArg_ParseTuple(args,"O|dd:_stringPath", &textObj, &x, &y)) return NULL;
 #ifdef	RENDERPM_FT
 	if(ft_font){
-		unicode = PyUnicode_DecodeUTF8(text, n,NULL);
-		if(!unicode) return NULL;
-		n = PyUnicode_GetSize(unicode);
-		utext = PyUnicode_AsUnicode(unicode);
+		/*we need unicode*/
+		if(PyUnicode_Check(textObj)){
+			obj0 = textObj;
+			}
+		else if(PyBytes_Check(textObj)){
+			text = PyBytes_AsString(textObj);
+			textlen = PyBytes_GET_SIZE(textObj);
+			obj0 = PyUnicode_DecodeUTF8(text, textlen,NULL);
+			if(!obj0) return NULL;
+			}
+		else{
+L0:			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: text must be bytes/unicode!");
+			return NULL;
+			}
+		textlen = PyUnicode_GetSize(obj0);
+		utext = PyUnicode_AsUnicode(obj0);
 		_ft_data.pathMax = 0;
 		_ft_data.path = NULL;
+		}
+	else {
+#endif
+		/*we need bytes*/
+		if(PyUnicode_Check(textObj)){
+			obj0 = PyUnicode_AsUTF8String(textObj);
+			if(!obj0) return NULL;
+			}
+		else if(PyBytes_Check(textObj)){
+			obj0 = textObj;
+			}
+		else goto L0;
+		text = PyBytes_AsString(obj0);
+		textlen = PyBytes_GET_SIZE(obj0);
+#ifdef	RENDERPM_FT
 		}
 #endif
 
 	s = self->fontSize/self->fontEMSize;
-	P = PyTuple_New(n);
-	for(i=0;i<n;i++){
+	P = PyTuple_New(textlen);
+	for(i=0;i<textlen;i++){
 #ifdef	RENDERPM_FT
 		if(ft_font){
 			c = utext[i];
@@ -1089,6 +1141,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 		PyTuple_SET_ITEM(P, i, p);
 		x += w*s;
 		}
+	if(textObj!=obj0) Py_DECREF(obj0);
 #ifdef	RENDERPM_FT
 	if(ft_font) art_free(_ft_data.path);
 #endif
