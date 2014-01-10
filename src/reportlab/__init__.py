@@ -23,4 +23,4 @@ else:
     from future_builtins import ascii
     import __builtin__
     __builtin__.ascii = ascii
-    del ascii, __builtins__
+    del ascii, __builtin__
