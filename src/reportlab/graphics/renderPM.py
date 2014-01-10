@@ -486,7 +486,6 @@ class PMCanvas:
             gfont = None
         font = getFont(fontName)
         if font._dynamicFont:
-            if isinstance(text,str): text = text.encode('utf8')
             gs.drawString(x,y,text)
         else:
             fc = font
