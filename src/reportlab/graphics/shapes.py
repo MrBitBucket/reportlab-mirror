@@ -14,7 +14,7 @@ from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName 
 from reportlab.lib import logger
 from reportlab.lib import colors
 from reportlab.lib.validators import *
-from reportlab.lib.utils import isSeq
+from reportlab.lib.utils import isSeq, asBytes
 isOpacity = NoneOr(isNumberInRange(0,1))
 from reportlab.lib.attrmap import *
 from reportlab.lib.rl_accel import fp_str
@@ -808,7 +808,7 @@ class Drawing(Group, Flowable):
         if 'py' in plotMode:
             filename = fnroot+'.py'
             if verbose: print(genFmt % ('py',filename))
-            open(filename,'w').write(self._renderPy())
+            open(filename,'wb').write(asBytes(self._renderPy().replace('\n',os.linesep)))
             ext = ext +  '/.py'
 
         logger.warnOnce.enabled, logger.infoOnce.enabled = _saved
