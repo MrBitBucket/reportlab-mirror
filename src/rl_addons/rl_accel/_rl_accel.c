@@ -1015,7 +1015,7 @@ static BoxObject* Box(PyObject* module, PyObject* args, PyObject* kw)
 	double		w;
 
 	if(!PyArg_ParseTupleAndKeywords(args,kw,"d|O:Box",kwlist,&w,&pC)) return NULL;
-	if(!(self = PyObject_NEW(BoxObject, &BoxType))) return NULL;
+	if(!(self = PyObject_New(BoxObject, &BoxType))) return NULL;
 	self->shrink = self->stretch = self->penalty = (double)(self->is_glue = self->is_penalty = self->flagged = 0);
 	self->is_box = 1;
 	self->width = w;
@@ -1034,7 +1034,7 @@ static BoxObject* Glue(PyObject* module, PyObject* args, PyObject* kw)
 	double		width,stretch,shrink;
 
 	if(!PyArg_ParseTupleAndKeywords(args,kw,"ddd:Glue",kwlist,&width,&stretch,&shrink)) return NULL;
-	if(!(self = PyObject_NEW(BoxObject, &BoxType))) return NULL;
+	if(!(self = PyObject_New(BoxObject, &BoxType))) return NULL;
 	self->penalty = (double)(self->is_box = self->is_penalty = self->flagged = 0);
 	self->is_glue = self->is_none = 1;
 	self->width = width;
@@ -1052,7 +1052,7 @@ static BoxObject* Penalty(PyObject* module, PyObject* args, PyObject* kw)
 	int		flagged = 0;
 
 	if(!PyArg_ParseTupleAndKeywords(args,kw,"dd|i:Penalty",kwlist,&width,&penalty,&flagged)) return NULL;
-	if(!(self = PyObject_NEW(BoxObject, &BoxType))) return NULL;
+	if(!(self = PyObject_New(BoxObject, &BoxType))) return NULL;
 	self->shrink = self->stretch = (double)(self->is_box = self->is_glue = 0);
 	self->is_penalty = self->is_none = 1;
 	self->width = width;
