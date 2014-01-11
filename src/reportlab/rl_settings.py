@@ -166,9 +166,18 @@ CMapSearchPath = (
                   )
 
 if sys.platform.startswith('linux'):
-    for root, dirs, files in os.walk('/usr/share/fonts/Type1'):
-        if not files: continue
-        T1SearchPath = T1SearchPath+(root,)
-    for root, dirs, files in os.walk('/usr/share/fonts/TTF'):
-        if not files: continue
-        TTFSearchPath = TTFSearchPath+(root,)
+    def _findFontDirs(*ROOTS):
+        R = [].append
+        for rootd in ROOTS:
+            for root, dirs, files in os.walk(rootd):
+                if not files: continue
+                R(root)
+        return tuple(R.__self__)
+    T1SearchPath = T1SearchPath + _findFontDirs(
+                        '/usr/share/fonts/type1',
+                        '/usr/share/fonts/Type1',
+                        )
+    TTFSearchPath = TTFSearchPath + _findFontDirs(
+                        '/usr/share/fonts/truetype',
+                        '/usr/share/fonts/TTF',
+                        )
