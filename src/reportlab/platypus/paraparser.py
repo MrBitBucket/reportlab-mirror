@@ -19,7 +19,7 @@ import unicodedata
 import reportlab.lib.sequencer
 
 from reportlab.lib.abag import ABag
-from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode, UniChr
+from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode, asBytes, UniChr
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -493,6 +493,11 @@ known_entities = dict([(k,UniChr(v)) for k,v in name2codepoint.items()])
 for k in greeks:
     if k not in known_entities:
         known_entities[k] = greeks[k]
+f = isPy3 and asBytes or asUnicode
+K = list(known_entities.keys())
+for k in K:
+    known_entities[f(k)] = known_entities[k]
+del k, f, K
 
 #------------------------------------------------------------------------
 class ParaFrag(ABag):
@@ -1178,9 +1183,9 @@ class ParaParser(HTMLParser):
     def handle_entityref(self, name):
         "Handles a named entity.  "
         try:
-            v = UniChr(known_entities[name])
+            v = known_entities[name]
         except:
-            v = u'&amp;%s;' % name
+            v = u'&%s;' % name
         self.handle_data(v)
 
 if __name__=='__main__':
