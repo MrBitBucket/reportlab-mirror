@@ -626,7 +626,7 @@ class PDFString:
                 raise ValueError("cannot escape %s %s" % (s, repr(s)))
             if escape&2:
                 es = es.replace('\\012','\n')
-            if escape&4 and _isbalanced(s):
+            if escape&4 and _isbalanced(es):
                 es = es.replace('\\(','(').replace('\\)',')')
             return pdfdocEnc(es)
         else:
