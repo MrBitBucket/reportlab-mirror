@@ -68,7 +68,7 @@ try:
                         ExpandGeneralEntities=1,
                         warnCB = warnCB,
                         srcName='string input',
-                        ReturnUTF8 = 1,
+                        ReturnUTF8 = 0,
                         )
     def parsexml(xmlText, oneOutermostTag=0,eoCB=None,entityReplacer=None,parseOpts={}):
         pyRXP_parser.eoCB = eoCB
