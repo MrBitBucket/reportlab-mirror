@@ -945,7 +945,7 @@ class QRRSBlock:
         rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel);
         if rsBlock == None:
             raise Exception("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel)
-        length = len(rsBlock) / 3
+        length = len(rsBlock) // 3
         list = []
         for i in range(length):
             count = rsBlock[i * 3 + 0]
