@@ -1163,7 +1163,7 @@ def _simpleSplit(txt,mW,SW):
 
 def simpleSplit(text,fontName,fontSize,maxWidth):
     from reportlab.pdfbase.pdfmetrics import stringWidth
-    lines = text.split('\n')
+    lines = asUnicode(text).split(u'\n')
     SW = lambda text, fN=fontName, fS=fontSize: stringWidth(text, fN, fS)
     if maxWidth:
         L = []
@@ -1177,10 +1177,11 @@ def escapeTextOnce(text):
     from xml.sax.saxutils import escape
     if text is None:
         return text
+    if isBytes(text): s = text.decode('utf8')
     text = escape(text)
-    text = text.replace('&amp;amp;', '&amp;')
-    text = text.replace('&amp;gt;', '&gt;')
-    text = text.replace('&amp;lt;', '&lt;')
+    text = text.replace(u'&amp;amp;',u'&amp;')
+    text = text.replace(u'&amp;gt;', u'&gt;')
+    text = text.replace(u'&amp;lt;', u'&lt;')
     return text
 
 if isPy3:
@@ -1242,25 +1243,25 @@ def commasplit(s):
     To avoid the ambiguity of 3 successive commas to denote a comma at the beginning
     or end of an item, add a space between the item seperator and the escaped comma.
     
-    >>> commasplit('a,b,c')
-    ['a', 'b', 'c']
-    >>> commasplit('a,, , b , c    ')
-    ['a,', 'b', 'c']
-    >>> commasplit('a, ,,b, c')
-    ['a', ',b', 'c']
+    >>> commasplit(u'a,b,c') == [u'a', u'b', u'c']
+    True
+    >>> commasplit('a,, , b , c    ') == [u'a,', u'b', u'c']
+    True
+    >>> commasplit(u'a, ,,b, c') == [u'a', u',b', u'c']
     '''
+    if isBytes(s): s = s.decode('utf8')
     n = len(s)-1
-    s += ' '
+    s += u' '
     i = 0
-    r=['']
+    r=[u'']
     while i<=n:
-        if s[i]==',':
-            if s[i+1]==',':
-                r[-1]+=','
+        if s[i]==u',':
+            if s[i+1]==u',':
+                r[-1]+=u','
                 i += 1
             else:
                 r[-1] = r[-1].strip()
-                if i!=n: r.append('')
+                if i!=n: r.append(u'')
         else:
             r[-1] += s[i]
         i+=1
@@ -1272,14 +1273,13 @@ def commajoin(l):
     Inverse of commasplit, except that whitespace around items is not conserved.
     Adds more whitespace than needed for simplicity and performance.
     
-    >>> commasplit(commajoin(['a', 'b', 'c']))
-    ['a', 'b', 'c']
-    >>> commasplit((commajoin(['a,', ' b ', 'c']))
-    ['a,', 'b', 'c']
-    >>> commasplit((commajoin(['a ', ',b', 'c']))
-    ['a', ',b', 'c']    
+    >>> commasplit(commajoin(['a', 'b', 'c'])) == [u'a', u'b', u'c']
+    True
+    >>> commasplit((commajoin([u'a,', u' b ', u'c'])) == [u'a,', u'b', u'c']
+    True
+    >>> commasplit((commajoin([u'a ', u',b', u'c'])) == [u'a', u',b', u'c'] 
     '''
-    return ','.join([ ' ' + i.replace(',', ',,') + ' ' for i in l ])
+    return u','.join([ u' ' + asUnicode(i).replace(u',', u',,') + u' ' for i in l ])
 
 def findInPaths(fn,paths,isfile=True,fail=False):
     '''search for relative files in likely places'''
