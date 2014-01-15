@@ -1,8 +1,8 @@
 __doc__="""helper for importing pdf structures into a ReportLab generated document
 """
-from reportlab.pdfbase.pdfdoc import format
-class PDFPattern:
-    __PDFObject__ = True
+from reportlab.pdfbase.pdfdoc import format, PDFObject, pdfdocEnc
+from reportlab.lib.utils import strTypes
+class PDFPattern(PDFObject):
     __RefOnly__ = 1
     def __init__(self, pattern_sequence, **keywordargs):
         """
@@ -20,11 +20,11 @@ class PDFPattern:
         self.pattern = pattern_sequence
         self.arguments = keywordargs
         for x in pattern_sequence:
-            if not isinstance(x,str) and not hasattr(x,'format'):
+            if not isinstance(x,strTypes) and not isinstance(x,PDFObject):
                 if len(x)!=1:
-                    raise ValueError("sequence elts must be strings or singletons containing strings: "+ascii(x))
-                if not isinstance(x[0],str):
-                    raise ValueError("Singletons must contain strings or instances only: "+ascii(x[0]))
+                    raise ValueError("sequence elts must be strings/bytes or singletons containing strings: "+ascii(x))
+                if not isinstance(x[0],strTypes):
+                    raise ValueError("Singletons must contain strings/bytes or PDFObject instances only: "+ascii(x[0]))
     def __setitem__(self, item, value):
         self.arguments[item] = value
     def __getitem__(self, item):
@@ -33,19 +33,19 @@ class PDFPattern:
         L = []
         arguments = self.arguments
         for x in self.pattern:
-            if isinstance(x,str):
-                L.append(x)
-            elif hasattr(x,'format'):
-                L.append(x.format(document) )
+            if isinstance(x,strTypes):
+                L.append(pdfdocEnc(x))
+            elif isinstance(x,PDFObject):
+                L.append(x.format(document))
             else:
                 name = x[0]
                 value = arguments.get(name, None)
                 if value is None:
                     raise ValueError("%s value not defined" % ascii(name))
-                if isinstance(value,str):
-                    L.append(value)
+                if isinstance(value,PDFObject):
+                    L.append(format(value,document))
+                elif isinstance(value,strTypes):
+                    L.append(pdfdocEnc(value))
                 else:
-                    L.append(value.formatformat(document))
-        return "".join(L)
-
-
+                    L.append(pdfdocEnc(str(value)))
+        return b"".join(L)
