@@ -21,7 +21,7 @@ from reportlab.platypus.flowables import Flowable, Preformatted, Spacer
 from reportlab import rl_config
 from reportlab.lib.styles import PropertySet, ParagraphStyle, _baseFontName
 from reportlab.lib import colors
-from reportlab.lib.utils import annotateException, IdentStr, flatten, isStr, asNative
+from reportlab.lib.utils import annotateException, IdentStr, flatten, isStr, asNative, strTypes
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.abag import ABag as CellFrame
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -1185,7 +1185,7 @@ class Table(Flowable):
         for c in cmds:
             c = tuple(c)
             (sc,sr), (ec,er) = c[1:3]
-            if sr>=n: continue
+            if isinstance(sr,strTypes) or sr>=n: continue
             if er>=n: er = n-1
             self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
 
