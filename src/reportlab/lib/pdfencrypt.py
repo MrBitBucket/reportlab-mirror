@@ -7,6 +7,7 @@ import sys, os, tempfile
 from reportlab.lib.utils import getBytesIO, md5, asBytes, int2Byte, char2int, rawUnicode, rawBytes, isPy3
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfutils
+from reportlab.pdfbase.pdfdoc import PDFObject
 from reportlab.platypus.flowables import Flowable
 from reportlab import rl_config
 
@@ -123,9 +124,8 @@ class StandardEncryption:
             raise ValueError("encryption not prepared!")
         return StandardEncryptionDictionary(O=self.O, U=self.U, P=self.P, revision=self.revision)
 
-class StandardEncryptionDictionary:
+class StandardEncryptionDictionary(PDFObject):
     __RefOnly__ = 1
-    __PDFObject__ = True
     def __init__(self, O, U, P, revision):
         self.O, self.U, self.P = O,U,P
         self.revision = revision

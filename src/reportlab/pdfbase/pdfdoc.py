@@ -69,7 +69,7 @@ def format(element, document, toplevel=0):
        Ensures that document parameters alter behaviour
        of formatting for all elements.
     """
-    if hasattr(element,'__PDFObject__'):
+    if isinstance(element,PDFObject):
         if not toplevel and hasattr(element, __RefOnly__):
             # the object cannot be a component at non top level.
             # make a reference to it and return it's format
@@ -111,14 +111,15 @@ class NoEncryption:
         # the representation of self in file if any (should be None or PDFDict)
         return None
 
-class DummyDoc:
+class PDFObject(object):
+    pass
+
+class DummyDoc(PDFObject):
     "used to bypass encryption when required"
-    __PDFObject__ = True
     encrypt = NoEncryption()
 
 ### the global document structure manager
-class PDFDocument:
-    __PDFObject__ = True
+class PDFDocument(PDFObject):
     # set this to define filters
     defaultStreamFilters = None
     encrypt = NoEncryption() # default no encryption
@@ -496,7 +497,7 @@ class PDFDocument:
         ### note references may "grow" during the final formatting pass: don't use d.keys()!
         # don't make references to other references, or non instances, unless they are named!
         #print"object type is ", type(object)
-        iob = hasattr(object,'__PDFObject__')
+        iob = isinstance(object,PDFObject)
         idToObject = self.idToObject
         if name is None and (not iob or object.__class__ is PDFObjectReference):
             return object
@@ -531,8 +532,7 @@ PDFtrue = "true"
 PDFfalse = "false"
 PDFnull = "null"
 
-class PDFText:
-    __PDFObject__ = True
+class PDFText(PDFObject):
     def __init__(self, t):
         self.t = t
     def format(self, document):
@@ -570,8 +570,7 @@ def _checkPdfdoc(utext):
     except UnicodeEncodeError as e:
         return 0
 
-class PDFString:
-    __PDFObject__ = True
+class PDFString(PDFObject):
     def __init__(self, s, escape=1, enc='auto'):
         '''s can be unicode/utf8 or a PDFString
         if escape is true then the output will be passed through escape
@@ -645,8 +644,7 @@ def PDFName(data,lo=chr(0x21),hi=chr(0x7e)):
             L[i] = "#"+hex(ord(c))[2:] # forget the 0x thing...
     return "/"+(''.join(L))
 
-class PDFDictionary:
-    __PDFObject__ = True
+class PDFDictionary(PDFObject):
     multiline = True
     def __init__(self, dict=None):
         """dict should be namestring to value eg "a": 122 NOT pdfname to value NOT "/a":122"""
@@ -768,9 +766,8 @@ class PDFStreamFilterBase85Encode:
 # need only one of these too
 PDFBase85Encode = PDFStreamFilterBase85Encode()
 
-class PDFStream:
+class PDFStream(PDFObject):
     '''set dictionary elements explicitly stream.dictionary[name]=value'''
-    __PDFObject__ = True
     ### compression stuff not implemented yet
     __RefOnly__ = 1 # must be at top level
     def __init__(self, dictionary=None, content=None, filters=None):
@@ -828,8 +825,7 @@ teststreamcontent = """
 1.00 0.00 1.00 rg
 n 72.00 72.00 432.00 648.00 re B*
 """
-class PDFArray:
-    __PDFObject__ = True
+class PDFArray(PDFObject):
     multiline = True
     def __init__(self, sequence):
         self.sequence = list(sequence)
@@ -855,8 +851,7 @@ class PDFArray:
 class PDFArrayCompact(PDFArray):
     multiline=False
 
-class PDFIndirectObject:
-    __PDFObject__ = True
+class PDFIndirectObject(PDFObject):
     __RefOnly__ = 1
     def __init__(self, name, content):
         self.name = name
@@ -871,8 +866,7 @@ class PDFIndirectObject:
                 +fcontent+ (b'' if fcontent.endswith(b'\r\n') else b'\r\n')
                 +b'endobj\r\n')
 
-class PDFObjectReference:
-    __PDFObject__ = True
+class PDFObjectReference(PDFObject):
     def __init__(self, name):
         self.name = name
     def format(self, document):
@@ -881,8 +875,7 @@ class PDFObjectReference:
         except:
             raise KeyError("forward reference to %s not resolved upon final formatting" % repr(self.name))
 
-class PDFFile:
-    __PDFObject__ = True
+class PDFFile(PDFObject):
     ### just accumulates strings: keeps track of current offset
     def __init__(self,pdfVersion=PDF_VERSION_DEFAULT):
         self.strings = []
@@ -914,8 +907,7 @@ class PDFFile:
 
 XREFFMT = '%0.10d %0.5d n'
 
-class PDFCrossReferenceSubsection:
-    __PDFObject__ = True
+class PDFCrossReferenceSubsection(PDFObject):
     def __init__(self, firstentrynumber, idsequence):
         self.firstentrynumber = firstentrynumber
         self.idsequence = idsequence
@@ -952,9 +944,7 @@ class PDFCrossReferenceSubsection:
         entries.append("")
         return pdfdocEnc('\r\n'.join(entries))
 
-class PDFCrossReferenceTable:
-    __PDFObject__ = True
-
+class PDFCrossReferenceTable(PDFObject):
     def __init__(self):
         self.sections = []
     def addsection(self, firstentry, ids):
@@ -970,9 +960,7 @@ class PDFCrossReferenceTable:
             L.append(fs)
         return pdfdocEnc(b''.join(L))
 
-class PDFTrailer:
-    __PDFObject__ = True
-
+class PDFTrailer(PDFObject):
     def __init__(self, startxref, Size=None, Prev=None, Root=None, Info=None, ID=None, Encrypt=None):
         self.startxref = startxref
         if Size is None or Root is None:
@@ -998,8 +986,7 @@ class PDFTrailer:
 
 #### chapter 6, doc structure
 
-class PDFCatalog:
-    __PDFObject__ = True
+class PDFCatalog(PDFObject):
     __Comment__ = "Document Root"
     __RefOnly__ = 1
     # to override, set as attributes
@@ -1132,7 +1119,7 @@ class PDFPage(PDFCatalog):
         else:
             #print self.Annots
             #raise ValueError("annotations not reimplemented yet")
-            if not hasattr(self.Annots,'__PDFObject__'):
+            if not isinstance(self.Annots,PDFObject):
                 self.Annots = PDFArray(self.Annots)
         if not self.Contents:
             stream = self.stream
@@ -1294,17 +1281,15 @@ DUMMYOUTLINE = """
       /Outlines
 >>"""
 
-class PDFOutlines0:
-    __PDFObject__ = True
+class PDFOutlines0(PDFObject):
     __Comment__ = "TEST OUTLINE!"
     text = DUMMYOUTLINE.replace("\n", '\r\n')
     __RefOnly__ = 1
     def format(self, document):
         return pdfdocEnc(self.text)
 
-class OutlineEntryObject:
+class OutlineEntryObject(PDFObject):
     "an entry in an outline"
-    __PDFObject__ = True
     Title = Dest = Parent = Prev = Next = First = Last = Count = None
     def format(self, document):
         D = {}
@@ -1318,7 +1303,7 @@ class OutlineEntryObject:
         PD = PDFDictionary(D)
         return PD.format(document)
 
-class PDFOutlines:
+class PDFOutlines(PDFObject):
     """
     takes a recursive list of outline destinations like::
 
@@ -1336,7 +1321,6 @@ class PDFOutlines:
 
     Higher layers may build this structure incrementally. KISS at base level.
     """
-    __PDFObject__ = True
     # first attempt, many possible features missing.
     #no init for now
     mydestinations = ready = None
@@ -1529,11 +1513,10 @@ def count(tree, closedict=None):
         return sum(counts)  #used to be: return reduce(add, counts)
     return 1
 
-class PDFInfo:
+class PDFInfo(PDFObject):
     """PDF documents can have basic information embedded, viewable from
     File | Document Info in Acrobat Reader.  If this is wrong, you get
     Postscript errors while printing, even though it does not print."""
-    __PDFObject__ = True
     producer = "ReportLab PDF Library - www.reportlab.com"
     creator = "ReportLab PDF Library - www.reportlab.com"
     title = "untitled"
@@ -1571,9 +1554,8 @@ class PDFInfo:
         return thing
 # skipping thumbnails, etc
 
-class Annotation:
+class Annotation(PDFObject):
     """superclass for all annotations."""
-    __PDFObject__ = True
     defaults = [("Type", PDFName("Annot"),)]
     required = ("Type", "Rect", "Contents", "Subtype")
     permitted = required+(
@@ -1725,8 +1707,7 @@ def rect_to_quad(Rect):
 # skipping names trees
 # skipping to chapter 7
 
-class PDFRectangle:
-    __PDFObject__ = True
+class PDFRectangle(PDFObject):
     def __init__(self, llx, lly, urx, ury):
         self.llx, self.lly, self.ulx, self.ury = llx, lly, urx, ury
     def format(self, document):
@@ -1741,8 +1722,7 @@ def _getTimeStamp():
         _NOWT = time.time()
     return _NOWT
 
-class PDFDate:
-    __PDFObject__ = True
+class PDFDate(PDFObject):
     # gmt offset now suppported properly
     def __init__(self, invariant=rl_config.invariant, dateFormatter=None):
         if invariant:
@@ -1765,10 +1745,10 @@ class PDFDate:
                         % (yyyy,mm,dd,hh,m,s,self.dhh,self.dmm))
         return format(PDFString(dfmt(*self.date)), doc)
 
-class Destination:
+class Destination(PDFObject):
     """
 
-    not a pdfobject!  This is a placeholder that can delegates
+    not a PDFObject!  This is a placeholder that can delegates
     to a pdf object only after it has been defined by the methods
     below.
 
@@ -1782,7 +1762,6 @@ class Destination:
         d.setPage(p)
         (at present setPageRef is called on generation of the page).
     """
-    __PDFObject__ = True
     representation = format = page = None
     def __init__(self,name):
         self.name = name
@@ -1814,8 +1793,7 @@ class Destination:
         self.page = page
         #self.fmt.page = page # may not yet be defined!
 
-class PDFDestinationXYZ:
-    __PDFObject__ = True
+class PDFDestinationXYZ(PDFObject):
     typename = "XYZ"
     def __init__(self, page, left, top, zoom):
         self.page = page
@@ -1827,8 +1805,7 @@ class PDFDestinationXYZ:
         A = PDFArray( [ pageref, PDFName(self.typename), self.left, self.top, self.zoom ] )
         return format(A, document)
 
-class PDFDestinationFit:
-    __PDFObject__ = True
+class PDFDestinationFit(PDFObject):
     typename = "Fit"
     def __init__(self, page):
         self.page = page
@@ -1840,8 +1817,7 @@ class PDFDestinationFit:
 class PDFDestinationFitB(PDFDestinationFit):
     typename = "FitB"
 
-class PDFDestinationFitH:
-    __PDFObject__ = True
+class PDFDestinationFitH(PDFObject):
     typename = "FitH"
     def __init__(self, page, top):
         self.page = page; self.top=top
@@ -1853,8 +1829,7 @@ class PDFDestinationFitH:
 class PDFDestinationFitBH(PDFDestinationFitH):
     typename = "FitBH"
 
-class PDFDestinationFitV:
-    __PDFObject__ = True
+class PDFDestinationFitV(PDFObject):
     typename = "FitV"
     def __init__(self, page, left):
         self.page = page; self.left=left
@@ -1866,8 +1841,7 @@ class PDFDestinationFitV:
 class PDFDestinationFitBV(PDFDestinationFitV):
     typename = "FitBV"
 
-class PDFDestinationFitR:
-    __PDFObject__ = True
+class PDFDestinationFitR(PDFObject):
     typename = "FitR"
     def __init__(self, page, left, bottom, right, top):
         self.page = page; self.left=left; self.bottom=bottom; self.right=right; self.top=top
@@ -1880,9 +1854,8 @@ class PDFDestinationFitR:
 
 # skipping filespecs
 
-class PDFResourceDictionary:
+class PDFResourceDictionary(PDFObject):
     """each element *could* be reset to a reference if desired"""
-    __PDFObject__ = True
     def __init__(self):
         self.ColorSpace = {}
         self.XObject = {}
@@ -1942,9 +1915,8 @@ class PDFResourceDictionary:
 #   to construct when given a user-facing Font object
 #
 ##############################################################################
-class PDFType1Font:
+class PDFType1Font(PDFObject):
     """no init: set attributes explicitly"""
-    __PDFObject__ = True
     __RefOnly__ = 1
     # note! /Name appears to be an undocumented attribute....
     name_attributes = "Type Subtype BaseFont Name".split()
@@ -2004,11 +1976,10 @@ class PDFTrueTypeFont(PDFType1Font):
 
 # skipping CMaps
 
-class PDFFormXObject:
+class PDFFormXObject(PDFObject):
     # like page requires .info set by some higher level (doc)
     # XXXX any resource used in a form must be propagated up to the page that (recursively) uses
     #   the form!! (not implemented yet).
-    __PDFObject__ = True
     XObjects = Annots = BBox = Matrix = Contents = stream = Resources = None
     hasImages = 1 # probably should change
     compression = 0
@@ -2069,9 +2040,8 @@ class PDFFormXObject:
         sdict["Resources"] = self.Resources
         return self.Contents.format(document)
 
-class PDFPostScriptXObject:
+class PDFPostScriptXObject(PDFObject):
     "For embedding PD (e.g. tray commands) in PDF"
-    __PDFObject__ = True
     def __init__(self, content=None):
         self.content = content
 
@@ -2085,13 +2055,12 @@ class PDFPostScriptXObject:
         return S.format(document)
 
 _mode2CS={'RGB':'DeviceRGB', 'L':'DeviceGray', 'CMYK':'DeviceCMYK'}
-class PDFImageXObject:
+class PDFImageXObject(PDFObject):
     # first attempts at a hard-coded one
     # in the file, Image XObjects are stream objects.  We already
     # have a PDFStream object with 3 attributes:  dictionary, content
     # and filters.  So the job of this thing is to construct the
     # right PDFStream instance and ask it to format itself.
-    __PDFObject__ = True
     def __init__(self, name, source=None, mask=None):
         self.name = name
         self.width = 24
@@ -2277,9 +2246,8 @@ class PDFSeparationCMYKColor:
                         )
                     ))
 
-class PDFFunction:
+class PDFFunction(PDFObject):
     """superclass for all function types."""
-    __PDFObject__ = True
     defaults = []
     required = ("FunctionType", "Domain")
     permitted = required+("Range",)
@@ -2341,9 +2309,8 @@ class PDFStitchingFunction(PDFFunction):
         d["Encode"] = PDFArray(self.Encode)
         return self.FunctionDict(**d)
 
-class PDFShading:
+class PDFShading(PDFObject):
     """superclass for all shading types."""
-    __PDFObject__ = True
     required = ("ShadingType", "ColorSpace")
     permitted = required+("Background", "BBox", "AntiAlias")
     def ShadingDict(self, **kw):

@@ -38,7 +38,7 @@ WHO WISH TO REMAIN ANONYMOUS.
 ### NOTE: MAKE THE STRING FORMATS DYNAMIC IN PATTERNS TO SUPPORT ENCRYPTION XXXX
 
 import string
-from reportlab.pdfbase.pdfdoc import PDFString, PDFStream, PDFDictionary, PDFName
+from reportlab.pdfbase.pdfdoc import PDFString, PDFStream, PDFDictionary, PDFName, PDFObject
 from reportlab.lib.colors import obj_R_G_B
 
 #==========================public interfaces
@@ -134,8 +134,7 @@ def getForm(canvas):
         cat.AcroForm = theform
         return theform
 
-class AcroForm:
-    __PDFObject__ = True
+class AcroForm(PDFObject):
     def __init__(self):
         self.fields = []
     def textField(self, canvas, title, xmin, ymin, xmax, ymax, value="", maxlen=1000000, multiline=0):
