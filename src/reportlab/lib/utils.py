@@ -57,7 +57,7 @@ if isPy3:
     def asNative(v):
         return asUnicode(v)
 
-    UniChr = chr
+    uniChr = chr
 
     def int2Byte(i):
         return bytes([i])
@@ -151,7 +151,7 @@ else:
     def asNative(v):
         return asBytes(v)
 
-    def UniChr(v):
+    def uniChr(v):
         return unichr(v)
 
     def isStr(v):

@@ -19,7 +19,7 @@ import unicodedata
 import reportlab.lib.sequencer
 
 from reportlab.lib.abag import ABag
-from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode, asBytes, UniChr
+from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode, asBytes, uniChr
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -489,7 +489,7 @@ greeks = {
     'zwnj': u'\u200c',
     }
 
-known_entities = dict([(k,UniChr(v)) for k,v in name2codepoint.items()])
+known_entities = dict([(k,uniChr(v)) for k,v in name2codepoint.items()])
 for k in greeks:
     if k not in known_entities:
         known_entities[k] = greeks[k]
@@ -726,7 +726,7 @@ class ParaParser(HTMLParser):
         except ValueError:
             self.unknown_charref(name)
             return
-        self.handle_data(UniChr(n))   #.encode('utf8'))
+        self.handle_data(uniChr(n))   #.encode('utf8'))
 
     def syntax_error(self,lineno,message):
         self._syntax_error(message)

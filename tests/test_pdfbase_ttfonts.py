@@ -17,11 +17,11 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, add32
 from reportlab import rl_config
-from reportlab.lib.utils import getBytesIO, isPy3, UniChr, int2Byte
+from reportlab.lib.utils import getBytesIO, isPy3, uniChr, int2Byte
 
 def utf8(code):
     "Convert a given UCS character index into UTF-8"
-    return UniChr(code).encode('utf8')
+    return uniChr(code).encode('utf8')
 
 def _simple_subset_generation(fn,npages,alter=0):
     c = Canvas(outputfile(fn))

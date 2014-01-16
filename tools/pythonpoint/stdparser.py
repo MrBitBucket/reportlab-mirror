@@ -8,7 +8,7 @@ pythonpoint.py.
 """
 
 import string, imp, sys, os, copy
-from reportlab.lib.utils import isSeq, UniChr, isPy3
+from reportlab.lib.utils import isSeq, uniChr, isPy3
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import recursiveImport
@@ -816,7 +816,7 @@ class PPMLParser(HTMLParser):
         except ValueError:
             self.unknown_charref(name)
             return
-        self.handle_data(UniChr(n).encode('utf8'))
+        self.handle_data(uniChr(n).encode('utf8'))
 
     #HTMLParser interface
     def handle_starttag(self, tag, attrs):
@@ -855,7 +855,7 @@ class PPMLParser(HTMLParser):
     def handle_entityref(self, name):
         "Handles a named entity.  "
         try:
-            v = UniChr(known_entities[name])
+            v = uniChr(known_entities[name])
         except:
             v = u'&amp;%s;' % name
         self.handle_data(v)
