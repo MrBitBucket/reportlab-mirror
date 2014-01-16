@@ -1,6 +1,7 @@
 __version__=''' $Id'''
 __doc__='''basic tests.'''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
+from reportlab.lib.utils import asBytes
 setOutDir(__name__)
 
 import unittest
@@ -52,8 +53,28 @@ class RlAccelTestCase(unittest.TestCase):
 
     def testAsciiBase85Decode(self):
         for func, kind in getFuncs('asciiBase85Decode'):
-            assert func('6ul^K@;[2RDIdd%@f~>')=='Dragan Andric',"%s asciiBase85Decode('6ul^K@;[2RDIdd%@f~>')=='Dragan Andric' fails with value %s!" % (
+            assert func('6ul^K@;[2RDIdd%@f~>')==b'Dragan Andric',"%s asciiBase85Decode('6ul^K@;[2RDIdd%@f~>')=='Dragan Andric' fails with value %s!" % (
                     kind,ascii(func('Dragan Andric')))
+
+    def testAsciiBase85RoundTrip(self):
+        plain = 'What is the average velocity of a sparrow?'
+        eFuncs = getFuncs('asciiBase85Encode')
+        for i in xrange(256):
+            for j,(dfunc, kind) in enumerate(getFuncs('asciiBase85Decode')):
+                efunc = eFuncs[j][0]
+                encoded = efunc(plain)
+                decoded = dfunc(encoded)
+                assert decoded == asBytes(plain,'latin1'), "Round-trip AsciiBase85 failed for %s & %s\nplain=%s\nencoded=%s\ndecoded=%s" % (
+                        ascii(efunc),ascii(dfunc), ascii(plain), ascii(encoded), ascii(decoded))
+                if not j:
+                    enc0 = encoded
+                    dec0 = decoded
+                else:
+                    assert encoded==enc0, " Python & C encodings differ failed for %s & %s\nplain=%s\nencode0=%s\nencoded=%s\ndecode0=%sdecoded=%s" % (
+                        ascii(efunc),ascii(dfunc), ascii(plain), ascii(enc0), ascii(encoded), ascii(dec0), ascii(decoded))
+                    assert decoded==dec0, " Python & C decodings differ failed for %s & %s\nplain=%s\nencode0=%s\nencoded=%s\ndecode0=%sdecoded=%s" % (
+                        ascii(efunc),ascii(dfunc), ascii(plain), ascii(enc0), ascii(encoded), ascii(dec0), ascii(decoded))
+            plain += chr(i)
 
     def testEscapePDF(self):
         for func, kind in getFuncs('escapePDF'):
