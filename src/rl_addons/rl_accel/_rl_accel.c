@@ -34,7 +34,6 @@
 
 struct module_state	{
 	PyObject *moduleVersion;
-	PyObject *error;
 	int moduleLineno;
 #ifndef isPy3
 	PyObject *module;
@@ -42,6 +41,8 @@ struct module_state	{
 	};
 #ifdef isPy3
 #	define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#	define STRNAME "str"
+#	define BYTESNAME "bytes"
 #else
 	static struct module_state _state;
 #	include "bytesobject.h"
@@ -56,7 +57,47 @@ struct module_state	{
 #	define PyBytes_AsString		PyString_AsString
 #	define PyBytes_GET_SIZE 	PyString_GET_SIZE
 #	define GETSTATE(m) (&_state)
+#	define STRNAME "unicode"
+#	define BYTESNAME "str"
 #endif
+
+#define ERROR_EXIT() {GETSTATE(module)->moduleLineno=__LINE__;goto L_ERR;}
+#define ADD_TB(module,name) _add_TB(module,name)
+#include "compile.h"
+#include "frameobject.h"
+#include "traceback.h"
+static void _add_TB(PyObject *module,char *funcname)
+{
+	int	moduleLineno = GETSTATE(module)->moduleLineno;
+	PyObject *py_globals = NULL;
+	PyCodeObject *py_code = NULL;
+	PyFrameObject *py_frame = NULL;
+
+#ifdef isPy3
+	py_globals = PyModule_GetDict(module);
+#else
+	py_globals = PyModule_GetDict(GETSTATE(module)->module);
+#endif
+	if(!py_globals) goto bad;
+	py_code = PyCode_NewEmpty(
+						__FILE__,		/*PyObject *filename,*/
+						funcname,	/*PyObject *name,*/
+						moduleLineno	/*int firstlineno,*/
+						);
+	if(!py_code) goto bad;
+	py_frame = PyFrame_New(
+		PyThreadState_Get(), /*PyThreadState *tstate,*/
+		py_code,			 /*PyCodeObject *code,*/
+		py_globals,			 /*PyObject *globals,*/
+		0					 /*PyObject *locals*/
+		);
+	if(!py_frame) goto bad;
+	py_frame->f_lineno = moduleLineno;
+	PyTraceBack_Here(py_frame);
+bad:
+	Py_XDECREF(py_code);
+	Py_XDECREF(py_frame);
+}
 
 #define a85_0		   1L
 #define a85_1		   85L
@@ -70,9 +111,27 @@ PyObject *_a85_encode(PyObject *module, PyObject *args)
 	int				length, blocks, extra, i, k, lim;
 	unsigned long	block, res;
 	char			*buf;
-	PyObject		*retVal;
-
-	if (!PyArg_ParseTuple(args, "z#", &inData, &length)) return NULL;
+	PyObject		*retVal=NULL, *inObj, *_o1=NULL;
+	if(!PyArg_ParseTuple(args, "O", &inObj)) return NULL;
+	if(PyUnicode_Check(inObj)){
+		_o1 = PyUnicode_AsLatin1String(inObj);
+		if(!_o1){
+			PyErr_SetString(PyExc_ValueError,"argument not decodable as latin1");
+			ERROR_EXIT();
+			}
+		inData = PyBytes_AsString(_o1);
+		inObj = _o1;
+		if(!inData){
+			PyErr_SetString(PyExc_ValueError,"argument not converted to internal char string");
+			ERROR_EXIT();
+			}
+		}
+	else if(!PyBytes_Check(inObj)){
+		PyErr_SetString(PyExc_ValueError,"argument should be " BYTESNAME " or latin1 decodable " STRNAME);
+		ERROR_EXIT();
+		}
+	inData = PyBytes_AsString(inObj);
+	length = PyBytes_GET_SIZE(inObj);
 
 	blocks = length / 4;
 	extra = length % 4;
@@ -135,7 +194,16 @@ PyObject *_a85_encode(PyObject *module, PyObject *args)
 	buf[k++] = '>';
 	retVal = PyUnicode_FromStringAndSize(buf, k);
 	free(buf);
+	if(!retVal){
+		PyErr_SetString(PyExc_ValueError,"failed to create return " STRNAME " value" );
+		ERROR_EXIT();
+		}
+L_exit:
+	Py_XDECREF(_o1);
 	return retVal;
+L_ERR:
+	ADD_TB(module,"asciiBase85Encode");
+	goto L_exit;
 }
 
 PyObject *_a85_decode(PyObject *module, PyObject *args)
@@ -143,9 +211,27 @@ PyObject *_a85_decode(PyObject *module, PyObject *args)
 	unsigned char	*inData, *p, *q, *tmp, *buf;
 	unsigned int	length, blocks, extra, k, num, c1, c2, c3, c4, c5;
 	static unsigned pad[] = {0,0,0xffffff,0xffff,0xff};
-	PyObject		*retVal;
-
-	if (!PyArg_ParseTuple(args, "z#", &inData, &length)) return NULL;
+	PyObject		*retVal=NULL, *inObj, *_o1=NULL;
+	if(!PyArg_ParseTuple(args, "O", &inObj)) return NULL;
+	if(PyUnicode_Check(inObj)){
+		_o1 = PyUnicode_AsLatin1String(inObj);
+		if(!_o1){
+			PyErr_SetString(PyExc_ValueError,"argument not decodable as latin1");
+			ERROR_EXIT();
+			}
+		inData = PyBytes_AsString(_o1);
+		inObj = _o1;
+		if(!inData){
+			PyErr_SetString(PyExc_ValueError,"argument not converted to internal char string");
+			ERROR_EXIT();
+			}
+		}
+	else if(!PyBytes_Check(inObj)){
+		PyErr_SetString(PyExc_ValueError,"argument should be " BYTESNAME " or latin1 decodable " STRNAME);
+		ERROR_EXIT();
+		}
+	inData = PyBytes_AsString(inObj);
+	length = PyBytes_GET_SIZE(inObj);
 	for(k=0,q=inData, p=q+length;q<p && (q=(unsigned char*)strchr((const char*)q,'z'));k++, q++);	/*count 'z'*/
 	length += k*4;
 	tmp = q = (unsigned char*)malloc(length+1);
@@ -163,9 +249,9 @@ PyObject *_a85_decode(PyObject *module, PyObject *args)
 	length = q - inData;
 	buf = inData+length-2;
 	if(buf[0]!='~' || buf[1]!='>'){
-		PyErr_SetString(GETSTATE(module)->error, "Invalid terminator for Ascii Base 85 Stream");
+		PyErr_SetString(PyExc_ValueError, "Invalid terminator for Ascii Base 85 Stream");
 		free(inData);
-		return NULL;
+		ERROR_EXIT();
 		}
 	length -= 2;
 	buf[0] = 0;
@@ -204,10 +290,19 @@ PyObject *_a85_decode(PyObject *module, PyObject *args)
 				}
 			}
 		}
-	retVal = PyUnicode_FromStringAndSize((const char*)buf, k);
+	retVal = PyBytes_FromStringAndSize((const char*)buf, k);
 	free(buf);
 	free(tmp);
+	if(!retVal){
+		PyErr_SetString(PyExc_ValueError,"failed to create return " BYTESNAME " value" );
+		ERROR_EXIT();
+		}
+L_exit:
+	Py_XDECREF(_o1);
 	return retVal;
+L_ERR:
+	ADD_TB(module,"asciiBase85Decode");
+	goto L_exit;
 }
 
 static	char* _fp_fmts[]={"%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f", "%.6f"};
@@ -222,7 +317,7 @@ static	char *_fp_one(PyObject* module,PyObject *pD)
 		Py_DECREF(pD);
 		}
 	else {
-		PyErr_SetString(GETSTATE(module)->error, "bad numeric value");
+		PyErr_SetString(PyExc_ValueError, "bad numeric value");
 		return NULL;
 		}
 	ad = fabs(d);
@@ -232,7 +327,7 @@ static	char *_fp_one(PyObject* module,PyObject *pD)
 		}
 	else{
 		if(ad>1e20){
-			PyErr_SetString(GETSTATE(module)->error, "number too large");
+			PyErr_SetString(PyExc_ValueError, "number too large");
 			return NULL;
 			}
 		if(ad>1) l = min(max(0,6-(int)log10(ad)),6);
@@ -458,43 +553,6 @@ static PyObject *_GetAttrString(PyObject *obj, char *name)
 	return res;
 }
 
-#define ERROR_EXIT() {GETSTATE(module)->moduleLineno=__LINE__;goto L_ERR;}
-#define ADD_TB(module,name) _add_TB(module,name)
-#include "compile.h"
-#include "frameobject.h"
-#include "traceback.h"
-static void _add_TB(PyObject *module,char *funcname)
-{
-	int	moduleLineno = GETSTATE(module)->moduleLineno;
-	PyObject *py_globals = NULL;
-	PyCodeObject *py_code = NULL;
-	PyFrameObject *py_frame = NULL;
-
-#ifdef isPy3
-	py_globals = PyModule_GetDict(module);
-#else
-	py_globals = PyModule_GetDict(GETSTATE(module)->module);
-#endif
-	if(!py_globals) goto bad;
-	py_code = PyCode_NewEmpty(
-						__FILE__,		/*PyObject *filename,*/
-						funcname,	/*PyObject *name,*/
-						moduleLineno	/*int firstlineno,*/
-						);
-	if(!py_code) goto bad;
-	py_frame = PyFrame_New(
-		PyThreadState_Get(), /*PyThreadState *tstate,*/
-		py_code,			 /*PyCodeObject *code,*/
-		py_globals,			 /*PyObject *globals,*/
-		0					 /*PyObject *locals*/
-		);
-	if(!py_frame) goto bad;
-	py_frame->f_lineno = moduleLineno;
-	PyTraceBack_Here(py_frame);
-bad:
-	Py_XDECREF(py_code);
-	Py_XDECREF(py_frame);
-}
 static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 {
 	long		i, j, _i1, _i2;
@@ -680,7 +738,7 @@ static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObjec
 		encStr = PyBytes_AS_STRING(encoding);
 		}
 	else{
-		PyErr_SetString(GETSTATE(module)->error, "invalid type for encoding");
+		PyErr_SetString(PyExc_ValueError, "invalid type for encoding");
 		ERROR_EXIT();
 		}
 	L = NULL;
@@ -696,7 +754,7 @@ static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObjec
 			_o1 = NULL;
 			}
 		else{
-			PyErr_SetString(GETSTATE(module)->error, "invalid type for text");
+			PyErr_SetString(PyExc_ValueError, "invalid type for argument text");
 			ERROR_EXIT();
 			}
 		}
@@ -1197,8 +1255,8 @@ _BOX__DOC__
 );
 
 static struct PyMethodDef _methods[] = {
-	{"asciiBase85Encode", _a85_encode, METH_VARARGS, "asciiBase85Encode(\".....\") return encoded string"},
-	{"asciiBase85Decode", _a85_decode, METH_VARARGS, "asciiBase85Decode(\".....\") return decoded string"},
+	{"asciiBase85Encode", _a85_encode, METH_VARARGS, "asciiBase85Encode(\".....\") return encoded " STRNAME},
+	{"asciiBase85Decode", _a85_decode, METH_VARARGS, "asciiBase85Decode(\".....\") return decoded " BYTESNAME},
 	{"escapePDF", escapePDF, METH_VARARGS, "escapePDF(s) return PDF safed string"},
 	{"fp_str", _fp_str, METH_VARARGS, "fp_str(a0, a1,...) convert numerics to blank separated string"},
 	{"sameFrag", sameFrag, 1, "sameFrag(f,g) return 1 if fragments have same style"},
@@ -1220,14 +1278,12 @@ static struct PyMethodDef _methods[] = {
 #ifdef isPy3
 static int _traverse(PyObject *m, visitproc visit, void *arg) {
 	struct module_state *st = GETSTATE(m);
-	Py_VISIT(st->error);
 	Py_VISIT(st->moduleVersion);
 	return 0;
 	}
 
 static int _clear(PyObject *m) {
 	struct module_state *st = GETSTATE(m);
-	Py_CLEAR(st->error);
 	Py_CLEAR(st->moduleVersion);
 	return 0;
 	}
@@ -1260,14 +1316,11 @@ void init_rl_accel(void)
 	if(!module) goto err;
 	st=GETSTATE(module);
 	/*Add some symbolic constants to the module */
-	st->error = PyErr_NewException("_rl_accel.error", NULL, NULL);
-	if(!st->error) goto err;
 	st->moduleVersion = PyBytes_FromString(VERSION);
 	if(!st->moduleVersion)goto err;
 #ifndef isPy3
 	st->module = module;
 #endif
-	PyModule_AddObject(module, "error", st->error);
 	PyModule_AddObject(module, "version", st->moduleVersion );
 
 #ifdef	HAVE_BOX
@@ -1291,7 +1344,6 @@ err:/*Check for errors*/
 #ifdef isPy3
 	if(st){
 		Py_XDECREF(st->moduleVersion);
-		Py_XDECREF(st->error);
 		}
 	Py_XDECREF(module);
 	return NULL;

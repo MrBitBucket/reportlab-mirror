@@ -29,7 +29,7 @@ for fn in __all__:
         _py_funcs[fn] = None
 
 if _py_funcs:
-    from reportlab.lib.utils import isBytes, isUnicode, isSeq, isPy3, rawBytes
+    from reportlab.lib.utils import isBytes, isUnicode, isSeq, isPy3, rawBytes, asNative
     from math import log
     from struct import unpack
 
@@ -242,10 +242,10 @@ if 'asciiBase85Decode' in _py_funcs:
     def asciiBase85Decode(input):
         """Decodes input using ASCII-Base85 coding.
 
-        This is not used - Acrobat Reader decodes for you
+        This is not normally used - Acrobat Reader decodes for you
         - but a round trip is essential for testing."""
         #strip all whitespace
-        stripped = ''.join(input.split())
+        stripped = ''.join(asNative(input).split())
         #check end
         assert stripped[-2:] == '~>', 'Invalid terminator for Ascii Base 85 Stream'
         stripped = stripped[:-2]  #chop off terminator
@@ -311,8 +311,8 @@ if 'asciiBase85Decode' in _py_funcs:
                 lastword = ''
             out(lastword)
 
-        #terminator code for ascii 85
-        return ''.join(out.__self__)
+        r = ''.join(out.__self__)
+        return r.encode('latin1') if isUnicode(input) else r
     _py_funcs['asciiBase85Decode'] = asciiBase85Decode
 
 if 'sameFrag' in _py_funcs:
