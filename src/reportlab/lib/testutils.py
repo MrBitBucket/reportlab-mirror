@@ -335,3 +335,7 @@ class ScriptThatMakesFileTest(unittest.TestCase):
 
 def equalStrings(a,b,enc='utf8'):
     return a==b if type(a)==type(b) else asUnicode(a,enc)==asUnicode(b,enc)
+
+def eqCheck(r,x):
+    if r!=x:
+        print('Strings unequal\nexp: %s\ngot: %s' % (ascii(x),ascii(r)))
