@@ -18,6 +18,7 @@ if isPy3:
 
     import builtins
     builtins.cmp = cmp
+    builtins.xrange = range
     del cmp, builtins
 else:
     from future_builtins import ascii

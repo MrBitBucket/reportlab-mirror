@@ -124,7 +124,6 @@ if isPy3:
         return s.encode('latin1') if isinstance(s,str) else s
     import builtins
     rl_exec = getattr(builtins,'exec')
-    builtins.xrange = range
     del builtins
     def char2int(s):
         return  s if isinstance(s,int) else ord(s if isinstance(s,str) else s.decode('latin1'))
@@ -132,7 +131,10 @@ if isPy3:
         if v.__traceback__ is not b:
             raise v.with_traceback(b)
         raise v
-
+    def rl_add_builtins(**kwd):
+        import builtins
+        for k,v in kwd.items():
+            setattr(builtins,k,v)
 else:
     bytesT = str
     unicodeT = unicode
@@ -228,6 +230,10 @@ else:
     rl_exec("""def rl_reraise(t, v, b=None):\n\traise t, v, b\n""")
 
     char2int = ord
+    def rl_add_builtins(**kwd):
+        import __builtin__
+        for k,v in kwd.items():
+            setattr(__builtin__,k,v)
 
 def zipImported(ldr=None):
     try:
