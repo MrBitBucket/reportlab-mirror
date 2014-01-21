@@ -9,7 +9,7 @@ This module contains the script for building the user guide.
 
 def run(pagesize=None, verbose=0, outDir=None):
     import sys,os
-    from reportlab.lib.utils import open_and_read
+    from reportlab.lib.utils import open_and_read, asUnicode
     cwd = os.getcwd()
     docsDir=os.path.dirname(os.path.dirname(sys.argv[0]) or cwd)
     topDir=os.path.dirname(docsDir)
@@ -50,7 +50,8 @@ def run(pagesize=None, verbose=0, outDir=None):
         'graph_widgets',
         'app_demos',
         ):
-        exec(open_and_read(f+'.py',mode='t'), G, G)
+        #python source is supposed to be utf8 these days
+        exec(asUnicode(open_and_read(f+'.py')), G, G)
     del G
 
     story = getStory()
