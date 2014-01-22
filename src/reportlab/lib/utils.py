@@ -465,11 +465,11 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
             msg = "Could not import '%s'" % modulename
             if baseDir:
                 msg = msg + " under %s" % baseDir
-            raise ImportError(msg)
+            annotateException(msg)
         except:
             e = sys.exc_info()
             msg = "Exception raised while importing '%s': %s" % (modulename, e[1])
-            raise ImportError(msg)
+            annotateException(msg)
     finally:
         sys.path = opath
 
