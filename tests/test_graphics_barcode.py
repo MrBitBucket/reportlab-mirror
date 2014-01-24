@@ -21,11 +21,12 @@ class BarcodeWidgetTestCase(unittest.TestCase):
     def test0(self):
         from reportlab.graphics.shapes import Drawing
         from reportlab.graphics.barcode import widgets
+        from reportlab.graphics.barcode import qr
         outDir = self.outDir
         html = ['<html><head></head><body>']
         a = html.append
         formats = ['gif','pict','pdf']
-        CN='''BarcodeI2of5
+        CN=[(name,getattr(widgets,name)) for name in '''BarcodeI2of5
                 BarcodeCode128
                 BarcodeStandard93
                 BarcodeExtended93
@@ -36,9 +37,9 @@ class BarcodeWidgetTestCase(unittest.TestCase):
                 BarcodeCode11
                 BarcodeFIM
                 BarcodePOSTNET
-                BarcodeUSPS_4State'''.split()
-        for name in CN:
-            C = getattr(widgets,name)
+                BarcodeUSPS_4State'''.split()]
+        CN += [('QR',qr.QrCodeWidget)]
+        for name,C in CN:
             i = C()
             D = Drawing(100,50)
             D.add(i)
