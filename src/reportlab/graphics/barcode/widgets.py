@@ -156,18 +156,10 @@ BarcodeI2of5 = _BCW('BarcodeI2of5',
         ),
     'reportlab.graphics.barcode.common',
     1234,
-    _bcTransMap = {},
-    _tests = [
-        '12',
-        '1234',
-        '123456',
-        '12345678',
-        '1234567890'
-        ],
-        )
+    )
 
 BarcodeCode128 = _BCW('BarcodeCode128',
-                BarcodeI2of5,
+                _BarcodeWidget,
                 """Code 128 encodes any number of characters in the ASCII character set.""",
                 "Code128",
                 AttrMap(BASE=BarcodeI2of5,UNWANTED=('bearers','checksum','ratio','checksum','stop')),
@@ -177,7 +169,7 @@ BarcodeCode128 = _BCW('BarcodeCode128',
                 )
 
 BarcodeStandard93=_BCW('BarcodeStandard93',
-                        BarcodeCode128,
+                        _BarcodeWidget,
                         """This is a compressed form of Code 39""",
                         "Standard93",
                         AttrMap(BASE=BarcodeCode128,
@@ -188,54 +180,56 @@ BarcodeStandard93=_BCW('BarcodeStandard93',
                         )
 
 BarcodeExtended93=_BCW('BarcodeExtended93',
-                        BarcodeStandard93,
+                        _BarcodeWidget,
                         """This is a compressed form of Code 39, allowing the full ASCII charset""",
                         "Extended93",
-                        None,
+                        AttrMap(BASE=BarcodeCode128,
+                                stop = AttrMapValue(isBoolean, desc='if we use start/stop symbols (default 1)'),
+                                ),
                         'reportlab.graphics.barcode.code93',
                         "L@@K! Code 93 ;-)",
                         )
 
 BarcodeStandard39=_BCW('BarcodeStandard39',
-                        BarcodeI2of5,
+                        _BarcodeWidget,
                         """Code39 is widely used in non-retail, especially US defence and health.
                         Allowed characters are 0-9, A-Z (caps only), space, and -.$/+%*.""",
                         "Standard39",
-                        None,
+                        AttrMap(BASE=BarcodeI2of5),
                         'reportlab.graphics.barcode.code39',
                         "A012345B%R",
                         )
 
 BarcodeExtended39=_BCW('BarcodeExtended39',
-                        BarcodeI2of5,
+                        _BarcodeWidget,
                         """Extended 39 encodes the full ASCII character set by encoding
                         characters as pairs of Code 39 characters; $, /, % and + are used as
                         shift characters.""",
                         "Extended39",
-                        None,
+                        AttrMap(BASE=BarcodeI2of5),
                         'reportlab.graphics.barcode.code39',
                         "A012345B}",
                         )
 
 BarcodeMSI=_BCW('BarcodeMSI',
-                BarcodeI2of5,
+                _BarcodeWidget,
                 """MSI is used for inventory control in retail applications.
 
                 There are several methods for calculating check digits so we
                 do not implement one.
                 """,
                 "MSI",
-                None,
+                AttrMap(BASE=BarcodeI2of5),
                 'reportlab.graphics.barcode.common',
                 1234,
                 )
 
 BarcodeCodabar=_BCW('BarcodeCodabar',
-                    BarcodeI2of5,
+                    _BarcodeWidget,
                     """Used in blood banks, photo labs and FedEx labels.
                     Encodes 0-9, -$:/.+, and four start/stop characters A-D.""",
                     "Codabar",
-                    None,
+                    AttrMap(BASE=BarcodeI2of5),
                     'reportlab.graphics.barcode.common',
                     "A012345B",
                     )
