@@ -20,25 +20,12 @@ class BarcodeWidgetTestCase(unittest.TestCase):
 
     def test0(self):
         from reportlab.graphics.shapes import Drawing
-        from reportlab.graphics.barcode import widgets
-        from reportlab.graphics.barcode import qr
         outDir = self.outDir
         html = ['<html><head></head><body>']
         a = html.append
         formats = ['gif','pict','pdf']
-        CN=[(name,getattr(widgets,name)) for name in '''BarcodeI2of5
-                BarcodeCode128
-                BarcodeStandard93
-                BarcodeExtended93
-                BarcodeStandard39
-                BarcodeExtended39
-                BarcodeMSI
-                BarcodeCodabar
-                BarcodeCode11
-                BarcodeFIM
-                BarcodePOSTNET
-                BarcodeUSPS_4State'''.split()]
-        CN += [('QR',qr.QrCodeWidget)]
+        from reportlab.graphics.barcode import getCodes
+        CN = list(getCodes().items())
         for name,C in CN:
             i = C()
             D = Drawing(100,50)
@@ -50,6 +37,13 @@ class BarcodeWidgetTestCase(unittest.TestCase):
                 self.assertTrue(os.path.isfile(efn),msg="Expected file %r was not created" % efn)
         a('</body></html>')
         open(os.path.join(outDir,'index.html'),'w').write('\n'.join(html))
+
+    def test1(self):
+        '''test createBarcodeDrawing'''
+        from reportlab.graphics.barcode import createBarcodeDrawing
+        from reportlab.graphics.barcode import getCodeNames
+        for name in getCodeNames():
+            d = createBarcodeDrawing(name)
 
 def makeSuite():
     return makeSuiteForClasses(BarcodeWidgetTestCase)
