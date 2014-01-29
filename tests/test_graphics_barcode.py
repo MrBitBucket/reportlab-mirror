@@ -44,6 +44,8 @@ class BarcodeWidgetTestCase(unittest.TestCase):
         from reportlab.graphics.barcode import getCodeNames
         for name in getCodeNames():
             d = createBarcodeDrawing(name)
+            for t in getattr(d.__class__,'_tests',[]):
+                createBarcodeDrawing(name,value=t)
 
 def makeSuite():
     return makeSuiteForClasses(BarcodeWidgetTestCase)
