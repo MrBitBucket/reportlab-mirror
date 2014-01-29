@@ -85,21 +85,20 @@ class _BarcodeWidget(PlotArea):
         self._Gadd(String(self.x+x,self.y+y,text,fontName=fontName,fontSize=fontSize,
                             textAnchor=anchor,fillColor=self.textColor))
 
-def _BCW(name, WKlass, doc, codeName,attrMap,mod,value,**kwds):
+def _BCW(doc,codeName,attrMap,mod,value,**kwds):
     """factory for Barcode Widgets"""
     _pre_init = kwds.pop('_pre_init','')
     _methods = kwds.pop('_methods','')
+    name = 'Barcode'+codeName
     ns = vars().copy()
     code = 'from %s import %s' % (mod,codeName)
     rl_exec(code,ns)
-    ns['WKlass'] = WKlass.__name__
     ns['_BarcodeWidget'] = _BarcodeWidget
-    code = '''class %(name)s(%(WKlass)s,%(codeName)s):
+    code = '''class %(name)s(_BarcodeWidget,%(codeName)s):
 \t_BCC = %(codeName)s
 \tcodeName = %(codeName)r
 \tdef __init__(self,**kw):%(_pre_init)s
 \t\t_BarcodeWidget.__init__(self,%(value)r,**kw)%(_methods)s''' % ns
-    ns[WKlass.__name__] = WKlass
     rl_exec(code,ns)
     Klass = ns[name]
     if attrMap: Klass._attrMap = attrMap
@@ -108,8 +107,7 @@ def _BCW(name, WKlass, doc, codeName,attrMap,mod,value,**kwds):
         setattr(Klass,k,v)
     return Klass
 
-BarcodeI2of5 = _BCW('BarcodeI2of5',
-        _BarcodeWidget,
+BarcodeI2of5 = _BCW(
     """Interleaved 2 of 5 is used in distribution and warehouse industries.
 
     It encodes an even-numbered sequence of numeric digits. There is an optional
@@ -156,21 +154,24 @@ BarcodeI2of5 = _BCW('BarcodeI2of5',
         ),
     'reportlab.graphics.barcode.common',
     1234,
+    _tests = [
+        '12',
+        '1234',
+        '123456',
+        '12345678',
+        '1234567890'
+        ],
     )
 
-BarcodeCode128 = _BCW('BarcodeCode128',
-                _BarcodeWidget,
-                """Code 128 encodes any number of characters in the ASCII character set.""",
+BarcodeCode128 = _BCW("""Code 128 encodes any number of characters in the ASCII character set.""",
                 "Code128",
                 AttrMap(BASE=BarcodeI2of5,UNWANTED=('bearers','checksum','ratio','checksum','stop')),
                 'reportlab.graphics.barcode.code128',
                 "AB-12345678",
-                _tests = ['ReportLab Rocks!'],
+                _tests = ['ReportLab Rocks!', 'PFWZF'],
                 )
 
-BarcodeStandard93=_BCW('BarcodeStandard93',
-                        _BarcodeWidget,
-                        """This is a compressed form of Code 39""",
+BarcodeStandard93=_BCW("""This is a compressed form of Code 39""",
                         "Standard93",
                         AttrMap(BASE=BarcodeCode128,
                                 stop = AttrMapValue(isBoolean, desc='if we use start/stop symbols (default 1)'),
@@ -179,9 +180,7 @@ BarcodeStandard93=_BCW('BarcodeStandard93',
                         "CODE 93",
                         )
 
-BarcodeExtended93=_BCW('BarcodeExtended93',
-                        _BarcodeWidget,
-                        """This is a compressed form of Code 39, allowing the full ASCII charset""",
+BarcodeExtended93=_BCW("""This is a compressed form of Code 39, allowing the full ASCII charset""",
                         "Extended93",
                         AttrMap(BASE=BarcodeCode128,
                                 stop = AttrMapValue(isBoolean, desc='if we use start/stop symbols (default 1)'),
@@ -190,9 +189,7 @@ BarcodeExtended93=_BCW('BarcodeExtended93',
                         "L@@K! Code 93 ;-)",
                         )
 
-BarcodeStandard39=_BCW('BarcodeStandard39',
-                        _BarcodeWidget,
-                        """Code39 is widely used in non-retail, especially US defence and health.
+BarcodeStandard39=_BCW("""Code39 is widely used in non-retail, especially US defence and health.
                         Allowed characters are 0-9, A-Z (caps only), space, and -.$/+%*.""",
                         "Standard39",
                         AttrMap(BASE=BarcodeI2of5),
@@ -200,9 +197,7 @@ BarcodeStandard39=_BCW('BarcodeStandard39',
                         "A012345B%R",
                         )
 
-BarcodeExtended39=_BCW('BarcodeExtended39',
-                        _BarcodeWidget,
-                        """Extended 39 encodes the full ASCII character set by encoding
+BarcodeExtended39=_BCW("""Extended 39 encodes the full ASCII character set by encoding
                         characters as pairs of Code 39 characters; $, /, % and + are used as
                         shift characters.""",
                         "Extended39",
@@ -211,9 +206,7 @@ BarcodeExtended39=_BCW('BarcodeExtended39',
                         "A012345B}",
                         )
 
-BarcodeMSI=_BCW('BarcodeMSI',
-                _BarcodeWidget,
-                """MSI is used for inventory control in retail applications.
+BarcodeMSI=_BCW("""MSI is used for inventory control in retail applications.
 
                 There are several methods for calculating check digits so we
                 do not implement one.
@@ -224,9 +217,7 @@ BarcodeMSI=_BCW('BarcodeMSI',
                 1234,
                 )
 
-BarcodeCodabar=_BCW('BarcodeCodabar',
-                    _BarcodeWidget,
-                    """Used in blood banks, photo labs and FedEx labels.
+BarcodeCodabar=_BCW("""Used in blood banks, photo labs and FedEx labels.
                     Encodes 0-9, -$:/.+, and four start/stop characters A-D.""",
                     "Codabar",
                     AttrMap(BASE=BarcodeI2of5),
@@ -234,9 +225,7 @@ BarcodeCodabar=_BCW('BarcodeCodabar',
                     "A012345B",
                     )
 
-BarcodeCode11=_BCW('BarcodeCode11',
-                    _BarcodeWidget,
-                    """Used mostly for labelling telecommunications equipment.
+BarcodeCode11=_BCW("""Used mostly for labelling telecommunications equipment.
                     It encodes numeric digits.""",
                     'Code11',
                     AttrMap(BASE=BarcodeI2of5,
@@ -250,9 +239,7 @@ BarcodeCode11=_BCW('BarcodeCode11',
                     "01234545634563",
                     )
 
-BarcodeFIM=_BCW('BarcodeFIM',
-                _BarcodeWidget,
-                """
+BarcodeFIM=_BCW("""
                 FIM was developed as part of the POSTNET barcoding system.
                 FIM (Face Identification Marking) is used by the cancelling machines
                 to sort mail according to whether or not they have bar code
@@ -284,9 +271,7 @@ BarcodeFIM=_BCW('BarcodeFIM',
                 "A",
                 )
 
-BarcodePOSTNET=_BCW('BarcodePOSTNET',
-                    _BarcodeWidget,
-                    '',
+BarcodePOSTNET=_BCW('',
                     "POSTNET",
                     AttrMap(BASE=_BarcodeWidget,
                             barWidth = AttrMapValue(isNumber,'''(float, default 0.018*in): the bar width.'''),
@@ -301,9 +286,7 @@ BarcodePOSTNET=_BCW('BarcodePOSTNET',
                     "78247-1043",
                     )
 
-BarcodeUSPS_4State=_BCW('BarcodeUSPS_4State',
-                        _BarcodeWidget,
-                        '',
+BarcodeUSPS_4State=_BCW('',
                         "USPS_4State",
                         AttrMap(BASE=_BarcodeWidget,
                             widthSize = AttrMapValue(isNumber,'''(float, default 1): the bar width size adjustment between 0 and 1.'''),
@@ -321,33 +304,4 @@ BarcodeUSPS_4State=_BCW('BarcodeUSPS_4State',
                         )
 
 if __name__=='__main__':
-    import os, sys, glob
-    from reportlab.graphics.shapes import Drawing
-    os.chdir(os.path.dirname(sys.argv[0]))
-    if not os.path.isdir('out'):
-        os.mkdir('out')
-    for x in glob.glob(os.path.join('out','*')):
-        os.remove(x)
-    html = ['<html><head></head><body>']
-    a = html.append
-    for C in (BarcodeI2of5,
-            BarcodeCode128,
-            BarcodeStandard93,
-            BarcodeExtended93,
-            BarcodeStandard39,
-            BarcodeExtended39,
-            BarcodeMSI,
-            BarcodeCodabar,
-            BarcodeCode11,
-            BarcodeFIM,
-            BarcodePOSTNET,
-            BarcodeUSPS_4State,
-            ):
-        name = C.__name__
-        i = C()
-        D = Drawing(100,50)
-        D.add(i)
-        D.save(formats=['gif','pict'],outDir='out',fnRoot=name)
-        a('<h2>%s</h2><img src="%s.gif"><br>' % (name, name))
-    a('</body></html>')
-    open(os.path.join('out','index.html'),'w').write('\n'.join(html))
+    raise ValueError('widgets.py has no script function')
