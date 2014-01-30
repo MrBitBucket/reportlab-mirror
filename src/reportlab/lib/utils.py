@@ -54,8 +54,8 @@ if isPy3:
     def asUnicode(v,enc='utf8'):
         return v if isinstance(v,str) else v.decode(enc)
 
-    def asNative(v):
-        return asUnicode(v)
+    def asNative(v,enc='utf8'):
+        return asUnicode(v,enc=enc)
 
     uniChr = chr
 
@@ -150,8 +150,8 @@ else:
     def asBytes(v,enc='utf8'):
         return v if isinstance(v,str) else v.encode(enc)
 
-    def asNative(v):
-        return asBytes(v)
+    def asNative(v,enc='utf8'):
+        return asBytes(v,enc=enc)
 
     def uniChr(v):
         return unichr(v)
