@@ -161,13 +161,9 @@ class DocstringTestCase(SecureTestCase):
                 if typ == 'function':
                     lines.append("%s.%s\n" % (name, obj.__name__))
                 elif typ == 'class':
-                        lines.append("%s.%s\n" % (obj.__module__, getattr(obj,'__qualname__',obj.__name__)))
+                    lines.append("%s.%s\n" % (obj.__module__, getattr(obj,'__qualname__',getattr(obj,'__name__','[unknown __name__]'))))
                 else:
-                    qname = getattr(self,'__qualname__',None)
-                    if qname:
-                        lines.append("%s\n" % (obj.__qualname__))
-                    else:
-                        lines.append("%s\n" % (obj.__name__))
+                    lines.append("%s\n" % (getattr(obj,'__qualname__',getattr(obj,'__name__','[unknown __name__]'))))
 
         lines.sort()
         for line in lines:
