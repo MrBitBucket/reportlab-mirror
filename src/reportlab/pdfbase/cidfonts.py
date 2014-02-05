@@ -376,12 +376,15 @@ class UnicodeCIDFont(CIDFont):
     >>> heisei.encoding.name
     'UniJIS-UCS2-H'
     >>> #This is how PDF data gets encoded.
-    >>> print heisei.formatForPdf('hello')
+    >>> print(heisei.formatForPdf('hello'))
     \\000h\\000e\\000l\\000l\\000o
     >>> tokyo = u'\u6771\u4AEC'
-    >>> print heisei.formatForPdf(tokyo)
+    >>> print(heisei.formatForPdf(tokyo))
     gqJ\\354
-
+    >>> print(heisei.stringWidth(tokyo,10))
+    20.0
+    >>> print(heisei.stringWidth('hello world',10))
+    45.83
     """
 
     def __init__(self, face, isVertical=False, isHalfWidth=False):
