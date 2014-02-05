@@ -100,8 +100,8 @@ def _calc_pc(V,avail):
     s = avail
     w = n = 0.
     for v in V:
-        if isinstance(v,str):
-            v = v.strip()
+        if isinstance(v,strTypes):
+            v = str(v).strip()
             if not v:
                 v = None
                 n += 1
