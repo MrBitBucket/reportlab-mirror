@@ -54,6 +54,9 @@ if isPy3:
     def asUnicode(v,enc='utf8'):
         return v if isinstance(v,str) else v.decode(enc)
 
+    def asUnicodeEx(v,enc='utf8'):
+        return v if isinstance(v,str) else v.decode(enc) if isinstance(v,bytes) else str(v)
+
     def asNative(v,enc='utf8'):
         return asUnicode(v,enc=enc)
 
@@ -167,6 +170,9 @@ else:
 
     def asUnicode(v,enc='utf8'):
         return v if isinstance(v,unicode) else v.decode(enc)
+
+    def asUnicodeEx(v,enc='utf8'):
+        return v if isinstance(v,unicode) else v.decode(enc) if isinstance(v,str) else str(v).decode(enc)
 
     def isClass(v):
         return isinstance(v,(types.ClassType,type))
