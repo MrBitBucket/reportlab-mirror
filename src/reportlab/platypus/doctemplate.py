@@ -35,7 +35,7 @@ from reportlab.platypus.frames import Frame
 from reportlab.rl_config import defaultPageSize, verbose
 import reportlab.lib.sequencer
 from reportlab.pdfgen import canvas
-from reportlab.lib.utils import isSeq, encode_label, decode_label
+from reportlab.lib.utils import isSeq, encode_label, decode_label, annotateException, strTypes
 try:
     set
 except NameError:
@@ -142,8 +142,7 @@ class ActionFlowable(Flowable):
             else:
                 raise
         except:
-            t, v, tb = sys.exc_info()
-            raise t("%s\n   handle_%s args=%s"%(v,action,args)).with_traceback(tb)
+            annotateException("\nhandle_%s args=%s"%(action,ascii(args)))
 
     def __call__(self):
         return self
@@ -634,7 +633,7 @@ class BaseDocTemplate:
 
     def handle_nextPageTemplate(self,pt):
         '''On endPage change to the page template with name or index pt'''
-        if isinstance(pt,str):
+        if isinstance(pt,strTypes):
             if hasattr(self, '_nextPageTemplateCycle'): del self._nextPageTemplateCycle
             for t in self.pageTemplates:
                 if t.id == pt:
