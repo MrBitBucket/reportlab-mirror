@@ -33,6 +33,7 @@
 from reportlab.lib.units import inch
 from reportlab.graphics.barcode.common import Barcode
 from string import digits as string_digits, whitespace as string_whitespace
+from reportlab.lib.utils import asNative
 
 _fim_patterns = {
     'A' : "||  |  ||",
@@ -97,6 +98,7 @@ class FIM(Barcode):
     lquiet = inch * (15.0/32.0)
     quiet = 0
     def __init__(self, value='', **args):
+        value = str(value) if isinstance(value,int) else asNative(value)
         for k, v in args.items():
             setattr(self, k, v)
 
@@ -161,7 +163,7 @@ class POSTNET(Barcode):
     barWidth = inch * 0.018
     spaceWidth = inch * 0.0275
     def __init__(self, value='', **args):
-
+        value = str(value) if isinstance(value,int) else asNative(value)
         for k, v in args.items():
             setattr(self, k, v)
 

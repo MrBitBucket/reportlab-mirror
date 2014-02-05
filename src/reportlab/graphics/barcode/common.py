@@ -47,7 +47,7 @@ class Barcode(Flowable):
         return self.encoded
 
     def __init__(self, value='',**kwd):
-        self.value = value
+        self.value = str(value)
 
         self._setKeywords(**kwd)
         if not hasattr(self, 'gap'):

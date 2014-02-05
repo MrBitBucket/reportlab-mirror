@@ -27,6 +27,7 @@ from reportlab.lib.validators import isNumber, isColor, isString, Validator
 from reportlab.lib.attrmap import *
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.lib.units import mm
+from reportlab.lib.utils import asNative
 try:
     from itertools import zip_longest
 except:
@@ -66,6 +67,7 @@ class QrCodeWidget(PlotArea):
     barLevel = 'L'
 
     def __init__(self,value='Hello World',**kw):
+        value = str(value) if isinstance(value,int) else asNative(value)
         self.value=value
         for k, v in kw.items():
             setattr(self, k, v)

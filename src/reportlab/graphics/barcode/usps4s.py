@@ -5,6 +5,7 @@ __all__ = ('USPS_4State',)
 
 from reportlab.lib.colors import black
 from reportlab.graphics.barcode.common import Barcode
+from reportlab.lib.utils import asNative
 
 class USPS_4State(Barcode):
     ''' USPS 4-State OneView (TM) barcode. All info from USPS-B-3200A
@@ -34,6 +35,7 @@ class USPS_4State(Barcode):
 
     def __init__(self,value='01234567094987654321',routing='',**kwd):
         self._init()
+        value = str(value) if isinstance(value,int) else asNative(value)
         self._tracking = value
         self._routing = routing
         self._setKeywords(**kwd)

@@ -31,6 +31,7 @@
 #
 
 from reportlab.lib.units import inch
+from reportlab.lib.utils import asNative
 from reportlab.graphics.barcode.common import MultiWidthBarcode
 
 _patterns = {
@@ -119,7 +120,7 @@ class _Code93Base(MultiWidthBarcode):
     def __init__(self, value='', **args):
 
         if type(value) is type(1):
-            value = str(value)
+            value = asNative(value)
             
         for (k, v) in args.items():
             setattr(self, k, v)

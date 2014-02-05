@@ -31,6 +31,7 @@
 #
 
 from reportlab.lib.units import inch
+from reportlab.lib.utils import asNative
 from reportlab.graphics.barcode.common import Barcode
 from string import digits as string_digits
 
@@ -113,6 +114,7 @@ class _Code39Base(Barcode):
     bearers = 0.0
     stop = 1
     def __init__(self, value = "", **args):
+        value = asNative(value)
         for k, v in args.items():
             setattr(self, k, v)
 
