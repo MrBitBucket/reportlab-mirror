@@ -670,7 +670,7 @@ class BaseDocTemplate:
 
     def handle_nextFrame(self,fx,resume=0):
         '''On endFrame change to the frame with name or index fx'''
-        if isinstance(fx,str):
+        if isinstance(fx,strTypes):
             for f in self.pageTemplate.frames:
                 if f.id == fx:
                     self._nextFrameIndex = self.pageTemplate.frames.index(f)
@@ -1030,7 +1030,7 @@ class BaseDocTemplate:
 
     _allowedLifetimes = 'page','frame','build','forever'
     def docAssign(self,var,expr,lifetime):
-        if not isinstance(expr,str): expr=str(expr)
+        if not isinstance(expr,strTypes): expr=str(expr)
         expr=expr.strip()
         var=var.strip()
         self.docExec('%s=(%s)'%(var.strip(),expr.strip()),lifetime)
