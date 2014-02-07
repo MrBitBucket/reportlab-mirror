@@ -171,7 +171,7 @@ def _convert2int(value, map, low, high, name, cmd):
             if low<=ivalue<=high: return ivalue
         except:
             pass
-    raise ValueError('Bad %s value %s in %s'%(name,value,str(cmd)))
+    raise ValueError('Bad %s value %s in %s'%(name,value,ascii(cmd)))
 
 def _endswith(obj,s):
     try:
@@ -342,7 +342,7 @@ class Table(Flowable):
                     else:
                         v = v is None and '' or str(v)
                         ix, jx, vx = i, j, v
-                        b = (vx and isinstance(v,str)) and 1 or 0
+                        b = (vx and isinstance(v,strTypes)) and 1 or 0
                         if maxLen: vx = vx[:maxLen]
                     if b: break
                 if b: break
@@ -1016,7 +1016,7 @@ class Table(Flowable):
         elif _isLineCommand(cmd):
             # we expect op, start, stop, weight, colour, cap, dashes, join
             cmd = list(cmd)
-            if len(cmd)<5: raise ValueError('bad line command '+str(cmd))
+            if len(cmd)<5: raise ValueError('bad line command '+ascii(cmd))
 
             #determine line cap value at position 5. This can be str or numeric.
             if len(cmd)<6:
@@ -1067,7 +1067,7 @@ class Table(Flowable):
         ccap, cdash, cjoin = None, None, None
         self.canv.saveState()
         for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
-            if isinstance(sr,str) and sr.startswith('split'): continue
+            if isinstance(sr,strTypes) and sr.startswith('split'): continue
             if sc < 0: sc = sc + self._ncols
             if ec < 0: ec = ec + self._ncols
             if sr < 0: sr = sr + self._nrows
@@ -1238,7 +1238,7 @@ class Table(Flowable):
         A = []
         # hack up the line commands
         for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
-            if isinstance(sr,str) and sr.startswith('split'):
+            if isinstance(sr,strTypes) and sr.startswith('split'):
                 A.append((op,(sc,sr), (ec,sr), weight, color, cap, dash, join, count, space))
                 if sr=='splitlast':
                     sr = er = n-1
