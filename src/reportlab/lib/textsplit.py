@@ -41,7 +41,7 @@ def is_multi_byte(ch):
     return (ord(ch) >= 0x3000)
     
 def getCharWidths(word, fontName, fontSize):
-    """Returns a list of glyph widths.  Should be easy to optimize in _rl_accel
+    """Returns a list of glyph widths.
 
     >>> getCharWidths('Hello', 'Courier', 10)
     [6.0, 6.0, 6.0, 6.0, 6.0]
