@@ -11,7 +11,7 @@ import os
 import binascii
 from reportlab import rl_config
 from reportlab.lib.utils import getBytesIO, ImageReader, isUnicode, isPy3
-from reportlab.lib._rl_accel import asciiBase85Encode, asciiBase85Decode
+from reportlab.lib.rl_accel import asciiBase85Encode, asciiBase85Decode
 
 def _chunker(src,dst=[],chunkSize=60):
     for i in range(0,len(src),chunkSize):
