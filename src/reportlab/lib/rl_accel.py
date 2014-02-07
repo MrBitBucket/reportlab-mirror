@@ -131,7 +131,7 @@ if 'calcChecksum' in _py_funcs:
     def calcChecksum(data):
         """Calculates TTF-style checksums"""
         data = rawBytes(data)
-        if len(data)&3: data = data + (4-(len(data)&3))*"\0"
+        if len(data)&3: data = data + (4-(len(data)&3))*b"\0"
         return sum(unpack(">%dl" % (len(data)>>2), data)) & 0xFFFFFFFF
     _py_funcs['calcChecksum'] = calcChecksum
 
@@ -327,7 +327,7 @@ if 'sameFrag' in _py_funcs:
 
 G=globals()
 for fn in __all__:
-    f = _c_funcs[fn] or _py_funcs[fn]
+    f = _c_funcs[fn] if fn in _c_funcs else _py_funcs[fn]
     if not f:
         raise RuntimeError('function %s is not properly defined' % fn)
     G[fn] = f
