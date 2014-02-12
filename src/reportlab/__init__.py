@@ -25,3 +25,9 @@ else:
     import __builtin__
     __builtin__.ascii = ascii
     del ascii, __builtin__
+
+#the module reportlab.local_rl_mods can be used to customize just about anything
+try:
+    import reportlab.local_rl_mods
+except ImportError:
+    pass
