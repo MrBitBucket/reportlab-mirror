@@ -190,7 +190,6 @@ class Frame:
                 flowable.drawOn(canv, self._x + self._leftExtraIndent, y, _sW=aW-w)
                 flowable.canv=canv
                 if self._debug: logger.debug('drew %s' % flowable.identity())
-                s = flowable.getSpaceAfter()
                 y -= s
                 if self._oASpace:
                     if getattr(flowable,'_SPACETRANSFER',False):
