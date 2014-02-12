@@ -883,6 +883,7 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
             c.drawOn(canv,x,y,_sW=aW-w)
             if c is not content[-1] and not getattr(c,'_SPACETRANSFER',None):
                 y -= pS
+            del c._frame
 
     def copyContent(self,content=None):
         C = [].append
@@ -1244,7 +1245,8 @@ class ImageAndFlowables(_Container,Flowable):
         if self._C0:
             _Container.drawOn(self, canv, Fx, y, content=self._C0, aW=self._iW)
         if self._C1:
-            _Container.drawOn(self, canv, x, y-self._aH,content=self._C1)
+            aW, aH = self._wrapArgs
+            _Container.drawOn(self, canv, x, y-self._aH,content=self._C1, aW=aW)
 
     def _findSplit(self,canv,availWidth,availHeight,mergeSpace=1,obj=None):
         '''return max width, required height for a list of flowables F'''
