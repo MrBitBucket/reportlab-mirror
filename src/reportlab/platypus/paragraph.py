@@ -1002,10 +1002,10 @@ class Paragraph(Flowable):
         #This used to be a global parser to save overhead.
         #In the interests of thread safety it is being instantiated per paragraph.
         #On the next release, we'll replace with a cElementTree parser
-        _parser = ParaParser()
 
         if frags is None:
             text = cleaner(text)
+            _parser = ParaParser()
             _parser.caseSensitive = self.caseSensitive
             style, frags, bulletTextFrags = _parser.parse(text,style)
             if frags is None:
