@@ -8,6 +8,7 @@ setOutDir(__name__)
 import sys
 import unittest
 from reportlab.platypus.flowables import Flowable, PTOContainer, KeepInFrame
+from reportlab.platypus import FrameBG
 from reportlab.lib.units import cm
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.colors import toColor, black
@@ -160,15 +161,20 @@ def _KeepInFrameTestCase(self,mode,offset=0):
     H1.pageBreakBefore = 0
     H1.keepWithNext = 0
     bt = styleSheet['BodyText']
-    def subStory(texts):
+    def subStory(texts,fbg=0):
         style = [
             ('VALIGN',(0,0),(-1,-1),'TOP'),
             ('INNERGRID', (0,0), (-1,-1), 0.25, black),
             ('BOX', (0,0), (-1,-1), 0.25, black),
             ]
+        if fbg:
+            fbg1 = [FrameBG(start=0,color=toColor('limegreen'))]
+            fbg0 = [FrameBG(start=0)]
+        else:
+            fbg0 = fbg1 = []
         return ([Paragraph(t,bt) for t in texts]
-                +[Table([('alignment', a.lower())],style = style,hAlign=a)
-                    for a in ('LEFT','RIGHT','CENTER')])
+                +fbg1+[Table([('alignment', a.lower())],style = style,hAlign=a)
+                    for a in ('LEFT','RIGHT','CENTER')]+fbg0)
     def allModesKIF(just,ifb=True,width=170):
         if ifb: fbreak()
         story.append(KeepInFrame(width-offset,284-offset,subStory(texts=(text0,)),mode=mode,hAlign=just))
@@ -176,6 +182,8 @@ def _KeepInFrameTestCase(self,mode,offset=0):
         story.append(KeepInFrame(width-offset,284-offset,subStory(texts=(text0,text1)),mode=mode,hAlign=just))
         fbreak()
         story.append(KeepInFrame(width-offset,284-offset,subStory(texts=(text0,text1,text2)),mode=mode,hAlign=just))
+        fbreak()
+        story.append(KeepInFrame(width-offset,284-offset,subStory(texts=(text0,text1,text2),fbg=1),mode=mode,hAlign=just))
     allModesKIF('LEFT',False)
     allModesKIF('LEFT',width=100)
     allModesKIF('CENTRE',width=100)
