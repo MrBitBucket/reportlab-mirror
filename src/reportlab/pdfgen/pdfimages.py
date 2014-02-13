@@ -12,7 +12,7 @@ from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.lib.utils import import_zlib, haveImages, getBytesIO, isStr
-from reportlab.lib.rl_accel import fp_str
+from reportlab.lib.rl_accel import fp_str, asciiBase85Encode
 from reportlab.lib.boxstuff import aspectRatioFix
 
 
@@ -66,7 +66,7 @@ class PDFImage:
         #write in blocks of (??) 60 characters per line to a list
         data = imageFile.read()
         if rl_config.useA85:
-            data = pdfutils._AsciiBase85Encode(data)
+            data = asciiBase85Encode(data)
         pdfutils._chunker(data,imagedata)
         imagedata.append('EI')
         return (imagedata, imgwidth, imgheight)
@@ -127,7 +127,7 @@ class PDFImage:
         assert len(raw) == rowstride*imgheight, "Wrong amount of data for image"
         data = zlib.compress(raw)    #this bit is very fast...
         if rl_config.useA85:
-            data = pdfutils._AsciiBase85Encode(data) #...sadly this may not be
+            data = asciiBase85Encode(data) #...sadly this may not be
         #append in blocks of 60 characters
         pdfutils._chunker(data,imagedata)
         imagedata.append('EI')
