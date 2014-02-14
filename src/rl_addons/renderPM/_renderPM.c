@@ -844,10 +844,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 			obj0 = PyUnicode_DecodeUTF8(text, textlen,NULL);
 			if(!obj0) return NULL;
 			}
-		else{
-L0:			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: text must be bytes/unicode!");
-			return NULL;
-			}
+		else goto L0;
 		textlen = PyUnicode_GetSize(obj0);
 		utext = PyUnicode_AsUnicode(obj0);
 		_ft_data.pathMax = 0;
@@ -938,6 +935,9 @@ L0:			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: text must 
 	self->path = saved_path;
 	Py_INCREF(Py_None);
 	return Py_None;
+
+L0:	PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: text must be bytes/unicode!");
+	return NULL;
 }
 
 static PyObject* _fmtPathElement(ArtBpath *p, char* name, int n)
@@ -1063,10 +1063,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 			obj0 = PyUnicode_DecodeUTF8(text, textlen,NULL);
 			if(!obj0) return NULL;
 			}
-		else{
-L0:			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: text must be bytes/unicode!");
-			return NULL;
-			}
+		else goto L0;
 		textlen = PyUnicode_GetSize(obj0);
 		utext = PyUnicode_AsUnicode(obj0);
 		_ft_data.pathMax = 0;
@@ -1146,6 +1143,9 @@ L0:			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: text must 
 	if(ft_font) art_free(_ft_data.path);
 #endif
 	return P;
+
+L0:	PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: text must be bytes/unicode!");
+	return NULL;
 }
 
 static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
