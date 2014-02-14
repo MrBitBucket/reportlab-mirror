@@ -8,6 +8,77 @@ E.g. to retrieve the changes made between release 1.19 and release 1.20, type:
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+
+#################################################################################
+#################### RELEASE 3.0  14/02/2014                    #################
+#################################################################################
+
+ReportLab 3.0 now supports Python 2.7, 3.3 and higher.  
+
+There has been a substantial internal rewrite to ensure consistent use of unicode strings for
+  natural-language text, and of bytes for all file format internals.  The intent
+  is to make as few API changes as possible so that there should be little or no
+  impact on users and their applications.  Changes are too numerous but can be
+  seen on Bitbucket.
+
+### Python 3.x compatibility
+  * Python 3.x compatibility.  A single line of code should run on 2.7 and 3.3
+  * __init__.py restricts to 2.7 or >=3.3
+  * __init__.py allow the import of on optional reportlab.local_rl_mods to allow monkey patching etc.
+  * rl_config now imports rl_settings & optionally local_rl_settings
+  * ReportLab C extensions now live inside reportlab; _rl_accel is no longer required. All _rl_accel imports now pass through reportlab.lib.rl_accel
+  * xmllib is gone, alongside the paraparser stuff that caused issues in favour of HTMLParser.
+  * some obsolete C extensions (sgmlop and pyHnj) are gone
+  * Improved support for multi-threaded systems to the _rl_accel extension module.
+  * Removed reportlab/lib/ para.py & pycanvas.py.  These would better belong in third party packages, which can make use of the monkeypatching feature above.
+
+
+### New features
+  *  Add ability to output greyscale and 1-bit PIL images without conversion to RGB. (contributed by Matthew Duggan)
+  
+  * highlight annotation (contributed by Ben Echols)
+
+
+### Other
+  * numerous very minor fixes, visible through BitBucket.
+
+
+
+
+
+#################################################################################
+#################### RELEASE 2.7  04/04/2013                    #################
+#################################################################################
+
+###Charts / graphics enhancements
+  * Added SimpleTimeSeriesPlot
+  * added _computeMaxSpace
+  * added in lineStyle (for bars)
+  * improved SVG rendering
+  * Pie Chart now has an 'innerRadiusFraction' to allow doughnut-like appearance for 2d charts  (it has no effect with 3d charts).  The separate 'doughnut' chart lacks many pie chart features and should only be used if you wanted multiple nested doughnuts. 
+
+###Charts/graphics bug fixes:
+  * piecharts.py: fix Pie3d __init__ to call its superclass
+  * linecharts.py: fix swatch creation
+  * fixed y axis in the simple time series plot
+
+###PDF
+
+  * Fixes to testshapes & pdfform resetting
+  * colors.py
+  * various minor fixes
+
+###Platypus
+
+  * Defined a small bullet rather than a big circle as the default for unordered lists
+  * fixed attribute spelling bug
+  * fixed CJK + endDots
+
+###Acknowledgements
+
+Many thanks to Andrew Cutler, Dinu Gherman, Matthias Kirst and Stephan Richter for their contributions to this release.
+
+
 #################################################################################
 #################### RELEASE 2.6  27/09/2012                    #################
 #################################################################################
