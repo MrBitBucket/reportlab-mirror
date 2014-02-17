@@ -65,7 +65,6 @@ class TableWidget(Widget):
         for k, v in kw.items():
             if k in list(self.__class__._attrMap.keys()):
                 setattr(self, k, v)
-                print('setting %s = %s'%(k, v))
             else:
                 raise ValueError('invalid argument supplied for class %s'%self.__class__)
 
