@@ -11,14 +11,13 @@ from reportlab.platypus.paraparser import ParaParser
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
-from reportlab.lib.utils import _className
 from reportlab.lib.geomutils import normalizeTRBL
 from reportlab.lib.textsplit import wordSplit, ALL_CANNOT_START
 from copy import deepcopy
 from reportlab.lib.abag import ABag
 from reportlab.rl_config import platypus_link_underline
 from reportlab import rl_config
-from reportlab.lib.utils import isBytes, unicodeT, bytesT, strTypes
+from reportlab.lib.utils import _className, isBytes, unicodeT, bytesT, strTypes
 from reportlab.lib.rl_accel import sameFrag
 import re
 
@@ -497,7 +496,7 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     maxlineno = len(maxWidths)-1
     W = []
     lineWidth = 0
-    fragText = ''
+    fragText = u''
     wordWidth = 0
     f = w[1][0]
     for g,cw,c in _fragWordIter(w):
@@ -515,7 +514,7 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
                 maxWidth = maxWidths[min(maxlineno,lineno)]
                 W = []
                 newLineWidth = wordWidth = cw
-            fragText = ''
+            fragText = u''
             f = g
             wordWidth = 0
         wordWidth += cw
@@ -526,10 +525,10 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     R.append(W)
     return R
 
-class _SplitText(str):
+class _SplitText(unicodeT):
     pass
 
-def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding):
+def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding='utf8'):
     '''
     split w into words that fit in lines of length
     maxWidth
@@ -545,7 +544,7 @@ def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding):
     lineWidth = 0
     wordText = u''
     if isBytes(w):
-        w = w.decode('utf8')
+        w = w.decode(encoding)
     for c in w:
         cw = stringWidth(c,fontName,fontSize,encoding)
         newLineWidth = lineWidth+cw
@@ -554,7 +553,7 @@ def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding):
             lineno += 1
             maxWidth = maxWidths[min(maxlineno,lineno)]
             newLineWidth = cw
-            wordText = ''
+            wordText = u''
         wordText += c
         lineWidth = newLineWidth
     R.append(_SplitText(wordText))

@@ -16,15 +16,13 @@ from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import _className
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame, ShowBoundaryValue
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, PageBreak, NextPageTemplate
 from reportlab.platypus import tableofcontents
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
-from reportlab.platypus.paragraph import *
-from reportlab.platypus.paragraph import _getFragWords
+from reportlab.platypus.paragraph import Paragraph, _getFragWords, _splitWord
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
@@ -380,6 +378,11 @@ class FragmentTestCase(unittest.TestCase):
         P = Paragraph(text, B)
         frags = [f.text for f in P.frags]
         assert frags == ['X', 'Y', 'Z']
+
+    def test2(self):
+        '''test _splitWord'''
+        self.assertEqual(_splitWord(u'd\'op\u00e9ration',30,[30],0,'Helvetica',12),[u"d'op\xe9", u'ratio', u'n'])
+        self.assertEqual(_splitWord(b'd\'op\xc3\xa9ration',30,[30],0,'Helvetica',12),[u"d'op\xe9", u'ratio', u'n'])
 
 class ULTestCase(unittest.TestCase):
     "Test underlining and overstriking of paragraphs."
