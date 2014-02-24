@@ -1385,12 +1385,12 @@ class FrameSplitter(NullDraw):
 
 from reportlab.lib.sequencer import _type2formatter
 _bulletNames = dict(
-                bulletchar='\u2022',    #usually a small circle
-                circle='\u25cf',    #circle as high as the font
-                square='\u25a0',
-                disc='\u25cf',
-                diamond='\u25c6',
-                rarrowhead='\u27a4',
+                bulletchar=u'\u2022',   #usually a small circle
+                circle=u'\u25cf',   #circle as high as the font
+                square=u'\u25a0',
+                disc=u'\u25cf',
+                diamond=u'\u25c6',
+                rarrowhead=u'\u27a4',
                 )
 
 def _bulletFormat(value,type='1',format=None):
