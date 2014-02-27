@@ -55,7 +55,9 @@ class ColorTestCase(unittest.TestCase):
         "Test toColor function on half a dozen ways to say 'red'."
 
         allRed = [colors.red, [1, 0, 0], (1, 0, 0),
-                  'red', 'RED', '0xFF0000', '0xff0000','rgb(255,0,0)']
+                  b'red', b'RED', b'0xFF0000', b'0xff0000',b'rgb(255,0,0)',
+                  u'red', u'RED', u'0xFF0000', u'0xff0000',u'rgb(255,0,0)',
+                  ]
 
         for thing in allRed:
             assert colors.toColor(thing) == colors.red,"colors.toColor(%s)-->%s != colors.red(%s)" % (ascii(thing),ascii(colors.toColor(thing)),colors.red)
@@ -101,7 +103,6 @@ class ColorTestCase(unittest.TestCase):
             deltas = list(map(abs, (r1-r2, g1-g2, b1-b2)))
             assert deltas < [math.pow(10, -N)] * 3
 
-
     def test5(self):
         "List and display all named colors and their gray equivalents."
 
@@ -146,6 +147,30 @@ class ColorTestCase(unittest.TestCase):
 
         canvas.save()
 
+    def test6(self):
+        '''test HexColor'''
+        HexColor = colors.HexColor
+        Color = colors.Color
+        self.assertEquals(HexColor(0xffffff),Color(1,1,1,1))
+        self.assertEquals(HexColor(16777215),Color(1,1,1,1))
+        self.assertEquals(HexColor(b'#ffffff'),Color(1,1,1,1))
+        self.assertEquals(HexColor(b'#FFFFFF'),Color(1,1,1,1))
+        self.assertEquals(HexColor(b'0xffffff'),Color(1,1,1,1))
+        self.assertEquals(HexColor(b'0xFFFFFF'),Color(1,1,1,1))
+        self.assertEquals(HexColor(b'16777215'),Color(1,1,1,1))
+        self.assertRaisesRegexp(ValueError,r"invalid literal for int\(\) with base 10:.*ffffff",HexColor,b'ffffff')
+        self.assertEquals(HexColor(b'#FFFFFF', htmlOnly=True),Color(1,1,1,1))
+        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,b'0xffffff',htmlOnly=True)
+        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,b'16777215',htmlOnly=True)
+        self.assertEquals(HexColor(u'#ffffff'),Color(1,1,1,1))
+        self.assertEquals(HexColor(u'#FFFFFF'),Color(1,1,1,1))
+        self.assertEquals(HexColor(u'0xffffff'),Color(1,1,1,1))
+        self.assertEquals(HexColor(u'0xFFFFFF'),Color(1,1,1,1))
+        self.assertEquals(HexColor(u'16777215'),Color(1,1,1,1))
+        self.assertRaisesRegexp(ValueError,r"invalid literal for int\(\) with base 10:.*ffffff",HexColor,u'ffffff')
+        self.assertEquals(HexColor(u'#FFFFFF', htmlOnly=True),Color(1,1,1,1))
+        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,u'0xffffff',htmlOnly=True)
+        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,u'16777215',htmlOnly=True)
 
 def makeSuite():
     return makeSuiteForClasses(ColorTestCase)

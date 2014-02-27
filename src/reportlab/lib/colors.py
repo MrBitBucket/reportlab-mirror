@@ -363,7 +363,8 @@ def HexColor(val, htmlOnly=False, hasAlpha=False):
 
     """ #" for emacs
 
-    if isinstance(val,str):
+    if isStr(val):
+        val = asNative(val)
         b = 10
         if val[:1] == '#':
             val = val[1:]
