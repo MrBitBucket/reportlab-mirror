@@ -117,7 +117,11 @@ T1SearchPath =  (
                 '%(REPORTLAB_DIR)s/fonts',              #special
                 '%(REPORTLAB_DIR)s/../fonts',           #special
                 '%(REPORTLAB_DIR)s/../../fonts',        #special
-                '%(HOME)s/fonts',                       #special
+                '%(CWD)s/fonts',                        #special
+                '~/fonts',
+                '~/.fonts',
+                '%(XDG_DATADIR)s/fonts',
+                '~/.local/share/fonts',
                  )
 
 # places to look for TT Font information
@@ -129,7 +133,11 @@ TTFSearchPath = (
                 '%(REPORTLAB_DIR)s/fonts',      #special
                 '%(REPORTLAB_DIR)s/../fonts',   #special
                 '%(REPORTLAB_DIR)s/../../fonts',#special
-                '%(HOME)s/fonts',               #special
+                '%(CWD)s/fonts',                #special
+                '~/fonts',
+                '~/.fonts',
+                '%(XDG_DATADIR)s/fonts',
+                '~/.local/share/fonts',
                 #mac os X - from
                 #http://developer.apple.com/technotes/tn/tn2024.html
                 '~/Library/Fonts',
@@ -162,7 +170,12 @@ CMapSearchPath = (
                   '%(REPORTLAB_DIR)s/fonts/CMap',       #special
                   '%(REPORTLAB_DIR)s/../fonts/CMap',    #special
                   '%(REPORTLAB_DIR)s/../../fonts/CMap', #special
-                  '%(HOME)s/fonts/CMap',                #special
+                  '%(CWD)s/fonts/CMap',             #special
+                  '%(CWD)s/fonts',              #special
+                  '~/fonts/CMap',
+                  '~/.fonts/CMap',
+                  '%(XDG_DATADIR)s/fonts/CMap',
+                  '~/.local/share/fonts/CMap',
                   )
 
 if sys.platform.startswith('linux'):

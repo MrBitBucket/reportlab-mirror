@@ -1,19 +1,43 @@
 '''module that aggregates config information'''
 __all__=('_reset','register_reset')
-from reportlab.lib.utils import rl_exec
-_overrides = {}
-try:
-    rl_exec('from reportlab.local_rl_settings import *',_overrides)
-except ImportError:
-    pass
-try:
-    rl_exec('from local_rl_settings import *',_overrides)
-except ImportError:
-    pass
-_DEFAULTS={}
-rl_exec('from reportlab.rl_settings import *',_DEFAULTS)
-_DEFAULTS.update(_overrides)
-del _overrides,rl_exec
+
+def _defaults_init():
+    '''
+    create & return defaults for all reportlab settings from
+    reportlab.rl_settings.py
+    reportlab.local_rl_settings.py
+    reportlab_settings or ~/.reportlab_settings
+
+    latter values override earlier
+    '''
+    from reportlab.lib.utils import rl_exec
+    import os
+
+    _DEFAULTS={}
+    rl_exec('from reportlab.rl_settings import *',_DEFAULTS)
+
+    _overrides={}
+    try:
+        rl_exec('from reportlab.local_rl_settings import *',_overrides)
+        _DEFAULTS.update(_overrides)
+    except ImportError:
+        pass
+
+    _overrides={}
+    try:
+        rl_exec('from reportlab_settings import *',_overrides)
+        _DEFAULTS.update(_overrides)
+    except ImportError:
+        _overrides={}
+        try:
+            with open(os.path.expanduser(os.path.join('~','.reportlab_settings')),'rb') as f:
+                rl_exec(f.read(),_overrides)
+            _DEFAULTS.update(_overrides)
+        except:
+            pass
+    return _DEFAULTS
+
+_DEFAULTS=_defaults_init()
 
 _SAVED = {}
 sys_version=None
@@ -54,9 +78,10 @@ def _startUp():
     #places to search for Type 1 Font files
     import reportlab
     D = {'REPORTLAB_DIR': os.path.abspath(os.path.dirname(reportlab.__file__)),
-        'HOME': os.environ.get('HOME',os.getcwd()),
+        'CWD': os.getcwd(),
         'disk': os.getcwd().split(':')[0],
         'sys_version': sys_version,
+        'XDG_DATADIR': os.environ.get('XDG_DATADIR','~/.local/share'),
         }
 
     for k in _SAVED:
@@ -64,6 +89,7 @@ def _startUp():
             P=[]
             for p in _SAVED[k]:
                 d = (p % D).replace('/',os.sep)
+                if '~' in d: d = os.path.expanduser(d)
                 if rl_isdir(d): P.append(d)
             _setOpt(k,os.pathsep.join(P),lambda x:x.split(os.pathsep))
             globals()[k] = list(filter(rl_isdir,globals()[k]))
