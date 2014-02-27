@@ -120,7 +120,7 @@ T1SearchPath =  (
                 '%(CWD)s/fonts',                        #special
                 '~/fonts',
                 '~/.fonts',
-                '%(XDG_DATADIR)s/fonts',
+                '%(XDG_DATA_HOME)s/fonts',
                 '~/.local/share/fonts',
                  )
 
@@ -136,7 +136,7 @@ TTFSearchPath = (
                 '%(CWD)s/fonts',                #special
                 '~/fonts',
                 '~/.fonts',
-                '%(XDG_DATADIR)s/fonts',
+                '%(XDG_DATA_HOME)s/fonts',
                 '~/.local/share/fonts',
                 #mac os X - from
                 #http://developer.apple.com/technotes/tn/tn2024.html
@@ -174,7 +174,7 @@ CMapSearchPath = (
                   '%(CWD)s/fonts',              #special
                   '~/fonts/CMap',
                   '~/.fonts/CMap',
-                  '%(XDG_DATADIR)s/fonts/CMap',
+                  '%(XDG_DATA_HOME)s/fonts/CMap',
                   '~/.local/share/fonts/CMap',
                   )
 

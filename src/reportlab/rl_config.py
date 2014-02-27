@@ -81,7 +81,7 @@ def _startUp():
         'CWD': os.getcwd(),
         'disk': os.getcwd().split(':')[0],
         'sys_version': sys_version,
-        'XDG_DATADIR': os.environ.get('XDG_DATADIR','~/.local/share'),
+        'XDG_DATA_HOME': os.environ.get('XDG_DATA_HOME','~/.local/share'),
         }
 
     for k in _SAVED:
