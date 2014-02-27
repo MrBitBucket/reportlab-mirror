@@ -622,18 +622,19 @@ class TTFontFile(TTFontParser):
                     break
         if unicode_cmap_offset is None:
             raise TTFError('Font does not have cmap for Unicode (platform 3, encoding 1, format 4 or platform 0 any encoding format 4)')
-        self.seek(unicode_cmap_offset + 2)
+        self.seek(unicode_cmap_offset)
+        cmapFormat = self.read_ushort()
         length = self.read_ushort()
         limit = unicode_cmap_offset + length
         self.skip(2)
         segCount = int(self.read_ushort() / 2.0)
         self.skip(6)
-        endCount = list(map(lambda x, self=self: self.read_ushort(), range(segCount)))
+        endCount = [self.read_ushort() for _ in range(segCount)]
         self.skip(2)
-        startCount = list(map(lambda x, self=self: self.read_ushort(), range(segCount)))
-        idDelta = list(map(lambda x, self=self: self.read_short(), range(segCount)))
+        startCount = [self.read_ushort() for _ in range(segCount)]
+        idDelta = [self.read_short() for _ in range(segCount)]
         idRangeOffset_start = self._pos
-        idRangeOffset = list(map(lambda x, self=self: self.read_ushort(), range(segCount)))
+        idRangeOffset = [self.read_ushort() for _ in range(segCount)]
 
         # Now it gets tricky.
         glyphToChar = {}
