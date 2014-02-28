@@ -56,6 +56,7 @@ from reportlab.lib.utils import getBytesIO, isPy3, bytestr, isUnicode, char2int
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
 from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF
+from collections import namedtuple
 
 class TTFError(pdfdoc.PDFError):
     "TrueType font exception"
@@ -175,7 +176,7 @@ class TTFontParser:
         self.numSubfonts = self.read_ulong()
         self.subfontOffsets = []
         a = self.subfontOffsets.append
-        for i in range(self.numSubfonts):
+        for i in xrange(self.numSubfonts):
             a(self.read_ulong())
 
     def getSubfont(self,subfontIndex):
@@ -200,7 +201,7 @@ class TTFontParser:
             # Read table directory
             self.table = {}
             self.tables = []
-            for n in range(self.numTables):
+            for n in xrange(self.numTables):
                 record = {}
                 record['tag'] = self.read_tag()
                 record['checksum'] = self.read_ulong()
@@ -282,6 +283,10 @@ class TTFontParser:
         def get_chunk(self, pos, length):
             "Return a chunk of raw data at given position"
             return bytes(self._ttf_data[pos:pos+length])
+
+        def read_uint8(self):
+            self._pos += 1
+            return int(self._ttf_data[self._pos-1])
     else:
         def read_tag(self):
             "Read a 4-character tag"
@@ -291,6 +296,10 @@ class TTFontParser:
         def get_chunk(self, pos, length):
             "Return a chunk of raw data at given position"
             return self._ttf_data[pos:pos+length]
+
+        def read_uint8(self):
+            self._pos += 1
+            return ord(self._ttf_data[self._pos-1])
 
     def read_ushort(self):
         "Reads an unsigned short"
@@ -380,6 +389,9 @@ class TTFontMaker:
 
         return stm.getvalue()
 
+#this is used in the cmap encoding fmt==2 case
+CMapFmt2SubHeader = namedtuple('CMapFmt2SubHeader', 'firstCode entryCount idDelta idRangeOffset')
+
 class TTFontFile(TTFontParser):
     "TTF file parser and generator"
 
@@ -431,7 +443,7 @@ class TTFontFile(TTFontParser):
         names = {1:None,2:None,3:None,4:None,6:None}
         K = list(names.keys())
         nameCount = len(names)
-        for i in range(numRecords):
+        for i in xrange(numRecords):
             platformId = self.read_ushort()
             encodingId = self.read_ushort()
             languageId = self.read_ushort()
@@ -590,7 +602,7 @@ class TTFontFile(TTFontParser):
         ver_maj, ver_min = self.read_ushort(), self.read_ushort()
         if ver_maj != 1:
             raise TTFError('Unknown maxp table version %d.%04x' % (ver_maj, ver_min))
-        numGlyphs = self.read_ushort()
+        self.numGlyphs = numGlyphs = self.read_ushort()
 
         if not charInfo:
             self.charToGlyph = None
@@ -603,62 +615,140 @@ class TTFontFile(TTFontParser):
 
         # cmap - Character to glyph index mapping table
         cmap_offset = self.seek_table("cmap")
-        self.skip(2)
+        cmapVersion = self.read_ushort()
         cmapTableCount = self.read_ushort()
-        unicode_cmap_offset = None
-        for n in range(cmapTableCount):
-            platformID = self.read_ushort()
-            encodingID = self.read_ushort()
+        if cmapTableCount==0 and cmapVersion!=0:
+            cmapTableCount, cmapVersion = cmapVersion, cmapTableCount
+        encoffs = None
+        enc = 0
+        for n in xrange(cmapTableCount):
+            platform = self.read_ushort()
+            encoding = self.read_ushort()
             offset = self.read_ulong()
-            if platformID == 3 and encodingID == 1: # Microsoft, Unicode
-                format = self.get_ushort(cmap_offset + offset)
-                if format == 4:
-                    unicode_cmap_offset = cmap_offset + offset
-                    break
-            elif platformID == 0: # Unicode -- assume all encodings are compatible
-                format = self.get_ushort(cmap_offset + offset)
-                if format == 4:
-                    unicode_cmap_offset = cmap_offset + offset
-                    break
-        if unicode_cmap_offset is None:
-            raise TTFError('Font does not have cmap for Unicode (platform 3, encoding 1, format 4 or platform 0 any encoding format 4)')
-        self.seek(unicode_cmap_offset)
-        cmapFormat = self.read_ushort()
-        length = self.read_ushort()
-        limit = unicode_cmap_offset + length
-        self.skip(2)
-        segCount = int(self.read_ushort() / 2.0)
-        self.skip(6)
-        endCount = [self.read_ushort() for _ in range(segCount)]
-        self.skip(2)
-        startCount = [self.read_ushort() for _ in range(segCount)]
-        idDelta = [self.read_short() for _ in range(segCount)]
-        idRangeOffset_start = self._pos
-        idRangeOffset = [self.read_ushort() for _ in range(segCount)]
-
-        # Now it gets tricky.
+            if platform==3:
+                enc = 1
+                encoffs = offset
+            elif platform==1 and encoding==0 and enc!=1:
+                enc = 2
+                encoffs = offset
+            elif platform==1 and encoding==1:
+                enc = 1
+                encoffs = offset
+            elif platform==0 and encoding!=5:
+                enc = 1
+                encoffs = offset
+        if encoffs is None:
+            raise TTFError('could not find a suitable cmap encoding')
+        encoffs += cmap_offset
+        self.seek(encoffs)
+        fmt = self.read_ushort()
+        self.charToGlyph = charToGlyph = {}
         glyphToChar = {}
-        charToGlyph = {}
-        for n in range(segCount):
-            for unichar in range(startCount[n], endCount[n] + 1):
-                if idRangeOffset[n] == 0:
-                    glyph = (unichar + idDelta[n]) & 0xFFFF
-                else:
-                    offset = (unichar - startCount[n]) * 2 + idRangeOffset[n]
-                    offset = idRangeOffset_start + 2 * n + offset
-                    if offset >= limit:
-                        # workaround for broken fonts (like Thryomanes)
+        if fmt!=12 and fmt!=10 and fmt!=8:
+            length = self.read_ushort()
+            lang = self.read_ushort()
+        else:
+            self.skip(2)    #padding
+            length = self.read_ulong()
+            lang = self.read_ulong()
+        if fmt==0:
+            T = [self.read_uint8() for i in xrange(length-6)]
+            for unichar in xrange(min(256,self.numGlyphs,len(table))):
+                glyph = T[glyph]
+                charToGlyph[unichar] = glyph
+                glyphToChar.setdefault(glyph,[]).append(unichar)
+        elif fmt==4:
+            limit = encoffs + length
+            segCount = int(self.read_ushort() / 2.0)
+            self.skip(6)
+            endCount = [self.read_ushort() for _ in xrange(segCount)]
+            self.skip(2)
+            startCount = [self.read_ushort() for _ in xrange(segCount)]
+            idDelta = [self.read_short() for _ in xrange(segCount)]
+            idRangeOffset_start = self._pos
+            idRangeOffset = [self.read_ushort() for _ in xrange(segCount)]
+
+            # Now it gets tricky.
+            for n in xrange(segCount):
+                for unichar in xrange(startCount[n], endCount[n] + 1):
+                    if idRangeOffset[n] == 0:
+                        glyph = (unichar + idDelta[n]) & 0xFFFF
+                    else:
+                        offset = (unichar - startCount[n]) * 2 + idRangeOffset[n]
+                        offset = idRangeOffset_start + 2 * n + offset
+                        if offset >= limit:
+                            # workaround for broken fonts (like Thryomanes)
+                            glyph = 0
+                        else:
+                            glyph = self.get_ushort(offset)
+                            if glyph != 0:
+                                glyph = (glyph + idDelta[n]) & 0xFFFF
+                    charToGlyph[unichar] = glyph
+                    glyphToChar.setdefault(glyph,[]).append(unichar)
+        elif fmt==6:
+            first = self.read_ushort()
+            count = self.read_ushort()
+            for glyph in xrange(first,first+count):
+                unichar = self.read_ushort()
+                charToGlyph[unichar] = glyph
+                glyphToChar.setdefault(glyph,[]).append(unichar)
+        elif fmt==12:
+            segCount = self.read_ulong()
+            for n in xrange(segCount):
+                start = self.read_ulong()
+                end = self.read_ulong()
+                inc = self.read_ulong() - start
+                for unichar in xrange(start,end+1):
+                    glyph = unichar + inc
+                    charToGlyph[unichar] = glyph
+                    glyphToChar.setdefault(glyph,[]).append(unichar)
+        elif fmt==2:
+            T = [self.read_ushort() for i in xrange(256)]   #subheader keys
+            maxSHK = max(T)
+            SH = []
+            for i in xrange(maxHK+1):
+                firstCode = self.read_ushort()
+                entryCount = self.read_ushort()
+                idDelta = self.read_ushort()
+                idRangeOffset = (self.read_ushort()-(maxSHK-i)*8-2)>>1
+                SH.append(CMapFmt2SubHeader(firstCode,entryCount,idDelta,idRangeOffset))
+            #number of glyph indexes to read. it is the length of the entire subtable minus that bit we've read so far
+            entryCount = (length-(self._pos-(cmap_offset+encoffs)))>>1
+            glyphs = [self.read_short() for i in xrange(entryCount)]
+            last = -1
+            for unichar in xrange(256):
+                if T[unichar]==0:
+                    #Special case, single byte encoding entry, look unichar up in subhead
+                    if last!=-1:
+                        glyph = 0
+                    elif (unichar<SH[0].firstCode or unichar>=SH[0].firstCode+SH[0].entryCount or
+                            SH[0].idRangeOffset+(unichar-SH[0].firstCode)>=entryCount):
                         glyph = 0
                     else:
-                        glyph = self.get_ushort(offset)
-                        if glyph != 0:
-                            glyph = (glyph + idDelta[n]) & 0xFFFF
-                charToGlyph[unichar] = glyph
-                if glyph in glyphToChar:
-                    glyphToChar[glyph].append(unichar)
+                        glyph = glyphs[SH[0].idRangeOffset+(unichar-SH[0].firstCode)]
+                        if glyph!=0:
+                            glyph += SH[0].idDelta
+                    #assume the single byte codes are ascii
+                    if glyph!=0 and glyph<self.numGlyphs:
+                        charToGlyph[unichar] = glyph
+                        glyphToChar.setdefault(glyph,[]).append(unichar)
                 else:
-                    glyphToChar[glyph] = [unichar]
-        self.charToGlyph = charToGlyph
+                    k = T[unichar]
+                    for j in xrange(SH[k].entryCount):
+                        if SH[k].idRangeOffset+j>=entryCount:
+                            glyph = 0
+                        else:
+                            glyph = glyphs[SH[k].idRangeOffset+j]
+                            if glyph!= 0:
+                                glyph += SH[k].idDelta
+                        if glyph!=0 and glyph<self.numGlyphs:
+                            enc = (unichar<<8)|(j+SH[k].firstCode)
+                            charToGlyph[enc] = glyph
+                            glyphToChar.setdefault(glyph,[]).append(enc)
+                    if last==-1:
+                        last = unichar
+        else:
+            raise ValueError('Unsupported cmap encoding format %d' % fmt)
 
         # hmtx - Horizontal metrics table
         # (needs data from hhea, maxp, and cmap tables)
@@ -666,7 +756,7 @@ class TTFontFile(TTFontParser):
         aw = None
         self.charWidths = {}
         self.hmetrics = []
-        for glyph in range(numberOfHMetrics):
+        for glyph in xrange(numberOfHMetrics):
             # advance width and left side bearing.  lsb is actually signed
             # short, but we don't need it anyway (except for subsetting)
             aw, lsb = self.read_ushort(), self.read_ushort()
@@ -677,7 +767,7 @@ class TTFontFile(TTFontParser):
             if glyph in glyphToChar:
                 for char in glyphToChar[glyph]:
                     self.charWidths[char] = aw
-        for glyph in range(numberOfHMetrics, numGlyphs):
+        for glyph in xrange(numberOfHMetrics, numGlyphs):
             # the rest of the table only lists advance left side bearings.
             # so we reuse aw set by the last iteration of the previous loop
             lsb = self.read_ushort()
@@ -690,10 +780,10 @@ class TTFontFile(TTFontParser):
         self.seek_table('loca')
         self.glyphPos = []
         if indexToLocFormat == 0:
-            for n in range(numGlyphs + 1):
+            for n in xrange(numGlyphs + 1):
                 self.glyphPos.append(self.read_ushort() << 1)
         elif indexToLocFormat == 1:
-            for n in range(numGlyphs + 1):
+            for n in xrange(numGlyphs + 1):
                 self.glyphPos.append(self.read_ulong())
         else:
             raise TTFError('Unknown location table format (%d)' % indexToLocFormat)
@@ -798,7 +888,7 @@ class TTFontFile(TTFontParser):
 
         # hmtx - Horizontal Metrics
         hmtx = []
-        for n in range(numGlyphs):
+        for n in xrange(numGlyphs):
             originalGlyphIdx = glyphMap[n]
             aw, lsb = self.hmetrics[originalGlyphIdx]
             if n < numberOfHMetrics:
@@ -812,7 +902,7 @@ class TTFontFile(TTFontParser):
         offsets = []
         glyf = []
         pos = 0
-        for n in range(numGlyphs):
+        for n in xrange(numGlyphs):
             offsets.append(pos)
             originalGlyphIdx = glyphMap[n]
             glyphPos = self.glyphPos[originalGlyphIdx]
@@ -968,7 +1058,7 @@ class TTFont:
                 # Let's add the first 128 unicodes to the 0th subset, so ' '
                 # always has code 32 (for word spacing to work) and the ASCII
                 # output is readable
-                subset0 = list(range(128))
+                subset0 = list(xrange(128))
                 self.subsets = [subset0]
                 for n in subset0:
                     self.assignments[n] = n
