@@ -3,7 +3,7 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/__init__.py
 __version__=''' $Id$ '''
 __doc__="""The Reportlab PDF generation library."""
-Version = "3.0-20140226"
+Version = "3.0-20140228"
 
 import sys, os, imp
 
@@ -28,7 +28,7 @@ else:
 
 #try to use dynamic modifications from
 #reportlab.local_rl_mods.py
-#reportlab_mods or ~/.reportlab_mods
+#reportlab_mods.py or ~/.reportlab_mods
 try:
     import reportlab.local_rl_mods
 except ImportError:
