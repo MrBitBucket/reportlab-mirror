@@ -16,7 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.validators import Auto
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import *
-from reportlab.graphics.charts.textlabels import Label
+from reportlab.graphics.charts.textlabels import Label, _text2Path
 from reportlab.platypus.flowables import Spacer, PageBreak
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
@@ -410,6 +410,21 @@ class ChartTestCase(unittest.TestCase):
         story.append(Spacer(0,0.5*cm))
         drawing8 = sample8()
         story.append(drawing8)
+        story.append(Spacer(0,1*cm))
+
+    def test8(self):
+        '''text _text2Path'''
+        story = self.story
+        story.append(Paragraph('Texts drawn using a Path', h3))
+        story.append(Spacer(0,0.5*cm))
+        P=_text2Path('Hello World from font Times-Roman!',x=10,y=20,fontName='Times-Roman',fontSize=20,strokeColor=colors.blue,strokeWidth=0.1,fillColor=colors.red)
+        d = Drawing(400,50)
+        d.add(P)
+        story.append(d)
+        P=_text2Path('Hello World from font Helvetica!',x=10,y=20,fontName='Helvetica',fontSize=20,strokeColor=colors.blue,strokeWidth=0.1,fillColor=colors.red)
+        d = Drawing(400,50)
+        d.add(P)
+        story.append(d)
         story.append(Spacer(0,1*cm))
 
 
