@@ -931,7 +931,7 @@ class ParaParser(HTMLParser):
     def end_seq(self):
         pass
 
-    def start_onDraw(self,attr):
+    def start_ondraw(self,attr):
         defn = ABag()
         if 'name' in attr: defn.name = attr['name']
         else: self._syntax_error('<onDraw> needs at least a name attribute')
@@ -941,7 +941,8 @@ class ParaParser(HTMLParser):
         self._push(cbDefn=defn)
         self.handle_data('')
         self._pop()
-    end_onDraw=end_seq
+    start_onDraw=start_ondraw 
+    end_onDraw=end_ondraw=end_seq
 
     def start_index(self,attr):
         attr=self.getAttributes(attr,_indexAttrMap)
@@ -1009,6 +1010,8 @@ class ParaParser(HTMLParser):
     def __init__(self,verbose=0, caseSensitive=0, ignoreUnknownTags=1):
         HTMLParser.__init__(self)
         self.verbose = verbose
+        #HTMLParser is cas insenstive anyway, but the rml interface still needs this
+        #all start/end_ methods should have a lower case version for HMTMParser
         self.caseSensitive = caseSensitive
         self.ignoreUnknownTags = ignoreUnknownTags
 
