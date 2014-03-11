@@ -46,7 +46,7 @@ epsilon.
 
 from reportlab.lib import enums
 from reportlab.lib.units import cm
-from reportlab.lib.utils import commasplit, escapeOnce, encode_label, decode_label
+from reportlab.lib.utils import commasplit, escapeOnce, encode_label, decode_label, strTypes
 from reportlab.lib.styles import ParagraphStyle, _baseFontName
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable
@@ -92,7 +92,7 @@ def drawPageNumbers(canvas, style, pages, availWidth, availHeight, dot=' . '):
         pagestrw = stringWidth(pagestr, style.fontName, fontSize)
         
     
-    if isinstance(dot, str):
+    if isinstance(dot, strTypes):
         if dot:
             dotw = stringWidth(dot, style.fontName, fontSize)
             dotsn = int((availWidth-x-pagestrw)/dotw)
