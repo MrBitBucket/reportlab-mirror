@@ -4,13 +4,13 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/tools/docco/rl_doc_utils.py
 __version__=''' $Id$ '''
 
-
 __doc__ = """
 This module contains utilities for generating guides
 """
 
 import os, sys, glob
 import string
+from reportlab.lib.utils import asUnicode
 
 from .rltemplate import RLDocTemplate
 from .stylesheet import getStyleSheet
@@ -133,7 +133,7 @@ def list1(text, doBullet=1):
     getStory().append(P)
 
 def bullet(text):
-    text='<bullet><font name="Symbol">\u2022</font></bullet>' + quickfix(text)
+    text=u'<bullet><font name="Symbol">\u2022</font></bullet>' + asUnicode(quickfix(text))
     P = Paragraph(text, BU)
     getStory().append(P)
 
