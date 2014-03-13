@@ -43,7 +43,10 @@ except:
 daily=int(os.environ.get('RL_EXE_DAILY','0'))
 
 import distutils
-from setuptools import setup, Extension
+try:
+    from setuptools import setup, Extension
+except ImportError:
+    from distutils.core import setup, Extension
 from distutils import sysconfig
 
 # from Zope - App.Common.package_home
@@ -514,13 +517,12 @@ def main():
                     'reportlab.pdfgen',
                     'reportlab.platypus',
                     ],
-            # Ideally we'd have this but PIL via easy_install doesn't seem stable
-            #install_requires=[
-            #        'PIL',
-            #],
             package_dir = PACKAGE_DIR,
             package_data = {'reportlab': reportlab_files},
             ext_modules =   EXT_MODULES,
+            
+            #this probably only works for setuptools, but distutils seems to ignore it
+            install_requires=['pillow >= 2.3.0'],
             )
         print()
         print('########## SUMMARY INFO #########')
