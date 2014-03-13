@@ -40,10 +40,10 @@ try:
     os.chdir(pkgDir)
 except:
     print('!!!!! warning could not change directory to %r' % pkgDir)
-daily=os.environ.get('RL_EXE_DAILY','')
+daily=int(os.environ.get('RL_EXE_DAILY','0'))
 
 import distutils
-from distutils.core import setup, Extension
+from setuptools import setup, Extension
 from distutils import sysconfig
 
 # from Zope - App.Common.package_home
