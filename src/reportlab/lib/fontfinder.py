@@ -58,7 +58,7 @@ of non-Python applications.
 Future plans might include using this to auto-register fonts; and making it
 update itself smartly on repeated instantiation.
 """
-import sys, time, os, cPickle, tempfile
+import sys, time, os, pickle, tempfile
 from xml.sax.saxutils import quoteattr
 try:
     from hashlib import md5
@@ -105,7 +105,7 @@ class FontDescriptor:
     def getTag(self):
         "Return an XML tag representation"
         attrs = []
-        for (k, v) in self.__dict__.items():
+        for k, v in self.__dict__.items():
             if k not in ['timeModified']:
                 if v:
                     attrs.append('%s=%s' % (k, quoteattr(str(v))))
@@ -148,7 +148,7 @@ class FontFinder:
                     self._fontsByFamily[fam].append(font)
                 else:
                     self._fontsByFamily[fam] = [font]
-        names = self._fontsByFamily.keys()
+        names = list(self._fontsByFamily.keys())
         names.sort()
         return names
 
@@ -178,7 +178,7 @@ class FontFinder:
         selected = []
         for font in self._fonts:
             OK = True
-            for (k, v) in kwds.items():
+            for k, v in kwds.items():
                 if getattr(font, k, None) != v:
                     OK = False
             if OK:
@@ -206,12 +206,12 @@ class FontFinder:
 
     def save(self, fileName):
         f = open(fileName, 'w')
-        cPickle.dump(self, f)
+        pickle.dump(self, f)
         f.close()
 
     def load(self, fileName):
         f = open(fileName, 'r')
-        finder2 = cPickle.load(f)
+        finder2 = pickle.load(f)
         f.close()
         self.__dict__.update(finder2.__dict__)
 
@@ -310,25 +310,25 @@ def test():
     ff.addDirectory(rlFontDir)
     ff.search()
 
-    print 'cache file name...'
-    print ff._getCacheFileName()
+    print('cache file name...')
+    print(ff._getCacheFileName())
 
-    print 'families...'
+    print('families...')
     for familyName in ff.getFamilyNames():
-        print '\t%s' % familyName
+        print('\t%s' % familyName)
 
-    print
-    print 'fonts called Vera:',
+    print()
+    outw = sys.stdout.write
+    outw('fonts called Vera:')
     for font in ff.getFontsInFamily('Bitstream Vera Sans'):
-        print '\t%s' % font.name
-
-    print
-    print 'Bold fonts\n\t'
+        outw(' %s' % font.name)
+    print()
+    outw('Bold fonts\n\t')
     for font in ff.getFontsWithAttributes(isBold=True, isItalic=False):
-        print font.fullName ,
-
-    print 'family report'
-    print ff.getFamilyXmlReport()
+        outw(font.fullName+' ')
+    print()
+    print('family report')
+    print(ff.getFamilyXmlReport())
 
 if __name__=='__main__':
     test()

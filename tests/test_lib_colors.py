@@ -35,7 +35,7 @@ class ColorTestCase(unittest.TestCase):
     def test0(self):
         "Test color2bw function on all named colors."
 
-        cols = colors.getAllNamedColors().values()
+        cols = list(colors.getAllNamedColors().values())
         for col in cols:
             gray = colors.color2bw(col)
             r, g, b = gray.red, gray.green, gray.blue
@@ -45,7 +45,7 @@ class ColorTestCase(unittest.TestCase):
     def test1(self):
         "Test colorDistance function."
 
-        cols = colors.getAllNamedColors().values()
+        cols = list(colors.getAllNamedColors().values())
         for col in cols:
             d = colors.colorDistance(col, col)
             assert d == 0
@@ -55,10 +55,12 @@ class ColorTestCase(unittest.TestCase):
         "Test toColor function on half a dozen ways to say 'red'."
 
         allRed = [colors.red, [1, 0, 0], (1, 0, 0),
-                  'red', 'RED', '0xFF0000', '0xff0000']
+                  b'red', b'RED', b'0xFF0000', b'0xff0000',b'rgb(255,0,0)',
+                  u'red', u'RED', u'0xFF0000', u'0xff0000',u'rgb(255,0,0)',
+                  ]
 
         for thing in allRed:
-            assert colors.toColor(thing) == colors.red
+            assert colors.toColor(thing) == colors.red,"colors.toColor(%s)-->%s != colors.red(%s)" % (ascii(thing),ascii(colors.toColor(thing)),colors.red)
 
 
     def test3(self):
@@ -67,7 +69,7 @@ class ColorTestCase(unittest.TestCase):
         # Take all colors as test subjects, except 'transparent'.
 ##        rgbCols = colors.getAllNamedColors()
 ##        del rgbCols['transparent']
-        rgbCols = colors.getAllNamedColors().items()
+        rgbCols = list(colors.getAllNamedColors().items())
 
         # Make a roundtrip test (RGB > CMYK > RGB).
         for name, rgbCol in rgbCols:
@@ -79,13 +81,13 @@ class ColorTestCase(unittest.TestCase):
             # Make sure the differences for each RGB component
             # isreally small (< power(10, -N)!
             N = 16 # max. value found to work on Python2.0 and Win2K.
-            deltas = map(abs, (r1-r2, g1-g2, b1-b2))
+            deltas = list(map(abs, (r1-r2, g1-g2, b1-b2)))
             assert deltas < [math.pow(10, -N)] * 3
 
     def test4(self):
         "Construct CMYK instances and test round trip conversion"
 
-        rgbCols = colors.getAllNamedColors().items()
+        rgbCols = list(colors.getAllNamedColors().items())
 
         # Make a roundtrip test (RGB > CMYK > RGB).
         for name, rgbCol in rgbCols:
@@ -98,9 +100,8 @@ class ColorTestCase(unittest.TestCase):
             # Make sure the differences for each RGB component
             # isreally small (< power(10, -N)!
             N = 16 # max. value found to work on Python2.0 and Win2K.
-            deltas = map(abs, (r1-r2, g1-g2, b1-b2))
+            deltas = list(map(abs, (r1-r2, g1-g2, b1-b2)))
             assert deltas < [math.pow(10, -N)] * 3
-
 
     def test5(self):
         "List and display all named colors and their gray equivalents."
@@ -110,7 +111,7 @@ class ColorTestCase(unittest.TestCase):
         #do all named colors
         framePage(canvas, 'Color Demo - page %d' % canvas.getPageNumber())
 
-        all_colors = reportlab.lib.colors.getAllNamedColors().items()
+        all_colors = list(reportlab.lib.colors.getAllNamedColors().items())
         all_colors.sort() # alpha order by name
         canvas.setFont('Times-Roman', 10)
         text = 'This shows all the named colors in the HTML standard (plus their gray and CMYK equivalents).'
@@ -146,6 +147,30 @@ class ColorTestCase(unittest.TestCase):
 
         canvas.save()
 
+    def test6(self):
+        '''test HexColor'''
+        HexColor = colors.HexColor
+        Color = colors.Color
+        self.assertEquals(HexColor(0xffffff),Color(1,1,1,1))
+        self.assertEquals(HexColor(16777215),Color(1,1,1,1))
+        self.assertEquals(HexColor(b'#ffffff'),Color(1,1,1,1))
+        self.assertEquals(HexColor(b'#FFFFFF'),Color(1,1,1,1))
+        self.assertEquals(HexColor(b'0xffffff'),Color(1,1,1,1))
+        self.assertEquals(HexColor(b'0xFFFFFF'),Color(1,1,1,1))
+        self.assertEquals(HexColor(b'16777215'),Color(1,1,1,1))
+        self.assertRaisesRegexp(ValueError,r"invalid literal for int\(\) with base 10:.*ffffff",HexColor,b'ffffff')
+        self.assertEquals(HexColor(b'#FFFFFF', htmlOnly=True),Color(1,1,1,1))
+        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,b'0xffffff',htmlOnly=True)
+        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,b'16777215',htmlOnly=True)
+        self.assertEquals(HexColor(u'#ffffff'),Color(1,1,1,1))
+        self.assertEquals(HexColor(u'#FFFFFF'),Color(1,1,1,1))
+        self.assertEquals(HexColor(u'0xffffff'),Color(1,1,1,1))
+        self.assertEquals(HexColor(u'0xFFFFFF'),Color(1,1,1,1))
+        self.assertEquals(HexColor(u'16777215'),Color(1,1,1,1))
+        self.assertRaisesRegexp(ValueError,r"invalid literal for int\(\) with base 10:.*ffffff",HexColor,u'ffffff')
+        self.assertEquals(HexColor(u'#FFFFFF', htmlOnly=True),Color(1,1,1,1))
+        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,u'0xffffff',htmlOnly=True)
+        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,u'16777215',htmlOnly=True)
 
 def makeSuite():
     return makeSuiteForClasses(ColorTestCase)

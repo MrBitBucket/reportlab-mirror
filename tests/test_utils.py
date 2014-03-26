@@ -6,11 +6,11 @@ __doc__="""Test reportlab.lib.util module"""
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import unittest
+from reportlab.lib.utils import FmtSelfDict, encode_label, decode_label
 
 class FmtTestCase(unittest.TestCase):
 
     def testFmt(self):
-        from reportlab.lib.utils import FmtSelfDict
         class MixedIn(FmtSelfDict):
             def __init__(self):
                 self.a = 'AA'
@@ -25,6 +25,9 @@ class FmtTestCase(unittest.TestCase):
             obj._fmt('moon %(a)s june%(_b)s spoon %%(a)s%(c)s %(d)s', c='CC', C='boon', d='ni'))
         self.assertRaises(AttributeError, obj._fmt, '%(c)s')  # XXX bit weird, can this be changed?
 
+    def testLabelCoding(self):
+        a = (1,2,[3,4],"a"), [1,2,"4",b'4']
+        assert a == decode_label(encode_label(a))
 
 def makeSuite():
     return makeSuiteForClasses(FmtTestCase)

@@ -4,7 +4,7 @@ from reportlab.graphics.charts.lineplots import LinePlot
 from reportlab.graphics.shapes import Drawing, _DrawingEditorMixin, String
 from reportlab.graphics.widgets.markers import makeMarker
 from reportlab.graphics.charts.textlabels import Label
-from excelcolors import *
+from reportlab.graphics.samples.excelcolors import *
 
 class LineChartWithMarkers(_DrawingEditorMixin,Drawing):
     def __init__(self,width=200,height=150,*args,**kw):

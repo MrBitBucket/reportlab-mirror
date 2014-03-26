@@ -5,12 +5,12 @@
 __version__=''' $Id$ '''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 setOutDir(__name__)
-import os
+import os, time, sys
 import reportlab
 import unittest
 from reportlab.lib import colors
 from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetAttr, rl_isfile, \
-                                isCompactDistro
+                                isCompactDistro, isPy3
 
 def _rel_open_and_read(fn):
     from reportlab.lib.utils import open_and_read
@@ -27,15 +27,18 @@ class ImporterTestCase(unittest.TestCase):
     count = 0
 
     def setUp(self):
-        from time import time
         from reportlab.lib.utils import get_rl_tempdir
-        s = repr(int(time())) + repr(self.count)
+        s = repr(int(time.time())) + repr(self.count)
         self.__class__.count += 1
         self._tempdir = get_rl_tempdir('reportlab_test','tmp_%s' % s)
+        if not os.path.isdir(self._tempdir):
+            os.makedirs(self._tempdir,0o700)
         _testmodulename = os.path.join(self._tempdir,'test_module_%s.py' % s)
         f = open(_testmodulename,'w')
         f.write('__all__=[]\n')
         f.close()
+        if sys.platform=='darwin' and isPy3:
+            time.sleep(0.3)
         self._testmodulename = os.path.splitext(os.path.basename(_testmodulename))[0]
 
     def tearDown(self):
@@ -115,8 +118,8 @@ class ImporterTestCase(unittest.TestCase):
 
     def test10(self):
         "test open and read of a simple relative file"
-        from reportlab.lib.utils import open_and_read, getStringIO
-        b = getStringIO(_rel_open_and_read('../docs/images/Edit_Prefs.gif'))
+        from reportlab.lib.utils import open_and_read, getBytesIO
+        b = getBytesIO(_rel_open_and_read('../docs/images/Edit_Prefs.gif'))
         b = open_and_read(b)
 
 
@@ -125,25 +128,21 @@ class ImporterTestCase(unittest.TestCase):
         try:
             m1 = recursiveImport('reportlab.pdfgen.brush')
             self.fail("Imported a nonexistent module")
-        except ImportError, e:
-            self.assertEquals(e.message, "Could not import 'reportlab.pdfgen.brush'")
+        except ImportError as e:
+            self.assertIn('reportlab.pdfgen.brush',str(e))
             
         try:
             m1 = recursiveImport('totally.non.existent')
             self.fail("Imported a nonexistent module")
-        except ImportError, e:
-            self.assertEquals(e.message, "Could not import 'totally.non.existent'")
+        except ImportError as e:
+            self.assertIn('totally',str(e))
 
         try:
             #import a module in the 'tests' directory with a bug
             m1 = recursiveImport('unimportable')
             self.fail("Imported a buggy module")
-        except ImportError, e:
-            self.assert_('integer division or modulo by zero' in e.message)
-
-
-
-
+        except Exception as e:
+            self.assertIn(reportlab.isPy3 and 'division by zero' or 'integer division or modulo by zero',str(e))
 
 def makeSuite():
     return makeSuiteForClasses(ImporterTestCase)

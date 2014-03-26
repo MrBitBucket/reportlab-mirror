@@ -27,6 +27,11 @@ from reportlab.lib.validators import isNumber, isColor, isString, Validator
 from reportlab.lib.attrmap import *
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.lib.units import mm
+from reportlab.lib.utils import asNative
+try:
+    from itertools import zip_longest
+except:
+    from itertools import izip_longest as zip_longest
 
 class isLevel(Validator):
     def test(self,x):
@@ -62,8 +67,9 @@ class QrCodeWidget(PlotArea):
     barLevel = 'L'
 
     def __init__(self,value='Hello World',**kw):
+        value = str(value) if isinstance(value,int) else asNative(value)
         self.value=value
-        for k, v in kw.iteritems():
+        for k, v in kw.items():
             setattr(self, k, v)
 
     def wrap(self,aW,aH):
@@ -123,7 +129,7 @@ class QR:
             if not re.search('^[%s]+$' % self.valid, data):
                 raise ValueError
         else:
-            self.valid = ''.join(chr(c) for c in range(256))
+            self.valid = ''.join(chr(c) for c in xrange(256))
         self.data = data
 
     def getLength(self):
@@ -133,10 +139,10 @@ class QR:
         return self.data
 
     def write(self, buffer):
-        for g in map(None, *[iter(self.data)] * self.group):
+        for g in zip_longest(*[iter(self.data)] * self.group):
             bits = 0
             n = 0
-            for i in range(self.group):
+            for i in xrange(self.group):
                 if g[i] is not None:
                     n *= len(self.valid)
                     n += self.valid.index(g[i])
@@ -156,7 +162,7 @@ class QRAlphaNum(QR):
     mode = QRMode.MODE_ALPHA_NUM
 
 class QR8bitByte(QR):
-    valid = None #''.join(chr(c) for c in range(256))
+    valid = None #''.join(chr(c) for c in xrange(256))
     bits = (8,)
     group = 1
     mode = QRMode.MODE_8BIT_BYTE
@@ -944,7 +950,7 @@ class QRRSBlock:
         rsBlock = QRRSBlock.getRsBlockTable(typeNumber, errorCorrectLevel);
         if rsBlock == None:
             raise Exception("bad rs block @ typeNumber:" + typeNumber + "/errorCorrectLevel:" + errorCorrectLevel)
-        length = len(rsBlock) / 3
+        length = len(rsBlock) // 3
         list = []
         for i in xrange(length):
             count = rsBlock[i * 3 + 0]

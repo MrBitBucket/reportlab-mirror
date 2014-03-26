@@ -29,20 +29,22 @@ def _processGlyph(G, truncate=1, pathReverse=0):
     O = []
     P = []
     R = []
+    if G and len(G)==1 and G[0][0]=='lineTo':
+        G = (('moveToClosed',)+G[0][1:],)+G #hack fix for some errors
     for g in G+(('end',),):
         op = g[0]
         if O and op in ['moveTo', 'moveToClosed','end']:
             if O[0]=='moveToClosed':
                 O = O[1:]
                 if pathReverse:
-                    for i in xrange(0,len(P),2):
+                    for i in range(0,len(P),2):
                         P[i+1], P[i] = P[i:i+2]
                     P.reverse()
                     O.reverse()
                 O.insert(0,'moveTo')
                 O.append('closePath')
             i = 0
-            if truncate: P = map(_pathNumTrunc,P)
+            if truncate: P = list(map(_pathNumTrunc,P))
             for o in O:
                 j = i + _PATH_OP_ARG_COUNT[_PATH_OP_NAMES.index(o)]
                 if o=='closePath':
@@ -58,11 +60,8 @@ def _processGlyph(G, truncate=1, pathReverse=0):
 
 def _text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
                             anchor='start', truncate=1, pathReverse=0):
-    global _gs
-    if not _gs:
-        import _renderPM
-        _gs = _renderPM.gstate(1,1)
-    from reportlab.graphics import renderPM
+    from reportlab.graphics import renderPM, _renderPM
+    _gs = _renderPM.gstate(1,1)
     renderPM._setFont(_gs,fontName,fontSize)
     P = []
     if not anchor=='start':
@@ -76,9 +75,9 @@ def _text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000
     return P
 
 def _text2Path(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
-                anchor='start', truncate=1, pathReverse=0):
+                anchor='start', truncate=1, pathReverse=0,**kwds):
     return definePath(_text2PathDescription(text,x=x,y=y,fontName=fontName,
-                    fontSize=fontSize,anchor=anchor,truncate=truncate,pathReverse=pathReverse))
+                    fontSize=fontSize,anchor=anchor,truncate=truncate,pathReverse=pathReverse),**kwds)
 
 _BA2TA={'w':'start','nw':'start','sw':'start','e':'end', 'ne': 'end', 'se':'end', 'n':'middle','s':'middle','c':'middle'}
 class Label(Widget):

@@ -47,7 +47,7 @@ class ExternalTestCase(SecureTestCase):
 
         # read module paths from file
         extraModulenames = open(extraFilename).readlines()
-        extraModulenames = map(string.strip, extraModulenames)
+        extraModulenames = list(map(string.strip, extraModulenames))
 
         # expand pathnames as much as possible
         for f in extraModulenames:
@@ -68,7 +68,7 @@ class ExternalTestCase(SecureTestCase):
 
                 module = __import__(modname) # seems to fail sometimes...
                 if 'makeSuite' in dir(module):
-                    print "running", f
+                    print("running", f)
                     testSuite = module.makeSuite()
                     unittest.TextTestRunner().run(testSuite)
                 os.chdir(cwd)

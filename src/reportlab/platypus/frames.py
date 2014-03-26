@@ -19,7 +19,7 @@ class ShowBoundaryValue:
         self.color = color
         self.width = width
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.color is not None and self.width>=0
 
 class Frame:
@@ -96,7 +96,7 @@ class Frame:
             for ga in _geomAttr:
                 ga = '_'+ga
                 self.__dict__['_savedGeom'][ga] = self.__dict__[ga]
-        for k,v in kwds.iteritems():
+        for k,v in kwds.items():
             setattr(self,k,v)
 
     def _restoreGeom(self):

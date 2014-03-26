@@ -31,8 +31,9 @@
 #
 
 from reportlab.lib.units import inch
-from common import Barcode
-import string
+from reportlab.lib.utils import asNative
+from reportlab.graphics.barcode.common import Barcode
+from string import digits as string_digits
 
 _patterns = {
     '0':    ("bsbSBsBsb", 0),       '1': ("BsbSbsbsB", 1),
@@ -59,7 +60,8 @@ _patterns = {
     '+':    ("bSbsbSbSb", 41),      '%': ("bsbSbSbSb", 42)
     }
 
-_stdchrs = string.digits + string.uppercase + "-. $/+%"
+from reportlab.lib.utils import ascii_uppercase, ascii_lowercase
+_stdchrs = string_digits + ascii_uppercase + "-. $/+%"
 
 _extended = {
     '\0':   "%U",    '\01':  "$A",    '\02':  "$B",    '\03':  "$C",
@@ -88,7 +90,7 @@ _extended = {
     }
 
 
-_extchrs = _stdchrs + string.lowercase + \
+_extchrs = _stdchrs + ascii_lowercase + \
     "\000\001\002\003\004\005\006\007\010\011\012\013\014\015\016\017" + \
     "\020\021\022\023\024\025\026\027\030\031\032\033\034\035\036\037" + \
     "*!'#&\"(),:;<=>?@[\\]^_`{|}~\177"
@@ -112,7 +114,8 @@ class _Code39Base(Barcode):
     bearers = 0.0
     stop = 1
     def __init__(self, value = "", **args):
-        for k, v in args.iteritems():
+        value = asNative(value)
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:
@@ -138,7 +141,7 @@ class Standard39(_Code39Base):
     """
     Options that may be passed to constructor:
 
-        value (int, or numeric string. required.):
+        value (int, or numeric string required.):
             The value to encode.
 
         barWidth (float, default .0075):
@@ -192,8 +195,8 @@ class Standard39(_Code39Base):
         vval = [].append
         self.valid = 1
         for c in self.value:
-            if c in string.lowercase:
-                c = string.upper(c)
+            if c in ascii_lowercase:
+                c = c.upper()
             if c not in _stdchrs:
                 self.valid = 0
                 continue

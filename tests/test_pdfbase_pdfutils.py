@@ -8,7 +8,8 @@ setOutDir(__name__)
 import os
 import unittest
 from reportlab.pdfbase.pdfutils import _AsciiHexEncode, _AsciiHexDecode
-from reportlab.pdfbase.pdfutils import _AsciiBase85Encode, _AsciiBase85Decode
+from reportlab.pdfbase.pdfutils import asciiBase85Encode, asciiBase85Decode
+from reportlab.lib.utils import asBytes
 
 class PdfEncodingTestCase(unittest.TestCase):
     "Test various encodings used in PDF files."
@@ -31,12 +32,11 @@ class PdfEncodingTestCase(unittest.TestCase):
         plain = 'What is the average velocity of a sparrow?'
 
         #the remainder block can be absent or from 1 to 4 bytes
-        for i in xrange(55):
-            encoded = _AsciiBase85Encode(plain)
-            decoded = _AsciiBase85Decode(encoded)
-            assert decoded == plain, msg
-            plain = plain + chr(i)
-
+        for i in xrange(256):
+            encoded = asciiBase85Encode(plain)
+            decoded = asciiBase85Decode(encoded)
+            assert decoded == asBytes(plain,'latin1'), msg
+            plain += chr(i)
 
 def makeSuite():
     return makeSuiteForClasses(PdfEncodingTestCase)

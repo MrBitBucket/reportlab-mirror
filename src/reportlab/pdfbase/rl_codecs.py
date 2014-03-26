@@ -1,8 +1,11 @@
 #codecs support
 __all__=['RL_Codecs']
+from collections import namedtuple
+StdCodecData=namedtuple('StdCodecData','exceptions rexceptions')
+ExtCodecData=namedtuple('ExtCodecData','baseName exceptions rexceptions')
 class RL_Codecs:
     __rl_codecs_data = {
-        'winansi':({
+        'winansi':StdCodecData({
             0x007f: 0x2022, # BULLET
             0x0080: 0x20ac, # EURO SIGN
             0x0081: 0x2022, # BULLET
@@ -38,7 +41,7 @@ class RL_Codecs:
             0x009f: 0x0178, # LATIN CAPITAL LETTER Y WITH DIAERESIS
             0x00a0: 0x0020, # SPACE
             }, {0x2022:0x7f,0x20:0x20,0xa0:0x20}),
-        'macroman':({
+        'macroman':StdCodecData({
             0x007f: None, # UNDEFINED
             0x0080: 0x00c4, # LATIN CAPITAL LETTER A WITH DIAERESIS
             0x0081: 0x00c5, # LATIN CAPITAL LETTER A WITH RING ABOVE
@@ -164,7 +167,7 @@ class RL_Codecs:
             0x00fe: 0x02db, # OGONEK
             0x00ff: 0x02c7, # CARON
             },None),
-    'standard':({
+    'standard':StdCodecData({
             0x0027: 0x2019, # RIGHT SINGLE QUOTATION MARK
             0x0060: 0x2018, # LEFT SINGLE QUOTATION MARK
             0x007f: None, # UNDEFINED
@@ -288,7 +291,7 @@ class RL_Codecs:
             0x00fe: None, # UNDEFINED
             0x00ff: None, # UNDEFINED
             },None),
-    'symbol':({
+    'symbol':StdCodecData({
             0x0022: 0x2200, # FOR ALL
             0x0024: 0x2203, # THERE EXISTS
             0x0027: 0x220b, # CONTAINS AS MEMBER
@@ -485,7 +488,7 @@ class RL_Codecs:
             0x03bc:0x006d, # GREEK SMALL LETTER MU
             }
             ),
-    'zapfdingbats':({
+    'zapfdingbats':StdCodecData({
             0x0021: 0x2701, # UPPER BLADE SCISSORS
             0x0022: 0x2702, # BLACK SCISSORS
             0x0023: 0x2703, # LOWER BLADE SCISSORS
@@ -710,7 +713,7 @@ class RL_Codecs:
             0x00fe: 0x27be, # OPEN-OUTLINED RIGHTWARDS ARROW
             0x00ff: None, # UNDEFINED
             },None),
-    'pdfdoc':({
+    'pdfdoc':StdCodecData({
             0x007f: None, # UNDEFINED
             0x0080: 0x2022, # BULLET
             0x0081: 0x2020, # DAGGER
@@ -755,7 +758,7 @@ class RL_Codecs:
             30: 0x02da, #ring
             31: 0x02dc, #tilde
             },None),
-    'macexpert':({
+    'macexpert':StdCodecData({
             0x0021: 0xf721, # [unknown unicode name for exclamsmall]
             0x0022: 0xf6f8, # [unknown unicode name for Hungarumlautsmall]
             0x0023: 0xf7a2, # [unknown unicode name for centoldstyle]
@@ -976,6 +979,9 @@ class RL_Codecs:
             0x00ff: None, # UNDEFINED
             },None),
         }
+    __rl_extension_codecs = {
+            'extpdfdoc':ExtCodecData('pdfdoc',{0x000a:0x000a,0x000d:0x000d},None),
+            }
     #for k,v in __rl_codecs_data.items():
     #   __rl_codecs_data[k+'enc'] = __rl_codecs_data[k+'encoding'] = v
     #del k,v
@@ -983,10 +989,9 @@ class RL_Codecs:
     def __init__(self):
         raise NotImplementedError
 
-    def _256_exception_codec(xt):
-        exceptions,rexceptions = xt
+    def _256_exception_codec(name,exceptions,rexceptions,baseRange=range(32,256)):
         import codecs
-        decoding_map = codecs.make_identity_dict(xrange(32,256))
+        decoding_map = codecs.make_identity_dict(baseRange)
         decoding_map.update(exceptions)
         encoding_map = codecs.make_encoding_map(decoding_map)
         if rexceptions: encoding_map.update(rexceptions)
@@ -1004,24 +1009,40 @@ class RL_Codecs:
         class StreamReader(Codec,codecs.StreamReader):
             pass
         C = Codec()
-        return (C.encode,C.decode,StreamReader,StreamWriter)
+        return codecs.CodecInfo(C.encode,C.decode,streamreader=StreamReader,streamwriter=StreamWriter,name=name)
     _256_exception_codec=staticmethod(_256_exception_codec)
 
     __rl_codecs_cache = {}
 
-    def __rl_codecs(name,cache=__rl_codecs_cache,data=__rl_codecs_data):
+    def __rl_codecs(name,cache=__rl_codecs_cache,data=__rl_codecs_data,extension_codecs=__rl_extension_codecs):
         try:
             return cache[name]
         except KeyError:
-            cache[name] = c = RL_Codecs._256_exception_codec(
-                data[name])
+            if name in extension_codecs:
+                x = extension_codecs[name]
+                e,r = data[x.baseName]
+                if x.exceptions:
+                    if e:
+                        e = e.copy()
+                        e.update(x.exceptions)
+                    else:
+                        e = x.exceptions
+                if x.rexceptions:
+                    if r:
+                        r = r.copy()
+                        r.update(x.rexceptions)
+                    else:
+                        r = x.exceptions
+            else:
+                e,r = data[name]
+            cache[name] = c = RL_Codecs._256_exception_codec(name,e,r)
         return c
     __rl_codecs=staticmethod(__rl_codecs)
 
     def _rl_codecs(name):
         name = name.lower()
-        from pdfmetrics import standardEncodings
-        for e in standardEncodings:
+        from reportlab.pdfbase.pdfmetrics import standardEncodings
+        for e in standardEncodings+('ExtPdfdocEncoding',):
             e = e[:-8].lower()
             if name.startswith(e): return RL_Codecs.__rl_codecs(e)
         return None

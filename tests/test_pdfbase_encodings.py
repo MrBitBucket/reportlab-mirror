@@ -7,17 +7,19 @@ from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfutils
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.rl_accel import escapePDF
+from reportlab.lib.utils import isUnicode
 from reportlab.graphics.shapes import Drawing, String, Ellipse
 import re
 import codecs
 textPat = re.compile(r'\([^(]*\)')
 
 #test sentences
-testCp1252 = 'copyright %s trademark %s registered %s ReportLab! Ol%s!' % (chr(169), chr(153),chr(174), chr(0xe9))
-testUni = unicode(testCp1252, 'cp1252')
+testCp1252 = b'copyright \xa9 trademark \x99 registered \xae ReportLab! Ol\xe9!'
+testUni = testCp1252.decode('cp1252')
 testUTF8 = testUni.encode('utf-8')
 # expected result is octal-escaped text in the PDF
-expectedCp1252 = pdfutils._escape(testCp1252)
+expectedCp1252 = escapePDF(testCp1252)
 
 def extractText(pdfOps):
     """Utility to rip out the PDF text within a block of PDF operators.
@@ -28,7 +30,7 @@ def extractText(pdfOps):
     """
     found = textPat.findall(pdfOps)
     #chop off '(' and ')'
-    return map(lambda x:x[1:-1], found)
+    return [x[1:-1] for x in found]
 
 def subsetToUnicode(ttf, subsetCodeStr):
     """Return unicode string represented by given subsetCode string
@@ -36,12 +38,12 @@ def subsetToUnicode(ttf, subsetCodeStr):
     object that was used."""
     # This relies on TTFont internals and uses the first document
     # and subset it finds
-    subset = ttf.state.values()[0].subsets[0]
+    subset = list(ttf.state.values())[0].subsets[0]
     chrs = []
     for codeStr in subsetCodeStr.split('\\'):
         if codeStr:
-            chrs.append(unichr(subset[int(codeStr[1:], 8)]))
-    return u''.join(chrs)
+            chrs.append(chr(subset[int(codeStr[1:], 8)]))
+    return ''.join(chrs)
 
 class TextEncodingTestCase(NearTestCase):
     """Tests of expected Unicode and encoding behaviour
@@ -59,7 +61,7 @@ class TextEncodingTestCase(NearTestCase):
         self.assertNear(pdfmetrics.stringWidth(msg, 'Times-Roman', 10),50.27)
         self.assertNear(pdfmetrics.stringWidth(msg, 'Vera', 10),57.7685546875)
 
-        uniMsg1 = u"Hello World"
+        uniMsg1 = "Hello World"
         self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Courier', 10),66.0)
         self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Helvetica', 10),51.67)
         self.assertNear(pdfmetrics.stringWidth(uniMsg1, 'Times-Roman', 10),50.27)
@@ -84,7 +86,8 @@ class TextEncodingTestCase(NearTestCase):
         self.assertNear(pdfmetrics.stringWidth(testUni, 'Vera', 10),279.809570313)
 
     def testUtf8FileName(self):
-        fn=outputfile('test_pdfbase_utf8_filename').decode('utf8')
+        fn=outputfile('test_pdfbase_utf8_filename')
+        if not isUnicode(fn): fn = fn.decode('utf8')
         fn += u'_portr\xe4t.pdf'
         c = Canvas(fn)
         c.drawString(100,700, u'Filename='+fn)

@@ -6,9 +6,7 @@ __version__=''' $Id$ '''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os, unittest
-from string import split, strip, join, whitespace
 from operator import truth
-from types import StringType, ListType
 from reportlab.pdfbase.pdfmetrics import stringWidth, registerFont, registerFontFamily
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus.paraparser import ParaParser
@@ -18,15 +16,13 @@ from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import _className
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame, ShowBoundaryValue
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, PageBreak, NextPageTemplate
 from reportlab.platypus import tableofcontents
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
-from reportlab.platypus.paragraph import *
-from reportlab.platypus.paragraph import _getFragWords
+from reportlab.platypus.paragraph import Paragraph, _getFragWords, _splitWord
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
@@ -172,7 +168,7 @@ it's actually easy to do using platypus.
         gif = os.path.join(testsFolder,'pythonpowered.gif')
         story.append(ParagraphAndImage(Paragraph(text,bt),Image(gif)))
         phrase = 'This should be a paragraph spanning at least three pages. '
-        description = ''.join([('%d: '%i)+phrase for i in xrange(250)])
+        description = ''.join([('%d: '%i)+phrase for i in range(250)])
         story.append(ParagraphAndImage(Paragraph(description, bt),Image(gif),side='left'))
 
         doc = MyDocTemplate(outputfile('test_platypus_paragraphandimage.pdf'))
@@ -210,7 +206,7 @@ your browser. If an internal link begins with something that looks like a scheme
         heading = Paragraph('This is a heading',h3)
         story.append(ImageAndFlowables(Image(gif),[heading,Paragraph(text,bt)]))
         phrase = 'This should be a paragraph spanning at least three pages. '
-        description = ''.join([('%d: '%i)+phrase for i in xrange(250)])
+        description = ''.join([('%d: '%i)+phrase for i in range(250)])
         story.append(ImageAndFlowables(Image(gif),[heading,Paragraph(description, bt)],imageSide='left'))
         story.append(NextPageTemplate('special'))
         story.append(PageBreak())
@@ -370,7 +366,7 @@ class FragmentTestCase(unittest.TestCase):
         B = styleSheet['BodyText']
         text = ''
         P = Paragraph(text, B)
-        frags = map(lambda f:f.text, P.frags)
+        frags = [f.text for f in P.frags]
         assert frags == []
 
     def test1(self):
@@ -380,8 +376,13 @@ class FragmentTestCase(unittest.TestCase):
         B = styleSheet['BodyText']
         text = "X<font name=Courier>Y</font>Z"
         P = Paragraph(text, B)
-        frags = map(lambda f:f.text, P.frags)
+        frags = [f.text for f in P.frags]
         assert frags == ['X', 'Y', 'Z']
+
+    def test2(self):
+        '''test _splitWord'''
+        self.assertEqual(_splitWord(u'd\'op\u00e9ration',30,[30],0,'Helvetica',12),[u"d'op\xe9", u'ratio', u'n'])
+        self.assertEqual(_splitWord(b'd\'op\xc3\xa9ration',30,[30],0,'Helvetica',12),[u"d'op\xe9", u'ratio', u'n'])
 
 class ULTestCase(unittest.TestCase):
     "Test underlining and overstriking of paragraphs."
@@ -434,7 +435,7 @@ phonemic and morphological analysis.''']
                 text0 = text0.replace('English sentences','<b>English sentences</b>').replace('quite equivalent','<i>quite equivalent</i>')
                 text1 = text1.replace('the methodological work','<b>the methodological work</b>').replace('to impose problems','<i>to impose problems</i>')
             for t in ('u','strike'):
-                for n in xrange(6):
+                for n in range(6):
                     for s in (normal,normal_center,normal_right,normal_just,normal_indent, normal_indent_lv_2):
                         for autoLeading in ('','min','max'):
                             if n==4 and s==normal_center and t=='strike' and mode==1:
@@ -599,7 +600,7 @@ phonemic and morphological analysis.'''
             elif mode==4:
                 text = text.replace('English ','English&nbsp;').replace('quite ','quite&nbsp;')
                 text = text.replace(' methodological','&nbsp;methodological').replace(' impose','&nbsp;impose')
-                a(Paragraph('Justified paragraph in normal font & some hard spaces',style=normal))
+                a(Paragraph('Justified paragraph in normal font &amp; some hard spaces',style=normal))
             else:
                 a(Paragraph('Justified paragraph in normal font',style=normal))
 

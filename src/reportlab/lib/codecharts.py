@@ -9,7 +9,6 @@ To be sure we can accurately represent characters in various encodings
 and fonts, we need some routines to display all those characters.
 These are defined herein.  The idea is to include flowable, drawable
 and graphic objects for single and multi-byte fonts. """
-import string
 import codecs
 
 from reportlab.pdfgen.canvas import Canvas
@@ -18,6 +17,7 @@ from reportlab.pdfbase import pdfmetrics, cidfonts
 from reportlab.graphics.shapes import Drawing, Group, String, Circle, Rect
 from reportlab.graphics.widgetbase import Widget
 from reportlab.lib import colors
+from reportlab.lib.utils import int2Byte
 
 adobe2codec = {
     'WinAnsiEncoding':'winansi',
@@ -150,7 +150,7 @@ class SingleByteEncodingChart(CodeChartBase):
 
     def draw(self):
         self.drawLabels()
-        charList = [None] * 32 + map(chr, range(32, 256))
+        charList = [None] * 32 + list(map(int2Byte, list(range(32, 256))))
 
         #we need to convert these to Unicode, since ReportLab
         #2.0 can only draw in Unicode.
@@ -207,15 +207,15 @@ class KutenRowCodeChart(CodeChartBase):
     def makeRow(self, row):
         """Works out the character values for this kuten row"""
         cells = []
-        if string.find(self.encodingName, 'EUC') > -1:
+        if self.encodingName.find('EUC') > -1:
             # it is an EUC family encoding.
             for col in range(1, 95):
-                ch = chr(row + 160) + chr(col+160)
+                ch = int2Byte(row + 160) + int2Byte(col+160)
                 cells.append(ch)
-##        elif string.find(self.encodingName, 'GB') > -1:
+##        elif self.encodingName.find('GB') > -1:
 ##            # it is an EUC family encoding.
 ##            for col in range(1, 95):
-##                ch = chr(row + 160) + chr(col+160)
+##                ch = int2Byte(row + 160) + int2Byte(col+160)
         else:
             cells.append([None] * 94)
         return cells
@@ -224,7 +224,7 @@ class KutenRowCodeChart(CodeChartBase):
         self.drawLabels(topLeft= 'R%d' % self.row)
 
         # work out which characters we need for the row
-        #assert string.find(self.encodingName, 'EUC') > -1, 'Only handles EUC encoding today, you gave me %s!' % self.encodingName
+        #assert self.encodingName.find('EUC') > -1, 'Only handles EUC encoding today, you gave me %s!' % self.encodingName
 
         # pad out by 1 to match Ken Lunde's tables
         charList = [None] + self.makeRow(self.row)
@@ -262,12 +262,12 @@ class Big5CodeChart(CodeChartBase):
         """Works out the character values for this Big5 row.
         Rows start at 0xA1"""
         cells = []
-        if string.find(self.encodingName, 'B5') > -1:
+        if self.encodingName.find('B5') > -1:
             # big 5, different row size
             for y in [4,5,6,7,10,11,12,13,14,15]:
                 for x in range(16):
                     col = y*16+x
-                    ch = chr(row) + chr(col)
+                    ch = int2Byte(row) + int2Byte(col)
                     cells.append(ch)
 
         else:
@@ -321,7 +321,7 @@ class CodeWidget(Widget):
                 charValue = y * 16 + x
                 if charValue > 32:
                     s = String(self.x + x * dx,
-                               self.y + (self.height - y*dy), chr(charValue))
+                               self.y + (self.height - y*dy), int2Byte(charValue))
                     g.add(s)
         return g
 
@@ -357,9 +357,7 @@ def test():
 ##    #Big5CodeChart(0xA1, 'MSungStd-Light-Acro','ETenms-B5-H').drawOn(c, 72, 500)
 
     c.save()
-    print 'saved codecharts.pdf'
+    print('saved codecharts.pdf')
 
 if __name__=='__main__':
     test()
-
-

@@ -14,20 +14,20 @@ class ManualTestCase(SecureTestCase):
         try:
             docsFolder = os.path.join(os.path.dirname(testsFolder),'docs')
         except:
-            print testsFolder
+            print(testsFolder)
             raise
         cwd = os.getcwd()
         os.chdir(docsFolder)
         try:
             if os.path.isfile('reportlab-userguide.pdf'):
                 os.remove('reportlab-userguide.pdf')
-            if os.path.isfile('reportlab-reference.pdf'):
-                os.remove('reportlab-reference.pdf')
+            #if os.path.isfile('reportlab-reference.pdf'):
+            #   os.remove('reportlab-reference.pdf')
 
             os.system('"%s" genAll.py -s' % sys.executable)
 
             assert os.path.isfile('reportlab-userguide.pdf'), 'genAll.py failed to generate reportlab-userguide.pdf!'
-            assert os.path.isfile('reportlab-reference.pdf'), 'genAll.py failed to generate reportlab-reference.pdf!'
+            #assert os.path.isfile('reportlab-reference.pdf'), 'genAll.py failed to generate reportlab-reference.pdf!'
         finally:
             os.chdir(cwd)
 

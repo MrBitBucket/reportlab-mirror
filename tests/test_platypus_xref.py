@@ -6,9 +6,7 @@ __version__='''$Id$'''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os, time
-from string import split, strip, join, whitespace, find
 from operator import truth
-from types import StringType, ListType
 import unittest
 from reportlab.lib import colors
 from reportlab.lib.units import cm
@@ -63,7 +61,7 @@ class MyDocTemplate(BaseDocTemplate):
             except:
                 return
             for phrase in ['uniform','depraved','finger', 'Fraudulin']:
-                if find(text, phrase) > -1:
+                if text.find(phrase) > -1:
                     self.notify('IndexEntry', (phrase, self.page))
                     #print 'IndexEntry:',phrase, self.page
 

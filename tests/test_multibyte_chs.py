@@ -67,7 +67,7 @@ class CHSFontTests(unittest.TestCase):
 ##
         c.save()
         if VERBOSE:
-            print 'saved '+outputfile('test_multibyte_chs.pdf')
+            print('saved '+outputfile('test_multibyte_chs.pdf'))
 
 
 def makeSuite():

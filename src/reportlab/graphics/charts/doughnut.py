@@ -13,7 +13,6 @@ Can handle multiple series (which produce concentric 'rings' in the chart).
 
 import copy
 from math import sin, cos, pi
-from types import ListType, TupleType
 from reportlab.lib import colors
 from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
                                     isListOfNumbers, isColorOrNone, isString,\
@@ -30,6 +29,7 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropH
 from reportlab.graphics.charts.piecharts import AbstractPieChart, WedgeProperties, _addWedgeLabel, fixLabelOverlaps
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgets.markers import Marker
+from functools import reduce
 
 class SectorProperties(WedgeProperties):
     """This holds descriptive information about the sectors in a doughnut chart.
@@ -113,11 +113,11 @@ class Doughnut(AbstractPieChart):
     def normalizeData(self, data=None):
         from operator import add
         sum = float(reduce(add,data,0))
-        return abs(sum)>=1e-8 and map(lambda x,f=360./sum: f*x, data) or len(data)*[0]
+        return abs(sum)>=1e-8 and list(map(lambda x,f=360./sum: f*x, data)) or len(data)*[0]
 
     def makeSectors(self):
         # normalize slice data
-        if type(self.data) in (ListType, TupleType) and type(self.data[0]) in (ListType, TupleType):
+        if isinstance(self.data,(list,tuple)) and isinstance(self.data[0],(list,tuple)):
             #it's a nested list, more than one sequence
             normData = []
             n = []
@@ -138,7 +138,7 @@ class Doughnut(AbstractPieChart):
         
         if self.labels is None:
             labels = []
-            if type(n) not in (ListType,TupleType):
+            if not isinstance(n,(list,tuple)):
                 labels = [''] * n
             else:
                 for m in n:
@@ -147,7 +147,7 @@ class Doughnut(AbstractPieChart):
             labels = self.labels
             #there's no point in raising errors for less than enough labels if
             #we silently create all for the extreme case of no labels.
-            if type(n) not in (ListType,TupleType):
+            if not isinstance(n,(list,tuple)):
                 i = n-len(labels)
                 if i>0:
                     labels = list(labels) + [''] * i
@@ -173,7 +173,7 @@ class Doughnut(AbstractPieChart):
         
         startAngle = self.startAngle #% 360
         styleCount = len(self.slices)
-        if type(self.data[0]) in (ListType, TupleType):
+        if isinstance(self.data[0],(list,tuple)):
             #multi-series doughnut
             iradius = (self.height/5.0)/len(self.data)
             for sn,series in enumerate(normData):
@@ -204,7 +204,7 @@ class Doughnut(AbstractPieChart):
                         cx = centerx + popdistance * cos(aveAngleRadians)
                         cy = centery + popdistance * sin(aveAngleRadians)
 
-                    if type(n) in (ListType,TupleType):
+                    if isinstance(n,(list,tuple)):
                         theSector = Wedge(cx, cy, xradius+(sn*iradius)-iradius, a1, a2, yradius=yradius+(sn*iradius)-iradius, radius1=yradius+(sn*iradius)-(2*iradius))
                     else:
                         theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius)

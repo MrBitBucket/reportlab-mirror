@@ -3,7 +3,7 @@ from reportlab.graphics.charts.legends import Legend
 from reportlab.graphics.charts.lineplots import ScatterPlot
 from reportlab.graphics.shapes import Drawing, _DrawingEditorMixin, String
 from reportlab.graphics.charts.textlabels import Label
-from excelcolors import *
+from reportlab.graphics.samples.excelcolors import *
 
 class ScatterLinesMarkers(_DrawingEditorMixin,Drawing):
     def __init__(self,width=200,height=150,*args,**kw):

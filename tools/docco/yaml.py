@@ -39,9 +39,8 @@ Special commands understood at present are:
 
 
 import sys
-import string
 import imp
-import codegrab
+from . import codegrab
 
 #modes:
 PLAIN = 1
@@ -73,7 +72,7 @@ class Parser:
     def readLine(self, line):
         #this is the inner loop
         self._lineNo = self._lineNo + 1
-        stripped = string.lstrip(line)
+        stripped = line.lstrip()
         if len(stripped) == 0:
             if self._mode == PLAIN:
                 self.endPara()
@@ -82,7 +81,7 @@ class Parser:
         elif line[0]=='.':
             # we have a command of some kind
             self.endPara()
-            words = string.split(stripped[1:])
+            words = stripped[1:].split()
             cmd, args = words[0], words[1:]
 
             #is it a parser method?
@@ -91,14 +90,14 @@ class Parser:
                 #we have to hack the traceback
                 try:
                     getattr(self,cmd)(*args)
-                except TypeError, err:
+                except TypeError as err:
                     sys.stderr.write("Parser method: %s(*%s) %s at line %d\n" % (cmd, tuple(args), err, self._lineNo))
                     raise
             else:
                 # assume it is a paragraph style -
                 # becomes the formatter's problem
                 self.endPara()  #end the last one
-                words = string.split(stripped, ' ', 1)
+                words = stripped.split(' ', 1)
                 assert len(words)==2, "Style %s but no data at line %d" % (words[0], self._lineNo)
                 (styletag, data) = words
                 self._style = styletag[1:]
@@ -110,12 +109,12 @@ class Parser:
     def endPara(self):
         #ends the current paragraph, or preformatted block
 
-        text = string.join(self._buf, ' ')
+        text = ' '.join(self._buf)
         if text:
             if self._mode == PREFORMATTED:
                 #item 3 is list of lines
                 self._results.append(('Preformatted', self._style,
-                                 string.join(self._buf,'\n')))
+                                 '\n'.join(self._buf)))
             else:
                 self._results.append(('Paragraph', self._style, text))
         self._buf = []
@@ -192,7 +191,7 @@ class Parser:
 
 if __name__=='__main__': #NORUNTESTS
     if len(sys.argv) != 2:
-        print 'usage: yaml.py source.txt'
+        print('usage: yaml.py source.txt')
     else:
         p = Parser()
         results = p.parseFile(sys.argv[1])

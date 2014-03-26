@@ -83,7 +83,7 @@ def _make_3d_line_info( G, x0, x1, y0, y1, z0, z1,
             dy = float(y1-y0)/n
             D = []
             a = D.append
-            for i in xrange(1,n):
+            for i in range(1,n):
                 a((x0+dx*i,y0+dy*i))
 
     a = G.add
@@ -176,8 +176,8 @@ class _Segment:
             t = o.s,o.i,x,y
             if t not in I:  I.append(t)
 
-def _segCmp(a,b):
-    return cmp((a.x0,a.x1,a.y0,a.y1,a.s,a.i),(b.x0,b.x1,b.y0,b.y1,b.s,b.i))
+def _segKey(a):
+    return (a.x0,a.x1,a.y0,a.y1,a.s,a.i)
 
 def find_intersections(data,small=0):
     '''
@@ -199,20 +199,20 @@ def find_intersections(data,small=0):
     #find all line segments
     S = []
     a = S.append
-    for s in xrange(len(data)):
+    for s in range(len(data)):
         ds = data[s]
         if not ds: continue
         n = len(ds)
         if n==1: continue
-        for i in xrange(1,n):
+        for i in range(1,n):
             seg = _Segment(s,i,data)
             if seg.a+abs(seg.b)>=small: a(seg)
-    S.sort(_segCmp)
+    S.sort(key=_segKey)
     I = []
     n = len(S)
-    for i in xrange(0,n-1):
+    for i in range(0,n-1):
         s = S[i]
-        for j in xrange(i+1,n):
+        for j in range(i+1,n):
             if s.intersect(S[j],I)==1: break
     I.sort()
     return I
@@ -226,8 +226,8 @@ if __name__=='__main__':
 
     D.save(formats=['pdf'],outDir='.',fnRoot='_draw_3d_bar')
 
-    print find_intersections([[(0,0.5),(1,0.5),(0.5,0),(0.5,1)],[(.2666666667,0.4),(0.1,0.4),(0.1,0.2),(0,0),(1,1)],[(0,1),(0.4,0.1),(1,0.1)]])
-    print find_intersections([[(0.1, 0.2), (0.1, 0.4)], [(0, 1), (0.4, 0.1)]])
-    print find_intersections([[(0.2, 0.4), (0.1, 0.4)], [(0.1, 0.8), (0.4, 0.1)]])
-    print find_intersections([[(0,0),(1,1)],[(0.4,0.1),(1,0.1)]])
-    print find_intersections([[(0,0.5),(1,0.5),(0.5,0),(0.5,1)],[(0,0),(1,1)],[(0.1,0.8),(0.4,0.1),(1,0.1)]])
+    print(find_intersections([[(0,0.5),(1,0.5),(0.5,0),(0.5,1)],[(.2666666667,0.4),(0.1,0.4),(0.1,0.2),(0,0),(1,1)],[(0,1),(0.4,0.1),(1,0.1)]]))
+    print(find_intersections([[(0.1, 0.2), (0.1, 0.4)], [(0, 1), (0.4, 0.1)]]))
+    print(find_intersections([[(0.2, 0.4), (0.1, 0.4)], [(0.1, 0.8), (0.4, 0.1)]]))
+    print(find_intersections([[(0,0),(1,1)],[(0.4,0.1),(1,0.1)]]))
+    print(find_intersections([[(0,0.5),(1,0.5),(0.5,0),(0.5,1)],[(0,0),(1,1)],[(0.1,0.8),(0.4,0.1),(1,0.1)]]))

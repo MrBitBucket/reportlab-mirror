@@ -11,7 +11,7 @@ def dumpttf(fn,fontName=None, verbose=0):
         fontName = os.path.splitext(os.path.basename(fn))[0]
     dmpfn = '%s-ttf-dump.pdf' % fontName
     ttf = TTFont(fontName, fn)
-    K = ttf.face.charToGlyph.keys()
+    K = list(ttf.face.charToGlyph.keys())
     registerFont(ttf)
     c = Canvas(dmpfn)
     W,H = c._pagesize
@@ -38,7 +38,7 @@ def dumpttf(fn,fontName=None, verbose=0):
         c.setFont(labelFontName, 10)
         c.drawString(x,y,'%5.5x:' % k )
         c.setFont(fontName, 10)
-        c.drawString(x+dx0,y,unichr(k).encode('utf8'))
+        c.drawString(x+dx0,y,chr(k).encode('utf8'))
         x += dx
         if x+dx>W-border:
             x = border
@@ -46,7 +46,7 @@ def dumpttf(fn,fontName=None, verbose=0):
     c.showPage()
     c.save()
     if verbose:
-        print 'Font %s("%s") has %d glyphs\ndumped to "%s"' % (fontName,fn,len(K),dmpfn)
+        print('Font %s("%s") has %d glyphs\ndumped to "%s"' % (fontName,fn,len(K),dmpfn))
 
 if __name__=='__main__':
     import sys, glob

@@ -183,7 +183,9 @@ disc("""Many people have contributed to ReportLab.  We would like to thank in pa
 Albertas Agejevas, 
 Alex Buck, 
 Andre Reitz, 
+Andrew Cutler,
 Andrew Mercer, 
+Ben Echols,
 Benjamin Dumke,
 Benn B,
 Chad Miller, 
@@ -206,11 +208,15 @@ Jerry Casiano,
 Jorge Godoy,
 Keven D Smith,
 Magnus Lie Hetland,
-Marcel Tromp, Ty Sarna
+Marcel Tromp, 
 Marius Gedminas,
+Matthew Duggan,
+Matthias Kirst,
+Matthias Klose,
 Max M, 
 Michael Egorov,
 Mike Folwell,
+Mirko Dziadzka,
 Moshe Wagner,
 Nate Silva,
 Paul McNett, 
@@ -223,13 +229,16 @@ Robert Hölzl,
 Robert Kern,
 Ron Peleg,
 Simon King,
+Stephan Richter,
 Steve Halasz, 
 T Blatter,
 Tim Roberts,
 Tomasz Swiderski,
+Ty Sarna,
 Volker Haas,
 Yoann Roman, 
 and many more.""")
+
 
 disc("""Special thanks go to Just van Rossum for his valuable assistance with
 font technicalities.""")
@@ -245,10 +254,8 @@ heading2("Installation and Setup")
 disc("""To avoid duplication, the installation instructions are kept in the README file
 in our distribution, which can be viewed online at ^http://bitbucket.org/rptlab/reportlab/^""")
 
-disc("""This release (2.7) of ReportLab requires Python versions 2.5, 2.6 or 2.7.   We will
-be maintaining a 2.7.x branch for essential bug fixes, but after this release the focus of
-our development will shift to dual support for Python 2.7 and 3.3+.  We advise everyone who
-can to move to Python 2.7.
+disc("""This release (3.0) of ReportLab requires Python versions 2.7, 3.3 or higher.  
+	If you need to use Python 2.5 or 2.6, please use the latest ReportLab 2.x package.
 """)
 
 
@@ -363,25 +370,31 @@ styles = getStyleSheet()
 indent0_style = styles['Indent0']
 indent1_style = styles['Indent1']
 
-heading2("Goals for the 2.x and 3.x release series")
-disc("""The main rationale for 2.0 was an incompatible change at the character level:
-to properly support Unicode input. Since then, we have tried to maintain backward
-compatibility up to this version 2.7""")
+heading2("Goals for the 3.x release series")
+disc("""ReportLab 3.0 has been produced to help in the migration to Python 3.x.  Python 3.x will
+be standard in future Ubuntu releases and is gaining popularity, and a good proportion
+of major Python packages now run on Python 3.  """)
 
-disc("""One main area where we have tried to make progress from release to release is with documentation
-and installability. We now offer full support for distutils, setuptools, pip and so on. """)
 
-disc("""
-Immediately after this release, we will be shifting focus to work on compatibility with both
-Python 2.7 and 3.3+, and starting to make larger changes to the ReportLab Toolkit to bring it
-up to date - using more modern Python libraries, supporting newer PDF features and more.  The
-next ReportLab release is likely to be numbered 3.0.  Inevitability this modernisation will need
-some changes to applications, although we do not plan to needlessly change APIs.
-""")
 
-heading2("What's New in ReportLab 2.7")
-disc("""This is a minor release to collect a small number of bug fixes since the last release
-at end of September 2012.   Detailed release notes are available at 
-$http://www.reportlab.com/software/documentation/relnotes/27/$""")
+bullet("""Python 3.x compatibility.  A single line of code should run on 2.7 and 3.3""")
+bullet(""" __init__.py restricts to 2.7 or >=3.3""")
+bullet("""__init__.py allow the import of on optional reportlab.local_rl_mods to allow monkey patching etc.""")
+bullet("""rl_config now imports rl_settings & optionally local_rl_settings""")
+bullet("""ReportLab C extensions now live inside reportlab; _rl_accel is no longer required. All _rl_accel imports now pass through reportlab.lib.rl_accel""")
+bullet("""xmllib is gone, alongside the paraparser stuff that caused issues in favour of HTMLParser.""")
+bullet("""some obsolete C extensions (sgmlop and pyHnj) are gone""")
+bullet("""Improved support for multi-threaded systems to the _rl_accel C extension module.""")
+bullet("""Removed reportlab/lib/ para.py & pycanvas.py.  These would better belong in third party packages, which can make use of the monkeypatching feature above.""")
+bullet("""Add ability to output greyscale and 1-bit PIL images without conversion to RGB. (contributed by Matthew Duggan)""")
+bullet("""highlight annotation (contributed by Ben Echols)""")
+bullet("""full compliance with pip, easy_install, wheels etc""")
+
+
+
+
+disc("""Detailed release notes are available at 
+$http://www.reportlab.com/software/documentation/relnotes/30/$""")
+
 
 

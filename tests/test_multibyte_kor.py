@@ -107,7 +107,7 @@ class KoreanFontTests(unittest.TestCase):
         c.save()
 
         if VERBOSE:
-            print 'saved '+outputfile('test_multibyte_kor.pdf')
+            print('saved '+outputfile('test_multibyte_kor.pdf'))
 
 
 def makeSuite():

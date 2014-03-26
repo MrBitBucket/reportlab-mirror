@@ -62,7 +62,7 @@ class PropertySet:
 
     def _setKwds(self,**kw):
         #step three - copy keywords if any
-        for (key, value) in kw.items():
+        for key, value in kw.items():
              self.__dict__[key] = value
 
     def __repr__(self):
@@ -73,20 +73,20 @@ class PropertySet:
         use if you have been hacking the styles.  This is
         used by __init__"""
         if self.parent:
-            for (key, value) in self.parent.__dict__.items():
+            for key, value in self.parent.__dict__.items():
                 if (key not in ['name','parent']):
                     self.__dict__[key] = value
 
     def listAttrs(self, indent=''):
-        print indent + 'name =', self.name
-        print indent + 'parent =', self.parent
-        keylist = self.__dict__.keys()
+        print(indent + 'name =', self.name)
+        print(indent + 'parent =', self.parent)
+        keylist = list(self.__dict__.keys())
         keylist.sort()
         keylist.remove('name')
         keylist.remove('parent')
         for key in keylist:
             value = self.__dict__.get(key, None)
-            print indent + '%s = %s' % (key, value)
+            print(indent + '%s = %s' % (key, value))
 
     def clone(self, name, parent=None, **kwds):
         r = self.__class__(name,parent)
@@ -221,16 +221,16 @@ class StyleSheet1:
             self.byAlias[alias] = style
 
     def list(self):
-        styles = self.byName.items()
+        styles = list(self.byName.items())
         styles.sort()
         alii = {}
-        for (alias, style) in self.byAlias.items():
+        for (alias, style) in list(self.byAlias.items()):
             alii[style] = alias
         for (name, style) in styles:
             alias = alii.get(style, None)
-            print name, alias
+            print(name, alias)
             style.listAttrs('    ')
-            print
+            print()
 
 def testStyles():
     pNormal = ParagraphStyle('Normal',None)
@@ -239,7 +239,7 @@ def testStyles():
     pNormal.leading = 14.4
 
     pNormal.listAttrs()
-    print
+    print()
     pPre = ParagraphStyle('Literal', pNormal)
     pPre.fontName = 'Courier'
     pPre.listAttrs()

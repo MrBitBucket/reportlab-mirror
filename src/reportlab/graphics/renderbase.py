@@ -37,7 +37,7 @@ def getStateDelta(shape):
     to set the pen color to red in between. Returns the effect
     the given shape would have on the graphics state"""
     delta = {}
-    for (prop, value) in shape.getProperties().items():
+    for prop, value in shape.getProperties().items():
         if prop in STATE_DEFAULTS:
             delta[prop] = value
     return delta
@@ -72,7 +72,7 @@ class StateTracker:
         through getState()"""
 
         newstate = self._combined[-1].copy()
-        for (key, value) in delta.items():
+        for key, value in delta.items():
             if key == 'transform':  #do cumulative matrix
                 newstate['transform'] = delta['transform']
                 newstate['ctm'] = mmult(self._combined[-1]['ctm'], delta['transform'])
@@ -125,7 +125,7 @@ class StateTracker:
         self._combined[-1][key] = value
 
 def testStateTracker():
-    print 'Testing state tracker'
+    print('Testing state tracker')
     defaults = {'fillColor':None, 'strokeColor':None,'fontName':None, 'transform':[1,0,0,1,0,0]}
     from reportlab.graphics.shapes import _baseGFontName
     deltas = [
@@ -137,16 +137,16 @@ def testStateTracker():
         ]
 
     st = StateTracker(defaults)
-    print 'initial:', st.getState()
-    print
+    print('initial:', st.getState())
+    print()
     for delta in deltas:
-        print 'pushing:', delta
+        print('pushing:', delta)
         st.push(delta)
-        print 'state:  ',st.getState(),'\n'
+        print('state:  ',st.getState(),'\n')
 
     for delta in deltas:
-        print 'popping:',st.pop()
-        print 'state:  ',st.getState(),'\n'
+        print('popping:',st.pop())
+        print('state:  ',st.getState(),'\n')
 
 
 def _expandUserNode(node,canvas):
@@ -181,7 +181,7 @@ class Renderer:
         self._nodeStack = []   #track nodes visited
 
     def undefined(self, operation):
-        raise ValueError, "%s operation not defined at superclass class=%s" %(operation, self.__class__)
+        raise ValueError("%s operation not defined at superclass class=%s" %(operation, self.__class__))
 
     def draw(self, drawing, canvas, x=0, y=0, showBoundary=rl_config._unset_):
         """This is the top level function, which draws the drawing at the given
@@ -230,7 +230,7 @@ class Renderer:
         parent.
         
         """
-        for (key, value) in node.__dict__.items():
+        for key, value in node.__dict__.items():
             if isinstance(value, DerivedValue):
                 #just replace with default for key?
                 #print '    fillDerivedValues(%s)' % key
@@ -281,7 +281,7 @@ class Renderer:
             elif isinstance(node, Wedge):
                 self.drawWedge(node)
             else:
-                print 'DrawingError','Unexpected element %s in drawing!' % str(node)
+                print('DrawingError','Unexpected element %s in drawing!' % str(node))
         finally:
             if not ocanvas: del node._canvas
 
@@ -350,5 +350,5 @@ class Renderer:
         self.undefined("applyStateChanges")
 
 if __name__=='__main__':
-    print "this file has no script interpretation"
-    print __doc__
+    print("this file has no script interpretation")
+    print(__doc__)

@@ -424,7 +424,7 @@ class XPreformatted(Paragraph):
         self.caseSensitive = caseSensitive
         if maximumLineLength and text:
             text = self.stopLine(text, maximumLineLength, splitCharacters)
-        cleaner = lambda text, dedent=dedent: string.join(_dedenter(text or '',dedent),'')
+        cleaner = lambda text, dedent=dedent: ''.join(_dedenter(text or '',dedent))
         self._setup(text, style, bulletText, frags, cleaner)
 '''
 t=Preformatted(text,normalStyle,maxLineLength=60, newLineChars='> ')
@@ -446,7 +446,7 @@ text='''
    <b><font color=red>XML</font></b> tags are allowed in <i>text</i> and have the same
 
       meanings as for the <b>Paragraph</b> class.
-   As for <b>Preformatted</b>, if dedent is non zero <font color=red size=+1>dedent</font>
+   As for <b>Preformatted</b>, if dedent is non zero <font color="red" size="+1">dedent</font>
        common leading spaces will be removed from the
    front of each line.
    You can have &amp;amp; style entities as well for &amp; &lt; &gt; and &quot;.

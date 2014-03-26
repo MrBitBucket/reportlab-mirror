@@ -4,32 +4,32 @@
 __version__=''' $Id$ '''
 __doc__="""Render drawing objects in Postscript"""
 
-import string, types
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth, unicode2T1 # for font info
-from reportlab.lib.utils import fp_str, getStringIO
+from reportlab.lib.utils import getBytesIO, getStringIO, asBytes, char2int, rawBytes, asNative, isUnicode
+from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.colors import black
 from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS
 import math
-from types import StringType
 from operator import getitem
 from reportlab import rl_config
 _ESCAPEDICT={}
 for c in xrange(256):
     if c<32 or c>=127:
-        _ESCAPEDICT[chr(c)]= '\\%03o' % c
+        _ESCAPEDICT[c]= '\\%03o' % c
     elif c in (ord('\\'),ord('('),ord(')')):
-        _ESCAPEDICT[chr(c)] = '\\'+chr(c)
+        _ESCAPEDICT[c] = '\\'+chr(c)
     else:
-        _ESCAPEDICT[chr(c)] = chr(c)
-    del c
+        _ESCAPEDICT[c] = chr(c)
+del c
 
 def _escape_and_limit(s):
+    s = asBytes(s)
     R = []
     aR = R.append
     n = 0
     for c in s:
-        c = _ESCAPEDICT[c]
+        c = _ESCAPEDICT[char2int(c)]
         aR(c)
         n += len(c)
         if n>=200:
@@ -37,53 +37,53 @@ def _escape_and_limit(s):
             aR('\\\n')
     return ''.join(R)
 
-# we need to create encoding vectors for each font we use, or they will      
- # come out in Adobe's old StandardEncoding, which NOBODY uses.      
-PS_WinAnsiEncoding="""       
-/RE { %def       
-  findfont begin     
-  currentdict dup length dict begin  
- { %forall   
-   1 index /FID ne { def } { pop pop } ifelse    
- } forall    
- /FontName exch def dup length 0 ne { %if    
-   /Encoding Encoding 256 array copy def     
-   0 exch { %forall      
-     dup type /nametype eq { %ifelse     
-       Encoding 2 index 2 index put      
-       pop 1 add     
-     }{ %else    
-       exch pop      
-     } ifelse    
-   } forall      
- } if pop    
-  currentdict dup end end    
-  /FontName get exch definefont pop  
-} bind def       
- 
-/WinAnsiEncoding [       
-  39/quotesingle 96/grave 128/euro 130/quotesinglbase/florin/quotedblbase    
-  /ellipsis/dagger/daggerdbl/circumflex/perthousand  
-  /Scaron/guilsinglleft/OE 145/quoteleft/quoteright  
-  /quotedblleft/quotedblright/bullet/endash/emdash       
-  /tilde/trademark/scaron/guilsinglright/oe/dotlessi     
-  159/Ydieresis 164/currency 166/brokenbar 168/dieresis/copyright    
-  /ordfeminine 172/logicalnot 174/registered/macron/ring     
-  177/plusminus/twosuperior/threesuperior/acute/mu       
-  183/periodcentered/cedilla/onesuperior/ordmasculine    
-  188/onequarter/onehalf/threequarters 192/Agrave/Aacute     
-  /Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla    
-  /Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute     
-  /Icircumflex/Idieresis/Eth/Ntilde/Ograve/Oacute    
-  /Ocircumflex/Otilde/Odieresis/multiply/Oslash  
-  /Ugrave/Uacute/Ucircumflex/Udieresis/Yacute/Thorn  
-  /germandbls/agrave/aacute/acircumflex/atilde/adieresis     
-  /aring/ae/ccedilla/egrave/eacute/ecircumflex       
-  /edieresis/igrave/iacute/icircumflex/idieresis     
-  /eth/ntilde/ograve/oacute/ocircumflex/otilde       
-  /odieresis/divide/oslash/ugrave/uacute/ucircumflex     
-  /udieresis/yacute/thorn/ydieresis  
-] def    
+# we need to create encoding vectors for each font we use, or they will
+ # come out in Adobe's old StandardEncoding, which NOBODY uses.
+PS_WinAnsiEncoding="""
+/RE { %def
+  findfont begin
+  currentdict dup length dict begin
+ { %forall
+   1 index /FID ne { def } { pop pop } ifelse
+ } forall
+ /FontName exch def dup length 0 ne { %if
+   /Encoding Encoding 256 array copy def
+   0 exch { %forall
+     dup type /nametype eq { %ifelse
+       Encoding 2 index 2 index put
+       pop 1 add
+     }{ %else
+       exch pop
+     } ifelse
+   } forall
+ } if pop
+  currentdict dup end end
+  /FontName get exch definefont pop
+} bind def
+
+/WinAnsiEncoding [
+  39/quotesingle 96/grave 128/euro 130/quotesinglbase/florin/quotedblbase
+  /ellipsis/dagger/daggerdbl/circumflex/perthousand
+  /Scaron/guilsinglleft/OE 145/quoteleft/quoteright
+  /quotedblleft/quotedblright/bullet/endash/emdash
+  /tilde/trademark/scaron/guilsinglright/oe/dotlessi
+  159/Ydieresis 164/currency 166/brokenbar 168/dieresis/copyright
+  /ordfeminine 172/logicalnot 174/registered/macron/ring
+  177/plusminus/twosuperior/threesuperior/acute/mu
+  183/periodcentered/cedilla/onesuperior/ordmasculine
+  188/onequarter/onehalf/threequarters 192/Agrave/Aacute
+  /Acircumflex/Atilde/Adieresis/Aring/AE/Ccedilla
+  /Egrave/Eacute/Ecircumflex/Edieresis/Igrave/Iacute
+  /Icircumflex/Idieresis/Eth/Ntilde/Ograve/Oacute
+  /Ocircumflex/Otilde/Odieresis/multiply/Oslash
+  /Ugrave/Uacute/Ucircumflex/Udieresis/Yacute/Thorn
+  /germandbls/agrave/aacute/acircumflex/atilde/adieresis
+  /aring/ae/ccedilla/egrave/eacute/ecircumflex
+  /edieresis/igrave/iacute/icircumflex/idieresis
+  /eth/ntilde/ograve/oacute/ocircumflex/otilde
+  /odieresis/divide/oslash/ugrave/uacute/ucircumflex
+  /udieresis/yacute/thorn/ydieresis
+] def
 """
 
 class PSCanvas:
@@ -125,21 +125,21 @@ class PSCanvas:
 
     def _t1_re_encode(self):
         if not self._fontsUsed: return
-        # for each font used, reencode the vectors   
+        # for each font used, reencode the vectors
         C = []
-        for fontName in self._fontsUsed:     
+        for fontName in self._fontsUsed:
             fontObj = getFont(fontName)
             if not fontObj._dynamicFont and fontObj.encName=='WinAnsiEncoding':
-                C.append('WinAnsiEncoding /%s /%s RE' % (fontName, fontName))    
+                C.append('WinAnsiEncoding /%s /%s RE' % (fontName, fontName))
         if C:
             C.insert(0,PS_WinAnsiEncoding)
-            self.code.insert(1, string.join(C, self._sep))
+            self.code.insert(1, self._sep.join(C))
 
     def save(self,f=None):
         if not hasattr(f,'write'):
-            file = open(f,'wb')
+            _f = open(f,'wb')
         else:
-            file = f
+            _f = f
         if self.code[-1]!='showpage': self.clear()
         self.code.insert(0,'''\
 %%!PS-Adobe-3.0 EPSF-3.0
@@ -151,9 +151,9 @@ class PSCanvas:
 ''' % (self.width,self.height))
 
         self._t1_re_encode()
-        file.write(string.join(self.code,self._sep))
-        if file is not f:
-            file.close()
+        _f.write(rawBytes(self._sep.join(self.code)))
+        if _f is not f:
+            _f.close()
             from reportlab.lib.utils import markfilename
             markfilename(f,creatorcode='XPR3',filetype='EPSF')
 
@@ -190,7 +190,7 @@ class PSCanvas:
             self.code_append('[%s %s] 0 %s' % (array, phase, psoperation))
         elif isinstance(array,(tuple,list)):
             assert phase >= 0, "phase is a length in user space"
-            textarray = string.join(map(str, array))
+            textarray = ' '.join(map(str, array))
             self.code_append('[%s] %s %s' % (textarray, phase, psoperation))
 
     def setStrokeColor(self, color):
@@ -235,7 +235,7 @@ class PSCanvas:
         try:
             return _escape_and_limit(s)
         except:
-            raise ValueError("cannot escape %s %s" % (s, repr(s)))
+            raise ValueError("cannot escape %s" % ascii(s))
 
     def _issueT1String(self,fontObj,x,y,s):
         fc = fontObj
@@ -243,16 +243,16 @@ class PSCanvas:
         fontSize = self._fontSize
         fontsUsed = self._fontsUsed
         escape = self._escape
-        if not isinstance(s,unicode):
+        if not isUnicode(s):
             try:
                 s = s.decode('utf8')
-            except UnicodeDecodeError,e:
+            except UnicodeDecodeError as e:
                 i,j = e.args[2:4]
                 raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],s[i-10:i],s[i:j],s[j:j+10]),)))
 
         for f, t in unicode2T1(s,[fontObj]+fontObj.substitutionFonts):
             if f!=fc:
-                psName = f.face.name
+                psName = asNative(f.face.name)
                 code_append('(%s) findfont %s scalefont setfont' % (psName,fp_str(fontSize)))
                 if psName not in fontsUsed:
                     fontsUsed.append(psName)
@@ -267,7 +267,7 @@ class PSCanvas:
         if self._fillColor != None:
             fontObj = getFont(self._font)
             if not self.code[self._fontCodeLoc]:
-                psName = fontObj.face.name
+                psName = asNative(fontObj.face.name)
                 self.code[self._fontCodeLoc]='(%s) findfont %s scalefont setfont' % (psName,fp_str(self._fontSize))
                 if psName not in self._fontsUsed:
                     self._fontsUsed.append(psName)
@@ -491,7 +491,7 @@ class PSCanvas:
                     a("%s l" % fp_str(args[:2]))
                 a("%s curveto" % fp_str(args[2:]))
             else:
-                raise TypeError, "unknown figure operator: "+op
+                raise TypeError("unknown figure operator: "+op)
 
         if closed:
             a("closepath")
@@ -602,8 +602,8 @@ class PSCanvas:
     def _AsciiHexEncode(self, input):  # also based on piddlePDF
         "Helper function used by images"
         output = getStringIO()
-        for char in input:
-            output.write('%02x' % ord(char))
+        for char in asBytes(input):
+            output.write('%02x' % char2int(char))
         return output.getvalue()
 
     def _drawImageLevel2(self, image, x1,y1, x2=None,y2=None): # Postscript Level2 version
@@ -673,7 +673,7 @@ class PSCanvas:
     from reportlab.graphics import renderPS
     renderPS.draw(drawing, canvas, x, y)
 Execute the script to see some test drawings."""
-from shapes import *
+from reportlab.graphics.shapes import *
 
 # hack so we only get warnings once each
 #warnOnce = WarnOnce()
@@ -691,7 +691,7 @@ def _pointsFromList(L):
     '''
     P=[]
     a = P.append
-    for i in xrange(0,len(L),2):
+    for i in range(0,len(L),2):
         a((L[i],L[i+1]))
     return P
 
@@ -801,7 +801,7 @@ class _PSRenderer(Renderer):
                 elif text_anchor=='numeric':
                     x -= numericXShift(text_anchor,text,textLen,font,fontSize,encoding='winansi')
                 else:
-                    raise ValueError, 'bad value for text_anchor '+str(text_anchor)
+                    raise ValueError('bad value for text_anchor '+str(text_anchor))
             self._canvas.drawString(x,y,text)
 
     def drawPath(self, path):
@@ -879,7 +879,7 @@ def drawToFile(d,fn, showBoundary=rl_config.showBoundary,**kwd):
 
 def drawToString(d, showBoundary=rl_config.showBoundary):
     "Returns a PS as a string in memory, without touching the disk"
-    s = getStringIO()
+    s = getBytesIO()
     drawToFile(d, s, showBoundary=showBoundary)
     return s.getvalue()
 
@@ -889,30 +889,33 @@ def drawToString(d, showBoundary=rl_config.showBoundary):
 #   Routine to draw them comes at the end.
 #
 #########################################################
-def test(outdir='epsout'):
-    import os
-    # print all drawings and their doc strings from the test
-    # file
-    if not os.path.isdir(outdir):
-        os.mkdir(outdir)
-    #grab all drawings from the test module
-    import testshapes
-    drawings = []
+def test(outDir='epsout',shout=False):
+    from reportlab.graphics import testshapes
+    from reportlab.rl_config import verbose
+    OLDFONTS = testshapes._FONTS[:]
+    testshapes._FONTS[:] = ['Times-Roman','Times-Bold','Times-Italic', 'Times-BoldItalic','Courier']
+    try:
+        import os
+        # save all drawings and their doc strings from the test file
+        if not os.path.isdir(outDir):
+            os.mkdir(outDir)
+        #grab all drawings from the test module
+        drawings = []
 
-    for funcname in dir(testshapes):
-        #if funcname[0:11] == 'getDrawing2':
-        #    print 'hacked to only show drawing 2'
-        if funcname[0:10] == 'getDrawing':
-            drawing = eval('testshapes.' + funcname + '()')  #execute it
-            docstring = eval('testshapes.' + funcname + '.__doc__')
-            drawings.append((drawing, docstring))
+        for funcname in dir(testshapes):
+            if funcname[0:10] == 'getDrawing':
+                drawing = eval('testshapes.' + funcname + '()')  #execute it
+                docstring = eval('testshapes.' + funcname + '.__doc__')
+                drawings.append((drawing, docstring))
 
-    i = 0
-    for (d, docstring) in drawings:
-        filename = outdir + os.sep + 'renderPS_%d.eps'%i
-        drawToFile(d,filename)
-        print 'saved', filename
-        i = i + 1
+        i = 0
+        for (d, docstring) in drawings:
+            filename = outDir + os.sep + 'renderPS_%d.eps'%i
+            drawToFile(d,filename)
+            if shout or verbose>2: print('renderPS test saved %s' % ascii(filename))
+            i += 1
+    finally:
+        testshapes._FONTS[:] = OLDFONTS
 
 if __name__=='__main__':
     import sys
@@ -920,4 +923,4 @@ if __name__=='__main__':
         outdir = sys.argv[1]
     else:
         outdir = 'epsout'
-    test(outdir)
+    test(outdir,shout=True)

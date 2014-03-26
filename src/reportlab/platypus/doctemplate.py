@@ -35,20 +35,12 @@ from reportlab.platypus.frames import Frame
 from reportlab.rl_config import defaultPageSize, verbose
 import reportlab.lib.sequencer
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import isSeq, encode_label, decode_label, annotateException, strTypes
 try:
     set
 except NameError:
     from sets import Set as set
 
-from base64 import encodestring, decodestring
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-dumps = pickle.dumps
-loads = pickle.loads
-
-from types import *
 import sys
 import logging
 logger = logging.getLogger("reportlab.platypus")
@@ -128,7 +120,7 @@ class ActionFlowable(Flowable):
         #must call super init to ensure it has a width and height (of zero),
         #as in some cases the packer might get called on it...
         Flowable.__init__(self)
-        if type(action) not in (ListType, TupleType):
+        if not isSeq(action):
             action = (action,)
         self.action = tuple(action)
 
@@ -144,14 +136,13 @@ class ActionFlowable(Flowable):
             pass
         try:
             getattr(doc,arn)(*args)
-        except AttributeError, aerr:
+        except AttributeError as aerr:
             if aerr.args[0]==arn:
-                raise NotImplementedError, "Can't handle ActionFlowable(%s)" % action
+                raise NotImplementedError("Can't handle ActionFlowable(%s)" % action)
             else:
                 raise
         except:
-            t, v, tb = sys.exc_info()
-            raise t, "%s\n   handle_%s args=%s"%(v,action,args), tb
+            annotateException("\nhandle_%s args=%s"%(action,ascii(args)))
 
     def __call__(self):
         return self
@@ -202,10 +193,10 @@ FrameBreak = _FrameBreak('frameEnd')
 PageBegin = LCActionFlowable('pageBegin')
 
 def _evalMeasurement(n):
-    if type(n) is type(''):
-        from paraparser import _num
+    if isinstance(n,str):
+        from reportlab.platypus.paraparser import _num
         n = _num(n)
-        if type(n) is type(()): n = n[1]
+        if isSeq(n): n = n[1]
     return n
 
 class FrameActionFlowable(Flowable):
@@ -255,8 +246,8 @@ class PageTemplate:
     def __init__(self,id=None,frames=[],onPage=_doNothing, onPageEnd=_doNothing,
                  pagesize=None, autoNextPageTemplate=None):
         frames = frames or []
-        if type(frames) not in (ListType,TupleType): frames = [frames]
-        assert filter(lambda x: not isinstance(x,Frame), frames)==[], "frames argument error"
+        if not isSeq(frames): frames = [frames]
+        assert [x for x in frames if not isinstance(x,Frame)]==[], "frames argument error"
         self.id = id
         self.frames = frames
         self.onPage = onPage
@@ -282,9 +273,9 @@ class PageTemplate:
         cp = None
         dp = None
         sp = None
-        if canv._pagesize: cp = map(int, canv._pagesize)
-        if self.pagesize: sp = map(int, self.pagesize)
-        if doc.pagesize: dp = map(int, doc.pagesize)
+        if canv._pagesize: cp = list(map(int, canv._pagesize))
+        if self.pagesize: sp = list(map(int, self.pagesize))
+        if doc.pagesize: dp = list(map(int, doc.pagesize))
         if cp!=sp:
             if sp:
                 canv.setPageSize(self.pagesize)
@@ -332,10 +323,10 @@ class PageAccumulator:
         self.data.append(args)
 
     def onDrawText(self,*args):
-        return '<onDraw name="%s" label="%s" />' % (self.name,encodestring(dumps(args)).strip())
+        return '<onDraw name="%s" label="%s" />' % (self.name,encode_label(args))
 
     def __call__(self,canv,kind,label):
-        self.add(*loads(decodestring(label)))
+        self.add(*decode_label(label))
 
     def attachToPageTemplate(self,pt):
         if pt.onPage:
@@ -374,7 +365,7 @@ class PageAccumulator:
         pass
 
     def onDrawStr(self,value,*args):
-        return onDrawStr(value,self,encodestring(dumps(args)).strip())
+        return onDrawStr(value,self,encode_label(args))
 
 class BaseDocTemplate:
     """
@@ -468,7 +459,7 @@ class BaseDocTemplate:
                 v = self._initArgs[k]
             else:
                 if k in self._invalidInitArgs:
-                    raise ValueError, "Invalid argument %s" % k
+                    raise ValueError("Invalid argument %s" % k)
                 v = kw[k]
             setattr(self,k,v)
 
@@ -522,7 +513,7 @@ class BaseDocTemplate:
 
     def addPageTemplates(self,pageTemplates):
         'add one or a sequence of pageTemplates'
-        if type(pageTemplates) not in (ListType,TupleType):
+        if not isSeq(pageTemplates):
             pageTemplates = [pageTemplates]
         #this test below fails due to inconsistent imports!
         #assert filter(lambda x: not isinstance(x,PageTemplate), pageTemplates)==[], "pageTemplates argument error"
@@ -587,7 +578,7 @@ class BaseDocTemplate:
 
             if hasattr(self,'_nextPageTemplateCycle'):
                 #they are cycling through pages'; we keep the index
-                self.pageTemplate = self._nextPageTemplateCycle.next()
+                self.pageTemplate = next(self._nextPageTemplateCycle)
             elif hasattr(self,'_nextPageTemplateIndex'):
                 self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
                 del self._nextPageTemplateIndex
@@ -642,17 +633,17 @@ class BaseDocTemplate:
 
     def handle_nextPageTemplate(self,pt):
         '''On endPage change to the page template with name or index pt'''
-        if type(pt) is StringType:
+        if isinstance(pt,strTypes):
             if hasattr(self, '_nextPageTemplateCycle'): del self._nextPageTemplateCycle
             for t in self.pageTemplates:
                 if t.id == pt:
                     self._nextPageTemplateIndex = self.pageTemplates.index(t)
                     return
-            raise ValueError, "can't find template('%s')"%pt
-        elif type(pt) is IntType:
+            raise ValueError("can't find template('%s')"%pt)
+        elif isinstance(pt,int):
             if hasattr(self, '_nextPageTemplateCycle'): del self._nextPageTemplateCycle
             self._nextPageTemplateIndex = pt
-        elif type(pt) in (ListType, TupleType):
+        elif isSeq(pt):
             #used for alternating left/right pages
             #collect the refs to the template objects, complain if any are bad
             c = PTCycle()
@@ -679,16 +670,16 @@ class BaseDocTemplate:
 
     def handle_nextFrame(self,fx,resume=0):
         '''On endFrame change to the frame with name or index fx'''
-        if type(fx) is StringType:
+        if isinstance(fx,strTypes):
             for f in self.pageTemplate.frames:
                 if f.id == fx:
                     self._nextFrameIndex = self.pageTemplate.frames.index(f)
                     return
             raise ValueError("can't find frame('%s') in %r(%s) which has frames %r"%(fx,self.pageTemplate,self.pageTemplate.id,[(f,f.id) for f in self.pageTemplate.frames]))
-        elif type(fx) is IntType:
+        elif isinstance(fx,int):
             self._nextFrameIndex = fx
         else:
-            raise TypeError, "argument fx should be string or integer"
+            raise TypeError("argument fx should be string or integer")
 
     def handle_currentFrame(self,fx,resume=0):
         '''change to the frame with name or index fx'''
@@ -942,8 +933,8 @@ class BaseDocTemplate:
 
     def pageRef(self, label):
         """hook to register a page number"""
-        if verbose: print "pageRef called with label '%s' on page %d" % (
-            label, self.page)
+        if verbose: print("pageRef called with label '%s' on page %d" % (
+            label, self.page))
         self._pageRefs[label] = self.page
 
     def multiBuild(self, story,
@@ -969,7 +960,7 @@ class BaseDocTemplate:
             passes += 1
             if self._onProgress:
                 self._onProgress('PASS', passes)
-            if verbose: print 'building pass '+str(passes) + '...',
+            if verbose: sys.stdout.write('building pass '+str(passes) + '...')
 
             for fl in self._indexingFlowables:
                 fl.beforeBuild()
@@ -989,7 +980,7 @@ class BaseDocTemplate:
                 self.canv.save()
                 break
             if passes > maxPasses:
-                raise IndexError, "Index entries not resolved after %d passes" % maxPasses
+                raise IndexError("Index entries not resolved after %d passes" % maxPasses)
 
             #work through any edits
             while mbe:
@@ -997,7 +988,7 @@ class BaseDocTemplate:
                 e[0](*e[1:])
 
         del self._multiBuildEdits
-        if verbose: print 'saved'
+        if verbose: print('saved')
         return passes
         
     #these are pure virtuals override in derived classes
@@ -1039,7 +1030,7 @@ class BaseDocTemplate:
 
     _allowedLifetimes = 'page','frame','build','forever'
     def docAssign(self,var,expr,lifetime):
-        if not isinstance(expr,(str,unicode)): expr=str(expr)
+        if not isinstance(expr,strTypes): expr=str(expr)
         expr=expr.strip()
         var=var.strip()
         self.docExec('%s=(%s)'%(var.strip(),expr.strip()),lifetime)
@@ -1047,28 +1038,28 @@ class BaseDocTemplate:
     def docExec(self,stmt,lifetime):
         stmt=stmt.strip()
         NS=self._nameSpace
-        K0=NS.keys()
+        K0=list(NS.keys())
         try:
             if lifetime not in self._allowedLifetimes:
                 raise ValueError('bad lifetime %r not in %r'%(lifetime,self._allowedLifetimes))
-            exec stmt in {},NS
+            exec(stmt, {},NS)
         except:
             exc = sys.exc_info()[1]
             args = list(exc.args)
             msg = '\ndocExec %s lifetime=%r failed!' % (stmt,lifetime)
             args.append(msg)
             exc.args = tuple(args)
-            for k in NS.iterkeys():
+            for k in NS.keys():
                 if k not in K0:
                     del NS[k]
             raise
-        self._addVars([k for k in NS.iterkeys() if k not in K0],lifetime)
+        self._addVars([k for k in NS.keys() if k not in K0],lifetime)
 
     def _addVars(self,vars,lifetime):
         '''add namespace variables to lifetimes lists'''
         LT=self._lifetimes
         for var in vars:
-            for v in LT.itervalues():
+            for v in LT.values():
                 if var in v:
                     v.remove(var)
             LT.setdefault(lifetime,set([])).add(var)
@@ -1169,7 +1160,7 @@ def progressCB(typ, value):
     really accurate would be to do two passes, and I don't
     want to take that performance hit.
     """
-    print 'PROGRESS MONITOR:  %-10s   %d' % (typ, value)
+    print('PROGRESS MONITOR:  %-10s   %d' % (typ, value))
 
 if __name__ == '__main__':
     from reportlab.lib.styles import _baseFontName, _baseFontNameB
@@ -1201,7 +1192,7 @@ if __name__ == '__main__':
         objects_to_draw = []
         from reportlab.lib.styles import ParagraphStyle
         #from paragraph import Paragraph
-        from doctemplate import SimpleDocTemplate
+        from reportlab.platypus.doctemplate import SimpleDocTemplate
 
         #need a style
         normal = ParagraphStyle('normal')

@@ -120,7 +120,7 @@ class ValidatorTestCase(unittest.TestCase):
 
         try:
             validators.OneOf(choices,'bongo')
-            raise AssertionError, "OneOf failed to detect bad arguments"
+            raise AssertionError("OneOf failed to detect bad arguments")
         except ValueError:
             pass
 

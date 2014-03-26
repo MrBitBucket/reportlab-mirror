@@ -1,8 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2012
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/tools/docco/examples.py
-import string
-
 testannotations="""
 def annotations(canvas):
     from reportlab.lib.units import inch
@@ -19,7 +17,7 @@ def annotations(canvas):
 
 test1 = """
 def f(a,b):
-    print "it worked", a, b
+    print("it worked", a, b)
     return a+b
 """
 
@@ -427,7 +425,7 @@ bought up the rights now
 and she'll have fun fun fun
 til her Daddy takes the keyboard away'''
 
-lyrics = string.split(lyrics, "\n")
+lyrics = lyrics.split("\n")
 testtextsize = """
 def textsize(canvas):
     from reportlab.lib.units import inch
@@ -516,7 +514,7 @@ def customfont1(canvas):
     import reportlab.rl_config
     reportlab.rl_config.warnOnMissingFontGlyphs = 0
 
-    import rl_doc_utils
+    from . import rl_doc_utils
     from reportlab.pdfbase import pdfmetrics
     afmFile, pfbFile = rl_doc_utils.getJustFontPaths()
     justFace = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
@@ -744,7 +742,7 @@ def variousshapes(canvas):
     from reportlab.lib.units import inch
     inch = int(inch)
     canvas.setStrokeGray(0.5)
-    canvas.grid(range(0,11*inch/2,inch/2), range(0,7*inch/2,inch/2))
+    canvas.grid(range(0,int(11*inch/2),int(inch/2)), range(0,int(7*inch/2),int(inch/2)))
     canvas.setLineWidth(4)
     canvas.setStrokeColorRGB(0, 0.2, 0.7)
     canvas.setFillColorRGB(1, 0.6, 0.8)
@@ -852,15 +850,10 @@ def doctemplateillustration(canvas):
     canvas.drawCentredString(3*Wd+2*W+W/2, Hd+H-H/4, "College Life")
 
 # D = dir()
-g = globals()
-Dprime = {}
-from types import StringType
-from string import strip
-for (a,b) in g.items():
-    if a[:4]=="test" and type(b) is StringType:
-        #print 'for', a
-        #print b
-        b = strip(b)
+TESTS=[(a,b) for a, b in globals().items() if a.startswith('test')]
+for a,b in TESTS:
+    if isinstance(b,str):
+        b = b.strip()
         exec(b+'\n')
 
 platypussetup = """
@@ -905,6 +898,6 @@ def go():
 if __name__=="__main__":
     # then do the platypus hello world
     for b in platypussetup, platypusfirstpage, platypusnextpage, platypusgo:
-        b = strip(b)
+        b = b.strip()
         exec(b+'\n')
     go()

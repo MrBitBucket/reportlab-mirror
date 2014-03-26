@@ -12,21 +12,18 @@ ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 import os
 import sys
 import re
-from string import join, split, strip, atoi, replace, upper, digits
+import hashlib
+from string import digits
 import tempfile
 from math import sin, cos, tan, pi, ceil
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
-
 from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject, textobject
 from reportlab.lib.colors import black, _chooseEnforceColorSpace, Color, CMYKColor, toColor
-from reportlab.lib.utils import import_zlib, ImageReader, fp_str, _digester
+from reportlab.lib.utils import import_zlib, ImageReader, isSeq, isStr, isUnicode, _digester
+from reportlab.lib.rl_accel import fp_str, escapePDF
 from reportlab.lib.boxstuff import aspectRatioFix
 
 digitPat = re.compile('\d')  #used in decimal alignment
@@ -52,9 +49,6 @@ PATH_OPS = {(0, 0, FILL_EVEN_ODD) : 'n',  #no op
             (1, 1, FILL_EVEN_ODD) : 'B*',  #Stroke and Fill
             (1, 1, FILL_NON_ZERO) : 'B',  #Stroke and Fill
             }
-
-_escapePDF = pdfutils._escape
-_instanceEscapePDF = pdfutils._instanceEscapePDF
 
 def _annFormat(D,color,thickness,dashArray,hradius=0,vradius=0):
     from reportlab.pdfbase.pdfdoc import PDFArray, PDFDictionary
@@ -87,7 +81,7 @@ def _normalizeColor(aColor):
             return "DeviceRGB", aColor
         elif l == 4:
             return "DeviceCMYK", aColor
-    elif isinstance(aColor, basestring):
+    elif isinstance(aColor, str):
         return _normalizeColor(toColor(aColor))
     raise ValueError("Unknown color %r" % aColor)
 
@@ -119,14 +113,14 @@ def _buildColorFunction(colors, positions):
         positions = [(1.0*x)/(nc-1) for x in range(nc)]
     else:
         # sort positions and colors in increasing order
-        poscolors = zip(positions, colors)
+        poscolors = list(zip(positions, colors))
         poscolors.sort(key=lambda x: x[0])
         # add endpoint positions if not already present
         if poscolors[0][0] != 0:
             poscolors.insert(0, (0.0, poscolors[0][1]))
         if poscolors[-1][0] != 1:
             poscolors.append((1.0, poscolors[-1][1]))
-        positions, colors = zip(*poscolors) # unzip
+        positions, colors = list(zip(*poscolors)) # unzip
     # build stitching function
     functions = []
     bounds = [pos for pos in positions[1:-1]]
@@ -172,7 +166,7 @@ class   ExtGState:
 
     def getState(self):
         S = {}
-        for t,name in self._c.iteritems():
+        for t,name in self._c.items():
             S[name] = pdfdoc.PDFDictionary(dict((t,)))
         return S and pdfdoc.PDFDictionary(S) or None
 
@@ -317,8 +311,8 @@ class Canvas(textobject._PDFColorSetter):
         '''
         if encrypt:
             from reportlab.lib import pdfencrypt
-            if isinstance(encrypt, basestring): #encrypt is the password itself
-                if isinstance(encrypt, unicode):
+            if isStr(encrypt): #encrypt is the password itself
+                if isUnicode(encrypt):
                     encrypt = encrypt.encode('utf-8')
                 encrypt = pdfencrypt.StandardEncryption(encrypt)    #now it's the encrypt object
                 encrypt.setAllPermissions(1)
@@ -373,12 +367,11 @@ class Canvas(textobject._PDFColorSetter):
     def pop_state_stack(self):
         self.__dict__.update(self.state_stack.pop())
 
-    STATE_ATTRIBUTES = split("""
-     _x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
+    STATE_ATTRIBUTES = """_x _y _fontname _fontsize _textMode _leading _currentMatrix _fillMode
      _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
      _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorObj
-     _strokeColorObj _extgstate""")
-    STATE_RANGE = range(len(STATE_ATTRIBUTES))
+     _strokeColorObj _extgstate""".split()
+    STATE_RANGE = list(range(len(STATE_ATTRIBUTES)))
 
         #self._addStandardFonts()
 
@@ -403,9 +396,8 @@ class Canvas(textobject._PDFColorSetter):
                 P('BT %s 12 Tf 14.4 TL ET' % self._doc.getInternalFontName(self._fontname))
         self._preamble = ' '.join(P.__self__)
 
-    if not _instanceEscapePDF:
-        def _escape(self, s):
-            return _escapePDF(s)
+    def _escape(self, s):
+        return escapePDF(s)
 
     #info functions - non-standard
     def setAuthor(self, author):
@@ -765,7 +757,7 @@ class Canvas(textobject._PDFColorSetter):
         elif fit == "FitBV":
             dest.fitbv(left)
         else:
-            raise "Unknown Fit type %s" % (fit,)
+            raise ValueError("Unknown Fit type %s" % ascii(fit))
 
         dest.setPage(pageref)
         return dest
@@ -830,7 +822,7 @@ class Canvas(textobject._PDFColorSetter):
         """
     
         self._currentPageHasImages = 1
-        from pdfimages import PDFImage
+        from reportlab.pdfgen.pdfimages import PDFImage
         img_obj = PDFImage(image, x,y, width, height)
         img_obj.drawInlineImage(self,
             preserveAspectRatio=preserveAspectRatio, 
@@ -909,10 +901,15 @@ class Canvas(textobject._PDFColorSetter):
                 mdata = smask.getRGBData()
             else:
                 mdata = str(mask)
+            if isUnicode(mdata):
+                mdata = mdata.encode('utf8')
             name = _digester(rawdata+mdata)
         else:
             #filename, use it
-            name = _digester('%s%s' % (image, mask))
+            s = '%s%s' % (image, mask)
+            if isUnicode(s):
+                s = s.encode('utf-8')
+            name = _digester(s)
 
         # in the pdf document, this will be prefixed with something to
         # say it is an XObject.  Does it exist yet?
@@ -1041,7 +1038,10 @@ class Canvas(textobject._PDFColorSetter):
         will error in Distiller but work on printers supporting it.
         """
         #check if we've done this one already...
-        rawName = 'PS' + md5(command).hexdigest()
+        if isUnicode(command):
+            rawName = 'PS' + hashlib.md5(command.encode('utf-8')).hexdigest()
+        else:
+            rawName = 'PS' + hashlib.md5(command).hexdigest()
         regName = self._doc.getXObjectName(rawName)
         psObj = self._doc.idToObject.get(regName, None)
         if not psObj:
@@ -1213,7 +1213,10 @@ class Canvas(textobject._PDFColorSetter):
         If there is current data a ShowPage is executed automatically.
         After this operation the canvas must not be used further."""
         if len(self._code): self.showPage()
-        return self._doc.GetPDFData(self)
+        s = self._doc.GetPDFData(self)
+        if isUnicode(s):
+            s = s.encode('utf-8')
+        return s
 
     def setPageSize(self, size):
         """accepts a 2-tuple in points for paper size for this
@@ -1269,8 +1272,8 @@ class Canvas(textobject._PDFColorSetter):
                                    a0*c+c0*d,    b0*c+d0*d,
                                    a0*e+c0*f+e0, b0*e+d0*f+f0)
         if self._code and self._code[-1][-3:]==' cm':
-            L = split(self._code[-1])
-            a0, b0, c0, d0, e0, f0 = map(float,L[-7:-1])
+            L = self._code[-1].split()
+            a0, b0, c0, d0, e0, f0 = list(map(float,L[-7:-1]))
             s = len(L)>7 and join(L)+ ' %s cm' or '%s cm'
             self._code[-1] = s % fp_str(a0*a+c0*b,b0*a+d0*b,a0*c+c0*d,b0*c+d0*d,a0*e+c0*f+e0,b0*e+d0*f+f0)
         else:
@@ -1279,7 +1282,7 @@ class Canvas(textobject._PDFColorSetter):
     def absolutePosition(self, x, y):
         """return the absolute position of x,y in user space w.r.t. default user space"""
         if not ENABLE_TRACKING:
-            raise ValueError, "tracking not enabled! (canvas.ENABLE_TRACKING=0)"
+            raise ValueError("tracking not enabled! (canvas.ENABLE_TRACKING=0)")
         (a,b,c,d,e,f) = self._currentMatrix
         xp = a*x + c*y + e
         yp = b*x + d*y + f
@@ -1490,6 +1493,8 @@ class Canvas(textobject._PDFColorSetter):
 
     def drawString(self, x, y, text, mode=None):
         """Draws a string in the current text styles."""
+        if sys.version_info[0] == 3 and not isinstance(text, str):
+            text = text.decode('utf-8')
         #we could inline this for speed if needed
         t = self.beginText(x, y)
         if mode is not None: t.setTextRenderMode(mode)
@@ -1498,6 +1503,8 @@ class Canvas(textobject._PDFColorSetter):
 
     def drawRightString(self, x, y, text, mode=None):
         """Draws a string right-aligned with the x coordinate"""
+        if sys.version_info[0] == 3 and not isinstance(text, str):
+            text = text.decode('utf-8')
         width = self.stringWidth(text, self._fontname, self._fontsize)
         t = self.beginText(x - width, y)
         if mode is not None: t.setTextRenderMode(mode)
@@ -1508,6 +1515,8 @@ class Canvas(textobject._PDFColorSetter):
         """Draws a string centred on the x coordinate. 
         
         We're British, dammit, and proud of our spelling!"""
+        if sys.version_info[0] == 3 and not isinstance(text, str):
+            text = text.decode('utf-8')
         width = self.stringWidth(text, self._fontname, self._fontsize)
         t = self.beginText(x - 0.5*width, y)
         if mode is not None: t.setTextRenderMode(mode)
@@ -1586,7 +1595,7 @@ class Canvas(textobject._PDFColorSetter):
 
     def listLoadedFonts0(self):
         "Convenience function to list all loaded fonts"
-        names = pdfmetrics.widths.keys()
+        names = list(pdfmetrics.widths.keys())
         names.sort()
         return names
 
@@ -1643,9 +1652,9 @@ class Canvas(textobject._PDFColorSetter):
         """Two notations.  pass two numbers, or an array and phase"""
         if isinstance(array,(int,float)):
             self._code.append('[%s %s] 0 d' % (array, phase))
-        elif isinstance(array,(tuple,list)):
+        elif isSeq(array):
             assert phase >= 0, "phase is a length in user space"
-            textarray = ' '.join(map(str, array))
+            textarray = ' '.join([str(s) for s in array])
             self._code.append('[%s] %s d' % (textarray, phase))
 
     # path stuff - the separate path object builds it
@@ -1818,9 +1827,5 @@ class Canvas(textobject._PDFColorSetter):
         from reportlab.pdfbase.pdfdoc import PDFPageLabel
         PL.addPageLabel(pageNum,PDFPageLabel(style,start,prefix))
 
-if _instanceEscapePDF:
-    import new
-    Canvas._escape = new.instancemethod(_instanceEscapePDF,None,Canvas)
-
 if __name__ == '__main__':
-    print 'For test scripts, look in tests'
+    print('For test scripts, look in tests')

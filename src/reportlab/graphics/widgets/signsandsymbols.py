@@ -927,7 +927,7 @@ def test():
                             fontSize=labelFontSize))
 
     renderPDF.drawToFile(D, 'signsandsymbols.pdf', 'signsandsymbols.py')
-    print 'wrote file: signsandsymbols.pdf'
+    print('wrote file: signsandsymbols.pdf')
 
 if __name__=='__main__':
     test()

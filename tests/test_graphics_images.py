@@ -31,7 +31,6 @@ class ImageTestCase(unittest.TestCase):
             d.add(img)
         outPath = outputfile("test_graphics_images.pdf")
         renderPDF.drawToFile(d, outPath) #, '')
-        print outPath
         assert os.path.exists(outPath) == 1
 
 

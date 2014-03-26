@@ -79,7 +79,7 @@ def run():
     f = Frame(inch, inch, 6*inch, 9*inch, showBoundary=1)
     f.addFromList(story, c)
     c.save()
-    print 'saved out.pdf'
+    print('saved out.pdf')
 
 def fullTest(fileName="test_full.pdf"):
     """Creates large-ish test document with a variety of parameters"""
@@ -167,8 +167,8 @@ def fullTest(fileName="test_full.pdf"):
     if height: options['height'] = height[0]
     if isoScale: options['isoScale'] = isoScale[0]
     scales = [x[8:].split(',') for x in sys.argv if x.startswith('--scale=')]
-    scales = map(float,scales and flatten(scales) or [1])
-    scales = map(float,scales and flatten(scales) or [1])
+    scales = list(map(float,scales and flatten(scales) or [1]))
+    scales = list(map(float,scales and flatten(scales) or [1]))
     for scale in scales:
         story.append(PageBreak())
         story.append(Paragraph('Scale = %.1f'%scale, styleH2))
@@ -185,7 +185,7 @@ def fullTest(fileName="test_full.pdf"):
             story.append(KeepTogether(s))
 
     SimpleDocTemplate(fileName).build(story)
-    print 'created', fileName
+    print('created', fileName)
 
 if __name__=='__main__':
     run()

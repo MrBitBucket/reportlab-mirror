@@ -4,14 +4,9 @@
 __version__=''' $Id$ '''
 __doc__="""Standard verifying functions used by attrmap."""
 
-import string, sys, codecs
-from types import *
-_SequenceTypes = (ListType,TupleType)
-_NumberTypes = (FloatType,IntType)
+import sys, codecs
+from reportlab.lib.utils import isSeq, isBytes, isStr, isPy3
 from reportlab.lib import colors
-if sys.hexversion<0x2030000:
-    True = 1
-    False = 0
 
 class Percentage(float):
     pass
@@ -43,32 +38,27 @@ class _isNothing(Validator):
         return False
 
 class _isBoolean(Validator):
-    if sys.hexversion>=0x2030000:
-        def test(self,x):
-            if type(x) in (IntType,BooleanType): return x in (0,1)
-            return self.normalizeTest(x)
-    else:
-        def test(self,x):
-            if type(x) is IntType: return x in (0,1)
-            return self.normalizeTest(x)
+    def test(self,x):
+        if isinstance(int,bool): return x in (0,1)
+        return self.normalizeTest(x)
 
     def normalize(self,x):
         if x in (0,1): return x
         try:
-            S = string.upper(x)
+            S = x.upper()
         except:
-            raise ValueError, 'Must be boolean'
+            raise ValueError('Must be boolean not %s' % ascii(s))
         if S in ('YES','TRUE'): return True
         if S in ('NO','FALSE',None): return False
-        raise ValueError, 'Must be boolean'
+        raise ValueError('Must be boolean not %s' % ascii(s))
 
 class _isString(Validator):
     def test(self,x):
-        return isinstance(x,(str,unicode))
+        return isStr(x)
 
 class _isCodec(Validator):
     def test(self,x):
-        if type(x) not in (StringType, UnicodeType):
+        if not isStr(x):
             return False
         try:
             a,b,c,d = codecs.lookup(x)
@@ -78,7 +68,7 @@ class _isCodec(Validator):
 
 class _isNumber(Validator):
     def test(self,x):
-        if type(x) in _NumberTypes: return True
+        if isinstance(x,(float,int)): return True
         return self.normalizeTest(x)
 
     def normalize(self,x):
@@ -89,11 +79,15 @@ class _isNumber(Validator):
 
 class _isInt(Validator):
     def test(self,x):
-        if type(x) not in (IntType,StringType): return False
+        if not isinstance(x,int) and not isStr(x): return False
         return self.normalizeTest(x)
 
-    def normalize(self,x):
-        return int(x)
+    if not isPy3:
+        def normalize(self,x):
+            return int(x)
+    else:
+        def normalize(self,x):
+            return int(x.decode('utf8') if isBytes(x) else x)
 
 class _isNumberOrNone(_isNumber):
     def test(self,x):
@@ -128,7 +122,7 @@ class _isListOfShapes(Validator):
     "ListOfShapes validator class."
     def test(self, x):
         from reportlab.graphics.shapes import Shape
-        if type(x) in _SequenceTypes:
+        if isSeq(x):
             answer = 1
             for e in x:
                 if not isinstance(e, Shape):
@@ -147,7 +141,7 @@ class _isListOfStringsOrNone(Validator):
 class _isTransform(Validator):
     "Transform validator class."
     def test(self, x):
-        if type(x) in _SequenceTypes:
+        if isSeq(x):
             if len(x) == 6:
                 for element in x:
                     if not isNumber(element):
@@ -208,9 +202,9 @@ class OneOf(Validator):
     (1,1,0)
     """
     def __init__(self, enum,*args):
-        if type(enum) in [ListType,TupleType]:
+        if isSeq(enum):
             if args!=():
-                raise ValueError, "Either all singleton args or a single sequence argument"
+                raise ValueError("Either all singleton args or a single sequence argument")
             self._enum = tuple(enum)+args
         else:
             self._enum = (enum,)+args
@@ -227,7 +221,7 @@ class SequenceOf(Validator):
         if name: self._str = name
 
     def test(self, x):
-        if type(x) not in _SequenceTypes:
+        if not isSeq(x):
             if x is None: return self._NoneOK
             return False
         if x==[] or x==():
@@ -239,7 +233,7 @@ class SequenceOf(Validator):
 
 class EitherOr(Validator):
     def __init__(self,tests,name=None):
-        if type(tests) not in _SequenceTypes: tests = (tests,)
+        if not isSeq(tests): tests = (tests,)
         self._tests = tests
         if name: self._str = name
 
@@ -280,12 +274,9 @@ class matchesPattern(Validator):
         self._pattern = re.compile(pattern)
 
     def test(self,x):
-        print 'testing %s against %s' % (x, self._pattern)
-        if type(x) is StringType:
-            text = x
-        else:
-            text = str(x)
-        return (self._pattern.match(text) != None)
+        x = str(x)
+        print('testing %s against %s' % (x, self._pattern))
+        return (self._pattern.match(x) != None)
 
 class DerivedValue:
     """This is used for magic values which work themselves out.

@@ -4,7 +4,7 @@
 """Runs all test files in all subfolders.
 """
 __version__=''' $Id$ '''
-import os, glob, sys, string, traceback, unittest
+import os, glob, sys, traceback, unittest
 
 #we need to ensure 'tests' is on the path.  It will be if you
 #run 'setup.py tests', but won't be if you CD into the tests
@@ -52,8 +52,9 @@ def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
         modname = os.path.splitext(os.path.basename(filename))[0]
         if modname not in exclude:
             try:
-                exec 'import %s as module' % modname
-                allTests.addTest(module.makeSuite())
+                ns ={}
+                exec('import %s as module' % modname,ns)
+                allTests.addTest(ns['module'].makeSuite())
             except:
                 tt, tv, tb = sys.exc_info()[:]
                 nonImportable.append((filename,traceback.format_exception(tt,tv,tb)))
@@ -61,7 +62,6 @@ def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
     del sys.path[0]
 
     return allTests
-
 
 def main(pattern='test_*.py'):
     try:
@@ -87,7 +87,7 @@ def main(pattern='test_*.py'):
     # special case for tests directory - clean up
     # all PDF & log files before starting run.  You don't
     # want this if reusing runAll anywhere else.
-    if string.find(folder, os.sep+'tests') > -1: cleanup(folder)
+    if os.sep+'tests' in folder: cleanup(folder)
     cleanup(outputfile(''))
     NI = []
     cleanOnly = '--clean' in sys.argv
@@ -100,7 +100,7 @@ def main(pattern='test_*.py'):
         if NI:
             sys.stderr.write('\n###################### the following tests could not be imported\n')
             for f,tb in NI:
-                print 'file: "%s"\n%s\n' % (f,string.join(tb,''))
+                print('file: "%s"\n%s\n' % (f,''.join(tb)))
         printLocation()
 
 def mainEx():

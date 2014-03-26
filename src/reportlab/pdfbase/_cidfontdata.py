@@ -473,12 +473,11 @@ message1 =  '\202\261\202\352\202\315\225\275\220\254\226\276\222\251\202\305\20
 message2 = '\202\261\202\352\202\315\225\275\220\254\212p\203S\203V\203b\203N\202\305\202\267\201B'
 
 ##def pswidths(text):
-##    import string
-##    words = string.split(text)
+##    words = text.split()
 ##    out = []
 ##    for word in words:
 ##        if word == '[':
 ##            out.append(word)
 ##        else:
 ##            out.append(word + ',')
-##    return eval(string.join(out, ''))
+##    return eval(''.join(out))

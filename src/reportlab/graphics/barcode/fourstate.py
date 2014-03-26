@@ -31,7 +31,7 @@
 #
 
 from reportlab.lib.units import inch
-from common import Barcode
+from reportlab.graphics.barcode.common import Barcode
 import string
 
 # . 3 T Tracker

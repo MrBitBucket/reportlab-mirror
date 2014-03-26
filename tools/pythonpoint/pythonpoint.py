@@ -71,13 +71,13 @@ Recently added features are:
 - add pyRXP support (TODO)
 """
 __version__='''$Id$'''
-import os, sys, imp, string, pprint, getopt, glob
+import os, sys, imp, pprint, getopt, glob
 
 from reportlab import rl_config
 from reportlab.lib import styles
 from reportlab.lib import colors
 from reportlab.lib.units import cm
-from reportlab.lib.utils import getStringIO
+from reportlab.lib.utils import getBytesIO, isStr
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
@@ -203,9 +203,10 @@ def registerFont0(sourceFile, name, path):
 def checkColor(col):
     "Converts a color name to an RGB tuple, if possible."
 
-    if type(col) == type('') and col in dir(colors):
-        col = getattr(colors, col)
-        col = (col.red, col.green, col.blue)
+    if isStr(col):
+        if col in dir(colors):
+            col = getattr(colors, col)
+            col = (col.red, col.green, col.blue)
 
     return col
 
@@ -223,7 +224,7 @@ def handleHiddenSlides(slides):
     to a list of items...
     """
 
-    itd = indicesToDelete = map(lambda s:s.outlineEntry == None, slides)
+    itd = indicesToDelete = [s.outlineEntry == None for s in slides]
 
     for i in range(len(itd)-1):
         if itd[i] == 1:
@@ -243,7 +244,7 @@ def handleHiddenSlides(slides):
             slides[i].outlineEntry = curOutlineEntry
             slides[i].delete = 0
 
-    slides = filter(lambda s:s.delete == 0, slides)
+    slides = [s for s in slides if s.delete == 0]
 
     return slides
 
@@ -344,15 +345,15 @@ class PPPresentation:
     def saveAsPresentation(self):
         """Write the PDF document, one slide per page."""
         if self.verbose:
-            print 'saving presentation...'
+            print('saving presentation...')
         pageSize = (self.pageWidth, self.pageHeight)
         if self.sourceFilename:
             filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
         if self.outDir: filename = os.path.join(self.outDir,os.path.basename(filename))
         if self.verbose:
-            print filename
+            print(filename)
         #canv = canvas.Canvas(filename, pagesize = pageSize)
-        outfile = getStringIO()
+        outfile = getBytesIO()
         if self.notes:
             #translate the page from landscape to portrait
             pageSize= pageSize[1], pageSize[0]
@@ -371,7 +372,7 @@ class PPPresentation:
             #need diagnostic output if something wrong with XML
             slideNo = slideNo + 1
             if self.verbose:
-                print 'doing slide %d, id = %s' % (slideNo, slide.id)
+                print('doing slide %d, id = %s' % (slideNo, slide.id))
             if self.notes:
                 #frame and shift the slide
                 #canv.scale(0.67, 0.67)
@@ -403,7 +404,7 @@ class PPPresentation:
         if self.sourceFilename :
             filename = os.path.splitext(self.sourceFilename)[0] + '.pdf'
 
-        outfile = getStringIO()
+        outfile = getBytesIO()
         doc = SimpleDocTemplate(outfile, pagesize=rl_config.defaultPageSize, showBoundary=0)
         doc.leftMargin = 1*cm
         doc.rightMargin = 1*cm
@@ -510,7 +511,7 @@ class PPNotes:
         self.content = []
 
     def drawOn(self, canv):
-        print self.content
+        print(self.content)
 
 
 class PPSlide:
@@ -666,13 +667,13 @@ class PPTable:
 
     def parseData(self):
         """Try to make sense of the table data!"""
-        rawdata = string.strip(string.join(self.rawBlocks, ''))
-        lines = string.split(rawdata, self.rowDelim)
+        rawdata = ''.join(self.rawBlocks).strip()
+        lines = rawdata.split(self.rowDelim)
         #clean up...
-        lines = map(string.strip, lines)
+        lines = [line.strip() for line in lines]
         self.data = []
         for line in lines:
-            cells = string.split(line, self.fieldDelim)
+            cells = line.split(self.fieldDelim)
             self.data.append(cells)
 
         #get the width list if not given
@@ -708,7 +709,7 @@ class PPSpacer:
 ##class PPDrawingElement:
 ##    """Base class for something which you draw directly on the page."""
 ##    def drawOn(self, canv):
-##        raise "NotImplementedError", "Abstract base class!"
+##        raise NotImplementedError("Abstract base class!")
 
 
 class PPFixedImage:
@@ -872,10 +873,10 @@ class PPString:
         We want to throw away
         tabs, newlines and so on, and only accept embedded string
         like '\n'"""
-        lines = string.split(self.text, '\n')
+        lines = self.text.split('\n')
         newtext = []
         for line in lines:
-            newtext.append(string.strip(line))
+            newtext.append(line.strip())
         #accept all the '\n' as newlines
 
         self.text = newtext
@@ -899,7 +900,7 @@ class PPString:
 
         if self.color is None:
             return
-        lines = string.split(string.strip(drawText), '\\n')
+        lines = drawText.strip().split('\\n')
         canv.saveState()
 
         canv.setFont(self.font, self.size)
@@ -1006,7 +1007,7 @@ def _process(rawdata, datafilename, notes=0, handout=0, printout=0, cols=0, verb
     pdfcontent = pres.save()
 
     if verbose:
-        print 'saved presentation %s.pdf' % os.path.splitext(datafilename)[0]
+        print('saved presentation %s.pdf' % os.path.splitext(datafilename)[0])
     parser.close()
 
     return pdfcontent
@@ -1040,12 +1041,12 @@ def handleOptions():
                'outDir': None}
 
     args = sys.argv[1:]
-    args = filter(lambda x: x and x[0]=='-',args) + filter(lambda x: not x or x[0]!='-',args)
+    args = [x for x in args if x and x[0]=='-'] + [x for x in args if not x or x[0]!='-']
     try:
         shortOpts = 'hnvsx'
-        longOpts = string.split('cols= outdir= handout help notes printout verbose silent nofx')
+        longOpts = 'cols= outdir= handout help notes printout verbose silent nofx'.split()
         optList, args = getopt.getopt(args, shortOpts, longOpts)
-    except getopt.error, msg:
+    except getopt.error as msg:
         options['help'] = 1
 
     if not args and os.path.isfile('pythonpoint.xml'):
@@ -1061,28 +1062,28 @@ def handleOptions():
         if o == 'cols': options['cols'] = int(v)
         elif o=='outdir': options['outDir'] = v
 
-    if filter(lambda ov: ov[0] == 'handout', optList):
+    if [ov for ov in optList if ov[0] == 'handout']:
         options['handout'] = 1
 
-    if filter(lambda ov: ov[0] == 'printout', optList):
+    if [ov for ov in optList if ov[0] == 'printout']:
         options['printout'] = 1
 
     if optList == [] and args == [] or \
-       filter(lambda ov: ov[0] in ('h', 'help'), optList):
+       [ov for ov in optList if ov[0] in ('h', 'help')]:
         options['help'] = 1
 
-    if filter(lambda ov: ov[0] in ('n', 'notes'), optList):
+    if [ov for ov in optList if ov[0] in ('n', 'notes')]:
         options['notes'] = 1
 
-    if filter(lambda ov: ov[0] in ('x', 'nofx'), optList):
+    if [ov for ov in optList if ov[0] in ('x', 'nofx')]:
         options['fx'] = 0
 
-    if filter(lambda ov: ov[0] in ('v', 'verbose'), optList):
+    if [ov for ov in optList if ov[0] in ('v', 'verbose')]:
         options['verbose'] = 1
 
     #takes priority over verbose.  Used by our test suite etc.
         #to ensure no output at all
-    if filter(lambda ov: ov[0] in ('s', 'silent'), optList):
+    if [ov for ov in optList if ov[0] in ('s', 'silent')]:
         options['silent'] = 1
         options['verbose'] = 0
 
@@ -1093,24 +1094,24 @@ def main():
     options, args = handleOptions()
 
     if options['help']:
-        print USAGE_MESSAGE
+        print(USAGE_MESSAGE)
         sys.exit(0)
 
     if options['verbose'] and options['notes']:
-        print 'speaker notes mode'
+        print('speaker notes mode')
 
     if options['verbose'] and options['handout']:
-        print 'handout mode'
+        print('handout mode')
 
     if options['verbose'] and options['printout']:
-        print 'printout mode'
+        print('printout mode')
 
     if not options['fx']:
-        print 'suppressing special effects'
+        print('suppressing special effects')
     for fileGlobs in args:
         files = glob.glob(fileGlobs)
         if not files:
-            print fileGlobs, "not found"
+            print(fileGlobs, "not found")
             return
         for datafile in files:
             if os.path.isfile(datafile):
@@ -1118,7 +1119,7 @@ def main():
                 notes, handout, printout, cols, verbose, fx = options['notes'], options['handout'], options['printout'],  options['cols'], options['verbose'], options['fx']
                 process(file, notes, handout, printout, cols, verbose, options['outDir'], fx=fx)
             else:
-                print 'Data file not found:', datafile
+                print('Data file not found:', datafile)
 
 if __name__ == '__main__':
     main()

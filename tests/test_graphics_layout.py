@@ -59,7 +59,7 @@ class BoundsTestCase(unittest.TestCase):
         g.translate(-40,-40)
         g.rotate(90)
         #approx bounds needed, trig functions create an error of 3e-15
-        assert map(int, g.getBounds()) == [-60,0,0,60]
+        assert list(map(int, g.getBounds())) == [-60,0,0,60]
 
     def testWidget(self):
         from reportlab.graphics.charts.barcharts import VerticalBarChart

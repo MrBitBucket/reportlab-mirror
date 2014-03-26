@@ -5,7 +5,7 @@ __version__=''' $Id$ '''
 __doc__='''Defines standard colour-handling classes and colour names.
 
 We define standard classes to hold colours in two models:  RGB and CMYK.
-These can be constructed from several popular formats.  We also include
+rhese can be constructed from several popular formats.  We also include
 
 - pre-built colour objects for the HTML standard colours
 
@@ -39,8 +39,11 @@ Traceback (most recent call last):
     ....
 ValueError: css color 'pcmyka(100,0,0,0)' has wrong number of components
 '''
-import math, re
-from reportlab.lib.utils import fp_str
+import math, re, functools
+from reportlab import isPy3
+from reportlab.lib.rl_accel import fp_str
+from reportlab.lib.utils import asNative, isStr
+import collections
 
 class Color:
     """This class is used to represent color.  Components red, green, blue
@@ -56,25 +59,38 @@ class Color:
     def __repr__(self):
         return "Color(%s)" % fp_str(*(self.red, self.green, self.blue,self.alpha)).replace(' ',',')
 
-    def __hash__(self):
-        return hash((self.red, self.green, self.blue, self.alpha))
-
-    def __cmp__(self,other):
+    @property
+    def __key__(self):
         '''simple comparison by component; cmyk != color ever
         >>> cmp(Color(0,0,0),None)
         -1
         >>> cmp(Color(0,0,0),black)
         0
         >>> cmp(Color(0,0,0),CMYKColor(0,0,0,1)),Color(0,0,0).rgba()==CMYKColor(0,0,0,1).rgba()
-        (-1, True)
+        (1, True)
         '''
-        if isinstance(other,CMYKColor) or not isinstance(other,Color): return -1
+        return self.red, self.green, self.blue, self.alpha
+
+    def __hash__(self):
+        return hash(self.__key__)
+
+    def __comparable__(self,other):
+        return not isinstance(other,CMYKColor) and isinstance(other,Color)
+
+    def __lt__(self,other):
+        if not self.__comparable__(other): return True
         try:
-            return cmp((self.red, self.green, self.blue, self.alpha),
-                    (other.red, other.green, other.blue, other.alpha))
+            return self.__key__ < other.__key__
         except:
-            return -1
-        return 0
+            pass
+        return True
+
+    def __eq__(self,other):
+        if not self.__comparable__(other): return False
+        try:
+            return self.__key__ == other.__key__
+        except:
+            return False
 
     def rgb(self):
         "Returns a three-tuple of components"
@@ -85,10 +101,10 @@ class Color:
         return (self.red, self.green, self.blue, self.alpha)
 
     def bitmap_rgb(self):
-        return tuple(map(lambda x: int(x*255)&255, self.rgb()))
+        return tuple([int(x*255)&255 for x in self.rgb()])
 
     def bitmap_rgba(self):
-        return tuple(map(lambda x: int(x*255)&255, self.rgba()))
+        return tuple([int(x*255)&255 for x in self.rgba()])
 
     def hexval(self):
         return '0x%02x%02x%02x' % self.bitmap_rgb()
@@ -118,7 +134,7 @@ class Color:
 
     def _lookupName(self,D={}):
         if not D:
-            for n,v in getAllNamedColors().iteritems():
+            for n,v in getAllNamedColors().items():
                 if not isinstance(v,CMYKColor):
                     t = v.red,v.green,v.blue
                     if t in D:
@@ -130,7 +146,7 @@ class Color:
     @property
     def normalizedAlpha(self):
         return self.alpha
-
+if isPy3: Color = functools.total_ordering(Color)
 
 class CMYKColor(Color):
     """This represents colors using the CMYK (cyan, magenta, yellow, black)
@@ -190,14 +206,12 @@ class CMYKColor(Color):
         *NB* note this dosen't reach density zero'''
         scale = self._scale
         dd = scale/float(n)
-        L = [self.clone(density=scale - i*dd) for i in xrange(n)]
+        L = [self.clone(density=scale - i*dd) for i in range(n)]
         if reverse: L.reverse()
         return L
 
-    def __hash__(self):
-        return hash( (self.cyan, self.magenta, self.yellow, self.black, self.density, self.spotName, self.alpha) )
-
-    def __cmp__(self,other):
+    @property
+    def __key__(self):
         """obvious way to compare colours
         Comparing across the two color models is of limited use.
         >>> cmp(CMYKColor(0,0,0,1),None)
@@ -209,14 +223,10 @@ class CMYKColor(Color):
         >>> cmp(CMYKColor(0,0,0,1),Color(0,0,1)),Color(0,0,0).rgba()==CMYKColor(0,0,0,1).rgba()
         (-1, True)
         """
-        if not isinstance(other, CMYKColor): return -1
-        try:
-            return cmp(
-                (self.cyan, self.magenta, self.yellow, self.black, self.density, self.alpha, self.spotName),
-                (other.cyan, other.magenta, other.yellow, other.black, other.density, other.alpha, other.spotName))
-        except: # or just return 'not equal' if not a color
-            return -1
-        return 0
+        return self.cyan, self.magenta, self.yellow, self.black, self.density, self.spotName, self.alpha
+
+    def __comparable__(self,other):
+        return isinstance(other,CMYKColor)
 
     def cmyk(self):
         "Returns a tuple of four color components - syntactic sugar"
@@ -232,7 +242,7 @@ class CMYKColor(Color):
 
     def _lookupName(self,D={}):
         if not D:
-            for n,v in getAllNamedColors().iteritems():
+            for n,v in getAllNamedColors().items():
                 if isinstance(v,CMYKColor):
                     t = v.cyan,v.magenta,v.yellow,v.black
                     if t in D:
@@ -353,7 +363,8 @@ def HexColor(val, htmlOnly=False, hasAlpha=False):
 
     """ #" for emacs
 
-    if isinstance(val,basestring):
+    if isStr(val):
+        val = asNative(val)
         b = 10
         if val[:1] == '#':
             val = val[1:]
@@ -385,7 +396,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
     if x1<x0:
         x0,x1,c0,c1 = x1,x0,c1,c0 # normalized so x1>x0
     if x<x0-1e-8 or x>x1+1e-8: # fudge factor for numerical problems
-        raise ValueError, "Can't interpolate: x=%f is not between %f and %f!" % (x,x0,x1)
+        raise ValueError("Can't interpolate: x=%f is not between %f and %f!" % (x,x0,x1))
     if x<=x0:
         return c0
     elif x>=x1:
@@ -481,7 +492,7 @@ def linearlyInterpolatedColor(c0, c1, x0, x1, x):
             a = c0.alpha+x*(c1.alpha - c0.alpha)/dx
             return PCMYKColor(c*100,m*100,y*100,k*100, density=d*100, alpha=a*100)
     else:
-        raise ValueError, "Can't interpolate: Unknown color class %s!" % cname
+        raise ValueError("Can't interpolate: Unknown color class %s!" % cname)
 
 def obj_R_G_B(c):
     '''attempt to convert an object to (red,green,blue)'''
@@ -703,9 +714,9 @@ def getAllNamedColors():
     # uses a singleton for efficiency
     global _namedColors
     if _namedColors is not None: return _namedColors
-    import colors
+    from reportlab.lib import colors
     _namedColors = {}
-    for (name, value) in colors.__dict__.items():
+    for name, value in colors.__dict__.items():
         if isinstance(value, Color):
             _namedColors[name] = value
 
@@ -719,18 +730,18 @@ def describe(aColor,mode=0):
     '''
     namedColors = getAllNamedColors()
     closest = (10, None, None)  #big number, name, color
-    for (name, color) in namedColors.items():
+    for name, color in namedColors.items():
         distance = colorDistance(aColor, color)
         if distance < closest[0]:
             closest = (distance, name, color)
     if mode<=1:
         s = 'best match is %s, distance %0.4f' % (closest[1], closest[0])
-        if mode==0: print s
+        if mode==0: print(s)
         else: return s
     elif mode==2:
         return (closest[1], closest[0])
     else:
-        raise ValueError, "Illegal value for mode "+str(mode)
+        raise ValueError("Illegal value for mode "+str(mode))
 
 def hue2rgb(m1, m2, h):
     if h<0: h += 1
@@ -816,7 +827,7 @@ class cssParse:
             if hsl:
                 R,G,B= hsl2rgb(self.hueVal(n[0]),self.pcVal(n[1]),self.pcVal(n[2]))
             else:
-                R,G,B = map('%' in n[0] and self.rgbPcVal or self.rgbVal,n)
+                R,G,B = list(map('%' in n[0] and self.rgbPcVal or self.rgbVal,n))
 
             return Color(R,G,B,a)
 
@@ -839,7 +850,8 @@ class toColor:
             assert 3<=len(arg)<=4, 'Can only convert 3 and 4 sequences to color'
             assert 0<=min(arg) and max(arg)<=1
             return len(arg)==3 and Color(arg[0],arg[1],arg[2]) or CMYKColor(arg[0],arg[1],arg[2],arg[3])
-        elif isinstance(arg,basestring):
+        elif isStr(arg):
+            arg = asNative(arg)
             C = cssParse(arg)
             if C: return C
             if arg in self.extraColorsNS: return self.extraColorsNS[arg]
@@ -875,7 +887,7 @@ def setColors(**kw):
         progress = 0
         for k, v in kw.items():
             if isinstance(v,(tuple,list)):
-                c = map(lambda x,UNDEF=UNDEF: toColor(x,UNDEF),v)
+                c = list(map(lambda x,UNDEF=UNDEF: toColor(x,UNDEF),v))
                 if isinstance(v,tuple): c = tuple(c)
                 ok = UNDEF not in c
             else:
@@ -1000,8 +1012,8 @@ def _enforceRGB(c):
     return tc
 
 def _chooseEnforceColorSpace(enforceColorSpace):
-    if enforceColorSpace is not None and not callable(enforceColorSpace):
-        if isinstance(enforceColorSpace,basestring): enforceColorSpace=enforceColorSpace.upper()
+    if enforceColorSpace is not None and not isinstance(enforceColorSpace, collections.Callable):
+        if isinstance(enforceColorSpace,str): enforceColorSpace=enforceColorSpace.upper()
         if enforceColorSpace=='CMYK':
             enforceColorSpace = _enforceCMYK
         elif enforceColorSpace=='RGB':

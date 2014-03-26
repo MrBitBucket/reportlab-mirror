@@ -1,5 +1,3 @@
-import string
-
 testannotations="""
 def annotations(canvas):
     from reportlab.lib.units import inch
@@ -365,7 +363,7 @@ bought up the rights now
 and she'll have fun fun fun
 til her Daddy takes the keyboard away'''
 
-lyrics = string.split(lyrics, "\n")
+lyrics = lyrics.split("\n")
 testtextsize = """
 def textsize(canvas):
     from reportlab.lib.units import inch
@@ -785,13 +783,11 @@ class PingoIllust:
 # D = dir()
 g = globals()
 Dprime = {}
-from types import StringType
-from string import strip
-for (a,b) in g.items():
-    if a[:4]=="test" and type(b) is StringType:
+for a,b in g.items()):
+    if a[:4]=="test" and isinstance(b,str):
         #print 'for', a
         #print b
-        b = strip(b)
+        b = b.strip()
         exec(b+'\n')
 
 platypussetup = """
@@ -836,6 +832,6 @@ def go():
 if __name__=="__main__":
     # then do the platypus hello world
     for b in platypussetup, platypusfirstpage, platypusnextpage, platypusgo:
-        b = strip(b)
+        b = b.strip()
         exec(b+'\n')
     go()

@@ -5,9 +5,8 @@
 #$Header$
 __version__=''' $Id'''
 __doc__="""Tests of intra-paragraph parsing behaviour in Platypus."""
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, equalStrings
 setOutDir(__name__)
-from types import TupleType, ListType, StringType, UnicodeType
 from pprint import pprint as pp
 import unittest
 from reportlab.platypus import cleanBlockQuotedText
@@ -33,65 +32,65 @@ class ParaParserTestCase(unittest.TestCase):
     def testPlain(self):
         txt = "Hello World"
         stuff = ParaParser().parse(txt, self.style)
-        assert type(stuff) is TupleType
+        assert isinstance(stuff,tuple)
         assert len(stuff) == 3
         assert  stuff[1][0].text == 'Hello World'
 
     def testBold(self):
         txt = "Hello <b>Bold</b> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','Bold',' World'])
+        self.assertEquals([x.text for x in fragList], ['Hello ','Bold',' World'])
         self.assertEquals(fragList[1].fontName, 'Times-Bold')
 
     def testStrong(self):
         txt = "Hello <strong>Strong</strong> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','Strong',' World'])
+        self.assertEquals([x.text for x in fragList], ['Hello ','Strong',' World'])
         self.assertEquals(fragList[1].fontName, 'Times-Bold')
 
     def testItalic(self):
         txt = "Hello <i>Italic</i> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','Italic',' World'])
+        self.assertEquals([x.text for x in fragList], ['Hello ','Italic',' World'])
         self.assertEquals(fragList[1].fontName, 'Times-Italic')
 
     def testEm(self):
         txt = "Hello <em>Em</em> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','Em',' World'])
+        self.assertEquals([x.text for x in fragList], ['Hello ','Em',' World'])
         self.assertEquals(fragList[1].fontName, 'Times-Italic')
 
     def testEntity(self):
         "Numeric entities should be unescaped by parser"
-        txt = "Hello &#169; copyright"
+        txt = b"Hello &#169; copyright"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals(map(lambda x:x.text, fragList), ['Hello ','\xc2\xa9',' copyright'])
+        self.assertEquals([x.text for x in fragList], [u'Hello ', u'\xa9', u' copyright'])
 
     def testEscaped(self):
         "Escaped high-bit stuff should go straight through"
         txt = "Hello \xc2\xa9 copyright"
         fragList = ParaParser().parse(txt, self.style)[1]
-        assert fragList[0].text == txt
+        assert equalStrings(fragList[0].text,txt)
 
     def testPlainUnicode(self):
         "See if simple unicode goes through"
-        txt = u"Hello World"
+        txt = "Hello World"
         stuff = ParaParser().parse(txt, self.style)
-        assert type(stuff) is TupleType
+        assert isinstance(stuff,tuple)
         assert len(stuff) == 3
-        assert  stuff[1][0].text == u'Hello World'
+        assert  stuff[1][0].text == 'Hello World'
 
     def testBoldUnicode(self):
-        txt = u"Hello <b>Bold</b> World"
+        txt = "Hello <b>Bold</b> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals(map(lambda x:x.text, fragList), [u'Hello ',u'Bold',u' World'])
+        self.assertEquals([x.text for x in fragList], ['Hello ','Bold',' World'])
         self.assertEquals(fragList[1].fontName, 'Times-Bold')
 
     def testEntityUnicode(self):
         "Numeric entities should be unescaped by parser"
-        txt = u"Hello &#169; copyright"
+        txt = "Hello &#169; copyright"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals(map(lambda x:x.text, fragList), [u'Hello ',u'\xa9',u' copyright'])
+        self.assertEquals([x.text for x in fragList], [u'Hello ', u'\xa9', u' copyright'])
 
     def testEscapedUnicode(self):
         "Escaped high-bit stuff should go straight through"
@@ -100,19 +99,25 @@ class ParaParserTestCase(unittest.TestCase):
         assert fragList[0].text == txt
 
     def testBr(self):
-        txt = u"Hello <br/> World"
+        txt = "Hello <br/> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals(map(lambda x:x.text, fragList), [u'Hello ',u'',u' World'])
+        self.assertEquals([x.text for x in fragList], ['Hello ','',' World'])
         self.assertEquals(fragList[1].lineBreak, True)
 
-    def testNakedAmpersands(self):
-        txt = "1 & 2"
-        parser = ParaParser()
-        parser.caseSensitive = True
-        frags = ParaParser().parse(txt, self.style)[1]
-        #print 'parsed OK, frags=', frags
-        from reportlab.platypus.paragraph import Paragraph
-        p = Paragraph(txt, self.style)
+    #def testNakedAmpersands(self):
+        #We no longer require this error to be raised when using html.parser
+        # import pyRXPU
+        # from reportlab.platypus.paragraph import Paragraph
+        # def func():
+        #     txt = "1 & 2"
+        #     parser = ParaParser()
+        #     parser.caseSensitive = True
+        #     frags = ParaParser().parse(txt, self.style)[1]
+        #     Paragraph(txt, self.style),
+        # self.assertRaises(
+        #         pyRXPU.error,
+        #         func,
+        #         )
 
 def makeSuite():
     return makeSuiteForClasses(ParaParserTestCase)

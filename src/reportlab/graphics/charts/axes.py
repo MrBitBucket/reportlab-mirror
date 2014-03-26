@@ -33,7 +33,7 @@ the former axes in its own coordinate system.
 
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
-                                        isString, EitherOr, Validator, _SequenceTypes, NoneOr, isInstanceOf, \
+                                        isString, EitherOr, Validator, NoneOr, isInstanceOf, \
                                         isNormalDate
 from reportlab.lib.attrmap import *
 from reportlab.lib import normalDate
@@ -43,20 +43,24 @@ from reportlab.graphics.charts.textlabels import Label, PMVLabel
 from reportlab.graphics.charts.utils import nextRoundNumber
 from reportlab.graphics.widgets.grids import ShadedRect
 from reportlab.lib.colors import Color
+from reportlab.lib.utils import isSeq
 import copy
-
+try:
+    reduce  # Python 2.x
+except NameError:
+    from functools import reduce
 
 # Helpers.
 def _findMinMaxValue(V, x, default, func, special=None):
-    if isinstance(V[0][0],_SequenceTypes):
+    if isSeq(V[0][0]):
         if special:
             f=lambda T,x=x,special=special,func=func: special(T,x,func)
         else:
             f=lambda T,x=x: T[x]
-        V=map(lambda e,f=f: map(f,e),V)
-    V = filter(len,map(lambda x: filter(lambda x: x is not None,x),V))
+        V=list(map(lambda e,f=f: list(map(f,e)),V))
+    V = list(filter(len,[[x for x in x if x is not None] for x in V]))
     if len(V)==0: return default
-    return func(map(func,V))
+    return func(list(map(func,V)))
 
 def _findMin(V, x, default,special=None):
     '''find minimum over V[i][x]'''
@@ -140,7 +144,7 @@ class AxisLineAnnotation:
                     d = hi
                 axis._get_line_pos = lambda x: d
             L = func(v)
-            for k,v in kwds.iteritems():
+            for k,v in kwds.items():
                 setattr(L,k,v)
         finally:
             axis._get_line_pos = oaglp
@@ -185,7 +189,7 @@ class AxisBackgroundAnnotation:
         G = Group()
         ncolors = len(colors)
         v0 = axis._get_line_pos(tv[0])
-        for i in xrange(1,len(tv)):
+        for i in range(1,len(tv)):
             v1 = axis._get_line_pos(tv[i])
             c = colors[(i-1)%ncolors]
             if c:
@@ -294,7 +298,7 @@ class _AxisG(Widget):
                 L.strokeLineCap = strokeLineCap
                 L.strokeMiterLimit = strokeMiterLimit
                 if t in specials:
-                    for a,v in specials[t].iteritems():
+                    for a,v in specials[t].items():
                         setattr(L,a,v)
                 g.add(L)
 
@@ -517,7 +521,7 @@ class CategoryAxis(_AxisG):
         self._length = float(length)
 
     def configure(self, multiSeries,barWidth=None):
-        self._catCount = max(map(len,multiSeries))
+        self._catCount = max(list(map(len,multiSeries)))
         self._barWidth = barWidth or ((self._length-self.loPad-self.hiPad)/float(self._catCount or 1))
         self._calcTickmarkPositions()
         if self.labelAxisMode == 'axispmv':
@@ -526,12 +530,12 @@ class CategoryAxis(_AxisG):
     def _calcTickmarkPositions(self):
         n = self._catCount
         if self.tickShift:
-            self._tickValues = [t+0.5 for t in xrange(n)]
+            self._tickValues = [t+0.5 for t in range(n)]
         else:
             if self.reverseDirection:
-                self._tickValues = range(-1,n)
+                self._tickValues = list(range(-1,n))
             else:
-                self._tickValues = range(n+1)
+                self._tickValues = list(range(n+1))
 
     def _scale(self,idx):
         if self.reverseDirection: idx = self._catCount-idx-1
@@ -596,7 +600,7 @@ class _XTicks:
                 if OTV[-1]<vx: OTV.append(OTV[-1]+dst)
                 dst /= float(nst+1)
                 for i,x in enumerate(OTV[:-1]):
-                    for j in xrange(nst):
+                    for j in range(nst):
                         t = x+dCnv((j+1)*dst)
                         if t<=vn or t>=vx: continue
                         T(t)
@@ -744,7 +748,7 @@ class XCategoryAxis(_XTicks,CategoryAxis):
             _x = self._x
             pmv = self._pmv if self.labelAxisMode=='axispmv' else None
 
-            for i in xrange(catCount):
+            for i in range(catCount):
                 if reverseDirection: ic = catCount-i-1
                 else: ic = i
                 if ic>=n: continue
@@ -858,7 +862,7 @@ class YCategoryAxis(_YTicks,CategoryAxis):
             _y = self._y
             pmv = self._pmv if self.labelAxisMode=='axispmv' else None
 
-            for i in xrange(catCount):
+            for i in range(catCount):
                 if reverseDirection: ic = catCount-i-1
                 else: ic = i
                 if ic>=n: continue
@@ -1174,10 +1178,10 @@ class ValueAxis(_AxisG):
         abf = self.avoidBoundFrac
         do_rr = not getattr(self,'valueSteps',None)
         do_abf = abf and do_rr
-        if not isinstance(abf,_SequenceTypes):
+        if not isSeq(abf):
             abf = abf, abf
         abfiz = getattr(self,'abf_ignore_zero', False)
-        if not isinstance(abfiz,_SequenceTypes):
+        if not isSeq(abfiz):
             abfiz = abfiz, abfiz
         do_rr = rangeRound is not 'none' and do_rr
         if do_rr:
@@ -1189,7 +1193,7 @@ class ValueAxis(_AxisG):
         abS = self.avoidBoundSpace
         do_abs = abS
         if do_abs:
-            if not isinstance(abS,_SequenceTypes):
+            if not isSeq(abS):
                 abS = abS, abS
         aL = float(self._length)
 
@@ -1313,7 +1317,7 @@ class ValueAxis(_AxisG):
         if rangeRound in ('both','ceiling'):
             if v<valueMax-fuzz: i1 += 1
         elif v>valueMax+fuzz: i1 -= 1
-        return valueStep,[i*valueStep for i in xrange(i0,i1+1)]
+        return valueStep,[i*valueStep for i in range(i0,i1+1)]
 
     def _calcTickPositions(self):
         return self._calcStepAndTickPositions()[1]
@@ -1388,8 +1392,8 @@ class ValueAxis(_AxisG):
                         t = tick*scl
                     else:
                         t = tick
-                    if type(f) is str: txt = f % t
-                    elif isinstance(f,_SequenceTypes):
+                    if isinstance(f, str): txt = f % t
+                    elif isSeq(f):
                         #it's a list, use as many items as we get
                         if i < len(f):
                             txt = f[i]
@@ -1401,7 +1405,7 @@ class ValueAxis(_AxisG):
                         else:
                             txt = f(t)
                     else:
-                        raise ValueError, 'Invalid labelTextFormat %s' % f
+                        raise ValueError('Invalid labelTextFormat %s' % f)
                     if post: txt = post % txt
                     pos[d] = v
                     label.setOrigin(*pos)
@@ -1546,7 +1550,7 @@ class _isListOfDaysAndMonths(Validator):
     for recurring dates.
     """
     def test(self,x):
-        if isinstance(x,_SequenceTypes):
+        if isSeq(x):
             answer = True
             for element in x:
                 try:
@@ -1680,7 +1684,7 @@ class NormalDateXValueAxis(XValueAxis):
         #specified the days of year to be ticked.  Other explicit routes may
         #be added.
         if self.forceDatesEachYear:
-            forcedPartialDates = map(parseDayAndMonth, self.forceDatesEachYear)
+            forcedPartialDates = list(map(parseDayAndMonth, self.forceDatesEachYear))
             #generate the list of dates in the range.
             #print 'dates range from %s to %s' % (firstDate, endDate)
             firstYear = firstDate.year()
@@ -1770,7 +1774,7 @@ class NormalDateXValueAxis(XValueAxis):
 
         VC = self._valueClass
         for D in data:
-            for i in xrange(len(D)):
+            for i in range(len(D)):
                 x, y = D[i]
                 if not isinstance(x,VC):
                     D[i] = (VC(x),y)
@@ -1796,7 +1800,7 @@ class NormalDateXValueAxis(XValueAxis):
     def configure(self, data):
         self._convertXV(data)
         from reportlab.lib.set_ops import union
-        xVals = reduce(union,map(lambda x: map(lambda dv: dv[0],x),data),[])
+        xVals = reduce(union,[[dv[0] for dv in x] for x in data],[])
         xVals.sort()
         steps,labels = self._getStepsAndLabels(xVals)
         valueMin, valueMax = self.valueMin, self.valueMax
@@ -1914,7 +1918,7 @@ class AdjYValueAxis(YValueAxis):
         from reportlab.graphics.charts.utils import find_good_grid, ticks
         y_min, y_max = self._valueMin, self._valueMax
         m = self.maximumTicks
-        n = filter(lambda x,m=m: x<=m,[4,5,6,7,8,9])
+        n = list(filter(lambda x,m=m: x<=m,[4,5,6,7,8,9]))
         if not n: n = [m]
 
         valueStep, requiredRange = self.valueStep, self.requiredRange
@@ -1936,7 +1940,7 @@ class AdjYValueAxis(YValueAxis):
         abf = self.avoidBoundFrac
         if abf:
             i1 = (T[1]-T[0])
-            if not isinstance(abf,_SequenceTypes):
+            if not isSeq(abf):
                 i0 = i1 = i1*abf
             else:
                 i0 = i1*abf[0]
@@ -1963,7 +1967,7 @@ class AdjYValueAxis(YValueAxis):
             self._valueMin = self._valueMin - m
 
         if self.leftAxisSkipLL0:
-            if isinstance(self.leftAxisSkipLL0,_SequenceTypes):
+            if isSeq(self.leftAxisSkipLL0):
                 for x in self.leftAxisSkipLL0:
                     try:
                         L[x] = ''

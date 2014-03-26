@@ -11,13 +11,14 @@ import math, types, sys, os, codecs
 from operator import getitem
 
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
-from reportlab.lib.utils import fp_str
+from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.colors import black
+from reportlab.lib.utils import asNative
 from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
-from reportlab.lib.utils import getStringIO, RLString
+from reportlab.lib.utils import getBytesIO, RLString, isPy3, isUnicode, isBytes
 
 from xml.dom import getDOMImplementation
 
@@ -34,7 +35,7 @@ TEXT_STYLES = 'font-family font-weight font-style font-variant font-size id'.spl
 ### top-level user function ###
 def drawToString(d, showBoundary=rl_config.showBoundary,**kwds):
     "Returns a SVG as a string in memory, without touching the disk"
-    s = getStringIO()
+    s = getBytesIO()
     drawToFile(d, s, showBoundary=showBoundary,**kwds)
     return s.getvalue()
 
@@ -96,8 +97,8 @@ def transformNode(doc, newTag, node=None, **attrDict):
 class EncodedWriter(list):
     '''
     EncodedWriter(encoding) assumes .write will be called with
-    either unicode or utf8 encoded strings.  it will accumulate
-    strings encoded as the specified encoding.
+    either unicode or utf8 encoded bytes. it will accumulate
+    unicode
     '''
     BOMS =  {
         'utf-32':codecs.BOM_UTF32,
@@ -113,22 +114,18 @@ class EncodedWriter(list):
         if bom and '16' in encoding or '32' in encoding:
             self.write(self.BOMS[encoding])
 
-    def write(self,s):
-        if isinstance(s,unicode):
-            s = s.encode(self.encoding)
-        elif isinstance(s,str):
+    def write(self,u):
+        if isBytes(u):
             try:
-                 u = s.decode('utf-8')
+                 u = u.decode('utf-8')
             except:
                 et, ev, tb = sys.exc_info()
                 ev = str(ev)
                 del et, tb
-                raise ValueError("String %r not encoded as 'utf-8'\nerror=%s" % (s,ev))
-            if self.encoding!='utf-8':
-                s = u.decode(self.encoding)
-        else:
-            raise ValueError("EncodedWriter.write(%r) argument should be 'utf-8' string or unicode" % s)
-        self.append(s)
+                raise ValueError("String %r not encoded as 'utf-8'\nerror=%s" % (u,ev))
+        elif not isUnicode(u):
+            raise ValueError("EncodedWriter.write(%s) argument should be 'utf-8' bytes or str" % ascii(u))
+        self.append(u)
 
     def getvalue(self):
         r = ''.join(self)
@@ -194,7 +191,7 @@ class SVGCanvas:
                     )
         svgAttrs["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
         svgAttrs.update(kwds.pop('svgAttrs',{}))
-        for k,v in svgAttrs.iteritems():
+        for k,v in svgAttrs.items():
             self.svg.setAttribute(k,v)
 
         title = self.doc.createElement('title')
@@ -242,15 +239,19 @@ class SVGCanvas:
         writer = EncodedWriter(self.encoding,bom=self.bom)
         self.doc.writexml(writer,addindent="\t",newl="\n",encoding=self.encoding)
 
-        if type(fn) in types.StringTypes:
-            f = open(fn, 'w')
-        else:
+        if hasattr(fn,'write'):
             f = fn
+        else:
+            if isPy3:
+                f = open(fn, 'w',encoding=self.encoding)
+            else:
+                f = open(fn, 'w')
+
         svg = writer.getvalue()
         exd = self.extraXmlDecl
         if exd:
             svg = svg.replace('?>','?>'+exd)
-        f.write(svg)
+        f.write(svg if isPy3 else svg.encode(self.encoding))
         if f is not fn:
             f.close()
 
@@ -268,7 +269,7 @@ class SVGCanvas:
     def _formatStyle(self, include=[], exclude='',**kwds):
         style = self.style.copy()
         style.update(kwds)
-        keys = style.keys()
+        keys = list(style.keys())
         if include:
             keys = [k for k in keys if k in include]
         if exclude:
@@ -387,9 +388,9 @@ class SVGCanvas:
                     del style[k]
             svgAttrs = self.fontHacks[font] if font in self.fontHacks else {}
             if isinstance(font,RLString):
-                svgAttrs.update(font.svgAttrs.iteritems())
+                svgAttrs.update(iter(font.svgAttrs.items()))
             if svgAttrs:
-                for k,v in svgAttrs.iteritems():
+                for k,v in svgAttrs.items():
                     a = 'font-'+k
                     if a in TEXT_STYLES:
                         style[a] = v
@@ -407,7 +408,7 @@ class SVGCanvas:
     def rect(self, x1,y1, x2,y2, rx=8, ry=8, link_info=None, **_svgAttrs):
         "Draw a rectangle between x1,y1 and x2,y2."
 
-        if self.verbose: print "+++ SVGCanvas.rect"
+        if self.verbose: print("+++ SVGCanvas.rect")
 
         x = min(x1,x2)
         y = min(y1,y2)
@@ -439,7 +440,8 @@ class SVGCanvas:
         self.currGroup.appendChild(rect)
 
     def drawString(self, s, x, y, angle=0, link_info=None,**_svgAttrs):
-        if self.verbose: print "+++ SVGCanvas.drawString"
+        s = asNative(s)
+        if self.verbose: print("+++ SVGCanvas.drawString")
 
         if self._fillColor != None:
             self.setColor(self._fillColor)
@@ -462,7 +464,7 @@ class SVGCanvas:
             self.currGroup.appendChild(text)
 
     def drawCentredString(self, s, x, y, angle=0, text_anchor='middle', link_info=None):
-        if self.verbose: print "+++ SVGCanvas.drawCentredString"
+        if self.verbose: print("+++ SVGCanvas.drawCentredString")
 
         if self._fillColor != None:
             if not text_anchor in ['start', 'inherited']:
@@ -474,7 +476,7 @@ class SVGCanvas:
                 elif text_anchor=='numeric':
                     x -= numericXShift(text_anchor,s,textLen,self._font,self._fontSize)
                 else:
-                    raise ValueError, 'bad value for text_anchor ' + str(text_anchor)
+                    raise ValueError('bad value for text_anchor ' + str(text_anchor))
         self.drawString(x,y,text,angle=angle, link_info=link_info)
 
     def drawRightString(self, text, x, y, angle=0, link_info=None):
@@ -580,7 +582,7 @@ class SVGCanvas:
         if self._strokeColor != None:
             self.setColor(self._strokeColor)
             pairs = []
-            for i in xrange(len(points)):
+            for i in range(len(points)):
                 pairs.append("%f %f" % (points[i]))
             pts = ', '.join(pairs)
             polyline = transformNode(self.doc, "polygon",
@@ -609,7 +611,7 @@ class SVGCanvas:
         if self._strokeColor != None:
             self.setColor(self._strokeColor)
             pairs = []
-            for i in xrange(len(points)):
+            for i in range(len(points)):
                 pairs.append("%f %f" % (points[i]))
             pts = ', '.join(pairs)
             polyline = transformNode(self.doc, "polyline",
@@ -618,20 +620,20 @@ class SVGCanvas:
 
     ### groups ###
     def startGroup(self):
-        if self.verbose: print "+++ begin SVGCanvas.startGroup"
+        if self.verbose: print("+++ begin SVGCanvas.startGroup")
         currGroup, group = self.currGroup, transformNode(self.doc, "g", transform="")
         currGroup.appendChild(group)
         self.currGroup = group
-        if self.verbose: print "+++ end SVGCanvas.startGroup"
+        if self.verbose: print("+++ end SVGCanvas.startGroup")
         return currGroup
 
     def endGroup(self,currGroup):
-        if self.verbose: print "+++ begin SVGCanvas.endGroup"
+        if self.verbose: print("+++ begin SVGCanvas.endGroup")
         self.currGroup = currGroup
-        if self.verbose: print "+++ end SVGCanvas.endGroup"
+        if self.verbose: print("+++ end SVGCanvas.endGroup")
 
     def transform(self, a, b, c, d, e, f):
-        if self.verbose: print "!!! begin SVGCanvas.transform", a, b, c, d, e, f
+        if self.verbose: print("!!! begin SVGCanvas.transform", a, b, c, d, e, f)
         tr = self.currGroup.getAttribute("transform")
         t = 'matrix(%f, %f, %f, %f, %f, %f)' % (a,b,c,d,e,f)
         if (a, b, c, d, e, f) != (1, 0, 0, 1, 0, 0):
@@ -639,7 +641,7 @@ class SVGCanvas:
 
     def translate(self, x, y):
         # probably never used
-        print "!!! begin SVGCanvas.translate"
+        print("!!! begin SVGCanvas.translate")
         return
 
         tr = self.currGroup.getAttribute("transform")
@@ -648,7 +650,7 @@ class SVGCanvas:
 
     def scale(self, x, y):
         # probably never used
-        print "!!! begin SVGCanvas.scale"
+        print("!!! begin SVGCanvas.scale")
         return
 
         tr = self.groups[-1].getAttribute("transform")
@@ -686,7 +688,7 @@ class _SVGRenderer(Renderer):
         """This is the recursive method called for each node in the tree.
         """
 
-        if self.verbose: print "### begin _SVGRenderer.drawNode(%r)" % node
+        if self.verbose: print("### begin _SVGRenderer.drawNode(%r)" % node)
 
         self._canvas.comment('begin node %r'%node)
         color = self._canvas._color
@@ -714,7 +716,7 @@ class _SVGRenderer(Renderer):
                 setattr(self._canvas,self._restores[k],v)
         self._canvas.style = style
 
-        if self.verbose: print "### end _SVGRenderer.drawNode(%r)" % node
+        if self.verbose: print("### end _SVGRenderer.drawNode(%r)" % node)
 
     _restores = {'strokeColor':'_strokeColor','strokeWidth': '_lineWidth','strokeLineCap':'_lineCap',
                 'strokeLineJoin':'_lineJoin','fillColor':'_fillColor','fontName':'_font',
@@ -752,7 +754,7 @@ class _SVGRenderer(Renderer):
             return None
 
     def drawGroup(self, group):
-        if self.verbose: print "### begin _SVGRenderer.drawGroup"
+        if self.verbose: print("### begin _SVGRenderer.drawGroup")
 
         currGroup = self._canvas.startGroup()
         a, b, c, d, e, f = self._tracker.getState()['transform']
@@ -765,7 +767,7 @@ class _SVGRenderer(Renderer):
         self._canvas.transform(a, b, c, d, e, f)
         self._canvas.endGroup(currGroup)
 
-        if self.verbose: print "### end _SVGRenderer.drawGroup"
+        if self.verbose: print("### end _SVGRenderer.drawGroup")
 
     def drawRect(self, rect):
         link_info = self._get_link_info_dict(rect)
@@ -798,7 +800,7 @@ class _SVGRenderer(Renderer):
                 elif text_anchor=='numeric':
                     x -= numericXShift(text_anchor,text,textLen,font,fontSize)
                 else:
-                    raise ValueError, 'bad value for text_anchor ' + str(text_anchor)
+                    raise ValueError('bad value for text_anchor ' + str(text_anchor))
             self._canvas.drawString(text,x,y,link_info=self._get_link_info_dict(stringObj),**getattr(stringObj,'_svgAttrs',{}))
 
     def drawLine(self, line):
@@ -879,11 +881,11 @@ class _SVGRenderer(Renderer):
                 fontsize = delta.get('fontSize', self._canvas._fontSize)
                 self._canvas.setFont(fontname, fontsize)
 
-def test0(outdir='svgout'):
+def test(outDir='out-svg'):
     # print all drawings and their doc strings from the test
     # file
-    if not os.path.isdir(outdir):
-        os.mkdir(outdir)
+    if not os.path.isdir(outDir):
+        os.mkdir(outDir)
     #grab all drawings from the test module
     from reportlab.graphics import testshapes
     drawings = []
@@ -896,30 +898,24 @@ def test0(outdir='svgout'):
             docstring = eval('testshapes.' + funcname + '.__doc__')
             drawings.append((drawing, docstring))
 
-    # return
 
     i = 0
     for (d, docstring) in drawings:
-        filename = outdir + os.sep + 'renderSVG_%d.svg' % i
+        filename = os.path.join(outDir,'renderSVG_%d.svg' % i)
         drawToFile(d, filename)
-        # print 'saved', filename
         i += 1
 
-def test1():
     from reportlab.graphics.testshapes import getDrawing01
     d = getDrawing01()
-    drawToFile(d, "svgout/test.svg")
+    drawToFile(d, os.path.join(outDir,"test.svg"))
 
-def test2():
     from reportlab.lib.corp import RL_CorpLogo
     from reportlab.graphics.shapes import Drawing
 
     rl = RL_CorpLogo()
     d = Drawing(rl.width,rl.height)
     d.add(rl)
-    drawToFile(d, "svgout/corplogo.svg")
+    drawToFile(d, os.path.join(outDir,"corplogo.svg"))
 
 if __name__=='__main__':
-    test0()
-    test1()
-    test2()
+    test()

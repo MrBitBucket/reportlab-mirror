@@ -12,7 +12,8 @@ Progress Reports:
 import string
 from types import *
 from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor, black, white, _CMYK_black, _CMYK_white
-from reportlab.lib.utils import fp_str
+from reportlab.lib.utils import isBytes, isStr, asUnicode
+from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase import pdfmetrics
 
 class _PDFColorSetter:
@@ -78,7 +79,7 @@ class _PDFColorSetter:
                 self._code.append('%s k' % fp_str(aColor))
             else:
                 raise ValueError('Unknown color %r' % aColor)
-        elif isinstance(aColor,basestring):
+        elif isStr(aColor):
             self.setFillColor(toColor(aColor))
         else:
             raise ValueError('Unknown color %r' % aColor)
@@ -114,7 +115,7 @@ class _PDFColorSetter:
                 self._code.append('%s K' % fp_str(aColor))
             else:
                 raise ValueError('Unknown color %r' % aColor)
-        elif isinstance(aColor,basestring):
+        elif isStr(aColor):
             self.setStrokeColor(toColor(aColor))
         else:
             raise ValueError('Unknown color %r' % aColor)
@@ -187,7 +188,7 @@ class PDFTextObject(_PDFColorSetter):
         self._code.append('ET')
         if self._clipping:
             self._code.append('%d Tr' % (self._textRenderMode^4))
-        return string.join(self._code, ' ')
+        return ' '.join(self._code)
 
     def setTextOrigin(self, x, y):
         if self._canvas.bottomup:
@@ -224,11 +225,11 @@ class PDFTextObject(_PDFColorSetter):
         # Check if we have a previous move cursor call, and combine
         # them if possible.
         if self._code and self._code[-1][-3:]==' Td':
-            L = string.split(self._code[-1])
+            L = self._code[-1].split()
             if len(L)==3:
                 del self._code[-1]
             else:
-                self._code[-1] = string.join(L[:-4])
+                self._code[-1] = ''.join(L[:-4])
 
             # Work out the last movement
             lastDx = float(L[-3])
@@ -383,10 +384,10 @@ class PDFTextObject(_PDFColorSetter):
         else:
             #convert to T1  coding
             fc = font
-            if not isinstance(text,unicode):
+            if isBytes(text):
                 try:
                     text = text.decode('utf8')
-                except UnicodeDecodeError,e:
+                except UnicodeDecodeError as e:
                     i,j = e.args[2:4]
                     raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[max(i-10,0):i],text[i:j],text[j:j+10]),)))
 
@@ -431,10 +432,10 @@ class PDFTextObject(_PDFColorSetter):
         since this may be indented, by default it trims whitespace
         off each line and from the beginning; set trim=0 to preserve
         whitespace."""
-        if isinstance(stuff,basestring):
-            lines = string.split(string.strip(stuff), '\n')
+        if isStr(stuff):
+            lines = '\n'.split(asUnicode(stuff).strip())
             if trim==1:
-                lines = map(string.strip,lines)
+                lines = [s.strip() for s in lines]
         elif isinstance(stuff,(tuple,list)):
             lines = stuff
         else:

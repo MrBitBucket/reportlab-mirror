@@ -1,5 +1,8 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2013
 #see license.txt for license details
+import __main__
+__main__._rl_testing=True
+del __main__
 __version__='''$Id$'''
 __doc__="""Provides support for the test suite.
 
@@ -9,9 +12,13 @@ can always be imported, and so that individual tests need to import
 nothing more than "reportlab.whatever..."
 """
 
-import sys, os, string, fnmatch, copy, re
-from ConfigParser import ConfigParser
+import sys, os, fnmatch, re
+try:
+    from configparser import ConfigParser
+except ImportError:
+    from ConfigParser import ConfigParser
 import unittest
+from reportlab.lib.utils import isCompactDistro, __loader__, rl_isdir, asUnicode
 
 # Helper functions.
 def isWritable(D):
@@ -85,7 +92,7 @@ def printLocation(depth=1):
     if sys._getframe(depth).f_locals.get('__name__')=='__main__':
         outDir = outputfile('')
         if outDir!=_OUTDIR:
-            print 'Logs and output files written to folder "%s"' % outDir
+            print('Logs and output files written to folder "%s"' % outDir)
 
 def makeSuiteForClasses(*classes):
     "Return a test suite with tests loaded from provided classes."
@@ -106,7 +113,6 @@ def getCVSEntries(folder, files=1, folders=0):
     """
 
     join = os.path.join
-    split = string.split
 
     # If CVS subfolder doesn't exist return empty list.
     try:
@@ -119,7 +125,7 @@ def getCVSEntries(folder, files=1, folders=0):
     for line in f.readlines():
         if folders and line[0] == 'D' \
            or files and line[0] != 'D':
-            entry = split(line, '/')[1]
+            entry = line.split('/')[1]
             if entry:
                 allEntries.append(join(folder, entry))
 
@@ -139,7 +145,7 @@ class ExtConfigParser(ConfigParser):
 
         # This seems to allow for newlines inside values
         # of the config file, but be careful!!
-        val = string.replace(value, '\n', '')
+        val = value.replace('\n', '')
 
         if self.pat.match(val):
             return eval(val)
@@ -161,13 +167,12 @@ class GlobDirectoryWalker:
             self.stack = [directory]
             self.files = []
         else:
-            from reportlab.lib.utils import isCompactDistro, __loader__, rl_isdir
             if not isCompactDistro() or not __loader__ or not rl_isdir(directory):
                 raise ValueError('"%s" is not a directory' % directory)
             self.directory = directory[len(__loader__.archive)+len(os.sep):]
             pfx = self.directory+os.sep
             n = len(pfx)
-            self.files = map(lambda x, n=n: x[n:],filter(lambda x,pfx=pfx: x.startswith(pfx),__loader__._files.keys()))
+            self.files = list(map(lambda x, n=n: x[n:],list(filter(lambda x,pfx=pfx: x.startswith(pfx),list(__loader__._files.keys())))))
             self.stack = []
 
     def __getitem__(self, index):
@@ -216,7 +221,7 @@ class RestrictedGlobDirectoryWalker(GlobDirectoryWalker):
         "Filters all items from files matching patterns to ignore."
 
         indicesToDelete = []
-        for i in xrange(len(files)):
+        for i in range(len(files)):
             f = files[i]
             for p in self.ignoredPatterns:
                 if fnmatch.fnmatch(f, p):
@@ -243,7 +248,7 @@ class CVSGlobDirectoryWalker(GlobDirectoryWalker):
         cvsFiles = getCVSEntries(folder)
         if cvsFiles:
             indicesToDelete = []
-            for i in xrange(len(files)):
+            for i in range(len(files)):
                 f = files[i]
                 if join(folder, f) not in cvsFiles:
                     indicesToDelete.append(i)
@@ -273,14 +278,11 @@ class SecureTestCase(unittest.TestCase):
 
     def setUp(self):
         "Remember sys.path and current working directory."
-
-        self._initialPath = copy.copy(sys.path)
+        self._initialPath = sys.path[:]
         self._initialWorkDir = os.getcwd()
-
 
     def tearDown(self):
         "Restore previous sys.path and working directory."
-
         sys.path = self._initialPath
         os.chdir(self._initialWorkDir)
 
@@ -327,7 +329,13 @@ class ScriptThatMakesFileTest(unittest.TestCase):
         p = os.popen(fmt % (sys.executable,self.scriptName),'r')
         out = p.read()
         if self.verbose:
-            print out
+            print(out)
         status = p.close()
         assert os.path.isfile(self.outFileName), "File %s not created!" % self.outFileName
 
+def equalStrings(a,b,enc='utf8'):
+    return a==b if type(a)==type(b) else asUnicode(a,enc)==asUnicode(b,enc)
+
+def eqCheck(r,x):
+    if r!=x:
+        print('Strings unequal\nexp: %s\ngot: %s' % (ascii(x),ascii(r)))

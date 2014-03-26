@@ -343,11 +343,11 @@ LIST_STYLE = TableStyle(
     """, styleSheet['BodyText']))
 
 
-    t = Table([[u'Corporate Assets','Amount'],
+    t = Table([['Corporate Assets','Amount'],
                ['Fixed Assets','1,234,567.89'],
                ['Company Vehicle','1,234.8901'],
                ['Petty Cash','42'],
-               [u'Intellectual Property\u00ae','(42,078,231.56)'],
+               ['Intellectual Property\u00ae','(42,078,231.56)'],
                ['Overdraft','(12,345)'],
                ['Boardroom Flat Screen','60 inches'],
                ['Net Position','Deep Sh*t.Really']
@@ -757,7 +757,7 @@ LIST_STYLE = TableStyle(
     sty = [ ('GRID',(0,0),(-1,-1),1,colors.green),
             ('BOX',(0,0),(-1,-1),2,colors.red),
            ]
-    data = [[str(i), Paragraph("xx "* (i%10), styleSheet["BodyText"]), Paragraph("blah "*(i%40), styleSheet["BodyText"])] for i in xrange(500)]
+    data = [[str(i), Paragraph("xx "* (i%10), styleSheet["BodyText"]), Paragraph("blah "*(i%40), styleSheet["BodyText"])] for i in range(500)]
     t=LongTable(data, style=sty, colWidths = [50,100,200])
     lst.append(t)
 
@@ -766,7 +766,7 @@ LIST_STYLE = TableStyle(
     lst.append(Paragraph('Yian Hong\'s Bug Case (should not blow up)', styleSheet['Heading2']))
     data = ([['Col1', 'Col2', 'Col3', 'Col4', 'Col5']]+
                 [['01', Paragraph('This is cell one that contains a paragraph.', styleSheet['Normal']), '02', '03', '04']
-                    for i in xrange(50)])
+                    for i in range(50)])
 
     t = Table(data, ['20%']*5, repeatRows=1)
     t.setStyle(TableStyle([

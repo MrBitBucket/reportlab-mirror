@@ -27,12 +27,13 @@ higher level components).
 import os
 from copy import deepcopy, copy
 from reportlab.lib.colors import red, gray, lightgrey
-from reportlab.lib.utils import fp_str
+from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 from reportlab.lib.styles import _baseFontName
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions
+import collections
 
 __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
         'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
@@ -98,7 +99,7 @@ class Flowable:
             elif a in ('RIGHT',TA_RIGHT):
                 x += sW
             elif a not in ('LEFT',TA_LEFT):
-                raise ValueError, "Bad hAlign value "+str(a)
+                raise ValueError("Bad hAlign value "+str(a))
         return x
 
     def drawOn(self, canvas, x, y, _sW=0):
@@ -491,7 +492,7 @@ class Image(Flowable):
 
     def identity(self,maxLen=None):
         r = Flowable.identity(self,maxLen)
-        if r[-4:]=='>...' and isinstance(self.filename,basestring):
+        if r[-4:]=='>...' and isinstance(self.filename,str):
             r = "%s filename=%s>" % (r[:-4],self.filename)
         return r
 
@@ -545,7 +546,7 @@ class CondPageBreak(Spacer):
         if availHeight<self.height:
             f = self._doctemplateAttr('frame')
             if not f: return availWidth, availHeight
-            from doctemplate import FrameBreak
+            from reportlab.platypus.doctemplate import FrameBreak
             f.add_generated_content(FrameBreak)
         return 0, 0
 
@@ -575,11 +576,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
                 if isinstance(f,Indenter):
                     availWidth -= f.left+f.right
                 continue
-            try:
-                w,h = copy(f).wrapOn(canv,availWidth,0xfffffff)
-            except:
-                print repr(f)
-                raise
+            w,h = f.wrapOn(canv,availWidth,0xfffffff)
             if dims is not None: dims.append((w,h))
             if cframe:
                 _addGeneratedContent(F,cframe)
@@ -610,7 +607,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
 def _flowableSublist(V):
     "if it isn't a list or tuple, wrap it in a list"
     if not isinstance(V,(list,tuple)): V = V is not None and [V] or []
-    from doctemplate import LCActionFlowable
+    from reportlab.platypus.doctemplate import LCActionFlowable
     assert not [x for x in V if isinstance(x,LCActionFlowable)],'LCActionFlowables not allowed in sublists'
     return V
 
@@ -638,7 +635,7 @@ class KeepTogether(_ContainerSpace,Flowable):
 
     def __repr__(self):
         f = self._content
-        L = map(repr,f)
+        L = list(map(repr,f))
         L = "\n"+"\n".join(L)
         L = L.replace("\n", "\n  ")
         return "%s(%s,maxHeight=%s)" % (self.__class__.__name__,L,self._maxHeight)
@@ -660,10 +657,10 @@ class KeepTogether(_ContainerSpace,Flowable):
         C1 = (self._H0>aH) or C0 and atTop
         if C0 or C1:
             if C0:
-                from doctemplate import FrameBreak
+                from reportlab.platypus.doctemplate import FrameBreak
                 A = FrameBreak
             else:
-                from doctemplate import NullActionFlowable
+                from reportlab.platypus.doctemplate import NullActionFlowable
                 A = NullActionFlowable
             S.insert(0,A())
         return S
@@ -686,7 +683,7 @@ class Macro(Flowable):
     def wrap(self, availWidth, availHeight):
         return (0,0)
     def draw(self):
-        exec self.command in globals(), {'canvas':self.canv}
+        exec(self.command, globals(), {'canvas':self.canv})
 
 class CallerMacro(Flowable):
     '''
@@ -839,7 +836,7 @@ def cdeepcopy(obj):
 class _Container(_ContainerSpace):  #Abstract some common container like behaviour
     def drawOn(self, canv, x, y, _sW=0, scale=1.0, content=None, aW=None):
         '''we simulate being added to a frame'''
-        from doctemplate import ActionFlowable, Indenter
+        from reportlab.platypus.doctemplate import ActionFlowable, Indenter
         x0 = x
         y0 = y
         pS = 0
@@ -924,10 +921,10 @@ class PTOContainer(_Container,Flowable):
         n = len(C)
         I2W = {}
         dLeft = dRight = 0
-        for x in xrange(n):
+        for x in range(n):
             c = C[x]
             I = c._ptoinfo
-            if I not in I2W.keys():
+            if I not in list(I2W.keys()):
                 T = I.trailer
                 Hdr = I.header
                 tW, tH = _listWrapOn(T, availWidth, self.canv)
@@ -1061,7 +1058,7 @@ class KeepInFrame(_Container,Flowable):
                 getattr(self,'maxHeight','')and (' maxHeight=%s' % fp_str(getattr(self,'maxHeight')))or '')
 
     def wrap(self,availWidth,availHeight):
-        from doctemplate import LayoutError
+        from reportlab.platypus.doctemplate import LayoutError
         mode = self.mode
         maxWidth = float(min(self.maxWidth or availWidth,availWidth))
         maxHeight = float(min(self.maxHeight or availHeight,availHeight))
@@ -1273,7 +1270,7 @@ class ImageAndFlowables(_Container,Flowable):
                 return W, availHeight, F[:i],F[i:]
             H += h
             if H>availHeight:
-                from paragraph import Paragraph
+                from reportlab.platypus.paragraph import Paragraph
                 aH = availHeight-(H-h)
                 if isinstance(f,(Paragraph,Preformatted)):
                     leading = f.style.leading
@@ -1281,7 +1278,7 @@ class ImageAndFlowables(_Container,Flowable):
                     if nH<aH: nH += leading
                     availHeight += nH-aH
                     aH = nH
-                S = f.splitOn(canv,availWidth,aH)
+                S = cdeepcopy(f).splitOn(canv,availWidth,aH)
                 if not S:
                     return W, availHeight, F[:i],F[i:]
                 else:
@@ -1403,9 +1400,9 @@ def _bulletFormat(value,type='1',format=None):
         s = _type2formatter[type](int(value))
 
     if format:
-        if isinstance(format,basestring):
+        if isinstance(format,str):
             s = format % s
-        elif callable(format):
+        elif isinstance(format, collections.Callable):
             s = format(s)
         else:
             raise ValueError('unexpected BulletDrawer format %r' % format)
@@ -1625,7 +1622,7 @@ class ListFlowable(_Container,Flowable):
                 raise ValueError('%s style argument not a ListStyle' % self.__class__.__name__)
             self.style = style
 
-        for k,v in ListStyle.defaults.iteritems():
+        for k,v in ListStyle.defaults.items():
             setattr(self,'_'+k,kwds.get(k,getattr(style,k,v)))
         if start is None:
             start = getattr(self,'_start',None)
@@ -1886,7 +1883,7 @@ class DocPara(DocAssign):
     def func(self):
         expr = self.expr
         if expr:
-            if not isinstance(expr,(str,unicode)): expr = str(expr)
+            if not isinstance(expr,str): expr = str(expr)
             return self._doctemplateAttr('docEval')(expr)
 
     def add_content(self,*args):

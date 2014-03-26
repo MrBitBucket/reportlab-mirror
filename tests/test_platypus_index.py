@@ -104,7 +104,7 @@ class IndexTestCase(unittest.TestCase):
 
 
             #test ampersand in index term
-            txt = '\nMarks &amp; Spencer - purveyors of fine groceries, underwear and ampersands - should have their initials displayed however they were input.\n<index item="M&S,groceries"/><index item="M&S,underwear"/><index item="M&amp;S,ampersands"/>'
+            txt = '\nMarks &amp; Spencer - purveyors of fine groceries, underwear and ampersands - should have their initials displayed however they were input.\n<index item="M&amp;S,groceries"/><index item="M&amp;S,underwear"/><index item="M&amp;S,ampersands"/>'
             para = Paragraph(txt, makeBodyStyle())
             story.append(para)
         

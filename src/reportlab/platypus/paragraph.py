@@ -3,25 +3,25 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/paragraph.py
 __version__=''' $Id$ '''
 __doc__='''The standard paragraph implementation'''
-from string import join, whitespace
+from string import whitespace
 from operator import truth
-from types import StringType, ListType
 from unicodedata import category
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont, getAscentDescent
 from reportlab.platypus.paraparser import ParaParser
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
-from reportlab.lib.utils import _className
 from reportlab.lib.geomutils import normalizeTRBL
 from reportlab.lib.textsplit import wordSplit, ALL_CANNOT_START
 from copy import deepcopy
 from reportlab.lib.abag import ABag
 from reportlab.rl_config import platypus_link_underline
 from reportlab import rl_config
+from reportlab.lib.utils import _className, isBytes, unicodeT, bytesT, strTypes
+from reportlab.lib.rl_accel import sameFrag
 import re
 
-#on UTF8 branch, split and strip must be unicode-safe!
+#on UTF8/py33 branch, split and strip must be unicode-safe!
 #thanks to Dirk Holtwick for helpful discussions/insight
 #on this one
 _wsc = ''.join((
@@ -59,15 +59,13 @@ _wsc = ''.join((
 _wsc_re_split=re.compile('[%s]+'% re.escape(_wsc)).split
 
 def split(text, delim=None):
-    if type(text) is str: text = text.decode('utf8')
-    if type(delim) is str: delim = delim.decode('utf8')
-    if delim is None and u'\xa0' in text:
-        return [uword.encode('utf8') for uword in _wsc_re_split(text)]
-    return [uword.encode('utf8') for uword in text.split(delim)]
+    if isBytes(text): text = text.decode('utf8')
+    if delim is not None and isBytes(delim): delim = delim.decode('utf8')
+    return [uword for uword in (_wsc_re_split(text) if delim is None and u'\xa0' in text else text.split(delim))]
 
 def strip(text):
-    if type(text) is str: text = text.decode('utf8')
-    return text.strip(_wsc).encode('utf8')
+    if isBytes(text): text = text.decode('utf8')
+    return text.strip(_wsc)
 
 class ParaLines(ABag):
     """
@@ -92,14 +90,14 @@ class FragLine(ABag):
     """
 
 def _lineClean(L):
-    return join(filter(truth,split(strip(L))))
+    return ' '.join(list(filter(truth,split(strip(L)))))
 
 def cleanBlockQuotedText(text,joiner=' '):
     """This is an internal utility which takes triple-
     quoted text form within the document and returns
     (hopefully) the paragraph the user intended originally."""
-    L=filter(truth,map(_lineClean, split(text, '\n')))
-    return join(L, joiner)
+    L=list(filter(truth,list(map(_lineClean, split(text, '\n')))))
+    return joiner.join(L)
 
 def setXPos(tx,dx):
     if dx>1e-6 or dx<-1e-6:
@@ -107,33 +105,33 @@ def setXPos(tx,dx):
 
 def _leftDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,offset)
-    tx._textOut(join(words),1)
+    tx._textOut(' '.join(words),1)
     setXPos(tx,-offset)
     return offset
 
 def _centerDrawParaLine( tx, offset, extraspace, words, last=0):
     m = offset + 0.5 * extraspace
     setXPos(tx,m)
-    tx._textOut(join(words),1)
+    tx._textOut(' '.join(words),1)
     setXPos(tx,-m)
     return m
 
 def _rightDrawParaLine( tx, offset, extraspace, words, last=0):
     m = offset + extraspace
     setXPos(tx,m)
-    tx._textOut(join(words),1)
+    tx._textOut(' '.join(words),1)
     setXPos(tx,-m)
     return m
 
 def _nbspCount(w):
-    if isinstance(w,str):
-        return w.count('\xc2\xa0')
+    if isBytes(w):
+        return w.count(b'\xc2\xa0')
     else:
         return w.count(u'\xa0')
 
 def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,offset)
-    text  = join(words)
+    text  = ' '.join(words)
     if last or extraspace<=1e-8:
         #last one, left align
         tx._textOut(text,1)
@@ -396,21 +394,6 @@ def _justifyDrawParaLineX( tx, offset, line, last=0):
         _putFragLine(offset, tx, line, last, 'justify') #no space modification
     setXPos(tx,-offset)
 
-try:
-    from _rl_accel import _sameFrag
-except ImportError:
-    try:
-        from reportlab.lib._rl_accel import _sameFrag
-    except ImportError:
-        #if you modify this you need to modify _rl_accel RGB
-        def _sameFrag(f,g):
-            'returns 1 if two ParaFrags map out the same'
-            if (hasattr(f,'cbDefn') or hasattr(g,'cbDefn')
-                    or hasattr(f,'lineBreak') or hasattr(g,'lineBreak')): return 0
-            for a in ('fontName', 'fontSize', 'textColor', 'rise', 'underline', 'strike', 'link', "backColor"):
-                if getattr(f,a,None)!=getattr(g,a,None): return 0
-            return 1
-
 def _getFragWords(frags,maxWidth=None):
     ''' given a Parafrag list return a list of fragwords
         [[size, (f00,w00), ..., (f0n,w0n)],....,[size, (fm0,wm0), ..., (f0n,wmn)]]
@@ -489,13 +472,10 @@ def _fragWordIter(w):
         if hasattr(f,'cbDefn'):
             yield f, getattr(f,'width'), s
         elif s:
-            if isinstance(s,str):
+            if isBytes(s):
                 s = s.decode('utf8')    #only encoding allowed
-                for c in s:
-                    yield f, stringWidth(c,f.fontName, f.fontSize), c.encode('utf8')
-            else:
-                for c in s:
-                    yield f, stringWidth(c,f.fontName, f.fontSize), c
+            for c in s:
+                yield f, stringWidth(c,f.fontName, f.fontSize), c
         else:
             yield f, 0, s
 
@@ -516,7 +496,7 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     maxlineno = len(maxWidths)-1
     W = []
     lineWidth = 0
-    fragText = ''
+    fragText = u''
     wordWidth = 0
     f = w[1][0]
     for g,cw,c in _fragWordIter(w):
@@ -534,7 +514,7 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
                 maxWidth = maxWidths[min(maxlineno,lineno)]
                 W = []
                 newLineWidth = wordWidth = cw
-            fragText = ''
+            fragText = u''
             f = g
             wordWidth = 0
         wordWidth += cw
@@ -545,10 +525,10 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     R.append(W)
     return R
 
-class _SplitText(str):
+class _SplitText(unicodeT):
     pass
 
-def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding):
+def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding='utf8'):
     '''
     split w into words that fit in lines of length
     maxWidth
@@ -563,33 +543,20 @@ def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding):
     maxlineno = len(maxWidths)-1
     lineWidth = 0
     wordText = u''
-    if isinstance(w,str):
-        w = w.decode('utf8')
-        for c in w:
-            cw = stringWidth(c,fontName,fontSize,encoding)
-            newLineWidth = lineWidth+cw
-            if newLineWidth>maxWidth:
-                R.append(_SplitText(wordText.encode(encoding)))
-                lineno += 1
-                maxWidth = maxWidths[min(maxlineno,lineno)]
-                newLineWidth = cw
-                wordText = u''
-            wordText += c
-            lineWidth = newLineWidth
-        R.append(_SplitText(wordText.encode(encoding)))
-    else:
-        for c in w:
-            cw = stringWidth(c,fontName,fontSize,encoding)
-            newLineWidth = lineWidth+cw
-            if newLineWidth>maxWidth:
-                R.append(_SplitText(wordText))
-                lineno += 1
-                maxWidth = maxWidths[min(maxlineno,lineno)]
-                newLineWidth = cw
-                wordText = u''
-            wordText += c
-            lineWidth = newLineWidth
-        R.append(_SplitText(wordText))
+    if isBytes(w):
+        w = w.decode(encoding)
+    for c in w:
+        cw = stringWidth(c,fontName,fontSize,encoding)
+        newLineWidth = lineWidth+cw
+        if newLineWidth>maxWidth:
+            R.append(_SplitText(wordText))
+            lineno += 1
+            maxWidth = maxWidths[min(maxlineno,lineno)]
+            newLineWidth = cw
+            wordText = u''
+        wordText += c
+        lineWidth = newLineWidth
+    R.append(_SplitText(wordText))
     return R
 
 def _split_blParaSimple(blPara,start,stop):
@@ -623,7 +590,7 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style):
     tx2 = canvas.beginText(style.bulletIndent, cur_y+getattr(style,"bulletOffsetY",0))
     tx2.setFont(style.bulletFontName, style.bulletFontSize)
     tx2.setFillColor(hasattr(style,'bulletColor') and style.bulletColor or style.textColor)
-    if isinstance(bulletText,basestring):
+    if isinstance(bulletText,strTypes):
         tx2.textOut(bulletText)
     else:
         for f in bulletText:
@@ -642,7 +609,7 @@ def _handleBulletWidth(bulletText,style,maxWidths):
     '''work out bullet width and adjust maxWidths[0] if neccessary
     '''
     if bulletText:
-        if isinstance(bulletText,basestring):
+        if isinstance(bulletText,strTypes):
             bulletWidth = stringWidth( bulletText, style.bulletFontName, style.bulletFontSize)
         else:
             #it's a list of fragments
@@ -715,13 +682,11 @@ def splitLines0(frags,widths):
 
 def _do_under_line(i, t_off, ws, tx, lm=-0.125):
     y = tx.XtraState.cur_y - i*tx.XtraState.style.leading + lm*tx.XtraState.f.fontSize
-    textlen = tx._canvas.stringWidth(join(tx.XtraState.lines[i][1]), tx._fontname, tx._fontsize)
+    textlen = tx._canvas.stringWidth(' '.join(tx.XtraState.lines[i][1]), tx._fontname, tx._fontsize)
     tx._canvas.line(t_off, y, t_off+textlen+ws, y)
 
 _scheme_re = re.compile('^[a-zA-Z][-+a-zA-Z0-9]+$')
 def _doLink(tx,link,rect):
-    if isinstance(link,unicode):
-        link = link.encode('utf8')
     parts = link.split(':',1)
     scheme = len(parts)==2 and parts[0].lower() or ''
     if _scheme_re.match(scheme) and scheme!='document':
@@ -738,7 +703,7 @@ def _do_link_line(i, t_off, ws, tx):
     xs = tx.XtraState
     leading = xs.style.leading
     y = xs.cur_y - i*leading - xs.f.fontSize/8.0 # 8.0 factor copied from para.py
-    text = join(xs.lines[i][1])
+    text = ' '.join(xs.lines[i][1])
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
     _doLink(tx, xs.link, (t_off, y, t_off+textlen+ws, y+leading))
 
@@ -799,11 +764,11 @@ def textTransformFrags(frags,style):
     if tt:
         tt=tt.lower()
         if tt=='lowercase':
-            tt = unicode.lower
+            tt = unicodeT.lower
         elif tt=='uppercase':
-            tt = unicode.upper
+            tt = unicodeT.upper
         elif  tt=='capitalize':
-            tt = unicode.title
+            tt = unicodeT.title
         elif tt=='none':
             return
         else:
@@ -811,13 +776,12 @@ def textTransformFrags(frags,style):
         n = len(frags)
         if n==1:
             #single fragment the easy case
-            frags[0].text = tt(frags[0].text.decode('utf8')).encode('utf8')
-        elif tt is unicode.title:
+            frags[0].text = tt(frags[0].text)
+        elif tt is unicodeT.title:
             pb = True
             for f in frags:
-                t = f.text
-                if not t: continue
-                u = t.decode('utf8')
+                u = f.text
+                if not u: continue
                 if u.startswith(u' ') or pb:
                     u = tt(u)
                 else:
@@ -825,17 +789,17 @@ def textTransformFrags(frags,style):
                     if i>=0:
                         u = u[:i]+tt(u[i:])
                 pb = u.endswith(u' ')
-                f.text = u.encode('utf8')
+                f.text = u
         else:
             for f in frags:
-                t = f.text
-                if not t: continue
-                f.text = tt(t.decode('utf8')).encode('utf8')
+                u = f.text
+                if not u: continue
+                f.text = tt(u)
 
-class cjkU(unicode):
+class cjkU(unicodeT):
     '''simple class to hold the frag corresponding to a str'''
     def __new__(cls,value,frag,encoding):
-        self = unicode.__new__(cls,value)
+        self = unicodeT.__new__(cls,value)
         self._frag = frag
         if hasattr(frag,'cbDefn'):
             w = getattr(frag.cbDefn,'width',0)
@@ -865,7 +829,7 @@ def makeCJKParaLine(U,maxWidth,widthUsed,extraSpace,lineBreak,calcBounds):
         maxSize = max(maxSize,fontSize)
         maxAscent = max(maxAscent,ascent)
         minDescent = min(minDescent,descent)
-        if not _sameFrag(f0,f):
+        if not sameFrag(f0,f):
             f0=f0.clone()
             f0.text = u''.join(CW)
             words.append(f0)
@@ -884,7 +848,7 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
     U = []  #get a list of single glyphs with their widths etc etc
     for f in frags:
         text = f.text
-        if not isinstance(text,unicode):
+        if isBytes(text):
             text = text.decode(encoding)
         if text:
             U.extend([cjkU(t,f,encoding) for t in text])
@@ -921,13 +885,13 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
                     #  - reversion to Kanji (which would be a good split point)
                     #  - in the worst case, roughly half way back along the line
                     limitCheck = (lineStartPos+i)>>1        #(arbitrary taste issue)
-                    for j in xrange(i-1,limitCheck,-1):
+                    for j in range(i-1,limitCheck,-1):
                         uj = U[j]
                         if uj and category(uj)=='Zs' or ord(uj)>=0x3000:
                             k = j+1
                             if k<i:
                                 j = k+1
-                                extraSpace += sum(U[ii].width for ii in xrange(j,i))
+                                extraSpace += sum(U[ii].width for ii in range(j,i))
                                 w = U[k].width
                                 u = U[k]
                                 i = j
@@ -1020,14 +984,13 @@ class Paragraph(Flowable):
     def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, encoding='utf8'):
         self.caseSensitive = caseSensitive
         self.encoding = encoding
-
         self._setup(text, style, bulletText or getattr(style,'bulletText',None), frags, cleanBlockQuotedText)
 
 
     def __repr__(self):
         n = self.__class__.__name__
         L = [n+"("]
-        keys = self.__dict__.keys()
+        keys = list(self.__dict__.keys())
         for k in keys:
             L.append('%s: %s' % (repr(k).replace("\n", " ").replace("  "," "),repr(getattr(self, k)).replace("\n", " ").replace("  "," ")))
         L.append(") #"+n)
@@ -1042,12 +1005,8 @@ class Paragraph(Flowable):
         if frags is None:
             text = cleaner(text)
             _parser = ParaParser()
-            try:
-                _parser.caseSensitive = self.caseSensitive
-                style, frags, bulletTextFrags = _parser.parse(text,style)
-            finally:
-                if _parser.parser:
-                    _parser.close()
+            _parser.caseSensitive = self.caseSensitive
+            style, frags, bulletTextFrags = _parser.parse(text,style)
             if frags is None:
                 raise ValueError("xml parser error (%s) in paragraph beginning\n'%s'"\
                     % (_parser.errors[0],text[:min(30,len(text))]))
@@ -1113,7 +1072,7 @@ class Paragraph(Flowable):
         else:
             words = _getFragWords(frags)
             func  = lambda x: x[0]
-        return max(map(func,words))
+        return max(list(map(func,words)))
 
     def _get_split_blParaFunc(self):
         return self.blPara.kind==0 and _split_blParaSimple or _split_blParaHard
@@ -1363,7 +1322,7 @@ class Paragraph(Flowable):
                         g = f.clone()
                         words = [g]
                         g.text = nText
-                    elif not _sameFrag(g,f):
+                    elif not sameFrag(g,f):
                         if currentWidth>0 and ((nText!='' and nText[0]!=' ') or hasattr(f,'cbDefn')):
                             if hasattr(g,'cbDefn'):
                                 i = len(words)-1
@@ -1637,7 +1596,7 @@ class Paragraph(Flowable):
                     if noJustifyLast and nLines==1 and style.endDots and dpl!=_rightDrawParaLine: _do_dots(0, dx, ws, xs, tx, dpl)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
-                    for i in xrange(1, nLines):
+                    for i in range(1, nLines):
                         ws = lines[i][0]
                         t_off = dpl( tx, _offsets[i], ws, lines[i][1], noJustifyLast and i==lim)
                         dx = t_off+leftIndent
@@ -1647,7 +1606,7 @@ class Paragraph(Flowable):
                         if link: _do_link_line(i, dx, ws, tx)
                         if noJustifyLast and i==lim and style.endDots and dpl!=_rightDrawParaLine: _do_dots(i, dx, ws, xs, tx, dpl)
                 else:
-                    for i in xrange(1, nLines):
+                    for i in range(1, nLines):
                         dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
             else:
                 f = lines[0]
@@ -1700,7 +1659,7 @@ class Paragraph(Flowable):
                 _do_post_text(tx)
 
                 #now the middle of the paragraph, aligned with the left margin which is our origin.
-                for i in xrange(1, nLines):
+                for i in range(1, nLines):
                     f = lines[i]
                     dpl( tx, _offsets[i], f, noJustifyLast and i==lim)
                     _do_post_text(tx)
@@ -1717,7 +1676,7 @@ class Paragraph(Flowable):
             for frag in frags:
                 if hasattr(frag, 'text'):
                     plains.append(frag.text)
-            return join(plains, '')
+            return ''.join(plains)
         elif identify:
             text = getattr(self,'text',None)
             if text is None: text = repr(self)
@@ -1735,12 +1694,13 @@ class Paragraph(Flowable):
             func = lambda frag, w=self.width: w - frag.extraSpace
         else:
             func = lambda frag, w=self.width: w - frag[0]
-        return map(func,self.blPara.lines)
+        return list(map(func,self.blPara.lines))
 
 if __name__=='__main__':    #NORUNTESTS
     def dumpParagraphLines(P):
-        print 'dumpParagraphLines(<Paragraph @ %d>)' % id(P)
+        print('dumpParagraphLines(<Paragraph @ %d>)' % id(P))
         lines = P.blPara.lines
+        outw = sys.stdout.write
         for l,line in enumerate(lines):
             line = lines[l]
             if hasattr(line,'words'):
@@ -1748,10 +1708,10 @@ if __name__=='__main__':    #NORUNTESTS
             else:
                 words = line[1]
             nwords = len(words)
-            print 'line%d: %d(%s)\n  ' % (l,nwords,str(getattr(line,'wordCount','Unknown'))),
-            for w in xrange(nwords):
-                print "%d:'%s'"%(w,getattr(words[w],'text',words[w])),
-            print
+            outw('line%d: %d(%s)\n  ' % (l,nwords,str(getattr(line,'wordCount','Unknown'))))
+            for w in range(nwords):
+                outw(" %d:'%s'"%(w,getattr(words[w],'text',words[w])))
+            print()
 
     def fragDump(w):
         R= ["'%s'" % w[1]]
@@ -1761,20 +1721,21 @@ if __name__=='__main__':    #NORUNTESTS
         return ', '.join(R)
 
     def dumpParagraphFrags(P):
-        print 'dumpParagraphFrags(<Paragraph @ %d>) minWidth() = %.2f' % (id(P), P.minWidth())
+        print('dumpParagraphFrags(<Paragraph @ %d>) minWidth() = %.2f' % (id(P), P.minWidth()))
         frags = P.frags
         n =len(frags)
-        for l in xrange(n):
-            print "frag%d: '%s' %s" % (l, frags[l].text,' '.join(['%s=%s' % (k,getattr(frags[l],k)) for k in frags[l].__dict__ if k!=text]))
+        for l in range(n):
+            print("frag%d: '%s' %s" % (l, frags[l].text,' '.join(['%s=%s' % (k,getattr(frags[l],k)) for k in frags[l].__dict__ if k!=text])))
 
+        outw = sys.stdout.write
         l = 0
         cum = 0
         for W in _getFragWords(frags,360):
             cum += W[0]
-            print "fragword%d: cum=%3d size=%d" % (l, cum, W[0]),
+            outw("fragword%d: cum=%3d size=%d" % (l, cum, W[0]))
             for w in W[1:]:
-                print '(%s)' % fragDump(w),
-            print
+                outw(' (%s)' % fragDump(w))
+            print()
             l += 1
 
 
@@ -1845,12 +1806,12 @@ umfassend zu sein."""
         P=Paragraph(text, B)
         dumpParagraphFrags(P)
         w,h = P.wrap(aW,aH)
-        print 'After initial wrap',w,h
+        print('After initial wrap',w,h)
         dumpParagraphLines(P)
         S = P.split(aW,aH)
         dumpParagraphFrags(S[0])
         w0,h0 = S[0].wrap(aW,aH)
-        print 'After split wrap',w0,h0
+        print('After split wrap',w0,h0)
         dumpParagraphLines(S[0])
 
     if flagged(5):
@@ -1884,7 +1845,7 @@ umfassend zu sein."""
         w,h = P.wrap(6*72, 9.7*72)
         dumpParagraphLines(P)
         S = P.split(6*72,h/2.0)
-        print len(S)
+        print(len(S))
         dumpParagraphLines(S[0])
         dumpParagraphLines(S[1])
 

@@ -261,7 +261,7 @@ class JapaneseFontTests(unittest.TestCase):
             c.drawString(70, y, group)
             y -= 20
             c.setFont('Helvetica',10)
-            c.drawString(70, y, ' '.join(map(lambda x: repr(x)[4:-1], group)))
+            c.drawString(70, y, ' '.join([ascii(x)[4:-1] for x in group]))
             c.setFont('HeiseiMin-W3', 14)
             y -= 20
 
@@ -274,7 +274,7 @@ class JapaneseFontTests(unittest.TestCase):
             c.drawString(70, y, group)
             y -= 20
             c.setFont('Helvetica',10)
-            c.drawString(70, y, ' '.join(map(lambda x: repr(x)[2:], group)))
+            c.drawString(70, y, ' '.join([ascii(x)[2:] for x in group]))
             c.setFont('HeiseiMin-W3', 14)
             y -= 20
 
@@ -369,7 +369,7 @@ class JapaneseFontTests(unittest.TestCase):
 
 
         if VERBOSE:
-            print 'saved test_multibyte_jpn.pdf'
+            print('saved test_multibyte_jpn.pdf')
 
 
     def ___test2_all(self):
@@ -406,7 +406,7 @@ class JapaneseFontTests(unittest.TestCase):
 
         c.save()
         if VERBOSE:
-            print 'saved '+outputfile('test_multibyte_jpn.pdf')
+            print('saved '+outputfile('test_multibyte_jpn.pdf'))
 
 
 def makeSuite():

@@ -3,8 +3,9 @@
 '''
 Arciv Stream  ciphering
 '''
-__version__=''' $Id$ '''
-from types import StringType
+__all__='''ArcIV encode decode'''.split()
+__version__=''' 1.0 '''
+from reportlab.lib.utils import isUnicode, isPy3
 class ArcIV:
 	'''
 	performs 'ArcIV' Stream Encryption of S using key
@@ -22,17 +23,22 @@ class ArcIV:
 		#Initialize private key, k With the values of the key mod 256.
 		#and sbox With numbers 0 - 255. Then compute sbox
 		key = self._key
-		sbox = range(256)
-		k = range(256)
+		if isUnicode(key): key = key.encode('utf8')
+		sbox = list(range(256))
+		k = list(range(256))
 		lk = len(key)
-		for i in sbox:
-			k[i] = ord(key[i % lk]) % 256
+		if isPy3:
+			for i in sbox:
+				k[i] = key[i % lk] % 256
+		else:
+			for i in sbox:
+				k[i] = ord(key[i % lk]) % 256
 
 		#Re-order sbox using the private key, k.
 		#Iterating each element of sbox re-calculate the counter j
 		#Then interchange the elements sbox[a] & sbox[b]
 		j = 0
-		for i in xrange(256):
+		for i in range(256):
 			j = (j+sbox[i]+k[i]) % 256
 			sbox[i], sbox[j] = sbox[j], sbox[i]
 		self._sbox, self._i, self._j = sbox, 0, 0
@@ -44,7 +50,12 @@ class ArcIV:
 		'''
 		sbox, i, j = self._sbox, self._i, self._j
 
-		C = type(B) is StringType and map(ord,B) or B[:]
+		if isPy3:
+			C = list(B.encode('utf8')) if isinstance(B,str) else (list(B) if isinstance(B,bytes) else B[:])
+		elif isinstance(B,basestring):
+			C = list(map(ord,B.encode('utf8') if isinstance(B,unicode) else B))
+		else:
+			C = B[:]
 		n = len(C)
 		p = 0
 		while p<n:
@@ -55,40 +66,45 @@ class ArcIV:
 			sbox[i], sbox[j] = sbox[j], sbox[i]
 			#overwrite the plaintext with the ciphered byte
 			C[p] = C[p] ^ sbox[(sbox[i] + sbox[j]) % 256]
-			p = p + 1
+			p += 1
 		return C
 
-	def encode(self,S):
-		'ArcIV encode string S'
-		return "".join(map(chr,self._encode(S)))
+	if isPy3:
+		def encode(self,S):
+			'ArcIV encode string S'
+			return bytes(self._encode(S))
+	else:
+		def encode(self,S):
+			'ArcIV encode string S'
+			return "".join(map(chr,self._encode(S)))
 
 _TESTS=[{
-		'key': "\x01\x23\x45\x67\x89\xab\xcd\xef",
-		'input': "\x01\x23\x45\x67\x89\xab\xcd\xef",
-		'output': "\x75\xb7\x87\x80\x99\xe0\xc5\x96",
+		'key': b"\x01\x23\x45\x67\x89\xab\xcd\xef",
+		'input': b"\x01\x23\x45\x67\x89\xab\xcd\xef",
+		'output': b"\x75\xb7\x87\x80\x99\xe0\xc5\x96",
 		},
 
 		{
-		'key': "\x01\x23\x45\x67\x89\xab\xcd\xef",
-		'input': "\x00\x00\x00\x00\x00\x00\x00\x00",
-		'output': "\x74\x94\xc2\xe7\x10\x4b\x08\x79",
+		'key': b"\x01\x23\x45\x67\x89\xab\xcd\xef",
+		'input': b"\x00\x00\x00\x00\x00\x00\x00\x00",
+		'output': b"\x74\x94\xc2\xe7\x10\x4b\x08\x79",
 		},
 
 		{
-		'key': "\x00\x00\x00\x00\x00\x00\x00\x00",
-		'input': "\x00\x00\x00\x00\x00\x00\x00\x00",
-		'output': "\xde\x18\x89\x41\xa3\x37\x5d\x3a",
+		'key': b"\x00\x00\x00\x00\x00\x00\x00\x00",
+		'input': b"\x00\x00\x00\x00\x00\x00\x00\x00",
+		'output': b"\xde\x18\x89\x41\xa3\x37\x5d\x3a",
 		},
 
 		{
-		'key': "\xef\x01\x23\x45",
-		'input': "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
-		'output': "\xd6\xa1\x41\xa7\xec\x3c\x38\xdf\xbd\x61",
+		'key': b"\xef\x01\x23\x45",
+		'input': b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00",
+		'output': b"\xd6\xa1\x41\xa7\xec\x3c\x38\xdf\xbd\x61",
 		},
 
 		{
-		'key': "\x01\x23\x45\x67\x89\xab\xcd\xef",
-		'input': "\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\
+		'key': b"\x01\x23\x45\x67\x89\xab\xcd\xef",
+		'input': b"\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\
 \x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\
 \x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\
 \x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\
@@ -140,7 +156,7 @@ _TESTS=[{
 \x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\
 \x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\
 \x01",
-	'output': "\x75\x95\xc3\xe6\x11\x4a\x09\x78\x0c\x4a\xd4\
+	'output': b"\x75\x95\xc3\xe6\x11\x4a\x09\x78\x0c\x4a\xd4\
 \x52\x33\x8e\x1f\xfd\x9a\x1b\xe9\x49\x8f\
 \x81\x3d\x76\x53\x34\x49\xb6\x77\x8d\xca\
 \xd8\xc7\x8a\x8d\x2b\xa9\xac\x66\x08\x5d\
@@ -208,7 +224,5 @@ if __name__=='__main__':
 	i = 0
 	for t in _TESTS:
 		o = ArcIV(t['key']).encode(t['input'])
-		print 'Forward test %d %s!' %(i,o!=t['output'] and 'failed' or 'succeeded')
 		o = ArcIV(t['key']).encode(t['output'])
-		print 'Reverse test %d %s!' %(i,o!=t['input'] and 'failed' or 'succeeded')
 		i += 1

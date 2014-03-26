@@ -16,7 +16,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.validators import Auto
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import *
-from reportlab.graphics.charts.textlabels import Label
+from reportlab.graphics.charts.textlabels import Label, _text2Path
 from reportlab.platypus.flowables import Spacer, PageBreak
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
@@ -79,8 +79,8 @@ def sample1bar(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     bc.categoryAxis.labels.dy = -2
     bc.categoryAxis.labels.angle = 30
 
-    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
-    catNames = map(lambda n:n+'-99', catNames)
+    catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split( ' ')
+    catNames = [n+'-99' for n in catNames]
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
 
@@ -113,8 +113,8 @@ def sample1line(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     bc.categoryAxis.labels.dy = -2
     bc.categoryAxis.labels.angle = 30
 
-    catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
-    catNames = map(lambda n:n+'-99', catNames)
+    catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split(' ')
+    catNames = [n+'-99' for n in catNames]
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
 
@@ -347,7 +347,7 @@ class ChartTestCase(unittest.TestCase):
     def test4b(self):
         story = self.story
         for code in (lpleg, hlcleg, bcleg, pcleg, scleg, plpleg):
-            code_name = code.func_code.co_name
+            code_name = code.__code__.co_name
             for i in ('standard', 'col auto', 'full auto', 'swatch set', 'swatch auto'):
                 d = code(i)
                 assert notFail(d),'getContents failed for %s %s' % (code_name,i)
@@ -410,6 +410,21 @@ class ChartTestCase(unittest.TestCase):
         story.append(Spacer(0,0.5*cm))
         drawing8 = sample8()
         story.append(drawing8)
+        story.append(Spacer(0,1*cm))
+
+    def test8(self):
+        '''text _text2Path'''
+        story = self.story
+        story.append(Paragraph('Texts drawn using a Path', h3))
+        story.append(Spacer(0,0.5*cm))
+        P=_text2Path('Hello World from font Times-Roman!',x=10,y=20,fontName='Times-Roman',fontSize=20,strokeColor=colors.blue,strokeWidth=0.1,fillColor=colors.red)
+        d = Drawing(400,50)
+        d.add(P)
+        story.append(d)
+        P=_text2Path('Hello World from font Helvetica!',x=10,y=20,fontName='Helvetica',fontSize=20,strokeColor=colors.blue,strokeWidth=0.1,fillColor=colors.red)
+        d = Drawing(400,50)
+        d.add(P)
+        story.append(d)
         story.append(Spacer(0,1*cm))
 
 

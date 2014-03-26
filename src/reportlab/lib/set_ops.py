@@ -6,15 +6,14 @@ __version__=''' $Id$ '''
 __doc__="""From before Python had a Set class..."""
 
 import types
-import string
 
 def __set_coerce(t, S):
-    if t is types.ListType:
+    if t is list:
         return list(S)
-    elif t is types.TupleType:
+    elif t is tuple:
         return tuple(S)
-    elif t is types.StringType:
-        return string.join(S, '')
+    elif t is bytes:
+        return ''.join(S)
     return S
 
 def unique(seq):
@@ -26,7 +25,7 @@ def unique(seq):
 
 def intersect(seq1, seq2):
     result = []
-    if type(seq1) != type(seq2) and type(seq2) == types.StringType: seq2 = list(seq2)
+    if type(seq1) != type(seq2) and type(seq2) == bytes: seq2 = list(seq2)
     for i in seq1:
         if i in seq2 and i not in result: result.append(i)
     return __set_coerce(type(seq1), result)
@@ -34,8 +33,8 @@ def intersect(seq1, seq2):
 def union(seq1, seq2):
     if type(seq1) == type(seq2):
         return unique(seq1 + seq2)
-    if type(seq1) == types.ListType or type(seq2) == types.ListType:
+    if type(seq1) == list or type(seq2) == list:
         return unique(list(seq1) + list(seq2))
-    if type(seq1) == types.TupleType or type(seq2) == types.TupleType:
+    if type(seq1) == tuple or type(seq2) == tuple:
         return unique(tuple(seq1) + tuple(seq2))
     return unique(list(seq1) + list(seq2))

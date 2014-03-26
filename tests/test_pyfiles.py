@@ -18,7 +18,7 @@ def unique(seq):
         return seq
 
     # Make a sorted copy of the input sequence.
-    cnvt = isinstance(seq,basestring)
+    cnvt = isinstance(seq,str)
     seq2 = seq[:]
     if cnvt: seq2 = list(seq2)
     seq2.sort()
@@ -71,15 +71,15 @@ class AsciiFileTestCase(unittest.TestCase):
 
         for path in allPyFiles:
             fileContent = open_and_read(path,'r')
-            nonAscii = filter(lambda c: ord(c)>127, fileContent)
+            nonAscii = [c for c in fileContent if ord(c)>127]
             nonAscii = unique(nonAscii)
 
-            truncPath = path[string.find(path, 'reportlab'):]
-            args = (truncPath, repr(map(ord, nonAscii)))
+            truncPath = path[path.find('reportlab'):]
+            args = (truncPath, repr(list(map(ord, nonAscii))))
             msg = "File %s contains characters: %s." % args
 ##            if nonAscii:
 ##                print msg
-            assert nonAscii == '', msg
+            assert not nonAscii, msg
 
 
 class FilenameTestCase(unittest.TestCase):
@@ -93,11 +93,11 @@ class FilenameTestCase(unittest.TestCase):
 
         for path in allPyFiles:
             #hack - exclude barcode extensions from this test
-            if string.find(path, 'barcode'):
+            if path.find('barcode'):
                 pass
             else:
                 basename = os.path.splitext(path)[0]
-                truncPath = path[string.find(path, 'reportlab'):]
+                truncPath = path[path.find('reportlab'):]
                 msg = "Filename %s contains trailing digits." % truncPath
                 assert basename[-1] not in string.digits, msg
 

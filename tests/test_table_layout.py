@@ -11,7 +11,6 @@ from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.flowables import PageBreak
 import os
 import unittest
-from types import TupleType, ListType, StringType
 
 class TableTestCase(unittest.TestCase):
 
@@ -69,7 +68,7 @@ class TableTestCase(unittest.TestCase):
             ('Mugs', 0, 4, 17, 3, 21, 47, 12, 33, 2, -2, 44, 89),
             ('T-Shirts', 0, 42, 9, -3, 16, 4, 72, 89, 3, 19, 32, 119),
             ('Key Ring', 0,0,0,0,0,0,1,0,0,0,2,13),
-            (Paragraph("Let's <b>really mess things up with a <i>paragraph</i>",styNormal),
+            (Paragraph("Let's <b>really mess things up with a <i>paragraph</i></b>",styNormal),
                    893, 912, '1,212', 643, 789, 159, 888, '1,298', 832, 453, '1,344','2,843')
             )
 
@@ -415,5 +414,5 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-    print 'saved '+outputfile('test_table_layout.pdf')
+    print('saved '+outputfile('test_table_layout.pdf'))
     printLocation()

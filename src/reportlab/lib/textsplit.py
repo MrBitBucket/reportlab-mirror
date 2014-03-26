@@ -12,10 +12,10 @@ in based on possible knowledge of the language and desirable 'niceness' of the a
 
 __version__=''' $Id$ '''
 
-from types import StringType, UnicodeType
 from unicodedata import category
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.rl_config import _FUZZ
+from reportlab.lib.utils import isUnicode
 
 CANNOT_START_LINE = [
     #strongly prohibited e.g. end brackets, stop, exclamation...
@@ -41,7 +41,7 @@ def is_multi_byte(ch):
     return (ord(ch) >= 0x3000)
     
 def getCharWidths(word, fontName, fontSize):
-    """Returns a list of glyph widths.  Should be easy to optimize in _rl_accel
+    """Returns a list of glyph widths.
 
     >>> getCharWidths('Hello', 'Courier', 10)
     [6.0, 6.0, 6.0, 6.0, 6.0]
@@ -72,7 +72,7 @@ def wordSplit(word, maxWidths, fontName, fontSize, encoding='utf8'):
     >>> wordSplit('HelloWorld', 31, 'Courier', 10)
     [[1.0, 'Hello'], [1.0, 'World']]
     """
-    if type(word) is not UnicodeType:
+    if not isUnicode(word):
         uword = word.decode(encoding)
     else:
         uword = word
@@ -80,7 +80,7 @@ def wordSplit(word, maxWidths, fontName, fontSize, encoding='utf8'):
     charWidths = getCharWidths(uword, fontName, fontSize)
     lines = dumbSplit(uword, charWidths, maxWidths)
 
-    if type(word) is not UnicodeType:
+    if not isUnicode(word):
         lines2 = []
         #convert back
         for (extraSpace, text) in lines:
@@ -115,7 +115,7 @@ def dumbSplit(word, widths, maxWidths):
     (u'\u65e5\u672c\u8a9e', u'\u306f\u96e3\u3057\u3044\u3067\u3059\u306d\uff01')
     """
     if not isinstance(maxWidths,(list,tuple)): maxWidths = [maxWidths]
-    assert type(word) is UnicodeType
+    assert isUnicode(word)
     lines = []
     i = widthUsed = lineStartPos = 0
     maxWidth = maxWidths[0]
@@ -141,7 +141,7 @@ def dumbSplit(word, widths, maxWidths):
                 #  - reversion to Kanji (which would be a good split point)
                 #  - in the worst case, roughly half way back along the line
                 limitCheck = (lineStartPos+i)>>1        #(arbitrary taste issue)
-                for j in xrange(i-1,limitCheck,-1):
+                for j in range(i-1,limitCheck,-1):
                     cj = word[j]
                     if category(cj)=='Zs' or ord(cj)>=0x3000:
                         k = j+1
@@ -224,7 +224,7 @@ def kinsokuShoriSplit(word, widths, availWidth):
 #
 #  http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/148061
 import re
-rx=re.compile(u"([\u2e80-\uffff])", re.UNICODE)
+rx=re.compile("([\u2e80-\uffff])", re.UNICODE)
 def cjkwrap(text, width, encoding="utf8"):
      return reduce(lambda line, word, width=width: '%s%s%s' %
                 (line,
@@ -232,10 +232,10 @@ def cjkwrap(text, width, encoding="utf8"):
                        + len(word.split('\n',1)[0] ) >= width) or
                       line[-1:] == '\0' and 2],
                  word),
-                rx.sub(r'\1\0 ', unicode(text,encoding)).split(' ')
+                rx.sub(r'\1\0 ', str(text,encoding)).split(' ')
             ).replace('\0', '').encode(encoding)
 
 if __name__=='__main__':
     import doctest
-    import textsplit
+    from reportlab.lib import textsplit
     doctest.testmod(textsplit)

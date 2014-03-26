@@ -32,7 +32,7 @@ class OverprintTestCase(unittest.TestCase):
         c.drawString(100, 700, desc)
 
         c.setFont('Helvetica', 10)
-        c.drawString(100, 670, "To view is page properly you probably need to enable 'overprint preview' in Acrobat Reader")
+        c.drawString(100, 670, "To view this page properly you probably need to enable 'overprint preview' in Acrobat Reader")
         c.drawString(100, 658, "or use a tool like Illustrator, Quark or Acrobat to view separated plates. Starting in")
         c.drawString(100, 646, "Acrobat Reader 9 there is a setting that lets you turn on the overprint preview, although")
         c.drawString(100, 634, "it's not on by default (Preferences > Page Display > Use Overprint Preview: Always).")

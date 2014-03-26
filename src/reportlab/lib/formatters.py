@@ -94,7 +94,7 @@ if __name__=='__main__':
     def t(n, s, places=2, decimalSep='.', thousandSep=None, prefix=None, suffix=None):
         f=DecimalFormatter(places,decimalSep,thousandSep,prefix,suffix)
         r = f(n)
-        print "places=%2d dot=%-4s comma=%-4s prefix=%-4s suffix=%-4s result=%10s %s" %(f.places, f.dot, f.comma, f.prefix, f.suffix,r, r==s and 'OK' or 'BAD')
+        print("places=%2d dot=%-4s comma=%-4s prefix=%-4s suffix=%-4s result=%10s %s" %(f.places, f.dot, f.comma, f.prefix, f.suffix,r, r==s and 'OK' or 'BAD'))
     t(1000.9,'1,000.9',1,thousandSep=',')
     t(1000.95,'1,001.0',1,thousandSep=',')
     t(1000.95,'1,001',-1,thousandSep=',')

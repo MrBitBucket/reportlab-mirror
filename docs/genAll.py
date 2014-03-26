@@ -6,9 +6,9 @@ def _genAll(verbose=1):
     from reportlab.lib.testutils import testsFolder
     topDir=os.path.dirname(testsFolder)
     L = [os.path.join(topDir,f) for f in (
-            'docs/reference/genreference.py',
+            #'docs/reference/genreference.py',
             'docs/userguide/genuserguide.py',
-            'tools/docco/graphdocpy.py',
+            #'tools/docco/graphdocpy.py',
             )   
         ]
     for f in ('src/rl_addons/pyRXP/docs/PyRXP_Documentation.rml',
@@ -27,7 +27,7 @@ def _genAll(verbose=1):
                 if verbose: traceback.print_exc()
         else:
             cmd = '"%s" %s %s' % (sys.executable,os.path.basename(p), not verbose and '-s' or '')
-            if verbose: print cmd
+            if verbose: print(cmd)
             os.system(cmd)
 
 """Runs the manual-building scripts"""

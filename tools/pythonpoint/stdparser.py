@@ -8,13 +8,14 @@ pythonpoint.py.
 """
 
 import string, imp, sys, os, copy
-from reportlab.lib.utils import isSeqType
-from reportlab.lib import xmllib
+from reportlab.lib.utils import isSeq, uniChr, isPy3
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import recursiveImport
+from reportlab.platypus.paraparser import HTMLParser, known_entities
 from tools.pythonpoint import pythonpoint
 from reportlab.platypus import figures
+from reportlab.lib.utils import asNative
 
 
 def getModule(modulename,fromPath='tools.pythonpoint.styles'):
@@ -27,18 +28,18 @@ def getModule(modulename,fromPath='tools.pythonpoint.styles'):
     """
 
     try:
-        exec 'from tools.pythonpoint import '+modulename
+        exec('from tools.pythonpoint import '+modulename)
         return eval(modulename)
     except ImportError:
         try:
-            exec 'from tools.pythonpoint.styles import '+modulename
+            exec('from tools.pythonpoint.styles import '+modulename)
             return eval(modulename)
         except ImportError:
-            exec 'import '+modulename
+            exec('import '+modulename)
             return eval(modulename)
 
 
-class PPMLParser(xmllib.XMLParser):
+class PPMLParser(HTMLParser):
     attributes = {
         #this defines the available attributes for all objects,
         #and their default values.  Although these don't have to
@@ -192,7 +193,9 @@ class PPMLParser(xmllib.XMLParser):
             }
         }
 
-    def __init__(self):
+    def __init__(self,verbose=0, caseSensitive=0, ignoreUnknownTags=1):
+        self.caseSensitive = caseSensitive
+        self.ignoreUnknownTags = ignoreUnknownTags
         self.presentations = []
         #yes, I know a generic stack would be easier...
         #still, testing if we are 'in' something gives
@@ -210,7 +213,12 @@ class PPMLParser(xmllib.XMLParser):
         self._curAuthor = None
         self._curSubject = None
         self.fx = 1
-        xmllib.XMLParser.__init__(self)
+        HTMLParser.__init__(self)
+        if not isPy3:
+            try:
+                self.parser.returnUnicode = False
+            except:
+                pass
 
     def _arg(self,tag,args,name):
         "What's this for???"
@@ -246,6 +254,7 @@ class PPMLParser(xmllib.XMLParser):
         #the only data should be paragraph text, preformatted para
         #text, 'string text' for a fixed string on the page,
         #or table data
+        data = asNative(data)
         if self._curPara:
             self._curPara.rawtext = self._curPara.rawtext + data
         elif self._curPrefmt:
@@ -302,7 +311,6 @@ class PPMLParser(xmllib.XMLParser):
     def start_title(self, args):
         self._curTitle = ''
 
-
     def end_title(self):
         self._curPres.title = self._curTitle
         self._curTitle = None
@@ -325,7 +333,7 @@ class PPMLParser(xmllib.XMLParser):
         #makes it the current style sheet.
         path = self._arg('stylesheet',args,'path')
         if path=='None': path = []
-        if not isSeqType(path): path = [path]
+        if not isSeq(path): path = [path]
         path.append('styles')
         path.append(os.getcwd())
         modulename = self._arg('stylesheet', args, 'module')
@@ -352,7 +360,6 @@ class PPMLParser(xmllib.XMLParser):
 
     def end_section(self):
         self._curSection = None
-
 
     def start_slide(self, args):
         s = pythonpoint.PPSlide()
@@ -444,9 +451,9 @@ class PPMLParser(xmllib.XMLParser):
         bt = self._arg('para',args,'bullettext')
         if bt == '':
             if self._curPara.style == 'Bullet':
-                bt = '\xe2\x80\xa2'  # Symbol Font bullet character, reasonable default
+                bt = '\u2022'  # Symbol Font bullet character, reasonable default
             elif self._curPara.style == 'Bullet2':
-                bt = '\xe2\x80\xa2'  # second-level bullet
+                bt = '\u2022'  # second-level bullet
             else:
                 bt = None
 
@@ -786,19 +793,19 @@ class PPMLParser(xmllib.XMLParser):
     def unknown_starttag(self, tag, attrs):
         if  self._curPara:
             echo = '<%s' % tag
-            for (key, value) in attrs.items():
+            for key, value in attrs.items():
                 echo = echo + ' %s="%s"' % (key, value)
             echo = echo + '>'
             self._curPara.rawtext = self._curPara.rawtext + echo
         else:
-            print 'Unknown start tag %s' % tag
+            print('Unknown start tag %s' % tag)
 
 
     def unknown_endtag(self, tag):
         if  self._curPara:
             self._curPara.rawtext = self._curPara.rawtext + '</%s>'% tag
         else:
-            print 'Unknown end tag %s' % tag
+            print('Unknown end tag %s' % tag)
 
     def handle_charref(self, name):
         try:
@@ -809,4 +816,51 @@ class PPMLParser(xmllib.XMLParser):
         except ValueError:
             self.unknown_charref(name)
             return
-        self.handle_data(unichr(n).encode('utf8'))
+        self.handle_data(uniChr(n).encode('utf8'))
+
+    #HTMLParser interface
+    def handle_starttag(self, tag, attrs):
+        "Called by HTMLParser when a tag starts"
+
+        #tuple tree parser used to expect a dict.  HTML parser
+        #gives list of two-element tuples
+        if isinstance(attrs, list):
+            d = {}
+            for (k,  v) in attrs:
+                d[k] = v
+            attrs = d
+        if not self.caseSensitive: tag = tag.lower()
+        try:
+            start = getattr(self,'start_'+tag)
+        except AttributeError:
+            if not self.ignoreUnknownTags:
+                raise ValueError('Invalid tag "%s"' % tag)
+            start = self.start_unknown
+        #call it
+        start(attrs or {})
+        
+    def handle_endtag(self, tag):
+        "Called by HTMLParser when a tag ends"
+        #find the existing end_tagname method
+        if not self.caseSensitive: tag = tag.lower()
+        try:
+            end = getattr(self,'end_'+tag)
+        except AttributeError:
+            if not self.ignoreUnknownTags:
+                raise ValueError('Invalid tag "%s"' % tag)
+            end = self.end_unknown
+        #call it
+        end()
+
+    def handle_entityref(self, name):
+        "Handles a named entity.  "
+        try:
+            v = uniChr(known_entities[name])
+        except:
+            v = u'&amp;%s;' % name
+        self.handle_data(v)
+
+    def start_unknown(self,attr):
+        pass
+    def end_unknown(self):
+        pass

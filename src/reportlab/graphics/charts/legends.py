@@ -17,8 +17,9 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropH
 from reportlab.graphics.shapes import Drawing, Group, String, Rect, Line, STATE_DEFAULTS
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
-from reportlab.lib.utils import isSeqType, find_locals
+from reportlab.lib.utils import isSeq, find_locals
 from reportlab.graphics.shapes import _baseGFontName
+from functools import reduce
 
 def _transMax(n,A):
     X = n*[0]
@@ -28,31 +29,31 @@ def _transMax(n,A):
         for i,x in enumerate(a):
             X[i] = max(X[i],x)
     X = [0] + X[:m]
-    for i in xrange(m):
+    for i in range(m):
         X[i+1] += X[i]
     return X
 
 def _objStr(s):
-    if isinstance(s,basestring):
+    if isinstance(s,str):
         return s
     else:
         return str(s)
 
 def _getStr(s):
-    if isSeqType(s):
-        return map(_getStr,s)
+    if isSeq(s):
+        return list(map(_getStr,s))
     else:
         return _objStr(s)
 
 def _getLines(s):
-    if isSeqType(s):
+    if isSeq(s):
         return tuple([(x or '').split('\n') for x in s])
     else:
         return (s or '').split('\n')
 
 def _getLineCount(s):
     T = _getLines(s)
-    if isSeqType(s):
+    if isSeq(s):
         return max([len(x) for x in T])
     else:
         return len(T)
@@ -60,7 +61,7 @@ def _getLineCount(s):
 def _getWidths(i,s, fontName, fontSize, subCols):
     S = []
     aS = S.append
-    if isSeqType(s):
+    if isSeq(s):
         for j,t in enumerate(s):
             sc = subCols[j,i]
             fN = getattr(sc,'fontName',fontName)
@@ -239,7 +240,7 @@ class Legend(Widget):
             texts = [_getStr(p[1]) for p in colorNamePairs]
         else:
             chart = getattr(colorNamePairs,'chart',getattr(colorNamePairs,'obj',None))
-            texts = [chart.getSeriesName(i,'series %d' % i) for i in xrange(chart._seriesCount)]
+            texts = [chart.getSeriesName(i,'series %d' % i) for i in range(chart._seriesCount)]
         return texts
 
     def _calculateMaxBoundaries(self, colorNamePairs):
@@ -254,7 +255,7 @@ class Legend(Widget):
         n = max([len(m) for m in M])
         if self.variColumn:
             columnMaximum = self.columnMaximum
-            return [_transMax(n,M[r:r+columnMaximum]) for r in xrange(0,len(M),self.columnMaximum)]
+            return [_transMax(n,M[r:r+columnMaximum]) for r in range(0,len(M),self.columnMaximum)]
         else:
             return _transMax(n,M)
 
@@ -371,7 +372,7 @@ class Legend(Widget):
             dividerOffsX = self.dividerOffsX
             dividerOffsY = self.dividerOffsY
 
-        for i in xrange(n):
+        for i in range(n):
             if autoCP:
                 col = autoCP
                 col.index = i
@@ -400,8 +401,8 @@ class Legend(Widget):
                 x = thisx+dx+dxTextSpace
                 xn = thisx
             else:
-                raise ValueError, "bad alignment"
-            if not isSeqType(name):
+                raise ValueError("bad alignment")
+            if not isSeq(name):
                 T = [T]
             yd = y
             for k,lines in enumerate(T):
@@ -525,7 +526,7 @@ class Legend(Widget):
         legend.y = 100
         legend.dxTextSpace = 5
         items = 'red green blue yellow pink black white'.split()
-        items = map(lambda i:(getattr(colors, i), i), items)
+        items = [(getattr(colors, i), i) for i in items]
         legend.colorNamePairs = items
 
         d.add(legend, 'legend')
@@ -641,7 +642,7 @@ def sample1c():
     legend.y = 100
     legend.dxTextSpace = 5
     items = 'red green blue yellow pink black white'.split()
-    items = map(lambda i:(getattr(colors, i), i), items)
+    items = [(getattr(colors, i), i) for i in items]
     legend.colorNamePairs = items
 
     d.add(legend, 'legend')
@@ -662,7 +663,7 @@ def sample2c():
     legend.dxTextSpace = 10
     legend.columnMaximum = 4
     items = 'red green blue yellow pink black white'.split()
-    items = map(lambda i:(getattr(colors, i), i), items)
+    items = [(getattr(colors, i), i) for i in items]
     legend.colorNamePairs = items
 
     d.add(legend, 'legend')
@@ -682,7 +683,7 @@ def sample3():
     legend.dxTextSpace = 10
     legend.columnMaximum = 4
     items = 'red green blue yellow pink black white'.split()
-    items = map(lambda i:(getattr(colors, i), i), items)
+    items = [(getattr(colors, i), i) for i in items]
     legend.colorNamePairs = items
     d.add(legend, 'legend')
 

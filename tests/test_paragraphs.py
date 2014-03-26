@@ -94,13 +94,13 @@ class ParagraphTestCase(unittest.TestCase):
 
 
         SA(Paragraph("This is a normal paragraph. "+ randomText(), styNormal))
-        SA(Paragraph("There follows a paragraph with only \"&lt;br/&gt\"", styNormal))
+        SA(Paragraph("There follows a paragraph with only \"&lt;br/&gt;\"", styNormal))
         SA(Paragraph("<br/>", styNormal))
         SA(Paragraph("This has 12 points space before and after, set in the style. " + randomText(), stySpaced))
         SA(Paragraph("This is normal. " + randomText(), styNormal))
         SA(Paragraph("""<para spacebefore="12" spaceafter="12">
             This has 12 points space before and after, set inline with
-            XML tag.  It works too.""" + randomText() + "</para",
+            XML tag.  It works too.""" + randomText() + "</para>",
                       styNormal))
 
         SA(Paragraph("This is normal. " + randomText(), styNormal))
@@ -123,7 +123,7 @@ class ParagraphTestCase(unittest.TestCase):
         SA(Paragraph("""This has <u>underlined text</u> here.""", styNormal))
         SA(Paragraph("""This has <font color=blue><u>blue and <font color=red>red</font> underlined text</u></font> here.""", styNormal))
         SA(Paragraph("""<u>green underlining</u>""", styGreen))
-        SA(Paragraph("""<u>green <font size=+4><i>underlining</font></i></u>""", styGreen))
+        SA(Paragraph("""<u>green <font size="+4"><i>underlining</i></font></u>""", styGreen))
         SA(Paragraph("""This has m<super>2</super> a superscript.""", styNormal))
         SA(Paragraph("""This has m<sub>2</sub> a subscript. Like H<sub>2</sub>O!""", styNormal))
         SA(Paragraph("""This has a font change to <font name=Helvetica>Helvetica</font>.""", styNormal))
@@ -167,7 +167,7 @@ class ParagraphTestCase(unittest.TestCase):
         SA(Indenter("-1cm"))
         SA(Indenter("-1cm"))
         
-        for i in xrange(2):
+        for i in range(2):
             SA(PageBreak())
             SA(Paragraph('''%s dotted paragraphs''' % (i and 'CJK' or 'Normal'), styNormal))
             SA(Paragraph('''Simple paragraph with dots''', i and styDotsCJK or styDots))

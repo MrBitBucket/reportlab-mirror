@@ -29,8 +29,8 @@ def run():
 
     buf = []
     buf.append('widthsByUnichar = {}')
-    for (fontName, (language, encName)) in defaultUnicodeEncodings.items():
-        print 'handling %s : %s : %s' % (fontName, language, encName)
+    for fontName, (language, encName) in defaultUnicodeEncodings.items():
+        print('handling %s : %s : %s' % (fontName, language, encName))
 
         #this does just about all of it for us, as all the info
         #we need is present.
@@ -39,21 +39,21 @@ def run():
         widthsByCID = font.face._explicitWidths
         cmap = font.encoding._cmap
         nonStandardWidthsByUnichar = {}
-        for (codePoint, cid) in cmap.items():
+        for codePoint, cid in cmap.items():
             width = widthsByCID.get(cid, 1000)
             if width != 1000:
-                nonStandardWidthsByUnichar[unichr(codePoint)] = width
+                nonStandardWidthsByUnichar[chr(codePoint)] = width
         
 
         
-        print 'created font width map (%d items).  ' % len(nonStandardWidthsByUnichar)
+        print('created font width map (%d items).  ' % len(nonStandardWidthsByUnichar))
 
         buf.append('widthsByUnichar["%s"] = %s' % (fontName, repr(nonStandardWidthsByUnichar)))
         
         
     src = '\n'.join(buf) + '\n'
     open('canned_widths.py','w').write(src)
-    print 'wrote canned_widths.py'
+    print('wrote canned_widths.py')
 
 if __name__=='__main__':
     run()

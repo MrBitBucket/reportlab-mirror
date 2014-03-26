@@ -46,7 +46,7 @@ epsilon.
 
 from reportlab.lib import enums
 from reportlab.lib.units import cm
-from reportlab.lib.utils import commasplit, escapeOnce
+from reportlab.lib.utils import commasplit, escapeOnce, encode_label, decode_label, strTypes
 from reportlab.lib.styles import ParagraphStyle, _baseFontName
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable
@@ -54,13 +54,6 @@ from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.flowables import Spacer, Flowable
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
-from base64 import encodestring, decodestring
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
-dumps = pickle.dumps
-loads = pickle.loads
 
 def unquote(txt):
     from xml.sax.saxutils import unescape
@@ -99,7 +92,7 @@ def drawPageNumbers(canvas, style, pages, availWidth, availHeight, dot=' . '):
         pagestrw = stringWidth(pagestr, style.fontName, fontSize)
         
     
-    if isinstance(dot, basestring):
+    if isinstance(dot, strTypes):
         if dot:
             dotw = stringWidth(dot, style.fontName, fontSize)
             dotsn = int((availWidth-x-pagestrw)/dotw)
@@ -311,10 +304,11 @@ class SimpleIndex(IndexingFlowable):
 
     def getFormatFunc(self,format):
         try:
-            exec 'from reportlab.lib.sequencer import _format_%s as formatFunc' % format in locals()
+            D = {}
+            exec('from reportlab.lib.sequencer import _format_%s as formatFunc' % format, D)
+            return D['formatFunc']
         except ImportError:
             raise ValueError('Unknown format %r' % format)
-        return formatFunc
 
     def setup(self, style=None, dot=None, tableStyle=None, headers=True, name=None, format='123', offset=0):
         """
@@ -353,7 +347,7 @@ class SimpleIndex(IndexingFlowable):
 
     def __call__(self,canv,kind,label):
         try:
-            terms, format, offset = loads(decodestring(label))
+            terms, format, offset = decode_label(label)
         except:
             terms = label
             format = offset = None
@@ -421,22 +415,21 @@ class SimpleIndex(IndexingFlowable):
         '''Return the last run's entries!  If there are none, returns dummy.'''
         if not self._lastEntries:
             if self._entries:
-                return self._entries.items()
+                return list(self._entries.items())
             return dummy
-        return self._lastEntries.items()
+        return list(self._lastEntries.items())
 
     def _build(self,availWidth,availHeight):
         _tempEntries = self._getlastEntries()
         def getkey(seq):
             return [x.upper() for x in seq[0]]
         _tempEntries.sort(key=getkey)
-        #was: _tempEntries.sort(lambda a,b: cmp([x.upper() for x in a[0]], [x.upper() for x in b[0]]))
         leveloffset = self.headers and 1 or 0
 
         def drawIndexEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
             style = self.getLevelStyle(leveloffset)
-            pages = loads(decodestring(label))
+            pages = decode_label(label)
             drawPageNumbers(canvas, style, pages, availWidth, availHeight, self.dot)
         self.canv.drawIndexEntryEnd = drawIndexEntryEnd
 
@@ -465,7 +458,7 @@ class SimpleIndex(IndexingFlowable):
             if diff:
                 lastTexts = texts
                 texts = texts[i:]
-            label = encodestring(dumps(list(pageNumbers))).strip()
+            label = encode_label(list(pageNumbers))
             texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (texts[-1], label)
             for text in texts:
                 #Platypus and RML differ on how parsed XML attributes are escaped.  

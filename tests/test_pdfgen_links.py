@@ -186,5 +186,5 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-    print "wrote", fn
+    print("wrote", fn)
     printLocation()

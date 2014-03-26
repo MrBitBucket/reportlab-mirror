@@ -64,7 +64,7 @@ def run():
     #do all named colors
     framePage(c, 'Color Demo - RGB Space - page %d' % c.getPageNumber())
 
-    all_colors = reportlab.lib.colors.getAllNamedColors().items()
+    all_colors = list(reportlab.lib.colors.getAllNamedColors().items())
     all_colors.sort() # alpha order by name
     c.setFont('Times-Roman', 12)
     c.drawString(72,730, 'This shows all the named colors in the HTML standard.')

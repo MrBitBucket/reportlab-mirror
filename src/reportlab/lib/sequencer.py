@@ -1,6 +1,5 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2013
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/sequencer.py
 __version__=''' $Id$ '''
 __doc__="""A Sequencer class counts things. It aids numbering and formatting lists."""
 __all__='''Sequencer getSequencer setSequencer'''.split()
@@ -12,12 +11,13 @@ __all__='''Sequencer getSequencer setSequencer'''.split()
 # fredrik@pythonware.com
 # http://www.pythonware.com
 
-_RN_TEMPLATES = [ 0, 01, 011, 0111, 012, 02, 021, 0211, 02111, 013 ]
+_RN_TEMPLATES = [ 0, 0o1, 0o11, 0o111, 0o12, 0o2, 0o21, 0o211, 0o2111, 0o13 ]
 _RN_LETTERS = "IVXLCDM"
+from reportlab import isPy3
 
 def _format_I(value):
     if value < 0 or value > 3999:
-        raise ValueError, "illegal value"
+        raise ValueError("illegal value")
     str = ""
     base = -1
     while value:
@@ -26,7 +26,7 @@ def _format_I(value):
         while tmp:
             tmp, index = divmod(tmp, 8)
             str = _RN_LETTERS[index+base] + str
-        base = base + 2
+        base += 2
     return str
 
 def _format_i(num):
@@ -78,18 +78,24 @@ class _Counter:
             self._value = self._base
 
     def next(self):
-        self._value = self._value + 1
+        self._value += 1
         v = self._value
         for counter in self._resets:
             counter.reset()
         return v
+    __next__ = next
 
     def _this(self):
         return self._value
 
-    def nextf(self):
-        """Returns next value formatted"""
-        return self._formatter(self.next())
+    if isPy3:
+        def nextf(self):
+            """Returns next value formatted"""
+            return self._formatter(next(self))
+    else:
+        def nextf(self):
+            """Returns next value formatted"""
+            return self._formatter(self.__next__())
 
     def thisf(self):
         return self._formatter(self._this())
@@ -159,12 +165,29 @@ class Sequencer:
             counter = self._defaultCounter
         return self._getCounter(counter)._this()
 
-    def next(self, counter=None):
-        """Retrieves the numeric value for the given counter, then
-        increments it by one.  New counters start at one."""
-        if not counter:
-            counter = self._defaultCounter
-        return self._getCounter(counter).next()
+    if isPy3:
+        def __next__(self):
+            """Retrieves the numeric value for the given counter, then
+            increments it by one.  New counters start at one."""
+            return next(self._getCounter(self._defaultCounter))
+
+        def next(self,counter=None):
+            if not counter:
+                return next(self)
+            else:
+                dc = self._defaultCounter
+                try:
+                    self._defaultCounter = counter
+                    return next(self)
+                finally:
+                    self._defaultCounter = dc
+    else:
+        def next(self, counter=None):
+            """Retrieves the numeric value for the given counter, then
+            increments it by one.  New counters start at one."""
+            if not counter:
+                counter = self._defaultCounter
+            return self._getCounter(counter).next()
 
     def thisf(self, counter=None):
         if not counter:
@@ -219,12 +242,12 @@ class Sequencer:
 
     def dump(self):
         """Write current state to stdout for diagnostics"""
-        counters = self._counters.items()
+        counters = list(self._counters.items())
         counters.sort()
-        print 'Sequencer dump:'
+        print('Sequencer dump:')
         for (key, counter) in counters:
-            print '    %s: value = %d, base = %d, format example = %s' % (
-                key, counter._this(), counter._base, counter.thisf())
+            print('    %s: value = %d, base = %d, format example = %s' % (
+                key, counter._this(), counter._base, counter.thisf()))
 
 """Your story builder needs to set this to"""
 _sequencer = None
@@ -252,52 +275,50 @@ del register_reset
 
 def test():
     s = Sequencer()
-    print 'Counting using default sequence: %d %d %d' % (s.next(),s.next(), s.next())
-    print 'Counting Figures: Figure %d, Figure %d, Figure %d' % (
-        s.next('figure'), s.next('figure'), s.next('figure'))
-    print 'Back to default again: %d' % s.next()
+    print('Counting using default sequence: %d %d %d' % (next(s),next(s), next(s)))
+    print('Counting Figures: Figure %d, Figure %d, Figure %d' % (
+        s.next('figure'), s.next('figure'), s.next('figure')))
+    print('Back to default again: %d' % next(s))
     s.setDefaultCounter('list1')
-    print 'Set default to list1: %d %d %d' % (s.next(),s.next(), s.next())
+    print('Set default to list1: %d %d %d' % (next(s),next(s), next(s)))
     s.setDefaultCounter()
-    print 'Set default to None again: %d %d %d' % (s.next(),s.next(), s.next())
-    print
-    print 'Creating Appendix counter with format A, B, C...'
+    print('Set default to None again: %d %d %d' % (next(s),next(s), next(s)))
+    print()
+    print('Creating Appendix counter with format A, B, C...')
     s.setFormat('Appendix', 'A')
-    print '    Appendix %s, Appendix %s, Appendix %s' % (
-        s.nextf('Appendix'),    s.nextf('Appendix'),s.nextf('Appendix'))
+    print('    Appendix %s, Appendix %s, Appendix %s' % (
+        s.nextf('Appendix'),    s.nextf('Appendix'),s.nextf('Appendix')))
 
     def format_french(num):
         return ('un','deux','trois','quatre','cinq')[(num-1)%5]
-    print
-    print 'Defining a custom format with french words:'
+    print()
+    print('Defining a custom format with french words:')
     s.registerFormat('french', format_french)
     s.setFormat('FrenchList', 'french')
-    print '   ',
-    for i in range(1,6):
-        print s.nextf('FrenchList'),
-    print
-    print 'Chaining H1 and H2 - H2 goes back to one when H1 increases'
+    print('   ' +(' '.join(str(s.nextf('FrenchList')) for i in range(1,6))))
+    print()
+    print('Chaining H1 and H2 - H2 goes back to one when H1 increases')
     s.chain('H1','H2')
-    print '    H1 = %d' % s.next('H1')
-    print '      H2 = %d' % s.next('H2')
-    print '      H2 = %d' % s.next('H2')
-    print '      H2 = %d' % s.next('H2')
-    print '    H1 = %d' % s.next('H1')
-    print '      H2 = %d' % s.next('H2')
-    print '      H2 = %d' % s.next('H2')
-    print '      H2 = %d' % s.next('H2')
-    print
-    print 'GetItem notation - append a plus to increment'
-    print '    seq["Appendix"] = %s' % s["Appendix"]
-    print '    seq["Appendix+"] = %s' % s["Appendix+"]
-    print '    seq["Appendix+"] = %s' % s["Appendix+"]
-    print '    seq["Appendix"] = %s' % s["Appendix"]
-    print
-    print 'Finally, string format notation for nested lists.  Cool!'
-    print 'The expression ("Figure %(Chapter)s.%(Figure+)s" % seq) gives:'
-    print '    Figure %(Chapter)s.%(Figure+)s' % s
-    print '    Figure %(Chapter)s.%(Figure+)s' % s
-    print '    Figure %(Chapter)s.%(Figure+)s' % s
+    print('    H1 = %d' % s.next('H1'))
+    print('      H2 = %d' % s.next('H2'))
+    print('      H2 = %d' % s.next('H2'))
+    print('      H2 = %d' % s.next('H2'))
+    print('    H1 = %d' % s.next('H1'))
+    print('      H2 = %d' % s.next('H2'))
+    print('      H2 = %d' % s.next('H2'))
+    print('      H2 = %d' % s.next('H2'))
+    print()
+    print('GetItem notation - append a plus to increment')
+    print('    seq["Appendix"] = %s' % s["Appendix"])
+    print('    seq["Appendix+"] = %s' % s["Appendix+"])
+    print('    seq["Appendix+"] = %s' % s["Appendix+"])
+    print('    seq["Appendix"] = %s' % s["Appendix"])
+    print()
+    print('Finally, string format notation for nested lists.  Cool!')
+    print('The expression ("Figure %(Chapter)s.%(Figure+)s" % seq) gives:')
+    print('    Figure %(Chapter)s.%(Figure+)s' % s)
+    print('    Figure %(Chapter)s.%(Figure+)s' % s)
+    print('    Figure %(Chapter)s.%(Figure+)s' % s)
 
 
 if __name__=='__main__':

@@ -6,12 +6,12 @@ __version__=''' $Id$ '''
 #tests and documents new low-level canvas
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import os, string
+import os
 import unittest
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
-from reportlab.lib.utils import haveImages, fileName2Utf8
+from reportlab.lib.utils import haveImages, fileName2FSEnc
 
 #################################################################
 #
@@ -83,9 +83,8 @@ def makesubsection(canvas, title, horizontal):
 
 
 #def newsubsection(name):
-#    from types import TupleType
 #    thissection = outlinenametree[-1]
-#    if type(thissection) is not TupleType:
+#    if not isinstance(thissection,tuple):
 #        subsectionlist = []
 #        thissection = outlinenametree[-1] = (thissection, subsectionlist)
 #    else:
@@ -106,9 +105,9 @@ class DocBlock:
 
     def _getHeight(self):
         "splits into lines"
-        self.comment1lines = string.split(self.comment1, '\n')
-        self.codelines = string.split(self.code, '\n')
-        self.comment2lines = string.split(self.comment2, '\n')
+        self.comment1lines = self.comment1.split('\n')
+        self.codelines = self.code.split('\n')
+        self.comment2lines = self.comment2.split('\n')
         textheight = (len(self.comment1lines) +
                 len(self.code) +
                 len(self.comment2lines) +
@@ -133,7 +132,7 @@ class DocBlock:
         self.namespace = {'canvas':canvas,'cm': cm,'inch':inch}
         canvas.translate(x+9, y - height + 9)
         codeObj = compile(self.code, '<sample>','exec')
-        exec codeObj in self.namespace
+        exec(codeObj, self.namespace)
 
         canvas.restoreState()
 
@@ -204,7 +203,7 @@ def makeDocument(filename, pageCallBack=None):
 
     #quickie encoding test: when canvas encoding not set,
     #the following should do (tm), (r) and (c)
-    msg_uni = u'copyright\u00A9 trademark\u2122 registered\u00AE scissors\u2702: ReportLab in unicode!'
+    msg_uni = 'copyright\u00A9 trademark\u2122 registered\u00AE scissors\u2702: ReportLab in unicode!'
     msg_utf8 = msg_uni.replace('unicode','utf8').encode('utf8')
     c.drawString(100, 100, msg_uni)
     c.drawString(100, 80, msg_utf8)
@@ -726,7 +725,7 @@ cost to performance.""")
     c.drawString(1*inch, 10.25*inch-2*14.4, "The second image is white alpha=0% to purple=100%")
 
 
-    for i in xrange(8):
+    for i in range(8):
         c.drawString(1*inch,8*inch+i*14.4,"mask=None   Line %d"%i)
         c.drawString(3*inch,8*inch+i*14.4,"mask='auto' Line %d"%i)
         c.drawString(1*inch,6*inch+i*14.4,"mask=None   Line %d"%i)
@@ -868,7 +867,7 @@ cost to performance.""")
                       color=colors.magenta)
     c.drawString(inch+3, 2*inch+6, 'Hyperlink with custom border style')
 
-    xpdf = fileName2Utf8(outputfile('test_hello.pdf').replace('\\','/'))
+    xpdf = fileName2FSEnc(outputfile('test_hello.pdf').replace('\\','/'))
     link = 'Hard link to %s, with red border' % xpdf
     r1 = (inch, 1.5*inch, inch+2*3+c.stringWidth(link,c._fontname, c._fontsize), 1.75*inch) # this is x1,y1,x2,y2
     c.linkURL(xpdf, r1, thickness=1, color=colors.red, kind='GoToR')
@@ -912,10 +911,10 @@ cost to performance.""")
 
 def run(filename):
     c = makeDocument(filename)
-    c.setAuthor(u'R\xfcp\xe9rt B\xe8\xe4r')
+    c.setAuthor('R\xfcp\xe9rt B\xe8\xe4r')
     c.setTitle('R\xc3\xbcp\xc3\xa9rt B\xc3\xa8\xc3\xa4r\'s Book')
-    c.setCreator(u'Some Creator')
-    c.setSubject(u'Some Subject')
+    c.setCreator('Some Creator')
+    c.setSubject('Some Subject')
     c.save()
     c = makeDocument(filename)
     import os
@@ -938,7 +937,7 @@ def pageShapes(c):
     d = DocBlock()
     d.comment1 = 'Lesson one'
     d.code = "canvas.textOut('hello, world')"
-    print d.code
+    print(d.code)
 
     d.comment2 = 'Lesson two'
 
@@ -968,7 +967,7 @@ class PdfgenTestCase(unittest.TestCase):
         c.addPageLabel(102, prefix="Back",start=1)
 
         # Make some (mostly) empty pages
-        for i in xrange(113):
+        for i in range(113):
             c.drawString(100, 100, 'Tis is page '+str(i))
             c.showPage()
 
@@ -1101,8 +1100,8 @@ class PdfgenTestCase(unittest.TestCase):
 
 
 def trySomeColors(C,enforceColorSpace=None):
-    from StringIO import StringIO
-    out=StringIO()
+    from reportlab.lib.utils import getBytesIO
+    out=getBytesIO()
     canv = canvas.Canvas(out,enforceColorSpace=enforceColorSpace)
     canv.setFont('Helvetica',10)
     x = 0

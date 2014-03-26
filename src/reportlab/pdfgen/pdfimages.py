@@ -7,14 +7,12 @@ Image functionality sliced out of canvas.py for generalization
 """
 
 import os
-import string
-from types import StringType
 import reportlab
 from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
-from reportlab.lib.utils import fp_str, getStringIO
-from reportlab.lib.utils import import_zlib, haveImages
+from reportlab.lib.utils import import_zlib, haveImages, getBytesIO, isStr
+from reportlab.lib.rl_accel import fp_str, asciiBase85Encode
 from reportlab.lib.boxstuff import aspectRatioFix
 
 
@@ -68,7 +66,7 @@ class PDFImage:
         #write in blocks of (??) 60 characters per line to a list
         data = imageFile.read()
         if rl_config.useA85:
-            data = pdfutils._AsciiBase85Encode(data)
+            data = asciiBase85Encode(data)
         pdfutils._chunker(data,imagedata)
         imagedata.append('EI')
         return (imagedata, imgwidth, imgheight)
@@ -85,7 +83,7 @@ class PDFImage:
         cachedname = os.path.splitext(image)[0] + (rl_config.useA85 and '.a85' or '.bin')
         imagedata = open(cachedname,'rb').readlines()
         #trim off newlines...
-        imagedata = map(string.strip, imagedata)
+        imagedata = list(map(str.strip, imagedata))
         return imagedata
 
     def PIL_imagedata(self):
@@ -129,7 +127,7 @@ class PDFImage:
         assert len(raw) == rowstride*imgheight, "Wrong amount of data for image"
         data = zlib.compress(raw)    #this bit is very fast...
         if rl_config.useA85:
-            data = pdfutils._AsciiBase85Encode(data) #...sadly this may not be
+            data = asciiBase85Encode(data) #...sadly this may not be
         #append in blocks of 60 characters
         pdfutils._chunker(data,imagedata)
         imagedata.append('EI')
@@ -140,16 +138,16 @@ class PDFImage:
             imagedata = pdfutils.cacheImageFile(image,returnInMemory=1)
         else:
             imagedata = self.cache_imagedata()
-        words = string.split(imagedata[1])
-        imgwidth = string.atoi(words[1])
-        imgheight = string.atoi(words[3])
+        words = imagedata[1].split()
+        imgwidth = int(words[1])
+        imgheight = int(words[3])
         return imagedata, imgwidth, imgheight
 
     def getImageData(self,preserveAspectRatio=False):
         "Gets data, height, width - whatever type of image"
         image = self.image
 
-        if type(image) == StringType:
+        if isStr(image):
             self.filename = image
             if os.path.splitext(image)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
                 try:
@@ -200,7 +198,7 @@ class PDFImage:
         dict['Height'] = self.height
         dict['BitsPerComponent'] = 8
         dict['ColorSpace'] = pdfdoc.PDFName(self.colorSpace)
-        content = string.join(self.imageData[3:-1], '\n') + '\n'
+        content = '\n'.join(self.imageData[3:-1]) + '\n'
         strm = pdfdoc.PDFStream(dictionary=dict, content=content)
         return strm.format(document)
 
@@ -215,5 +213,5 @@ if __name__=='__main__':
     img = PDFImage(srcfile, 100, 100)
     import pprint
     doc = pdfdoc.PDFDocument()
-    print 'source=',img.source
-    print img.format(doc)
+    print('source=',img.source)
+    print(img.format(doc))

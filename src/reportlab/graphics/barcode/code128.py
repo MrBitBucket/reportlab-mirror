@@ -31,7 +31,8 @@
 #
 
 from reportlab.lib.units import inch
-from common import MultiWidthBarcode
+from reportlab.lib.utils import asNative
+from reportlab.graphics.barcode.common import MultiWidthBarcode
 from string import digits
 
 _patterns = {
@@ -166,7 +167,7 @@ setmap = {
     'START_B' : (startb, setb, seta),
     'START_C' : (startc, setc, None),
 }
-tos = setmap.keys()
+tos = list(setmap.keys())
 
 class Code128(MultiWidthBarcode):
     """
@@ -219,11 +220,9 @@ class Code128(MultiWidthBarcode):
     quiet = 1
     barHeight = None
     def __init__(self, value='', **args):
-
-        if type(value) is type(1):
-            value = str(value)
+        value = str(value) if isinstance(value,int) else asNative(value)
             
-        for (k, v) in args.items():
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:

@@ -28,8 +28,8 @@ class Rect(SolidShape):
 
 
 '''
-from UserDict import UserDict
-from reportlab.lib.validators import isAnything, _SequenceTypes, DerivedValue
+from reportlab.lib.validators import isAnything, DerivedValue
+from reportlab.lib.utils import isSeq
 from reportlab import rl_config
 
 class CallableValue:
@@ -60,32 +60,29 @@ class AttrMapValue:
             return self._initial
         elif name=='hidden':
             return 0
-        raise AttributeError, name
+        raise AttributeError(name)
 
     def __repr__(self):
-        return 'AttrMapValue(%s)' % ', '.join(['%s=%r' % i for i in self.__dict__.iteritems()])
+        return 'AttrMapValue(%s)' % ', '.join(['%s=%r' % i for i in self.__dict__.items()])
 
-class AttrMap(UserDict):
+class AttrMap(dict):
     def __init__(self,BASE=None,UNWANTED=[],**kw):
         data = {}
         if BASE:
             if isinstance(BASE,AttrMap):
-                data = BASE.data                        #they used BASECLASS._attrMap
+                data = BASE
             else:
-                if type(BASE) not in (type(()),type([])): BASE = (BASE,)
+                if not isSeq(BASE): BASE = (BASE,)
                 for B in BASE:
-                    if hasattr(B,'_attrMap'):
-                        data.update(getattr(B._attrMap,'data',{}))
+                    am = getattr(B,'_attrMap',self)
+                    if am is not self:
+                        if am: data.update(am)
                     else:
-                        raise ValueError, 'BASE=%s has wrong kind of value' % str(B)
+                        raise ValueError('BASE=%s has wrong kind of value' % ascii(B))
 
-        UserDict.__init__(self,data)
+        dict.__init__(self,data)
         self.remove(UNWANTED)
-        self.data.update(kw)
-
-    def update(self,kw):
-        if isinstance(kw,AttrMap): kw = kw.data
-        self.data.update(kw)
+        self.update(kw)
 
     def remove(self,unwanted):
         for k in unwanted:
@@ -113,9 +110,9 @@ def validateSetattr(obj,name,value):
                 try:
                     validate = map[name].validate
                     if not validate(value):
-                        raise AttributeError, "Illegal assignment of '%s' to '%s' in class %s" % (value, name, obj.__class__.__name__)
+                        raise AttributeError("Illegal assignment of '%s' to '%s' in class %s" % (value, name, obj.__class__.__name__))
                 except KeyError:
-                    raise AttributeError, "Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__)
+                    raise AttributeError("Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__))
     obj.__dict__[name] = value
 
 def _privateAttrMap(obj,ret=0):
@@ -134,7 +131,7 @@ def _privateAttrMap(obj,ret=0):
 def _findObjectAndAttr(src, P):
     '''Locate the object src.P for P a string, return parent and name of attribute
     '''
-    P = string.split(P, '.')
+    P = P.split('.')
     if len(P) == 0:
         return None, None
     else:
@@ -157,11 +154,11 @@ def addProxyAttribute(src,name,validate=None,desc=None,initial=None,dst=None):
     #sanity
     assert hasattr(src,'_attrMap'), 'src object has no _attrMap'
     A, oA = _privateAttrMap(src,1)
-    if type(dst) not in _SequenceTypes: dst = dst,
+    if not isSeq(dst): dst = dst,
     D = []
     DV = []
     for d in dst:
-        if type(d) in _SequenceTypes:
+        if isSeq(d):
             d, e = d[0], d[1:]
         obj, attr = _findObjectAndAttr(src,d)
         if obj:

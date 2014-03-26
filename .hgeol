@@ -17,7 +17,6 @@ native = LF
 **.py=native
 **.pyw=native
 **.pyx=native
-**.pyd=native
 **.tac=native
 **.tap=native
 **.c=native

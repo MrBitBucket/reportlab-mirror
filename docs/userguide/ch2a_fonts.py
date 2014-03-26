@@ -49,7 +49,7 @@ includes converters for all the common encodings, including Asian ones.
 
 
 
-disc(u"""
+disc("""
 If your data is not encoded as UTF8, you will get a UnicodeDecodeError as
 soon as you feed in a non-ASCII character.  For example, this snippet below is
 attempting to read in and print a series of names, including one with a French
@@ -57,7 +57,7 @@ accent:  ^Marc-Andr\u00e9 Lemburg^.  The standard error is quite helpful and tel
 what character it doesn't like:
 """)
 
-eg(u"""
+eg("""
 >>> from reportlab.pdfgen.canvas import Canvas
 >>> c = Canvas('temp.pdf')
 >>> y = 700
@@ -327,7 +327,7 @@ from reportlab.pdfbase.pdfmetrics import registerFontFamily
 registerFontFamily('Vera',normal='Vera',bold='VeraBd',italic='VeraIt',boldItalic='VeraBI')
 
 disc("""Before using the TT Fonts in Platypus we should add a mapping from the family name to the
-individual font names that describe the behaviour under the $<b>$ and $<i>$ attributes.""")
+individual font names that describe the behaviour under the $&lt;b&gt;$ and $&lt;i&gt;$ attributes.""")
 
 eg("""
 from reportlab.pdfbase.pdfmetrics import registerFontFamily

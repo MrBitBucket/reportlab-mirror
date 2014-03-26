@@ -4,28 +4,251 @@
 __version__=''' $Id$ '''
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
-import os, sys, imp, time
+import os, sys, imp, time, types
+from base64 import decodestring as base64_decodestring, encodestring as base64_encodestring
+try:
+    from cPickle import dumps as pickle_dumps, loads as pickle_loads, dump as pickle_dump, load as pickle_load
+except ImportError:
+    from pickle import dumps as pickle_dumps, loads as pickle_loads, dump as pickle_dump, load as pickle_load
+from reportlab import isPy3
+from reportlab.lib.logger import warnOnce
+from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
+
 try:
     from hashlib import md5
-except:
-    from md5 import md5
-from reportlab.lib.logger import warnOnce
-from rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
+except ImportError:
+    import md5
 
-def isSeqType(v,_st=(tuple,list)):
+def isFunction(v):
+    return type(v) == type(isFunction)
+
+class c:
+    def m(self): pass
+
+def isMethod(v,mt=type(c.m)):
+    return type(v) == mt
+del c
+
+def isModule(v):
+    return type(v) == type(sys)
+
+def isSeq(v,_st=(tuple,list)):
     return isinstance(v,_st)
 
-if sys.hexversion<0x2030000:
-    True = 1
-    False = 0
+def isNative(v):
+    return isinstance(v, str)
 
-if sys.hexversion >= 0x02000000:
+#isStr is supposed to be for arbitrary stringType
+#isBytes for bytes strings only
+#isUnicode for proper unicode
+if isPy3:
+    bytesT = bytes
+    unicodeT = str
+    strTypes = (str,bytes)
     def _digester(s):
-        return md5(s).hexdigest()
+        return md5(s if isBytes(s) else s.encode('utf8')).hexdigest()
+
+    def asBytes(v,enc='utf8'):
+        return v if isinstance(v,bytes) else v.encode(enc)
+
+    def asUnicode(v,enc='utf8'):
+        return v if isinstance(v,str) else v.decode(enc)
+
+    def asUnicodeEx(v,enc='utf8'):
+        return v if isinstance(v,str) else v.decode(enc) if isinstance(v,bytes) else str(v)
+
+    def asNative(v,enc='utf8'):
+        return asUnicode(v,enc=enc)
+
+    uniChr = chr
+
+    def int2Byte(i):
+        return bytes([i])
+
+    def isStr(v):
+        return isinstance(v, (str,bytes))
+
+    def isBytes(v):
+        return isinstance(v, bytes)
+
+    def isUnicode(v):
+        return isinstance(v, str)
+
+    def isClass(v):
+        return isinstance(v, type)
+
+    def isNonPrimitiveInstance(x):
+        return not isinstance(x,(float,int,type,tuple,list,dict,str,bytes,complex,bool,slice,
+            types.FunctionType,types.LambdaType,types.CodeType,
+            types.MappingProxyType,types.SimpleNamespace,
+            types.GeneratorType,types.MethodType,types.BuiltinFunctionType,
+            types.BuiltinMethodType,types.ModuleType,types.TracebackType,
+            types.FrameType,types.GetSetDescriptorType,types.MemberDescriptorType))
+
+    def instantiated(v):
+        return not isinstance(v,type)
+
+    from string import ascii_letters, ascii_uppercase, ascii_lowercase
+
+    from io import BytesIO, StringIO
+    def getBytesIO(buf=None):
+        '''unified StringIO instance interface'''
+        if buf:
+            return BytesIO(buf)
+        return BytesIO()
+    _bytesIOType = BytesIO 
+
+    def getStringIO(buf=None):
+        '''unified StringIO instance interface'''
+        if buf:
+            return StringIO(buf)
+        return StringIO()
+
+    def bytestr(x,enc='utf8'):
+        if isinstance(x,str):
+            return x.encode(enc)
+        elif isinstance(x,bytes):
+            return x
+        else:
+            return str(x).encode(enc)
+
+    def encode_label(args):
+        return base64_encodestring(pickle_dumps(args)).strip().decode('latin1')
+
+    def decode_label(label):
+        return pickle_loads(base64_decodestring(label.encode('latin1')))
+
+    def rawUnicode(s):
+        '''converts first 256 unicodes 1-1'''
+        return s.decode('latin1') if not isinstance(s,str) else s
+
+    def rawBytes(s):
+        '''converts first 256 unicodes 1-1'''
+        return s.encode('latin1') if isinstance(s,str) else s
+    import builtins
+    rl_exec = getattr(builtins,'exec')
+    del builtins
+    def char2int(s):
+        return  s if isinstance(s,int) else ord(s if isinstance(s,str) else s.decode('latin1'))
+    def rl_reraise(t, v, b=None):
+        if v.__traceback__ is not b:
+            raise v.with_traceback(b)
+        raise v
+    def rl_add_builtins(**kwd):
+        import builtins
+        for k,v in kwd.items():
+            setattr(builtins,k,v)
 else:
-    # hexdigest not available in 1.5
-    def _digester(s):
-        return join(map(lambda x : "%02x" % ord(x), md5(s).digest()), '')
+    bytesT = str
+    unicodeT = unicode
+    strTypes = basestring
+    if sys.hexversion >= 0x02000000:
+        def _digester(s):
+            return md5(s).hexdigest()
+    else:
+        # hexdigest not available in 1.5
+        def _digester(s):
+            return join(["%02x" % ord(x) for x in md5(s).digest()], '')
+
+    def asBytes(v,enc='utf8'):
+        return v if isinstance(v,str) else v.encode(enc)
+
+    def asNative(v,enc='utf8'):
+        return asBytes(v,enc=enc)
+
+    def uniChr(v):
+        return unichr(v)
+
+    def isStr(v):
+        return isinstance(v, basestring)
+
+    def isBytes(v):
+        return isinstance(v, str)
+
+    def isUnicode(v):
+        return isinstance(v, unicode)
+
+    def asUnicode(v,enc='utf8'):
+        return v if isinstance(v,unicode) else v.decode(enc)
+
+    def asUnicodeEx(v,enc='utf8'):
+        return v if isinstance(v,unicode) else v.decode(enc) if isinstance(v,str) else  unicode(v)
+
+    def isClass(v):
+        return isinstance(v,(types.ClassType,type))
+
+    def isNonPrimitiveInstance(x):
+        return isinstance(x,types.InstanceType) or not isinstance(x,(float,int,long,type,tuple,list,dict,bool,unicode,str,buffer,complex,slice,
+                    types.FunctionType,types.LambdaType,types.CodeType,types.GeneratorType,
+                    types.ClassType,types.UnboundMethodType,types.MethodType,types.BuiltinFunctionType,
+                    types.BuiltinMethodType,types.ModuleType,types.FileType,types.XRangeType,
+                    types.TracebackType,types.FrameType,types.EllipsisType,types.DictProxyType,
+                    types.NotImplementedType,types.GetSetDescriptorType,types.MemberDescriptorType
+                    ))
+
+    def instantiated(v):
+        return not isinstance(v,type) and hasattr(v,'__class__')
+
+    int2Byte = chr
+
+    from StringIO import StringIO
+    def getBytesIO(buf=None):
+        '''unified StringIO instance interface'''
+        if buf:
+            return StringIO(buf)
+        return StringIO()
+    getStringIO = getBytesIO
+    _bytesIOType = StringIO 
+
+    def bytestr(x,enc='utf8'):
+        if isinstance(x,unicode):
+            return x.encode(enc)
+        elif isinstance(x,str):
+            return x
+        else:
+            return str(x).encode(enc)
+    from string import letters as ascii_letters, uppercase as ascii_uppercase, lowercase as ascii_lowercase
+
+    def encode_label(args):
+        return base64_encodestring(pickle_dumps(args)).strip()
+
+    def decode_label(label):
+        return pickle_loads(base64_decodestring(label))
+
+    def rawUnicode(s):
+        '''converts first 256 unicodes 1-1'''
+        return s.decode('latin1') if not isinstance(s,unicode) else s
+
+    def rawBytes(s):
+        '''converts first 256 unicodes 1-1'''
+        return s.encode('latin1') if isinstance(s,unicode) else s
+
+    def rl_exec(obj, G=None, L=None):
+        if G is None:
+            frame = sys._getframe(1)
+            G = frame.f_globals
+            if L is None:
+                L = frame.f_locals
+            del frame
+        elif L is None:
+            L = G
+        exec("""exec obj in G, L""")
+    rl_exec("""def rl_reraise(t, v, b=None):\n\traise t, v, b\n""")
+
+    char2int = ord
+    def rl_add_builtins(**kwd):
+        import __builtin__
+        for k,v in kwd.items():
+            setattr(__builtin__,k,v)
+
+def zipImported(ldr=None):
+    try:
+        if not ldr:
+            ldr = sys._getframe(1).f_globals['__loader__']
+        from zipimport import zipimporter
+        return ldr if isinstance(ldr,zipimporter) else None
+    except:
+        return None
 
 def _findFiles(dirList,ext='.ttf'):
     from os.path import isfile, isdir, join as path_join
@@ -40,12 +263,7 @@ def _findFiles(dirList,ext='.ttf'):
             if isfile(fn) and (not ext or fn.lower().endswith(ext)): A(fn)
     return R
 
-try:
-    _UserDict = dict
-except:
-    from UserDict import UserDict as _UserDict
-
-class CIDict(_UserDict):
+class CIDict(dict):
     def __init__(self,*args,**kwds):
         for a in args: self.update(a)
         self.update(kwds)
@@ -58,21 +276,21 @@ class CIDict(_UserDict):
             k = k.lower()
         except:
             pass
-        _UserDict.__setitem__(self,k,v)
+        dict.__setitem__(self,k,v)
 
     def __getitem__(self,k):
         try:
             k = k.lower()
         except:
             pass
-        return _UserDict.__getitem__(self,k)
+        return dict.__getitem__(self,k)
 
     def __delitem__(self,k):
         try:
             k = k.lower()
         except:
             pass
-        return _UserDict.__delitem__(self,k)
+        return dict.__delitem__(self,k)
 
     def get(self,k,dv=None):
         try:
@@ -92,14 +310,14 @@ class CIDict(_UserDict):
             k = k.lower()
         except:
             pass
-        return _UserDict.pop(*((self,k)+a))
+        return dict.pop(*((self,k)+a))
 
     def setdefault(self,k,*a):
         try:
             k = k.lower()
         except:
             pass
-        return _UserDict.setdefault(*((self,k)+a))
+        return dict.setdefault(*((self,k)+a))
 
 if os.name == 'mac':
     #with the Mac, we need to tag the file in a special
@@ -189,7 +407,7 @@ try:
         c, pfn = __startswith_rl(pattern)
         r = glob(pfn)
         if c or r==[]:
-            r += map(lambda x,D=_archivepfx,pjoin=pjoin: pjoin(_archivepfx,x),filter(lambda x,pfn=pfn,fnmatch=fnmatch: fnmatch(x,pfn),__loader__._files.keys()))
+            r += list(map(lambda x,D=_archivepfx,pjoin=pjoin: pjoin(_archivepfx,x),list(filter(lambda x,pfn=pfn,fnmatch=fnmatch: fnmatch(x,pfn),list(__loader__._files.keys())))))
         return r
 except:
     _isFSD = os.path.isfile(__file__)   #slight risk of wrong path
@@ -213,54 +431,12 @@ def isSourceDistro():
     '''return truth if a source file system distribution'''
     return _isFSSD
 
-try:
-    #raise ImportError
-    ### NOTE!  FP_STR SHOULD PROBABLY ALWAYS DO A PYTHON STR() CONVERSION ON ARGS
-    ### IN CASE THEY ARE "LAZY OBJECTS".  ACCELLERATOR DOESN'T DO THIS (YET)
-    try:
-        from _rl_accel import fp_str                # in case of builtin version
-    except ImportError:
-        from reportlab.lib._rl_accel import fp_str  # specific
-except ImportError:
-    from math import log
-    _log_10 = lambda x,log=log,_log_e_10=log(10.0): log(x)/_log_e_10
-    _fp_fmts = "%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f", "%.6f"
-    import re
-    _tz_re = re.compile('0+$')
-    del re
-    def fp_str(*a):
-        '''convert separate arguments (or single sequence arg) into space separated numeric strings'''
-        if len(a)==1 and isSeqType(a[0]): a = a[0]
-        s = []
-        A = s.append
-        for i in a:
-            sa =abs(i)
-            if sa<=1e-7: A('0')
-            else:
-                l = sa<=1 and 6 or min(max(0,(6-int(_log_10(sa)))),6)
-                n = _fp_fmts[l]%i
-                if l:
-                    n = _tz_re.sub('',n)
-                    try:
-                        if n[-1]=='.': n = n[:-1]
-                    except:
-                        print i, n
-                        raise
-                A((n[0]!='0' or len(n)==1) and n or n[1:])
-        return ' '.join(s)
-
-#hack test for comma users
-if ',' in fp_str(0.25):
-    _FP_STR = fp_str
-    def fp_str(*a):
-        return _FP_STR(*a).replace(',','.')
-
 def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
     normalize = lambda x: os.path.normcase(os.path.abspath(os.path.normpath(x)))
-    path = map(normalize,sys.path)
+    path = [normalize(p) for p in sys.path]
     if baseDir:
-        if not isSeqType(baseDir):
+        if not isSeq(baseDir):
             tp = [baseDir]
         else:
             tp = filter(None,list(baseDir))
@@ -271,7 +447,7 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     if noCWD:
         for p in ('','.',normalize('.')):
             while p in path:
-                if debug: print 'removed "%s" from path' % p
+                if debug: print('removed "%s" from path' % p)
                 path.remove(p)
     elif '.' not in path:
             path.insert(0,'.')
@@ -279,27 +455,29 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     if debug:
         import pprint
         pp = pprint.pprint
-        print 'path=',
+        print('path=')
         pp(path)
 
     #make import errors a bit more informative
     opath = sys.path
     try:
-        sys.path = path
-        exec 'import %s\nm = %s\n' % (modulename,modulename) in locals()
+        try:
+            sys.path = path
+            NS = {}
+            rl_exec('import %s as m' % modulename,NS)
+            return NS['m']
+        except ImportError:
+            sys.path = opath
+            msg = "Could not import '%s'" % modulename
+            if baseDir:
+                msg = msg + " under %s" % baseDir
+            annotateException(msg)
+        except:
+            e = sys.exc_info()
+            msg = "Exception raised while importing '%s': %s" % (modulename, e[1])
+            annotateException(msg)
+    finally:
         sys.path = opath
-        return m
-    except ImportError:
-        sys.path = opath
-        msg = "Could not import '%s'" % modulename
-        if baseDir:
-            msg = msg + " under %s" % baseDir
-        raise ImportError, msg
-
-    except Exception, e:
-        msg = "Exception raised while importing '%s': %s" % (modulename, e.message)
-        raise ImportError, msg
-        
 
 def recursiveGetAttr(obj, name):
     "Can call down into e.g. object1.object2[4].attr"
@@ -347,15 +525,6 @@ else:
             Image = None
     haveImages = Image is not None
 
-try:
-    from cStringIO import StringIO as __StringIO
-except ImportError:
-    from StringIO import StringIO as __StringIO
-def getStringIO(buf=None):
-    '''unified StringIO instance interface'''
-    return buf is not None and __StringIO(buf) or __StringIO()
-_StringIOKlass=__StringIO().__class__
-
 class ArgvDictValue:
     '''A type to allow clients of getArgvDict to specify a conversion function'''
     def __init__(self,value,func):
@@ -371,8 +540,7 @@ def getArgvDict(**kw):
         if func:
             v = func(av)
         else:
-            if isinstance(v,basestring):
-                if isinstance(v,unicode): v = v.encode('utf8')
+            if isStr(v):
                 v = av
             elif isinstance(v,float):
                 v = float(av)
@@ -412,7 +580,7 @@ def getHyphenater(hDict=None):
         from reportlab.lib.pyHnj import Hyphen
         if hDict is None: hDict=os.path.join(os.path.dirname(__file__),'hyphen.mashed')
         return Hyphen(hDict)
-    except ImportError, errMsg:
+    except ImportError as errMsg:
         if str(errMsg)!='No module named pyHnj': raise
         return None
 
@@ -437,20 +605,26 @@ def open_for_read_by_name(name,mode='b'):
         name = _startswith_rl(name)
         s = __loader__.get_data(name)
         if 'b' not in mode and os.linesep!='\n': s = s.replace(os.linesep,'\n')
-        return getStringIO(s)
+        return getBytesIO(s)
 
-import urllib2
-def open_for_read(name,mode='b', urlopen=urllib2.urlopen):
+try:
+    import urllib2
+    urlopen=urllib2.urlopen
+except ImportError:
+    import urllib.request
+    urlopen=urllib.request.urlopen
+
+def open_for_read(name,mode='b', urlopen=urlopen):
     '''attempt to open a file or URL for reading'''
     if hasattr(name,'read'): return name
     try:
         return open_for_read_by_name(name,mode)
     except:
         try:
-            return getStringIO(urlopen(name).read())
+            return getBytesIO(urlopen(name).read())
         except:
             raise IOError('Cannot open resource "%s"' % name)
-del urllib2
+del urlopen
 
 def open_and_read(name,mode='b'):
     return open_for_read(name,mode).read()
@@ -463,14 +637,14 @@ def rl_isfile(fn,os_path_isfile=os.path.isfile):
     if os_path_isfile(fn): return True
     if _isFSD or __loader__ is None: return False
     fn = _startswith_rl(fn)
-    return fn in __loader__._files.keys()
+    return fn in list(__loader__._files.keys())
 
 def rl_isdir(pn,os_path_isdir=os.path.isdir,os_path_normpath=os.path.normpath):
     if os_path_isdir(pn): return True
     if _isFSD or __loader__ is None: return False
     pn = _startswith_rl(os_path_normpath(pn))
     if not pn.endswith(os.sep): pn += os.sep
-    return len(filter(lambda x,pn=pn: x.startswith(pn),__loader__._files.keys()))>0
+    return len(list(filter(lambda x,pn=pn: x.startswith(pn),list(__loader__._files.keys()))))>0
 
 def rl_listdir(pn,os_path_isdir=os.path.isdir,os_path_normpath=os.path.normpath,os_listdir=os.listdir):
     if os_path_isdir(pn) or _isFSD or __loader__ is None: return os_listdir(pn)
@@ -547,7 +721,7 @@ class ImageReader(object):
             try:
                 from reportlab.rl_config import imageReaderFlags
                 self.fp = open_for_read(fileName,'b')
-                if isinstance(self.fp,_StringIOKlass):  imageReaderFlags=0 #avoid messing with already internal files
+                if isinstance(self.fp,_bytesIOType): imageReaderFlags=0 #avoid messing with already internal files
                 if imageReaderFlags>0:  #interning
                     data = self.fp.read()
                     if imageReaderFlags&2:  #autoclose
@@ -559,9 +733,9 @@ class ImageReader(object):
                         if not self._cache:
                             from rl_config import register_reset
                             register_reset(self._cache.clear)
-                        data=self._cache.setdefault(md5(data).digest(),data)
-                    self.fp=getStringIO(data)
-                elif imageReaderFlags==-1 and isinstance(fileName,(str,unicode)):
+                        data=self._cache.setdefault(_digester(data),data)
+                    self.fp=getBytesIO(data)
+                elif imageReaderFlags==-1 and isinstance(fileName,str):
                     #try Ralf Schmitt's re-opening technique of avoiding too many open files
                     self.fp.close()
                     del self.fp #will become a property in the next statement
@@ -587,7 +761,7 @@ class ImageReader(object):
     def identity(self):
         '''try to return information that will identify the instance'''
         fn = self.fileName
-        if not isinstance(fn,basestring):
+        if not isStr(fn):
             fn = getattr(getattr(self,'fp',None),'name',None)
         ident = self._ident
         return '[%s@%s%s%s]' % (self.__class__.__name__,hex(id(self)),ident and (' ident=%r' % ident) or '',fn and (' filename=%r' % fn) or '')
@@ -676,7 +850,10 @@ class ImageReader(object):
                         palette = palette.data
                     except:
                         return None
-                return map(ord, palette[transparency:transparency+3])
+                if isPy3:
+                    return palette[transparency:transparency+3]
+                else:
+                    return [ord(c) for c in palette[transparency:transparency+3]]
             else:
                 return None
 
@@ -736,7 +913,7 @@ class DebugMemo:
         self.store = store = {}
         if capture_traceback and sys.exc_info() != (None,None,None):
             import traceback
-            s = getStringIO()
+            s = getBytesIO()
             traceback.print_exc(None,s)
             store['__traceback'] = s.getvalue()
         cwd=os.getcwd()
@@ -753,7 +930,7 @@ class DebugMemo:
         except:
             pass
         env = os.environ
-        K=env.keys()
+        K=list(env.keys())
         K.sort()
         store.update({  'gmt': time.asctime(time.gmtime(time.time())),
                         'platform': sys.platform,
@@ -769,7 +946,6 @@ class DebugMemo:
                         'lcwd': lcwd,
                         'lpcwd': lpcwd,
                         'byteorder': sys.byteorder,
-                        'maxint': sys.maxint,
                         'maxint': getattr(sys,'maxunicode','????'),
                         'api_version': getattr(sys,'api_version','????'),
                         'version_info': getattr(sys,'version_info','????'),
@@ -807,8 +983,8 @@ class DebugMemo:
         for n,m in sys.modules.items():
             if n=='reportlab' or n=='rlextra' or n[:10]=='reportlab.' or n[:8]=='rlextra.':
                 v = [getattr(m,x,None) for x in ('__version__','__path__','__file__')]
-                if filter(None,v):
-                    v = [v[0]] + filter(None,v[1:])
+                if [_f for _f in v if _f]:
+                    v = [v[0]] + [_f for _f in v[1:] if _f]
                     module_versions[n] = tuple(v)
         store['__module_versions'] = module_versions
         self.store['__payload'] = {}
@@ -823,20 +999,19 @@ class DebugMemo:
         self._add(kw)
 
     def _dump(self,f):
-        import pickle
         try:
             pos=f.tell()
-            pickle.dump(self.store,f)
+            pickle_dump(self.store,f)
         except:
             S=self.store.copy()
-            ff=getStringIO()
-            for k,v in S.iteritems():
+            ff=getBytesIO()
+            for k,v in S.items():
                 try:
-                    pickle.dump({k:v},ff)
+                    pickle_dump({k:v},ff)
                 except:
                     S[k] = '<unpicklable object %r>' % v
             f.seek(pos,0)
-            pickle.dump(S,f)
+            pickle_dump(S,f)
 
     def dump(self):
         f = open(self.fn,'wb')
@@ -846,13 +1021,12 @@ class DebugMemo:
             f.close()
 
     def dumps(self):
-        f = getStringIO()
+        f = getBytesIO()
         self._dump(f)
         return f.getvalue()
 
     def _load(self,f):
-        import pickle
-        self.store = pickle.load(f)
+        self.store = pickle_load(f)
 
     def load(self):
         f = open(self.fn,'rb')
@@ -862,17 +1036,18 @@ class DebugMemo:
             f.close()
 
     def loads(self,s):
-        self._load(getStringIO(s))
+        self._load(getBytesIO(s))
 
     def _show_module_versions(self,k,v):
         self._writeln(k[2:])
-        K = v.keys()
+        K = list(v.keys())
         K.sort()
         for k in K:
             vk = vk0 = v[k]
             if isinstance(vk,tuple): vk0 = vk[0]
             try:
-                m = recursiveImport(k,sys.path[:],1)
+                __import__(k)
+                m = sys.modules[k]
                 d = getattr(m,'__version__',None)==vk0 and 'SAME' or 'DIFFERENT'
             except:
                 m = None
@@ -908,7 +1083,8 @@ class DebugMemo:
         for mn in ('_rl_accel','_renderPM','sgmlop','pyRXP','pyRXPU','_imaging','Image'):
             try:
                 A = [mn].append
-                m = recursiveImport(mn,sys.path[:],1)
+                __import__(mn)
+                m = sys.modules[mn]
                 A(m.__file__)
                 for vn in ('__version__','VERSION','_version','version'):
                     if hasattr(m,vn):
@@ -923,12 +1099,12 @@ class DebugMemo:
                 '__script': _show_file,
                 }
     def show(self):
-        K = self.store.keys()
+        K = list(self.store.keys())
         K.sort()
         for k in K:
-            if k not in self.specials.keys(): self._writeln('%-15s = %s' % (k,self.store[k]))
+            if k not in list(self.specials.keys()): self._writeln('%-15s = %s' % (k,self.store[k]))
         for k in K:
-            if k in self.specials.keys(): self.specials[k](self,k,self.store[k])
+            if k in list(self.specials.keys()): self.specials[k](self,k,self.store[k])
         self._show_extensions()
 
     def payload(self,name):
@@ -945,7 +1121,7 @@ class DebugMemo:
 
 def _flatten(L,a):
     for x in L:
-        if isSeqType(x): _flatten(x,a)
+        if isSeq(x): _flatten(x,a)
         else: a(x)
 
 def flatten(L):
@@ -999,7 +1175,7 @@ def _simpleSplit(txt,mW,SW):
 
 def simpleSplit(text,fontName,fontSize,maxWidth):
     from reportlab.pdfbase.pdfmetrics import stringWidth
-    lines = text.split('\n')
+    lines = asUnicode(text).split(u'\n')
     SW = lambda text, fN=fontName, fS=fontSize: stringWidth(text, fN, fS)
     if maxWidth:
         L = []
@@ -1013,22 +1189,37 @@ def escapeTextOnce(text):
     from xml.sax.saxutils import escape
     if text is None:
         return text
+    if isBytes(text): s = text.decode('utf8')
     text = escape(text)
-    text = text.replace('&amp;amp;', '&amp;')
-    text = text.replace('&amp;gt;', '&gt;')
-    text = text.replace('&amp;lt;', '&lt;')
+    text = text.replace(u'&amp;amp;',u'&amp;')
+    text = text.replace(u'&amp;gt;', u'&gt;')
+    text = text.replace(u'&amp;lt;', u'&lt;')
     return text
 
-def fileName2Utf8(fn):
-    '''attempt to convert a filename to utf8'''
-    from reportlab.rl_config import fsEncodings
-    for enc in fsEncodings:
-        try:
-            return fn.decode(enc).encode('utf8')
-        except:
-            pass
-    raise ValueError('cannot convert %r to utf8' % fn)
-
+if isPy3:
+    def fileName2FSEnc(fn):
+        if isUnicode(fn):
+            return  fn
+        else:
+            for enc in fsEncodings:
+                try:
+                    return fn.decode(enc)
+                except:
+                    pass
+        raise ValueError('cannot convert %r to filesystem encoding' % fn)
+else:
+    def fileName2FSEnc(fn):
+        '''attempt to convert a filename to utf8'''
+        from reportlab.rl_config import fsEncodings
+        if isUnicode(fn):
+            return asBytes(fn)
+        else:
+            for enc in fsEncodings:
+                try:
+                    return fn.decode(enc).encode('utf8')
+                except:
+                    pass
+        raise ValueError('cannot convert %r to utf8 for file path name' % fn)
 
 import itertools
 def prev_this_next(items):
@@ -1050,12 +1241,12 @@ def prev_this_next(items):
     extend = itertools.chain([None], items, [None])
     prev, this, next = itertools.tee(extend, 3)
     try:
-        this.next()
-        next.next()
-        next.next()
+        next(this)
+        next(next)
+        next(next)
     except StopIteration:
         pass
-    return itertools.izip(prev, this, next)
+    return zip(prev, this, next)
 
 def commasplit(s):
     '''
@@ -1064,25 +1255,25 @@ def commasplit(s):
     To avoid the ambiguity of 3 successive commas to denote a comma at the beginning
     or end of an item, add a space between the item seperator and the escaped comma.
     
-    >>> commasplit('a,b,c')
-    ['a', 'b', 'c']
-    >>> commasplit('a,, , b , c    ')
-    ['a,', 'b', 'c']
-    >>> commasplit('a, ,,b, c')
-    ['a', ',b', 'c']
+    >>> commasplit(u'a,b,c') == [u'a', u'b', u'c']
+    True
+    >>> commasplit('a,, , b , c    ') == [u'a,', u'b', u'c']
+    True
+    >>> commasplit(u'a, ,,b, c') == [u'a', u',b', u'c']
     '''
+    if isBytes(s): s = s.decode('utf8')
     n = len(s)-1
-    s += ' '
+    s += u' '
     i = 0
-    r=['']
+    r=[u'']
     while i<=n:
-        if s[i]==',':
-            if s[i+1]==',':
-                r[-1]+=','
+        if s[i]==u',':
+            if s[i+1]==u',':
+                r[-1]+=u','
                 i += 1
             else:
                 r[-1] = r[-1].strip()
-                if i!=n: r.append('')
+                if i!=n: r.append(u'')
         else:
             r[-1] += s[i]
         i+=1
@@ -1094,14 +1285,13 @@ def commajoin(l):
     Inverse of commasplit, except that whitespace around items is not conserved.
     Adds more whitespace than needed for simplicity and performance.
     
-    >>> commasplit(commajoin(['a', 'b', 'c']))
-    ['a', 'b', 'c']
-    >>> commasplit((commajoin(['a,', ' b ', 'c']))
-    ['a,', 'b', 'c']
-    >>> commasplit((commajoin(['a ', ',b', 'c']))
-    ['a', ',b', 'c']    
+    >>> commasplit(commajoin(['a', 'b', 'c'])) == [u'a', u'b', u'c']
+    True
+    >>> commasplit((commajoin([u'a,', u' b ', u'c'])) == [u'a,', u'b', u'c']
+    True
+    >>> commasplit((commajoin([u'a ', u',b', u'c'])) == [u'a', u',b', u'c'] 
     '''
-    return ','.join([ ' ' + i.replace(',', ',,') + ' ' for i in l ])
+    return u','.join([ u' ' + asUnicode(i).replace(u',', u',,') + u' ' for i in l ])
 
 def findInPaths(fn,paths,isfile=True,fail=False):
     '''search for relative files in likely places'''
@@ -1124,18 +1314,19 @@ def annotateException(msg,enc='utf8'):
     e = -1
     A = list(v.args)
     for i,a in enumerate(A):
-        if isinstance(a,basestring):
+        if isinstance(a,str):
             e = i
             break
     if e>=0:
-        if isinstance(a,unicode):
-            if not isinstance(msg,unicode):
-                msg=msg.decode(enc)
-        else:
-            if isinstance(msg,unicode):
-                msg=msg.encode(enc)
+        if not isPy3:
+            if isUnicode(a):
+                if not isUnicode(msg):
+                    msg=msg.decode(enc)
             else:
-                msg = str(msg)
+                if isUnicode(msg):
+                    msg=msg.encode(enc)
+                else:
+                    msg = str(msg)
         if isinstance(v,IOError) and getattr(v,'strerror',None):
             v.strerror = msg+'\n'+str(v.strerror)
         else:
@@ -1143,8 +1334,8 @@ def annotateException(msg,enc='utf8'):
     else:
         A.append(msg)
     v.args = tuple(A)
-    raise t,v,b
-    
+    rl_reraise(t,v,b)
+
 def escapeOnce(data):
     """Ensure XML output is escaped just once, irrespective of input
 
@@ -1171,7 +1362,7 @@ def escapeOnce(data):
     data = data.replace("&amp;gt;", "&gt;")
     data = data.replace("&amp;lt;", "&lt;")
     return data
-
+    
 class IdentStr(str):
     '''useful for identifying things that get split'''
     def __new__(cls,value):
@@ -1193,13 +1384,12 @@ class RLString(str):
     '''
     def __new__(cls,v,**kwds):
         self = str.__new__(cls,v)
-        for k,v in kwds.iteritems():
+        for k,v in kwds.items():
             setattr(self,k,v)
         return self
 
 def makeFileName(s):
     '''force filename strings to unicode so python can handle encoding stuff'''
-    assert isinstance(s,basestring),"filename is %r should be str or unicode" % s
-    if isinstance(s,str):
+    if not isUnicode(s):
         s = s.decode('utf8')
     return s

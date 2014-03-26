@@ -1,5 +1,4 @@
 import struct
-from types import StringType
 class _BUILDER:
 	'''Virtual base helper class for structured file scanning'''
 	def _get_struct_fmt(self,info):
@@ -19,15 +18,15 @@ class _BUILDER:
 
 	def _dump(self,A):
 		for a in A:
-			print a, getattr(self,a)
+			print(a, getattr(self,a))
 
 	def _attr_names(self,*I):
 		A = []
 		for i in I:
-			if type(i) is StringType:
+			if isinstance(i,str):
 				A.append(i)
 			else:
-				A.extend(map(lambda x: x[1],i))
+				A.extend([x[1] for x in i])
 		return A
 
 	def _scanZTStr(self,f,loc):
@@ -60,7 +59,7 @@ class _BUILDER:
 				X.append(S)
 				i = 0
 				S = []
-		return map(lambda x,T=T: T(*x),X)
+		return list(map(lambda x,T=T: T(*x),X))
 
 class KernPair:
 	'''hold info about a possible kerning pair'''
@@ -90,7 +89,7 @@ class KernTrack:
 class PFM(_BUILDER):
 	def __init__(self,fn=None):
 		if fn:
-			if type(fn) is StringType:
+			if isinstance(fn,str):
 				f = open(fn,'rb')
 			else:
 				f = fn
@@ -100,11 +99,11 @@ class PFM(_BUILDER):
 	'''Class to hold information scanned from a type-1 .pfm file'''
 	def scan_from_file(self,f):
 		self._scan_from_file(f,self._header_struct_info)
-		if self.dfType!=0x81: raise ValueError, "Not a Type-1 Font description"
+		if self.dfType!=0x81: raise ValueError("Not a Type-1 Font description")
 		else: self.WidthTable = None
 		self._scan_from_file(f,self._extension_struct_info)
-		if not self.dfExtentTable: raise ValueError, 'dfExtentTable is zero'
-		if not self.dfExtMetricsOffset: raise ValueError, 'dfExtMetricsOffset is zero'
+		if not self.dfExtentTable: raise ValueError('dfExtentTable is zero')
+		if not self.dfExtMetricsOffset: raise ValueError('dfExtMetricsOffset is zero')
 		if self.dfDevice: self.DeviceName = self._scanZTStr(f,self.dfDevice)
 		else: self.DeviceName = None
 		if self.dfFace: self.FaceName = self._scanZTStr(f,self.dfFace)
@@ -611,6 +610,6 @@ a KerningTracks table the value is zero. '''),
 if __name__=='__main__':
 	from glob import glob
 	for f in glob('/Program Files/Adobe/Acrobat 4.0/resource/font/pfm/*.pfm'):
-		print f
+		print(f)
 		p=PFM(f)
 		p.dump()

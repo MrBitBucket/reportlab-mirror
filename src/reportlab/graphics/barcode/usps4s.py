@@ -4,7 +4,8 @@ __version__=''' $Id$ '''
 __all__ = ('USPS_4State',)
 
 from reportlab.lib.colors import black
-from common import Barcode
+from reportlab.graphics.barcode.common import Barcode
+from reportlab.lib.utils import asNative
 
 class USPS_4State(Barcode):
     ''' USPS 4-State OneView (TM) barcode. All info from USPS-B-3200A
@@ -34,8 +35,9 @@ class USPS_4State(Barcode):
 
     def __init__(self,value='01234567094987654321',routing='',**kwd):
         self._init()
-        self.tracking = value
-        self.routing = routing
+        value = str(value) if isinstance(value,int) else asNative(value)
+        self._tracking = value
+        self._routing = routing
         self._setKeywords(**kwd)
 
     def _init(self):
@@ -125,7 +127,7 @@ class USPS_4State(Barcode):
                 svalue = tracking[j:i]
                 try:
                     if len(svalue)!=nd: raise ValueError
-                    for j in xrange(nd):
+                    for j in range(nd):
                         value *= 10
                         value += int(svalue[j])
                 except:
@@ -150,7 +152,7 @@ class USPS_4State(Barcode):
             A, D = divmod(A,1365)
             A, C = divmod(A,1365)
             A, B = divmod(A,1365)
-            assert 0<=A<=658, 'improper value %s passed to _2codewords A-->%s' % (hex(long(value)),A)
+            assert 0<=A<=658, 'improper value %s passed to _2codewords A-->%s' % (hex(int(value)),A)
             self._fcs = _crc11(value)
             if self._fcs&1024: A += 659
             J *= 2
@@ -181,7 +183,7 @@ class USPS_4State(Barcode):
             aC = C.append
             table1 = self.table1
             table2 = self.table2
-            for i in xrange(10):
+            for i in range(10):
                 cw = codewords[i]
                 if cw<=1286:
                     c = table1[cw]
@@ -313,12 +315,12 @@ def _crc11(value):
     >>> print ' '.join(hex(_crc11(USPS_4State('01234567094987654321',x).binary)) for x in ('','01234','012345678','01234567891'))
     0x51 0x65 0x606 0x751
     '''
-    bytes = hex(long(value))[2:-1]
+    bytes = hex(int(value))[2:-1]
     bytes = '0'*(26-len(bytes))+bytes
     gp = 0x0F35
     fcs = 0x07FF
     data = int(bytes[:2],16)<<5
-    for b in xrange(2,8):
+    for b in range(2,8):
         if (fcs ^ data)&0x400:
             fcs = (fcs<<1)^gp
         else:
@@ -326,9 +328,9 @@ def _crc11(value):
         fcs &= 0x7ff
         data <<= 1
 
-    for x in xrange(2,2*13,2):
+    for x in range(2,2*13,2):
         data = int(bytes[x:x+2],16)<<3
-        for b in xrange(8):
+        for b in range(8):
             if (fcs ^ data)&0x400:
                 fcs = (fcs<<1)^gp
             else:
@@ -343,7 +345,7 @@ def _ru13(i):
     31 7936 7808 47
     '''
     r = 0
-    for x in xrange(13):
+    for x in range(13):
         r <<= 1
         r |= i & 1
         i >>= 1
@@ -358,9 +360,9 @@ def _initNof13Table(N,lenT):
     T = lenT*[None]
     l = 0
     u = lenT-1
-    for c in xrange(8192):
+    for c in range(8192):
         bc = 0
-        for b in xrange(13):
+        for b in range(13):
             bc += (c&(1<<b))!=0
         if bc!=N: continue
         r = _ru13(c)

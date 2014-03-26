@@ -13,7 +13,7 @@ This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
 
-import copy
+import copy, functools
 from math import sin, cos, pi
 
 from reportlab.lib import colors
@@ -256,7 +256,7 @@ def findOverlapRun(B,wrap=1):
     '''determine a set of overlaps in bounding boxes B or return None'''
     n = len(B)
     if n>1:
-        for i in xrange(n-1):
+        for i in range(n-1):
             R = _findOverlapRun(B,i,wrap)
             if len(R)>1: return R
     return None
@@ -353,10 +353,14 @@ def _makeSideArcDefs(sa,direction):
             a = (1,sa,offs+90),(0,offs+90,offs+270),(1,offs+270,360+sa)
     return tuple([a for a in a if a[1]<a[2]])
 
+def _keyFLA(x,y):
+    return cmp(y[1]-y[0],x[1]-x[0])
+_keyFLA = functools.cmp_to_key(_keyFLA)
+
 def _findLargestArc(xArcs,side):
     a = [a[1] for a in xArcs if a[0]==side and a[1] is not None]
     if not a: return None
-    if len(a)>1: a.sort(lambda x,y: cmp(y[1]-y[0],x[1]-x[0]))
+    if len(a)>1: a.sort(key=_keyFLA)
     return a[0]
 
 def _fPLSide(l,width,side=None):
@@ -392,11 +396,13 @@ def _fPLSide(l,width,side=None):
     data['side'] = side
     return side,w
 
-def _fPLCF(a,b):
+#key functions
+def _fPLCF(a,b): 
     return cmp(b._origdata['smid'],a._origdata['smid'])
+_fPLCF = functools.cmp_to_key(_fPLCF)
 
-def _arcCF(a,b):
-    return cmp(a[1],b[1])
+def _arcCF(a):
+    return a[1]
 
 def _fixPointerLabels(n,L,x,y,width,height,side=None):
     LR = [],[]
@@ -418,7 +424,7 @@ def _fixPointerLabels(n,L,x,y,width,height,side=None):
             aB = B.append
             S = []
             aS = S.append
-            T.sort(_fPLCF)
+            T.sort(key=_fPLCF)
             p = 0
             yh = y+height
             for l in T:
@@ -481,7 +487,7 @@ def theta0(data, direction):
     vstar = len(data)*1e6
     rstar = 0
     delta = pi/36.0
-    for i in xrange(36):
+    for i in range(36):
         r = i*delta
         v = sum([abs(sin(r+a)) for a in hrads])
         if v < vstar:
@@ -658,7 +664,7 @@ class Pie(AbstractPieChart):
         return PL(centerx,centery,xradius,yradius,G,lu,ru)
 
     def normalizeData(self,keepData=False):
-        data = map(abs,self.data)
+        data = list(map(abs,self.data))
         s = self._sum = float(sum(data))
         if s<=1e-8: s = 0
         f = 360./s
@@ -678,7 +684,7 @@ class Pie(AbstractPieChart):
         D = [a for a in enumerate(self.normalizeData(keepData=wr))]
         if self.orderMode=='alternate' and not self.sideLabels:
             W = [a for a in D if abs(a[1])>=1e-5]
-            W.sort(_arcCF)
+            W.sort(key=_arcCF)
             T = [[],[]]
             i = 0
             while W:
@@ -968,7 +974,7 @@ class LegendedPie(Pie):
         self.legend1.columnMaximum = 7
         self.legend1.alignment = 'right'
         self.legend_names = ['AAA:','AA:','A:','BBB:','NR:']
-        for f in xrange(len(self.data)):
+        for f in range(len(self.data)):
             self.legend1.colorNamePairs.append((self.pieAndLegend_colors[f], self.legend_names[f]))
         self.legend1.fontName = "Helvetica-Bold"
         self.legend1.fontSize = 6
@@ -993,7 +999,7 @@ class LegendedPie(Pie):
         if self.drawLegend:
             self.legend1.colorNamePairs = []
             self._legend2.colorNamePairs = []
-        for f in xrange(len(self.data)):
+        for f in range(len(self.data)):
             if self.legend_names == None:
                 self.slices[f].fillColor = self.pieAndLegend_colors[f]
                 self.legend1.colorNamePairs.append((self.pieAndLegend_colors[f], None))
@@ -1007,28 +1013,15 @@ class LegendedPie(Pie):
             if self.legend_data != None:
                 ldf = self.legend_data[f]
                 lNF = self.legendNumberFormat
-                from types import StringType
                 if ldf is None or lNF is None:
                     pass
-                elif type(lNF) is StringType:
+                elif isinstance(lNF,str):
                     ldf = lNF % ldf
                 elif hasattr(lNF,'__call__'):
                     ldf = lNF(ldf)
                 else:
-                    p = self.legend_names[f]
-                if self.legend_data != None:
-                    ldf = self.legend_data[f]
-                    lNF = self.legendNumberFormat
-                    if ldf is None or lNF is None:
-                        pass
-                    elif type(lNF) is StringType:
-                        ldf = lNF % ldf
-                    elif hasattr(lNF,'__call__'):
-                        ldf = lNF(ldf)
-                    else:
-                        msg = "Unknown formatter type %s, expected string or function" % self.legendNumberFormat
-                        raise Exception, msg
-                    self._legend2.colorNamePairs.append((None,ldf))
+                    raise ValueError("Unknown formatter type %s, expected string or function" % ascii(self.legendNumberFormat))
+                self._legend2.colorNamePairs.append((None,ldf))
         p = Pie.draw(self)
         if self.drawLegend:
             p.add(self.legend1)
@@ -1143,6 +1136,10 @@ class _SL3D:
     def __str__(self):
         return '_SL3D(%.2f,%.2f)' % (self.lo,self.hi)
 
+def _keyS3D(a,b):
+    return -cmp(a[0],b[0])
+_keyS3D = functools.cmp_to_key(_keyS3D)
+
 _270r = _2rad(270)
 class Pie3d(Pie):
     _attrMap = AttrMap(BASE=Pie,
@@ -1243,7 +1240,7 @@ class Pie3d(Pie):
     
         checkLabelOverlap = self.checkLabelOverlap
 
-        for i in xrange(n):
+        for i in range(n):
             style = slices[i]
             if not style.visible: continue
             sl = _sl3d[i]
@@ -1310,7 +1307,7 @@ class Pie3d(Pie):
                 self._radiusx = radiusx
                 self._radiusy = radiusy
 
-        S.sort(lambda a,b: -cmp(a[0],b[0]))
+        S.sort(key=_keyS3D)
         if checkLabelOverlap and L:
             fixLabelOverlaps(L,sideLabels)
         for x in ([s[1] for s in S]+T+L):

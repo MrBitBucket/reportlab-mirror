@@ -32,7 +32,8 @@
 
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.units import inch
-import string
+from reportlab.lib.utils import ascii_uppercase, ascii_lowercase
+from string import digits as string_digits
 
 class Barcode(Flowable):
     """Abstract Base for barcodes. Includes implementations of
@@ -46,7 +47,7 @@ class Barcode(Flowable):
         return self.encoded
 
     def __init__(self, value='',**kwd):
-        self.value = value
+        self.value = str(value)
 
         self._setKeywords(**kwd)
         if not hasattr(self, 'gap'):
@@ -60,7 +61,7 @@ class Barcode(Flowable):
         self.computeSize()
 
     def _setKeywords(self,**kwd):
-        for (k, v) in kwd.iteritems():
+        for (k, v) in kwd.items():
             setattr(self, k, v)
 
     def validate(self):
@@ -187,9 +188,9 @@ class MultiWidthBarcode(Barcode):
 
         for c in self.decomposed:
             oc = ord(c)
-            if c in string.lowercase:
+            if c in ascii_lowercase:
                 w = w + barWidth * (oc - oa)
-            elif c in string.uppercase:
+            elif c in ascii_uppercase:
                 w = w + barWidth * (oc - oA)
 
         if self.barHeight is None:
@@ -210,9 +211,9 @@ class MultiWidthBarcode(Barcode):
 
         for c in self.decomposed:
             oc = ord(c)
-            if c in string.lowercase:
+            if c in ascii_lowercase:
                 left = left + (oc - oa) * barWidth
-            elif c in string.uppercase:
+            elif c in ascii_uppercase:
                 w = (oc - oA) * barWidth
                 self.rect(left, 0, w, self.barHeight)
                 left += w
@@ -225,7 +226,7 @@ class I2of5(Barcode):
 
     Options that may be passed to constructor:
 
-        value (int, or numeric string. required.):
+        value (int, or numeric string required.):
             The value to encode.
 
         barWidth (float, default .0075):
@@ -308,7 +309,7 @@ class I2of5(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in args.items():
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:
@@ -323,8 +324,8 @@ class I2of5(Barcode):
     def validate(self):
         vval = ""
         self.valid = 1
-        for c in string.strip(self.value):
-            if c not in string.digits:
+        for c in self.value.strip():
+            if c not in string_digits:
                 self.valid = 0
                 continue
             vval = vval + c
@@ -342,7 +343,7 @@ class I2of5(Barcode):
             c += 1
 
         if cs:
-            c = 3*sum([int(s[i]) for i in xrange(0,c,2)])+sum([int(s[i]) for i in xrange(1,c,2)])
+            c = 3*sum([int(s[i]) for i in range(0,c,2)])+sum([int(s[i]) for i in range(1,c,2)])
             s += str((10 - c) % 10)
 
         self.encoded = s
@@ -351,7 +352,7 @@ class I2of5(Barcode):
         dval = self.stop and [self.patterns['start']] or []
         a = dval.append
 
-        for i in xrange(0, len(self.encoded), 2):
+        for i in range(0, len(self.encoded), 2):
             b = self.patterns['B' + self.encoded[i]]
             s = self.patterns['S' + self.encoded[i+1]]
 
@@ -368,7 +369,7 @@ class MSI(Barcode):
 
     Options that may be passed to constructor:
 
-        value (int, or numeric string. required.):
+        value (int, or numeric string required.):
             The value to encode.
 
         barWidth (float, default .0075):
@@ -433,7 +434,7 @@ class MSI(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in args.items():
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:
@@ -448,8 +449,8 @@ class MSI(Barcode):
     def validate(self):
         vval = ""
         self.valid = 1
-        for c in string.strip(self.value):
-            if c not in string.digits:
+        for c in self.value.strip():
+            if c not in string_digits:
                 self.valid = 0
                 continue
             vval = vval + c
@@ -489,7 +490,7 @@ class Codabar(Barcode):
 
     Options that may be passed to constructor:
 
-        value (string. required.):
+        value (string required.):
             The value to encode.
 
         barWidth (float, default .0065):
@@ -553,7 +554,7 @@ class Codabar(Barcode):
         '+' : 15,   'A' : 16,   'B' : 17,   'C' : 18,   'D' : 19
         }
 
-    chars = string.digits + "-$:/.+"
+    chars = string_digits + "-$:/.+"
 
     stop = 1
     barHeight = None
@@ -569,7 +570,7 @@ class Codabar(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in args.items():
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:
@@ -584,7 +585,7 @@ class Codabar(Barcode):
     def validate(self):
         vval = ""
         self.valid = 1
-        s = string.strip(self.value)
+        s = self.value.strip()
         for i in range(0, len(s)):
             c = s[i]
             if c not in self.chars:
@@ -621,7 +622,7 @@ class Code11(Barcode):
     Code 11 is an almost-numeric barcode. It encodes the digits 0-9 plus
     dash ("-"). 11 characters total, hence the name.
 
-        value (int or string. required.):
+        value (int or string required.):
             The value to encode.
 
         barWidth (float, default .0075):
@@ -689,7 +690,7 @@ class Code11(Barcode):
         if type(value) == type(1):
             value = str(value)
 
-        for (k, v) in args.items():
+        for k, v in args.items():
             setattr(self, k, v)
 
         if self.quiet:
@@ -704,8 +705,8 @@ class Code11(Barcode):
     def validate(self):
         vval = ""
         self.valid = 1
-        s = string.strip(self.value)
-        for i in xrange(0, len(s)):
+        s = self.value.strip()
+        for i in range(0, len(s)):
             c = s[i]
             if c not in self.chars:
                 self.Valid = 0

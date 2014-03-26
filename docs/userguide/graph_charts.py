@@ -20,32 +20,32 @@ heading3("Design Goals")
 disc("Here are some of the design goals: ")
 
 disc("<i>Make simple top-level use really simple </i>")
-disc("""<para lindent=+36>It should be possible to create a simple chart with minimum lines of
+disc("""<para lindent="+36">It should be possible to create a simple chart with minimum lines of
        code, yet have it 'do the right things' with sensible automatic
        settings. The pie chart snippets above do this. If a real chart has
        many subcomponents, you still should not need to interact with them
-       unless you want to customize what they do.""")
+       unless you want to customize what they do.</para>""")
 
 disc("<i>Allow precise positioning </i>")
-disc("""<para lindent=+36>An absolute requirement in publishing and graphic design is to control
+disc("""<para lindent="+36">An absolute requirement in publishing and graphic design is to control
        the placing and style of every element. We will try to have properties
        that specify things in fixed sizes and proportions of the drawing,
        rather than having automatic resizing. Thus, the 'inner plot
        rectangle' will not magically change when you make the font size of
        the y labels bigger, even if this means your labels can spill out of
        the left edge of the chart rectangle. It is your job to preview the
-       chart and choose sizes and spaces which will work.""")
+       chart and choose sizes and spaces which will work.</para>""")
 
-disc("""<para lindent=+36>Some things do need to be automatic. For example, if you want to fit N
+disc("""<para lindent="+36">Some things do need to be automatic. For example, if you want to fit N
        bars into a 200 point space and don't know N in advance, we specify
        bar separation as a percentage of the width of a bar rather than a
        point size, and let the chart work it out. This is still deterministic
-       and controllable.""")
+       and controllable.</para>""")
 
 disc("<i>Control child elements individually or as a group</i>")
-disc("""<para lindent=+36>We use smart collection classes that let you customize a group of
+disc("""<para lindent="+36">We use smart collection classes that let you customize a group of
        things, or just one of them. For example you can do this in our
-       experimental pie chart:""")
+       experimental pie chart:</para>""")
 
 eg("""
 d = Drawing(400,200)
@@ -63,23 +63,23 @@ pc.slices[3].fontColor = colors.red
 d.add(pc, '')
 """)
 
-disc("""<para lindent=+36>pc.slices[3] actually lazily creates a little object which holds
+disc("""<para lindent="+36">pc.slices[3] actually lazily creates a little object which holds
        information about the slice in question; this will be used to format a
-       fourth slice at draw-time if there is one.""")
+       fourth slice at draw-time if there is one.</para>""")
 
 disc("<i>Only expose things you should change </i>")
-disc("""<para lindent=+36>It would be wrong from a statistical viewpoint to let you directly
+disc("""<para lindent="+36">It would be wrong from a statistical viewpoint to let you directly
        adjust the angle of one of the pie wedges in the above example, since
        that is determined by the data. So not everything will be exposed
        through the public properties. There may be 'back doors' to let you
        violate this when you really need to, or methods to provide advanced
-       functionality, but in general properties will be orthogonal.""")
+       functionality, but in general properties will be orthogonal.</para>""")
 
 disc("<i>Composition and component based </i>")
-disc("""<para lindent=+36>Charts are built out of reusable child widgets. A Legend is an
+disc("""<para lindent="+36">Charts are built out of reusable child widgets. A Legend is an
        easy-to-grasp example. If you need a specialized type of legend (e.g.
        circular colour swatches), you should subclass the standard Legend
-       widget. Then you could either do something like...""")
+       widget. Then you could either do something like...</para>""")
 
 eg("""
 c = MyChartWithLegend()
@@ -88,26 +88,26 @@ c.legend.swatchRadius = 5    # set a property only relevant to the new one
 c.data = [10,20,30]   #   and then configure as usual...
 """)
 
-disc("""<para lindent=+36>...or create/modify your own chart or drawing class which creates one
+disc("""<para lindent="+36">...or create/modify your own chart or drawing class which creates one
        of these by default. This is also very relevant for time series
-       charts, where there can be many styles of x axis.""")
+       charts, where there can be many styles of x axis.</para>""")
 
-disc("""<para lindent=+36>Top level chart classes will create a number of such components, and
+disc("""<para lindent="+36">Top level chart classes will create a number of such components, and
        then either call methods or set private properties to tell them their
        height and position - all the stuff which should be done for you and
        which you cannot customise. We are working on modelling what the
        components should be and will publish their APIs here as a consensus
-       emerges.""")
+       emerges.</para>""")
 
 disc("<i>Multiples </i>")
-disc("""<para lindent=+36>A corollary of the component approach is that you can create diagrams
+disc("""<para lindent="+36">A corollary of the component approach is that you can create diagrams
        with multiple charts, or custom data graphics. Our favourite example
        of what we are aiming for is the weather report in our gallery
        contributed by a user; we'd like to make it easy to create such
        drawings, hook the building blocks up to their legends, and feed that
-       data in a consistent way.""")
-disc("""<para lindent=+36>(If you want to see the image, it is available on our website
-<font color="blue"><a href="https://www.reportlab.com/media/imadj/data/RLIMG_e5e5cb85cc0a555f5433528ac38c5884.PDF">here</a></font>)""")
+       data in a consistent way.</para>""")
+disc("""<para lindent="+36">(If you want to see the image, it is available on our website
+<font color="blue"><a href="https://www.reportlab.com/media/imadj/data/RLIMG_e5e5cb85cc0a555f5433528ac38c5884.PDF">here</a></font>)</para>""")
 
 
 ##heading3("Key Concepts and Components")
@@ -900,7 +900,7 @@ lc.height = 125
 lc.width = 300
 lc.data = data
 lc.joinedLines = 1
-catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split(' ')
 lc.categoryAxis.categoryNames = catNames
 lc.categoryAxis.labels.boxAnchor = 'n'
 lc.valueAxis.valueMin = 0
@@ -927,7 +927,7 @@ lc.height = 125
 lc.width = 300
 lc.data = data
 lc.joinedLines = 1
-catNames = string.split('Jan Feb Mar Apr May Jun Jul Aug', ' ')
+catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split(' ')
 lc.categoryAxis.categoryNames = catNames
 lc.categoryAxis.labels.boxAnchor = 'n'
 lc.valueAxis.valueMin = 0

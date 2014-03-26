@@ -4,16 +4,16 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/tools/docco/rl_doc_utils.py
 __version__=''' $Id$ '''
 
-
 __doc__ = """
 This module contains utilities for generating guides
 """
 
 import os, sys, glob
 import string
+from reportlab.lib.utils import asUnicode
 
-from rltemplate import RLDocTemplate
-from stylesheet import getStyleSheet
+from .rltemplate import RLDocTemplate
+from .stylesheet import getStyleSheet
 styleSheet = getStyleSheet()
 
 #from reportlab.platypus.doctemplate import SimpleDocTemplate
@@ -29,11 +29,11 @@ from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.sequencer import getSequencer
 
-import examples
+from . import examples
 
 appmode=0
 
-from t_parse import Template
+from .t_parse import Template
 QFcodetemplate = Template("X$X$", "X")
 QFreptemplate = Template("X^X^", "X")
 codesubst = "%s<font name=Courier>%s</font>"
@@ -46,7 +46,6 @@ def quickfix(text):
        format the arg as replaceable.  The escape sequence for literal
        $ is $\\$ (^ is ^\\^.
     """
-    from string import join
     for (template,subst) in [(QFcodetemplate, codesubst), (QFreptemplate, QFsubst)]:
         fragment = text
         parts = []
@@ -65,7 +64,7 @@ def quickfix(text):
                     fragment = fragment[index:]
         except ValueError:
             parts.append(fragment)
-        text = join(parts, "")
+        text = ''.join(parts)
     return text
 #print quickfix("$testing$ testing $one$ ^two^ $three(^four^)$")
 
@@ -126,7 +125,7 @@ def disc(text, klass=Paragraph, style=discussiontextstyle):
 def restartList():
     getSequencer().reset('list1')
 
-def list(text, doBullet=1):
+def list1(text, doBullet=1):
     text=quickfix(text)
     if doBullet:
         text='<bullet><seq id="list1"/>.</bullet>'+text
@@ -134,7 +133,7 @@ def list(text, doBullet=1):
     getStory().append(P)
 
 def bullet(text):
-    text='<bullet><font name="Symbol">\xe2\x80\xa2</font></bullet>' + quickfix(text)
+    text=u'<bullet><font name="Symbol">\u2022</font></bullet>' + asUnicode(quickfix(text))
     P = Paragraph(text, BU)
     getStory().append(P)
 
@@ -149,7 +148,7 @@ def space(inches=1./6):
 def EmbeddedCode(code,name='t'):
     eg(code)
     disc("produces")
-    exec code+("\ngetStory().append(%s)\n"%name)
+    exec(code+("\ngetStory().append(%s)\n"%name))
 
 def startKeep():
     return len(getStory())
@@ -308,10 +307,10 @@ class ParaBox(figures.Figure):
     def getStyleText(self, style):
         """Converts style to preformatted block of text"""
         lines = []
-        for (key, value) in style.__dict__.items():
+        for key, value in style.__dict__.items():
             lines.append('%s = %s' % (key, value))
         lines.sort()
-        return string.join(lines, '\n')
+        return '\n'.join(lines)
 
     def drawFigure(self):
 
@@ -346,10 +345,10 @@ class ParaBox(figures.Figure):
     def getStyleText(self, style):
         """Converts style to preformatted block of text"""
         lines = []
-        for (key, value) in style.__dict__.items():
+        for key, value in style.__dict__.items():
             if key not in ('name','parent'):
                 lines.append('%s = %s' % (key, value))
-        return string.join(lines, '\n')
+        return '\n'.join(lines)
 
 
 class ParaBox2(figures.Figure):

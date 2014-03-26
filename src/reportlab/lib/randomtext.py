@@ -1,5 +1,5 @@
 #!/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2013
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/randomtext.py
 
@@ -305,7 +305,7 @@ def chomsky(times = 1):
     prevparts = []
     newparts = []
     output = []
-    for i in xrange(times):
+    for i in range(times):
         for partlist in (leadins, subjects, verbs, objects):
             while 1:
                 part = random.choice(partlist)
@@ -322,7 +322,7 @@ if rl_config.invariant:
     if not getattr(rl_config,'_random',None):
         rl_config._random = 1
         import random
-        random.seed(2342471922L)
+        random.seed(2342471922)
         del random
 del rl_config
 
@@ -362,10 +362,10 @@ if __name__=='__main__':
         else:
             sentences = 5
         try:
-            print randomText(theme,sentences)
+            print(randomText(theme,sentences))
         except:
-            print>>sys.stderr,"Usage: randomtext.py [theme [#sentences]]"
-            print>>sys.stderr," theme in chomsky|STARTUP|COMPUTERS|BLAH|BUZZWORD|STARTREK|PRINTING|PYTHON"
+            sys.stderr.write("Usage: randomtext.py [theme [#sentences]]\n")
+            sys.stderr.write(" theme in chomsky|STARTUP|COMPUTERS|BLAH|BUZZWORD|STARTREK|PRINTING|PYTHON\n")
             raise
     else:
-        print chomsky(5)
+        print(chomsky(5))

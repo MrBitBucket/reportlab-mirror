@@ -31,8 +31,9 @@
 #
 
 from reportlab.lib.units import inch
-from common import Barcode
-import string
+from reportlab.graphics.barcode.common import Barcode
+from string import digits as string_digits, whitespace as string_whitespace
+from reportlab.lib.utils import asNative
 
 _fim_patterns = {
     'A' : "||  |  ||",
@@ -97,7 +98,8 @@ class FIM(Barcode):
     lquiet = inch * (15.0/32.0)
     quiet = 0
     def __init__(self, value='', **args):
-        for (k, v) in args.items():
+        value = str(value) if isinstance(value,int) else asNative(value)
+        for k, v in args.items():
             setattr(self, k, v)
 
         Barcode.__init__(self, value)
@@ -106,15 +108,15 @@ class FIM(Barcode):
         self.valid = 1
         self.validated = ''
         for c in self.value:
-            if c in string.whitespace:
+            if c in string_whitespace:
                 continue
             elif c in "abcdABCD":
-                self.validated = self.validated + string.upper(c)
+                self.validated = self.validated + c.upper()
             else:
                 self.valid = 0
 
         if len(self.validated) != 1:
-            raise ValueError, "Input must be exactly one character"
+            raise ValueError("Input must be exactly one character")
 
         return self.validated
 
@@ -161,8 +163,8 @@ class POSTNET(Barcode):
     barWidth = inch * 0.018
     spaceWidth = inch * 0.0275
     def __init__(self, value='', **args):
-
-        for (k, v) in args.items():
+        value = str(value) if isinstance(value,int) else asNative(value)
+        for k, v in args.items():
             setattr(self, k, v)
 
         Barcode.__init__(self, value)
@@ -172,9 +174,9 @@ class POSTNET(Barcode):
         self.valid = 1
         count = 0
         for c in self.value:
-            if c in (string.whitespace + '-'):
+            if c in (string_whitespace + '-'):
                 pass
-            elif c in string.digits:
+            elif c in string_digits:
                 count = count + 1
                 if count == 6:
                     self.validated = self.validated + '-'
@@ -191,13 +193,13 @@ class POSTNET(Barcode):
         self.encoded = "S"
         check = 0
         for c in self.validated:
-            if c in string.digits:
+            if c in string_digits:
                 self.encoded = self.encoded + c
-                check = check + string.atoi(c)
+                check = check + int(c)
             elif c == '-':
                 pass
             else:
-                raise ValueError, "Invalid character in input"
+                raise ValueError("Invalid character in input")
         check = (10 - check) % 10
         self.encoded = self.encoded + repr(check) + 'S'
         return self.encoded
