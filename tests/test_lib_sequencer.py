@@ -88,6 +88,21 @@ class SequencerTestCase(unittest.TestCase):
             msg = 'Sequence value is not correct!'
             assert seq._this('myCounter1') == m, msg
 
+    def testChain(self):
+        "Test auto resetting of subsections"
+        seq = Sequencer()
+        seq.chain('h1', 'h2')  #creates them and links
+        self.assertEquals(seq.next('h1'), 1)
+        self.assertEquals(seq.next('h1'), 2)
+        self.assertEquals(seq.next('h2'), 1)
+        self.assertEquals(seq.next('h2'), 2)
+        self.assertEquals(seq.next('h2'), 3)
+
+        #start chapter 3
+        self.assertEquals(seq.next('h1'), 3)
+        #...and the first section should be numbered 1, not 4
+        self.assertEquals(seq.next('h2'), 1)        
+
 
 ##    def testRandom(self):
 ##        "Test randomly manipulating multiple dedicated counters."
