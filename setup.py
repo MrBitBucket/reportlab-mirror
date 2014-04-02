@@ -522,7 +522,7 @@ def main():
             ext_modules =   EXT_MODULES,
             
             #this probably only works for setuptools, but distutils seems to ignore it
-            install_requires=['pillow >= 2.3.0'],
+            install_requires=['pillow == 2.0.0'],
             )
         print()
         print('########## SUMMARY INFO #########')
