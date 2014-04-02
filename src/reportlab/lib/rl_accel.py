@@ -29,7 +29,7 @@ for fn in __all__:
         _py_funcs[fn] = None
 
 if _py_funcs:
-    from reportlab.lib.utils import isBytes, isUnicode, isSeq, isPy3, rawBytes, asNative
+    from reportlab.lib.utils import isBytes, isUnicode, isSeq, isPy3, rawBytes, asNative, asUnicode, asBytes
     from math import log
     from struct import unpack
 
@@ -312,7 +312,7 @@ if 'asciiBase85Decode' in _py_funcs:
             out(lastword)
 
         r = ''.join(out.__self__)
-        return r.encode('latin1') if isUnicode(input) else r
+        return asBytes(r,enc='latin1')
     _py_funcs['asciiBase85Decode'] = asciiBase85Decode
 
 if 'sameFrag' in _py_funcs:
