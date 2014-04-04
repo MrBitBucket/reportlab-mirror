@@ -37,6 +37,7 @@ __pycache__
 *.pyd
 
 syntax: regexp
+^reportlab.egg-info
 ^dist/.*
 ^demos/stdfonts/.*\.pdf
 ^docs/.*\.pdf
