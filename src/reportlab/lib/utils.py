@@ -42,6 +42,7 @@ def isNative(v):
 #isBytes for bytes strings only
 #isUnicode for proper unicode
 if isPy3:
+    _rl_NoneType=type(None)
     bytesT = bytes
     unicodeT = str
     strTypes = (str,bytes)
@@ -78,7 +79,7 @@ if isPy3:
         return isinstance(v, type)
 
     def isNonPrimitiveInstance(x):
-        return not isinstance(x,(float,int,type,tuple,list,dict,str,bytes,complex,bool,slice,
+        return not isinstance(x,(float,int,type,tuple,list,dict,str,bytes,complex,bool,slice,_rl_NoneType,
             types.FunctionType,types.LambdaType,types.CodeType,
             types.MappingProxyType,types.SimpleNamespace,
             types.GeneratorType,types.MethodType,types.BuiltinFunctionType,
@@ -178,7 +179,7 @@ else:
         return isinstance(v,(types.ClassType,type))
 
     def isNonPrimitiveInstance(x):
-        return isinstance(x,types.InstanceType) or not isinstance(x,(float,int,long,type,tuple,list,dict,bool,unicode,str,buffer,complex,slice,
+        return isinstance(x,types.InstanceType) or not isinstance(x,(float,int,long,type,tuple,list,dict,bool,unicode,str,buffer,complex,slice,types.NoneType,
                     types.FunctionType,types.LambdaType,types.CodeType,types.GeneratorType,
                     types.ClassType,types.UnboundMethodType,types.MethodType,types.BuiltinFunctionType,
                     types.BuiltinMethodType,types.ModuleType,types.FileType,types.XRangeType,
