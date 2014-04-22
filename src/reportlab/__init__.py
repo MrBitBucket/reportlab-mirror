@@ -3,7 +3,7 @@
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/__init__.py
 __version__=''' $Id$ '''
 __doc__="""The Reportlab PDF generation library."""
-Version = "3.1.7"
+Version = "3.1.8"
 
 import sys, os, imp
 
