@@ -1008,9 +1008,10 @@ class ParaParser(HTMLParser):
     #----------------------------------------------------------------
 
     def __init__(self,verbose=0, caseSensitive=0, ignoreUnknownTags=1):
-        HTMLParser.__init__(self)
+        HTMLParser.__init__(self,
+            **(dict(convert_charrefs=False) if sys.version_info>=(3,4) else {}))
         self.verbose = verbose
-        #HTMLParser is cas insenstive anyway, but the rml interface still needs this
+        #HTMLParser is case insenstive anyway, but the rml interface still needs this
         #all start/end_ methods should have a lower case version for HMTMParser
         self.caseSensitive = caseSensitive
         self.ignoreUnknownTags = ignoreUnknownTags
