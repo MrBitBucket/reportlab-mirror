@@ -123,7 +123,7 @@ class PDFImage:
 
         #use a flate filter and, optionally, Ascii Base 85 to compress
         raw = myimage.tostring()
-        rowstride = (imgwidth*bpc*bpp+7)/8
+        rowstride = (imgwidth*bpc*bpp+7)>>3
         assert len(raw) == rowstride*imgheight, "Wrong amount of data for image"
         data = zlib.compress(raw)    #this bit is very fast...
         if rl_config.useA85:
