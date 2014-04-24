@@ -114,6 +114,7 @@ T1SearchPath =  (
                 '/usr/local/Acrobat6/Resource/Font',    #Linux, Acrobat 5?
                 '/usr/local/Acrobat5/Resource/Font',    #Linux, Acrobat 5?
                 '/usr/local/Acrobat4/Resource/Font',    #Linux, Acrobat 4
+                '/usr/share/fonts/default/Type1'        #Linux, Fedora
                 '%(REPORTLAB_DIR)s/fonts',              #special
                 '%(REPORTLAB_DIR)s/../fonts',           #special
                 '%(REPORTLAB_DIR)s/../../fonts',        #special
@@ -130,6 +131,8 @@ TTFSearchPath = (
                 'c:/windows/fonts',
                 '/usr/lib/X11/fonts/TrueType/',
                 '/usr/share/fonts/truetype',
+                '/usr/share/fonts'              #Linux, Fedora
+                '/usr/share/fonts/dejavu'       #Linux, Fedora
                 '%(REPORTLAB_DIR)s/fonts',      #special
                 '%(REPORTLAB_DIR)s/../fonts',   #special
                 '%(REPORTLAB_DIR)s/../../fonts',#special
