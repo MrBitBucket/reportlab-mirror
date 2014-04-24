@@ -1055,11 +1055,17 @@ class PdfgenTestCase(unittest.TestCase):
         self.assertRaises(ValueError,trySomeColors,cmyk+rgb+seps,'cmyk')
         trySomeColors(cmyk+['black']+seps,'cmyk')   #OK because black & seps are convertible
 
-    def test5(self):
+    def test5(self,uopw=None):
         from reportlab.lib.pagesizes import A4,LETTER
-        canv = canvas.Canvas(outputfile('test_pdfgen_general_page_sizes.pdf'),
-                        pagesize=A4,
-                        )
+        if uopw:
+            from reportlab.lib import pdfencrypt
+            encrypt = pdfencrypt.StandardEncryption(uopw[0], uopw[1])
+            encrypt.setAllPermissions(0)
+            encrypt.canPrint = 1
+            canv = canvas.Canvas(outputfile('test_pdfgen_general_page_sizes_encrypted.pdf'),pagesize=A4)
+            canv._doc.encrypt = encrypt
+        else:
+            canv = canvas.Canvas(outputfile('test_pdfgen_general_page_sizes.pdf'),pagesize=A4)
         canv.setFont('Helvetica',10)
         S = A4
         canv.drawString(0,S[1]-10,'Top Left=(%s,%s) Page Size=%s x %s' % (0,S[1],S[0],S[1]))
@@ -1087,6 +1093,9 @@ class PdfgenTestCase(unittest.TestCase):
         canv.drawRightString(S[0],32,'Bottom Right=(%s,%s) Page Size=%s x %s' % (S[0],0,S[0],S[1]))
         canv.showPage()
         canv.save()
+
+    def test6(self):
+        self.test5(('User','Password'))
 
     def testMultipleSavesOk(self):
         c=canvas.Canvas(outputfile('test_pdfgen_savetwice.pdf'))
