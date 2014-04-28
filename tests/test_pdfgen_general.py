@@ -715,6 +715,8 @@ cost to performance.""")
     if haveImages:
         c.drawImage(gif, 1*inch, 1.2*inch, w, h, mask=myMask)
         c.drawImage(gif, 3*inch, 1.2*inch, w, h, mask='auto')
+        c.drawImage(os.path.join(testsFolder,'test-rgba.png'),5*inch,1.2*inch,width=10,height=10,mask='auto')
+        c.drawImage(os.path.join(testsFolder,'test-indexed.png'),5.5*inch,1.2*inch,width=10,height=10,mask='auto')
     else:
         c.rect(1*inch, 1.2*inch, w, h)
         c.rect(3*inch, 1.2*inch, w, h)

@@ -823,7 +823,12 @@ class ImageReader(object):
                         im = im.convert('RGB')
                         self.mode = 'RGB'
                     elif mode not in ('L','RGB','CMYK'):
-                        im = im.convert('RGB')
+                        if im.format=='PNG' and im.mode=='P' and 'transparency' in im.info:
+                            im = im.convert('RGBA')
+                            self._dataA = ImageReader(im.split()[3])
+                            im = im.convert('RGB')
+                        else:
+                            im = im.convert('RGB')
                         self.mode = 'RGB'
                     if hasattr(im, 'tobytes'):  #make pillow and PIL both happy, for now
                         self._data = im.tobytes()
