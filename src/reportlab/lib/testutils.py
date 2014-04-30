@@ -1,8 +1,8 @@
 #Copyright ReportLab Europe Ltd. 2000-2013
 #see license.txt for license details
-import __main__
-__main__._rl_testing=True
-del __main__
+import reportlab
+reportlab._rl_testing=True
+del reportlab
 __version__='''$Id$'''
 __doc__="""Provides support for the test suite.
 

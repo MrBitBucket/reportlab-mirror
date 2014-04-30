@@ -16,9 +16,9 @@ __all__ = list(filter(None,'''
         add32
         hex32
         '''.split()))
-import __main__
-testing = getattr(__main__,'_rl_testing',False)
-del __main__
+import reportlab
+testing = getattr(reportlab,'_rl_testing',False)
+del reportlab
 
 for fn in __all__:
     try:
