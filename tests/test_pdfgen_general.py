@@ -680,6 +680,11 @@ cost to performance.""")
         gif = os.path.join(testsFolder,'pythonpowered.gif')
         c.drawInlineImage(gif,2*inch, 7*inch)
         c.drawInlineImage(os.path.join(testsFolder,'pythonpowered-gs.gif'),4*inch, 7.5*inch)
+        tif = os.path.join(testsFolder,'test-cross.tiff')   #example of a mode '1' image
+        c.drawInlineImage(tif,1*inch, 1*inch)
+        from reportlab.lib.utils import Image as PilImage
+        if PilImage:
+            c.drawInlineImage(PilImage.open(tif),1.25*inch, 1*inch)
     else:
         c.rect(2*inch, 7*inch, 110, 44)
         c.rect(4*inch, 7*inch, 110, 44)
