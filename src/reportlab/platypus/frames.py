@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger('reportlab.platypus')
 
 _geomAttr=('x1', 'y1', 'width', 'height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
-from reportlab import rl_config
+from reportlab import rl_config, isPy3
 _FUZZ=rl_config._FUZZ
 
 class ShowBoundaryValue:
@@ -19,8 +19,13 @@ class ShowBoundaryValue:
         self.color = color
         self.width = width
 
-    def __bool__(self):
-        return self.color is not None and self.width>=0
+    if isPy3:
+        def __bool__(self):
+            return self.color is not None and self.width>=0
+    else:
+        def __nonzero__(self):
+            return self.color is not None and self.width>=0
+
 
 class Frame:
     '''

@@ -560,7 +560,6 @@ def run():
 
 
 class PlatypusTestCase(unittest.TestCase):
-    "Make documents with lots of Platypus features"
 
     def test0(self):
         "Make a platypus document"
@@ -581,6 +580,16 @@ class PlatypusTestCase(unittest.TestCase):
                 ]
         doc = SimpleDocTemplate(outputfile('test_drawing_keepwithnext.pdf'))
         doc.build(story)
+
+    def test2(self):
+        '''ensure showBoundaryValue works as expected'''
+        from reportlab.platypus.frames import ShowBoundaryValue
+        assert (1 if ShowBoundaryValue(width=1) else 0) == 1
+        assert (1 if ShowBoundaryValue(color=None,width=1) else 0) == 0
+        assert (1 if ShowBoundaryValue(width=-1) else 0) == 0
+        assert bool(ShowBoundaryValue(width=1)) == True
+        assert bool(ShowBoundaryValue(color=None,width=1)) == False
+        assert bool(ShowBoundaryValue(width=-1)) == False
 
 def makeSuite():
     return makeSuiteForClasses(PlatypusTestCase)
