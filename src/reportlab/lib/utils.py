@@ -608,24 +608,59 @@ def open_for_read_by_name(name,mode='b'):
         if 'b' not in mode and os.linesep!='\n': s = s.replace(os.linesep,'\n')
         return getBytesIO(s)
 
-try:
-    import urllib2
+if not isPy3:
+    import urllib2, urllib
     urlopen=urllib2.urlopen
-except ImportError:
-    import urllib.request
-    urlopen=urllib.request.urlopen
+    def datareader(url,opener=urllib.URLopener().open):
+        return opener(url).read()
+    del urllib, urllib2
+else:
+    from urllib.request import urlopen
+    from urllib.parse import unquote
+    import base64
+    #copied here from urllib.URLopener.open_data because
+    # 1) they want to remove it
+    # 2) the existing one is borken
+    def datareader(url, unquote=unquote, decodebytes=base64.decodebytes):
+        """Use "data" URL."""
+        # ignore POSTed data
+        #
+        # syntax of data URLs:
+        # dataurl   := "data:" [ mediatype ] [ ";base64" ] "," data
+        # mediatype := [ type "/" subtype ] *( ";" parameter )
+        # data      := *urlchar
+        # parameter := attribute "=" value
+        try:
+            typ, data = url.split(',', 1)
+        except ValueError:
+            raise IOError('data error', 'bad data URL')
+        if not typ:
+            typ = 'text/plain;charset=US-ASCII'
+        semi = typ.rfind(';')
+        if semi >= 0 and '=' not in typ[semi:]:
+            encoding = typ[semi+1:]
+            typ = typ[:semi]
+        else:
+            encoding = ''
+        if encoding == 'base64':
+            # XXX is this encoding/decoding ok?
+            data = decodebytes(data.encode('ascii'))
+        else:
+            data = unquote(data).encode('latin-1')
+        return data
+    del unquote, base64
 
-def open_for_read(name,mode='b', urlopen=urlopen):
+def open_for_read(name,mode='b', urlopen=urlopen, datareader=datareader):
     '''attempt to open a file or URL for reading'''
     if hasattr(name,'read'): return name
     try:
         return open_for_read_by_name(name,mode)
     except:
         try:
-            return getBytesIO(urlopen(name).read())
+            return getBytesIO(datareader(name) if name.startswith('data:') else urlopen(name).read())
         except:
             raise IOError('Cannot open resource "%s"' % name)
-del urlopen
+del urlopen, datareader
 
 def open_and_read(name,mode='b'):
     return open_for_read(name,mode).read()

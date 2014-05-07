@@ -122,6 +122,15 @@ class ImporterTestCase(unittest.TestCase):
         b = getBytesIO(_rel_open_and_read('../docs/images/Edit_Prefs.gif'))
         b = open_and_read(b)
 
+    def test11(self):
+        "test open and read of an RFC 2397 data URI with base64 encoding"
+        result = _rel_open_and_read('data:image/gif;base64,R0lGODdhAQABAIAAAP///////ywAAAAAAQABAAACAkQBADs=')
+        self.assertEquals(result,b'GIF87a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\xff\xff\xff,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;')
+
+    def test12(self):
+        "test open and read of an RFC 2397 data URI without an encoding"
+        result = _rel_open_and_read('data:text/plain;,Hello%20World')
+        self.assertEquals(result,b'Hello World')
 
     def testRecursiveImportErrors(self):
         "check we get useful error messages"
