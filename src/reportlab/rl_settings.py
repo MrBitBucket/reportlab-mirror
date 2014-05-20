@@ -43,6 +43,7 @@ ttfAsciiReadable
 pdfMultiLine
 pdfComments
 debug
+rtlSupport
 T1SearchPath
 TTFSearchPath
 CMapSearchPath'''.split())
@@ -92,6 +93,7 @@ ttfAsciiReadable=           1                       #smaller subsets when set to
 pdfMultiLine=               0                       #use more lines in pdf etc
 pdfComments=                0                       #put in pdf comments
 debug=                      0                       #for debugging code
+rtlSupport=                 0                       #set to 1 to attempt import of RTL assistance eg fribidi etc etc
 
 # places to look for T1Font information
 T1SearchPath =  (

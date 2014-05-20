@@ -15,6 +15,16 @@ from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor, black,
 from reportlab.lib.utils import isBytes, isStr, asUnicode
 from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase import pdfmetrics
+from reportlab.rl_config import rtlSupport
+
+log2vis = None
+if rtlSupport:
+    try:
+        from pyfribidi2 import log2vis, ON as DIR_ON, LTR as DIR_LTR, RTL as DIR_RTL
+        directionsMap = dict(LTR=DIR_LTR,RTL=DIR_RTL)
+    except:
+        import warnings
+        warnings.warn('pyfribidi is not installed - RTL not supported')
 
 class _PDFColorSetter:
     '''Abstracts the color setting operations; used in Canvas and Textobject
@@ -168,7 +178,7 @@ class PDFTextObject(_PDFColorSetter):
 
     It keeps track of x and y coordinates relative to its origin."""
 
-    def __init__(self, canvas, x=0,y=0):
+    def __init__(self, canvas, x=0,y=0, direction = 'LTR'):
         self._code = ['BT']    #no point in [] then append RGB
         self._canvas = canvas  #canvas sets this so it has access to size info
         self._fontname = self._canvas._fontname
@@ -179,6 +189,7 @@ class PDFTextObject(_PDFColorSetter):
         self._enforceColorSpace = getattr(canvas,'_enforceColorSpace',None)
         font = pdfmetrics.getFont(self._fontname)
         self._curSubset = -1
+        self.direction = direction
         self.setTextOrigin(x, y)
         self._textRenderMode = 0
         self._clipping = 0
@@ -362,6 +373,9 @@ class PDFTextObject(_PDFColorSetter):
 
     def _formatText(self, text):
         "Generates PDF text output operator(s)"
+        if log2vis and self.direction!='LTR':
+            # Use pyfribidi to write the text in the correct visual order.
+            text = log2vis(text, directionsMap.get(self.direction.upper(),DIR_ON))
         canv = self._canvas
         font = pdfmetrics.getFont(self._fontname)
         R = []
