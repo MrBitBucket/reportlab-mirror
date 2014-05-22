@@ -54,24 +54,18 @@ do the job.  Full details follow below for each platform.
 
 2.1 General prerequisites
 --------------------------
-You need to have installed Python (versions 2.5 through 2.7),
+You need to have installed Python (versions 2.7 or >=3.3),
 and ideally PIL with Freetype support; more notes on prerequisites
 follow below.  
 
 2.2. Where to get the code
 ------------------------------------------
+Latest builds are available from ReportLab's
+open source download area::
 
-    
-Daily and release builds are available from ReportLab's
-open download area::
+    https://www.reportlab.org/pypi/
 
-    http://www.reportlab.org/ftp/
-
-Daily builds will unzip/untar to produce a dated directory e.g. 
-``reportlab-YYYYMMDD/`` but are otherwise structured just like the Mercurial
-repository and release builds.
-
-Releases are also available from the Python Package Index:
+Main releases are also available from the Python Package Index:
 
     http://pypi.python.org/
 
@@ -89,16 +83,20 @@ both in sync.
 
 
 
-2.3 Windows Installer
---------------------------
-A binary ``.exe`` installer for Windows (built with distutils) is
-available on our website.  This will install the 'reportlab' package
-into your site-packages area (e.g. ``C:\Python27\lib\site-packages``).
+2.3 Windows Packages
+--------------------
+We provide ``.whl`` files with compiled C extensions for all supported
+python versions at 
+
+    http://pypi.python.org/
+
+these may be installed using recent pip or other competent distribution
+package.
 
 This will NOT install the tests, examples and documentation.  If you want
 to learn your way around the package or do development with it on Windows,
-we suggest you also download a source copy, unzip it and work with the
-examples/tests within that directory.
+we suggest you also obtain source from https://bitbucket.org/rptlab/reportlab 
+and work with the examples/tests within that directory.
 
 2.4 Mac OS
 -------------
