@@ -55,7 +55,7 @@ do the job.  Full details follow below for each platform.
 2.1 General prerequisites
 --------------------------
 You need to have installed Python (versions 2.7 or >=3.3),
-and ideally PIL with Freetype support; more notes on prerequisites
+and ideally PIL or Pillow with Freetype support; more notes on prerequisites
 follow below.  
 
 2.2. Where to get the code
@@ -63,7 +63,7 @@ follow below.
 Latest builds are available from ReportLab's
 open source download area::
 
-    https://www.reportlab.org/pypi/
+    https://www.reportlab.com/pypi/
 
 Main releases are also available from the Python Package Index:
 
@@ -72,7 +72,7 @@ Main releases are also available from the Python Package Index:
 From March 2013, the code is being hosted in Mercurial on BitBucket.
 You can obtain the latest code from our Mercurial repository with::
 
-    hg clone http://bitbucket.org/rptlab/reportlab
+    hg clone https://bitbucket.org/rptlab/reportlab
 
 
 Users of our commercial libraries, and/or anyone who registers on our site,
@@ -144,7 +144,7 @@ This works with Python 2.5 - 2.7. Older versions are available
 going back to Python 1.5 or thereabouts.
 
 There are no absolute prerequisites beyond the Python
-standard library; but the Python Imaging Library (PIL)
+standard library; but the Python Imaging Library (PIL or Pillow)
 is needed to include images other than JPG inside PDF files.
 
 The C extension are optional but anyone able to do so should
