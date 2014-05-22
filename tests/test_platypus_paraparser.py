@@ -104,6 +104,16 @@ class ParaParserTestCase(unittest.TestCase):
         self.assertEquals([x.text for x in fragList], ['Hello ','',' World'])
         self.assertEquals(fragList[1].lineBreak, True)
 
+
+    def testRejectsBadlyFormed(self):
+        txt = "Hello <b>World"
+
+        def parseIt(txt, style=self.style):
+            fragList = ParaParser().parse(txt, self.style)[1]
+
+        self.assertRaises(ValueError, parseIt, txt)
+        
+
     #def testNakedAmpersands(self):
         #We no longer require this error to be raised when using html.parser
         # import pyRXPU
