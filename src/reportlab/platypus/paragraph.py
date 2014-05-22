@@ -1579,8 +1579,7 @@ class Paragraph(Flowable):
                     leading = blPara.ascent-blPara.descent
 
                 # set the paragraph direction
-                if self.style.wordWrap == 'RTL':
-                    tx.direction = 'RTL'
+                tx.direction = self.style.wordWrap
 
                 #now the font for the rest of the paragraph
                 tx.setFont(f.fontName, f.fontSize, leading)
@@ -1652,8 +1651,7 @@ class Paragraph(Flowable):
                 #set up the font etc.
                 tx = self.beginText(cur_x, cur_y)
                 # set the paragraph direction
-                if self.style.wordWrap == 'RTL':
-                    tx.direction = 'RTL'
+                tx.direction = self.style.wordWrap
 
                 xs = tx.XtraState=ABag()
                 xs.textColor=None

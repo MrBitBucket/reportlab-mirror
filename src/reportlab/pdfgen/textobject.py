@@ -178,7 +178,7 @@ class PDFTextObject(_PDFColorSetter):
 
     It keeps track of x and y coordinates relative to its origin."""
 
-    def __init__(self, canvas, x=0,y=0, direction = 'LTR'):
+    def __init__(self, canvas, x=0,y=0, direction=None):
         self._code = ['BT']    #no point in [] then append RGB
         self._canvas = canvas  #canvas sets this so it has access to size info
         self._fontname = self._canvas._fontname
@@ -366,14 +366,14 @@ class PDFTextObject(_PDFColorSetter):
             self._code.append('%d Tr' % mode)
 
     def setRise(self, rise):
-        "Move text baseline up or down to allow superscrip/subscripts"
+        "Move text baseline up or down to allow superscript/subscripts"
         self._rise = rise
         self._y = self._y - rise    # + ?  _textLineMatrix?
         self._code.append('%s Ts' % fp_str(rise))
 
     def _formatText(self, text):
         "Generates PDF text output operator(s)"
-        if log2vis and self.direction!='LTR':
+        if log2vis and self.direction in ('LTR','RTL'):
             # Use pyfribidi to write the text in the correct visual order.
             text = log2vis(text, directionsMap.get(self.direction.upper(),DIR_ON))
         canv = self._canvas

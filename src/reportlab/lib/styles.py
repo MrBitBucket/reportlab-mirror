@@ -112,7 +112,10 @@ class ParagraphStyle(PropertySet):
         #'bulletColor':black,
         'textColor': black,
         'backColor':None,
-        'wordWrap':None,
+        'wordWrap':None,        #None means do nothing special
+                                #CJK use Chinese Line breaking
+                                #LTR RTL use left to right / right to left
+                                #with support from pyfribi2 if available
         'borderWidth': 0,
         'borderPadding': 0,
         'borderColor': None,
