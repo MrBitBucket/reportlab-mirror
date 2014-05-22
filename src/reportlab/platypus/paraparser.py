@@ -596,52 +596,51 @@ class ParaParser(HTMLParser):
 
     #### bold
     def start_b( self, attributes ):
-        self._push(bold=1)
+        self._push('b',bold=1)
 
     def end_b( self ):
-        self._pop(bold=1)
+        self._pop('b')
 
     def start_strong( self, attributes ):
-        self._push(bold=1)
+        self._push('strong',bold=1)
 
     def end_strong( self ):
-        self._pop(bold=1)
+        self._pop('strong')
 
     #### italics
     def start_i( self, attributes ):
-        self._push(italic=1)
+        self._push('i',italic=1)
 
     def end_i( self ):
-        self._pop(italic=1)
+        self._pop('i')
 
     def start_em( self, attributes ):
-        self._push(italic=1)
+        self._push('em', italic=1)
 
     def end_em( self ):
-        self._pop(italic=1)
+        self._pop('em')
 
     #### underline
     def start_u( self, attributes ):
-        self._push(underline=1)
+        self._push('u',underline=1)
 
     def end_u( self ):
-        self._pop(underline=1)
+        self._pop('u')
 
     #### strike
     def start_strike( self, attributes ):
-        self._push(strike=1)
+        self._push('strike',strike=1)
 
     def end_strike( self ):
-        self._pop(strike=1)
+        self._pop('strike')
 
     #### link
     def start_link(self, attributes):
-        self._push(**self.getAttributes(attributes,_linkAttrMap))
+        self._push('link',**self.getAttributes(attributes,_linkAttrMap))
 
     def end_link(self):
-        frag = self._stack[-1]
-        del self._stack[-1]
-        assert frag.link!=None
+        if self._pop('link').link is None:
+            raise ValueError('<link> has no target or href')
 
     #### anchor
     def start_a(self, attributes):
@@ -659,33 +658,35 @@ class ParaParser(HTMLParser):
             href = A.get('href','').strip()
             A['link'] = href    #convert to our link form
             A.pop('href',None)
-        self._push(**A)
+        self._push('a',**A)
 
     def end_a(self):
         frag = self._stack[-1]
         sct = getattr(frag,'_selfClosingTag','')
         if sct:
-            assert sct=='anchor' and frag.name,'Parser failure in <a/>'
+            if not (sct=='anchor' and frag.name):
+                raise ValueError('Parser failure in <a/>')
             defn = frag.cbDefn = ABag()
             defn.label = defn.kind = 'anchor'
             defn.name = frag.name
             del frag.name, frag._selfClosingTag
             self.handle_data('')
-            self._pop()
+            self._pop('a')
         else:
-            del self._stack[-1]
-            assert frag.link!=None
+            if self._pop('a').link is None:
+                raise ValueError('<link> has no href')
 
     def start_img(self,attributes):
         A = self.getAttributes(attributes,_imgAttrMap)
         if not A.get('src'):
             self._syntax_error('<img> needs src attribute')
         A['_selfClosingTag'] = 'img'
-        self._push(**A)
+        self._push('img',**A)
 
     def end_img(self):
         frag = self._stack[-1]
-        assert getattr(frag,'_selfClosingTag',''),'Parser failure in <img/>'
+        if not getattr(frag,'_selfClosingTag',''):
+            raise ValueError('Parser failure in <img/>')
         defn = frag.cbDefn = ABag()
         defn.kind = 'img'
         defn.src = getattr(frag,'src',None)
@@ -696,24 +697,27 @@ class ParaParser(HTMLParser):
         defn.valign = getattr(frag,'valign','bottom')
         del frag._selfClosingTag
         self.handle_data('')
-        self._pop()
+        self._pop('img')
 
     #### super script
     def start_super( self, attributes ):
-        self._push(super=1)
+        self._push('super',super=1)
 
     def end_super( self ):
-        self._pop(super=1)
+        self._pop('super')
 
-    start_sup = start_super
-    end_sup = end_super
+    def start_sup( self, attributes ):
+        self._push('sup',super=1)
+
+    def end_sup( self ):
+        self._pop('sup')
 
     #### sub script
     def start_sub( self, attributes ):
-        self._push(sub=1)
+        self._push('sub',sub=1)
 
     def end_sub( self ):
-        self._pop(sub=1)
+        self._pop('sub')
 
     #### greek script
     #### add symbol encoding
@@ -736,10 +740,10 @@ class ParaParser(HTMLParser):
         self.errors.append(message)
 
     def start_greek(self, attr):
-        self._push(greek=1)
+        self._push('greek',greek=1)
 
     def end_greek(self):
-        self._pop(greek=1)
+        self._pop('greek')
 
     def start_unichar(self, attr):
         if 'name' in attr:
@@ -764,16 +768,16 @@ class ParaParser(HTMLParser):
 
         if v is not None:
             self.handle_data(v)
-        self._push(_selfClosingTag='unichar')
+        self._push('unichar',_selfClosingTag='unichar')
 
     def end_unichar(self):
-        self._pop()
+        self._pop('unichar')
 
     def start_font(self,attr):
-        self._push(**self.getAttributes(attr,_fontAttrMap))
+        self._push('font',**self.getAttributes(attr,_fontAttrMap))
 
     def end_font(self):
-        self._pop()
+        self._pop('font')
 
     def start_span(self,attr):
         A = self.getAttributes(attr,_spanAttrMap)
@@ -786,20 +790,22 @@ class ParaParser(HTMLParser):
                 D[k] = v
             D.update(A)
             A = D
-        self._push(**A)
+        self._push('span',**A)
 
-    end_span = end_font
+    def end_span(self):
+        self._pop('span')
 
     def start_br(self, attr):
-        self._push(_selfClosingTag='br',lineBreak=True,text='')
+        self._push('br',_selfClosingTag='br',lineBreak=True,text='')
         
     def end_br(self):
         #print('\nend_br called, %d frags in list' % len(self.fragList))
         frag = self._stack[-1]
-        assert frag._selfClosingTag=='br' and frag.lineBreak,'Parser failure in <br/>'
+        if not (frag._selfClosingTag=='br' and frag.lineBreak):
+                raise ValueError('Parser failure in <br/>')
         del frag._selfClosingTag
         self.handle_data('')
-        self._pop()
+        self._pop('br')
 
     def _initial_frag(self,attr,attrMap,bullet=0):
         style = self._style
@@ -828,10 +834,12 @@ class ParaParser(HTMLParser):
         return frag
 
     def start_para(self,attr):
-        self._stack = [self._initial_frag(attr,_paraAttrMap)]
+        frag = self._initial_frag(attr,_paraAttrMap)
+        frag.__tag__ = 'para'
+        self._stack = [frag]
 
     def end_para(self):
-        self._pop()
+        self._pop('para')
 
     def start_bullet(self,attr):
         if hasattr(self,'bFragList'):
@@ -839,10 +847,11 @@ class ParaParser(HTMLParser):
         self.bFragList = []
         frag = self._initial_frag(attr,_bulletAttrMap,1)
         frag.isBullet = 1
+        frag.__tag__ = 'bullet'
         self._stack.append(frag)
 
     def end_bullet(self):
-        self._pop()
+        self._pop('bullet')
 
     #---------------------------------------------------------------
     def start_seqdefault(self, attr):
@@ -938,9 +947,9 @@ class ParaParser(HTMLParser):
 
         if 'label' in attr: defn.label = attr['label']
         defn.kind='onDraw'
-        self._push(cbDefn=defn)
+        self._push('ondraw',cbDefn=defn)
         self.handle_data('')
-        self._pop()
+        self._pop('ondraw')
     start_onDraw=start_ondraw 
     end_onDraw=end_ondraw=end_seq
 
@@ -967,9 +976,9 @@ class ParaParser(HTMLParser):
         defn.label = encode_label((label,format,offset))
         defn.name = name
         defn.kind='index'
-        self._push(cbDefn=defn)
+        self._push('index',cbDefn=defn)
         self.handle_data('')
-        self._pop()
+        self._pop('index',)
     end_index=end_seq
 
     def start_unknown(self,attr):
@@ -977,17 +986,16 @@ class ParaParser(HTMLParser):
     end_unknown=end_seq
 
     #---------------------------------------------------------------
-    def _push(self,**attr):
+    def _push(self,tag,**attr):
         frag = copy.copy(self._stack[-1])
+        frag.__tag__ = tag
         _applyAttributes(frag,attr)
         self._stack.append(frag)
 
-    def _pop(self,**kw):
-        frag = self._stack[-1]
-        del self._stack[-1]
-        for k, v in kw.items():
-            assert getattr(frag,k)==v
-        return frag
+    def _pop(self,tag):
+        frag = self._stack.pop()
+        if tag==frag.__tag__: return frag
+        raise ValueError('Parse error: saw </%s> instead of expected </%s>' % (tag,frag.__tag__))
 
     def getAttributes(self,attr,attrMap):
         A = {}
@@ -1148,7 +1156,7 @@ class ParaParser(HTMLParser):
         try:
             self.feed(text)
         except:
-            annotateException('paragraph text %s caused exception' % ascii(text))
+            annotateException('\nparagraph text %s caused exception' % ascii(text))
         return self._complete_parse()
 
     def handle_starttag(self, tag, attrs):

@@ -5,7 +5,7 @@ __version__='''$Id$'''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import unittest
-from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter, XPreformatted, PageBreak
+from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter, XPreformatted, PageBreak, Spacer
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.abag import ABag
@@ -15,7 +15,7 @@ from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.rl_config import defaultPageSize, rtlSupport
 from reportlab.pdfbase import ttfonts
 from reportlab.pdfbase import pdfmetrics
-from reportlab.lib.fonts import addMapping
+from reportlab.lib.fonts import addMapping, tt2ps
 
 (PAGE_WIDTH, PAGE_HEIGHT) = defaultPageSize
 
@@ -30,7 +30,6 @@ def myFirstPage(canvas, doc):
     canvas.drawString(4 * inch, 0.75 * inch, "First Page")
     canvas.restoreState()
 
-
 def myLaterPages(canvas, doc):
     canvas.saveState()
     canvas.setStrokeColor(red)
@@ -39,7 +38,6 @@ def myLaterPages(canvas, doc):
     canvas.setFont('Times-Roman',12)
     canvas.drawString(4 * inch, 0.75 * inch, "Page %d" % doc.page)
     canvas.restoreState()
-
 
 def getAFont():
     '''register a font that supports most Unicode characters'''
@@ -56,7 +54,6 @@ def getAFont():
                  (font_name, 0, 1, font_name + 'Italic'),
                  (font_name, 1, 1, font_name + 'BoldItalic'),
                  ])
-    I.reverse()
     for info in I:
         n = 0
         for font in info:
@@ -67,7 +64,7 @@ def getAFont():
                 n += 1
             except:
                 pass
-        if n==4: return fontName
+        if n==4: return font[0]
     raise ValueError('could not find suitable font')
 
 class ParagraphTestCase(unittest.TestCase):
@@ -123,7 +120,6 @@ class ParagraphTestCase(unittest.TestCase):
                                    parent=styNormal,
                                    spaceBefore=12,
                                    spaceAfter=12)
-
 
         SA(Paragraph("This is a normal paragraph. "+ randomText(), styNormal))
         SA(Paragraph("There follows a paragraph with only \"&lt;br/&gt;\"", styNormal))
@@ -253,12 +249,13 @@ class ParagraphTestCase(unittest.TestCase):
             fontName = getAFont()
 
             # create styles based on the registered font
-            from reportlab.lib.enums import TA_LEFT, TA_RIGHT
-            styLTR = ParagraphStyle('left', fontName = fontName)
-            styRTL = ParagraphStyle('right', parent = styLTR, alignment = TA_RIGHT,
+            stySTD = ParagraphStyle('STD', fontName = fontName)
+            styRJ = ParagraphStyle('RJ', parent=stySTD, alignment=TA_RIGHT)
+            styLTR = ParagraphStyle('LTR', parent=stySTD, wordWrap='LTR')
+            styRTL = ParagraphStyle('RTL', parent = stySTD, alignment = TA_RIGHT,
                                     wordWrap = 'RTL', spaceAfter = 12)
 
-            # strings for testing LTR.
+            # strings for testing Normal & LTR styles
             ltrStrings = [# English followed by Arabic.
                           b'English followed by \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a.',
                           # English with Arabic in the middle
@@ -300,7 +297,7 @@ class ParagraphTestCase(unittest.TestCase):
                               b' \xd8\xa5\xd9\x84\xd9\x89 \xd8\xa7\xd9\x84\xd9\x8a\xd8\xb3\xd8\xa7\xd8\xb1'
                               b' 456.78 \xd8\xa3\xd8\xb1\xd9\x82\xd8\xa7\xd9\x85'
                               b' \xd8\xb9\xd8\xb4\xd8\xb1\xd9\x8a\xd8\xa9 456.78.',
-                          # Long Arabic text with LTR script in the middle, splitting over multiple lines
+                          # Long Arabic text with LTR text in the middle, splitting over multiple lines
                           b'\xd9\x86\xd8\xb5 \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a \xd8\xb7\xd9\x88\xd9\x8a\xd9\x84'
                               b' Long Arabic text \xd9\x85\xd8\xb9 with \xd9\x83\xd8\xaa\xd8\xa7\xd8\xa8\xd8\xa9'
                               b' \xd9\x85\xd9\x86 \xd8\xa7\xd9\x84\xd9\x8a\xd8\xb3\xd8\xa7\xd8\xb1'
@@ -317,11 +314,18 @@ class ParagraphTestCase(unittest.TestCase):
             # create a store to be printed
             story = []
             
+            story.append(Paragraph("<b><i>Following pairs of left justified texts have style.wordWrap=None &amp; 'LTR'.</i></b><br/>",stySTD))
             # write every LTR string and its corresponding RTL string to be matched.
-            for i in range(0, n):
+            for i in xrange(n):
+                story.append(Paragraph(ltrStrings[i], stySTD))
                 story.append(Paragraph(ltrStrings[i], styLTR))
+
+            story.append(Paragraph("<br/><b><i>Following pairs of right justfied texts have style.wordWrap=None &amp; 'RTL'.</i></b><br/>",stySTD))
+            for i in xrange(n):
+                story.append(Paragraph(rtlStrings[i], styRJ))
                 story.append(Paragraph(rtlStrings[i], styRTL))
 
+            story.append(Paragraph("<b><i><br/>Following texts have style.wordWrap='RTL'</i></b>",stySTD))
             # a few additional scripts for testing.
             story.append(
                 Paragraph(b'\xd9\x87\xd8\xb0\xd9\x87 \xd9\x81\xd9\x82\xd8\xb1\xd8\xa9'
@@ -353,13 +357,6 @@ class ParagraphTestCase(unittest.TestCase):
                 import mwlib.ext
             except ImportError:
                 pass
-
-            import os
-            from reportlab.platypus import SimpleDocTemplate
-            from reportlab.platypus.paragraph import Paragraph
-            from reportlab.platypus.flowables import Spacer
-            from reportlab.lib.styles import ParagraphStyle
-            from reportlab.lib.enums import TA_JUSTIFY, TA_RIGHT
 
             font_name = getAFont()
             doc = SimpleDocTemplate(outputfile('test_rtl_bullets.pdf'),showBoundary=True)
@@ -394,13 +391,12 @@ class ParagraphTestCase(unittest.TestCase):
                 else:
                     list_style.leftIndent = indent_amount*list_lvl
 
-
             elements =[]
 
             TEXTS=[
                     b'\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f, \xd7\x94\xd7\x95\xd7\x90 \xd7\x94\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x90\xd7\x97\xd7\xa8\xd7\x90\xd7\x99 \xd7\xa2\xd7\x9c \xd7\x9e\xd7\xa9\xd7\xa8\xd7\x93 \xd7\x96\xd7\x94. \xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93 \xd7\x96\xd7\x94 \xd7\xa0\xd7\x97\xd7\xa9\xd7\x91 \xd7\x9c\xd7\x90\xd7\x97\xd7\x93 \xd7\x94\xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93\xd7\x99\xd7\x9d \xd7\x94\xd7\x91\xd7\x9b\xd7\x99\xd7\xa8\xd7\x99\xd7\x9d \xd7\x91\xd7\x9e\xd7\x9e\xd7\xa9\xd7\x9c\xd7\x94. \xd7\x9c\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f \xd7\x9e\xd7\xaa\xd7\x9e\xd7\xa0\xd7\x94 \xd7\x9c\xd7\xa8\xd7\x95\xd7\x91 \xd7\x92\xd7\x9d \xd7\xa1\xd7\x92\xd7\x9f \xd7\xa9\xd7\xa8.',
-                    b'\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f, <b>\xd7\x94\xd7\x95\xd7\x90 \xd7\x94\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x90\xd7\x97\xd7\xa8\xd7\x90\xd7\x99 \xd7\xa2\xd7\x9c \xd7\x9e\xd7\xa9\xd7\xa8\xd7\x93 \xd7\x96\xd7\x94.</b> \xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93 \xd7\x96\xd7\x94 <i>\xd7\xa0\xd7\x97\xd7\xa9\xd7\x91 \xd7\x9c\xd7\x90\xd7\x97\xd7\x93</i> \xd7\x94\xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93\xd7\x99\xd7\x9d <b><i>\xd7\x94\xd7\x91\xd7\x9b\xd7\x99\xd7\xa8\xd7\x99\xd7\x9d \xd7\x91\xd7\x9e\xd7\x9e\xd7\xa9\xd7\x9c\xd7\x94</b></i>. \xd7\x9c\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f \xd7\x9e\xd7\xaa\xd7\x9e\xd7\xa0\xd7\x94 \xd7\x9c\xd7\xa8\xd7\x95\xd7\x91 \xd7\x92\xd7\x9d \xd7\xa1\xd7\x92\xd7\x9f \xd7\xa9\xd7\xa8.',
-                    u'<bullet>\u2022</bullet>\u05e9\u05e8 \u05d4\u05d1\u05d9\u05d8\u05d7\u05d5\u05df, <b>\u05d4\u05d5\u05d0 \u05d4\u05e9\u05e8 \u05d4\u05d0\u05d7\u05e8\u05d0\u05d9 \u05e2\u05dc \u05de\u05e9\u05e8\u05d3 \u05d6\u05d4.</b> \u05ea\u05e4\u05e7\u05d9\u05d3 \u05d6\u05d4 <i>\u05e0\u05d7\u05e9\u05d1 \u05dc\u05d0\u05d7\u05d3</i> \u05d4\u05ea\u05e4\u05e7\u05d9\u05d3\u05d9\u05dd <b><i>\u05d4\u05d1\u05db\u05d9\u05e8\u05d9\u05dd \u05d1\u05de\u05de\u05e9\u05dc\u05d4</b></i>. \u05dc\u05e9\u05e8\u05d4\u05d1\u05d9\u05d8\u05d7\u05d5\u05df \u05de\u05ea\u05de\u05e0\u05d4 \u05dc\u05e8\u05d5\u05d1 \u05d2\u05dd \u05e1\u05d2\u05df \u05e9\u05e8.',
+                    b'\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f, <b>\xd7\x94\xd7\x95\xd7\x90 \xd7\x94\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x90\xd7\x97\xd7\xa8\xd7\x90\xd7\x99 \xd7\xa2\xd7\x9c \xd7\x9e\xd7\xa9\xd7\xa8\xd7\x93 \xd7\x96\xd7\x94.</b> \xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93 \xd7\x96\xd7\x94 <i>\xd7\xa0\xd7\x97\xd7\xa9\xd7\x91 \xd7\x9c\xd7\x90\xd7\x97\xd7\x93</i> \xd7\x94\xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93\xd7\x99\xd7\x9d <b><i>\xd7\x94\xd7\x91\xd7\x9b\xd7\x99\xd7\xa8\xd7\x99\xd7\x9d \xd7\x91\xd7\x9e\xd7\x9e\xd7\xa9\xd7\x9c\xd7\x94</i></b>. \xd7\x9c\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f \xd7\x9e\xd7\xaa\xd7\x9e\xd7\xa0\xd7\x94 \xd7\x9c\xd7\xa8\xd7\x95\xd7\x91 \xd7\x92\xd7\x9d \xd7\xa1\xd7\x92\xd7\x9f \xd7\xa9\xd7\xa8.',
+                    u'<bullet>\u2022</bullet>\u05e9\u05e8 \u05d4\u05d1\u05d9\u05d8\u05d7\u05d5\u05df, <b>\u05d4\u05d5\u05d0 \u05d4\u05e9\u05e8 \u05d4\u05d0\u05d7\u05e8\u05d0\u05d9 \u05e2\u05dc \u05de\u05e9\u05e8\u05d3 \u05d6\u05d4.</b> \u05ea\u05e4\u05e7\u05d9\u05d3 \u05d6\u05d4 <i>\u05e0\u05d7\u05e9\u05d1 \u05dc\u05d0\u05d7\u05d3</i> \u05d4\u05ea\u05e4\u05e7\u05d9\u05d3\u05d9\u05dd <b><i>\u05d4\u05d1\u05db\u05d9\u05e8\u05d9\u05dd \u05d1\u05de\u05de\u05e9\u05dc\u05d4</i></b>. \u05dc\u05e9\u05e8\u05d4\u05d1\u05d9\u05d8\u05d7\u05d5\u05df \u05de\u05ea\u05de\u05e0\u05d4 \u05dc\u05e8\u05d5\u05d1 \u05d2\u05dd \u05e1\u05d2\u05df \u05e9\u05e8.',
                     ]
 
             # simple text in a paragraph
@@ -422,9 +418,16 @@ class ParagraphTestCase(unittest.TestCase):
 
             doc.build(elements)
 
+        def testParsing(self):
+            fontName = getAFont()
+            fontNameBI = tt2ps(fontName,1,1)
+            stySTD = ParagraphStyle('STD',fontName=fontName)
+            styBI = ParagraphStyle('BI',fontName=fontNameBI)
+            self.assertRaises(ValueError,Paragraph,'aaaa <b><i>bibibi</b></i> ccccc',stySTD)
+            self.assertRaises(ValueError,Paragraph,'AAAA <b><i>BIBIBI</b></i> CCCCC',styBI)
+
 def makeSuite():
     return makeSuiteForClasses(ParagraphTestCase)
-
 
 #noruntests
 if __name__ == "__main__":
