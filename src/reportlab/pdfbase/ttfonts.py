@@ -463,9 +463,9 @@ class TTFontFile(TTFontParser):
                     A = N.append
                     while length > 0:
                         char = self.read_ushort()
-                        A(chr(char))
+                        A(bytes([char]) if isPy3 else chr(char))
                         length -= 1
-                    N = ''.join(N)
+                    N = b''.join(N)
                 finally:
                     self._pos = opos
             elif platformId == 1 and encodingId == 0 and languageId == 0: # Macintosh, Roman, English, PS Name
