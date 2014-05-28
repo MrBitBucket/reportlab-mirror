@@ -865,10 +865,7 @@ class ImageReader(object):
                         else:
                             im = im.convert('RGB')
                         self.mode = 'RGB'
-                    if hasattr(im, 'tobytes'):  #make pillow and PIL both happy, for now
-                        self._data = im.tobytes()
-                    else:
-                        self._data = im.tostring()
+                    self._data = (im.tobytes if hasattr(im, 'tobytes') else im.tostring)()  #make pillow and PIL both happy, for now
             return self._data
         except:
             annotateException('\nidentity=%s'%self.identity())

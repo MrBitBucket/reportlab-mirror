@@ -137,7 +137,7 @@ class _PMRenderer(Renderer):
         if dstH is None: dstH = srcH
         self._canvas._aapixbuf(
                 image.x, image.y, dstW, dstH,
-                im.tostring(), srcW, srcH, 3,
+                (im.tobytes if hasattr(im,'tobytes') else im.tostring)(), srcW, srcH, 3,
                 )
 
     def drawCircle(self, circle):
@@ -241,7 +241,7 @@ def _saveAsPICT(im,fn,fmt,transparent=None):
     im = _convert2pilp(im)
     cols, rows = im.size
     #s = _renderPM.pil2pict(cols,rows,im.tostring(),im.im.getpalette(),transparent is not None and Color2Hex(transparent) or -1)
-    s = _renderPM.pil2pict(cols,rows,im.tostring(),im.im.getpalette())
+    s = _renderPM.pil2pict(cols,rows,(im.tobytes if hasattr(im,'tobytes') else im.tostring)(),im.im.getpalette())
     if not hasattr(fn,'write'):
         open(os.path.splitext(fn)[0]+'.'+fmt.lower(),'wb').write(s)
         if os.name=='mac':

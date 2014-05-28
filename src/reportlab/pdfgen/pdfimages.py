@@ -122,7 +122,7 @@ class PDFImage:
         imagedata=['BI /W %d /H %d /BPC %d /CS /%s /F [%s/Fl] ID' % (imgwidth, imgheight, bpc, colorSpace, rl_config.useA85 and '/A85 ' or '')]
 
         #use a flate filter and, optionally, Ascii Base 85 to compress
-        raw = myimage.tostring()
+        raw = (myimage.tobytes if hasattr(myimage,'tobytes') else myimage.tostring)()
         rowstride = (imgwidth*bpc*bpp+7)>>3
         assert len(raw) == rowstride*imgheight, "Wrong amount of data for image"
         data = zlib.compress(raw)    #this bit is very fast...

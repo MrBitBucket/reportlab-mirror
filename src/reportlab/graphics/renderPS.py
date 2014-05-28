@@ -585,7 +585,7 @@ class PSCanvas:
         # data source output--now we just need to deliver a hex encode
         # series of lines of the right overall size can follow
         # piddlePDF again
-        rawimage = myimage.tostring()
+        rawimage = (myimage.tobytes if hasattr(myimage,'tobytes') else myimage.tostring)()
         hex_encoded = self._AsciiHexEncode(rawimage)
 
         # write in blocks of 78 chars per line
@@ -655,7 +655,7 @@ class PSCanvas:
                             '>> % End image dictionary',
                             'image'])
         # after image operator just need to dump image dat to file as hexstring
-        rawimage = myimage.tostring()
+        rawimage = (myimage.tobytes if hasattr(myimage,'tobytes') else myimage.tostring)()
         hex_encoded = self._AsciiHexEncode(rawimage)
 
         # write in blocks of 78 chars per line
