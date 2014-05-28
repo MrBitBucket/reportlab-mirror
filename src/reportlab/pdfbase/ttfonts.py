@@ -706,7 +706,7 @@ class TTFontFile(TTFontParser):
             T = [self.read_ushort() for i in xrange(256)]   #subheader keys
             maxSHK = max(T)
             SH = []
-            for i in xrange(maxHK+1):
+            for i in xrange(maxSHK+1):
                 firstCode = self.read_ushort()
                 entryCount = self.read_ushort()
                 idDelta = self.read_ushort()
