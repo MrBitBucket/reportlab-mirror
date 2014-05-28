@@ -447,7 +447,7 @@ class PDFTextObject(_PDFColorSetter):
         off each line and from the beginning; set trim=0 to preserve
         whitespace."""
         if isStr(stuff):
-            lines = '\n'.split(asUnicode(stuff).strip())
+            lines = asUnicode(stuff).strip().split(u'\n')
             if trim==1:
                 lines = [s.strip() for s in lines]
         elif isinstance(stuff,(tuple,list)):
