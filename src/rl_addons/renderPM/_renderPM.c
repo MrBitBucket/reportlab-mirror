@@ -18,7 +18,7 @@
 #endif
 
 
-#define VERSION "2.00"
+#define VERSION "2.01"
 #define MODULENAME "_renderPM"
 #ifdef isPy3
 #	define PyInt_FromLong	PyLong_FromLong
@@ -1262,19 +1262,19 @@ static	void _reverse_rows_inplace( char *buf, int nrows, int stride)
 
 static PyObject* gstate__aapixbuf(gstateObject* self, PyObject* args)
 {
-	int			dstX, dstY, dstW, dstH, srclen;
-	double		ctm[6];
+	int			srclen;
+	double		ctm[6], dstX, dstY, dstW, dstH;
 	ArtPixBuf	src;
 
 	src.n_channels = 3;
 
 	/*(dstX,dstY,dstW,dstH,src,srcW,srcH[,srcD[,aff]])*/
-	if(!PyArg_ParseTuple(args,"iiiit#ii|i:_aapixbuf",
+	if(!PyArg_ParseTuple(args,"ddddt#ii|i:_aapixbuf",
 				&dstX, &dstY, &dstW, &dstH,
 				&src.pixels,&srclen,&src.width,&src.height,&src.n_channels)) return NULL;
-	ctm[0] = ((float)dstW)/src.width;
+	ctm[0] = dstW/src.width;
 	ctm[1] = ctm[2] = 0;
-	ctm[3] = -((float)dstH)/src.height;
+	ctm[3] = -dstH/src.height;
 	ctm[4] = dstX;
 	ctm[5] = dstY+dstH;
 	art_affine_multiply(ctm,ctm,self->ctm);
