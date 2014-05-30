@@ -844,10 +844,6 @@ class TTFontFile(TTFontParser):
                     elif flags & GF_WE_HAVE_A_TWO_BY_TWO:
                         self.skip(8)
 
-        numGlyphs = n = len(glyphMap)
-        while n > 1 and self.hmetrics[n][0] == self.hmetrics[n - 1][0]:
-            n -= 1
-        numberOfHMetrics = n
 
         # The following tables are simply copied from the original
         for tag in ('name', 'OS/2', 'cvt ', 'fpgm', 'prep'):
@@ -862,6 +858,26 @@ class TTFontFile(TTFontParser):
         # post - PostScript
         post = b"\x00\x03\x00\x00" + self.get_table('post')[4:16] + b"\x00" * 16
         output.add('post', post)
+
+        numGlyphs = len(glyphMap)
+
+        # hmtx - Horizontal Metrics
+        hmtx = []
+        for n in xrange(numGlyphs):
+            aw, lsb = self.hmetrics[glyphMap[n]]
+            hmtx.append(int(aw))
+            hmtx.append(int(lsb))
+
+        #work out n as 0 or first aw that's the start of a run
+        n = len(hmtx)-2
+        while n and hmtx[n]==hmtx[n-2]:
+            n -= 2
+        if not n: n = 2                 #need at least one pair
+        numberOfHMetrics = n>>1         #number of full H Metric pairs
+        hmtx = hmtx[:n] + hmtx[n+1::2]  #full pairs + all the trailing lsb's
+
+        hmtx = pack(*([">%dH" % len(hmtx)] + hmtx))
+        output.add('hmtx', hmtx)
 
         # hhea - Horizontal Header
         hhea = self.get_table('hhea')
@@ -885,17 +901,6 @@ class TTFontFile(TTFontParser):
                list(map(codeToGlyph.get, subset))
         cmap = pack(*([">%dH" % len(cmap)] + cmap))
         output.add('cmap', cmap)
-
-        # hmtx - Horizontal Metrics
-        hmtx = []
-        for n in xrange(numGlyphs):
-            originalGlyphIdx = glyphMap[n]
-            aw, lsb = self.hmetrics[originalGlyphIdx]
-            if n < numberOfHMetrics:
-                hmtx.append(int(aw))
-            hmtx.append(int(lsb))
-        hmtx = pack(*([">%dH" % len(hmtx)] + hmtx))
-        output.add('hmtx', hmtx)
 
         # glyf - Glyph data
         glyphData = self.get_table('glyf')
