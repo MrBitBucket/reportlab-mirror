@@ -85,13 +85,14 @@ both in sync.
 
 2.3 Windows Packages
 --------------------
-We provide ``.whl`` files with compiled C extensions for all supported
-python versions at 
+We no longer made .exe or .msi files.  We provide ``.whl`` files with compiled 
+C extensions for all supported python versions at 
 
-    http://pypi.python.org/
+    http://pypi.python.org/pypi/reportlab/
 
-these may be installed using recent pip or other competent distribution
-package.
+These may be installed using recent `pip` or other competent distribution
+package.  If you aren't comfortable with the command line, we recommend pip-win:
+    https://sites.google.com/site/pydatalog/python/pip-for-windows
 
 This will NOT install the tests, examples and documentation.  If you want
 to learn your way around the package or do development with it on Windows,
