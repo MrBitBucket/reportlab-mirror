@@ -32,7 +32,7 @@ from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 from reportlab.lib.styles import _baseFontName
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions
+from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions, listWrapOnFakeWidth
 import collections
 
 __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
@@ -553,10 +553,12 @@ class CondPageBreak(Spacer):
     def identity(self,maxLen=None):
         return repr(self).replace(')',',frame=%s)'%self._frameName())
 
-def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
+def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None,fakeWidth=None):
     '''return max width, required height for a list of flowables F'''
     doct = getattr(canv,'_doctemplate',None)
     cframe = getattr(doct,'frame',None)
+    if fakeWidth is None:
+        fakeWidth = listWrapOnFakeWidth
     if cframe:
         from reportlab.platypus.doctemplate import _addGeneratedContent, Indenter
         doct_frame = cframe
@@ -581,7 +583,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None):
             if cframe:
                 _addGeneratedContent(F,cframe)
             if w<=_FUZZ or h<=_FUZZ: continue
-            W = max(W,min(w,availWidth))
+            W = max(W,min(w,availWidth) if fakeWidth else w)
             H += h
             if not atTop:
                 h = f.getSpaceBefore()
@@ -921,10 +923,10 @@ class PTOContainer(_Container,Flowable):
         n = len(C)
         I2W = {}
         dLeft = dRight = 0
-        for x in range(n):
+        for x in xrange(n):
             c = C[x]
             I = c._ptoinfo
-            if I not in list(I2W.keys()):
+            if I not in I2W.keys():
                 T = I.trailer
                 Hdr = I.header
                 tW, tH = _listWrapOn(T, availWidth, self.canv)
@@ -1029,12 +1031,13 @@ def _qsolve(h,ab):
     return max(1./s1, 1./s2)
 
 class KeepInFrame(_Container,Flowable):
-    def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=1, mode='shrink', name='',hAlign='LEFT',vAlign='BOTTOM'):
+    def __init__(self, maxWidth, maxHeight, content=[], mergeSpace=1, mode='shrink', name='',hAlign='LEFT',vAlign='BOTTOM', fakeWidth=None):
         '''mode describes the action to take when overflowing
             error       raise an error in the normal way
             continue    ignore ie just draw it and report maxWidth, maxHeight
             shrink      shrinkToFit
             truncate    fit as much as possible
+            set fakeWidth to False to make _listWrapOn do the 'right' thing
         '''
         self.name = name
         self.maxWidth = maxWidth
@@ -1047,6 +1050,7 @@ class KeepInFrame(_Container,Flowable):
         self._content = content or []
         self.vAlign = vAlign
         self.hAlign = hAlign
+        self.fakeWidth = fakeWidth
 
     def _getAvailableWidth(self):
         return self.maxWidth - self._leftExtraIndent - self._rightExtraIndent
@@ -1062,7 +1066,8 @@ class KeepInFrame(_Container,Flowable):
         mode = self.mode
         maxWidth = float(min(self.maxWidth or availWidth,availWidth))
         maxHeight = float(min(self.maxHeight or availHeight,availHeight))
-        W, H = _listWrapOn(self._content,maxWidth,self.canv)
+        fakeWidth = self.fakeWidth
+        W, H = _listWrapOn(self._content,maxWidth,self.canv, fakeWidth=fakeWidth)
         if (mode=='error' and (W>maxWidth+_FUZZ or H>maxHeight+_FUZZ)):
             ident = 'content %sx%s too large for %s' % (W,H,self.identity(30))
             #leave to keep apart from the raise
@@ -1075,7 +1080,8 @@ class KeepInFrame(_Container,Flowable):
             self.height = min(maxHeight,H)-_FUZZ
         else:
             def func(x):
-                W, H = _listWrapOn(self._content,x*maxWidth,self.canv)
+                x = float(x)
+                W, H = _listWrapOn(self._content,x*maxWidth,self.canv, fakeWidth=fakeWidth)
                 W /= x
                 H /= x
                 return W, H
@@ -1084,7 +1090,7 @@ class KeepInFrame(_Container,Flowable):
             s0 = 1
             if W>maxWidth+_FUZZ:
                 #squeeze out the excess width and or Height
-                s1 = W/maxWidth
+                s1 = W/maxWidth     #linear model
                 W, H = func(s1)
                 if H<=maxHeight+_FUZZ:
                     self.width = W-_FUZZ
