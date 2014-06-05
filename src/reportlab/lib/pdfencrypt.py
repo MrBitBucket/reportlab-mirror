@@ -384,7 +384,7 @@ def encryptPdfInMemory(inputPDF,
         from rlextra.pageCatcher.pageCatcher import storeFormsInMemory, restoreFormsInMemory
     except ImportError:
         raise ImportError('''reportlab.lib.pdfencrypt.encryptPdfInMemory failed because rlextra cannot be imported.
-See http://developer.reportlab.com''')
+See https://www.reportlab.com/downloads''')
 
     (bboxInfo, pickledForms) = storeFormsInMemory(inputPDF, all=1, BBoxes=1)
     names = list(bboxInfo.keys())
@@ -405,12 +405,11 @@ See http://developer.reportlab.com''')
 
     formNames = restoreFormsInMemory(pickledForms, canv)
     for formName in formNames:
-        #need to extract page size in future
+        canv.setPageSize(bboxInfo[formName][2:])
         canv.doForm(formName)
         canv.showPage()
     canv.save()
     return buf.getvalue()
-
 
 def encryptPdfOnDisk(inputFileName, outputFileName,
                   userPassword, ownerPassword=None,
