@@ -28,7 +28,8 @@ class BarcodeWidgetTestCase(unittest.TestCase):
         CN = list(getCodes().items())
         for name,C in CN:
             i = C()
-            D = Drawing(100,50)
+            x0,y0,x1,y1 = i.getBounds()
+            D = Drawing(x1-x0,y1-y0)
             D.add(i)
             D.save(formats=formats,outDir=outDir,fnRoot=name)
             a('<h2>%s</h2><img src="%s.gif"><br>' % (name, name))
