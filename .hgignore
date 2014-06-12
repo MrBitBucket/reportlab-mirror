@@ -60,3 +60,5 @@ syntax: regexp
 ^tests/test_source_chars\.txt
 ^tests/barcode-out
 ^tests/render-out
+^tmp/
+^/patches/

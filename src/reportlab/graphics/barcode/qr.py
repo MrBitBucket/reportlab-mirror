@@ -103,9 +103,9 @@ class QrCodeWidget(PlotArea):
         qr.make()
 
         moduleCount = qr.getModuleCount()
-        boxsize = min(barWidth, barHeight) / (moduleCount + barBorder * 2)
-        offsetX = (barWidth - min(barWidth, barHeight)) / 2
-        offsetY = (min(barWidth, barHeight) - barHeight) / 2
+        boxsize = min(barWidth, barHeight) / (moduleCount + barBorder * 2.0)
+        offsetX = (barWidth - min(barWidth, barHeight)) / 2.0
+        offsetY = (min(barWidth, barHeight) - barHeight) / 2.0
 
         for r in xrange(moduleCount):
             for c in xrange(moduleCount):
