@@ -61,4 +61,4 @@ syntax: regexp
 ^tests/barcode-out
 ^tests/render-out
 ^tmp/
-^/patches/
+^patches/
