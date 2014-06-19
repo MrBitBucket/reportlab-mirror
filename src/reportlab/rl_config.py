@@ -30,9 +30,14 @@ def _defaults_init():
     except ImportError:
         _overrides=_DEFAULTS.copy()
         try:
-            with open(os.path.expanduser(os.path.join('~','.reportlab_settings')),'rb') as f:
-                rl_exec(f.read(),_overrides)
-            _DEFAULTS.update(_overrides)
+            try:
+                fn = os.path.expanduser(os.path.join('~','.reportlab_settings'))    #appengine fails with ImportError
+            except ImportError:
+                fn = None
+            if fn:
+                with open(fn,'rb') as f:
+                    rl_exec(f.read(),_overrides)
+                _DEFAULTS.update(_overrides)
         except:
             pass
     return _DEFAULTS
@@ -89,7 +94,11 @@ def _startUp():
             P=[]
             for p in _SAVED[k]:
                 d = (p % D).replace('/',os.sep)
-                if '~' in d: d = os.path.expanduser(d)
+                if '~' in d:
+                    try:
+                        d = os.path.expanduser(d)   #appengine fails with ImportError
+                    except ImportError:
+                        continue
                 if rl_isdir(d): P.append(d)
             _setOpt(k,os.pathsep.join(P),lambda x:x.split(os.pathsep))
             globals()[k] = list(filter(rl_isdir,globals()[k]))
