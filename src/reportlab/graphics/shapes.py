@@ -641,7 +641,9 @@ class Drawing(Group, Flowable):
         renderScale = AttrMapValue(isNumber,desc="Global scaling for rendering"),
         )
 
-    _attrMap = AttrMap(BASE=Group)
+    _attrMap = AttrMap(BASE=Group,
+            formats = AttrMapValue(isListOfStrings,desc="default formats"),
+            )
     _attrMap.update(_xtraAttrMap)
 
     def __init__(self, width=400, height=200, *nodes, **keywords):
