@@ -247,6 +247,7 @@ class PythonPreformatted(XPreformatted):
         return fontifiedCode
 
 if __name__=='__main__':    #NORUNTESTS
+    import sys
     def dumpXPreformattedLines(P):
         print('\n############dumpXPreforemattedLines(%s)' % str(P))
         lines = P.blPara.lines

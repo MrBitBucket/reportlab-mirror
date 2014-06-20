@@ -634,7 +634,7 @@ class paragraphEngine:
                    hasattr(this,'width') or hasattr(next,'width'):
                     doswap = 0
                 # only swap two tuples if the second one is an end operation and the first is something else
-                elif isintance(this,tuple):
+                elif isinstance(this,tuple):
                     thisindicator = this[0]
                     if isinstance(next,tuple):
                         nextindicator = next[0]
@@ -868,7 +868,7 @@ def readBool(text):
     elif text.upper() in ("N", "NO", "FALSE", "0"):
         return 0
     else:
-        raise RMLError("true/false attribute has illegal value '%s'" % text)
+        raise ValueError("true/false attribute has illegal value '%s'" % text)
 
 def readAlignment(text):
     up = text.upper()
@@ -903,7 +903,7 @@ def readLength(text):
                 'pt':1
                 }[units]
         except KeyError:
-            raise RMLError("invalid length attribute '%s'" % text)
+            raise ValueError("invalid length attribute '%s'" % text)
 
         return number * multiplier
 

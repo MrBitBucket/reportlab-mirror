@@ -752,7 +752,7 @@ class ParaParser(HTMLParser):
             try:
                 v = unicodedata.lookup(attr['name'])
             except KeyError:
-                self._syntax_error('<unichar/> invalid name attribute\n"%s"' % ascii(name))
+                self._syntax_error('<unichar/> invalid name attribute\n"%s"' % ascii(attr['name']))
                 v = '\0'
         elif 'code' in attr:
             try:

@@ -7,7 +7,7 @@ __doc__="Utilities used here and there."
 from time import mktime, gmtime, strftime
 from math import log10, pi, floor, sin, cos, sqrt, hypot
 import weakref
-from reportlab.graphics.shapes import transformPoint, transformPoints, inverse, Ellipse, Group, String, Path
+from reportlab.graphics.shapes import transformPoint, transformPoints, inverse, Ellipse, Group, String, Path, numericXShift
 from reportlab.lib.utils import flatten
 from reportlab.pdfbase.pdfmetrics import stringWidth
 

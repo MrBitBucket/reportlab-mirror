@@ -449,7 +449,7 @@ def precalculate(cmapdir):
     import os
     files = os.listdir(cmapdir)
     for file in files:
-        if os.path.isfile(cmapdir + os.sep + self.name + '.fastmap'):
+        if os.path.isfile(cmapdir + os.sep + file + '.fastmap'):
             continue
         try:
             enc = CIDEncoding(file)

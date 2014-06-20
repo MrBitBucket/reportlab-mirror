@@ -591,7 +591,7 @@ See PdfEncryptIntro.pdf for more information.
             print("wrote output file '%s'(%s bytes)\n  owner password is '%s'\n  user password is '%s'" % (SAVEFILE, filesize, OWNER, USER))
 
         if len(argv)>0:
-            raise valueError("\nUnrecognised arguments : %s\nknown arguments are:\n%s" % (str(argv)[1:-1], known_modes))
+            raise ValueError("\nUnrecognised arguments : %s\nknown arguments are:\n%s" % (str(argv)[1:-1], known_modes))
     else:
         print(usage)
 

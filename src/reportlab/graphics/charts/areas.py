@@ -9,6 +9,7 @@ from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isNoneOrS
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.shapes import Rect, Group, Line, Polygon
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
+from reportlab.lib.colors import grey
 
 class PlotArea(Widget):
     "Abstract base class representing a chart's plot area, pretty unusable by itself."

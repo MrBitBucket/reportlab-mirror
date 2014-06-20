@@ -24,6 +24,7 @@ from hashlib import md5
 
 from sys import platform
 from sys import version_info
+from sys import stderr
 
 if platform[:4] == 'java' and version_info[:2] == (2, 1):
     # workaround for list()-bug in Jython 2.1 (should be fixed in 2.2)
@@ -601,7 +602,7 @@ class PDFString(PDFObject):
                     try:
                         s.decode('pdfdoc')
                     except:
-                        sys.stderr.write('Error in %s' % (repr(s),))
+                        stderr.write('Error in %s' % (repr(s),))
                         raise
         elif isUnicode(s):
             if enc is 'auto':
@@ -1419,7 +1420,7 @@ class PDFOutlines(PDFObject):
                 return tuple(L)
             return L
         # bug contributed by Benjamin Dumke <reportlab@benjamin-dumke.de>
-        raise TypeError("in outline, destination name must be string: got a %s"%Ot)
+        raise TypeError("in outline, destination name must be string: got a %s"%type(object))
 
     def prepare(self, document, canvas):
         """prepare all data structures required for save operation (create related objects)"""
@@ -1484,7 +1485,7 @@ class PDFOutlines(PDFObject):
                 eltobj.Count = count(subsections, closedict)
                 (eltobj.First, eltobj.Last) = self.maketree(document, subsections, eltref)
             else:
-                raise ValueError("destination tree elt should be dict or tuple, got %s" % te)
+                raise ValueError("destination tree elt should be dict or tuple, got %s" % type(elt))
             try:
                 [(Title, Dest)] = list(leafdict.items())
             except:

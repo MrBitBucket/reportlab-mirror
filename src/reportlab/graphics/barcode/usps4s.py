@@ -53,12 +53,12 @@ class USPS_4State(Barcode):
 
     def tracking(self,tracking):
         self._init()
-        self._tracking = value
+        self._tracking = tracking
     tracking = property(lambda self: self._tracking,tracking)
 
     def routing(self,routing):
         self._init()
-        self._routing = value
+        self._routing = routing
     routing = property(lambda self: self._routing,routing)
 
     def widthSize(self,value):
