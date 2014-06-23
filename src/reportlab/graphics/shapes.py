@@ -642,7 +642,10 @@ class Drawing(Group, Flowable):
         )
 
     _attrMap = AttrMap(BASE=Group,
-            formats = AttrMapValue(isListOfStrings,desc="default formats"),
+            formats = AttrMapValue(SequenceOf(
+                OneOf('pdf','gif','png','tif','jpg','tiff','pct','pict',
+                        'bmp','tiffp','tiffl','tiff1','eps','svg','ps','py'),
+                lo=1,emptyOK=0), desc='One or more plot modes'),
             )
     _attrMap.update(_xtraAttrMap)
 
