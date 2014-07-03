@@ -291,7 +291,7 @@ class PageTemplate:
 
 def _addGeneratedContent(flowables,frame):
     S = getattr(frame,'_generated_content',None)
-    if S: 
+    if S:
         flowables[0:0] = S
         del frame._generated_content
 
@@ -372,7 +372,7 @@ class BaseDocTemplate:
     First attempt at defining a document template class.
 
     The basic idea is simple.
-    
+
     1)  The document has a list of data associated with it
         this data should derive from flowables. We'll have
         special classes like PageBreak, FrameBreak to do things
@@ -417,7 +417,7 @@ class BaseDocTemplate:
     - bottomMargin:  Margin sizes in points (default 1 inch).  These margins may be
       overridden by the pageTemplates.  They are primarily of interest for the
       SimpleDocumentTemplate subclass.
-    
+
     - allowSplitting:  If set flowables (eg, paragraphs) may be split across frames or pages
       (default: 1)
     - title: Internal title for document (does not automatically display on any page)
@@ -832,7 +832,7 @@ class BaseDocTemplate:
                                 pageCompression=self.pageCompression,
                                 enforceColorSpace=self.enforceColorSpace,
                                 )
- 
+
         getattr(self.canv,'setEncrypt',lambda x: None)(self.encrypt)
 
         self.canv._cropMarks = self.cropMarks
@@ -929,7 +929,14 @@ class BaseDocTemplate:
     def notify(self, kind, stuff):
         """Forward to any listeners"""
         for l in self._indexingFlowables:
-            l.notify(kind, stuff)
+            _canv = getattr(l,'_canv',self)
+            try:
+                if _canv==self:
+                    l._canv = self.canv
+                l.notify(kind, stuff)
+            finally:
+                if _canv==self:
+                    del l._canv
 
     def pageRef(self, label):
         """hook to register a page number"""
@@ -943,7 +950,7 @@ class BaseDocTemplate:
                    ):
         """Makes multiple passes until all indexing flowables
         are happy.
-        
+
         Returns number of passes"""
         self._indexingFlowables = []
         #scan the story and keep a copy
@@ -990,7 +997,7 @@ class BaseDocTemplate:
         del self._multiBuildEdits
         if verbose: print('saved')
         return passes
-        
+
     #these are pure virtuals override in derived classes
     #NB these get called at suitable places by the base class
     #so if you derive and override the handle_xxx methods

@@ -74,13 +74,12 @@ def drawPageNumbers(canvas, style, pages, availWidth, availHeight, dot=' . '):
     If dot is a string, pagestr is drawn right-aligned. If the string is not empty,
     the gap is filled with it.
     '''
-    pages.sort()
     pagestr = ', '.join([str(p) for p, _ in pages])
     x, y = canvas._curr_tx_info['cur_x'], canvas._curr_tx_info['cur_y']
-    
+
     fontSize = style.fontSize
     pagestrw = stringWidth(pagestr, style.fontName, fontSize)
-    
+
     #if it's too long to fit, we need to shrink to fit in 10% increments.
     #it would be very hard to output multiline entries.
     #however, we impose a minimum size of 1 point as we don't want an
@@ -90,8 +89,8 @@ def drawPageNumbers(canvas, style, pages, availWidth, availHeight, dot=' . '):
     while pagestrw > freeWidth and fontSize >= 1.0:
         fontSize = 0.9 * fontSize
         pagestrw = stringWidth(pagestr, style.fontName, fontSize)
-        
-    
+
+
     if isinstance(dot, strTypes):
         if dot:
             dotw = stringWidth(dot, style.fontName, fontSize)
@@ -313,7 +312,7 @@ class SimpleIndex(IndexingFlowable):
     def setup(self, style=None, dot=None, tableStyle=None, headers=True, name=None, format='123', offset=0):
         """
         This method makes it possible to change styling and other parameters on an existing object.
-        
+
         style is the paragraph style to use for index entries.
         dot can either be None or a string. If it's None, entries are immediatly followed by their
             corresponding page numbers. If it's a string, page numbers are aligned on the right side
@@ -321,16 +320,16 @@ class SimpleIndex(IndexingFlowable):
         tableStyle is the style used by the table which the index uses to draw itself. Use this to
             change properties like spacing between elements.
         headers is a boolean. If it is True, alphabetic headers are displayed in the Index when the first
-        letter changes. If False, we just output some extra space before the next item 
+        letter changes. If False, we just output some extra space before the next item
         name makes it possible to use several indexes in one document. If you want this use this
             parameter to give each index a unique name. You can then index a term by refering to the
             name of the index which it should appear in:
-            
+
                 <index item="term" name="myindex" />
 
         format can be 'I', 'i', '123',  'ABC', 'abc'
         """
-        
+
         if style is None:
             style = ParagraphStyle(name='index',
                                         fontName=_baseFontName,
@@ -359,12 +358,13 @@ class SimpleIndex(IndexingFlowable):
             offset = self.offset
 
         terms = commasplit(terms)
-        pns = formatFunc(canv.getPageNumber()-offset)
+        cPN = canv.getPageNumber()
+        pns = formatFunc(cPN-offset)
         key = 'ix_%s_%s_p_%s' % (self.name, label, pns)
 
         info = canv._curr_tx_info
         canv.bookmarkHorizontal(key, info['cur_x'], info['cur_y'] + info['leading'])
-        self.addEntry(terms, pns, key)
+        self.addEntry(terms, (cPN,pns), key)
 
     def getCanvasMaker(self, canvasmaker=canvas.Canvas):
 
@@ -396,8 +396,8 @@ class SimpleIndex(IndexingFlowable):
         Here we are interested in 'IndexEntry' events only.
         """
         if kind == 'IndexEntry':
-            (text, pageNum) = stuff
-            self.addEntry(text, pageNum)
+            text, pageNum = stuff
+            self.addEntry(text, (self._canv.getPageNumber(),pageNum))
 
     def addEntry(self, text, pageNum, key=None):
         """Allows incremental buildup"""
@@ -429,7 +429,7 @@ class SimpleIndex(IndexingFlowable):
         def drawIndexEntryEnd(canvas, kind, label):
             '''Callback to draw dots and page numbers after each entry.'''
             style = self.getLevelStyle(leveloffset)
-            pages = decode_label(label)
+            pages = [(p[1],k) for p,k in sorted(decode_label(label))]
             drawPageNumbers(canvas, style, pages, availWidth, availHeight, self.dot)
         self.canv.drawIndexEntryEnd = drawIndexEntryEnd
 
@@ -453,7 +453,7 @@ class SimpleIndex(IndexingFlowable):
                 tableData.append([Paragraph(header, alphaStyle),])
                 tableData.append([Spacer(1, alphaStyle.spaceAfter),])
 
-                    
+
             i, diff = listdiff(lastTexts, texts)
             if diff:
                 lastTexts = texts
@@ -461,11 +461,11 @@ class SimpleIndex(IndexingFlowable):
             label = encode_label(list(pageNumbers))
             texts[-1] = '%s<onDraw name="drawIndexEntryEnd" label="%s"/>' % (texts[-1], label)
             for text in texts:
-                #Platypus and RML differ on how parsed XML attributes are escaped.  
+                #Platypus and RML differ on how parsed XML attributes are escaped.
                 #e.g. <index item="M&S"/>.  The only place this seems to bite us is in
                 #the index entries so work around it here.
-                text = escapeOnce(text)    
-                
+                text = escapeOnce(text)
+
                 style = self.getLevelStyle(i+leveloffset)
                 para = Paragraph(text, style)
                 if style.spaceBefore:
@@ -551,5 +551,3 @@ class ReferenceText(IndexingFlowable):
 
     def drawOn(self, canvas, x, y, _sW=0):
         self._para.drawOn(canvas, x, y, _sW)
-
-
