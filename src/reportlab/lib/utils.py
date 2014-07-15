@@ -663,7 +663,12 @@ def open_for_read(name,mode='b', urlopen=urlopen, datareader=datareader):
 del urlopen, datareader
 
 def open_and_read(name,mode='b'):
-    return open_for_read(name,mode).read()
+    f = open_for_read(name,mode)
+    if name is not f and hasattr(f,'__exit__'):
+        with f:
+            return f.read()
+    else:
+        return f.read()
 
 def open_and_readlines(name,mode='t'):
     return open_and_read(name,mode).split('\n')
