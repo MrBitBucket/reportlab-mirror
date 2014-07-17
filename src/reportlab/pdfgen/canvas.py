@@ -272,6 +272,7 @@ class Canvas(textobject._PDFColorSetter):
         self._cropMarks = cropMarks
 
         self._pagesize = pagesize
+        self._hanging_pagesize = None
         self._pageRotation = 0
         #self._currentPageHasImages = 0
         self._pageTransition = None
@@ -646,6 +647,9 @@ class Canvas(textobject._PDFColorSetter):
 
     def _startPage(self):
         #now get ready for the next one
+        if self._hanging_pagesize:
+            self.setPageSize(self._hanging_pagesize)
+            self._hanging_pagesize = None
         self._pageNumber += 1
         self._restartAccumulators()
         self.init_graphics_state()
