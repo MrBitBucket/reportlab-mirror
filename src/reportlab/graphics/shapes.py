@@ -120,7 +120,9 @@ def transformPoint(A,v):
     return (A[0]*v[0]+A[2]*v[1]+A[4],A[1]*v[0]+A[3]*v[1]+A[5])
 
 def transformPoints(matrix, V):
-    return list(map(transformPoint, V))
+    r = [transformPoint(matrix,v) for v in V]
+    if isinstance(V,tuple): r = tuple(r)
+    return r
 
 def zTransformPoints(matrix, V):
     return list(map(lambda x,matrix=matrix: zTransformPoint(matrix,x), V))
