@@ -774,6 +774,9 @@ class ParaParser(HTMLParser):
         self._pop('unichar')
 
     def start_font(self,attr):
+        A = self.getAttributes(attr,_spanAttrMap)
+        if 'fontName' in A:
+            A['fontName'], A['bold'], A['italic'] = ps2tt(A['fontName'])
         self._push('font',**self.getAttributes(attr,_fontAttrMap))
 
     def end_font(self):
@@ -790,6 +793,8 @@ class ParaParser(HTMLParser):
                 D[k] = v
             D.update(A)
             A = D
+        if 'fontName' in A:
+            A['fontName'], A['bold'], A['italic'] = ps2tt(A['fontName'])
         self._push('span',**A)
 
     def end_span(self):
