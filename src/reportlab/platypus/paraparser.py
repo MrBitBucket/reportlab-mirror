@@ -777,7 +777,7 @@ class ParaParser(HTMLParser):
         A = self.getAttributes(attr,_spanAttrMap)
         if 'fontName' in A:
             A['fontName'], A['bold'], A['italic'] = ps2tt(A['fontName'])
-        self._push('font',**self.getAttributes(attr,_fontAttrMap))
+        self._push('font',**A)
 
     def end_font(self):
         self._pop('font')
