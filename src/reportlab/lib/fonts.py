@@ -63,9 +63,13 @@ _tt2ps_map = {
             }
 
 _ps2tt_map={}
-for k,v in _tt2ps_map.items():
-    if k not in _ps2tt_map:
-        _ps2tt_map[v.lower()] = k
+for k in sorted(_tt2ps_map.keys()):
+    v = _tt2ps_map[k].lower()
+    if v not in _ps2tt_map:
+        _ps2tt_map[v] = k
+    v = k[0].lower()
+    if v not in _ps2tt_map:
+        _ps2tt_map[v] = k
 
 def ps2tt(psfn):
     'ps fontname to family name, bold, italic'
