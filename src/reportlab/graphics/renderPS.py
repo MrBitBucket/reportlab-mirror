@@ -760,7 +760,7 @@ class _PSRenderer(Renderer):
 
     def drawWedge(self, wedge):
         yradius, radius1, yradius1 = wedge._xtraRadii()
-        if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None):
+        if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None) and not wedge.annular:
             startangledegrees = wedge.startangledegrees
             endangledegrees = wedge.endangledegrees
             centerx= wedge.centerx
@@ -770,7 +770,11 @@ class _PSRenderer(Renderer):
             self._canvas.drawArc(centerx-radius, centery-yradius, centerx+radius, centery+yradius,
                 startangledegrees, extent, fromcenter=1)
         else:
-            self.drawPolygon(wedge.asPolygon())
+            P = wedge.asPolygon()
+            if isinstance(P,Path):
+                self.drawPath(P)
+            else:
+                self.drawPolygon(P)
 
     def drawPolyLine(self, p):
         if self._canvas._strokeColor:

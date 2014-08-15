@@ -811,13 +811,21 @@ class _SVGRenderer(Renderer):
         self._canvas.circle( circle.cx, circle.cy, circle.r, link_info=self._get_link_info_dict(circle))
 
     def drawWedge(self, wedge):
-        centerx, centery, radius, startangledegrees, endangledegrees = \
-         wedge.centerx, wedge.centery, wedge.radius, wedge.startangledegrees, wedge.endangledegrees
-        yradius = wedge.yradius or wedge.radius
-        (x1, y1) = (centerx-radius, centery-yradius)
-        (x2, y2) = (centerx+radius, centery+yradius)
-        extent = endangledegrees - startangledegrees
-        self._canvas.drawArc(x1, y1, x2, y2, startangledegrees, extent, fromcenter=1)
+        yradius, radius1, yradius1 = wedge._xtraRadii()
+        if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None) and not wedge.annular:
+            centerx, centery, radius, startangledegrees, endangledegrees = \
+             wedge.centerx, wedge.centery, wedge.radius, wedge.startangledegrees, wedge.endangledegrees
+            yradius = wedge.yradius or wedge.radius
+            (x1, y1) = (centerx-radius, centery-yradius)
+            (x2, y2) = (centerx+radius, centery+yradius)
+            extent = endangledegrees - startangledegrees
+            self._canvas.drawArc(x1, y1, x2, y2, startangledegrees, extent, fromcenter=1)
+        else:
+            P = wedge.asPolygon()
+            if isinstance(P,Path):
+                self.drawPath(P)
+            else:
+                self.drawPolygon(P)
 
     def drawPolyLine(self, p):
         if self._canvas._strokeColor:

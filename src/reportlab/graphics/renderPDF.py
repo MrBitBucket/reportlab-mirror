@@ -109,25 +109,28 @@ class _PDFRenderer(Renderer):
             self._canvas.drawPath(path)
 
     def drawWedge(self, wedge):
-        centerx, centery, radius, startangledegrees, endangledegrees = \
-         wedge.centerx, wedge.centery, wedge.radius, wedge.startangledegrees, wedge.endangledegrees
-        yradius, radius1, yradius1 = wedge._xtraRadii()
-        if yradius is None: yradius = radius
-        angle = endangledegrees-startangledegrees
-        path = self._canvas.beginPath()
-        if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None):
-            path.moveTo(centerx, centery)
-            path.arcTo(centerx-radius, centery-yradius, centerx+radius, centery+yradius,
-                   startangledegrees, angle)
+        if wedge.annular:
+            self.drawPath(wedge.asPolygon())
         else:
-            path.arc(centerx-radius, centery-yradius, centerx+radius, centery+yradius,
-                   startangledegrees, angle)
-            path.arcTo(centerx-radius1, centery-yradius1, centerx+radius1, centery+yradius1,
-                   endangledegrees, -angle)
-        path.close()
-        self._canvas.drawPath(path,
-                    fill=self._fill,
-                    stroke=self._stroke)
+            centerx, centery, radius, startangledegrees, endangledegrees = \
+             wedge.centerx, wedge.centery, wedge.radius, wedge.startangledegrees, wedge.endangledegrees
+            yradius, radius1, yradius1 = wedge._xtraRadii()
+            if yradius is None: yradius = radius
+            angle = endangledegrees-startangledegrees
+            path = self._canvas.beginPath()
+            if (radius1==0 or radius1 is None) and (yradius1==0 or yradius1 is None):
+                path.moveTo(centerx, centery)
+                path.arcTo(centerx-radius, centery-yradius, centerx+radius, centery+yradius,
+                       startangledegrees, angle)
+            else:
+                path.arc(centerx-radius, centery-yradius, centerx+radius, centery+yradius,
+                       startangledegrees, angle)
+                path.arcTo(centerx-radius1, centery-yradius1, centerx+radius1, centery+yradius1,
+                       endangledegrees, -angle)
+            path.close()
+            self._canvas.drawPath(path,
+                        fill=self._fill,
+                        stroke=self._stroke)
 
     def drawEllipse(self, ellipse):
         #need to convert to pdfgen's bounding box representation

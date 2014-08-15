@@ -267,7 +267,7 @@ class Doughnut(AbstractPieChart):
                 if n > 1:
                     theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius)
                 elif n==1:
-                    theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, iradius=iradius)
+                    theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius, annular=True)
 
                 theSector.fillColor = sectorStyle.fillColor
                 theSector.strokeColor = sectorStyle.strokeColor

@@ -314,8 +314,11 @@ class Renderer:
     def drawWedge(self, wedge):
         # by default ask the wedge to make a polygon of itself and draw that!
         #print "drawWedge"
-        polygon = wedge.asPolygon()
-        self.drawPolygon(polygon)
+        P = wedge.asPolygon()
+        if isinstance(P,Path):
+            self.drawPath(P)
+        else:
+            self.drawPolygon(P)
 
     def drawPath(self, path):
         polygons = path.asPolygons()

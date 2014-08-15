@@ -1223,11 +1223,13 @@ class Wedge(SolidShape):
         yradius = AttrMapValue(isNumberOrNone),
         radius1 = AttrMapValue(isNumberOrNone),
         yradius1 = AttrMapValue(isNumberOrNone),
+        annular = AttrMapValue(isBoolean,desc='treat as annular ring'),
         )
 
     degreedelta = 1 # jump every 1 degrees
 
-    def __init__(self, centerx, centery, radius, startangledegrees, endangledegrees, yradius=None, **kw):
+    def __init__(self, centerx, centery, radius, startangledegrees, endangledegrees, yradius=None,
+            annular=False, **kw):
         SolidShape.__init__(self, kw)
         while endangledegrees<startangledegrees:
             endangledegrees = endangledegrees+360
@@ -1235,6 +1237,7 @@ class Wedge(SolidShape):
         self.centerx, self.centery, self.radius, self.startangledegrees, self.endangledegrees = \
             centerx, centery, radius, startangledegrees, endangledegrees
         self.yradius = yradius
+        self.annular = annular
 
     def _xtraRadii(self):
         yradius = getattr(self, 'yradius', None)
@@ -1276,7 +1279,7 @@ class Wedge(SolidShape):
         CA = []
         CAA = CA.append
         a = points.append
-        for angle in range(n):
+        for angle in xrange(n):
             angle = startangle+angle*radiansdelta
             CAA((cos(angle),sin(angle)))
         for c,s in CA:
@@ -1289,7 +1292,19 @@ class Wedge(SolidShape):
             for c,s in CA:
                 a(centerx+radius1*c)
                 a(centery+yradius1*s)
-        return Polygon(points)
+        if self.annular:
+            P = Path()
+            P.moveTo(points[0],points[1])
+            for x in xrange(2,2*n,2):
+                P.lineTo(points[x],points[x+1])
+            P.closePath()
+            P.moveTo(points[2*n],points[2*n+1])
+            for x in xrange(2*n+2,4*n,2):
+                P.lineTo(points[x],points[x+1])
+            P.closePath()
+            return P
+        else:
+            return Polygon(points)
 
     def copy(self):
         new = self.__class__(self.centerx,
