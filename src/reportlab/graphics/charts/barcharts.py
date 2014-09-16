@@ -173,10 +173,15 @@ class BarChart(PlotArea):
         if cA.style not in ('parallel','parallel_3d'):
             _data = data
             data = max(list(map(len,_data)))*[0]
+            ndata = data[:]
             for d in _data:
-                for i in range(len(d)):
-                    data[i] = data[i] + (d[i] or 0)
-            data = list(_data) + [data]
+                for i in xrange(len(d)):
+                    v = d[i] or 0
+                    if v<=-1e-6:
+                        ndata[i] += v
+                    else:
+                        data[i] += v
+            data = list(_data) + [data] + [ndata]
         self._configureData = data
 
     def _getMinMax(self):
@@ -303,7 +308,8 @@ class BarChart(PlotArea):
             bGapB = barWidth
             bGapS = barSpacing
         else:
-            accum = rowLength*[0]
+            accumNeg = rowLength*[0]
+            accumPos = rowLength*[0]
             wB = barWidth
             wS = bGapB = bGapS = 0
         self._groupWidth = groupWidth = wG+wB+wS
@@ -376,7 +382,7 @@ class BarChart(PlotArea):
         self._barPositions = []
         aBP = self._barPositions.append
         reversePlotOrder = self.reversePlotOrder
-        for rowNo in range(seriesCount):
+        for rowNo in xrange(seriesCount):
             barRow = []
             if reversePlotOrder:
                 xVal = seriesCount-1 - rowNo
@@ -384,7 +390,7 @@ class BarChart(PlotArea):
                 xVal = rowNo
             xVal = offs + xVal*bGap
             row = data[rowNo]
-            for colNo in range(nC):
+            for colNo in xrange(nC):
                 datum = row[colNo]
 
                 # Ufff...
@@ -399,10 +405,16 @@ class BarChart(PlotArea):
                     y = baseLine
                 else:
                     if style not in ('parallel','parallel_3d'):
-                        y = vScale(accum[colNo])
-                        if y<baseLine: y = baseLine
-                        accum[colNo] = accum[colNo] + datum
-                        datum = accum[colNo]
+                        if datum<=-1e-6:
+                            y = vScale(accumNeg[colNo])
+                            if y>baseLine: y = baseLine
+                            accumNeg[colNo] = accumNeg[colNo] + datum
+                            datum = accumNeg[colNo]
+                        else:
+                            y = vScale(accumPos[colNo])
+                            if y<baseLine: y = baseLine
+                            accumPos[colNo] = accumPos[colNo] + datum
+                            datum = accumPos[colNo]
                     else:
                         y = baseLine
                     height = vScale(datum) - y
@@ -544,19 +556,19 @@ class BarChart(PlotArea):
             CBL = []
             rowNoL = lenData - 1
             #find all the categories that have at least one value
-            for rowNo in range(lenData):
+            for rowNo in xrange(lenData):
                 row = BP[rowNo]
-                for colNo in range(len(row)):
+                for colNo in xrange(len(row)):
                     x, y, width, height = row[colNo]
                     if None not in (width,height):
                         catNNA[colNo] = 1
 
-        for rowNo in range(lenData):
+        for rowNo in xrange(lenData):
             row = BP[rowNo]
             styleCount = len(bars)
             styleIdx = rowNo % styleCount
             rowStyle = bars[styleIdx]
-            for colNo in range(len(row)):
+            for colNo in xrange(len(row)):
                 style = (styleIdx,colNo) in bars and bars[(styleIdx,colNo)] or rowStyle
                 x, y, width, height = row[colNo]
                 if None in (width,height):
@@ -678,7 +690,7 @@ class BarChart(PlotArea):
             lo = self.x
             hi = lo + self.width
             end = self.y+self.height
-            for i in range(lenData):
+            for i in xrange(lenData):
                 for x, y, w, h in BP[i]:
                     v = x+w
                     z = y+h
@@ -687,7 +699,7 @@ class BarChart(PlotArea):
             lo = self.y
             hi = lo + self.height
             end = self.x+self.width
-            for i in range(lenData):
+            for i in xrange(lenData):
                 for x, y, w, h in BP[i]:
                     v = y+h
                     z = x+w
@@ -741,10 +753,10 @@ class BarChart(PlotArea):
         bars = self.bars
         R = [].append
         BP = self._barPositions
-        for rowNo in range(lenData):
+        for rowNo in xrange(lenData):
             row = BP[rowNo]
             C = [].append
-            for colNo in range(len(row)):
+            for colNo in xrange(len(row)):
                 x, y, width, height = row[colNo]
                 if None in (width,height):
                     na = self.naLabel
