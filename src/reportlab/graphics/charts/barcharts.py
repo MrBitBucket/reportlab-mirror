@@ -451,7 +451,9 @@ class BarChart(PlotArea):
         if anti: value = 0
         a = x + 0.5*width
         nudge = (height>=0 and 1 or -1)*nudge
-        if bt=='hi':
+        if bt=='mid':
+            b = y+height*0.5
+        elif bt=='hi':
             if value>=0:
                 b = y + value + nudge
             else:

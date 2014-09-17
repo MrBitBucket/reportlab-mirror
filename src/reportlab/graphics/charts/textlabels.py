@@ -430,6 +430,7 @@ class BarChartLabel(PMVLabel):
         fixedEnd = AttrMapValue(NoneOrInstanceOfLabelOffset, desc="None or fixed draw ends +/-"),
         fixedStart = AttrMapValue(NoneOrInstanceOfLabelOffset, desc="None or fixed draw starts +/-"),
         nudge = AttrMapValue(isNumber, desc="Non-zero sign dependent nudge"),
+        boxTarget = AttrMapValue(OneOf('normal','anti','lo','hi','mid'),desc="one of ('normal','anti','lo','hi','mid')"),
         )
 
     def __init__(self):
