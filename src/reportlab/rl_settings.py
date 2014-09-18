@@ -47,7 +47,8 @@ rtlSupport
 listWrapOnFakeWidth
 T1SearchPath
 TTFSearchPath
-CMapSearchPath'''.split())
+CMapSearchPath
+baseUnderlineProportion'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -97,6 +98,8 @@ debug=                      0                       #for debugging code
 rtlSupport=                 0                       #set to 1 to attempt import of RTL assistance eg fribidi etc etc
 listWrapOnFakeWidth=        1                       #set to 0/False to force platypus.flowables._listWrapOn to report correct widths
                                                     #else it reports minimum(required,available) width
+baseUnderlineProportion=    0.0                     #non-zero for doing font size proportional lines in Paragraph.py
+                                                    #by default typical value 0.05. may be overridden on a parastyle.
 
 # places to look for T1Font information
 T1SearchPath =  (

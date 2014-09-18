@@ -25,7 +25,7 @@ __all__=(
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from reportlab.lib.fonts import tt2ps
-from reportlab.rl_config import canvas_basefontname as _baseFontName
+from reportlab.rl_config import canvas_basefontname as _baseFontName, baseUnderlineProportion as _baseUnderlineProportion
 _baseFontNameB = tt2ps(_baseFontName,1,0)
 _baseFontNameI = tt2ps(_baseFontName,0,1)
 _baseFontNameBI = tt2ps(_baseFontName,1,1)
@@ -127,6 +127,7 @@ class ParagraphStyle(PropertySet):
                                 #string or object with text and optional fontName, fontSize, textColor & backColor
                                 #dy
         'splitLongWords':1,     #make best efforts to split long words
+        'underlineProportion': _baseUnderlineProportion,    #set to non-zero to get proportional
         }
 
 class LineStyle(PropertySet):
