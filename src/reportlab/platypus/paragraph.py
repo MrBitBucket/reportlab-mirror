@@ -15,8 +15,7 @@ from reportlab.lib.geomutils import normalizeTRBL
 from reportlab.lib.textsplit import wordSplit, ALL_CANNOT_START
 from copy import deepcopy
 from reportlab.lib.abag import ABag
-from reportlab.rl_config import platypus_link_underline
-from reportlab import rl_config
+from reportlab.rl_config import platypus_link_underline, decimalSymbol, _FUZZ, paraFontSizeHeightOffset
 from reportlab.lib.utils import _className, isBytes, unicodeT, bytesT, strTypes
 from reportlab.lib.rl_accel import sameFrag
 import re
@@ -596,16 +595,39 @@ def _split_blParaHard(blPara,start,stop):
 
 def _drawBullet(canvas, offset, cur_y, bulletText, style, rtl):
     '''draw a bullet text could be a simple string or a frag list'''
-    if not rtl:
-        tx2 = canvas.beginText(style.bulletIndent, cur_y+getattr(style,"bulletOffsetY",0))
+    bulletAnchor = style.bulletAnchor
+    if rtl or style.bulletAnchor!='start':
+        numeric = bulletAnchor=='numeric'
+        if isinstance(bulletText,strTypes):
+            t =  bulletText
+            q = numeric and decimalSymbol in t
+            if q: t = t[:t.index(decimalSymbol)]
+            bulletWidth = stringWidth(t, style.bulletFontName, style.bulletFontSize)
+            if q: bulletWidth += 0.5 * stringWidth(decimalSymbol, style.bulletFontName, style.bulletFontSize)
+        else:
+            #it's a list of fragments
+            bulletWidth = 0
+            for f in bulletText:
+                t = f.text
+                q = numeric and decimalSymbol in t
+                if q:
+                    t = t[:t.index(decimalSymbol)]
+                    bulletWidth += 0.5 * stringWidth(decimalSymbol, f.fontName, f.fontSize)
+                bulletWidth += stringWidth(t, f.fontName, f.fontSize)
+                if q:
+                    break
     else:
-        bt = bulletText[0].text
-        bulletWidth = stringWidth(bt, style.bulletFontName, style.bulletFontSize)
+        bulletWidth = 0
+    if bulletAnchor=='middle': bulletWidth *= 0.5
+    cur_y += getattr(style,"bulletOffsetY",0)
+    if not rtl:
+        tx2 = canvas.beginText(style.bulletIndent-bulletWidth,cur_y)
+    else:
         width = rtl[0]
         bulletStart = width+style.rightIndent-(style.bulletIndent+bulletWidth)
-        tx2 = canvas.beginText(bulletStart, cur_y+getattr(style,"bulletOffsetY",0))
+        tx2 = canvas.beginText(bulletStart, cur_y)
     tx2.setFont(style.bulletFontName, style.bulletFontSize)
-    tx2.setFillColor(hasattr(style,'bulletColor') and style.bulletColor or style.textColor)
+    tx2.setFillColor(getattr(style,'bulletColor',style.textColor))
     if isinstance(bulletText,strTypes):
         tx2.textOut(bulletText)
     else:
@@ -632,7 +654,7 @@ def _handleBulletWidth(bulletText,style,maxWidths):
             #it's a list of fragments
             bulletWidth = 0
             for f in bulletText:
-                bulletWidth = bulletWidth + stringWidth(f.text, f.fontName, f.fontSize)
+                bulletWidth += stringWidth(f.text, f.fontName, f.fontSize)
         bulletLen = style.bulletIndent + bulletWidth + 0.6 * style.bulletFontSize
         if style.wordWrap=='RTL':
             indent = style.rightIndent+style.firstLineIndent
@@ -877,7 +899,6 @@ def makeCJKParaLine(U,maxWidth,widthUsed,extraSpace,lineBreak,calcBounds):
 
 def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
     '''This attempts to be wordSplit for frags using the dumb algorithm'''
-    from reportlab.rl_config import _FUZZ
     U = []  #get a list of single glyphs with their widths etc etc
     for f in frags:
         text = f.text
@@ -1584,7 +1605,7 @@ class Paragraph(Flowable):
                 elif self.style.alignment == TA_JUSTIFY:
                     dpl = _justifyDrawParaLine
                 f = blPara
-                if rl_config.paraFontSizeHeightOffset:
+                if paraFontSizeHeightOffset:
                     cur_y = self.height - f.fontSize
                 else:
                     cur_y = self.height - getattr(f,'ascent',f.fontSize)
@@ -1656,7 +1677,7 @@ class Paragraph(Flowable):
                     for line in lines:
                         line.words = line.words[::-1]
                 f = lines[0]
-                if rl_config.paraFontSizeHeightOffset:
+                if paraFontSizeHeightOffset:
                     cur_y = self.height - f.fontSize
                 else:
                     cur_y = self.height - getattr(f,'ascent',f.fontSize)

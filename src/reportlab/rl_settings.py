@@ -48,7 +48,8 @@ listWrapOnFakeWidth
 T1SearchPath
 TTFSearchPath
 CMapSearchPath
-baseUnderlineProportion'''.split())
+baseUnderlineProportion
+decimalSymbol'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -100,6 +101,7 @@ listWrapOnFakeWidth=        1                       #set to 0/False to force pla
                                                     #else it reports minimum(required,available) width
 baseUnderlineProportion=    0.0                     #non-zero for doing font size proportional lines in Paragraph.py
                                                     #by default typical value 0.05. may be overridden on a parastyle.
+decimalSymbol=              '.'                     #what we use to align floats numerically
 
 # places to look for T1Font information
 T1SearchPath =  (

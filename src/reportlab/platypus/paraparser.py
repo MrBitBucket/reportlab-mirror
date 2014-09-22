@@ -116,7 +116,13 @@ def _align(s):
     elif s=='right': return TA_RIGHT
     elif s=='justify': return TA_JUSTIFY
     elif s in ('centre','center'): return TA_CENTER
-    else: raise ValueError
+    else: raise ValueError('illegal alignment %r' % s)
+
+def _bAnchor(s):
+    s = s.lower()
+    if not s in ('start','middle','end','numeric'):
+        raise ValueError('illegal bullet anchor %r' % s)
+    return s
 
 _paraAttrMap = {'font': ('fontName', None),
                 'face': ('fontName', None),
@@ -135,6 +141,7 @@ _paraAttrMap = {'font': ('fontName', None),
                 'boffsety': ('bulletOffsetY',_num),
                 'bindent': ('bulletIndent',_num),
                 'bcolor': ('bulletColor',toColor),
+                'banchor': ('bulletAnchor',_bAnchor),
                 'color':('textColor',toColor),
                 'backcolor':('backColor',toColor),
                 'bgcolor':('backColor',toColor),
@@ -151,6 +158,7 @@ _bulletAttrMap = {
                 'indent': ('bulletIndent',_num),
                 'color': ('bulletColor',toColor),
                 'fg': ('bulletColor',toColor),
+                'anchor': ('bulletAnchor',_bAnchor),
                 }
 
 #things which are valid font attributes

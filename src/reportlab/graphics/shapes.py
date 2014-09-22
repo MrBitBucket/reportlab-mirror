@@ -10,7 +10,7 @@ from math import pi, cos, sin, tan, sqrt
 from pprint import pprint
 
 from reportlab.platypus import Flowable
-from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName as _baseGFontName, _unset_
+from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName as _baseGFontName, _unset_, decimalSymbol
 from reportlab.lib import logger
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -1371,7 +1371,7 @@ class PolyLine(LineShape):
     def getBounds(self):
         return getPointsBounds(self.points)
 
-def numericXShift(tA,text,w,fontName,fontSize,encoding=None,pivotCharacter='.'):
+def numericXShift(tA,text,w,fontName,fontSize,encoding=None,pivotCharacter=decimalSymbol):
     dp = getattr(tA,'_dp',pivotCharacter)
     i = text.rfind(dp)
     if i>=0:

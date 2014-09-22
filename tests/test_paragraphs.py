@@ -166,6 +166,18 @@ class ParagraphTestCase(unittest.TestCase):
         SA(Paragraph('''This is just a very long silly text to see if the <FONT face="Courier">caseSensitive</FONT> flag also works if the paragraph is <EM>very</EM> long. '''*20, styNormal, caseSensitive=0))
 
         SA(Indenter("1cm"))
+        SA(Paragraph("<para><bullet bulletIndent='-0.7cm' bulletOffsetY='2'>1.1</bullet>sample bullet default anchor</para>", styNormal))
+        SA(Paragraph("<para><bullet bulletIndent='-0.7cm' bulletOffsetY='2'>1.22</bullet>sample bullet default anchor</para>", styNormal))
+        SA(Paragraph("<para><bullet bulletIndent='-0.7cm' bulletOffsetY='2' anchor='start'>1.1</bullet>sample bullet start align</para>", styNormal))
+        SA(Paragraph("<para><bullet bulletIndent='-0.7cm' bulletOffsetY='2' anchor='start'>1.22</bullet>sample bullet start align</para>", styNormal))
+        SA(Paragraph("<para><bullet bulletIndent='-0.7cm' bulletOffsetY='2' anchor='middle'>1.1</bullet>sample bullet middle align</para>", styNormal))
+        SA(Paragraph("<para><bullet bulletIndent='-0.7cm' bulletOffsetY='2' anchor='middle'>1.22</bullet>sample bullet middle align</para>", styNormal))
+        SA(Paragraph("<para><bullet bulletIndent='-0.7cm' bulletOffsetY='2' anchor='end'>1.1</bullet>sample bullet end align</para>", styNormal))
+        SA(Paragraph("<para><bullet bulletIndent='-0.7cm' bulletOffsetY='2' anchor='end'>1.22</bullet>sample bullet end align</para>", styNormal))
+        SA(Paragraph("<para><bullet bulletIndent='-0.7cm' bulletOffsetY='2' anchor='numeric'>1.1</bullet>sample bullet numeric align</para>", styNormal))
+        SA(Paragraph("<para><bullet bulletIndent='-0.7cm' bulletOffsetY='2' anchor='numeric'>1.22</bullet>sample bullet numeric align</para>", styNormal))
+        SA(Paragraph("<para><bullet bulletIndent='-0.7cm' bulletOffsetY='2' anchor='numeric'><span color='red'>1</span><span color='green'>.</span><span color='blue'>3</span></bullet>sample bullet numeric align</para>", styNormal))
+
         SA(Paragraph("<para><bullet bulletIndent='-1cm' bulletOffsetY='2'><seq id='s0'/>)</bullet>Indented list bulletOffsetY=2. %s</para>" % randomText(), styNormal))
         SA(Paragraph("<para><bullet bulletIndent='-1cm'><seq id='s0'/>)</bullet>Indented list. %s</para>" % randomText(), styNormal))
         SA(Paragraph("<para><bullet bulletIndent='-1cm'><seq id='s0'/>)</bullet>Indented list. %s</para>" % randomText(), styNormal))

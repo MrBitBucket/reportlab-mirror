@@ -1529,7 +1529,7 @@ class Canvas(textobject._PDFColorSetter):
         t.textLine(text)
         self.drawText(t)
 
-    def drawAlignedString(self, x, y, text, pivotChar="."):
+    def drawAlignedString(self, x, y, text, pivotChar=rl_config.decimalSymbol):
         """Draws a string aligned on the first '.' (or other pivot character).
 
         The centre position of the pivot character will be used as x.

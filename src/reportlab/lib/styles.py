@@ -128,6 +128,7 @@ class ParagraphStyle(PropertySet):
                                 #dy
         'splitLongWords':1,     #make best efforts to split long words
         'underlineProportion': _baseUnderlineProportion,    #set to non-zero to get proportional
+        'bulletAnchor': 'start',    #where the bullet is anchored ie start, middle, end or numeric
         }
 
 class LineStyle(PropertySet):
