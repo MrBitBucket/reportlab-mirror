@@ -9,7 +9,7 @@ import os
 from reportlab.lib import colors
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.utils import recursiveImport
+from reportlab.lib.utils import recursiveImport, strTypes
 from reportlab.platypus import Frame
 from reportlab.platypus import Flowable
 from reportlab.platypus import Paragraph
@@ -27,10 +27,13 @@ class Figure(Flowable):
                  background=None,
                  captionTextColor=toColor('black'),
                  captionBackColor=None,
-                 border=1,
+                 border=None,
                  spaceBefore=12,
                  spaceAfter=12,
                  captionGap=None,
+                 captionAlign='centre',
+                 captionPosition='bottom',
+                 hAlign='CENTER',
                  ):
         Flowable.__init__(self)
         self.width = width
@@ -40,13 +43,16 @@ class Figure(Flowable):
         self.captionSize = captionSize
         self.captionTextColor = captionTextColor
         self.captionBackColor = captionBackColor
-        self.captionGap = captionGap
+        self.captionGap = captionGap or 0.5*captionSize
+        self.captionAlign = captionAlign
+        self.captionPosition = captionPosition
         self._captionData = None
         self.captionHeight = 0  # work out later
         self.background = background
         self.border = border
         self.spaceBefore = spaceBefore
         self.spaceAfter = spaceAfter
+        self.hAlign=hAlign
         self._getCaptionPara()  #Larry Meyn's fix - otherwise they all get the number of the last chapter.
 
     def _getCaptionPara(self):
@@ -55,48 +61,79 @@ class Figure(Flowable):
         captionSize = self.captionSize
         captionTextColor = self.captionTextColor
         captionBackColor = self.captionBackColor
-        if self._captionData!=(caption,captionFont,captionSize,captionTextColor,captionBackColor):
-            self._captionData = (caption,captionFont,captionSize,captionTextColor,captionBackColor)
-            self.captionStyle = ParagraphStyle(
-                'Caption',
-                fontName=captionFont,
-                fontSize=captionSize,
-                leading=1.2*captionSize,
-                textColor = captionTextColor,
-                backColor = captionBackColor,
-                #seems to be getting ignored
-                spaceBefore=self.captionGap or 0.5*captionSize,
-                alignment=TA_CENTER)
-            #must build paragraph now to get sequencing in synch with rest of story
-            self.captionPara = Paragraph(self.caption, self.captionStyle)
+        captionAlign = self.captionAlign
+        captionPosition = self.captionPosition
+        if self._captionData!=(caption,captionFont,captionSize,captionTextColor,captionBackColor,captionAlign,captionPosition):
+            self._captionData = (caption,captionFont,captionSize,captionTextColor,captionBackColor,captionAlign,captionPosition)
+            if isinstance(caption,Paragraph):
+                self.captionPara = caption
+            elif isinstance(caption,strTypes):
+                self.captionStyle = ParagraphStyle(
+                    'Caption',
+                    fontName=captionFont,
+                    fontSize=captionSize,
+                    leading=1.2*captionSize,
+                    textColor = captionTextColor,
+                    backColor = captionBackColor,
+                    #seems to be getting ignored
+                    spaceBefore=self.captionGap,
+                    alignment=TA_LEFT if captionAlign=='left' else TA_RIGHT if captionAlign=='right' else TA_CENTER,
+                    )
+                #must build paragraph now to get sequencing in synch with rest of story
+                self.captionPara = Paragraph(self.caption, self.captionStyle)
+            else:
+                raise ValueError('Figure caption of type %r is not a string or Paragraph' % type(caption))
 
     def wrap(self, availWidth, availHeight):
         # try to get the caption aligned
         if self.caption:
             self._getCaptionPara()
             w, h = self.captionPara.wrap(self.width, availHeight - self.figureHeight)
-            self.captionHeight = h + (self.captionGap or 0.5*self.captionSize)
+            self.captionHeight = h + self.captionGap
             self.height = self.captionHeight + self.figureHeight
             if w>self.width: self.width = w
         else:
             self.height = self.figureHeight
-        self.dx = 0.5 * (availWidth - self.width)
+        if self.hAlign in ('CENTER','CENTRE',TA_CENTER):
+            self.dx = 0.5 * (availWidth - self.width)
+        elif self.hAlign in ('RIGHT',TA_RIGHT):
+            self.dx = availWidth - self.width
+        else:
+            self.dx = 0
         return (self.width, self.height)
 
     def draw(self):
         self.canv.translate(self.dx, 0)
-        if self.caption:
-            self._getCaptionPara()
-            self.drawCaption()
+        if self.caption and self.captionPosition=='bottom':
             self.canv.translate(0, self.captionHeight)
         if self.background:
             self.drawBackground()
         if self.border:
             self.drawBorder()
         self.drawFigure()
+        if self.caption:
+            if self.captionPosition=='bottom':
+                self.canv.translate(0, -self.captionHeight)
+            else:
+                self.canv.translate(0, self.figureHeight+self.captionGap)
+            self._getCaptionPara()
+            self.drawCaption()
 
     def drawBorder(self):
-        self.canv.rect(0, 0, self.width, self.figureHeight)
+        canv = self.canv
+        border = self.border
+        bc = getattr(border,'color',None)
+        bw = getattr(border,'width',None)
+        bd = getattr(border,'dashArray',None)
+        ss = bc or bw or bd
+        if ss:
+            canv.saveState()
+            if bc: canv.setStrokeColor(bc)
+            if bw: canv.setLineWidth(bw)
+            if bd: canv.setDash(bd)
+        canv.rect(0, 0, self.width, self.figureHeight,fill=0,stroke=1)
+        if ss:
+            canv.restoreState()
 
     def _doBackground(self, color):
         self.canv.saveState()
@@ -176,6 +213,11 @@ class FlexFigure(Figure):
                         spaceBefore=12,
                         spaceAfter=12,
                         captionGap=9,
+                        captionAlign='centre',
+                        captionPosition='top',
+                        scaleFactor=None,
+                        hAlign='CENTER',
+                        border=1,
                         ):
         Figure.__init__(self, width, height, caption,
                         captionFont=captionFont,
@@ -184,11 +226,15 @@ class FlexFigure(Figure):
                         captionTextColor=captionTextColor,
                         spaceBefore = spaceBefore,
                         spaceAfter = spaceAfter,
-                        captionGap=9,
+                        captionGap=captionGap,
+                        captionAlign=captionAlign,
+                        captionPosition=captionPosition,
+                        hAlign=hAlign,
+                        border=border,
                         )
         self.shrinkToFit = shrinkToFit  #if set and wrap is too tight, shrinks
         self.growToFit = growToFit      #if set and wrap is too small, grows
-        self.scaleFactor = None
+        self.scaleFactor = scaleFactor
         self._scaleFactor = None
         self.background = background
 
@@ -219,15 +265,15 @@ class FlexFigure(Figure):
 
 class ImageFigure(FlexFigure):
     """Image with a caption below it"""
-    def __init__(self, filename, caption, background=None):
+    def __init__(self, filename, caption, background=None,scaleFactor=None,hAlign='CENTER',border=None):
         assert os.path.isfile(filename), 'image file %s not found' % filename
         from reportlab.lib.utils import ImageReader
         w, h = ImageReader(filename).getSize()
         self.filename = filename
-        FlexFigure.__init__(self, w, h, caption, background)
+        FlexFigure.__init__(self, w, h, caption, background,scaleFactor=scaleFactor,hAlign=hAlign,border=border)
 
     def drawFigure(self):
-        self.canv.drawInlineImage(self.filename,
+        self.canv.drawImage(self.filename,
                                   0, 0,self.width, self.figureHeight)
 
 class DrawingFigure(FlexFigure):
