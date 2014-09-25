@@ -157,7 +157,7 @@ def _hLine(canvLine, scp, ecp, y, hBlocks, FUZZ=rl_config._FUZZ):
 def _multiLine(scp,ecp,y,canvLine,ws,count):
     offset = 0.5*(count-1)*ws
     y += offset
-    for idx in range(count):
+    for idx in xrange(count):
         canvLine(scp, y, ecp, y)
         y -= ws
 
@@ -186,9 +186,9 @@ def spanFixDim(V0,V,spanCons,lim=None,FUZZ=rl_config._FUZZ):
     for (x0,x1),v in spanCons.items():
         if x0>=lim: continue
         x1 += 1
-        t = sum([V[x]+M.get(x,0) for x in range(x0,x1)])
+        t = sum([V[x]+M.get(x,0) for x in xrange(x0,x1)])
         if t>=v-FUZZ: continue      #already good enough
-        X = [x for x in range(x0,x1) if V0[x] is None] #variable candidates
+        X = [x for x in xrange(x0,x1) if V0[x] is None] #variable candidates
         if not X: continue          #something wrong here mate
         v -= t
         v /= float(len(X))
@@ -265,9 +265,9 @@ class Table(Flowable):
         self._colWidths = self._argW = colWidths
         if cellStyles is None:
             cellrows = []
-            for i in range(nrows):
+            for i in xrange(nrows):
                 cellcols = []
-                for j in range(ncols):
+                for j in xrange(ncols):
                     cellcols.append(CellStyle(repr((i,j))))
                 cellrows.append(cellcols)
             self._cellStyles = cellrows
@@ -327,8 +327,8 @@ class Table(Flowable):
         rh = getattr(self, '_rowHeights', None)
         if cv and 'unknown' not in (nr,nc):
             b = 0
-            for i in range(nr):
-                for j in range(nc):
+            for i in xrange(nr):
+                for j in xrange(nc):
                     v = cv[i][j]
                     if isinstance(v,(list,tuple,Flowable)):
                         if not isinstance(v,(tuple,list)): v = (v,)
@@ -654,8 +654,8 @@ class Table(Flowable):
         Allow a couple which we know are fixed size such as
         images and graphics."""
         if upToRow is None: upToRow = self._nrows
-        for row in range(min(self._nrows, upToRow)):
-            for col in range(self._ncols):
+        for row in xrange(min(self._nrows, upToRow)):
+            for col in xrange(self._ncols):
                 value = self._cellvalues[row][col]
                 if not self._canGetWidth(value):
                     return 1
@@ -711,12 +711,12 @@ class Table(Flowable):
         minimums = {}
         totalMinimum = 0
         elementWidth = self._elementWidth
-        for colNo in range(self._ncols):
+        for colNo in xrange(self._ncols):
             w = W[colNo]
             if w is None or w=='*' or _endswith(w,'%'):
                 siz = 1
                 final = 0
-                for rowNo in range(self._nrows):
+                for rowNo in xrange(self._nrows):
                     value = self._cellvalues[rowNo][colNo]
                     style = self._cellStyles[rowNo][colNo]
                     pad = style.leftPadding+style.rightPadding
@@ -832,10 +832,10 @@ class Table(Flowable):
         W = list(self._argW)
         width = 0
         elementWidth = self._elementWidth
-        rowNos = range(self._nrows)
+        rowNos = xrange(self._nrows)
         values = self._cellvalues
         styles = self._cellStyles
-        for colNo in range(len(W)):
+        for colNo in xrange(len(W)):
             w = W[colNo]
             if w is None or w=='*' or _endswith(w,'%'):
                 final = 0
@@ -862,8 +862,8 @@ class Table(Flowable):
         Any cell not in the key is not part of a spanned region
         """
         self._spanRanges = spanRanges = {}
-        for x in range(self._ncols):
-            for y in range(self._nrows):
+        for x in xrange(self._ncols):
+            for y in xrange(self._nrows):
                 spanRanges[x,y] = (x, y, x, y)
         self._colSpanCells = []
         self._rowSpanCells = []
@@ -883,16 +883,16 @@ class Table(Flowable):
 
             if x0!=x1 or y0!=y1:
                 if x0!=x1: #column span
-                    for y in range(y0, y1+1):
-                        for x in range(x0,x1+1):
+                    for y in xrange(y0, y1+1):
+                        for x in xrange(x0,x1+1):
                             csa((x,y))
                 if y0!=y1: #row span
-                    for y in range(y0, y1+1):
-                        for x in range(x0,x1+1):
+                    for y in xrange(y0, y1+1):
+                        for x in xrange(x0,x1+1):
                             rsa((x,y))
 
-                for y in range(y0, y1+1):
-                    for x in range(x0,x1+1):
+                for y in xrange(y0, y1+1):
+                    for x in xrange(x0,x1+1):
                         spanRanges[x,y] = None
                 # set the main entry
                 spanRanges[x0,y0] = (x0, y0, x1, y1)
@@ -908,8 +908,8 @@ class Table(Flowable):
         Any cell not in the key is not part of a spanned region
         """
         self._nosplitRanges = nosplitRanges = {}
-        for x in range(self._ncols):
-            for y in range(self._nrows):
+        for x in xrange(self._ncols):
+            for y in xrange(self._nrows):
                 nosplitRanges[x,y] = (x, y, x, y)
         self._colNoSplitCells = []
         self._rowNoSplitCells = []
@@ -930,17 +930,17 @@ class Table(Flowable):
             if x0!=x1 or y0!=y1:
                 #column span
                 if x0!=x1:
-                    for y in range(y0, y1+1):
-                        for x in range(x0,x1+1):
+                    for y in xrange(y0, y1+1):
+                        for x in xrange(x0,x1+1):
                             csa((x,y))
                 #row span
                 if y0!=y1:
-                    for y in range(y0, y1+1):
-                        for x in range(x0,x1+1):
+                    for y in xrange(y0, y1+1):
+                        for x in xrange(x0,x1+1):
                             rsa((x,y))
 
-                for y in range(y0, y1+1):
-                    for x in range(x0,x1+1):
+                for y in xrange(y0, y1+1):
+                    for x in xrange(x0,x1+1):
                         nosplitRanges[x,y] = None
                 # set the main entry
                 nosplitRanges[x0,y0] = (x0, y0, x1, y1)
@@ -975,10 +975,10 @@ class Table(Flowable):
                 if row1>=rlim: continue
                 col,row = coord
                 if col1-col0>0:
-                    for _ in range(col0+1,col1+1):
+                    for _ in xrange(col0+1,col1+1):
                         vBlocks.setdefault(colpositions[_],[]).append((rowpositions[row1+1],rowpositions[row0]))
                 if row1-row0>0:
-                    for _ in range(row0+1,row1+1):
+                    for _ in xrange(row0+1,row1+1):
                         hBlocks.setdefault(rowpositions[_],[]).append((colpositions[col0],colpositions[col1+1]))
                 x = colpositions[col0]
                 y = rowpositions[row1+1]
@@ -1059,8 +1059,8 @@ class Table(Flowable):
             if ec < 0: ec = ec + self._ncols
             if sr < 0: sr = sr + self._nrows
             if er < 0: er = er + self._nrows
-            for i in range(sr, er+1):
-                for j in range(sc, ec+1):
+            for i in xrange(sr, er+1):
+                for j in xrange(sc, ec+1):
                     _setCellStyle(self._cellStyles, i, j, op, values)
 
     def _drawLines(self):
@@ -1369,8 +1369,8 @@ class Table(Flowable):
         else:
             # we have some row or col spans, need a more complex algorithm
             # to find the rect for each
-            for rowNo in range(self._nrows):
-                for colNo in range(self._ncols):
+            for rowNo in xrange(self._nrows):
+                for colNo in xrange(self._ncols):
                     cellRect = self._spanRects[colNo, rowNo]
                     if cellRect is not None:
                         (x, y, width, height) = cellRect
@@ -1408,7 +1408,7 @@ class Table(Flowable):
                 colorCycle = list(map(colors.toColorOrNone, arg))
                 count = len(colorCycle)
                 rowCount = er - sr + 1
-                for i in range(rowCount):
+                for i in xrange(rowCount):
                     color = colorCycle[i%count]
                     h = rowHeights[sr + i]
                     if color:
@@ -1420,7 +1420,7 @@ class Table(Flowable):
                 colorCycle = list(map(colors.toColorOrNone, arg))
                 count = len(colorCycle)
                 colCount = ec - sc + 1
-                for i in range(colCount):
+                for i in xrange(colCount):
                     color = colorCycle[i%count]
                     w = colWidths[sc + i]
                     if color:
