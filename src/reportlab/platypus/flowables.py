@@ -690,6 +690,9 @@ class Macro(Flowable):
     def draw(self):
         exec(self.command, globals(), {'canvas':self.canv})
 
+def _nullCallable(*args,**kwds):
+    pass
+
 class CallerMacro(Flowable):
     '''
     like Macro, but with callable command(s)
@@ -697,11 +700,10 @@ class CallerMacro(Flowable):
     wrapCallable(self,aW,aH)
     '''
     def __init__(self, drawCallable=None, wrapCallable=None):
-        _ = lambda *args: None
-        self._drawCallable = drawCallable or _
-        self._wrapCallable = wrapCallable or _
+        self._drawCallable = drawCallable or _nullCallable
+        self._wrapCallable = wrapCallable or _nullCallable
     def __repr__(self):
-        return "CallerMacro(%s)" % repr(self.command)
+        return "CallerMacro(%r,%r)" % (self._drawCallable,self._wrapCallable)
     def wrap(self, aW, aH):
         self._wrapCallable(self,aW,aH)
         return (0,0)
