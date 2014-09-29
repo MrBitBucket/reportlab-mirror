@@ -644,13 +644,13 @@ class TTFontFile(TTFontParser):
         fmt = self.read_ushort()
         self.charToGlyph = charToGlyph = {}
         glyphToChar = {}
-        if fmt!=12 and fmt!=10 and fmt!=8:
-            length = self.read_ushort()
-            lang = self.read_ushort()
-        else:
+        if fmt in (13,12,10,8):
             self.skip(2)    #padding
             length = self.read_ulong()
             lang = self.read_ulong()
+        else:
+            length = self.read_ushort()
+            lang = self.read_ushort()
         if fmt==0:
             T = [self.read_uint8() for i in xrange(length-6)]
             for unichar in xrange(min(256,self.numGlyphs,len(table))):
@@ -692,6 +692,13 @@ class TTFontFile(TTFontParser):
                 unichar = self.read_ushort()
                 charToGlyph[unichar] = glyph
                 glyphToChar.setdefault(glyph,[]).append(unichar)
+        elif fmt==10:
+            first = self.read_ulong()
+            count = self.read_ulong()
+            for glyph in xrange(first,first+count):
+                unichar = self.read_ushort()
+                charToGlyph[unichar] = glyph
+                glyphToChar.setdefault(glyph,[]).append(unichar)
         elif fmt==12:
             segCount = self.read_ulong()
             for n in xrange(segCount):
@@ -702,6 +709,15 @@ class TTFontFile(TTFontParser):
                     glyph = unichar + inc
                     charToGlyph[unichar] = glyph
                     glyphToChar.setdefault(glyph,[]).append(unichar)
+        elif fmt==13:
+            segCount = self.read_ulong()
+            for n in xrange(segCount):
+                start = self.read_ulong()
+                end = self.read_ulong()
+                gid = self.read_ulong()
+                for unichar in xrange(start,end+1):
+                    charToGlyph[unichar] = gid
+                    glyphToChar.setdefault(gid,[]).append(unichar)
         elif fmt==2:
             T = [self.read_ushort() for i in xrange(256)]   #subheader keys
             maxSHK = max(T)
