@@ -41,6 +41,7 @@ __all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBrea
         'FailOnWrap','HRFlowable','PTOContainer','KeepInFrame','UseUpSpace',
         'ListFlowable','ListItem','DDIndenter','LIIndenter',
         'DocAssign', 'DocExec', 'DocAssert', 'DocPara', 'DocIf', 'DocWhile',
+        'PageBreakIfNotEmpty',
         )
 class TraceInfo:
     "Holder for info about where an object originated"
@@ -533,8 +534,13 @@ class UseUpSpace(NullDraw):
 class PageBreak(UseUpSpace):
     """Move on to the next page in the document.
        This works by consuming all remaining space in the frame!"""
+    def __init__(self,nextTemplate=None):
+        self.nextTemplate = nextTemplate
 
 class SlowPageBreak(PageBreak):
+    pass
+
+class PageBreakIfNotEmpty(PageBreak):
     pass
 
 class CondPageBreak(Spacer):

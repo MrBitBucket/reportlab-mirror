@@ -73,17 +73,23 @@ def _doNothing(canvas, doc):
     pass
 
 class PTCycle(list):
-    def __init__(self):
+    def __new__(cls,*args,**kwds):
+        self = list.__new__(cls,*args,**kwds)
         self._restart = 0
         self._idx = 0
-        list.__init__(self)
+        return self
 
-    def cyclicIterator(self):
-        while 1:
-            yield self[self._idx]
-            self._idx += 1
-            if self._idx>=len(self):
-                self._idx = self._restart
+    @property
+    def next_value(self):
+        v = self[self._idx]
+        self._idx += 1
+        if self._idx>=len(self):
+            self._idx = self._restart
+        return v
+
+    @property
+    def peek(self):
+        return self[self._idx]
 
 class IndexingFlowable(Flowable):
     """Abstract interface definition for flowables which might
@@ -225,12 +231,12 @@ class Indenter(FrameActionFlowable):
         frame._rightExtraIndent += self.right
 
 class NotAtTopPageBreak(FrameActionFlowable):
-    def __init__(self):
-        pass
+    def __init__(self,nextTemplate=None):
+        self.nextTemplate = nextTemplate
 
     def frameAction(self,frame):
         if not frame._atTop:
-            frame.add_generated_content(PageBreak())
+            frame.add_generated_content(PageBreak(nextTemplate=self.nextTemplate))
 
 class NextPageTemplate(ActionFlowable):
     """When you get to the next page, use the template specified (change to two column, for example)  """
@@ -545,6 +551,27 @@ class BaseDocTemplate:
         self.frame._debug = self._debug
         self.handle_frameBegin()
 
+    def _setPageTemplate(self):
+        if hasattr(self,'_nextPageTemplateCycle'):
+            #they are cycling through pages'; we keep the index
+            self.pageTemplate = self._nextPageTemplateCycle.next_value
+        elif hasattr(self,'_nextPageTemplateIndex'):
+            self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
+            del self._nextPageTemplateIndex
+        elif self.pageTemplate.autoNextPageTemplate:
+            self.handle_nextPageTemplate(self.pageTemplate.autoNextPageTemplate)
+            self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
+
+    def _samePT(self,npt):
+        if isSeq(npt):
+            return getattr(self,'_nextPageTemplateCycle',[])
+        if isinstance(npt,strTypes):
+            return npt == (self.pageTemplates[self._nextPageTemplateIndex].id if hasattr(self,'_nextPageTemplateIndex') else self.pageTemplate.id)
+        if isinstance(npt,int) and 0<=npt<len(self.pageTemplates):
+            if hasattr(self,'_nextPageTemplateIndex'):
+                return npt==self._nextPageTemplateIndex
+            return npt==self.pageTemplates.find(self.pageTemplate)
+
     def handle_pageEnd(self):
         ''' show the current page
             check the next page template
@@ -575,16 +602,7 @@ class BaseDocTemplate:
             if self._debug: logger.debug("ending page %d" % self.page)
             self.canv.setPageRotation(getattr(self.pageTemplate,'rotation',self.rotation))
             self.canv.showPage()
-
-            if hasattr(self,'_nextPageTemplateCycle'):
-                #they are cycling through pages'; we keep the index
-                self.pageTemplate = next(self._nextPageTemplateCycle)
-            elif hasattr(self,'_nextPageTemplateIndex'):
-                self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
-                del self._nextPageTemplateIndex
-            elif self.pageTemplate.autoNextPageTemplate:
-                self.handle_nextPageTemplate(self.pageTemplate.autoNextPageTemplate)
-                self.pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
+            self._setPageTemplate()
             if self._emptyPages==0:
                 pass    #store good state here
         self._hanging.append(PageBegin)
@@ -664,7 +682,7 @@ class BaseDocTemplate:
                 raise ValueError("Invalid cycle restart position")
 
             #ensure we start on the first one
-            self._nextPageTemplateCycle = c.cyclicIterator()
+            self._nextPageTemplateCycle = c
         else:
             raise TypeError("argument pt should be string or integer or list")
 
@@ -758,6 +776,11 @@ class BaseDocTemplate:
             return
 
         if isinstance(f,PageBreak):
+            npt = f.nextTemplate
+            if npt and not self._samePT(npt):
+                npt=NextPageTemplate(npt)
+                npt.apply(self)
+                self.afterFlowable(npt)
             if isinstance(f,SlowPageBreak):
                 self.handle_pageBreak(slow=1)
             else:
@@ -884,6 +907,13 @@ class BaseDocTemplate:
         try:
             canv._doctemplate = self
             while len(flowables):
+                if self._hanging and self._hanging[-1] is PageBegin and isinstance(flowables[0],PageBreakIfNotEmpty):
+                    npt = flowables[0].nextTemplate
+                    if npt and not self._samePT(npt):
+                        npt=NextPageTemplate(npt)
+                        npt.apply(self)
+                        self._setPageTemplate()
+                    del flowables[0]
                 self.clean_hanging()
                 try:
                     first = flowables[0]
