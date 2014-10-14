@@ -110,7 +110,9 @@ class Figure(Flowable):
             self.drawBackground()
         if self.border:
             self.drawBorder()
+        self.canv.saveState()
         self.drawFigure()
+        self.canv.restoreState()
         if self.caption:
             if self.captionPosition=='bottom':
                 self.canv.translate(0, -self.captionHeight)
