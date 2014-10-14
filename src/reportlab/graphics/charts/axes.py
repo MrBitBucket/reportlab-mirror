@@ -1725,7 +1725,7 @@ class NormalDateXValueAxis(XValueAxis):
 
         #otherwise, we apply the 'magic algorithm...' which looks for nice spacing
         #based on the size and separation of the labels.
-        for d in (1,2,3,6,12,24,60,120):
+        for d in (1,2,3,6,12,24,60,120,180,240,300,360,420,480,540,600):
             k = n/d
             if k<=maximumTicks and k*W <= axisLength:
                 i = n-1
@@ -1768,6 +1768,7 @@ class NormalDateXValueAxis(XValueAxis):
                     pass
 
                 return ticks, labels
+        raise ValueError('Problem selecting NormalDate value axis tick positions')
 
     def _convertXV(self,data):
         '''Convert all XValues to a standard normalDate type'''
