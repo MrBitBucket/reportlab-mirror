@@ -175,7 +175,11 @@ class Doughnut(AbstractPieChart):
         styleCount = len(self.slices)
         if isinstance(self.data[0],(list,tuple)):
             #multi-series doughnut
-            iradius = (self.height/5.0)/len(self.data)
+            ndata = len(self.data)
+            yir = (yradius/2.5)/ndata
+            xir = (xradius/2.5)/ndata
+            ydr = (yradius-yir)/ndata
+            xdr = (xradius-xir)/ndata
             for sn,series in enumerate(normData):
                 for i,angle in enumerate(series):
                     endAngle = (startAngle + (angle * whichWay)) #% 360
@@ -204,10 +208,14 @@ class Doughnut(AbstractPieChart):
                         cx = centerx + popdistance * cos(aveAngleRadians)
                         cy = centery + popdistance * sin(aveAngleRadians)
 
+                    yr1 = yir+sn*ydr
+                    yr = yr1 + ydr
+                    xr1 = xir+sn*xdr
+                    xr = xr1 + xdr
                     if isinstance(n,(list,tuple)):
-                        theSector = Wedge(cx, cy, xradius+(sn*iradius)-iradius, a1, a2, yradius=yradius+(sn*iradius)-iradius, radius1=yradius+(sn*iradius)-(2*iradius))
+                        theSector = Wedge(cx, cy, xr, a1, a2, yradius=yr, radius1=xr1, yradius1=yr1)
                     else:
-                        theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius)
+                        theSector = Wedge(cx, cy, xr, a1, a2, yradius=yr, radius1=xr1, yradius1=yr1, annular=True)
 
                     theSector.fillColor = sectorStyle.fillColor
                     theSector.strokeColor = sectorStyle.strokeColor
@@ -236,7 +244,8 @@ class Doughnut(AbstractPieChart):
 
         else:
             #single series doughnut
-            iradius = self.height/5.0
+            yir = yradius/2.5
+            xir = xradius/2.5
             for i,angle in enumerate(normData):
                 endAngle = (startAngle + (angle * whichWay)) #% 360
                 if abs(startAngle-endAngle)<1e-5:
@@ -265,9 +274,9 @@ class Doughnut(AbstractPieChart):
                     cy = centery + popdistance * sin(aveAngleRadians)
 
                 if n > 1:
-                    theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius)
+                    theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=xir, yradius1=yir)
                 elif n==1:
-                    theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=iradius, annular=True)
+                    theSector = Wedge(cx, cy, xradius, a1, a2, yradius=yradius, radius1=xir, yradius1=yir, annular=True)
 
                 theSector.fillColor = sectorStyle.fillColor
                 theSector.strokeColor = sectorStyle.strokeColor
