@@ -296,8 +296,6 @@ simulation of behavior, relational information may remedy and, at the
 same time, eliminate a descriptive fact.  There is also a different
 approach to the [unification] problem, the descriptive power of the base
 component delimits the traditional practice of grammarians.'''
-        from reportlab.platypus.flowables import ImageAndFlowables, Image
-        from reportlab.lib.testutils import testsFolder
         gif = os.path.join(testsFolder,'pythonpowered.gif')
         heading = Paragraph('This is a heading',h3)
         story.append(NextPageTemplate('template2'))
