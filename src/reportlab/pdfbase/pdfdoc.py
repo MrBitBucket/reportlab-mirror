@@ -15,6 +15,7 @@ and are not part of any public interface.  Instead, canvas and font
 classes are made available elsewhere for users to manipulate.
 """
 import types, binascii, codecs
+from collections import OrderedDict
 from reportlab.pdfbase import pdfutils
 from reportlab import rl_config
 from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester, isStr, bytestr, isPy3
@@ -409,7 +410,8 @@ class PDFDocument(PDFObject):
         idToOf = self.idToOffset
         ### note that new entries may be "appended" DURING FORMATTING
         done = None
-        File = PDFFile(self._pdfVersion) # output collector
+        # __accum__ allows objects to know where they are in the file etc etc
+        self.__accum__ = File = PDFFile(self._pdfVersion) # output collector
         while done is None:
             counter += 1 # do next object...
             if counter in numbertoid:
@@ -432,6 +434,7 @@ class PDFDocument(PDFObject):
                 ids.append(id)
             else:
                 done = 1
+        del self.__accum__
         # sanity checks (must happen AFTER formatting)
         lno = len(numbertoid)
         if counter-1!=lno:
@@ -452,6 +455,8 @@ class PDFDocument(PDFObject):
             )
         trailerf = trailer.format(self)
         File.add(trailerf)
+        for ds in getattr(self,'_digiSigs',[]):
+            ds.sign(File)
         # return string format for pdf file
         return File.format(self)
 
@@ -494,22 +499,21 @@ class PDFDocument(PDFObject):
         #print "xobjDict D", D
         return PDFDictionary(D)
 
-    def Reference(self, object, name=None):
+    def Reference(self, obj, name=None):
         ### note references may "grow" during the final formatting pass: don't use d.keys()!
         # don't make references to other references, or non instances, unless they are named!
-        #print"object type is ", type(object)
-        iob = isinstance(object,PDFObject)
+        iob = isinstance(obj,PDFObject)
         idToObject = self.idToObject
-        if name is None and (not iob or object.__class__ is PDFObjectReference):
-            return object
-        if hasattr(object, __InternalName__):
+        if name is None and (not iob or obj.__class__ is PDFObjectReference):
+            return obj
+        if hasattr(obj, __InternalName__):
             # already registered
-            intname = object.__InternalName__
+            intname = obj.__InternalName__
             if name is not None and name!=intname:
                 raise ValueError("attempt to reregister object %s with new name %s" % (
                     repr(intname), repr(name)))
             if intname not in idToObject:
-                raise ValueError("object named but not registered")
+                raise ValueError("object of type %s named as %s, but not registered" % (type(obj),ascii(intname)))
             return PDFObjectReference(intname)
         # otherwise register the new object
         objectcounter = self.objectcounter = self.objectcounter+1
@@ -517,15 +521,15 @@ class PDFDocument(PDFObject):
             name = "R"+repr(objectcounter)
         if name in idToObject:
             other = idToObject[name]
-            if other!=object:
+            if other!=obj:
                 raise ValueError("redefining named object: "+repr(name))
             return PDFObjectReference(name)
         if iob:
-            object.__InternalName__ = name
+            obj.__InternalName__ = name
         #print "name", name, "counter", objectcounter
         self.idToObjectNumberAndVersion[name] = (objectcounter, 0)
         self.numberToId[objectcounter] = name
-        idToObject[name] = object
+        idToObject[name] = obj
         return PDFObjectReference(name)
 
 ### chapter 4 Objects
@@ -668,7 +672,7 @@ class PDFDictionary(PDFObject):
         except:
             print(ascii(dict))
             raise
-        keys.sort()
+        if not isinstance(dict,OrderedDict): keys.sort()
         L = [(format(PDFName(k),document)+b" "+format(dict[k],document)) for k in keys]
         if self.multiline and rl_config.pdfMultiLine:
             L = IND.join(L)
