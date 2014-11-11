@@ -120,7 +120,7 @@ def test1():
 
 #==========================end of public interfaces
 
-from reportlab.pdfbase.pdfpattern import PDFPattern
+from reportlab.pdfbase.pdfpattern import PDFPattern, PDFPatternIf
 
 def getForm(canvas):
     "get form from canvas, create the form if needed"
@@ -172,17 +172,18 @@ class AcroForm(PDFObject):
         canvas._addAnnotation(field)
     def format(self, document):
         from reportlab.pdfbase.pdfdoc import PDFArray
-        proxy = PDFPattern(FormPattern, Resources=GLOBALRESOURCES, fields=PDFArray(self.fields))
+        proxy = PDFPattern(FormPattern, Resources=getattr(self,'resources',GLOBALRESOURCES),
+                    NeedAppearances=getattr(self,'needAppearances','false'),
+                    fields=PDFArray(self.fields), SigFlags=getattr(self,'sigFlags',0))
         return proxy.format(document)
 
 FormPattern = [
 '<<\r\n',
-' /NeedAppearances true \r\n'
-' /DA ', PDFString('/Helv 0 Tf 0 g '), '\r\n',
-' /DR \r\n',
-["Resources"],
-' /Fields \r\n',
-["fields"],
+'/NeedAppearances ',['NeedAppearances'],'\r\n'
+'/DA ', PDFString('/Helv 0 Tf 0 g '), '\r\n',
+'/DR ',["Resources"],'\r\n',
+'/Fields ', ["fields"],'\r\n',
+PDFPatternIf('SigFlags',['\r\n/SigFlags ',['SigFlags']]),
 '>>'
 ]
 
@@ -192,12 +193,12 @@ def FormFontsDictionary():
     fontsdictionary.__RefOnly__ = 1
     for fullname, shortname in FORMFONTNAMES.items():
         fontsdictionary[shortname] = FormFont(fullname, shortname)
-    fontsdictionary["ZaDb"] = ZADB
+    fontsdictionary["ZaDb"] = ZADB.clone()
     return fontsdictionary
 
 def FormResources():
     return PDFPattern(FormResourcesDictionaryPattern,
-                      Encoding=ENCODING, Font=GLOBALFONTSDICTIONARY)
+                      Encoding=ENCODING.clone(), Font=GLOBALFONTSDICTIONARY)
 
 ZaDbPattern = [
 ' <<'
@@ -394,7 +395,7 @@ PDFDocEncodingPattern = [
 
 def FormFont(BaseFont, Name):
     from reportlab.pdfbase.pdfdoc import PDFName
-    return PDFPattern(FormFontPattern, BaseFont=PDFName(BaseFont), Name=PDFName(Name), Encoding=PDFDOCENC)
+    return PDFPattern(FormFontPattern, BaseFont=PDFName(BaseFont), Name=PDFName(Name), Encoding=PDFDOCENC.clone())
 
 FormFontPattern = [
 '<<',
@@ -413,7 +414,7 @@ FormFontPattern = [
 def resetPdfForm():
     global PDFDOCENC,ENCODING,GLOBALFONTSDICTIONARY,GLOBALRESOURCES,ZADB
     PDFDOCENC = PDFPattern(PDFDocEncodingPattern)
-    ENCODING = PDFPattern(EncodingPattern, PDFDocEncoding=PDFDOCENC)
+    ENCODING = PDFPattern(EncodingPattern, PDFDocEncoding=PDFDOCENC.clone())
     ZADB = PDFPattern(ZaDbPattern)
     GLOBALFONTSDICTIONARY = FormFontsDictionary()
     GLOBALRESOURCES = FormResources()
@@ -606,7 +607,7 @@ def buttonStreamDictionary():
     result["SubType"] = "/Form"
     result["BBox"] = "[0 0 16.77036 14.90698]"
     font = PDFDictionary()
-    font["ZaDb"] = ZADB
+    font["ZaDb"] = ZADB.clone()
     resources = PDFDictionary()
     resources["ProcSet"] = "[ /PDF /Text ]"
     resources["Font"] = font
