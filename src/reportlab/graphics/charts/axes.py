@@ -1567,6 +1567,7 @@ class _isListOfDaysAndMonths(Validator):
 
 isListOfDaysAndMonths = _isListOfDaysAndMonths()
 
+_NDINTM = 1,2,3,6,12,24,60,120,180,240,300,360,420,480,540,600,720,840,960,1080,1200,2400
 class NormalDateXValueAxis(XValueAxis):
     """An X axis applying additional rules.
 
@@ -1725,7 +1726,7 @@ class NormalDateXValueAxis(XValueAxis):
 
         #otherwise, we apply the 'magic algorithm...' which looks for nice spacing
         #based on the size and separation of the labels.
-        for d in (1,2,3,6,12,24,60,120,180,240,300,360,420,480,540,600):
+        for d in _NDINTM:
             k = n/d
             if k<=maximumTicks and k*W <= axisLength:
                 i = n-1
@@ -1800,8 +1801,11 @@ class NormalDateXValueAxis(XValueAxis):
 
     def configure(self, data):
         self._convertXV(data)
-        from reportlab.lib.set_ops import union
-        xVals = reduce(union,[[dv[0] for dv in x] for x in data],[])
+        xVals = set()
+        for x in data:
+            for dv in x:
+                xVals.add(dv[0])
+        xVals = list(xVals)
         xVals.sort()
         steps,labels = self._getStepsAndLabels(xVals)
         valueMin, valueMax = self.valueMin, self.valueMax
