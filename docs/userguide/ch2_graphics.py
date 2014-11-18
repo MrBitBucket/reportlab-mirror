@@ -110,7 +110,7 @@ if the page size changes.""")
 disc("""The $bottomup$ argument
 switches coordinate systems.  Some graphics systems (like PDF
 and PostScript) place (0,0) at the bottom left of the page
-others (like many graphical user interfaces [GUI's]) place the origen at the top left.  The
+others (like many graphical user interfaces [GUI's]) place the origin at the top left.  The
 $bottomup$ argument is deprecated and may be dropped in future""")
 
 todo("""Need to see if it really works for all tasks, and if not

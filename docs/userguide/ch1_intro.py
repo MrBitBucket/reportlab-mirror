@@ -243,7 +243,7 @@ and many more.""")
 disc("""Special thanks go to Just van Rossum for his valuable assistance with
 font technicalities.""")
 
-disc("""Moshe Wagner and Hosam Aly deserve a huge thanks for contributing to the RTL patch, which is not yet on thr trunk.""")
+disc("""Moshe Wagner and Hosam Aly deserve a huge thanks for contributing to the RTL patch, which is not yet on the trunk.""")
 
 disc("""Marius Gedminas deserves a big hand for contributing the work on TrueType fonts and we
 are glad to include these in the toolkit. Finally we thank Michal Kosmulski for the DarkGarden font
