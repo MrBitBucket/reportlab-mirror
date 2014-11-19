@@ -37,7 +37,7 @@ except ImportError:
 def _fake_import(fn,name):
     if os.path.isfile(fn):
         with open(fn,'rb') as f:
-            imp.load_source('reportlab_mods',fn,f)
+            imp.load_source(name,fn,f)
 
 try:
     import reportlab_mods   #application specific modifications can be anywhere on python path
