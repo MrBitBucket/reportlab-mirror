@@ -1204,10 +1204,14 @@ class ImageAndFlowables(_Container,Flowable):
         irpad = self._irpad
         ibpad = self._ibpad
         itpad = self._itpad
-        self._iW = availWidth - irpad - wI - ilpad
+        self._iW = iW = availWidth - irpad - wI - ilpad
         aH = itpad + hI + ibpad
-        W,H0,self._C0,self._C1 = self._findSplit(canv,self._iW,aH)
-        if W>self._iW+_FUZZ:
+        if iW>_FUZZ:
+            W,H0,self._C0,self._C1 = self._findSplit(canv,iW,aH)
+        else:
+            W = availWidth
+            H0 = 0
+        if W>iW+_FUZZ:
             self._C0 = []
             self._C1 = self._content
         aH = self._aH = max(aH,H0)
