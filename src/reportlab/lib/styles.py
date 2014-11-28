@@ -91,6 +91,7 @@ class PropertySet:
     def clone(self, name, parent=None, **kwds):
         r = self.__class__(name,parent)
         r.__dict__ = self.__dict__.copy()
+        r.name = name
         r.parent = parent is None and self or parent
         r._setKwds(**kwds)
         return r
