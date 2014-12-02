@@ -794,21 +794,22 @@ def _do_post_text(tx):
     xs.strike=0
     xs.strikeColor=None
 
-    yl = y + leading
+    yl = y0 + f.fontSize
+    ydesc = yl - leading
     for x1,x2,link,c in xs.links:
         if platypus_link_underline:
             if c!=csc:
                 tx._canvas.setStrokeColor(c)
                 csc = c
             tx._do_line(x1, y, x2, y)
-        _doLink(tx, link, (x1, y, x2, yl))
+        _doLink(tx, link, (x1, ydesc, x2, yl))
     xs.links = []
     xs.link=None
     xs.linkColor=None
 
     for x1,x2,c in xs.backColors:
         tx._canvas.setFillColor(c)
-        tx._canvas.rect(x1,y,x2-x1,yl-y,stroke=0,fill=1)
+        tx._canvas.rect(x1,ydesc,x2-x1,leading,stroke=0,fill=1)
 
     xs.backColors=[]
     xs.backColor=None
@@ -939,13 +940,13 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
                     #  - reversion to Kanji (which would be a good split point)
                     #  - in the worst case, roughly half way back along the line
                     limitCheck = (lineStartPos+i)>>1        #(arbitrary taste issue)
-                    for j in range(i-1,limitCheck,-1):
+                    for j in xrange(i-1,limitCheck,-1):
                         uj = U[j]
                         if uj and category(uj)=='Zs' or ord(uj)>=0x3000:
                             k = j+1
                             if k<i:
                                 j = k+1
-                                extraSpace += sum(U[ii].width for ii in range(j,i))
+                                extraSpace += sum(U[ii].width for ii in xrange(j,i))
                                 w = U[k].width
                                 u = U[k]
                                 i = j
@@ -1266,7 +1267,7 @@ class Paragraph(Flowable):
         calcBounds = autoLeading not in ('','off')
         frags = self.frags
         nFrags= len(frags)
-        if nFrags==1 and not hasattr(frags[0],'cbDefn') and not style.endDots:
+        if nFrags==1 and not (style.endDots or hasattr(frags[0],'cbDefn') or hasattr(frags[0],'backColor')):
             f = frags[0]
             fontSize = f.fontSize
             fontName = f.fontName
@@ -1660,7 +1661,7 @@ class Paragraph(Flowable):
                     if noJustifyLast and nLines==1 and style.endDots and dpl!=_rightDrawParaLine: _do_dots(0, dx, ws, xs, tx, dpl)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
-                    for i in range(1, nLines):
+                    for i in xrange(1, nLines):
                         ws = lines[i][0]
                         t_off = dpl( tx, _offsets[i], ws, lines[i][1], noJustifyLast and i==lim)
                         dx = t_off+leftIndent
@@ -1670,7 +1671,7 @@ class Paragraph(Flowable):
                         if link: _do_link_line(i, dx, ws, tx)
                         if noJustifyLast and i==lim and style.endDots and dpl!=_rightDrawParaLine: _do_dots(i, dx, ws, xs, tx, dpl)
                 else:
-                    for i in range(1, nLines):
+                    for i in xrange(1, nLines):
                         dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
             else:
                 if self.style.wordWrap == 'RTL':
@@ -1785,7 +1786,7 @@ if __name__=='__main__':    #NORUNTESTS
                 words = line[1]
             nwords = len(words)
             outw('line%d: %d(%s)\n  ' % (l,nwords,str(getattr(line,'wordCount','Unknown'))))
-            for w in range(nwords):
+            for w in xrange(nwords):
                 outw(" %d:'%s'"%(w,getattr(words[w],'text',words[w])))
             print()
 
@@ -1800,7 +1801,7 @@ if __name__=='__main__':    #NORUNTESTS
         print('dumpParagraphFrags(<Paragraph @ %d>) minWidth() = %.2f' % (id(P), P.minWidth()))
         frags = P.frags
         n =len(frags)
-        for l in range(n):
+        for l in xrange(n):
             print("frag%d: '%s' %s" % (l, frags[l].text,' '.join(['%s=%s' % (k,getattr(frags[l],k)) for k in frags[l].__dict__ if k!=text])))
 
         outw = sys.stdout.write
