@@ -752,7 +752,8 @@ def test(outDir='pmout', shout=False):
         html.extend(errs)
     html.append(htmlBottom)
     htmlFileName = os.path.join(outDir, 'pm-index.html')
-    open(htmlFileName, 'w').writelines(html)
+    with open(htmlFileName, 'w') as f:
+        f.writelines(html)
     if sys.platform=='mac':
         from reportlab.lib.utils import markfilename
         markfilename(htmlFileName,ext='HTML')
