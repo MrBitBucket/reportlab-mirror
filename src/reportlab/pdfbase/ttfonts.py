@@ -229,7 +229,7 @@ class TTFontParser:
 
     def readFile(self,f):
         if hasattr(f,'read'):
-            self.filename = '(ttf)'
+            self.filename = getattr(f,'name','(ttf)')   #good idea Marius
             self._ttf_data = f.read()
         else:
             self.filename, f = TTFOpenFile(f)
