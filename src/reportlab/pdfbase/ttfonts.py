@@ -230,10 +230,11 @@ class TTFontParser:
     def readFile(self,f):
         if hasattr(f,'read'):
             self.filename = '(ttf)'
+            self._ttf_data = f.read()
         else:
             self.filename, f = TTFOpenFile(f)
-
-        self._ttf_data = f.read()
+            self._ttf_data = f.read()
+            f.close()
         self._pos = 0
 
     def checksumTables(self):
