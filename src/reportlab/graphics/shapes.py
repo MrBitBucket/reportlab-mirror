@@ -815,7 +815,8 @@ class Drawing(Group, Flowable):
         if 'py' in plotMode:
             filename = fnroot+'.py'
             if verbose: print(genFmt % ('py',filename))
-            open(filename,'wb').write(asBytes(self._renderPy().replace('\n',os.linesep)))
+            with open(filename,'wb') as f:
+                f.write(asBytes(self._renderPy().replace('\n',os.linesep)))
             ext = ext +  '/.py'
 
         logger.warnOnce.enabled, logger.infoOnce.enabled = _saved

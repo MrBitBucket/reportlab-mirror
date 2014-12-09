@@ -2090,11 +2090,14 @@ class PDFImageXObject(PDFObject):
             import os
             ext = os.path.splitext(source)[1].lower()
             src = open_for_read(source)
-            if not(ext in ('.jpg', '.jpeg') and self.loadImageFromJPEG(src)):
-                if rl_config.useA85:
-                    self.loadImageFromA85(src)
-                else:
-                    self.loadImageFromRaw(src)
+            try:
+                if not(ext in ('.jpg', '.jpeg') and self.loadImageFromJPEG(src)):
+                    if rl_config.useA85:
+                        self.loadImageFromA85(src)
+                    else:
+                        self.loadImageFromRaw(src)
+            finally:
+                src.close()
 
     def loadImageFromA85(self,source):
         IMG=[]

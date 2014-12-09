@@ -243,7 +243,8 @@ def _saveAsPICT(im,fn,fmt,transparent=None):
     #s = _renderPM.pil2pict(cols,rows,im.tostring(),im.im.getpalette(),transparent is not None and Color2Hex(transparent) or -1)
     s = _renderPM.pil2pict(cols,rows,(im.tobytes if hasattr(im,'tobytes') else im.tostring)(),im.im.getpalette())
     if not hasattr(fn,'write'):
-        open(os.path.splitext(fn)[0]+'.'+fmt.lower(),'wb').write(s)
+        with open(os.path.splitext(fn)[0]+'.'+fmt.lower(),'wb') as f:
+            f.write(s)
         if os.name=='mac':
             from reportlab.lib.utils import markfilename
             markfilename(fn,ext='PICT')
