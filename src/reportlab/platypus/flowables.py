@@ -384,17 +384,20 @@ class Preformatted(Flowable):
 
 class Image(Flowable):
     """an image (digital picture).  Formats supported by PIL/Java 1.4 (the Python/Java Imaging Library
-       are supported.  At the present time images as flowables are always centered horozontally
-       in the frame. We allow for two kinds of lazyness to allow for many images in a document
+       are supported. Images as flowables may be aligned horizontally in the
+       frame with the hAlign parameter - accepted values are 'CENTER',
+       'LEFT' or 'RIGHT' with 'CENTER' being the default.
+       We allow for two kinds of lazyness to allow for many images in a document
        which could lead to file handle starvation.
        lazy=1 don't open image until required.
        lazy=2 open image when required then shut it.
     """
     _fixedWidth = 1
     _fixedHeight = 1
-    def __init__(self, filename, width=None, height=None, kind='direct', mask="auto", lazy=1):
+    def __init__(self, filename, width=None, height=None, kind='direct',
+                 mask="auto", lazy=1, hAlign='CENTER'):
         """If size to draw at not specified, get it from the image."""
-        self.hAlign = 'CENTER'
+        self.hAlign = hAlign
         self._mask = mask
         fp = hasattr(filename,'read')
         if fp:
