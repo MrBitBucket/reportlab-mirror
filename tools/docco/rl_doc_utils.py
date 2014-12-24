@@ -28,6 +28,7 @@ from reportlab.platypus.xpreformatted import PythonPreformatted
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.lib.sequencer import getSequencer
+from xml.sax.saxutils import escape as xmlEscape
 
 from . import examples
 
@@ -38,7 +39,6 @@ QFcodetemplate = Template("X$X$", "X")
 QFreptemplate = Template("X^X^", "X")
 codesubst = "%s<font name=Courier>%s</font>"
 QFsubst = "%s<font name=Courier><i>%s</i></font>"
-
 
 def quickfix(text):
     """inside text find any subsequence of form $subsequence$.
@@ -67,8 +67,6 @@ def quickfix(text):
         text = ''.join(parts)
     return text
 #print quickfix("$testing$ testing $one$ ^two^ $three(^four^)$")
-
-
 
 H1 = styleSheet['Heading1']
 H2 = styleSheet['Heading2']
@@ -362,7 +360,7 @@ class ParaBox2(figures.Figure):
                                 leading=9.6)
         textStyle = B
         self.text = text
-        self.left = Paragraph('<![CDATA[' + text + ']]>', descrStyle)
+        self.left = Paragraph(xmlEscape(text), descrStyle)
         self.right = Paragraph(text, B)
 
 

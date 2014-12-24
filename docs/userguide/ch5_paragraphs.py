@@ -225,7 +225,7 @@ outermost paragraph tag.""")
 
 
 heading2("Intra-paragraph markup")
-disc("""'<![CDATA[Within each paragraph, we use a basic set of XML tags
+disc("""<![CDATA[Within each paragraph, we use a basic set of XML tags
 to provide markup.  The most basic of these are bold (<b>...</b>),
 italic (<i>...</i>) and underline (<u>...</u>).
 Other tags which are allowed are strong (<strong>...</strong>), and strike through (<strike>...</strike>). The <link> and <a> tags
