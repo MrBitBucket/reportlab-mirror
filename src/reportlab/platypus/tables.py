@@ -1114,10 +1114,10 @@ class Table(Flowable):
         self._drawVLines((sc+1, sr), (ec, er), weight, color, count, space)
 
     def _prepLine(self, weight, color):
-        if color != self._curcolor:
+        if color and color!=self._curcolor:
             self.canv.setStrokeColor(color)
             self._curcolor = color
-        if weight != self._curweight:
+        if weight and weight!=self._curweight:
             self.canv.setLineWidth(weight)
             self._curweight = weight
 
