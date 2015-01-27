@@ -523,7 +523,7 @@ def dayOfWeek(y, m, d):
     if m == 1 or m == 2:
         m = m + 12
         y = y - 1
-    return (d + 2*m + 3*(m+1)/5 + y + y/4 - y/100 + y/400) % 7
+    return (d + 2*m + 3*(m+1)//5 + y + y//4 - y//100 + y//400) % 7
 
 def firstDayOfYear(year):
     """number of days to the first of the year, relative to Jan 1, 1900"""
@@ -585,13 +585,13 @@ class BusinessDate(NormalDate):
 
     def normalize(self, i):
         i = int(i)
-        NormalDate.normalize(self,(i/5)*7+i%5+BDEpochScalar)
+        NormalDate.normalize(self,(i//5)*7+i%5+BDEpochScalar)
 
     def scalar(self):
         d = self.asNormalDate()
         i = d - BDEpoch     #luckily BDEpoch is a Monday so we don't have a problem
                             #concerning the relative weekday
-        return 5*(i/7) + i%7
+        return 5*(i//7) + i%7
 
     def setNormalDate(self, normalDate):
         NormalDate.setNormalDate(self,normalDate)
