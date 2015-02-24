@@ -33,6 +33,12 @@ class LinePlotProperties(PropHolder):
         inFill = AttrMapValue(isBoolean, desc='If true flood fill to x axis',advancedUsage=1),
         )
 
+class InFillValue(int):
+    def __new__(cls,v,yValue=None):
+        self = int.__new__(cls,v)
+        self.yValue = yValue
+        return self
+
 class Shader(_SetKeyWordArgs):
     _attrMap = AttrMap(BASE=PlotArea,
         vertical = AttrMapValue(isBoolean, desc='If true shade to x axis'),
@@ -240,10 +246,10 @@ class LinePlot(AbstractLineChart):
 
     def makeLines(self):
         g = Group()
+        yA = self.yValueAxis
+        xA = self.xValueAxis
         bubblePlot = getattr(self,'_bubblePlot',None)
         if bubblePlot:
-            yA = self.yValueAxis
-            xA = self.xValueAxis
             bubbleR = min(yA._bubbleRadius,xA._bubbleRadius)
             bubbleMax = xA._bubbleMax
 
@@ -254,9 +260,13 @@ class LinePlot(AbstractLineChart):
         inFill = getattr(self,'_inFill',None)
         styleCount = len(self.lines)
         if inFill or [rowNo for rowNo in P if getattr(self.lines[rowNo%styleCount],'inFill',False)]:
-            inFillY = self.xValueAxis._y
-            inFillX0 = self.yValueAxis._x
-            inFillX1 = inFillX0 + self.xValueAxis._length
+            inFillY = getattr(inFill,'yValue',None)
+            if inFillY is None:
+                inFillY = xA._y
+            else:
+                inFillY = yA.scale(inFillY)
+            inFillX0 = yA._x
+            inFillX1 = inFillX0 + xA._length
             inFillG = getattr(self,'_inFillG',g)
         lG = getattr(self,'_lineG',g)
         # Iterate over data rows.
