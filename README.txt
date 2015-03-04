@@ -141,7 +141,7 @@ Take care not to confuse it with any releases you download.
 
 3. Prerequisites / Dependencies
 ===============================
-This works with Python 2.5 - 2.7. Older versions are available 
+This works with Python versions 2.7 or >=3.3. Older versions are available 
 going back to Python 1.5 or thereabouts.
 
 There are no absolute prerequisites beyond the Python
