@@ -155,14 +155,15 @@ class Frame:
             p = self._y1p
             s = 0
             aW = self._getAvailableWidth()
+            zeroSize = getattr(flowable,'_ZEROSIZE',False)
             if not self._atTop:
                 s =flowable.getSpaceBefore()
                 if self._oASpace:
-                    if getattr(flowable,'_SPACETRANSFER',False):
+                    if getattr(flowable,'_SPACETRANSFER',False) or zeroSize:
                         s = self._prevASpace
                     s = max(s-self._prevASpace,0)
             h = y - p - s
-            if h>0:
+            if h>0 or zeroSize:
                 w, h = flowable.wrap(aW, h)
             else:
                 return 0
