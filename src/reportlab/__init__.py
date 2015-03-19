@@ -44,5 +44,5 @@ try:
 except ImportError:
     try:
         _fake_import(os.path.expanduser(os.path.join('~','.reportlab_mods')),'reportlab_mods')
-    except ImportError:
+    except (ImportError,KeyError):
         pass
