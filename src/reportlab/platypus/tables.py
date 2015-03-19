@@ -203,7 +203,8 @@ class _ExpandedCellTuple(tuple):
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None,
-                hAlign=None,vAlign=None, normalizedData=0, cellStyles=None):
+                hAlign=None,vAlign=None, normalizedData=0, cellStyles=None, rowSplitRange=None,
+                spaceBefore=None,spaceAfter=None):
         self.ident = ident
         self.hAlign = hAlign or 'CENTER'
         self.vAlign = vAlign or 'MIDDLE'
@@ -284,6 +285,12 @@ class Table(Flowable):
 
         if style:
             self.setStyle(style)
+
+        self._rowSplitRange = rowSplitRange
+        if spaceBefore is not None:
+            self.spaceBefore = spaceBefore
+        if spaceAfter is not None:
+            self.spaceAfter = spaceAfter
 
     def __repr__(self):
         "incomplete, but better than nothing"
@@ -1201,6 +1208,17 @@ class Table(Flowable):
                 if er>=repeatRows and er<n: er=repeatRows
                 elif er>=repeatRows and er>=n: er=er+repeatRows-n
                 self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
+        sr = self._rowSplitRange
+        if sr:
+            sr, er = sr
+            if sr>=0 and sr>=repeatRows and sr<n and er>=0 and er<n:
+                self._rowSplitRange = None
+            else:
+                if sr>=repeatRows and sr<n: sr=repeatRows
+                elif sr>=repeatRows and sr>=n: sr=sr+repeatRows-n
+                if er>=repeatRows and er<n: er=repeatRows
+                elif er>=repeatRows and er>=n: er=er+repeatRows-n
+                self._rowSplitRange = sr,er
 
     def _cr_1_0(self,n,cmds):
         for c in cmds:
@@ -1219,6 +1237,16 @@ class Table(Flowable):
         if n<=self.repeatRows: return []
         lim = len(self._rowHeights)
         if n==lim: return [self]
+
+        lo = self._rowSplitRange
+        if lo:
+            lo, hi = lo
+            if lo<0: lo += lim
+            if hi<0: hi += lim
+            if n>hi:
+                return self._splitRows(availHeight - sum(self._rowHeights[hi:n]))
+            elif n<lo:
+                return []
 
         repeatRows = self.repeatRows
         repeatCols = self.repeatCols
