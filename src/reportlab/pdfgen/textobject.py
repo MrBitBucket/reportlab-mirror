@@ -375,7 +375,7 @@ class PDFTextObject(_PDFColorSetter):
         "Generates PDF text output operator(s)"
         if log2vis and self.direction in ('LTR','RTL'):
             # Use pyfribidi to write the text in the correct visual order.
-            text = log2vis(text, directionsMap.get(self.direction.upper(),DIR_ON))
+            text = log2vis(text, directionsMap.get(self.direction.upper(),DIR_ON),clean=True)
         canv = self._canvas
         font = pdfmetrics.getFont(self._fontname)
         R = []
