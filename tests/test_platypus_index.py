@@ -10,7 +10,7 @@ from os.path import join, basename, splitext
 from math import sqrt
 import unittest
 from reportlab.lib.units import cm
-from reportlab.lib.utils import commajoin
+from reportlab.lib.utils import commajoin, asUnicode
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
@@ -95,13 +95,20 @@ class IndexTestCase(unittest.TestCase):
             story.append(Paragraph(description, bt))
             index = SimpleIndex(dot=' . ', headers=headers)
 
-    
-            for i in range(20):
-                words = randomtext.randomText(randomtext.PYTHON, 5).split(' ')
-                txt = ' '.join([(len(w) > 5 and '<index item=%s/>%s' % (quoteattr(commajoin([w[:2], w[:3], w])), w) or w) for w in words])
+            def addParas(words):
+                words = [asUnicode(w) for w in words]
+                txt = u' '.join([(len(w) > 5 and u'<index item=%s/>%s' % (quoteattr(commajoin([w[:2], w[:3], w])), w) or w) for w in words])
                 para = Paragraph(txt, makeBodyStyle())
                 story.append(para)
-
+    
+            for i in xrange(20):
+                addParas(randomtext.randomText(randomtext.PYTHON, 5).split(' '))
+            addParas([u+w for u in u'E\xc8\xc9\xca\xcb' for w in (u'erily',u'asily')])
+            addParas([u+w for u in u'A\xc0\xc4\xc1\xc3\xc2' for w in (u'dvance',u'ttend')])
+            addParas([u+w for u in u'O\xd2\xd6\xd3\xd2' for w in (u'rdinary',u'verflow')])
+            addParas([u+w for u in u'U\xd9\xdc\xdb' for w in (u'ndertow',u'nbeliever')])
+            addParas([u+w for u in u'e\xe8\xea\xeb\xe9' for w in (u'ventide',u'lision')])
+            addParas([u+w for u in u'o\xf2\xf5\xf3\xf4' for w in (u'verture',u'ntology')])
 
             #test ampersand in index term
             txt = '\nMarks &amp; Spencer - purveyors of fine groceries, underwear and ampersands - should have their initials displayed however they were input.\n<index item="M&amp;S,groceries"/><index item="M&amp;S,underwear"/><index item="M&amp;S,ampersands"/>'

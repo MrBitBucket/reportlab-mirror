@@ -46,7 +46,7 @@ epsilon.
 
 from reportlab.lib import enums
 from reportlab.lib.units import cm
-from reportlab.lib.utils import commasplit, escapeOnce, encode_label, decode_label, strTypes
+from reportlab.lib.utils import commasplit, escapeOnce, encode_label, decode_label, strTypes, asUnicode
 from reportlab.lib.styles import ParagraphStyle, _baseFontName
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable
@@ -54,6 +54,7 @@ from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.flowables import Spacer, Flowable
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
+import unicodedata
 
 def unquote(txt):
     from xml.sax.saxutils import unescape
@@ -420,9 +421,10 @@ class SimpleIndex(IndexingFlowable):
         return list(self._lastEntries.items())
 
     def _build(self,availWidth,availHeight):
-        _tempEntries = self._getlastEntries()
+        _tempEntries = [(tuple(asUnicode(t) for t in texts),pageNumbers)
+                            for texts, pageNumbers in self._getlastEntries()]
         def getkey(seq):
-            return [x.upper() for x in seq[0]]
+            return [''.join((c for c in unicodedata.normalize('NFD', x.upper()) if unicodedata.category(c) != 'Mn')) for x in seq[0]]
         _tempEntries.sort(key=getkey)
         leveloffset = self.headers and 1 or 0
 
@@ -442,7 +444,7 @@ class SimpleIndex(IndexingFlowable):
             #track when the first character changes; either output some extra
             #space, or the first letter on a row of its own.  We cannot do
             #widow/orphan control, sadly.
-            nalpha = texts[0][0].upper()
+            nalpha = ''.join((c for c in unicodedata.normalize('NFD', texts[0][0].upper()) if unicodedata.category(c) != 'Mn'))
             if alpha != nalpha:
                 alpha = nalpha
                 if self.headers:
