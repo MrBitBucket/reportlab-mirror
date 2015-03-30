@@ -1497,39 +1497,50 @@ class Canvas(textobject._PDFColorSetter):
         # use PDFTextObject for multi-line text.
         ##################################################
 
-    def drawString(self, x, y, text, mode=None):
+    def drawString(self, x, y, text, mode=None, charSpace=0):
         """Draws a string in the current text styles."""
         if sys.version_info[0] == 3 and not isinstance(text, str):
             text = text.decode('utf-8')
         #we could inline this for speed if needed
         t = self.beginText(x, y)
         if mode is not None: t.setTextRenderMode(mode)
+        if charSpace: t.setCharSpace(charSpace)
         t.textLine(text)
+        if charSpace: t.setCharSpace(0)
+        if mode is not None: t.setTextRenderMode(0)
         self.drawText(t)
 
-    def drawRightString(self, x, y, text, mode=None):
+    def drawRightString(self, x, y, text, mode=None, charSpace=0):
         """Draws a string right-aligned with the x coordinate"""
         if sys.version_info[0] == 3 and not isinstance(text, str):
             text = text.decode('utf-8')
         width = self.stringWidth(text, self._fontname, self._fontsize)
+        if charSpace: width += (len(text)-1)*charSpace
         t = self.beginText(x - width, y)
         if mode is not None: t.setTextRenderMode(mode)
+        if charSpace: t.setCharSpace(charSpace)
         t.textLine(text)
+        if charSpace: t.setCharSpace(0)
+        if mode is not None: t.setTextRenderMode(0)
         self.drawText(t)
 
-    def drawCentredString(self, x, y, text,mode=None):
+    def drawCentredString(self, x, y, text, mode=None, charSpace=0):
         """Draws a string centred on the x coordinate. 
         
         We're British, dammit, and proud of our spelling!"""
         if sys.version_info[0] == 3 and not isinstance(text, str):
             text = text.decode('utf-8')
         width = self.stringWidth(text, self._fontname, self._fontsize)
+        if charSpace: width += (len(text)-1)*charSpace
         t = self.beginText(x - 0.5*width, y)
         if mode is not None: t.setTextRenderMode(mode)
+        if charSpace: t.setCharSpace(charSpace)
         t.textLine(text)
+        if charSpace: t.setCharSpace(0)
+        if mode is not None: t.setTextRenderMode(0)
         self.drawText(t)
 
-    def drawAlignedString(self, x, y, text, pivotChar=rl_config.decimalSymbol):
+    def drawAlignedString(self, x, y, text, pivotChar=rl_config.decimalSymbol, mode=None, charSpace=0):
         """Draws a string aligned on the first '.' (or other pivot character).
 
         The centre position of the pivot character will be used as x.
@@ -1570,16 +1581,16 @@ class Canvas(textobject._PDFColorSetter):
                 rightText = leftText[-1] + rightText
                 leftText = leftText[0:-1]
 
-            self.drawRightString(x-0.5*pivW, y, leftText)
-            self.drawString(x-0.5*pivW, y, rightText)
+            self.drawRightString(x-0.5*pivW, y, leftText, mode=mode, charSpace=charSpace)
+            self.drawString(x-0.5*pivW, y, rightText, mode=mode, charSpace=charSpace)
 
         else:
             #normal case
             leftText = parts[0]
-            self.drawRightString(x-0.5*pivW, y, leftText)
+            self.drawRightString(x-0.5*pivW, y, leftText, mode=mode, charSpace=charSpace)
             if len(parts) > 1:
                 rightText = pivotChar + parts[1]
-                self.drawString(x-0.5*pivW, y, rightText)
+                self.drawString(x-0.5*pivW, y, rightText, mode=mode, charSpace=charSpace)
 
     def getAvailableFonts(self):
         """Returns the list of PostScript font names available.

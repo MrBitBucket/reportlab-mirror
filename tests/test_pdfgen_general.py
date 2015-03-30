@@ -188,6 +188,7 @@ def makeDocument(filename, pageCallBack=None):
     #the extra arg is a hack added later, so other
     #tests can get hold of the canvas just before it is
     #saved
+    from reportlab.lib.colors import red, green, blue
     global titlelist, closeit
     titlelist = []
     closeit = 0
@@ -519,11 +520,11 @@ cost to performance.""")
 
     t = c.beginText(inch, 2.75 * inch)
     t.setFont('Times-Bold',36)
-    t.setFillColor(colors.green)  #green
+    t.setFillColor(green)  #green
     t.textLine('Green fill, no stroke')
 
     #t.setStrokeColorRGB(1,0,0)  #ou can do this in a text object, or the canvas.
-    t.setStrokeColor(colors.red)  #ou can do this in a text object, or the canvas.
+    t.setStrokeColor(red)  #ou can do this in a text object, or the canvas.
     t.setTextRenderMode(2)   # fill and stroke
     t.textLine('Green fill, red stroke - yuk!')
 
@@ -535,7 +536,59 @@ cost to performance.""")
 
 #########################################################################
 #
-#  Page 5 - coord transforms
+#  Page 5 - character spacing
+#
+#########################################################################
+    framePage(c, "Character Spacing")
+
+    c.drawString(inch, 10*inch, 'Listing available fonts...')
+    def drawBox(x,y,width,height,color=green,anchor='start'):
+        if anchor=='end':
+            x -= width
+        elif anchor in ('centre','center'):
+            x = 0.5*width 
+        c.saveState()
+        c.setDash(2,2)
+        c.setStrokeColor(color)
+        c.setLineWidth(0.01)
+        c.rect(x,y,width,height,fill=0,stroke=1)
+        c.restoreState()
+
+    y = 9.5*inch
+    x = 72
+    def drawString(x,y, s,fontName,fontSize,cs=1,anchor='start'):
+        c.setFont(fontName, fontSize)
+        y -= 12
+        w = c.stringWidth(s)
+        func = c.drawString if anchor=='start' else c.drawRightString if anchor=='end' else c.drawCentredString
+        func(x, y, s)
+        drawBox(x,y,w,10,anchor=anchor)
+        y -= 12
+        func(x, y, s,charSpace=cs)
+        n = len(s) - 1
+        drawBox(x,y,w+n,10,anchor=anchor)
+        y -= 12
+        return x,y
+
+    x,y = drawString(x,y,u'Hello World','Helvetica',10)
+    x,y = drawString(x,y,u'M','Helvetica',10)
+    x,y = drawString(x,y,u'MM','Helvetica',10)
+    x,y = drawString(x,y,u'M M','Helvetica',10)
+    x,y = drawString(x,y,u'M    M','Helvetica',10)
+
+    x = 3*72
+    y = 9.5*inch
+    x,y = drawString(x,y,u'Hello World','Helvetica',10,anchor='end')
+    x,y = drawString(x,y,u'M','Helvetica',10,anchor='end')
+    x,y = drawString(x,y,u'MM','Helvetica',10,anchor='end')
+    x,y = drawString(x,y,u'M M','Helvetica',10,anchor='end')
+    x,y = drawString(x,y,u'M    M','Helvetica',10,anchor='end')
+
+    c.showPage()
+
+#########################################################################
+#
+#  Page 6 - coord transforms
 #
 #########################################################################
     framePage(c, "Coordinate Transforms")
@@ -582,7 +635,7 @@ cost to performance.""")
 
 #########################################################################
 #
-#  Page 6 - clipping
+#  Page 7 - clipping
 #
 #########################################################################
     framePage(c, "Clipping")
@@ -652,7 +705,7 @@ cost to performance.""")
 
 #########################################################################
 #
-#  Page 7 - images
+#  Page 8 - images
 #
 #########################################################################
     framePage(c, "Images")
@@ -823,7 +876,7 @@ cost to performance.""")
 
 #########################################################################
 #
-#  Page 8 - Forms and simple links
+#  Page 9 - Forms and simple links
 #
 #########################################################################
     framePage(c, "Forms and Links")
@@ -860,7 +913,7 @@ cost to performance.""")
 
     # test URLs
     r1 = (inch, 3*inch, 5*inch, 3.25*inch) # this is x1,y1,x2,y2
-    c.linkURL('http://www.reportlab.com/', r1, thickness=1, color=colors.green)
+    c.linkURL('http://www.reportlab.com/', r1, thickness=1, color=green)
     c.drawString(inch+3, 3*inch+6, 'Hyperlink to www.reportlab.com, with green border')
 
     r1 = (inch, 2.5*inch, 5*inch, 2.75*inch) # this is x1,y1,x2,y2
@@ -877,7 +930,7 @@ cost to performance.""")
     xpdf = fileName2FSEnc(outputfile('test_hello.pdf').replace('\\','/'))
     link = 'Hard link to %s, with red border' % xpdf
     r1 = (inch, 1.5*inch, inch+2*3+c.stringWidth(link,c._fontname, c._fontsize), 1.75*inch) # this is x1,y1,x2,y2
-    c.linkURL(xpdf, r1, thickness=1, color=colors.red, kind='GoToR')
+    c.linkURL(xpdf, r1, thickness=1, color=red, kind='GoToR')
     c.drawString(inch+3, 1.5*inch+6, link )
     c.showPage()
 
@@ -886,7 +939,6 @@ cost to performance.""")
     c.drawString(1*inch,10.8*inch,title)
     c.addOutlineEntry(title+" section", title, level=0, closed=True)
     c.bookmarkHorizontalAbsolute(title, 10.8*inch)
-    from reportlab.lib.colors import red, green, blue
 
     c.saveState()
     p = c.beginPath()
