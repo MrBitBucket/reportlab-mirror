@@ -34,7 +34,7 @@ with this key needs to be created first like this:
     self.notify('TOCEntry', (level, text, pageNum, key))
 
 As the table of contents need at least two passes over the Platypus
-story which is why the moultiBuild0() method must be called.
+story which is why the multiBuild() method must be called.
 
 The level<NUMBER>ParaStyle variables are the paragraph styles used
 to format the entries in the table of contents. Their indentation
@@ -68,7 +68,7 @@ except:
             if x not in self:
                 list.append(self,x)
 
-def drawPageNumbers(canvas, style, pages, availWidth, availHeight, dot=' . '):
+def drawPageNumbers(canvas, style, pages, availWidth, availHeight, dot=' . ', formatter=None):
     '''
     Draws pagestr on the canvas using the given style.
     If dot is None, pagestr is drawn at the current position in the canvas.
@@ -158,11 +158,13 @@ class TableOfContents(IndexingFlowable):
     If dotsMinLevel is set to a negative value, no dotted lines are drawn.
     """
 
-    def __init__(self):
-        self.rightColumnWidth = 72
-        self.levelStyles = defaultLevelStyles
-        self.tableStyle = defaultTableStyle
-        self.dotsMinLevel = 1
+    def __init__(self,**kwds):
+        self.rightColumnWidth = kwds.get('rightColumnWidth',72)
+        self.levelStyles = kwds.get('levelStyles',defaultLevelStyles)
+        self.tableStyle = kwds.get('tableStyle',defaultTableStyle)
+        self.dotsMinLevel = kwds.get('dotsMinLevel',1)
+        self.formatter = kwds.get('formatter',None)
+        if kwds: raise ValueError('unexpected keyword arguments %s' % ', '.join(kwds.keys()))
         self._table = None
         self._entries = []
         self._lastEntries = []
@@ -243,6 +245,7 @@ class TableOfContents(IndexingFlowable):
                 dot = ' . '
             else:
                 dot = ''
+            if self.formatter: page = self.formatter(page)
             drawPageNumbers(canvas, style, [(page, key)], availWidth, availHeight, dot)
         self.canv.drawTOCEntryEnd = drawTOCEntryEnd
 
