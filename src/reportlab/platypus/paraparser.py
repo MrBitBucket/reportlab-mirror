@@ -10,11 +10,6 @@ import os
 import copy
 import base64
 from pprint import pprint as pp
-
-try:
-    import pickle as pickle
-except:
-    import pickle
 import unicodedata
 import reportlab.lib.sequencer
 

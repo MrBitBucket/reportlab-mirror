@@ -6,13 +6,14 @@ __doc__='''Gazillions of miscellaneous internal utility functions'''
 
 import os, sys, imp, time, types
 from base64 import decodestring as base64_decodestring, encodestring as base64_encodestring
-try:
-    from cPickle import dumps as pickle_dumps, loads as pickle_loads, dump as pickle_dump, load as pickle_load
-except ImportError:
-    from pickle import dumps as pickle_dumps, loads as pickle_loads, dump as pickle_dump, load as pickle_load
 from reportlab import isPy3
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 try:
     from hashlib import md5
@@ -114,10 +115,10 @@ if isPy3:
             return str(x).encode(enc)
 
     def encode_label(args):
-        return base64_encodestring(pickle_dumps(args)).strip().decode('latin1')
+        return base64_encodestring(pickle.dumps(args)).strip().decode('latin1')
 
     def decode_label(label):
-        return pickle_loads(base64_decodestring(label.encode('latin1')))
+        return pickle.loads(base64_decodestring(label.encode('latin1')))
 
     def rawUnicode(s):
         '''converts first 256 unicodes 1-1'''
@@ -211,10 +212,10 @@ else:
     from string import letters as ascii_letters, uppercase as ascii_uppercase, lowercase as ascii_lowercase
 
     def encode_label(args):
-        return base64_encodestring(pickle_dumps(args)).strip()
+        return base64_encodestring(pickle.dumps(args)).strip()
 
     def decode_label(label):
-        return pickle_loads(base64_decodestring(label))
+        return pickle.loads(base64_decodestring(label))
 
     def rawUnicode(s):
         '''converts first 256 unicodes 1-1'''
@@ -1044,17 +1045,17 @@ class DebugMemo:
     def _dump(self,f):
         try:
             pos=f.tell()
-            pickle_dump(self.store,f)
+            pickle.dump(self.store,f)
         except:
             S=self.store.copy()
             ff=getBytesIO()
             for k,v in S.items():
                 try:
-                    pickle_dump({k:v},ff)
+                    pickle.dump({k:v},ff)
                 except:
                     S[k] = '<unpicklable object %r>' % v
             f.seek(pos,0)
-            pickle_dump(S,f)
+            pickle.dump(S,f)
 
     def dump(self):
         f = open(self.fn,'wb')
@@ -1069,7 +1070,7 @@ class DebugMemo:
         return f.getvalue()
 
     def _load(self,f):
-        self.store = pickle_load(f)
+        self.store = pickle.load(f)
 
     def load(self):
         f = open(self.fn,'rb')

@@ -58,7 +58,8 @@ of non-Python applications.
 Future plans might include using this to auto-register fonts; and making it
 update itself smartly on repeated instantiation.
 """
-import sys, time, os, pickle, tempfile
+import sys, time, os, tempfile
+from reportlab.lib.utils import pickle
 from xml.sax.saxutils import quoteattr
 try:
     from hashlib import md5
