@@ -34,7 +34,7 @@ the former axes in its own coordinate system.
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
                                         isString, EitherOr, Validator, NoneOr, isInstanceOf, \
-                                        isNormalDate
+                                        isNormalDate, isNoneOrCallable
 from reportlab.lib.attrmap import *
 from reportlab.lib import normalDate
 from reportlab.graphics.shapes import Drawing, Line, PolyLine, Rect, Group, STATE_DEFAULTS, _textBoxLimits, _rotatedBoxLimits
@@ -458,6 +458,7 @@ class CategoryAxis(_AxisG):
         loLLen = AttrMapValue(isNumber, desc='extra line length before start of the axis'),
         hiLLen = AttrMapValue(isNumber, desc='extra line length after end of the axis'),
         skipGrid = AttrMapValue(OneOf('none','top','both','bottom'),"grid lines to skip top bottom both none"),
+        innerTickDraw = AttrMapValue(isNoneOrCallable, desc="Callable to replace _drawInnerTicks"),
         )
 
     def __init__(self):
@@ -550,7 +551,10 @@ class _XTicks:
     _tickTweaks = 0 #try 0.25-0.5
 
     def _drawTicksInner(self,tU,tD,g):
-        if tU or tD:
+        itd = getattr(self,'innerTickDraw',None)
+        if itd:
+            itd(self,tU,tD,g)
+        elif tU or tD:
             sW = self.strokeWidth
             tW = self._tickTweaks
             if tW:
@@ -612,8 +616,10 @@ class _XTicks:
         if getattr(self,'visibleSubTicks',0) and self.subTickNum>0:
             otv = self._calcSubTicks()
             try:
+                self._subTicking = 1
                 self._drawTicksInner(tU,tD,g)
             finally:
+                del self._subTicking
                 self._tickValues = otv
 
     def makeTicks(self):
@@ -959,6 +965,7 @@ class ValueAxis(_AxisG):
         keepTickLabelsInside = AttrMapValue(isBoolean, desc='Ensure tick labels do not project beyond bounds of axis if true'),
         skipGrid = AttrMapValue(OneOf('none','top','both','bottom'),"grid lines to skip top bottom both none"),
         requiredRange = AttrMapValue(isNumberOrNone, desc='Minimum required value range.'),
+        innerTickDraw = AttrMapValue(isNoneOrCallable, desc="Callable to replace _drawInnerTicks"),
         )
 
     def __init__(self,**kw):
