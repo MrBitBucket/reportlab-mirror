@@ -450,6 +450,7 @@ class BaseDocTemplate:
                     'encrypt': None,
                     'cropMarks': None,
                     'enforceColorSpace': None,
+                    'displayDocTitle': None,
                     }
     _invalidInitArgs = ()
     _firstPageTemplateIndex = 0
@@ -864,6 +865,8 @@ class BaseDocTemplate:
         self.canv.setSubject(self.subject)
         self.canv.setCreator(self.creator)
         self.canv.setKeywords(self.keywords)
+        if self.displayDocTitle is not None:
+            self.canv.setViewerPreference('DisplayDocTitle',['false','true'][self.displayDocTitle])
 
         if self._onPage:
             self.canv.setPageCallBack(self._onPage)
