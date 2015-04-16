@@ -1833,6 +1833,23 @@ class Canvas(textobject._PDFColorSetter):
         '''you'll get an error here if none have been set'''
         del self._doc.Catalog.ViewerPreferences[pref]
 
+    def setCatalogEntry(self,key,value):
+        from reportlab.pdfbase.pdfdoc import PDFDictionary, PDFArray, PDFString
+        if isStr(value):
+            value = PDFString(value)
+        elif isinstance(value,(list,tuple)):
+            value = PDFArray(value)
+        elif isinstance(value,dict):
+            value = PDFDictionary(value)
+        setattr(self._doc.Catalog,key,value)
+
+    def getCatalogEntry(self,key):
+        return getattr(self._doc.Catalog,key)
+
+    def delCatalogEntry(self,key):
+        '''you'll get an error here if it's not been set'''
+        delattr(self._doc.Catalog,key)
+
     def addPageLabel(self, pageNum, style=None, start=None, prefix=None):
         '''add a PDFPageLabel for pageNum'''
         catalog = self._doc.Catalog

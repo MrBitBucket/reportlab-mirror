@@ -997,6 +997,7 @@ class PDFCatalog(PDFObject):
     # to override, set as attributes
     __Defaults__ = {"Type": PDFName("Catalog"),
                 "PageMode": PDFName("UseNone"),
+                "Lang": None,
                 }
     __NoDefault__ = """
         Dests Outlines Pages Threads AcroForm Names OpenAction PageMode URI
@@ -1008,20 +1009,14 @@ class PDFCatalog(PDFObject):
         defaults = self.__Defaults__
         Refs = self.__Refs__
         D = {}
-        for k in defaults.keys():
-            default = defaults[k]
-            v = None
-            if hasattr(self, k) and getattr(self,k) is not None:
-                v = getattr(self, k)
-            elif default is not None:
-                v = default
+        for k,v in defaults.items():
+            v = getattr(self,k,v)
             if v is not None:
                 D[k] = v
         for k in self.__NoDefault__:
-            if hasattr(self, k):
-                v = getattr(self,k)
-                if v is not None:
-                    D[k] = v
+            v = getattr(self,k,None)
+            if v is not None:
+                D[k] = v
         # force objects to be references where required
         for k in Refs:
             if k in D:

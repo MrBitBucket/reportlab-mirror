@@ -36,6 +36,7 @@ from reportlab.rl_config import defaultPageSize, verbose
 import reportlab.lib.sequencer
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import isSeq, encode_label, decode_label, annotateException, strTypes
+
 try:
     set
 except NameError:
@@ -451,6 +452,7 @@ class BaseDocTemplate:
                     'cropMarks': None,
                     'enforceColorSpace': None,
                     'displayDocTitle': None,
+                    'lang': None,
                     }
     _invalidInitArgs = ()
     _firstPageTemplateIndex = 0
@@ -867,6 +869,8 @@ class BaseDocTemplate:
         self.canv.setKeywords(self.keywords)
         if self.displayDocTitle is not None:
             self.canv.setViewerPreference('DisplayDocTitle',['false','true'][self.displayDocTitle])
+        if self.lang:
+            self.canv.setCatalogEntry('Lang',self.lang)
 
         if self._onPage:
             self.canv.setPageCallBack(self._onPage)
