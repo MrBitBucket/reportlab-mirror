@@ -31,8 +31,8 @@ def _defaults_init():
         _overrides=_DEFAULTS.copy()
         try:
             try:
-                fn = os.path.expanduser(os.path.join('~','.reportlab_settings'))    #appengine fails with KeyError
-            except KeyError:
+                fn = os.path.expanduser(os.path.join('~','.reportlab_settings'))    #appengine fails with KeyError/ImportError (dev/live)
+            except (KeyError, ImportError):
                 fn = None
             if fn:
                 with open(fn,'rb') as f:
@@ -96,8 +96,8 @@ def _startUp():
                 d = (p % D).replace('/',os.sep)
                 if '~' in d:
                     try:
-                        d = os.path.expanduser(d)   #appengine fails with KeyError
-                    except KeyError:
+                        d = os.path.expanduser(d)   #appengine fails with KeyError/ImportError (dev/live)
+                    except (KeyError, ImportError):
                         continue
                 if rl_isdir(d): P.append(d)
             _setOpt(k,os.pathsep.join(P),lambda x:x.split(os.pathsep))
