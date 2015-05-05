@@ -334,10 +334,10 @@ class Legend(Widget):
         xW = dx+dxTextSpace+self.autoXPadding
         variColumn = self.variColumn
         if variColumn:
-            width = reduce(operator.add,[m[-1] for m in maxWidth],0)+xW*nCols
+            width = sum([m[-1] for m in maxWidth])+xW*nCols
         else:
             deltax = max(maxWidth[-1]+xW,deltax)
-            width = maxWidth[-1]+nCols*deltax
+            width = nCols*deltax
             maxWidth = nCols*[maxWidth]
 
         thisx = self.x
@@ -372,7 +372,7 @@ class Legend(Widget):
             dividerOffsX = self.dividerOffsX
             dividerOffsY = self.dividerOffsY
 
-        for i in range(n):
+        for i in xrange(n):
             if autoCP:
                 col = autoCP
                 col.index = i
