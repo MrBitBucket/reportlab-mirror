@@ -1768,9 +1768,9 @@ class Destination(PDFObject):
         self.fmt = self.page = None
     def format(self, document):
         f = self.fmt
-        if f is None: raise ValueError("format not resolved %s" % self.name)
+        if f is None: raise ValueError("format not resolved, probably missing URL scheme or undefined destination target for '%s'" % self.name)
         p = self.page
-        if p is None: raise ValueError("Page reference unbound %s" % self.name)
+        if p is None: raise ValueError("Page not bound, probably missing URL scheme or undefined destination target for '%s'" % self.name)
         f.page = p
         return f.format(document)
     def xyz(self, left, top, zoom):  # see pdfspec mar 11 99 pp184+
