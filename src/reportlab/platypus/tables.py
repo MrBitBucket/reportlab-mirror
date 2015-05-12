@@ -1259,7 +1259,8 @@ class Table(Flowable):
         R0 = self.__class__( data[:n], colWidths=self._colWidths, rowHeights=self._argH[:n],
                 repeatRows=repeatRows, repeatCols=repeatCols,
                 splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[:n],
-                ident=ident)
+                ident=ident,
+                spaceBefore=getattr(self,'spaceBefore',None))
 
         #copy the commands
 
@@ -1322,6 +1323,7 @@ class Table(Flowable):
                     splitByRow=splitByRow, normalizedData=1,
                     cellStyles=self._cellStyles[:repeatRows]+self._cellStyles[n:],
                     ident=ident,
+                    spaceAfter=getattr(self,'spaceAfter',None),
                     )
             R1._cr_1_1(n,repeatRows,A)
             R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
@@ -1333,6 +1335,7 @@ class Table(Flowable):
                     repeatRows=repeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[n:],
                     ident=ident,
+                    spaceAfter=getattr(self,'spaceAfter',None),
                     )
             R1._cr_1_0(n,A)
             R1._cr_1_0(n,self._bkgrndcmds)
