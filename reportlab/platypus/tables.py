@@ -278,6 +278,7 @@ class Table(Flowable):
 
         if style:
             self.setStyle(style)
+
         self._rowSplitRange = rowSplitRange
         if spaceBefore is not None:
             self.spaceBefore = spaceBefore
@@ -1177,7 +1178,8 @@ class Table(Flowable):
         #R0 = slelf.__class__( data[:n], self._argW, self._argH[:n],
         R0 = self.__class__( data[:n], colWidths=self._colWidths, rowHeights=self._argH[:n],
                 repeatRows=repeatRows, repeatCols=repeatCols,
-                splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[:n])
+                splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[:n],
+                spaceBefore=getattr(self,'spaceBefore',None))
 
         #copy the commands
 
@@ -1237,7 +1239,9 @@ class Table(Flowable):
                     rowHeights=self._argH[:repeatRows]+self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow, normalizedData=1,
-                    cellStyles=self._cellStyles[:repeatRows]+self._cellStyles[n:])
+                    cellStyles=self._cellStyles[:repeatRows]+self._cellStyles[n:],
+                    spaceAfter=getattr(self,'spaceAfter',None),
+                    )
             R1._cr_1_1(n,repeatRows,A)
             R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
             R1._cr_1_1(n,repeatRows,self._spanCmds)
@@ -1246,7 +1250,9 @@ class Table(Flowable):
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
             R1 = self.__class__(data[n:], colWidths=self._colWidths, rowHeights=self._argH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
-                    splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[n:])
+                    splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[n:],
+                    spaceAfter=getattr(self,'spaceAfter',None),
+                    )
             R1._cr_1_0(n,A)
             R1._cr_1_0(n,self._bkgrndcmds)
             R1._cr_1_0(n,self._spanCmds)
