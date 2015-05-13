@@ -272,6 +272,8 @@ class Table(Flowable):
         self._linecmds = []
         self._spanCmds = []
         self._nosplitCmds = []
+        # NB repeatRows can be a list or tuple eg (1,) reapesat only the second row of a table
+        # or an integer eg 2 to repeat both rows 0 & 1
         self.repeatRows = repeatRows
         self.repeatCols = repeatCols
         self.splitByRow = splitByRow
@@ -1155,7 +1157,8 @@ class Table(Flowable):
 
     def _splitRows(self,availHeight):
         n=self._getFirstPossibleSplitRowPosition(availHeight)
-        if n<=self.repeatRows: return []
+        repeatRows = self.repeatRows
+        if n<= (repeatRows if isinstance(repeatRows,int) else (max(repeatRows)+1)): return []
         lim = len(self._rowHeights)
         if n==lim: return [self]
 
@@ -1169,13 +1172,11 @@ class Table(Flowable):
             elif n<lo:
                 return []
 
-        repeatRows = self.repeatRows
         repeatCols = self.repeatCols
         splitByRow = self.splitByRow
         data = self._cellvalues
 
         #we're going to split into two superRows
-        #R0 = slelf.__class__( data[:n], self._argW, self._argH[:n],
         R0 = self.__class__( data[:n], colWidths=self._colWidths, rowHeights=self._argH[:n],
                 repeatRows=repeatRows, repeatCols=repeatCols,
                 splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[:n],
@@ -1234,18 +1235,29 @@ class Table(Flowable):
         R0._cr_0(n,self._nosplitCmds)
 
         if repeatRows:
-            #R1 = slelf.__class__(data[:repeatRows]+data[n:],self._argW,
-            R1 = self.__class__(data[:repeatRows]+data[n:],colWidths=self._colWidths,
-                    rowHeights=self._argH[:repeatRows]+self._argH[n:],
-                    repeatRows=repeatRows, repeatCols=repeatCols,
+            if isinstance(repeatRows,int):
+                iRows = data[:repeatRows]
+                nRepeatRows = repeatRows
+                iRowH = self._argH[:repeatRows]
+                iCS = self._cellStyles[:repeatRows]
+            else:
+                #we have a list of repeated rows eg (1,3)
+                repeatRows = list(sorted(repeatRows))
+                iRows = [data[i] for i in repeatRows]
+                nRepeatRows = len(repeatRows)
+                iRowH = [self._argH[i] for i in repeatRows]
+                iCS = [self._cellStyles[i] for i in repeatRows]
+            R1 = self.__class__(iRows+data[n:],colWidths=self._colWidths,
+                    rowHeights=iRowH+self._argH[n:],
+                    repeatRows=nRepeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow, normalizedData=1,
-                    cellStyles=self._cellStyles[:repeatRows]+self._cellStyles[n:],
+                    cellStyles=iCS+self._cellStyles[n:],
                     spaceAfter=getattr(self,'spaceAfter',None),
                     )
-            R1._cr_1_1(n,repeatRows,A)
-            R1._cr_1_1(n,repeatRows,self._bkgrndcmds)
-            R1._cr_1_1(n,repeatRows,self._spanCmds)
-            R1._cr_1_1(n,repeatRows,self._nosplitCmds)
+            R1._cr_1_1(n,nRepeatRows,A)
+            R1._cr_1_1(n,nRepeatRows,self._bkgrndcmds)
+            R1._cr_1_1(n,nRepeatRows,self._spanCmds)
+            R1._cr_1_1(n,nRepeatRows,self._nosplitCmds)
         else:
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
             R1 = self.__class__(data[n:], colWidths=self._colWidths, rowHeights=self._argH[n:],
