@@ -49,7 +49,8 @@ T1SearchPath
 TTFSearchPath
 CMapSearchPath
 baseUnderlineProportion
-decimalSymbol'''.split())
+decimalSymbol
+errorOnDuplicatePageLabelPage'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -102,6 +103,7 @@ listWrapOnFakeWidth=        1                       #set to 0/False to force pla
 baseUnderlineProportion=    0.0                     #non-zero for doing font size proportional lines in Paragraph.py
                                                     #by default typical value 0.05. may be overridden on a parastyle.
 decimalSymbol=              '.'                     #what we use to align floats numerically
+errorOnDuplicatePageLabelPage= 0                    #if True will cause repeated PageLabel page numbers to raise an error.
 
 # places to look for T1Font information
 T1SearchPath =  (

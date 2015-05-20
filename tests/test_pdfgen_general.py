@@ -1022,12 +1022,15 @@ class PdfgenTestCase(unittest.TestCase):
         c.addPageLabel(11, style='ARABIC',start=6)
         c.addPageLabel(17, style='ARABIC', start=14)
         c.addPageLabel(21, style='ARABIC', start=22)
+        #check that duplicate page start will not cause sort error in python 3.x
+        c.addPageLabel(98, style='ROMAN_LOWER', start=99, prefix='r')
+        c.addPageLabel(98, style='ARABIC', start=99, prefix='A')
         c.addPageLabel(99, style='LETTERS_UPPER')
         c.addPageLabel(102, prefix="Back",start=1)
 
         # Make some (mostly) empty pages
         for i in range(113):
-            c.drawString(100, 100, 'Tis is page '+str(i))
+            c.drawString(100, 100, 'This is page '+str(i))
             c.showPage()
 
         # Output the PDF

@@ -18,7 +18,7 @@ import types, binascii, codecs
 from collections import OrderedDict
 from reportlab.pdfbase import pdfutils
 from reportlab import rl_config
-from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester, isStr, bytestr, isPy3
+from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester, isStr, bytestr, isPy3, annotateException
 from reportlab.lib.rl_accel import escapePDF, fp_str, asciiBase85Encode, asciiBase85Decode
 from reportlab.pdfbase import pdfmetrics
 from hashlib import md5
@@ -1154,6 +1154,8 @@ class PDFPage(PDFCatalog):
             self.Parent = document.Reference(pages)
 
 #this code contributed by  Christian Jacobs <cljacobsen@gmail.com>
+class DuplicatePageLabelPage(Exception):
+    pass
 class PDFPageLabels(PDFCatalog):
     __comment__ = None
     __RefOnly__ = 0
@@ -1181,7 +1183,11 @@ class PDFPageLabels(PDFCatalog):
         self.labels.append((page, label))
 
     def format(self, document):
-        self.labels.sort()
+        try:
+            self.labels.sort()
+        except DuplicatePageLabelPage:
+            tmp = sorted([x[0] for x in self.labels])
+            annotateException('\n\n!!!!! Duplicate PageLabel seen for pages %r' % list(set([x for x in tmp if tmp.count(x)>1])))
         labels = []
         for page, label in self.labels:
             labels.append(page)
@@ -1258,6 +1264,11 @@ class PDFPageLabel(PDFCatalog):
             self.S = PDFName(style)
         if start: self.St = PDFnumber(start)
         if prefix: self.P = PDFString(prefix)
+
+    def __lt__(self,oth):
+        if rl_config.errorOnDuplicatePageLabelPage:
+            raise DuplicatePageLabelPage()
+        return False
 #ends code contributed by  Christian Jacobs <cljacobsen@gmail.com>
 
 def testpage(document):
