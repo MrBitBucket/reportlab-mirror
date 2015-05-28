@@ -292,7 +292,7 @@ heading3("Image methods")
 pencilnote()
 disc("""
 You need the Python Imaging Library (PIL) to use images with the ReportLab package.
-Examnples of the techniques below can be found by running the script $test_pdfgen_general.py$
+Examples of the techniques below can be found by running the script $test_pdfgen_general.py$
 in our $tests$ subdirectory and looking at page 7 of the output.
 """)
 
