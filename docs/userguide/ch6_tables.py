@@ -87,8 +87,10 @@ by row before attempting to split itself by column when too little space is avai
 the current drawing area and the caller wants the $Table$ to split.
 Splitting a $Table$ by column is currently not implemented, so setting $splitByRow$ to $False$ will result in a $NotImplementedError$.""")
 
-disc("""The $repeatRows$ argument specifies the number of leading rows
-that should be repeated when the $Table$ is asked to split itself. The $repeatCols$ argument is currently ignored as a $Table$ cannot be split by column.""")
+disc("""The $repeatRows$ argument specifies the number or a tuple of leading rows
+that should be repeated when the $Table$ is asked to split itself. If it is a tuple it should specify which of the leading rows should be repeated; this allows
+for cases where the first appearance of the table hsa more leading rows than later split parts.
+The $repeatCols$ argument is currently ignored as a $Table$ cannot be split by column.""")
 heading4('$Table.setStyle(tblStyle)$')
 disc("""
 This method applies a particular instance of class $TableStyle$ (discussed below)

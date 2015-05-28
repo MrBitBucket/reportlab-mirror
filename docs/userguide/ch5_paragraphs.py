@@ -64,6 +64,11 @@ class ParagraphStyle(PropertySet):
         'borderRadius': None,
         'allowWidows': 1,
         'allowOrphans': 0,
+        'textTransform':None,
+        'endDots':None,
+        'splitLongWords':1,
+        'underlineProportion': _baseUnderlineProportion,
+        'bulletAnchor': 'start',
         }
 """)
 
@@ -165,6 +170,12 @@ The default color of the text can be set with $textColor$ and the paragraph back
 colour can be set with $backColor$. The paragraph's border properties may be changed using
 $borderWidth$, $borderPadding$, $borderColor$ and $borderRadius$.""")
 
+disc("""The $textTransform$ attribute can be <b><i>None</i></b>, <i>'upper'</i> or <i>'lower'</i> to get the obvious result.""")
+disc("""Attribute $endDots$ can be <b><i>None</i></b>, a string, or an object with attributes text and optional fontName, fontSize, textColor,  backColor
+and dy(y offset) to specify trailing matter on the last line of left/right justified paragraphs.""")
+disc("""The $splitLongWords$ attribute can be set to a false value to avoid splitting very long words.""")
+disc("""The $underLineProportion$ attribute can be set to a true or false value to control whether underlines are proportional to the font size.""")
+disc("""Attribute $bulletAnchor$ can be <i>'start'</i>, <i>'middle'</i>, <i>'end'</i> or <i>'numeric'</i> to control where the bullet is anchored.""")
 
 heading2("Paragraph XML Markup Tags")
 disc("""XML markup can be used to modify or specify the
