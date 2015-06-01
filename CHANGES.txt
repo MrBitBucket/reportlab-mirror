@@ -9,6 +9,17 @@ The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
 #################################################################################
+#################### RELEASE 3.2  01/06/2015                    #################
+#################################################################################
+
+  * Added proportional underlining specific to font sizes, set via the underlineProportion attribute of ParagraphStyles. 
+  * TrueType fonts: added support for cmaps 10 & 13
+  * DocTemplate class now supports a boolean displayDocTitle argument.
+  * TableofContents now supports a formatter argument to allow formatting of the displayed page numbers (eg for appendices etc).
+  * A number of other fixes. See the ReportLab Bitbucket repository at https://bitbucket.org/rptlab/reportlab/ for further details.
+
+
+#################################################################################
 #################### RELEASE 3.1  22/04/2014                    #################
 #################################################################################
 
