@@ -19,6 +19,15 @@ mentioned. If we missed you, please let us know!
   * A number of other fixes. See the ReportLab Bitbucket repository at https://bitbucket.org/rptlab/reportlab/ for further details.
 
 
+###Contributors:
+   * Steven Jacobs
+   * Philip Semanchuk
+   * Marius Gedminas
+   * masklinn
+   * Kale Franz
+   * Albertas Agejavas
+
+
 #################################################################################
 #################### RELEASE 3.1  22/04/2014                    #################
 #################################################################################
@@ -27,6 +36,12 @@ If you are running ReportLab 3.0.x, the changes are minor.
 
   * support for emoji - characters outside the Unicode basic multilingual plane
   * improved pip-based installers will pull in all the needed dependencies.  Pillow 2.4 appears to deal with all our issues.
+
+
+###Contributors:
+    * Ivan Tchomgue
+    * Waldemar Osuch
+
 
 #################################################################################
 #################### RELEASE 3.0  14/02/2014                    #################
