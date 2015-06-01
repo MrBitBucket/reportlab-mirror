@@ -1,13 +1,21 @@
 This is a summary of changes made to the reportlab source code for each release.
 Please refer to subversion backlogs (using the release dates) for more details
 or for releases which we have not provide a higher level changes list for.
-E.g. to retrieve the changes made between release 1.19 and release 1.20, type:
+E.g. to retrieve the changes made between release 3.1 and release 3.2, type:
 
-  svn log -r {2004-11-25T18:00}:{2004-01-21T18:00}
+  hg log -r adb3f0d
 
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+#################################################################################
+#################### RELEASE 3.1  22/04/2014                    #################
+#################################################################################
+
+If you are running ReportLab 3.0.x, the changes are minor.
+
+  * support for emoji - characters outside the Unicode basic multilingual plane
+  * improved pip-based installers will pull in all the needed dependencies.  Pillow 2.4 appears to deal with all our issues.
 
 #################################################################################
 #################### RELEASE 3.0  14/02/2014                    #################
