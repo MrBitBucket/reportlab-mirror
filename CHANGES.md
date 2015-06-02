@@ -97,30 +97,31 @@ There has been a substantial internal rewrite to ensure consistent use of unicod
 RELEASE 2.7  04/04/2013
 -----------------------
 
-###Charts / graphics enhancements
+#### Charts / graphics enhancements
   * Added SimpleTimeSeriesPlot
   * added _computeMaxSpace
   * added in lineStyle (for bars)
   * improved SVG rendering
-  * Pie Chart now has an `innerRadiusFraction` to allow doughnut-like appearance for 2d charts  (it has no effect with 3d charts).  The separate 'doughnut' chart lacks many pie chart features and should only be used if you wanted multiple nested doughnuts. 
+  * Pie Chart now has an `innerRadiusFraction` to allow doughnut-like appearance for 2d charts  (it has no effect with 3d charts). 
+	 The separate 'doughnut' chart lacks many pie chart features and should only be used if you wanted multiple nested doughnuts. 
 
-###Charts/graphics bug fixes:
+#### Charts/graphics bug fixes
   * piecharts.py: fix Pie3d __init__ to call its superclass
   * linecharts.py: fix swatch creation
   * fixed `y` axis in the simple time series plot
 
-###PDF
+#### PDF
   * Fixes to testshapes & pdfform resetting
   * colors.py
   * various minor fixes
 
-###Platypus
+#### Platypus
   * Defined a small bullet rather than a big circle as the default for unordered lists
   * fixed attribute spelling bug
   * fixed CJK + endDots
 
-###Acknowledgements
-    Many thanks to Andrew Cutler, Dinu Gherman, Matthias Kirst and Stephan Richter for their contributions to this release.
+### Acknowledgements
+  Many thanks to Andrew Cutler, Dinu Gherman, Matthias Kirst and Stephan Richter for their contributions to this release.
 
 
 RELEASE 2.6  27/09/2012
@@ -130,11 +131,11 @@ This is a minor release focusing mainly on improved documentation.  There are a
 number of minor enhancements, and a larger number of previous-undocumented
 enhancements which we have documented better.
 
-####General changes
+#### General changes
    * Manuals have been reformatted with more pleasing code snippets and tables of 
      contents, and reviewed and expanded
 
-####Flowing documents (Platypus):
+#### Flowing documents (Platypus)
    * Added support for HTML-style list objects
    * Added flexible mechanism for drawing bullets
    * Allowed XPreformatted objects to use Asian line wrapping
@@ -148,7 +149,7 @@ enhancements which we have documented better.
    * Documentation for images within text (`test_032_images`)
    * Trailing dots for use on contents pages
 
-####Charts and graphics:
+#### Charts and graphics
    * Support for UPCA bar codes
    * We now have a semi-intelligent system for labelling pie charts with 
      callout lines.  Thanks to James Martin-Collar, a maths student at Warwick 
@@ -160,7 +161,7 @@ enhancements which we have documented better.
    * Pie charts - fixed bugs in 3d appearance
    * SVG output back end has seen some bugs fixed and now outputs resizeable SVG
    
-####Contributors:
+### Contributors
    * Alex Buck
    * Felix Labrecque <felixl@densi.com>
    * Peter Johnson <johnson.peter@gmail.com>
@@ -191,11 +192,11 @@ Major contributors are credited in the user documentation.
      so we are turning this behaviour on.
    * New support for QR barcodes - [try our demo!](https://www.reportlab.com/demos/qr/)
 
-###PDF
+#### PDF
    * Colour separation and other enhancements for high-end print
    * Python 2.7 support
 
-###Charts
+#### Charts
    * reportlab.graphics.charts.axes
        * ValueAxis
            * avoidBoundSpace - Space to allow above and below
@@ -266,7 +267,7 @@ RELEASE 2.4  at 18:00 GMT  20/Jan/2010
    * pdfdoc.py: fix ro PDFDate contributed by Robert Alsina
    * and others ..
 
-### Contributers
+### Contributors
    * PJACock's (<peter@maubp.freeserve.co.uk>)
    * Hans Brand
    * Ian Stevens
@@ -314,17 +315,17 @@ RELEASE 2.3  at 18:00 GMT  04/Feb/2009
 RELEASE 2.2  at 18:00 GMT  10/Sep/2008
 --------------------------------------
 
-####PDF
+#### PDF
    * pdfmetrics: Added registerFontFamily function
    * Basic support for pdf document viewer preferences (e.g.: fullscreen).
 
-####Platypus
+#### Platypus
    * Paragraph <img> tag support for inline images.
    * Paragraph autoleading support (helps with <img> tags).
    * Platypus doctemplate programming support.
    * Support for tables with non-uniform row length.
 
-####Graphics
+#### Graphics
    * RGBA image support for suitable bitmap types.
    * LTO labelling barcode.
 
@@ -541,7 +542,7 @@ Here is what's different now:
     ensure at least one paragraph appears after the heading and that you don't get 
     headings alone at the bottom of a column. 
 
-####Graphics
+#### Graphics
   * Barcodes:
     The barcode package has been added to the standard reportlab 
     toolkit distribution (it used to live separately in our contributions area). It 
@@ -565,7 +566,7 @@ Here is what's different now:
     algorithm work better.
   * Improved spiderplots
 
-####Noteworthy bug fixes
+#### Noteworthy bug fixes
   * Fixes to TTF splitting (patch from Albertas Agejevas):
     This affected some documents using font subsetting
   * Tables with spans improved splitting:
