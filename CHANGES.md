@@ -4,9 +4,9 @@ CHANGES
 This is a summary of changes made to the reportlab source code for each release.
 Please refer to subversion backlogs (using the release dates) for more details
 or for releases which we have not provide a higher level changes list for.
-E.g. to retrieve the changes made between release 3.1 and release 3.2, type:
+E.g. to retrieve the changes made between release 3.1 and release 3.2, type::
 
-  `hg log -r adb3f0d`
+  $ hg log -r adb3f0d
 
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
@@ -15,22 +15,22 @@ mentioned. If we missed you, please let us know!
 RELEASE 3.2  01/06/2015
 -----------------------
 
-   * Added proportional underlining specific to font sizes, set via the underlineProportion attribute of ParagraphStyles. 
+   * Added proportional underlining specific to font sizes, set via the `underlineProportion` attribute of ParagraphStyles. 
    * TrueType fonts: added support for cmaps 10 & 13
-   * DocTemplate class now supports a boolean displayDocTitle argument.
+   * DocTemplate class now supports a boolean `displayDocTitle` argument.
    * TableofContents now supports a formatter argument to allow formatting of the displayed page numbers (eg for appendices etc).
-   * Table repeatRows can now be a tuple of row numbers to allow incomplete ranges of rows to be repeated. 
-   * Tables now do pass instance.spaceBefore & spaceAfter to their split children when split 
-   * Several strangenesses were fixed in the pdfbase.pdfform  module. Multiple usage is now allowed.
+   * Table `repeatRows` can now be a tuple of row numbers to allow incomplete ranges of rows to be repeated. 
+   * Tables now do pass instance.`spaceBefore` & `spaceAfter` to their split children when split 
+   * Several strangenesses were fixed in the pdfbase.pdfform module; Multiple usage is now allowed.
    * Error message fixes
    * Various environment fixes for Google Application Environment
    * Resource fixes
-   * PDFDoc can now set the Lang attribute
+   * PDFDoc can now set the `Lang` attribute
    * canvas.drawString and similar now allow the character spacing to be set 
    * Index of accented stuff has been improved
    * RTL code was improved
    * fix Propertyset.clone
-   * flowables.py: fix ImageAndFlowables so it avoids testing negative availableWidth 
+   * `flowables.py`: fix ImageAndFlowables so it avoids testing negative availableWidth 
 
 ### Contributors:
    * Steven Jacobs
@@ -44,6 +44,7 @@ RELEASE 3.2  01/06/2015
    * Glen Lindermann
    * Greg Jones
    * James Bynd
+   * fcoelho @ bitbucket
 
 
 RELEASE 3.1  22/04/2014
@@ -51,7 +52,7 @@ RELEASE 3.1  22/04/2014
 
 If you are running ReportLab 3.0.x, the changes are minor.
    * support for emoji - characters outside the Unicode basic multilingual plane
-   * improved pip-based installers will pull in all the needed dependencies.  Pillow 2.4 appears to deal with all our issues.
+   * improved pip-based installers will pull in all the needed dependencies; Pillow 2.4 appears to deal with all our issues.
 
 ### Contributors
    * Ivan Tchomgue
@@ -76,15 +77,17 @@ There has been a substantial internal rewrite to ensure consistent use of unicod
   * __init__.py restricts to 2.7 or >=3.3
   * __init__.py allow the import of on optional reportlab.local_rl_mods to allow monkey patching etc.
   * rl_config now imports rl_settings & optionally local_rl_settings
-  * ReportLab C extensions now live inside reportlab; _rl_accel is no longer required. All _rl_accel imports now pass through reportlab.lib.rl_accel
+  * ReportLab C extensions now live inside reportlab; _rl_accel is no longer required; All _rl_accel imports now 
+	pass through reportlab.lib.rl_accel
   * xmllib is gone, alongside the paraparser stuff that caused issues in favour of HTMLParser.
   * some obsolete C extensions (sgmlop and pyHnj) are gone
   * Improved support for multi-threaded systems to the _rl_accel extension module.
-  * Removed reportlab/lib/ para.py & pycanvas.py.  These would better belong in third party packages, which can make use of the monkeypatching feature above.
+  * Removed reportlab/lib/ para.py & pycanvas.py;  these would better belong in third party packages, 
+	which can make use of the monkeypatching feature above.
 
 
 ### New features
-  *  Add ability to output greyscale and 1-bit PIL images without conversion to RGB. (contributed by Matthew Duggan)
+  * Add ability to output greyscale and 1-bit PIL images without conversion to RGB. (contributed by Matthew Duggan)
   * highlight annotation (contributed by Ben Echols)
 
 ### Other
@@ -104,7 +107,7 @@ RELEASE 2.7  04/04/2013
 ###Charts/graphics bug fixes:
   * piecharts.py: fix Pie3d __init__ to call its superclass
   * linecharts.py: fix swatch creation
-  * fixed y axis in the simple time series plot
+  * fixed `y` axis in the simple time series plot
 
 ###PDF
   * Fixes to testshapes & pdfform resetting
@@ -127,11 +130,11 @@ This is a minor release focusing mainly on improved documentation.  There are a
 number of minor enhancements, and a larger number of previous-undocumented
 enhancements which we have documented better.
 
-###General changes
+####General changes
    * Manuals have been reformatted with more pleasing code snippets and tables of 
      contents, and reviewed and expanded
 
-###Flowing documents (Platypus):
+####Flowing documents (Platypus):
    * Added support for HTML-style list objects
    * Added flexible mechanism for drawing bullets
    * Allowed XPreformatted objects to use Asian line wrapping
@@ -142,10 +145,10 @@ enhancements which we have documented better.
    * added a TopPadder flowable, which will 'wrap' another Flowable and move it 
      to the bottom of the current page.  
    * More helpful error messages when large tables cannot be rendered
-   * Documentation for images within text (test_032_images)
+   * Documentation for images within text (`test_032_images`)
    * Trailing dots for use on contents pages
 
-###Charts and graphics:
+####Charts and graphics:
    * Support for UPCA bar codes
    * We now have a semi-intelligent system for labelling pie charts with 
      callout lines.  Thanks to James Martin-Collar, a maths student at Warwick 
@@ -157,7 +160,7 @@ enhancements which we have documented better.
    * Pie charts - fixed bugs in 3d appearance
    * SVG output back end has seen some bugs fixed and now outputs resizeable SVG
    
-###Contributors:
+####Contributors:
    * Alex Buck
    * Felix Labrecque <felixl@densi.com>
    * Peter Johnson <johnson.peter@gmail.com>
@@ -225,12 +228,12 @@ Major contributors are credited in the user documentation.
 RELEASE 2.4  at 18:00 GMT  20/Jan/2010
 --------------------------------------
 
-PDF
+#### PDF
    * lots of improvements and verbosity to error messages and the way they are handled.
    * font size can now be specified in pixels
    * unicode file names are now accepted
 
-Platypus
+#### Platypus
    * canvas auto cropmarks
    * added support for styles h4-h6
    * Improved support for onDraw and SimpleIndex
@@ -240,7 +243,7 @@ Platypus
    * Added support for an unlimited number of TOC levels with default styles
    * Index entries can now be clickable.
 
-Graphics:
+#### Graphics
    * Axes values can be reversible.
    * Labels on the axes can now be drawn above or below the axes (hi or low).
    * A per swatch callout is now allowed in the legend.
@@ -250,7 +253,7 @@ Graphics:
    * colors module has a fade function that returns a list of different shades made up of one base colour.
    * added in support for Overprint/Opacity & Separated colours
 
-Bugs fixes
+#### Bugs fixes
    * word counting in complex paragraphs has been fixed.
    * SimpleIndex and TableOfContents bugs have been fixed.
    * Fix for position of hyperlinks when crop marks are added.
@@ -263,7 +266,7 @@ Bugs fixes
    * pdfdoc.py: fix ro PDFDate contributed by Robert Alsina
    * and others ..
 
-###Contributers
+### Contributers
    * PJACock's (<peter@maubp.freeserve.co.uk>)
    * Hans Brand
    * Ian Stevens
@@ -281,22 +284,22 @@ Bugs fixes
 RELEASE 2.3  at 18:00 GMT  04/Feb/2009
 --------------------------------------
 
-PDF
-   • Encryption support (see encrypt parameter on Canvas and BaseDocTemplate constructor)
+#### PDF
+   * Encryption support (see encrypt parameter on Canvas and BaseDocTemplate constructor)
 
-Platypus
-   • TableOfContents - Creates clickable tables of contents
-   • Variable border padding for paragraphs (using the borderPadding style attribute)
-   • New programming Flowable, docAssert, used to assert expressions on wrap time.
+#### Platypus
+   * TableOfContents - Creates clickable tables of contents
+   * Variable border padding for paragraphs (using the borderPadding style attribute)
+   * New programming Flowable, docAssert, used to assert expressions on wrap time.
 
-Bug fixes
-   • Fixed old documentation and installation issues
-   • 610 - Fixed Image anchoring code to match documentation
-   • 704 - renderSVG groups problem
-   • 706 - rl_codecs.py now compatible with WordAxe
-   • and others...
+#### Bug fixes
+   * Fixed old documentation and installation issues
+   * 610 - Fixed Image anchoring code to match documentation
+   * 704 - renderSVG groups problem
+   * 706 - rl_codecs.py now compatible with WordAxe
+   * and others...
 
-###Contributors 
+### Contributors 
    * Yoann Roman
    * Dinu Gherman
    * Dirk Holtwick
@@ -311,19 +314,19 @@ Bug fixes
 RELEASE 2.2  at 18:00 GMT  10/Sep/2008
 --------------------------------------
 
-PDF
-  * pdfmetrics: Added registerFontFamily function
-  * Basic support for pdf document viewer preferences (e.g.: fullscreen).
+####PDF
+   * pdfmetrics: Added registerFontFamily function
+   * Basic support for pdf document viewer preferences (e.g.: fullscreen).
 
-Platypus
-  * Paragraph <img> tag support for inline images.
-  * Paragraph autoleading support (helps with <img> tags).
-  * Platypus doctemplate programming support.
-  * Support for tables with non-uniform row length.
+####Platypus
+   * Paragraph <img> tag support for inline images.
+   * Paragraph autoleading support (helps with <img> tags).
+   * Platypus doctemplate programming support.
+   * Support for tables with non-uniform row length.
 
-Graphics
-  * RGBA image support for suitable bitmap types.
-  * LTO labelling barcode.
+####Graphics
+   * RGBA image support for suitable bitmap types.
+   * LTO labelling barcode.
 
 And many bugfixes...
 
@@ -396,7 +399,7 @@ RELEASE 2.0  at 15:00 GMT  23/May/2006
    * Paul McNett
    * Chad Miller
 
-###Unicode support
+### Unicode support
 
 This is the Big One, and the reason some apps may break. You must now pass in 
 text either in UTF-8 or as unicode string objects. The library will handle 
@@ -417,7 +420,7 @@ With ReportLab 2, none of that necessary. Instead:
 
 Here is what's different now:
 
-Input text encoding is UTF-8 or Python Unicode strings
+#### Input text encoding is UTF-8 or Python Unicode strings
 
   Any text you pass to a canvas API (drawString etc.), Paragraph or other 
   flowable constructor, into a table cell, or as an attribute of a graphic (e.g. 
@@ -425,7 +428,7 @@ Input text encoding is UTF-8 or Python Unicode strings
   string, it is assumed to be UTF-8. If you pass a Unicode object, we know it's 
   unicode. 
 
-Font encodings
+#### Font encodings
 
   Fonts still work in different ways, and the built-in ones will still use 
   WinAnsi or MacRoman internally while TrueType will use UTF-8. However, the 
@@ -438,7 +441,7 @@ Font encodings
   just the face name. ReportLab knows about the standard fonts in Adobe's Asian 
   Language Packs. 
 
-Asian Truetype fonts
+#### Asian Truetype fonts
 
   The standard Truetype fonts differ slightly for Asian languages (e.g 
   msmincho.ttc). These can now be read and used, albeit somewhat inefficiently. 
@@ -448,7 +451,7 @@ Asian Truetype fonts
   properly wrap paragraphs as there are no gaps between the words. We now have a 
   basic word wrapping algorithm.
 
-unichar tag
+#### unichar tag
 
   A convenience tag, <unichar/> has also been added. You can now do <unichar 
   code="0xfc"/> or <unichar name='LATIN SMALL LETTER U WITH DIAERESIS'/> and get 
@@ -472,7 +475,7 @@ unichar tag
 
 ### Other New Features
 
-PDF
+#### PDF
 
   * Improved low-level annotation support for PDF "free text annotations"
     FreeTextAnnotation allows showing and hiding of an arbitrary PDF "form" 
@@ -490,18 +493,23 @@ PDF
     so that JPEG CMYK images are no longer (lossily) converted to RGB format before 
     including them in PDF. 
 
-Platypus
+#### Platypus
 
   * Link support in paragraphs:
     Platypus paragraphs can now contain link elements, which support both 
     internal links to the same PDF document, links to other local PDF documents, 
     and URL links to pages on the web. Some examples:
 
-    Web links:
+    Web links::
+
         <link href="http://www.reportlab.com/">ReportLab<link>
-    Internal link to current PDF document:
+
+    Internal link to current PDF document::
+
         <link href="summary">ReportLab<link>
-    External link to a PDF document on the local filesystem:
+
+    External link to a PDF document on the local filesystem::
+
         <link href="pdf:c:/john/report.pdf">ReportLab<link>
 
   * Improved wrapping support:
@@ -533,9 +541,8 @@ Platypus
     ensure at least one paragraph appears after the heading and that you don't get 
     headings alone at the bottom of a column. 
 
-###Graphics
-
-  * Barcodes::
+####Graphics
+  * Barcodes:
     The barcode package has been added to the standard reportlab 
     toolkit distribution (it used to live separately in our contributions area). It 
     has also seen fairly extensive reworking for production use in a recent 
@@ -558,8 +565,7 @@ Platypus
     algorithm work better.
   * Improved spiderplots
 
-###Noteworthy bug fixes
-
+####Noteworthy bug fixes
   * Fixes to TTF splitting (patch from Albertas Agejevas):
     This affected some documents using font subsetting
   * Tables with spans improved splitting:
@@ -567,10 +573,11 @@ Platypus
     row/column spans
   * Fix runtime error affecting keepWithNext
 
+
 Older releases
 --------------
 
-Please refer to subversion backlogs for a low level change list:
+Please refer to subversion backlogs for a low level change list
 
 	RELEASE 1.20 at 18:00 GMT  25/Nov/2004
 	RELEASE 1.19 at 18:00 GMT  21/Jan/2004
