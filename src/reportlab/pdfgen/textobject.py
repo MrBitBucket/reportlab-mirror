@@ -463,3 +463,16 @@ class PDFTextObject(_PDFColorSetter):
     def __nonzero__(self):
         'PDFTextObject is true if it has something done after the init'
         return self._code != ['BT']
+
+    def _setFillAlpha(self,v):
+        self._canvas._doc.ensureMinPdfVersion('transparency')
+        self._canvas._extgstate.set(self,'ca',v)
+
+    def _setStrokeOverprint(self,v):
+        self._canvas._extgstate.set(self,'OP',v)
+
+    def _setFillOverprint(self,v):
+        self._canvas._extgstate.set(self,'op',v)
+
+    def _setOverprintMask(self,v):
+        self._canvas._extgstate.set(self,'OPM',v and 1 or 0)
