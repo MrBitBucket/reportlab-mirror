@@ -1,3 +1,7 @@
+=======
+CHANGES
+=======
+
 This is a summary of changes made to the reportlab source code for each release.
 Please refer to subversion backlogs (using the release dates) for more details
 or for releases which we have not provide a higher level changes list for.
@@ -8,39 +12,58 @@ E.g. to retrieve the changes made between release 3.1 and release 3.2, type:
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-#################################################################################
-#################### RELEASE 3.2  01/06/2015                    #################
-#################################################################################
+
+RELEASE 3.2  01/06/2015
+=======================
 
   * Added proportional underlining specific to font sizes, set via the underlineProportion attribute of ParagraphStyles. 
   * TrueType fonts: added support for cmaps 10 & 13
   * DocTemplate class now supports a boolean displayDocTitle argument.
   * TableofContents now supports a formatter argument to allow formatting of the displayed page numbers (eg for appendices etc).
-  * A number of other fixes. See the ReportLab Bitbucket repository at https://bitbucket.org/rptlab/reportlab/ for further details.
+  * Table repeatRows can now be a tuple of row numbers to allow incomplete ranges of rows to be repeated. 
+  * Tables now do pass instance.spaceBefore & spaceAfter to their split children when split 
+  * Several strangenesses were fixed in the pdfbase.pdfform  module. Multiple usage is now allowed.
+  * Error message fixes
+  * Various environment fixes for Google Application Environment
+  * Resource fixes
+  * PDFDoc can now set the Lang attribute
+  * canvas.drawString and similar now allow the character spacing to be set 
+  * Index of accented stuff has been improved
+  * RTL code was improved
+  * fix Propertyset.clone
+  * flowables.py: fix ImageAndFlowables so it avoids testing negative availableWidth 
 
 
-###Contributors:
+Contributors:
+-------------
    * Steven Jacobs
    * Philip Semanchuk
    * Marius Gedminas
    * masklinn
    * Kale Franz
    * Albertas Agejavas
+   • Anders Hammarquist
+   * jvanzuela @ bitbucket
+   * Glen Lindermann
+   * Greg Jones
+   * James Bynd
 
 
-#################################################################################
-#################### RELEASE 3.1  22/04/2014                    #################
-#################################################################################
+
+RELEASE 3.1  22/04/2014
+=======================
 
 If you are running ReportLab 3.0.x, the changes are minor.
 
   * support for emoji - characters outside the Unicode basic multilingual plane
   * improved pip-based installers will pull in all the needed dependencies.  Pillow 2.4 appears to deal with all our issues.
 
-
-###Contributors:
+Contributors
+------------
     * Ivan Tchomgue
     * Waldemar Osuch
+    * masayuku
+    * alexandrel_sgi
 
 
 #################################################################################
