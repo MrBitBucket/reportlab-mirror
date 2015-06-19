@@ -237,6 +237,9 @@ class Canvas(textobject._PDFColorSetter):
                  cropMarks=None,
                  pdfVersion=None,
                  enforceColorSpace=None,
+                 initialFontName=None,
+                 initialFontSize=None,
+                 initialLeading=None,
                  ):
         """Create a canvas of a given size. etc.
 
@@ -255,6 +258,11 @@ class Canvas(textobject._PDFColorSetter):
         """
         if pagesize is None: pagesize = rl_config.defaultPageSize
         if invariant is None: invariant = rl_config.invariant
+
+        self._initialFontName = initialFontName if initialFontName else rl_config.canvas_basefontname
+        self._initialFontSize = initialFontSize if initialFontSize is not None else 12
+        self._initialLeading = initialLeading if initialLeading is not None else self._initialFontSize*1.2
+
         self._filename = filename
 
         self._doc = pdfdoc.PDFDocument(compression=pageCompression,
@@ -330,11 +338,11 @@ class Canvas(textobject._PDFColorSetter):
         #initial graphics state, never modify any of these in place
         self._x = 0
         self._y = 0
-        self._fontname = rl_config.canvas_basefontname
-        self._fontsize = 12
+        self._fontname = self._initialFontName
+        self._fontsize = self._initialFontSize
 
         self._textMode = 0  #track if between BT/ET
-        self._leading = 14.4
+        self._leading = self._initialLeading
         self._currentMatrix = (1., 0., 0., 1., 0., 0.)
         self._fillMode = 0   #even-odd
 
@@ -1597,18 +1605,7 @@ class Canvas(textobject._PDFColorSetter):
 
         Standard set now, but may grow in future with font embedding."""
         fontnames = self._doc.getAvailableFonts()
-        fontnames.sort()
         return fontnames
-
-    def addFont(self, fontObj):
-        "add a new font for subsequent use."
-        self._doc.addFont(fontObj)
-
-    def _addStandardFonts(self):
-        """Ensures the standard 14 fonts are available in the system encoding.
-        Called by canvas on initialization"""
-        for fontName in pdfmetrics.standardFonts:
-            self.addFont(pdfmetrics.fontsByName[fontName])
 
     def listLoadedFonts0(self):
         "Convenience function to list all loaded fonts"
