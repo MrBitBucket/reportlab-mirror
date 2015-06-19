@@ -14,7 +14,7 @@ filename = outputfile('test_invariant.pdf')
 
 class InvarTestCase(unittest.TestCase):
     "Simplest test that makes PDF"
-    def test(self):
+    def test0(self):
         import os
         from reportlab.lib.testutils import testsFolder
         c = Canvas(filename, invariant=1, pageCompression=0)
@@ -24,7 +24,8 @@ class InvarTestCase(unittest.TestCase):
         c.drawImage(gif,100,600)
         c.save()
 
-        raw1 = open(filename, 'rb').read()
+        with open(filename, 'rb') as f:
+            raw1 = f.read()
 
         c = Canvas(filename, invariant=1, pageCompression=0)
         c.setFont('Helvetica-Bold', 36)
@@ -32,8 +33,21 @@ class InvarTestCase(unittest.TestCase):
         c.drawImage(gif,100,600)
         c.save()
 
-        raw2 = open(filename, 'rb').read()
+        with open(filename, 'rb') as f:
+            raw2 = f.read()
+
         assert raw1 == raw2, 'repeated runs differ!'
+
+    def test1(self):
+        import os
+        from reportlab.lib.testutils import testsFolder
+        filename = outputfile('test_no_helvetica.pdf')
+        c = Canvas(filename, invariant=1, pageCompression=0, initialFontName='Times-Roman')
+        c.drawString(100,700, 'Hello World')
+        c.save()
+        with open(filename, 'rb') as f:
+            raw = f.read()
+        assert b'Helvetica' not in raw and b'Times-Roman' in raw, 'Canvas initialFontName expectations not satisfied!'
 
 def makeSuite():
     return makeSuiteForClasses(InvarTestCase)

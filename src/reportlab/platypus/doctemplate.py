@@ -453,6 +453,9 @@ class BaseDocTemplate:
                     'enforceColorSpace': None,
                     'displayDocTitle': None,
                     'lang': None,
+                    'initialFontName': None,
+                    'initialFontSize': None,
+                    'initialLeading': None,
                     }
     _invalidInitArgs = ()
     _firstPageTemplateIndex = 0
@@ -857,6 +860,9 @@ class BaseDocTemplate:
                                 invariant=self.invariant,
                                 pageCompression=self.pageCompression,
                                 enforceColorSpace=self.enforceColorSpace,
+                                initialFontName = self.initialFontName,
+                                initialFontSize = self.initialFontSize,
+                                initialLeading = self.initialLeading,
                                 )
 
         getattr(self.canv,'setEncrypt',lambda x: None)(self.encrypt)
