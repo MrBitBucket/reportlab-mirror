@@ -269,7 +269,6 @@ class PDFDocument(PDFObject):
                 if fontObj._dynamicFont:
                     raise PDFError("getInternalFontName(%s) called for a dynamic font" % repr(psfontname))
                 fontObj.addObjects(self)
-                #self.addFont(fontObj)
                 return fm[psfontname]
             except KeyError:
                 raise PDFError("Font %s not known!" % repr(psfontname))
