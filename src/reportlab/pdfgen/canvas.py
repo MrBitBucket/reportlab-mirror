@@ -240,6 +240,10 @@ class Canvas(textobject._PDFColorSetter):
                  initialFontName=None,
                  initialFontSize=None,
                  initialLeading=None,
+                 cropBox=None,
+                 artBox=None,
+                 trimBox=None,
+                 bleedBox=None,
                  ):
         """Create a canvas of a given size. etc.
 
@@ -305,6 +309,12 @@ class Canvas(textobject._PDFColorSetter):
         #drawing coordinates.
         self.bottomup = bottomup
         self.imageCaching = rl_config.defaultImageCaching
+
+        self._cropBox = cropBox     #we don't do semantics for these at all
+        self._artBox = artBox
+        self._trimBox = trimBox
+        self._bleedBox = bleedBox
+
         self.init_graphics_state()
         self._make_preamble()
         self.state_stack = []
@@ -638,6 +648,10 @@ class Canvas(textobject._PDFColorSetter):
         page.hasImages = self._currentPageHasImages
         page.setPageTransition(self._pageTransition)
         page.setCompression(self._pageCompression)
+        for box in ('crop','art','bleed','trim'):
+            size = getattr(self,'_%sBox'%box,None)
+            if size:
+                setattr(page,box.capitalize()+'Box',pdfdoc.PDFArray(size))
         if self._pageDuration is not None:
             page.Dur = self._pageDuration
 
@@ -1237,6 +1251,23 @@ class Canvas(textobject._PDFColorSetter):
         and subsequent pages"""
         self._pagesize = size
         self._make_preamble()
+
+    def setCropBox(self, size, name='crop'):
+        """accepts a 2-tuple in points for name+'Box' size for this and subsequent pages"""
+        name = name.lower()
+        if name.endswith('box'): name = name[:-3]
+        if name not in ('crop','art','trim','bleed'):
+            raise ValueError('unknown box name: %r' % name)
+        setattr(self,'_%sBox' % name, size)
+
+    def setTrimBox(self,size):
+        self.setCropBox(size,name='trim')
+
+    def setArtBox(self,size):
+        self.setCropBox(size,name='art')
+
+    def setBleedBox(self,size):
+        self.setCropBox(size,name='bleed')
 
     def setPageRotation(self, rot):
         """Instruct display device that this page is to be rotated"""

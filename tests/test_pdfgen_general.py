@@ -209,7 +209,7 @@ def makeDocument(filename, pageCallBack=None):
     c.drawString(100, 100, msg_uni)
     c.drawString(100, 80, msg_utf8)
 
-    
+
 
 
     t = c.beginText(inch, 10*inch)
@@ -546,7 +546,7 @@ cost to performance.""")
         if anchor=='end':
             x -= width
         elif anchor in ('centre','center'):
-            x = 0.5*width 
+            x = 0.5*width
         c.saveState()
         c.setDash(2,2)
         c.setStrokeColor(color)
@@ -824,33 +824,33 @@ cost to performance.""")
         #preserveAspectRatio test
         c.drawString(inch, 8.8*inch, 'Both of these should appear within the boxes, vertically centered')
 
-    
+
         x, y, w, h = inch, 6.75* inch, 2*inch, 2*inch
         c.rect(x, y, w, h)
         (w2, h2) = c.drawImage(gif,  #anchor southwest, drawImage
-                    x, y, width=w, height=h, 
-                    preserveAspectRatio=True, 
-                    anchor='c'
-                    )
-                    
-        #now test drawInlineImage across the page            
-        x = 5 * inch
-        c.rect(x, y, w, h)
-        (w2, h2) = c.drawInlineImage(gif,  #anchor southwest, drawInlineImage
-                    x, y, width=w, height=h, 
+                    x, y, width=w, height=h,
                     preserveAspectRatio=True,
                     anchor='c'
                     )
-                    
-        c.drawString(inch, 5.75*inch, 
+
+        #now test drawInlineImage across the page
+        x = 5 * inch
+        c.rect(x, y, w, h)
+        (w2, h2) = c.drawInlineImage(gif,  #anchor southwest, drawInlineImage
+                    x, y, width=w, height=h,
+                    preserveAspectRatio=True,
+                    anchor='c'
+                    )
+
+        c.drawString(inch, 5.75*inch,
         'anchored by respective corners - use both a wide and a tall one as tests')
         x = 0.25 * inch
         for anchor in ['nw','n','ne','w','c','e','sw','s','se']:
             x += 0.75*inch
             c.rect(x, 5*inch, 0.6*inch, 0.6*inch)
             c.drawImage(
-                    gif, x, 5*inch, 
-                    width=0.6*inch, height=0.6*inch, 
+                    gif, x, 5*inch,
+                    width=0.6*inch, height=0.6*inch,
                     preserveAspectRatio=True,
                     anchor=anchor
                     )
@@ -862,8 +862,8 @@ cost to performance.""")
             x += 0.75*inch
             c.rect(x, 4*inch, 0.6*inch, 0.6*inch)
             c.drawImage(
-                    tall_red, x, 4*inch, 
-                    width=0.6*inch, height=0.6*inch, 
+                    tall_red, x, 4*inch,
+                    width=0.6*inch, height=0.6*inch,
                     preserveAspectRatio=True,
                     anchor=anchor
                     )
@@ -1034,7 +1034,7 @@ class PdfgenTestCase(unittest.TestCase):
             c.showPage()
 
         # Output the PDF
-        c.save()    
+        c.save()
 
     def test2(self):
         c=canvas.Canvas('test_pdfgen_autocropmarks.pdf',cropMarks=True)
@@ -1112,7 +1112,7 @@ class PdfgenTestCase(unittest.TestCase):
         self.assertRaises(ValueError,trySomeColors,rgb+cmyk+seps,'rgb')
         self.assertRaises(ValueError,trySomeColors,rgb+cmyk,'rgb')
         self.assertRaises(ValueError,trySomeColors,rgb+seps,'rgb')
-        trySomeColors(rgb+sepb,'rgb')   #should work because blacks are convertible 
+        trySomeColors(rgb+sepb,'rgb')   #should work because blacks are convertible
         trySomeColors(rgb+cmykb,'rgb')
         self.assertRaises(ValueError,trySomeColors,cmyk+rgb+seps,'cmyk')
         trySomeColors(cmyk+['black']+seps,'cmyk')   #OK because black & seps are convertible
@@ -1167,8 +1167,18 @@ class PdfgenTestCase(unittest.TestCase):
         # Output the PDF
         stuff = c.getpdfdata()
         #multiple calls to save / getpdfdata used to cause errors
-        stuff = c.getpdfdata()    
+        stuff = c.getpdfdata()
 
+    def testBoxes(self):
+        c=canvas.Canvas(outputfile('test_pdfgen_boxes.pdf'))
+        w,h = c._pagesize
+        c.setCropBox((0.1,0.1,w-0.2,h-0.2))
+        c.setBleedBox((-0.1,-0.1,w+0.2,h+0.2))
+        c.setArtBox((0.2,0.2,w-0.4,h-0.4))
+        c.setTrimBox((0.01,0.01,w-0.02,h-0.02))
+        c.drawString(100, 700, 'Hello World!')
+        c.showPage()
+        c.save()
 
 def trySomeColors(C,enforceColorSpace=None):
     from reportlab.lib.utils import getBytesIO

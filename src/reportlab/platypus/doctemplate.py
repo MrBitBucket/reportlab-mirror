@@ -251,7 +251,12 @@ class PageTemplate:
     derived classes can also implement beforeDrawPage and afterDrawPage if they want
     """
     def __init__(self,id=None,frames=[],onPage=_doNothing, onPageEnd=_doNothing,
-                 pagesize=None, autoNextPageTemplate=None):
+                 pagesize=None, autoNextPageTemplate=None,
+                 cropBox=None,
+                 artBox=None,
+                 trimBox=None,
+                 bleedBox=None,
+                 ):
         frames = frames or []
         if not isSeq(frames): frames = [frames]
         assert [x for x in frames if not isinstance(x,Frame)]==[], "frames argument error"
@@ -261,6 +266,10 @@ class PageTemplate:
         self.onPageEnd = onPageEnd
         self.pagesize = pagesize
         self.autoNextPageTemplate = autoNextPageTemplate
+        self.cropBox = cropBox
+        self.artBox = artBox
+        self.trimBox = trimBox
+        self.bleedBox = bleedBox
 
     def beforeDrawPage(self,canv,doc):
         """Override this if you want additional functionality or prefer
@@ -288,6 +297,10 @@ class PageTemplate:
                 canv.setPageSize(self.pagesize)
             elif cp!=dp:
                 canv.setPageSize(doc.pagesize)
+        for box in 'crop','art','trim','bleed':
+            size = getattr(self,box+'Box',None)
+            if size:
+                canv.setCropBox(size,name=box)
 
     def afterDrawPage(self, canv, doc):
         """This is called after the last flowable for the page has
@@ -456,6 +469,10 @@ class BaseDocTemplate:
                     'initialFontName': None,
                     'initialFontSize': None,
                     'initialLeading': None,
+                    'cropBox': None,
+                    'artBox': None,
+                    'trimBox': None,
+                    'bleedBox': None,
                     }
     _invalidInitArgs = ()
     _firstPageTemplateIndex = 0
@@ -863,6 +880,10 @@ class BaseDocTemplate:
                                 initialFontName = self.initialFontName,
                                 initialFontSize = self.initialFontSize,
                                 initialLeading = self.initialLeading,
+                                cropBox = self.cropBox,
+                                artBox = self.artBox,
+                                trimBox = self.trimBox,
+                                bleedBox = self.bleedBox,
                                 )
 
         getattr(self.canv,'setEncrypt',lambda x: None)(self.encrypt)
