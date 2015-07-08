@@ -1257,6 +1257,7 @@ class Paragraph(Flowable):
         maxlineno = len(maxWidths)-1
         style = self.style
         splitLongWords = style.splitLongWords
+        self._splitLongWordCount = 0
 
         #for bullets, work out width and ensure we wrap the right amount onto line one
         _handleBulletWidth(self.bulletText,style,maxWidths)
@@ -1297,6 +1298,7 @@ class Paragraph(Flowable):
                     if wordWidth>max(maxWidths[nmw:nmw+1]) and not isinstance(word,_SplitText) and splitLongWords:
                         #a long word
                         words[0:0] = _splitWord(word,maxWidth-spaceWidth-currentWidth,maxWidths,lineno,fontName,fontSize,self.encoding)
+                        self._splitLongWordCount += 1
                         continue
                 if newWidth <= maxWidth or not len(cLine):
                     # fit one more on this line
@@ -1356,6 +1358,7 @@ class Paragraph(Flowable):
                     if wordWidth>max(maxWidths[nmw:nmw+1]):
                         #a long word
                         _words[0:0] = _splitFragWord(w,maxWidth-spaceWidth-currentWidth,maxWidths,lineno)
+                        self._splitLongWordCount += 1
                         continue
                 endLine = (newWidth>maxWidth and n>0) or lineBreak
                 if not endLine:
