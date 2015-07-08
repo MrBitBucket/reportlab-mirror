@@ -57,6 +57,7 @@ from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
 from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF
 from collections import namedtuple
+import time
 
 class TTFError(pdfdoc.PDFError):
     "TrueType font exception"
@@ -158,6 +159,9 @@ class TTFontParser:
         """
         self.validate = validate
         self.readFile(file)
+        self._filename = getattr(file,'name','')
+        if self._filename.startswith('<'):
+            self._filename = ''
         isCollection = self.readHeader()
         if isCollection:
             self.readTTCHeader()
@@ -395,6 +399,8 @@ CMapFmt2SubHeader = namedtuple('CMapFmt2SubHeader', 'firstCode entryCount idDelt
 
 class TTFontFile(TTFontParser):
     "TTF file parser and generator"
+    _agfnc = 0
+    _agfnm = {}
 
     def __init__(self, file, charInfo=1, validate=0,subfontIndex=0):
         """Loads and parses a TrueType font file.
@@ -479,18 +485,38 @@ class TTFontFile(TTFontParser):
                 nameCount -= 1
                 if nameCount==0: break
         if names[6] is not None:
-            psName = names[6].replace(b" ", b"-")  #Dinu Gherman's fix for font names with spaces
+            psName = names[6]
         elif names[4] is not None:
-            psName = names[4].replace(b" ", b"-")
+            psName = names[4]
         # Fine, one last try before we bail.
         elif names[1] is not None:
-            psName = names[1].replace(b" ", b"-")
+            psName = names[1]
         else:
             psName = None
 
         # Don't just assume, check for None since some shoddy fonts cause crashes here...
         if not psName:
-            raise TTFError("Could not find PostScript font name")
+            if rl_config.autoGenerateTTFMissingTTFName:
+                fn = self._filename
+                if fn:
+                    bfn = os.path.splitext(os.path.basename(fn))[0]
+                if not fn:
+                    psName = bytestr('_RL_%s_%s_TTF' % (time.time(), self.__class__._agfnc))
+                    self.__class__._agfnc += 1
+                else:
+                    psName = self._agfnm.get(fn,'')
+                    if not psName:
+                        if bfn:
+                            psName = bytestr('_RL_%s_TTF' % bfn)
+                        else:
+                            psName = bytestr('_RL_%s_%s_TTF' % (time.time(), self.__class__._agfnc))
+                            self.__class__._agfnc += 1
+                        self._agfnm[fn] = psName
+            else:
+                raise TTFError("Could not find PostScript font name")
+
+        psName = psName.replace(b" ", b"-")  #Dinu Gherman's fix for font names with spaces
+
         for c in psName:
             if char2int(c)>126 or c in b' [](){}<>/%':
                 raise TTFError("psName=%r contains invalid character %s" % (psName,ascii(c)))
