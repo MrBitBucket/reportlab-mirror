@@ -34,7 +34,7 @@ standardEncodings = _fontdata.standardEncodings
 _typefaces = {}
 _encodings = {}
 _fonts = {}
-
+_dynFaceNames = {}      #record dynamicFont face names
 
 class FontError(Exception):
     pass
@@ -599,7 +599,20 @@ def registerFont(font):
     "Registers a font, including setting up info for accelerated stringWidth"
     #assert isinstance(font, Font), 'Not a Font: %s' % font
     fontName = font.fontName
-    _fonts[fontName] = font
+    if font._dynamicFont:
+        faceName = font.face.name
+        if fontName not in _fonts:
+            if faceName in _dynFaceNames:
+                ofont = _dynFaceNames[faceName]
+                if not ofont._dynamicFont:
+                    raise ValueError('Attempt to register fonts %r %r for face %r' % (ofont, font, faceName))
+                else:
+                    _fonts[fontName] = ofont
+            else:
+                _dynFaceNames[faceName] = _fonts[fontName] = font
+    else:
+        _fonts[fontName] = font
+
     if font._multiByte:
         # CID fonts don't need to have typeface registered.
         #need to set mappings so it can go in a paragraph even if within
@@ -783,6 +796,7 @@ def _reset(
             _typefaces = _typefaces.copy(),
             _encodings = _encodings.copy(),
             _fonts = _fonts.copy(),
+            _dynFaceNames = _dynFaceNames.copy(),
             )
         ):
     for k,v in initial_dicts.items():
