@@ -56,6 +56,19 @@ class TTFontsTestCase(unittest.TestCase):
         c.drawString(100, 700, b'Hello, ' + utf8(0xffee))
         c.save()
 
+    def testSameTTFDifferentName(self):
+        "Test PDF generation with TrueType fonts"
+        pdfmetrics.registerFont(TTFont("Vera", "Vera.ttf"))
+        pdfmetrics.registerFont(TTFont("MyVera", "Vera.ttf"))
+
+        # Do it twice with the same font object
+        c = Canvas(outputfile('test_pdfbase_ttfontsduplicate.pdf'))
+        # Draw a table of Unicode characters
+        c.setFont('Vera', 10)
+        c.drawString(100, 700, b'Hello World')
+        c.setFont('MyVera', 10)
+        c.drawString(100, 688, b'Hello World')
+        c.save()
 
 class TTFontFileTestCase(NearTestCase):
     "Tests TTFontFile, TTFontParser and TTFontMaker classes"
