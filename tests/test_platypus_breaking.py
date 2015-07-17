@@ -18,6 +18,7 @@ from reportlab.platypus.frames import Frame
 from reportlab.lib.randomtext import randomText, PYTHON
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, Indenter, SimpleDocTemplate
 from reportlab.platypus.paragraph import *
+from reportlab.rl_config import invariant
 
 
 def myMainPageFrame(canvas, doc):
@@ -86,7 +87,7 @@ def _test0(self):
         <a name='top'/>Subsequent pages test pageBreakBefore, frameBreakBefore and
         keepTogether attributes.  Generated at %s.  The number in brackets
         at the end of each paragraph is its position in the story. (%d)""" % (
-            time.ctime(time.time()), len(story)), bt))
+            time.ctime(946684800.0 if invariant else time.time()), len(story)), bt))
 
     for i in range(10):
         a(Paragraph('Heading 1 always starts a new page (%d)' % len(story), h1))
