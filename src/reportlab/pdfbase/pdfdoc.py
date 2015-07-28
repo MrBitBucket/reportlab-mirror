@@ -2106,7 +2106,10 @@ class PDFImageXObject(PDFObject):
 
     def loadImageFromA85(self,source):
         IMG=[]
-        imagedata = [s.strip() for s in pdfutils.makeA85Image(source,IMG=IMG)]
+        imagedata = pdfutils.makeA85Image(source,IMG=IMG,detectJpeg=True)
+        if not imagedata:
+            return self.loadImageFromSRC(IMG[0])
+        imagedata = [s.strip() for s in imagedata]
         words = imagedata[1].split()
         self.width, self.height = (int(words[1]),int(words[3]))
         self.colorSpace = {'/RGB':'DeviceRGB', '/G':'DeviceGray', '/CMYK':'DeviceCMYK'}[words[7]]
@@ -2144,7 +2147,9 @@ class PDFImageXObject(PDFObject):
 
     def loadImageFromRaw(self,source):
         IMG=[]
-        imagedata = pdfutils.makeRawImage(source,IMG=IMG)
+        imagedata = pdfutils.makeRawImage(source,IMG=IMG,detectJpeg=True)
+        if not imagedata:
+            return self.loadImageFromSRC(IMG[0])
         words = imagedata[1].split()
         self.width = int(words[1])
         self.height = int(words[3])

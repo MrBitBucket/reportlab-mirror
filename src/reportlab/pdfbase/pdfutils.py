@@ -26,10 +26,13 @@ def _chunker(src,dst=[],chunkSize=60):
 ##########################################################
 _mode2cs = {'RGB':'RGB', 'CMYK': 'CMYK', 'L': 'G'}
 _mode2bpp = {'RGB': 3, 'CMYK':4, 'L':1}
-def makeA85Image(filename,IMG=None):
+def makeA85Image(filename,IMG=None, detectJpeg=False):
     import zlib
     img = ImageReader(filename)
-    if IMG is not None: IMG.append(img)
+    if IMG is not None:
+        IMG.append(img)
+        if detectJpeg and img.jpeg_fh():
+            return None
 
     imgwidth, imgheight = img.getSize()
     raw = img.getRGBData()
@@ -50,10 +53,13 @@ def makeA85Image(filename,IMG=None):
 
     append('EI')
     return code
-def makeRawImage(filename,IMG=None):
+def makeRawImage(filename,IMG=None,detectJpeg=False):
     import zlib
     img = ImageReader(filename)
-    if IMG is not None: IMG.append(img)
+    if IMG is not None:
+        IMG.append(img)
+        if detectJpeg and img.jpeg_fh():
+            return None
 
     imgwidth, imgheight = img.getSize()
     raw = img.getRGBData()
