@@ -1329,6 +1329,7 @@ class Paragraph(Flowable):
                 #preserving splitting algorithm
                 return self.blPara
             n = 0
+            njlbv = not style.justifyBreaks
             words = []
             _words = _getFragWords(frags,maxWidth)
             while _words:
@@ -1437,7 +1438,7 @@ class Paragraph(Flowable):
                     if currentWidth>self.width: self.width = currentWidth
                     #end of line
                     lines.append(FragLine(extraSpace=maxWidth-currentWidth, wordCount=n,
-                                        lineBreak=lineBreak, words=words, fontSize=maxSize, ascent=maxAscent, descent=minDescent, maxWidth=maxWidth))
+                                        lineBreak=lineBreak and njlbv, words=words, fontSize=maxSize, ascent=maxAscent, descent=minDescent, maxWidth=maxWidth))
 
                     #start new line
                     lineno += 1
@@ -1483,7 +1484,7 @@ class Paragraph(Flowable):
             #deal with any leftovers on the final line
             if words!=[]:
                 if currentWidth>self.width: self.width = currentWidth
-                lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,
+                lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,lineBreak=False,
                                     words=words, fontSize=maxSize,ascent=maxAscent,descent=minDescent,maxWidth=maxWidth))
             return ParaLines(kind=1, lines=lines)
 
@@ -1597,7 +1598,8 @@ class Paragraph(Flowable):
             alignment = style.alignment
             offset = style.firstLineIndent+_offsets[0]
             lim = nLines-1
-            noJustifyLast = not (hasattr(self,'_JustifyLast') and self._JustifyLast)
+            noJustifyLast = not getattr(self,'_JustifyLast',False)
+            jllwc = style.justifyLastLine
 
             if blPara.kind==0:
                 if alignment == TA_LEFT:
@@ -1637,7 +1639,11 @@ class Paragraph(Flowable):
                 #now the font for the rest of the paragraph
                 tx.setFont(f.fontName, f.fontSize, leading)
                 ws = lines[0][0]
-                t_off = dpl( tx, offset, ws, lines[0][1], noJustifyLast and nLines==1)
+                words = lines[0][1]
+                lastLine = noJustifyLast and nLines==1
+                if lastLine and jllwc and len(words)>jllwc:
+                    lastLine=False
+                t_off = dpl( tx, offset, ws, words, lastLine)
                 if f.underline or f.link or f.strike or style.endDots:
                     xs = tx.XtraState = ABag()
                     xs.cur_y = cur_y
@@ -1661,21 +1667,29 @@ class Paragraph(Flowable):
                     if underline: _do_under_line(0, dx, ws, tx)
                     if strike: _do_under_line(0, dx, ws, tx, lm=0.125)
                     if link: _do_link_line(0, dx, ws, tx)
-                    if noJustifyLast and nLines==1 and style.endDots and dpl!=_rightDrawParaLine: _do_dots(0, dx, ws, xs, tx, dpl)
+                    if lastLine and style.endDots and dpl!=_rightDrawParaLine: _do_dots(0, dx, ws, xs, tx, dpl)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
                     for i in xrange(1, nLines):
                         ws = lines[i][0]
-                        t_off = dpl( tx, _offsets[i], ws, lines[i][1], noJustifyLast and i==lim)
+                        words = lines[i][1]
+                        lastLine = noJustifyLast and i==lim
+                        if lastLine and jllwc and len(words)>jllwc:
+                            lastLine=False
+                        t_off = dpl( tx, _offsets[i], ws, words, lastLine)
                         dx = t_off+leftIndent
                         if dpl!=_justifyDrawParaLine: ws = 0
                         if underline: _do_under_line(i, dx, ws, tx)
                         if strike: _do_under_line(i, dx, ws, tx, lm=0.125)
                         if link: _do_link_line(i, dx, ws, tx)
-                        if noJustifyLast and i==lim and style.endDots and dpl!=_rightDrawParaLine: _do_dots(i, dx, ws, xs, tx, dpl)
+                        if lastLine and style.endDots and dpl!=_rightDrawParaLine: _do_dots(i, dx, ws, xs, tx, dpl)
                 else:
                     for i in xrange(1, nLines):
-                        dpl( tx, _offsets[i], lines[i][0], lines[i][1], noJustifyLast and i==lim)
+                        words = lines[i][1]
+                        lastLine = noJustifyLast and i==lim
+                        if lastLine and jllwc and len(words)>jllwc:
+                            lastLine=False
+                        dpl( tx, _offsets[i], lines[i][0], words, lastLine)
             else:
                 if self.style.wordWrap == 'RTL':
                     for line in lines:
@@ -1735,13 +1749,20 @@ class Paragraph(Flowable):
                 xs.autoLeading = autoLeading
 
                 tx._fontname,tx._fontsize = None, None
-                dpl( tx, offset, lines[0], noJustifyLast and nLines==1)
+                line = lines[0]
+                lastLine = noJustifyLast and nLines==1
+                if lastLine and jllwc and line.wordCount>jllwc:
+                    lastLine=False
+                dpl( tx, offset, line, lastLine)
                 _do_post_text(tx)
 
                 #now the middle of the paragraph, aligned with the left margin which is our origin.
                 for i in xrange(1, nLines):
-                    f = lines[i]
-                    dpl( tx, _offsets[i], f, noJustifyLast and i==lim)
+                    line = lines[i]
+                    lastLine = noJustifyLast and i==lim
+                    if lastLine and jllwc and line.wordCount>jllwc:
+                        lastLine=False
+                    dpl( tx, _offsets[i], line, lastLine)
                     _do_post_text(tx)
 
             canvas.drawText(tx)

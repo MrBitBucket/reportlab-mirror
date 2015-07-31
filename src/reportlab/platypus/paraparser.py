@@ -14,7 +14,7 @@ import unicodedata
 import reportlab.lib.sequencer
 
 from reportlab.lib.abag import ABag
-from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode, asBytes, uniChr
+from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode, asBytes, uniChr, isStr
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -71,6 +71,20 @@ def _num(s, unit=1, allowRelative=True):
         s = s[:-4]
     return _convnum(s,unit,allowRelative)
 
+def _int(s):
+    try:
+        return int(s)
+    except:
+        raise ValueError('cannot convert %r to int' % s)
+
+def _bool(s):
+    s = s.lower()
+    if s in ('true','1','yes'):
+        return True
+    if s in ('false','0','no'):
+        return False
+    raise ValueError('cannot convert %r to bool value' % s)
+
 def _numpct(s,unit=1,allowRelative=False):
     if s.endswith('%'):
         return _PCT(_convnum(s[:-1],allowRelative=allowRelative))
@@ -119,6 +133,20 @@ def _bAnchor(s):
         raise ValueError('illegal bullet anchor %r' % s)
     return s
 
+def _wordWrapConv(s):
+    s = s.upper().strip()
+    if not s: return None
+    if s not in ('CJK','RTL','LTR'):
+        raise ValueError('cannot convert wordWrap=%r' % s)
+    return s
+
+def _textTransformConv(s):
+    s = s.lower().strip()
+    if not s: return None
+    if s not in ('uppercase','lowercase','capitalize','none'):
+        raise ValueError('cannot convert wordWrap=%r' % s)
+    return s
+
 _paraAttrMap = {'font': ('fontName', None),
                 'face': ('fontName', None),
                 'fontsize': ('fontSize', _num),
@@ -142,6 +170,19 @@ _paraAttrMap = {'font': ('fontName', None),
                 'bgcolor':('backColor',toColor),
                 'bg':('backColor',toColor),
                 'fg': ('textColor',toColor),
+                'justifybreaks': ('justifyBreaks',_bool),
+                'justifylastline': ('justifyLastLine',_int),
+                'wordwrap': ('wordWrap',_wordWrapConv),
+                'allowwidows': ('allowWidows',_bool),
+                'alloworphans': ('allowOrphans',_bool),
+                'splitlongwords': ('splitLongWords',_bool),
+                'borderwidth': ('borderWidth',_num),
+                'borderpadding': ('borderpadding',_num),
+                'bordercolor': ('borderColor',toColor),
+                'borderradius': ('borderRadius',_num),
+                'texttransform':('textTransform',_textTransformConv),
+                'enddots':('endDots',None),
+                'underlineproportion':('underlineProportion',_num),
                 }
 
 _bulletAttrMap = {
@@ -1010,7 +1051,7 @@ class ParaParser(HTMLParser):
         for k, v in attr.items():
             if not self.caseSensitive:
                 k = k.lower()
-            if k in list(attrMap.keys()):
+            if k in attrMap:
                 j = attrMap[k]
                 func = j[1]
                 try:
@@ -1018,6 +1059,7 @@ class ParaParser(HTMLParser):
                 except:
                     self._syntax_error('%s: invalid value %s'%(k,v))
             else:
+                raise ValueError('invalid attribute name %s attrMap=%r'% (k,list(sorted(attrMap.keys()))))
                 self._syntax_error('invalid attribute name %s'%k)
         return A
 

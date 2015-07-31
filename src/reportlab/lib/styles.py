@@ -130,6 +130,8 @@ class ParagraphStyle(PropertySet):
         'splitLongWords':1,     #make best efforts to split long words
         'underlineProportion': _baseUnderlineProportion,    #set to non-zero to get proportional
         'bulletAnchor': 'start',    #where the bullet is anchored ie start, middle, end or numeric
+        'justifyLastLine': 0,   #n allow justification on the last line for more than n words 0 means don't bother
+        'justifyBreaks': 0,     #justify lines broken with <br/>
         }
 
 class LineStyle(PropertySet):

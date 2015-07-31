@@ -583,8 +583,9 @@ linguistics can be defined in such a way as to impose problems of
 phonemic and morphological analysis.'''
         story =[]
         a = story.append
-        for mode in (0,1,2,3,4):
+        for mode in (0,1,2,3,4,5,6,7):
             text = text0
+            paraStyle = normal_just
             if mode==1:
                 text = text.replace('English sentences','<b>English sentences</b>').replace('quite equivalent','<i>quite equivalent</i>')
                 text = text.replace('the methodological work','<b>the methodological work</b>').replace('to impose problems','<i>to impose problems</i>')
@@ -599,10 +600,26 @@ phonemic and morphological analysis.'''
                 text = text.replace('English ','English&nbsp;').replace('quite ','quite&nbsp;')
                 text = text.replace(' methodological','&nbsp;methodological').replace(' impose','&nbsp;impose')
                 a(Paragraph('Justified paragraph in normal font &amp; some hard spaces',style=normal))
+            elif mode in (5,6,7):
+                text = text.replace('as to impose','<br/>as to impose').replace(' most of the','<br/>most of the')
+                text = text.replace(' grounds','<br/>grounds').replace(' various','<br/>various')
+                if mode in (6,7):
+                    msg = []
+                    msg.append('justifyBreaks=1')
+                    paraStyle = paraStyle.clone('paraStyle6',paraStyle,justifyBreaks=1)
+                    if mode==7:
+                        msg.append('justifyLastLine=3')
+                        paraStyle = paraStyle.clone('paraStyle7',paraStyle,justifyLastLine=3)
+                    msg = '(%s) ' % (' '.join(msg))
+                else:
+                    a(PageBreak())
+                    msg = ' '
+
+                a(Paragraph('Justified%swith some &lt;br/&gt; tags' % msg,style=normal))
             else:
                 a(Paragraph('Justified paragraph in normal font',style=normal))
 
-            a(Paragraph(text,style=normal_just))
+            a(Paragraph(text,style=paraStyle))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_just.pdf'))
         doc.build(story)
 
