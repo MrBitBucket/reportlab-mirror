@@ -42,7 +42,7 @@ def getCodes():
                         BarcodePOSTNET, BarcodeUSPS_4State
 
     #newer codes will typically get their own module
-    from reportlab.graphics.barcode.eanbc import Ean13BarcodeWidget, Ean8BarcodeWidget, UPCA
+    from reportlab.graphics.barcode.eanbc import Ean13BarcodeWidget, Ean8BarcodeWidget, UPCA, Ean5BarcodeWidget, ISBNBarcodeWidget
     from reportlab.graphics.barcode.qr import QrCodeWidget
 
 
@@ -65,6 +65,8 @@ def getCodes():
                 Ean13BarcodeWidget,
                 Ean8BarcodeWidget,
                 UPCA,
+                Ean5BarcodeWidget,
+                ISBNBarcodeWidget,
                 QrCodeWidget,
                 ):
         codeName = widget.codeName
