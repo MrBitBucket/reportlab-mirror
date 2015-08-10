@@ -1,10 +1,11 @@
 __all__=(
-        'Ean13BarcodeWidget','isEanString',
+        'Ean13BarcodeWidget','isEanString'
+        'Ean8BarcodeWidget', 'UPCA', 'Ean5BarcodeWidget', 'ISBNBarcodeWidget',
         )
 from reportlab.graphics.shapes import Group, String, Rect
 from reportlab.lib import colors
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.lib.validators import isNumber, isColor, isString, Validator, isBoolean
+from reportlab.lib.validators import isNumber, isColor, isString, Validator, isBoolean, NoneOr
 from reportlab.lib.attrmap import *
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.lib.units import mm
@@ -354,10 +355,6 @@ class Ean5BarcodeWidget(Ean13BarcodeWidget):
     EAN-5 barcodes can print the human readable price, set:
         price=True
     """
-    def __init__(self, *args, **kwargs):
-        self._human_price = kwargs.pop('price', False)
-        super().__init__(*args, **kwargs)
-
     codeName = "EAN5"
     _attrMap = AttrMap(BASE=Ean13BarcodeWidget,
                        price=AttrMapValue(isBoolean,
@@ -419,22 +416,21 @@ class Ean5BarcodeWidget(Ean13BarcodeWidget):
         gAdd(String(x, y, s, fontName=fontName, fontSize=fontSize,
                     fillColor=textColor, textAnchor='middle'))
 
-        if not self._human_price:
-            return
+        price = getattr(self,'price',None)
+        if price:
+            price = None
+            if s[0] in '3456':
+                price = '$'
+            elif s[0] in '01':
+                price = '\xc2\xa3'
 
-        price = None
-        if s[0] in '3456':
-            price = '$'
-        elif s[0] in '01':
-            price = '?'
+            if price is None:
+                return
 
-        if price is None:
-            return
-
-        price += s[1:3] + '.' + s[3:5]
-        y += self.barHeight
-        gAdd(String(x, y, price, fontName=fontName, fontSize=fontSize,
-                    fillColor=textColor, textAnchor='middle'))
+            price += s[1:3] + '.' + s[3:5]
+            y += self.barHeight
+            gAdd(String(x, y, price, fontName=fontName, fontSize=fontSize,
+                        fillColor=textColor, textAnchor='middle'))
 
     def draw(self):
         g = Group()
@@ -484,7 +480,6 @@ class Ean5BarcodeWidget(Ean13BarcodeWidget):
             self._add_human_readable(s, gAdd)
         return g
 
-
 class ISBNBarcodeWidget(Ean13BarcodeWidget):
     """
     ISBN Barcodes optionally print the EAN-5 supplemental price
@@ -503,18 +498,13 @@ class ISBNBarcodeWidget(Ean13BarcodeWidget):
     codeName = 'ISBN'
     _attrMap = AttrMap(BASE=Ean13BarcodeWidget,
                        price=AttrMapValue(
-                           isBoolean,
-                           desc='whether to display the price or not'),
+                           NoneOr(nDigits(5)),
+                           desc='None or the price to display'),
                        )
-
-    def __init__(self, *args, **kwargs):
-        self._human_price = kwargs.pop('price', False)
-        super().__init__(*args, **kwargs)
-
     def draw(self):
-        g = super().draw()
+        g = Ean13BarcodeWidget.draw(self)
 
-        price = self._human_price
+        price = getattr(self,'price',None)
         if not price:
             return g
 
@@ -522,12 +512,12 @@ class ISBNBarcodeWidget(Ean13BarcodeWidget):
         x = bounds[2]
         pricecode = Ean5BarcodeWidget(x=x, value=price, price=True,
                                       humanReadable=True,
-                                      barHeight=self.barHeight)
+                                      barHeight=self.barHeight, quiet=self.quiet)
         g.add(pricecode)
         return g
 
     def _add_human_readable(self, s, gAdd):
-        super()._add_human_readable(s, gAdd)
+        Ean13BarcodeWidget._add_human_readable(self,s, gAdd)
         barWidth = self.barWidth
         barHeight = self.barHeight
         fontSize = self.fontSize

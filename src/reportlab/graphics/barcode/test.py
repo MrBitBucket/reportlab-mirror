@@ -27,58 +27,89 @@ def run():
     styleN = styles['Normal']
     styleH = styles['Heading1']
     story = []
+    storyAdd = story.append
 
     #for codeNames in code
-    story.append(Paragraph('I2of5', styleN))
-    story.append(I2of5(1234, barWidth = inch*0.02, checksum=0))
-    story.append(Paragraph('MSI', styleN))
-    story.append(MSI(1234))
-    story.append(Paragraph('Codabar', styleN))
-    story.append(Codabar("A012345B", barWidth = inch*0.02))
-    story.append(Paragraph('Code 11', styleN))
-    story.append(Code11("01234545634563"))
-    story.append(Paragraph('Code 39', styleN))
-    story.append(Standard39("A012345B%R"))
-    story.append(Paragraph('Extended Code 39', styleN))
-    story.append(Extended39("A012345B}"))
-    story.append(Paragraph('Code93', styleN))
-    story.append(Standard93("CODE 93"))
-    story.append(Paragraph('Extended Code93', styleN))
-    story.append(Extended93("L@@K! Code 93 :-)")) #, barWidth=0.005 * inch))
-    story.append(Paragraph('Code 128', styleN))
-    c=Code128("AB-12345678") #, barWidth=0.005 * inch)
-    #print 'WIDTH =', (c.width / inch), 'barWidth =', (c.barWidth / inch)
-    #print 'LQ =', (c.lquiet / inch), 'RQ =', (c.rquiet / inch)
-    story.append(c)
-    story.append(Paragraph('USPS FIM', styleN))
-    story.append(FIM("A"))
-    story.append(Paragraph('USPS POSTNET', styleN))
-    story.append(POSTNET('78247-1043'))
-    story.append(Paragraph('USPS 4 State', styleN))
-    story.append(USPS_4State('01234567094987654321','01234567891'))
+    storyAdd(Paragraph('I2of5', styleN))
+    storyAdd(I2of5(1234, barWidth = inch*0.02, checksum=0))
+
+    storyAdd(Paragraph('MSI', styleN))
+    storyAdd(MSI(1234))
+
+    storyAdd(Paragraph('Codabar', styleN))
+    storyAdd(Codabar("A012345B", barWidth = inch*0.02))
+
+    storyAdd(Paragraph('Code 11', styleN))
+    storyAdd(Code11("01234545634563"))
+
+    storyAdd(Paragraph('Code 39', styleN))
+    storyAdd(Standard39("A012345B%R"))
+
+    storyAdd(Paragraph('Extended Code 39', styleN))
+    storyAdd(Extended39("A012345B}"))
+
+    storyAdd(Paragraph('Code93', styleN))
+    storyAdd(Standard93("CODE 93"))
+
+    storyAdd(Paragraph('Extended Code93', styleN))
+    storyAdd(Extended93("L@@K! Code 93 :-)")) #, barWidth=0.005 * inch))
+
+    storyAdd(Paragraph('Code 128', styleN))
+    storyAdd(Code128("AB-12345678"))
+
+    storyAdd(Paragraph('USPS FIM', styleN))
+    storyAdd(FIM("A"))
+
+    storyAdd(Paragraph('USPS POSTNET', styleN))
+    storyAdd(POSTNET('78247-1043'))
+
+    storyAdd(Paragraph('USPS 4 State', styleN))
+    storyAdd(USPS_4State('01234567094987654321','01234567891'))
 
     from reportlab.graphics.barcode import createBarcodeDrawing
-    story.append(Paragraph('EAN13', styleN))
-    bcd = createBarcodeDrawing('EAN13', value='123456789012')
-    story.append(bcd)
-    story.append(Paragraph('EAN8', styleN))
-    bcd = createBarcodeDrawing('EAN8', value='1234567')
-    story.append(bcd)
-    story.append(Paragraph('UPCA', styleN))
-    bcd = createBarcodeDrawing('UPCA', value='03600029145')
-    story.append(bcd)
-    story.append(Paragraph('USPS_4State', styleN))
-    bcd = createBarcodeDrawing('USPS_4State', value='01234567094987654321',routing='01234567891')
-    story.append(bcd)
 
-    story.append(Paragraph('Label Size', styleN))
-    story.append(XBox((2.0 + 5.0/8.0)*inch, 1 * inch, '1x2-5/8"'))
-    story.append(Paragraph('Label Size', styleN))
-    story.append(XBox((1.75)*inch, .5 * inch, '1/2x1-3/4"'))
-    c = Canvas('out.pdf')
-    f = Frame(inch, inch, 6*inch, 9*inch, showBoundary=1)
-    f.addFromList(story, c)
-    c.save()
+    storyAdd(Paragraph('EAN13', styleN))
+    storyAdd(createBarcodeDrawing('EAN13', value='123456789012'))
+
+    storyAdd(Paragraph('EAN13 quiet=False', styleN))
+    storyAdd(createBarcodeDrawing('EAN13', value='123456789012', quiet=False))
+
+    storyAdd(Paragraph('EAN8', styleN))
+    storyAdd(createBarcodeDrawing('EAN8', value='1234567'))
+
+    storyAdd(PageBreak())
+
+    storyAdd(Paragraph('EAN5 price=True', styleN))
+    storyAdd(createBarcodeDrawing('EAN5', value='11299', price=True))
+
+    storyAdd(Paragraph('EAN5 price=True quiet=False', styleN))
+    storyAdd(createBarcodeDrawing('EAN5', value='11299', price=True, quiet=False))
+
+    storyAdd(Paragraph('EAN5 price=False', styleN))
+    storyAdd(createBarcodeDrawing('EAN5', value='11299', price=False))
+
+    storyAdd(Paragraph('ISBN alone', styleN))
+    storyAdd(createBarcodeDrawing('ISBN', value='9781565924796'))
+
+    storyAdd(Paragraph('ISBN  with ean5 price', styleN))
+    storyAdd(createBarcodeDrawing('ISBN', value='9781565924796',price='01299'))
+
+    storyAdd(Paragraph('ISBN  with ean5 price, quiet=False', styleN))
+    storyAdd(createBarcodeDrawing('ISBN', value='9781565924796',price='01299',quiet=False))
+
+    storyAdd(Paragraph('UPCA', styleN))
+    storyAdd(createBarcodeDrawing('UPCA', value='03600029145'))
+
+    storyAdd(Paragraph('USPS_4State', styleN))
+    storyAdd(createBarcodeDrawing('USPS_4State', value='01234567094987654321',routing='01234567891'))
+
+    storyAdd(Paragraph('Label Size', styleN))
+    storyAdd(XBox((2.0 + 5.0/8.0)*inch, 1 * inch, '1x2-5/8"'))
+
+    storyAdd(Paragraph('Label Size', styleN))
+    storyAdd(XBox((1.75)*inch, .5 * inch, '1/2x1-3/4"'))
+
+    SimpleDocTemplate('out.pdf').build(story)
     print('saved out.pdf')
 
 def fullTest(fileName="test_full.pdf"):
