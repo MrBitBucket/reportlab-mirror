@@ -137,8 +137,8 @@ class QrCodeWidget(Widget):
         moduleCount = self.qr.getModuleCount()
         minwh = float(min(width, height))
         boxsize = minwh / (moduleCount + border * 2.0)
-        offsetX = (width - minwh) / 2.0
-        offsetY = (minwh - height) / 2.0
+        offsetX = x + (width - minwh) / 2.0
+        offsetY = y + (minwh - height) / 2.0
 
         for r, row in enumerate(self.qr.modules):
             row = map(bool, row)

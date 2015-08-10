@@ -8,6 +8,7 @@ from reportlab.graphics.barcode.code93 import *
 from reportlab.graphics.barcode.code128 import *
 from reportlab.graphics.barcode.usps import *
 from reportlab.graphics.barcode.usps4s import USPS_4State
+from reportlab.graphics.barcode.qr import QrCodeWidget
 
 
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle, Preformatted, PageBreak
@@ -19,7 +20,7 @@ from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.flowables import XBox, KeepTogether
-from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.shapes import Drawing, Rect, Line
 
 from reportlab.graphics.barcode import getCodes, getCodeNames, createBarcodeDrawing, createBarcodeImageInMemory
 def run():
@@ -103,11 +104,32 @@ def run():
     storyAdd(Paragraph('USPS_4State', styleN))
     storyAdd(createBarcodeDrawing('USPS_4State', value='01234567094987654321',routing='01234567891'))
 
+    storyAdd(Paragraph('QR', styleN))
+    storyAdd(createBarcodeDrawing('QR', value='01234567094987654321'))
+
+    storyAdd(Paragraph('QR', styleN))
+    storyAdd(createBarcodeDrawing('QR', value='01234567094987654321',x=30,y=50))
+
+    storyAdd(Paragraph('QR in drawing at (0,0)', styleN))
+    d = Drawing(100,100)
+    d.add(Rect(0,0,100,100,strokeWidth=1,strokeColor=colors.red,fillColor=None))
+    d.add(QrCodeWidget(value='01234567094987654321'))
+    storyAdd(d)
+
+    storyAdd(Paragraph('QR in drawing at (10,10)', styleN))
+    d = Drawing(100,100)
+    d.add(Rect(0,0,100,100,strokeWidth=1,strokeColor=colors.red,fillColor=None))
+    d.add(Line(7.5,10,12.5,10,strokeWidth=0.5,strokeColor=colors.blue))
+    d.add(Line(10,7.5, 10, 12.5,strokeWidth=0.5,strokeColor=colors.blue))
+    d.add(QrCodeWidget(value='01234567094987654321',x=10,y=10))
+    storyAdd(d)
+
     storyAdd(Paragraph('Label Size', styleN))
     storyAdd(XBox((2.0 + 5.0/8.0)*inch, 1 * inch, '1x2-5/8"'))
 
     storyAdd(Paragraph('Label Size', styleN))
     storyAdd(XBox((1.75)*inch, .5 * inch, '1/2x1-3/4"'))
+    
 
     SimpleDocTemplate('out.pdf').build(story)
     print('saved out.pdf')
