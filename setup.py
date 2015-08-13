@@ -535,7 +535,7 @@ def main():
                 'Programming Language :: Python :: 3',
                 'Programming Language :: Python :: 3.3',
                 'Programming Language :: Python :: 3.4',
-                ]
+                ],
             
             #this probably only works for setuptools, but distutils seems to ignore it
             install_requires=['pillow>=2.4.0','pip>=1.4.1', 'setuptools>=2.2'],
