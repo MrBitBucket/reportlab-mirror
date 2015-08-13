@@ -524,6 +524,18 @@ def main():
             package_dir = PACKAGE_DIR,
             package_data = {'reportlab': reportlab_files},
             ext_modules =   EXT_MODULES,
+            classifiers = [
+                'Development Status :: 5 - Production/Stable',
+                'Intended Audience :: Developers',
+                'License :: OSI Approved :: BSD License',
+                'Topic :: Printing',
+                'Topic :: Text Processing :: Markup',
+                'Programming Language :: Python :: 2',
+                'Programming Language :: Python :: 2.7',
+                'Programming Language :: Python :: 3',
+                'Programming Language :: Python :: 3.3',
+                'Programming Language :: Python :: 3.4',
+                ]
             
             #this probably only works for setuptools, but distutils seems to ignore it
             install_requires=['pillow>=2.4.0','pip>=1.4.1', 'setuptools>=2.2'],
