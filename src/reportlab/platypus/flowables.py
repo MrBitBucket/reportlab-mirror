@@ -1980,3 +1980,17 @@ class DocWhile(DocIf):
         if bool(self.funcWrap(aW,aH)):
             self.add_content(*(list(self.block)+[self]))
         return 0,0
+
+class SetTopFlowables(NullDraw):
+    _ZEROZSIZE = 1
+    def __init__(self,F,show=False):
+        self._F = F
+        self._show = show
+
+    def wrap(self,aW,aH):
+        doc = getattr(getattr(self,'canv',None),'_doctemplate',None)
+        if doc:
+            doc._topFlowables=self._F
+            if self._show and self._F:
+                doc.frame._generated_content = self._F
+        return 0,0
