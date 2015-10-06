@@ -294,7 +294,6 @@ def _addGeneratedContent(flowables,frame):
         flowables[0:0] = S
         del frame._generated_content
 
-
 class onDrawStr(str):
     def __new__(cls,value,onDraw,label,kind=None):
         self = str.__new__(cls,value)
@@ -486,6 +485,7 @@ class BaseDocTemplate:
         #context sensitive margins - set by story, not from outside
         self._leftExtraIndent = 0.0
         self._rightExtraIndent = 0.0
+        self._topFlowables = []
 
         self._calc()
         self.afterInit()
@@ -598,6 +598,8 @@ class BaseDocTemplate:
                 self.frame.drawBoundary(self.canv)
         f._leftExtraIndent = self._leftExtraIndent
         f._rightExtraIndent = self._rightExtraIndent
+        if self._topFlowables:
+            self._hanging.extend(self._topFlowables)
 
     def handle_frameEnd(self,resume=0):
         ''' Handles the semantics of the end of a frame. This includes the selection of
