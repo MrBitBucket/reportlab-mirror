@@ -363,24 +363,56 @@ def _do_dots_frag(cur_x, cur_x_s, maxWidth, xs, tx):
         if dy: tx.setTextOrigin(tx._x0,xs.cur_y-dy)
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
-    setXPos(tx,offset)
-    _putFragLine(offset, tx, line, last, 'left')
+    extraSpace = line.extraSpace
+    simple = extraSpace>-1e-8 or getattr(line,'preformatted',False)
+    if not simple:
+        nSpaces = line.wordCount+sum([_nbspCount(w.text) for w in line.words if not hasattr(w,'cbDefn')])-1
+        simple = not nSpaces
+    if simple:
+        setXPos(tx,offset)
+        _putFragLine(offset, tx, line, last, 'left')
+    else:
+        tx.setWordSpace(extraSpace / float(nSpaces))
+        _putFragLine(offset, tx, line, last, 'left')
+        tx.setWordSpace(0)
     setXPos(tx,-offset)
 
 def _centerDrawParaLineX( tx, offset, line, last=0):
     tx._dotsOffsetX = offset + tx._x0
     try:
-        m = offset+0.5*line.extraSpace
-        setXPos(tx,m)
-        _putFragLine(m,tx, line, last,'center')
+        extraSpace = line.extraSpace
+        simple = extraSpace>-1e-8 or getattr(line,'preformatted',False)
+        if not simple:
+            nSpaces = line.wordCount+sum([_nbspCount(w.text) for w in line.words if not hasattr(w,'cbDefn')])-1
+            simple = not nSpaces
+        if simple:
+            m = offset+0.5*line.extraSpace
+            setXPos(tx,m)
+            _putFragLine(m, tx, line, last,'center')
+        else:
+            m = offset
+            tx.setWordSpace(extraSpace / float(nSpaces))
+            _putFragLine(m, tx, line, last, 'center')
+            tx.setWordSpace(0)
         setXPos(tx,-m)
     finally:
         del tx._dotsOffsetX
 
 def _rightDrawParaLineX( tx, offset, line, last=0):
-    m = offset+line.extraSpace
-    setXPos(tx,m)
-    _putFragLine(m,tx, line, last, 'right')
+    extraSpace = line.extraSpace
+    simple = extraSpace>-1e-8 or getattr(line,'preformatted',False)
+    if not simple:
+        nSpaces = line.wordCount+sum([_nbspCount(w.text) for w in line.words if not hasattr(w,'cbDefn')])-1
+        simple = not nSpaces
+    if simple:
+        m = offset+line.extraSpace
+        setXPos(tx,m)
+        _putFragLine(m,tx, line, last, 'right')
+    else:
+        m = offset
+        tx.setWordSpace(extraSpace / float(nSpaces))
+        _putFragLine(m, tx, line, last, 'right')
+        tx.setWordSpace(0)
     setXPos(tx,-m)
 
 def _justifyDrawParaLineX( tx, offset, line, last=0):
@@ -402,6 +434,13 @@ def _trailingSpaceLength(text, tx):
     ws = _wsc_end_search(text)
     return tx._canvas.stringWidth(ws.group(), tx._fontname, tx._fontsize) if ws else 0
 
+class _HSWord(list):
+    pass
+
+_FK_TEXT = 0
+_FK_IMG = 1
+_FK_APPEND = 2
+_FK_BREAK = 3
 def _getFragWords(frags,maxWidth=None):
     ''' given a Parafrag list return a list of fragwords
         [[size, (f00,w00), ..., (f0n,w0n)],....,[size, (fm0,wm0), ..., (f0n,wmn)]]
@@ -410,38 +449,48 @@ def _getFragWords(frags,maxWidth=None):
     '''
     R = []
     W = []
+    hangingSpace = False
     n = 0
-    hangingStrip = False
+    hangingStrip = True
     for f in frags:
         text = f.text
-        #del f.text # we can't do this until we sort out splitting
-                    # of paragraphs
         if text!='':
+            f._fkind = _FK_TEXT
             if hangingStrip:
-                hangingStrip = False
                 text = text.lstrip()
+                if not text: continue
+                hangingStrip = False
             S = split(text)
-            if S==[]: S = ['']
-            if W!=[] and text[0] in whitespace:
-                W.insert(0,n)
-                R.append(W)
-                W = []
-                n = 0
+            if text[0] in whitespace:
+                if W:
+                    W.insert(0,n)   #end preceding word
+                    R.append(W)
+                    whs = hangingSpace
+                    W = []
+                    hangingSpace = False
+                    n = 0
+                else:
+                    whs = R and isinstance(R[-1],_HSWord)
+                if not whs:
+                    S.insert(0,'')
+                elif not S:
+                    continue
 
             for w in S[:-1]:
                 W.append((f,w))
                 n += stringWidth(w, f.fontName, f.fontSize)
                 W.insert(0,n)
-                R.append(W)
+                R.append(_HSWord(W))
                 W = []
                 n = 0
 
+            hangingSpace = False
             w = S[-1]
             W.append((f,w))
             n += stringWidth(w, f.fontName, f.fontSize)
             if text and text[-1] in whitespace:
                 W.insert(0,n)
-                R.append(W)
+                R.append(_HSWord(W))
                 W = []
                 n = 0
         elif hasattr(f,'cbDefn'):
@@ -451,25 +500,34 @@ def _getFragWords(frags,maxWidth=None):
                 if hasattr(w,'normalizedValue'):
                     w._normalizer = maxWidth
                     w = w.normalizedValue(maxWidth)
-                if W!=[]:
+                if W:
                     W.insert(0,n)
-                    R.append(W)
+                    R.append(_HSWord(W) if hangingSpace else W)
                     W = []
+                    hangingSpace = False
                     n = 0
+                f._fkind = _FK_IMG
                 R.append([w,(f,'')])
+                hangingStrip = False
             else:
-                W.append((f,''))
+                f._fkind = _FK_APPEND
+                if not W and R and isinstance(R[-1],_HSWord):
+                    R[-1].append((f,''))
+                else:
+                    W.append((f,''))
         elif hasattr(f, 'lineBreak'):
             #pass the frag through.  The line breaker will scan for it.
-            if W!=[]:
+            if W:
                 W.insert(0,n)
                 R.append(W)
                 W = []
                 n = 0
+                hangingSpace = False
+            f._fkind = _FK_BREAK
             R.append([0,(f,'')])
             hangingStrip = True
 
-    if W!=[]:
+    if W:
         W.insert(0,n)
         R.append(W)
 
@@ -488,6 +546,9 @@ def _fragWordIter(w):
             yield f, 0, s
 
 class _SplitList(list):
+    pass
+
+class _HSSplitList(_HSWord):
     pass
 
 def _splitFragWord(w,maxWidth,maxWidths,lineno):
@@ -529,7 +590,8 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
         fragText += c
         lineWidth = newLineWidth
     W.append((f,fragText))
-    W = _SplitList([wordWidth]+W)
+    W = _HSSplitList([wordWidth]+W) if isinstance(w,_HSWord) else _SplitList([wordWidth]+W)
+
     R.append(W)
     return R
 
@@ -1123,12 +1185,9 @@ class Paragraph(Flowable):
             f = frags[0]
             fS = f.fontSize
             fN = f.fontName
-            words = hasattr(f,'text') and split(f.text, ' ') or f.words
-            func = lambda w, fS=fS, fN=fN: stringWidth(w,fN,fS)
+            return max(stringWidth(w,fN,fS) for w in (split(f.text, ' ') if hasattr(f,'text') else f.words))
         else:
-            words = _getFragWords(frags)
-            func  = lambda x: x[0]
-        return max(list(map(func,words)))
+            return max(w[0] for w in _getFragWords(frags))
 
     def _get_split_blParaFunc(self):
         return self.blPara.kind==0 and _split_blParaSimple or _split_blParaHard
@@ -1256,6 +1315,7 @@ class Paragraph(Flowable):
         self.height = lineno = 0
         maxlineno = len(maxWidths)-1
         style = self.style
+        spaceShrinkage = style.spaceShrinkage
         splitLongWords = style.splitLongWords
         self._splitLongWordCount = 0
 
@@ -1328,19 +1388,17 @@ class Paragraph(Flowable):
                 #NB this is an utter hack that awaits the proper information
                 #preserving splitting algorithm
                 return self.blPara
-            n = 0
             njlbv = not style.justifyBreaks
             words = []
             _words = _getFragWords(frags,maxWidth)
             while _words:
                 w = _words.pop(0)
-                f=w[-1][0]
+                f = w[-1][0]
                 fontName = f.fontName
                 fontSize = f.fontSize
-                spaceWidth = stringWidth(' ',fontName, fontSize)
 
                 if not words:
-                    currentWidth = -spaceWidth   # hack to get around extra space for word 1
+                    n = space = spaceWidth = currentWidth = 0
                     maxSize = fontSize
                     maxAscent, minDescent = getAscentDescent(fontName,fontSize)
 
@@ -1353,24 +1411,23 @@ class Paragraph(Flowable):
 
                 #test to see if this frag is a line break. If it is we will only act on it
                 #if the current width is non-negative or the previous thing was a deliberate lineBreak
-                lineBreak = hasattr(f,'lineBreak')
-                if not lineBreak and newWidth>maxWidth and not isinstance(w,_SplitList) and splitLongWords:
+                lineBreak = f._fkind==_FK_BREAK
+                if not lineBreak and newWidth>(maxWidth+space*spaceShrinkage) and not isinstance(w,_SplitList) and splitLongWords:
                     nmw = min(lineno,maxlineno)
                     if wordWidth>max(maxWidths[nmw:nmw+1]):
                         #a long word
                         _words[0:0] = _splitFragWord(w,maxWidth-spaceWidth-currentWidth,maxWidths,lineno)
                         self._splitLongWordCount += 1
                         continue
-                endLine = (newWidth>maxWidth and n>0) or lineBreak
+                endLine = (newWidth>(maxWidth+space*spaceShrinkage) and n>0) or lineBreak
                 if not endLine:
                     if lineBreak: continue      #throw it away
                     nText = w[1][1]
                     if nText: n += 1
                     fontSize = f.fontSize
                     if calcBounds:
-                        cbDefn = getattr(f,'cbDefn',None)
-                        if getattr(cbDefn,'width',0):
-                            descent,ascent = imgVRange(imgNormV(cbDefn.height,fontSize),cbDefn.valign,fontSize)
+                        if f._fkind==_FK_IMG:
+                            descent,ascent = imgVRange(imgNormV(f.cbDefn.height,fontSize),f.cbDefn.valign,fontSize)
                         else:
                             ascent, descent = getAscentDescent(f.fontName,fontSize)
                     else:
@@ -1383,28 +1440,29 @@ class Paragraph(Flowable):
                         words = [g]
                         g.text = nText
                     elif not sameFrag(g,f):
-                        if currentWidth>0 and ((nText!='' and nText[0]!=' ') or hasattr(f,'cbDefn')):
-                            if hasattr(g,'cbDefn'):
-                                i = len(words)-1
-                                while i>=0:
-                                    wi = words[i]
-                                    cbDefn = getattr(wi,'cbDefn',None)
-                                    if cbDefn:
-                                        if not getattr(cbDefn,'width',0):
-                                            i -= 1
-                                            continue
+                        if spaceWidth:
+                            i = len(words)-1
+                            while i>=0:
+                                wi = words[i]
+                                i -= 1
+                                if wi._fkind==_FK_TEXT:
                                     if not wi.text.endswith(' '):
                                         wi.text += ' '
+                                        space += spaceWidth
                                     break
-                            else:
-                                if not g.text.endswith(' '):
-                                    g.text += ' '
                         g = f.clone()
                         words.append(g)
                         g.text = nText
-                    else:
-                        if nText and nText[0]!=' ':
+                    elif spaceWidth:
+                        if not g.text.endswith(' '):
                             g.text += ' ' + nText
+                            space += spaceWidth
+                        else:
+                            g.text += nText
+                    else:
+                        g.text += nText
+
+                    spaceWidth = stringWidth(' ',fontName,fontSize) if isinstance(w,_HSWord) else 0 #of the space following this word
 
                     ni = 0
                     for i in w[2:]:
@@ -1414,9 +1472,8 @@ class Paragraph(Flowable):
                         words.append(g)
                         fontSize = g.fontSize
                         if calcBounds:
-                            cbDefn = getattr(g,'cbDefn',None)
-                            if getattr(cbDefn,'width',0):
-                                descent,ascent = imgVRange(imgNormV(cbDefn.height,fontSize),cbDefn.valign,fontSize)
+                            if g._fkind==_FK_IMG:
+                                descent,ascent = imgVRange(imgNormV(g.cbDefn.height,fontSize),g.cbDefn.valign,fontSize)
                             else:
                                 ascent, descent = getAscentDescent(g.fontName,fontSize)
                         else:
@@ -1445,18 +1502,18 @@ class Paragraph(Flowable):
                     maxWidth = maxWidths[min(maxlineno,lineno)]
 
                     if lineBreak:
-                        n = 0
                         words = []
                         continue
 
+                    spaceWidth = stringWidth(' ',fontName,fontSize) if isinstance(w,_HSWord) else 0 #of the space following this word
                     currentWidth = wordWidth
                     n = 1
+                    space = 0
                     g = f.clone()
                     maxSize = g.fontSize
                     if calcBounds:
-                        cbDefn = getattr(g,'cbDefn',None)
-                        if getattr(cbDefn,'width',0):
-                            minDescent,maxAscent = imgVRange(imgNormV(cbDefn.height,fontSize),cbDefn.valign,maxSize)
+                        if g._fkind==_FK_IMG:
+                            descent,ascent = imgVRange(imgNormV(g.cbDefn.height,fontSize),g.cbDefn.valign,fontSize)
                         else:
                             maxAscent, minDescent = getAscentDescent(g.fontName,maxSize)
                     else:
@@ -1470,9 +1527,8 @@ class Paragraph(Flowable):
                         words.append(g)
                         fontSize = g.fontSize
                         if calcBounds:
-                            cbDefn = getattr(g,'cbDefn',None)
-                            if getattr(cbDefn,'width',0):
-                                descent,ascent = imgVRange(imgNormV(cbDefn.height,fontSize),cbDefn.valign,fontSize)
+                            if g._fkind==_FK_IMG:
+                                descent,ascent = imgVRange(imgNormV(g.cbDefn.height,fontSize),g.cbDefn.valign,fontSize)
                             else:
                                 ascent, descent = getAscentDescent(g.fontName,fontSize)
                         else:

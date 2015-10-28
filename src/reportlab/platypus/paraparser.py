@@ -183,6 +183,7 @@ _paraAttrMap = {'font': ('fontName', None),
                 'texttransform':('textTransform',_textTransformConv),
                 'enddots':('endDots',None),
                 'underlineproportion':('underlineProportion',_num),
+                'spaceshrinkage':('spaceShrinkage',_num),
                 }
 
 _bulletAttrMap = {
@@ -994,7 +995,7 @@ class ParaParser(HTMLParser):
         if 'name' in attr: defn.name = attr['name']
         else: self._syntax_error('<onDraw> needs at least a name attribute')
 
-        if 'label' in attr: defn.label = attr['label']
+        defn.label = attr.get('label',None)
         defn.kind='onDraw'
         self._push('ondraw',cbDefn=defn)
         self.handle_data('')

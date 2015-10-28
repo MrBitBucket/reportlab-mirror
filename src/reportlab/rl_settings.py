@@ -51,7 +51,8 @@ CMapSearchPath
 baseUnderlineProportion
 decimalSymbol
 errorOnDuplicatePageLabelPage
-autoGenerateMissingTTFName'''.split())
+autoGenerateMissingTTFName
+spaceShrinkage'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -106,6 +107,7 @@ baseUnderlineProportion=    0.0                     #non-zero for doing font siz
 decimalSymbol=              '.'                     #what we use to align floats numerically
 errorOnDuplicatePageLabelPage= 0                    #if True will cause repeated PageLabel page numbers to raise an error.
 autoGenerateMissingTTFName=0                        #if true we try to auto generate any missing TTF font name
+spaceShrinkage=0.05                                 #allowable space shrinkage to make lines fit
 
 # places to look for T1Font information
 T1SearchPath =  (

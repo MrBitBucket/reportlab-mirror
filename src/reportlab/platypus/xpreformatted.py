@@ -192,7 +192,7 @@ class XPreformatted(Paragraph):
                 maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
                 requiredWidth = max(currentWidth,requiredWidth)
                 extraSpace = maxWidth - currentWidth
-                lines.append(ParaLines(extraSpace=extraSpace,wordCount=n, words=words, fontSize=maxSize, ascent=maxAscent,descent=minDescent,currentWidth=currentWidth))
+                lines.append(ParaLines(extraSpace=extraSpace,wordCount=n, words=words, fontSize=maxSize, ascent=maxAscent,descent=minDescent,currentWidth=currentWidth,preformatted=True))
 
             self.width = max(self.width,requiredWidth)
             return ParaLines(kind=1, lines=lines)

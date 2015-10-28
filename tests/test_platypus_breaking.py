@@ -5,7 +5,7 @@
 __version__='''$Id$'''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import sys, os, time
+import sys, os, time, re
 from operator import truth
 import unittest
 from reportlab.platypus.flowables import Flowable
@@ -18,8 +18,9 @@ from reportlab.platypus.frames import Frame
 from reportlab.lib.randomtext import randomText, PYTHON
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, Indenter, SimpleDocTemplate
 from reportlab.platypus.paragraph import *
-from reportlab.rl_config import invariant
-
+from reportlab.pdfgen.canvas import Canvas
+from reportlab.rl_config import invariant, paraFontSizeHeightOffset
+from reportlab.pdfbase.pdfmetrics import stringWidth
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
@@ -29,7 +30,6 @@ def myMainPageFrame(canvas, doc):
     pageNumber = canvas.getPageNumber()
     canvas.drawString(10*cm, cm, str(pageNumber))
     canvas.restoreState()
-
 
 class MyDocTemplate(BaseDocTemplate):
     _invalidInitArgs = ('pageTemplates',)
@@ -153,7 +153,6 @@ I hope we don't, but you never do Know.</a></font>""",bt)
     doc = MyDocTemplate(outputfile('test_platypus_breaking.pdf'))
     doc.multiBuild(story)
 
-
 class BreakingTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
     def test0(self):
@@ -187,8 +186,6 @@ class BreakingTestCase(unittest.TestCase):
         self.assertEqual(len(p.split(20,16)),2) #orphans allowed
 
     def test3(self):
-        from reportlab.pdfgen.canvas import Canvas
-
         aW=307
         styleSheet = getSampleStyleSheet()
         bt = styleSheet['BodyText']
@@ -210,15 +207,185 @@ class BreakingTestCase(unittest.TestCase):
         canv.restoreState()
         canv.showPage()
         canv.save()
-        from reportlab import rl_config
-        x = rl_config.paraFontSizeHeightOffset and '50' or '53.17'
+        x = paraFontSizeHeightOffset and '50' or '53.17'
         good = ['q', '1 0 0 1 0 0 cm', 'q', 'BT 1 0 0 1 0 '+x+' Tm 3.59 Tw 12 TL /F1 10 Tf 0 0 0 rg (Subsequent pages test pageBreakBefore, frameBreakBefore and) Tj T* 0 Tw .23 Tw (keepTogether attributes. Generated at 1111. The number in brackets) Tj T* 0 Tw .299167 Tw (at the end of each paragraph is its position in the story. llllllllllllllllllllllllll) Tj T* 0 Tw 66.9 Tw (bbbbbbbbbbbbbbbbbbbbbb ccccccccccccccccccccccc) Tj T* 0 Tw (ddddddddddddddddddddd eeeeyyy) Tj T* ET', 'Q', 'Q']
         ok= ParaCode==good
         assert ok, "\nParaCode=%r\nexpected=%r" % (ParaCode,good)
 
+    def test4(self):
+        styleSheet = getSampleStyleSheet()
+        bt = styleSheet['BodyText']
+        bfn = bt.fontName = 'Helvetica'
+        bfs = bt.fontSize
+        bfl = bt.leading
+        canv=Canvas(outputfile('test_platypus_paragraph_line_lengths.pdf'))
+        canv.setFont('Courier',bfs,bfl)
+        pageWidth, pageHeight = canv._pagesize
+        y = pageHeight - 15
+        x = stringWidth('999: ','Courier',bfs) + 5
+        aW = int(pageWidth)-2*x
+
+        def doPara(x,text,wc,ns,n,hrep=' ',crep=' ',hdw=0,cdw=0):
+            if '{H}' in text:
+                text = text.replace('{H}',hrep)
+                wc += hdw
+            if '{C}' in text:
+                text = text.replace('{C}',crep)
+                wc += cdw
+            p = Paragraph(text,bt)
+            w,h = p.wrap(aW,1000)
+            annotations[:] = []
+            if measuring:
+                ends[:] = []
+            p.drawOn(canv,x,y-h)
+            canv.saveState()
+            canv.setLineWidth(0.1)
+            canv.setStrokeColorRGB(1,0,0)
+            canv.rect(x,y-h,wc,h)
+
+            if n is not None:
+                canv.setFillColorRGB(0,1,0)
+                canv.drawRightString(x,y-h,'%3d: ' % n)
+
+            if annotations:
+                canv.setLineWidth(0.1)
+                canv.setStrokeColorRGB(0,1,0)
+                canv.setFillColorRGB(0,0,1)
+                canv.setFont('Helvetica',0.2)
+                for info in annotations:
+                    cur_x = info['cur_x']+x
+                    cur_y = info['cur_y']+y-h
+                    canv.drawCentredString(cur_x, cur_y+0.3,'%.2f' % (cur_x-x))
+                    canv.line(cur_x,cur_y,cur_x,cur_y+0.299)
+            if measuring:
+                if not ends:
+                    errors.append('Paragraph measurement failure no ends found for %s\n%r' % (ns,text))
+                elif len(ends)>1:
+                    errors.append('Paragraph measurement failure no len(ends)==%d for %s\n%r' % (len(ends),ns,text))
+                else:
+                    cur_x = ends[0]['cur_x']
+                    adiff = abs(wc-cur_x)
+                    length_errors.append(adiff)
+                    if adiff>1e-8:
+                        errors.append('Paragraph measurement error wc=%.4f measured=%.4f for %s\n%r' % (wc,cur_x,ns,text))
+            canv.restoreState()
+            return h
+        swc = lambda t: stringWidth(t,'Courier',bfs)
+        swcbo = lambda t: stringWidth(t,'Courier-BoldOblique',bfs)
+        swh = lambda t: stringWidth(t,'Helvetica',bfs)
+        swhbo = lambda t: stringWidth(t,'Helvetica-BoldOblique',bfs)
+        swt = lambda t: stringWidth(t,'Times-Roman',bfs)
+        swtb = lambda t: stringWidth(t,'Times-Bold',bfs)
+
+        apat = re.compile("(<a\\s+name='a\\d+'/>)")
+        argv = sys.argv[1:]
+        data = (
+            (0,"<span fontName='Courier'>Hello{C}</span> World.", swc('Hello ')+swh('World.')),
+            (1,"<span fontName='Courier'>Hello</span>{H}World.", swc('Hello')+swh(' World.')),
+            (2," <a name='a2'/><span fontName='Courier'>Hello{C}</span> World.", swc('Hello ')+swh('World.')),
+            (3," <a name='a3'/><span fontName='Courier'>Hello</span>{H}World.", swc('Hello')+swh(' World.')),
+            (4,"<span fontName='Courier'><a name='a4'/>Hello{C}</span> World.", swc('Hello ')+swh('World.')),
+            (5,"<span fontName='Courier'><a name='a5'/>Hello</span>{H}World.", swc('Hello')+swh(' World.')),
+            (6,"<span fontName='Courier'>Hello<a name='a6'/>{C}</span> World.", swc('Hello ')+swh('World.')),
+            (7,"<span fontName='Courier'>Hello<a name='a7'/></span>{H}World.", swc('Hello')+swh(' World.')),
+            (8,"<span fontName='Courier'>Hello{C}<a name='a8'/></span> World.", swc('Hello ')+swh('World.')),
+            (9,"<span fontName='Courier'>Hello</span><a name='a9'/>{H}World.", swc('Hello')+swh(' World.')),
+            (10,"<span fontName='Courier'>Hello{C}</span> <a name='a10'/>World.", swc('Hello ')+swh('World.')),
+            (11,"<span fontName='Courier'>Hello</span>{H}<a name='a11'/>World.", swc('Hello')+swh(' World.')),
+            (12,"<span fontName='Courier'>Hello{C}</span> World. <a name='a12'/>", swc('Hello ')+swh('World.')),
+            (13,"<span fontName='Courier'>Hello</span>{H}World. <a name='a13'/>", swc('Hello')+swh(' World.')),
+            (14," <a name='a2'/> <span fontName='Courier'>Hello{C}</span> World.", swc('Hello ')+swh('World.')),
+            (15," <a name='a3'/> <span fontName='Courier'>Hello</span>{H}World.", swc('Hello')+swh(' World.')),
+            (16," <a name='a2'/> <span fontName='Courier'>Hello{C}<a name='b'/> </span> <a name='b'/> World.", swc('Hello ')+swh('World.')),
+            (17," <a name='a3'/> <span fontName='Courier'>Hello</span>{H}<a name='b'/> World.", swc('Hello')+swh(' World.')),
+            (30,"<span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span>{C}</span> World.", swt('l')+swtb('lo')+swc('He ')+swh('World.')),
+            (31,"<span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span></span>{H}World.", swt('l')+swtb('lo')+swc('He')+swh(' World.')),
+            (32," <a name='a2'/><span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span>{C}</span> World.", swt('l')+swtb('lo')+swc('He ')+swh('World.')),
+            (33," <a name='a3'/><span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span></span>{H}World.", swt('l')+swtb('lo')+swc('He')+swh(' World.')),
+            (34,"<span fontName='Courier'><a name='a4'/>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span> </span> World.", swt('l')+swtb('lo')+swc('He ')+swh('World.')),
+            (35,"<span fontName='Courier'><a name='a5'/>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span></span>{H}World.", swt('l')+swtb('lo')+swc('He')+swh(' World.')),
+            (36,"<span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span><a name='a6'/> </span> World.", swt('l')+swtb('lo')+swc('He ')+swh('World.')),
+            (37,"<span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span><a name='a7'/></span>{H}World.", swt('l')+swtb('lo')+swc('He')+swh(' World.')),
+            (38,"<span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span>{C}<a name='a8'/></span> World.", swt('l')+swtb('lo')+swc('He ')+swh('World.')),
+            (39,"<span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span></span><a name='a9'/>{H}World.", swt('l')+swtb('lo')+swc('He')+swh(' World.')),
+            (40,"<span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span>{C}</span> <a name='a10'/>World.", swt('l')+swtb('lo')+swc('He ')+swh('World.')),
+            (41,"<span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span></span>{H}<a name='a11'/>World.", swt('l')+swtb('lo')+swc('He')+swh(' World.')),
+            (42,"<span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span>{C}</span> World. <a name='a12'/>", swt('l')+swtb('lo')+swc('He ')+swh('World.')),
+            (43,"<span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span></span> World.{H}<a name='a13'/>", swt('l')+swtb('lo')+swc('He')+swh(' World.')),
+            (44," <a name='a2'/> <span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span>{C}</span> World.", swt('l')+swtb('lo')+swc('He ')+swh('World.')),
+            (45," <a name='a3'/> <span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span></span>{H}World.", swt('l')+swtb('lo')+swc('He')+swh(' World.')),
+            (46," <a name='a2'/> <span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span>{C}<a name='b'/> </span> <a name='b'/> World.", swt('l')+swtb('lo')+swc('He ')+swh('World.')),
+            (47," <a name='a3'/> <span fontName='Courier'>He<span face='Times-Roman' color='red'>l</span><span face='Times-Bold' color='orange'>lo</span></span>{H}<a name='b'/> World.", swt('l')+swtb('lo')+swc('He')+swh(' World.')),
+            )
+        _exceptions = {
+                1:  {
+                    8: swh(' '),
+                    12: swh(' '),
+                    13: swh(' '),
+                    14: swh(' '),
+                    15: swh(' '),
+                    16: swh(' '),
+                    17: swh(' '),
+                    38: swh(' '),
+                    42: swh(' '),
+                    43: swh(' '),
+                    44: swh(' '),
+                    45: swh(' '),
+                    46: swh(' '),
+                    47: swh(' '),
+                    },
+                }
+        def gex(n,v):
+            return _exceptions[1].get(v,0)
+        x1 = x + max(_tmp[2] for _tmp in data) + 5
+        x2 = x1 + max(_tmp[2]+10+gex(1,_tmp[0]) for _tmp in data) + 5
+        x3 = x2 + max(_tmp[2]+10+gex(2,_tmp[0]) for _tmp in data) + 5
+        x4 = x3 + max(_tmp[2]+20+gex(3,_tmp[0]) for _tmp in data) + 5
+        annotations = []
+        ends = []
+        errors = []
+        measuring = True
+        length_errors = []
+        def _onDrawFunc(canv,name,label):
+            if measuring and label=='end':
+                ends.append(canv._curr_tx_info)
+            annotations.append(canv._curr_tx_info)
+        canv._onDrawFunc = _onDrawFunc
+
+        rep0 = '<ondraw name="_onDrawFunc"/>\\1'
+        for n,text,wc in data:
+            if argv and str(n) not in argv: continue
+            text0 = (apat.sub(rep0,text) if rep0 else text)+('<ondraw name="_onDrawFunc" label="end"/>' if measuring else '')
+            ns = str(n)
+            h = doPara(x,text0,wc,ns,n)
+            if '<a' in text:
+                text1 = apat.sub('<img width="10" height="5" src="pythonpowered.gif"/>',text0)
+                doPara(x1,text1,wc+10+gex(1,n),ns+'.11',None)
+                text2 = apat.sub('\\1<img width="10" height="5" src="pythonpowered.gif"/>',text0)
+                doPara(x2,text1,wc+10+gex(2,n),ns+'.12',None)
+                text3 = apat.sub('\\1<img width="10" height="5" src="pythonpowered.gif"/><img width="10" height="5" src="pythonpowered.gif"/>\\1',text0)
+                doPara(x3,text3,wc+20+gex(3,n),ns+'.13',None)
+                doPara(x4,text3,wc+20+gex(3,n),ns+'.14',None,
+                        hrep='<span face="Courier-BoldOblique"> </span>',
+                        crep='<span face="Helvetica-BoldOblique"> </span>',
+                        hdw = swcbo(' ') - swhbo(' '),
+                        cdw = swhbo(' ') - swcbo(' '),
+                        )
+            else:
+                doPara(x1,text0,wc,ns+'.21',None,
+                        hrep='<span face="Courier-BoldOblique"> </span>',
+                        crep='<span face="Helvetica-BoldOblique"> </span>',
+                        hdw = swcbo(' ') - swhbo(' '),
+                        cdw = swhbo(' ') - swcbo(' '),
+                        )
+            y -= h+1
+        canv.showPage()
+        canv.save()
+        if errors:
+            raise ValueError('\n'.join(errors))
+
 def makeSuite():
     return makeSuiteForClasses(BreakingTestCase)
-
 
 #noruntests
 if __name__ == "__main__": #NORUNTESTS
