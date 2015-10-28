@@ -122,6 +122,8 @@ class NormalDate:
             2. integer in yyyymmdd format
             3. string in yyyymmdd format
             4. tuple in (yyyy, mm, dd) - localtime/gmtime can also be used
+            5. string iso date format see _iso_re above
+            6. datetime.datetime or datetime.date
         """
         if normalDate is None:
             self.setNormalDate(time.localtime(time.time()))
