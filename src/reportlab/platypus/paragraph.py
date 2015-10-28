@@ -253,7 +253,7 @@ def _putFragLine(cur_x, tx, line, last, pKind):
                         raise AttributeError("Missing %s callback attribute '%s'" % (kind,name))
                     tx._canvas._curr_tx_info=dict(tx=tx,cur_x=cur_x,cur_y=cur_y,leading=leading,xs=tx.XtraState)
                     try:
-                        func(tx._canvas,kind,cbDefn.label)
+                        func(tx._canvas,kind,getattr(cbDefn,'label',None))
                     finally:
                         del tx._canvas._curr_tx_info
             if f is words[-1]:
