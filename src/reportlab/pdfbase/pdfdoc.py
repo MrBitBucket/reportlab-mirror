@@ -1537,6 +1537,7 @@ class PDFInfo(PDFObject):
 
     def __init__(self):
         self.invariant = rl_config.invariant
+        self.trapped = 'False'  #could be 'True' or 'Unknown'
 
     def digest(self, md5object):
         # add self information to signature
@@ -1547,11 +1548,12 @@ class PDFInfo(PDFObject):
         D = {}
         D["Title"] = PDFString(self.title)
         D["Author"] = PDFString(self.author)
-        D["CreationDate"] = PDFDate(invariant=self.invariant,dateFormatter=self._dateFormatter)
+        D['ModDate'] = D["CreationDate"] = PDFDate(invariant=self.invariant,dateFormatter=self._dateFormatter)
         D["Producer"] = PDFString(self.producer)
         D["Creator"] = PDFString(self.creator)
         D["Subject"] = PDFString(self.subject)
         D["Keywords"] = PDFString(self.keywords)
+        D["Trapped"] = PDFName(self.trapped)
 
         PD = PDFDictionary(D)
         return PD.format(document)
