@@ -666,8 +666,7 @@ class Pie(AbstractPieChart):
     def normalizeData(self,keepData=False):
         data = list(map(abs,self.data))
         s = self._sum = float(sum(data))
-        if s<=1e-8: s = 0
-        f = 360./s
+        f = 360./s if s!=0 else 1
         if keepData:
             return [AngleData(f*x,x) for x in data]
         else:
