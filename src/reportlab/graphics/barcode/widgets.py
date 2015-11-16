@@ -171,6 +171,14 @@ BarcodeCode128 = _BCW("""Code 128 encodes any number of characters in the ASCII 
                 _tests = ['ReportLab Rocks!', 'PFWZF'],
                 )
 
+BarcodeCode128Auto = _BCW(
+                'Modified Code128 to use auto encoding',
+                'Code128Auto',
+                AttrMap(BASE=BarcodeCode128),
+                'reportlab.graphics.barcode.code128',
+                'XY149740345GB'
+                )
+
 BarcodeStandard93=_BCW("""This is a compressed form of Code 39""",
                         "Standard93",
                         AttrMap(BASE=BarcodeCode128,
@@ -302,6 +310,38 @@ BarcodeUSPS_4State=_BCW('',
                         _pre_init="\n\t\tkw.setdefault('routing','01234567891')\n",
                         _methods = "\n\tdef annotate(self,x,y,text,fontName,fontSize,anchor='middle'):\n\t\t_BarcodeWidget.annotate(self,x,y,text,fontName,fontSize,anchor='start')\n"
                         )
+BarcodeECC200DataMatrix = _BCW(
+    'ECC200DataMatrix',
+    'ECC200DataMatrix',
+    AttrMap(BASE=_BarcodeWidget,
+        x=AttrMapValue(isNumber, desc='X position of the lower-left corner of the barcode.'),
+        y=AttrMapValue(isNumber, desc='Y position of the lower-left corner of the barcode.'),
+        barWidth=AttrMapValue(isNumber, desc='Size of data modules.'),
+        barFillColor=AttrMapValue(isColorOrNone, desc='Color of data modules.'),
+        value=AttrMapValue(EitherOr((isString,isNumber)), desc='Value.'),
+        height=AttrMapValue(None, desc='ignored'),
+        width=AttrMapValue(None, desc='ignored'),
+        strokeColor=AttrMapValue(None, desc='ignored'),
+        strokeWidth=AttrMapValue(None, desc='ignored'),
+        fillColor=AttrMapValue(None, desc='ignored'),
+        background=AttrMapValue(None, desc='ignored'),
+        debug=AttrMapValue(None, desc='ignored'),
+        gap=AttrMapValue(None, desc='ignored'),
+        row_modules=AttrMapValue(None, desc='???'),
+        col_modules=AttrMapValue(None, desc='???'),
+        row_regions=AttrMapValue(None, desc='???'),
+        col_regions=AttrMapValue(None, desc='???'),
+        cw_data=AttrMapValue(None, desc='???'),
+        cw_ecc=AttrMapValue(None, desc='???'),
+        row_usable_modules = AttrMapValue(None, desc='???'),
+        col_usable_modules = AttrMapValue(None, desc='???'),
+        valid = AttrMapValue(None, desc='???'),
+        validated = AttrMapValue(None, desc='???'),
+        decomposed = AttrMapValue(None, desc='???'),
+    ),
+    'reportlab.graphics.barcode.ecc200datamatrix',
+    'JGB 0204H20B012722900021AC35B2100001003241014241014TPS01  WJ067073605GB185 MOUNT PLEASANT MAIL CENTER         EC1A1BB9ZGBREC1A1BB  EC1A1BB  STEST FILE       FOR SPEC                                       '
+    )
 
 if __name__=='__main__':
     raise ValueError('widgets.py has no script function')

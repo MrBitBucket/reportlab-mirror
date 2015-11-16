@@ -58,6 +58,9 @@ def run():
     storyAdd(Paragraph('Code 128', styleN))
     storyAdd(Code128("AB-12345678"))
 
+    storyAdd(Paragraph('Code 128 Auto', styleN))
+    storyAdd(Code128Auto("AB-12345678"))
+
     storyAdd(Paragraph('USPS FIM', styleN))
     storyAdd(FIM("A"))
 

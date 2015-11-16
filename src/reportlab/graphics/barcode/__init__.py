@@ -29,29 +29,27 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 #
-
+__all__ = tuple('''registerWidget getCodes getCodeNames createBarcodeDrawing createBarcodeImageInMemory'''.split())
 __version__ = '0.9'
 __doc__='''Popular barcodes available as reusable widgets'''
 
-def getCodes():
-    """Returns a dict mapping code names to widgets"""
+_widgets = []
+def registerWidget(widget):
+    _widgets.append(widget)
 
+def _reset():
+    _widgets[:] = []
     from reportlab.graphics.barcode.widgets import BarcodeI2of5, BarcodeCode128, BarcodeStandard93,\
                         BarcodeExtended93, BarcodeStandard39, BarcodeExtended39,\
                         BarcodeMSI, BarcodeCodabar, BarcodeCode11, BarcodeFIM,\
-                        BarcodePOSTNET, BarcodeUSPS_4State
+                        BarcodePOSTNET, BarcodeUSPS_4State, BarcodeCode128Auto, BarcodeECC200DataMatrix
 
     #newer codes will typically get their own module
     from reportlab.graphics.barcode.eanbc import Ean13BarcodeWidget, Ean8BarcodeWidget, UPCA, Ean5BarcodeWidget, ISBNBarcodeWidget
     from reportlab.graphics.barcode.qr import QrCodeWidget
-
-
-    #the module exports a dictionary of names to widgets, to make it easy for
-    #apps and doc tools to display information about them.
-    codes = {}
-    for widget in (
-                BarcodeI2of5,
+    for widget in (BarcodeI2of5,
                 BarcodeCode128,
+                BarcodeCode128Auto,
                 BarcodeStandard93,
                 BarcodeExtended93,
                 BarcodeStandard39,
@@ -68,7 +66,19 @@ def getCodes():
                 Ean5BarcodeWidget,
                 ISBNBarcodeWidget,
                 QrCodeWidget,
+                BarcodeECC200DataMatrix,
                 ):
+        registerWidget(widget)
+_reset()
+from reportlab.rl_config import register_reset
+register_reset(_reset)
+
+def getCodes():
+    """Returns a dict mapping code names to widgets"""
+    #the module exports a dictionary of names to widgets, to make it easy for
+    #apps and doc tools to display information about them.
+    codes = {}
+    for widget in _widgets:
         codeName = widget.codeName
         codes[codeName] = widget
 
