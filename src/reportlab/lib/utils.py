@@ -20,6 +20,12 @@ try:
 except ImportError:
     import md5
 
+try:
+    import platform
+    isPyPy = platform.python_implementation()=='PyPy'
+except:
+    isPyPy = False
+
 def isFunction(v):
     return type(v) == type(isFunction)
 
