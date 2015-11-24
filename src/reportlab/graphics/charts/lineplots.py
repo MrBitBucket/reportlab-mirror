@@ -258,8 +258,9 @@ class LinePlot(AbstractLineChart):
         P = list(range(len(self._positions)))
         if self.reversePlotOrder: P.reverse()
         inFill = getattr(self,'_inFill',None)
-        styleCount = len(self.lines)
-        if inFill or [rowNo for rowNo in P if getattr(self.lines[rowNo%styleCount],'inFill',False)]:
+        lines = self.lines
+        styleCount = len(lines)
+        if inFill or [rowNo for rowNo in P if getattr(lines[rowNo%styleCount],'inFill',False)]:
             inFillY = getattr(inFill,'yValue',None)
             if inFillY is None:
                 inFillY = xA._y
@@ -272,14 +273,15 @@ class LinePlot(AbstractLineChart):
         # Iterate over data rows.
         for rowNo in P:
             row = self._positions[rowNo]
-            rowStyle = self.lines[rowNo % styleCount]
+            styleRowNo = rowNo % styleCount
+            rowStyle = lines[styleRowNo]
             rowColor = getattr(rowStyle,'strokeColor',None)
             dash = getattr(rowStyle, 'strokeDashArray', None)
 
             if hasattr(rowStyle, 'strokeWidth'):
                 width = rowStyle.strokeWidth
-            elif hasattr(self.lines, 'strokeWidth'):
-                width = self.lines.strokeWidth
+            elif hasattr(lines, 'strokeWidth'):
+                width = lines.strokeWidth
             else:
                 width = None
 
@@ -305,15 +307,25 @@ class LinePlot(AbstractLineChart):
 
             if hasattr(rowStyle, 'symbol'):
                 uSymbol = rowStyle.symbol
-            elif hasattr(self.lines, 'symbol'):
-                uSymbol = self.lines.symbol
+            elif hasattr(lines, 'symbol'):
+                uSymbol = lines.symbol
             else:
                 uSymbol = None
 
             if uSymbol:
                 if bubblePlot: drow = self.data[rowNo]
                 for j,xy in enumerate(row):
-                    symbol = uSymbol2Symbol(uSymbol,xy[0],xy[1],rowColor)
+                    if (styleRowNo,j) in lines._children:
+                        juSymbol = getattr(lines[styleRowNo,j],'symbol',uSymbol)
+                    else:
+                        juSymbol = uSymbol
+                    if juSymbol is uSymbol:
+                        symbol = uSymbol
+                        symColor = rowColor
+                    else:
+                        symbol = juSymbol
+                        symColor = getattr(symbol,'fillColor',rowColor)
+                    symbol = uSymbol2Symbol(symbol,xy[0],xy[1],symColor)
                     if symbol:
                         if bubblePlot:
                             symbol.size = bubbleR*(drow[j][2]/bubbleMax)**0.5
@@ -321,9 +333,10 @@ class LinePlot(AbstractLineChart):
             else:
                 if bubblePlot: drow = self.data[rowNo]
                 for j,xy in enumerate(row):
-                    usymbol = getattr(self.lines[rowNo,j],'symbol',None)
-                    if not usymbol: continue
-                    symbol = uSymbol2Symbol(uSymbol,xy[0],xy[1],rowColor)
+                    juSymbol = getattr(lines[styleRowNo,j],'symbol',None)
+                    if not juSymbol: continue
+                    symColor = getattr(juSymbol,'fillColor',getattr(juSymbol,'strokeColor',rowColor))
+                    symbol = uSymbol2Symbol(juSymbol,xy[0],xy[1],symColor)
                     if symbol:
                         if bubblePlot:
                             symbol.size = bubbleR*(drow[j][2]/bubbleMax)**0.5
