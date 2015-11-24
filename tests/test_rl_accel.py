@@ -1,7 +1,7 @@
 __version__=''' $Id'''
 __doc__='''basic tests.'''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
-from reportlab.lib.utils import asBytes
+from reportlab.lib.utils import asBytes, isPyPy
 setOutDir(__name__)
 
 import unittest
@@ -9,6 +9,7 @@ def getFuncs(name):
     return (_c_funcs.get(name,None),'c'),(_py_funcs.get(name,None),'py')
 
 def getrc(defns,depth=1):
+    if isPyPy: return ''
     from sys import getrefcount, _getframe
     f = _getframe(depth)
     G0 = f.f_globals
@@ -31,6 +32,7 @@ def getrc(defns,depth=1):
     return ' '.join([str(getrefcount(eval(x,L,G0))-1) for x in defns.split()])
 
 def checkrc(defns,rcv0):
+    if isPyPy: return ''
     rcv1 = getrc(defns,2)
     return ' '.join(["%s %s-->%s" % (x,v,w) for x,v,w in zip(defns.split(),rcv0.split(),rcv1.split()) if v!=w])
 

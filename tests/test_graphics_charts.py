@@ -30,7 +30,10 @@ from reportlab.graphics.charts.legends import Legend
 from reportlab.graphics.charts.spider import SpiderChart
 from reportlab.graphics.widgets.markers import makeMarker
 
-
+try:
+    from reportlab.graphics import _renderPM
+except ImportError:
+    _renderPM = None
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
@@ -412,6 +415,7 @@ class ChartTestCase(unittest.TestCase):
         story.append(drawing8)
         story.append(Spacer(0,1*cm))
 
+    @unittest.skipIf(not _renderPM,'no _renderPM')
     def test8(self):
         '''text _text2Path'''
         story = self.story

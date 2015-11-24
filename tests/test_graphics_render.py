@@ -7,6 +7,10 @@ from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, p
 setOutDir(__name__)
 import unittest, os, sys, glob
 from reportlab.lib.utils import isPy3
+try:
+    from reportlab.graphics import _renderPM
+except:
+    _renderPM = None
 
 class RenderTestCase(unittest.TestCase):
     "Test renderPS classes."
@@ -22,10 +26,12 @@ class RenderTestCase(unittest.TestCase):
     def test0(self):
         from reportlab.graphics.renderPS import test
         assert test(self.outDir) is None
+
     def test1(self):
         from reportlab.graphics.renderPDF import test
         assert test(self.outDir) is None
 
+    @unittest.skipIf(not _renderPM,'no _renderPM')
     def test2(self):
         from reportlab.graphics.renderPM import test
         assert test(self.outDir) is None

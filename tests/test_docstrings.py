@@ -13,8 +13,7 @@ from reportlab.lib.testutils import setOutDir,SecureTestCase, GlobDirectoryWalke
 setOutDir(__name__)
 import os, sys, glob, re, unittest, inspect
 import reportlab
-isPy3= reportlab.isPy3
-from reportlab.lib.utils import rl_exec
+from reportlab.lib.utils import rl_exec, isPy3, isPyPy
 
 def typ2is(typ):
     return getattr(inspect,'is'+typ)
@@ -23,7 +22,7 @@ _typ2key={
         'module':lambda x: (x[0],getattr(x[1],'__name__',''),getattr(x[1],'__path__',getattr(x,'__file__',''))),
         'class':lambda x: (x[0],getattr(x[1],'__name__',''),getattr(x[1],'__module__','')),
         'method':lambda x: (x[0],getattr(x[1],'__name__',''),getattr(x[1],'__module__','')),
-        'function':lambda x: (x[0],getattr(x[1],'__name__',''),x[1].__code__.co_filename),
+        'function':lambda x: (x[0],getattr(x[1],'__name__',''),'???' if isPyPy else x[1].__code__.co_filename),
         }
 def typ2key(typ):
     return _typ2key[typ]
@@ -97,7 +96,7 @@ def getObjects(objects,lookup,mName,modBn,tobj):
             continue
         typ = obj2typ(obj)
         if typ in ('function','method'):
-            if os.path.splitext(obj.__code__.co_filename)[0]==modBn:
+            if not isPyPy and os.path.splitext(obj.__code__.co_filename)[0]==modBn:
                 lookup[obj] = 1
                 objects.setdefault(typ if typ=='function' and ttyp=='module' else 'method',[]).append((mName,obj))
         elif typ=='class':
