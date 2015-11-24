@@ -10,7 +10,7 @@ import reportlab
 import unittest
 from reportlab.lib import colors
 from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetAttr, rl_isfile, \
-                                isCompactDistro, isPy3
+                                isCompactDistro, isPy3, isPyPy
 
 def _rel_open_and_read(fn):
     from reportlab.lib.utils import open_and_read
@@ -151,8 +151,12 @@ class ImporterTestCase(unittest.TestCase):
             m1 = recursiveImport('unimportable')
             self.fail("Imported a buggy module")
         except Exception as e:
-            self.assertIn(reportlab.isPy3 and 'division by zero' or 'integer division or modulo by zero',str(e))
-
+            self.assertIn(("integer division by zeroException raised while importing 'unimportable': integer division by zero"
+                            if isPyPy 
+                            else ('division by zero' if isPy3
+                                 else 'integer division or modulo by zero'))
+                        ,str(e))
+ 
 def makeSuite():
     return makeSuiteForClasses(ImporterTestCase)
 
