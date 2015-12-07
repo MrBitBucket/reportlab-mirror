@@ -1,9 +1,9 @@
 #Copyright ReportLab Europe Ltd. 2000-2015
 #see license.txt for license details
 __doc__="""The Reportlab PDF generation library."""
-Version = "3.2.11"
+Version = "3.2.12"
 __version__=Version
-__date__='20151124'
+__date__='20151207'
 
 import sys, os, imp
 

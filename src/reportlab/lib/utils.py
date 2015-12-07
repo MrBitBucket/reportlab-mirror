@@ -1230,7 +1230,7 @@ def simpleSplit(text,fontName,fontSize,maxWidth):
     if maxWidth:
         L = []
         for l in lines:
-            L[-1:-1] = _simpleSplit(l,maxWidth,SW)
+            L.extend(_simpleSplit(l,maxWidth,SW))
         lines = L
     return lines
 
