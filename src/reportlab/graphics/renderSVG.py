@@ -280,13 +280,8 @@ class SVGCanvas:
         return '; '.join(items) + ';'
 
     def _escape(self, s):
-        """
-        return a copy of string s with special characters in postscript strings
-        escaped with backslashes.
-        Have not handled characters that are converted normally in python strings
-        i.e. \\n -> newline
-        """
-        return s.replace(chr(0x5C), r'\\' ).replace('(', '\(' ).replace(')', '\)')
+        '''I don't think this was ever needed; seems to have been copied from renderPS'''
+        return s
 
     def _genArcCode(self, x1, y1, x2, y2, startAng, extent):
         """Calculate the path for an arc inscribed in rectangle defined
