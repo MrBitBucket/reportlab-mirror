@@ -29,11 +29,10 @@
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.70"
+#define VERSION "0.71"
 #define MODULE "_rl_accel"
 
 struct module_state	{
-	PyObject *moduleVersion;
 	int moduleLineno;
 #ifndef isPy3
 	PyObject *module;
@@ -1274,20 +1273,8 @@ static struct PyMethodDef _methods[] = {
 	{NULL,		NULL}		/* sentinel */
 	};
 
-/*Initialization function for the module (*must* be called init_pdfmetrics)*/
+/*Initialization function for the module*/
 #ifdef isPy3
-static int _traverse(PyObject *m, visitproc visit, void *arg) {
-	struct module_state *st = GETSTATE(m);
-	Py_VISIT(st->moduleVersion);
-	return 0;
-	}
-
-static int _clear(PyObject *m) {
-	struct module_state *st = GETSTATE(m);
-	Py_CLEAR(st->moduleVersion);
-	return 0;
-	}
-
 static struct PyModuleDef moduledef = {
 	PyModuleDef_HEAD_INIT,
 	"_rl_accel",
@@ -1295,8 +1282,8 @@ static struct PyModuleDef moduledef = {
 	sizeof(struct module_state),
 	_methods,
 	NULL,
-	_traverse,
-	_clear,
+	NULL,
+	NULL,
 	NULL
 	};
 
@@ -1305,8 +1292,7 @@ PyMODINIT_FUNC PyInit__rl_accel(void)
 void init_rl_accel(void)
 #endif
 {
-	PyObject			*module=NULL;
-	struct module_state *st=NULL;
+	PyObject			*module=NULL, *moduleVersion=NULL;
 	/*Create the module and add the functions and module doc string*/
 #ifdef isPy3
 	module = PyModule_Create(&moduledef);
@@ -1314,14 +1300,13 @@ void init_rl_accel(void)
 	module = Py_InitModule3("_rl_accel", _methods,__DOC__);
 #endif
 	if(!module) goto err;
-	st=GETSTATE(module);
 	/*Add some symbolic constants to the module */
-	st->moduleVersion = PyBytes_FromString(VERSION);
-	if(!st->moduleVersion)goto err;
+	moduleVersion = PyBytes_FromString(VERSION);
+	if(!moduleVersion)goto err;
 #ifndef isPy3
-	st->module = module;
+	GETSTATE(module)->module = module;
 #endif
-	PyModule_AddObject(module, "version", st->moduleVersion );
+	PyModule_AddObject(module, "version", moduleVersion);
 
 #ifdef	HAVE_BOX
 #ifndef isPy3
@@ -1342,9 +1327,7 @@ void init_rl_accel(void)
 
 err:/*Check for errors*/
 #ifdef isPy3
-	if(st){
-		Py_XDECREF(st->moduleVersion);
-		}
+	Py_XDECREF(moduleVersion);
 	Py_XDECREF(module);
 	return NULL;
 #else
