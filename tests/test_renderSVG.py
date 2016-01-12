@@ -259,9 +259,8 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
     </body>
 <html>
 """
-        open('test_renderSVG_output.html', 'w').write(body)
-        
-
+        with open('test_renderSVG_output.html', 'w') as f:
+            f.write(body)
 
 class RenderSvgAxesTestCase(unittest.TestCase):
     "Testing renderSVG module on Axes widgets."
