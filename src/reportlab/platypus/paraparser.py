@@ -30,7 +30,7 @@ _re_para = re.compile(r'^\s*<\s*para(?:\s+|>|/>)')
 
 sizeDelta = 2       # amount to reduce font size by for super and sub script
 subFraction = 0.5   # fraction of font size that a sub script should be lowered
-superFraction = 0.5 # fraction of font size that a super script should be raised
+supFraction = 0.5 # fraction of font size that a super script should be raised
 
 DEFAULT_INDEX_NAME='_indexAdd'
 
@@ -249,6 +249,10 @@ _indexAttrMap = {
                 'item': ('item',None),
                 'offset': ('offset',None),
                 'format': ('format',None),
+                }
+_supAttrMap = {
+                'rise': ('supr', _num),
+                'size': ('sups', _num),
                 }
 
 def _addAttributeNames(m):
@@ -581,9 +585,9 @@ def _greekConvert(data):
 #       < /i > - italics
 #       < u > < /u > - underline
 #       < strike > < /strike > - strike through
-#       < super > < /super > - superscript
-#       < sup > < /sup > - superscript
-#       < sub > < /sub > - subscript
+#       < super [size="pts"] [rise="pts"]> < /super > - superscript
+#       < sup ="pts"] [rise="pts"]> < /sup > - superscript
+#       < sub ="pts"] [rise="pts"]> < /sub > - subscript
 #       <font name=fontfamily/fontname color=colorname size=float>
 #        <span name=fontfamily/fontname color=colorname backcolor=colorname size=float style=stylename>
 #       < bullet > </bullet> - bullet text (at head of para only)
@@ -745,20 +749,26 @@ class ParaParser(HTMLParser):
 
     #### super script
     def start_super( self, attributes ):
-        self._push('super',super=1)
+        A = self.getAttributes(attributes,_supAttrMap)
+        A['sup']=1
+        self._push('super',**A)
 
     def end_super( self ):
         self._pop('super')
 
     def start_sup( self, attributes ):
-        self._push('sup',super=1)
+        A = self.getAttributes(attributes,_supAttrMap)
+        A['sup']=1
+        self._push('sup',**A)
 
     def end_sup( self ):
         self._pop('sup')
 
     #### sub script
     def start_sub( self, attributes ):
-        self._push('sub',sub=1)
+        A = self.getAttributes(attributes,_supAttrMap)
+        A['sub']=1
+        self._push('sub',**A)
 
     def end_sub( self ):
         self._pop('sub')
@@ -866,7 +876,7 @@ class ParaParser(HTMLParser):
         # initialize semantic values
         frag = ParaFrag()
         frag.sub = 0
-        frag.super = 0
+        frag.sup = 0
         frag.rise = 0
         frag.underline = 0
         frag.strike = 0
@@ -1105,17 +1115,17 @@ class ParaParser(HTMLParser):
             if data!='': self._syntax_error('No content allowed in %s tag' % frag._selfClosingTag)
             return
         else:
-            # if sub and super are both on they will cancel each other out
-            if frag.sub == 1 and frag.super == 1:
+            # if sub and sup are both on they will cancel each other out
+            if frag.sub == 1 and frag.sup == 1:
                 frag.sub = 0
-                frag.super = 0
+                frag.sup = 0
 
             if frag.sub:
-                frag.rise = -frag.fontSize*subFraction
-                frag.fontSize = max(frag.fontSize-sizeDelta,3)
-            elif frag.super:
-                frag.rise = frag.fontSize*superFraction
-                frag.fontSize = max(frag.fontSize-sizeDelta,3)
+                frag.rise = -getattr(frag,'supr',frag.fontSize*subFraction)
+                frag.fontSize = getattr(frag,'sups',frag.fontSize-min(sizeDelta,0.2*frag.fontSize))
+            elif frag.sup:
+                frag.rise = getattr(frag,'supr',frag.fontSize*supFraction)
+                frag.fontSize = getattr(frag,'sups',frag.fontSize-min(sizeDelta,0.2*frag.fontSize))
 
             if frag.greek:
                 frag.fontName = 'symbol'

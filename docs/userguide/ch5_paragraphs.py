@@ -282,15 +282,18 @@ of the peace.  How do you plead?""", "The $font$ tag")
 
 heading3("Superscripts and Subscripts")
 disc("""Superscripts and subscripts are supported with the
-<![CDATA[<super> and <sub> tags, which work exactly
-as you might expect.  In addition, most greek letters
+<![CDATA[<super>/<sup> and <sub> tags, which work exactly
+as you might expect. Additionally these three tags have
+attributes rise and size to optionally set the rise/descent
+and font size for the  superscript/subscript text.
+In addition, most greek letters
 can be accessed by using the <greek></greek>
 tag, or with mathML entity names.]]>""")
 
 ##parabox2("""<greek>epsilon</greek><super><greek>iota</greek>
 ##<greek>pi</greek></super> = -1""", "Greek letters and subscripts")
 
-parabox2("""Equation (&alpha;): <greek>e</greek> <super><greek>ip</greek></super>  = -1""",
+parabox2("""Equation (&alpha;): <greek>e</greek> <super rise=9 size=6><greek>ip</greek></super>  = -1""",
          "Greek letters and superscripts")
 
 heading3("Inline Images")
