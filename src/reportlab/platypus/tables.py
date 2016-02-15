@@ -1190,11 +1190,13 @@ class Table(Flowable):
         '''
         pass
 
-    def _cr_0(self,n,cmds):
+    def _cr_0(self,n,cmds,nr0):
         for c in cmds:
             c = tuple(c)
             (sc,sr), (ec,er) = c[1:3]
-            if isinstance(sr,strTypes) or sr>=n: continue
+            if isinstance(sr,strTypes): continue
+            if sr<0: sr += nr0
+            if sr>=n: continue
             if er>=n: er = n-1
             self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
 
@@ -1230,8 +1232,8 @@ class Table(Flowable):
             else:
                 if er>=0 and er<n: continue
                 if sr>=0 and sr<n: sr=0
-                if sr>=n: sr = sr-n
-                if er>=n: er = er-n
+                if sr>=n: sr -= n
+                if er>=n: er -= n
                 self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
 
     def _splitRows(self,availHeight):
@@ -1264,8 +1266,9 @@ class Table(Flowable):
                 ident=ident,
                 spaceBefore=getattr(self,'spaceBefore',None))
 
+        nrows = self._nrows
+        ncols = self._ncols
         #copy the commands
-
         A = []
         # hack up the line commands
         for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
@@ -1277,10 +1280,10 @@ class Table(Flowable):
                     sr = n
                     er = n
 
-            if sc < 0: sc = sc + self._ncols
-            if ec < 0: ec = ec + self._ncols
-            if sr < 0: sr = sr + self._nrows
-            if er < 0: er = er + self._nrows
+            if sc < 0: sc += ncols
+            if ec < 0: ec += ncols
+            if sr < 0: sr += nrows
+            if er < 0: er += nrows
 
             if op in ('BOX','OUTLINE','GRID'):
                 if sr<n and er>=n:
@@ -1311,10 +1314,10 @@ class Table(Flowable):
             else:
                 A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
 
-        R0._cr_0(n,A)
-        R0._cr_0(n,self._bkgrndcmds)
-        R0._cr_0(n,self._spanCmds)
-        R0._cr_0(n,self._nosplitCmds)
+        R0._cr_0(n,A,nrows)
+        R0._cr_0(n,self._bkgrndcmds,nrows)
+        R0._cr_0(n,self._spanCmds,nrows)
+        R0._cr_0(n,self._nosplitCmds,nrows)
 
         if ident: ident = IdentStr(ident)
         if repeatRows:
