@@ -142,10 +142,7 @@ class TableTestCase(unittest.TestCase):
         command to the style to make the cell at row 1 column 3 cover 4 cells,
         and a 'center' command for all cells in the top row. The spanning
         is not immediately evident but trust us, it's happening - the word
-        'Period' is centered across the 4 columns.  Note also that the
-        underlying grid shows through.  All line drawing commands apply
-        to the underlying grid, so you have to take care what you put
-        grids through.""", styNormal))
+        'Period' is centered across the 4 columns.""", styNormal))
         sty = TableStyle([
             #
             ('GRID', (0,0), (-1,-1), 0.25, colors.pink),
@@ -157,7 +154,7 @@ class TableTestCase(unittest.TestCase):
         lst.append(t)
 
         lst.append(Paragraph("""We repeat this for the words 'Region', Product'
-        and 'Total', which each span the top 2 rows; and for 'Nprth' and 'South'
+        and 'Total', which each span the top 2 rows; and for 'North' and 'South'
         which span 3 rows.  At the moment each cell's alignment is the default
         (bottom), so these words appear to have "dropped down"; in fact they
         are sitting on the bottom of their allocated ranges.  You will just see that
@@ -186,12 +183,13 @@ class TableTestCase(unittest.TestCase):
         lst.append(Paragraph("""Now we'll tart things up a bit.  First,
         we set the vertical alignment of each spanned cell to 'middle'.
         Next we add in some line drawing commands which do not slash across
-        the spanned cells (this needs a bit of work).
-        Finally we'll add some thicker lines to divide it up, and hide the pink.  Voila!
+        the spanned cells (for demonstration only, as lines do not show through
+        spanned cells).  Finally we'll add some thicker lines to divide it up.
+        We leave the pink as proof that spanned rows hide underlying lines.  Voila!
         """, styNormal))
         sty = TableStyle([
             #
-#            ('GRID', (0,0), (-1,-1), 0.25, colors.pink),
+            ('GRID', (0,0), (-1,-1), 0.25, colors.pink),
             ('TOPPADDING', (0,0), (-1,-1), 3),
 
             #span the 'period'
@@ -331,11 +329,11 @@ class TableTestCase(unittest.TestCase):
         of ReportLab tables:  (1) fix the widths if you can, (2) don't use
         a paragraph when a string will do.
         """, styNormal))
-        
+
         lst.append(Paragraph("""Unsized columns that contain flowables without
         precise widths, such as paragraphs and nested tables,
-        still need to try and keep their content within borders and ideally 
-        even honor percentage requests.  This can be tricky--and expensive.  
+        still need to try and keep their content within borders and ideally
+        even honor percentage requests.  This can be tricky--and expensive.
         But sometimes you can't follow the golden rules.
         """, styNormal))
 
@@ -348,20 +346,20 @@ class TableTestCase(unittest.TestCase):
         wider than its percentage warrants, it is not further expanded, and
         the other widths accomodate it.
         """, styNormal))
-        
+
         lst.append(Paragraph("""For instance, consider this tortured table.
         It contains four columns, with widths of None, None, 60%, and 20%,
         respectively, and a single row.  The first cell contains a paragraph.
-        The second cell contains a table with fixed column widths that total 
+        The second cell contains a table with fixed column widths that total
         about 50% of the total available table width.  The third cell contains
-        a string.  The last cell contains a table with no set widths but a 
+        a string.  The last cell contains a table with no set widths but a
         single cell containing a paragraph.
         """, styNormal))
         ministy = TableStyle([
             ('GRID', (0,0), (-1,-1), 1.0, colors.black),
             ])
         nested1 = [Paragraph(
-            'This is a paragraph.  The column has a width of None.', 
+            'This is a paragraph.  The column has a width of None.',
             styNormal)]
         nested2 = [Table(
             [[Paragraph(
@@ -374,7 +372,7 @@ class TableTestCase(unittest.TestCase):
         nested4 = [Table(
             [[[Paragraph(
                 "This is a table with a paragraph in it but no width set.  "
-                "The column width in the containing table is 20%.", 
+                "The column width in the containing table is 20%.",
                 styNormal)]]],
             colWidths=(None,),
             rowHeights=None,
@@ -384,10 +382,10 @@ class TableTestCase(unittest.TestCase):
                   rowHeights=None,
                   style=ministy)
         lst.append(t)
-        
+
         lst.append(Paragraph("""Notice that the second column does expand to
         account for the minimum size of its contents; and that the remaining
-        space goes to the third column, in an attempt to honor the '60%' 
+        space goes to the third column, in an attempt to honor the '60%'
         request as much as possible.  This is reminiscent of the typical HTML
         browser approach to tables.""", styNormal))
 
@@ -395,13 +393,13 @@ class TableTestCase(unittest.TestCase):
         this is, consider the case of the last column: the table gets the
         minimum width of every flowable of every cell in the column.  In this
         case one of the flowables is a table with a column without a set
-        width, so the nested table must itself iterate over its flowables. 
+        width, so the nested table must itself iterate over its flowables.
         The contained paragraph then calculates the width of every word in it
         to see what the biggest word is, given the set font face and size.  It
         is easy to imagine creating a structure of this sort that took an
         unacceptably large amount of time to calculate.  Remember the golden
         rule, if you can. """, styNormal))
-        
+
         lst.append(Paragraph("""This code does not yet handle spans well.""",
         styNormal))
 
