@@ -1,11 +1,11 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 # full screen test
 """Tests for overprint/knockout.
 
 This has been placed in a separate file so output can be passed to printers
 """
-__version__='''$Id$'''
+__version__='3.3.0'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import unittest

@@ -1,8 +1,8 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 """Tests for context-dependent indentation
 """
-__version__='''$Id: test_platypus_indents.py 3660 2010-02-08 18:17:33Z damian $'''
+__version__='3.3.0'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os, random

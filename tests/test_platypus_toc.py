@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 """Tests for the Platypus TableOfContents class.
 
@@ -6,7 +6,7 @@ Currently there is only one such test. Most such tests, like this
 one, will be generating a PDF document that needs to be eye-balled
 in order to find out if it is 'correct'.
 """
-__version__='''$Id$'''
+__version__='3.3.0'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os

@@ -1,8 +1,8 @@
 #!/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/testdrawings.py
-__version__=''' $Id $ '''
+__version__='3.3.0'
 __doc__="""Defines some standard drawings to use as test cases
 
 This contains a number of routines to generate test drawings

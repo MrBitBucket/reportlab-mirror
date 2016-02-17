@@ -1,7 +1,7 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/styles.py
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __doc__='''Classes for ParagraphStyle and similar things.
 
 A style is a collection of attributes, but with some extra features

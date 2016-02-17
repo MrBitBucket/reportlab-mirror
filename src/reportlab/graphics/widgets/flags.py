@@ -3,7 +3,7 @@
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __doc__="""This file is a collection of flag graphics as widgets.
 
 All flags are represented at the ratio of 1:2, even where the official ratio for the flag is something else

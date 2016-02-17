@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/piecharts.py
 # experimental pie chart script.  Two types of pie - one is a monolithic
@@ -6,7 +6,7 @@
 #a wedges collection whic lets you customize the group or every individual
 #wedge.
 
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __doc__="""Basic Pie Chart class.
 
 This permits you to customize and pop out individual wedges;

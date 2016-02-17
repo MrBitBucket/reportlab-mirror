@@ -1,6 +1,6 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
-__version__=''' $Id$ '''
+__version__='3.3.0'
 """Tests performed on all Python source files of the ReportLab distribution.
 """
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, SecureTestCase, GlobDirectoryWalker, outputfile, printLocation

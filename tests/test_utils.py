@@ -1,7 +1,7 @@
 #!/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
-__version__='''$Id$'''
+__version__='3.3.0'
 __doc__="""Test reportlab.lib.util module"""
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)

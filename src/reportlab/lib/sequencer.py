@@ -1,6 +1,6 @@
-#Copyright ReportLab Europe Ltd. 2000-2013
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __doc__="""A Sequencer class counts things. It aids numbering and formatting lists."""
 __all__='''Sequencer getSequencer setSequencer'''.split()
 #

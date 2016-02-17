@@ -1,6 +1,6 @@
-#copyright ReportLab Inc. 2000-2012
+#copyright ReportLab Inc. 2000-2016
 #see license.txt for license details
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __all__ = ('USPS_4State',)
 
 from reportlab.lib.colors import black

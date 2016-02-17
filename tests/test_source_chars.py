@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 """This tests for things in source files.  Initially, absence of tabs :-)
 """
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, SecureTestCase, GlobDirectoryWalker, printLocation
 setOutDir(__name__)
 from reportlab.lib.testutils import RL_HOME,testsFolder
-__version__=''' $Id$ '''
+__version__='3.3.0'
 import os, sys, glob, re
 import reportlab
 import unittest

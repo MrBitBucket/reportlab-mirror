@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 __doc__="""
 This generates tables showing the 14 standard fonts in both
@@ -9,7 +9,7 @@ sequences in Python literals.
 
 usage: standardfonts.py [dec|hex|oct]
 """
-__version__=''' $Id$ '''
+__version__='3.3.0'
 import sys
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas

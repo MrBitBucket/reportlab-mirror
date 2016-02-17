@@ -1,10 +1,10 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #this test and associates functionality kinds donated by Ian Sparks.
 #see license.txt for license details
 """
 Tests for internal links and destinations
 """
-__version__='''$Id$'''
+__version__='3.3.0'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 

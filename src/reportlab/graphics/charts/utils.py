@@ -1,8 +1,8 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/utils.py
 
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __doc__="Utilities used here and there."
 from time import mktime, gmtime, strftime
 from math import log10, pi, floor, sin, cos, sqrt, hypot

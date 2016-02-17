@@ -3,7 +3,7 @@
 # Event Calendar widget
 # author: Andy Robinson
 
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __doc__="""This file is a
 """
 

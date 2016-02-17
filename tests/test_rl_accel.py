@@ -1,4 +1,4 @@
-__version__=''' $Id'''
+__version__='3.3.0'
 __doc__='''basic tests.'''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 from reportlab.lib.utils import asBytes, isPyPy

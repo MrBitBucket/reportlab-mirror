@@ -1,7 +1,7 @@
 #Copyright ReportLab Europe Ltd. 2000-2012
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/tools/pythonpoint/styles/modern.py
-__version__=''' $Id$ '''
+__version__='3.3.0'
 # style_modern.py
 __doc__="""This is an example style sheet.  You can create your own, and
 have them loaded by the presentation.  A style sheet is just a

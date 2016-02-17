@@ -10,7 +10,7 @@
 # derived from an original version created
 # by Jeff Bauer of Rubicon Research and used
 # with his kind permission
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __doc__="Jeff Bauer's lightweight date class, extended by us.  Predates Python's datetime module."
 
 

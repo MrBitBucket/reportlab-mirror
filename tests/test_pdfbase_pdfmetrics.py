@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 #test_pdfbase_pdfmetrics_widths
 """
@@ -7,7 +7,7 @@ Various tests for PDF metrics.
 The main test prints out a PDF documents enabling checking of widths of every
 glyph in every standard font.  Long!
 """
-__version__='''$Id$'''
+__version__='3.3.0'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import unittest

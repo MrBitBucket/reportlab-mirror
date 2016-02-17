@@ -1,9 +1,9 @@
-#Copyright ReportLab Europe Ltd. 2000-2013
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 import reportlab
 reportlab._rl_testing=True
 del reportlab
-__version__='''$Id$'''
+__version__='3.3.0'
 __doc__="""Provides support for the test suite.
 
 The test suite as a whole, and individual tests, need to share

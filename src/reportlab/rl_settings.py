@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2013
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 '''default settings for reportlab
 
@@ -6,7 +6,7 @@ to override these drop a module rl_local_settings.py parallel to this file or
 anywhere on the path.
 '''
 import os, sys
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __all__=tuple('''allowTableBoundsErrors
 shapeChecking
 defaultEncoding

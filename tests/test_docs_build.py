@@ -1,4 +1,4 @@
-__version__=''' $Id$ '''
+__version__='3.3.0'
 """Tests that all manuals can be built.
 """
 from reportlab.lib.testutils import setOutDir,SecureTestCase, printLocation

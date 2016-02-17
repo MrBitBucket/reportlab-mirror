@@ -1,8 +1,8 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfbase/_fontdata.py
 #$Header $
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __doc__="""Database of font related things
 
     - standardFonts - tuple of the 14 standard string font names

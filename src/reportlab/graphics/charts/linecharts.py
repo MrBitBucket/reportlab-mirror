@@ -1,8 +1,8 @@
-#Copyright ReportLab Europe Ltd. 2000-2004
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/linecharts.py
 
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __doc__="""This modules defines a very preliminary Line Chart example."""
 
 from reportlab.lib import colors

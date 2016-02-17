@@ -1,9 +1,9 @@
-    #Copyright ReportLab Europe Ltd. 2000-2004
+    #Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/charts/spider.py
 # spider chart, also known as radar chart
 
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __doc__="""Spider Chart
 
 Normal use shows variation of 5-10 parameters against some 'norm' or target.

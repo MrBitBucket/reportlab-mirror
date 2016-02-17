@@ -12,6 +12,44 @@ The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
 
+RELEASE 3.3  17/02/2016
+-----------------------
+    * Canvas & Doctemplate now allow specification of the initial font Name, Size & Leading. Prevously you had to mess with rl_settings to accomplish this.
+    * Canvas & Doctemplate now support specification of the crop/art/trim/bleed boxes.
+    * Add option to auto generate missing TTF font names. Handy for CJKers with home produced fonts. Also attempt to prevent usage of multiple TTFs with same name.
+    * Paragraph styles now have justifyBreaks to control justification of lines broken with <br/>.
+    * Paragraph styles now have justifyLastLine=n to control justification of last lines with more than n words (0 means do not).
+    * Added EAN-5 and ISBN barcode widgets (contribution by Edward Greve).
+    * Bug fix of QrCodeWidget (prompted by https://bitbucket.org/fubu/).
+    * Frames now have support for automatic flowables at the top of frame. story support via the class reportlab.platypus.flowables.SetTopFlowables.
+    * Added support for Trapped and ModDate PDF info dictionary keys.
+    * Bug fix for pie charts with no data (raised by  Michael Spector).
+    * New barcodes BarcodeCode128Auto & BarcodeECC200DataMatrix (contributed by Kyle MacFarlane).
+    * Improved LinePlot marker handling.
+    * PyPy improvements inspired by Marius Gedminas.
+    * Bug fix in reportlab.lib.utils.simpleSplit (reported by Chris Buergi <cb@enerweb.ch>).
+    * Unwanted escaping in renderSVG fixed (reported by Ruby Yocum).
+    * Bug fix in _rl_accel.c (remove excess state and fix refcount breakage reported by Mark De Wit <mark.dewit@iesve.com>).
+    * Code128 barcode length optimization inspired by Klaas Feenstra.
+    * Paragraph <sup>/<super> & <sub> tags now support rise & size attributes to allow special control over position & font size.
+    * Splitting tables now remove unwanted styles in the first part of the split (reported by Lele Gaifax). 
+    * test changes inspired by https://bitbucket.org/stoneleaf
+    * ReportLab now runs all tests under Python 2.7, 3.3, 3.4 & 3.5.
+
+
+### Contributors:
+    * Edward Greve
+    * https://bitbucket.org/fubu/
+    * Michael Spector
+    * Kyle MacFarlane
+    * Marius Gedminas
+    * Chris Buergi
+    * Ruby Yocum
+    * Mark de Wit
+    * Klaas Feenstra
+    * Lele Gaifax
+    * https://bitbucket.org/stoneleaf
+
 RELEASE 3.2  01/06/2015
 -----------------------
 

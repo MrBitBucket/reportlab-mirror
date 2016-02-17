@@ -2,7 +2,7 @@
 README
 =====================================
 
-(C) Copyright ReportLab Europe Ltd. 2000-2014.
+(C) Copyright ReportLab Europe Ltd. 2000-2016.
 See ``LICENSE.txt`` for license details.
 
 This is the ReportLab PDF Toolkit. It allows rapid creation
@@ -208,6 +208,6 @@ the parser.
 ==============================
 ``lib/normalDate.py`` originally by Jeff Bauer.
 
-Many, many contributors have helped out between 2000 and 2013.
+Many, many contributors have helped out between 2000 and 2016.
 We try to keep a list in the first chapter of the User Guide; if you
 have contributed and are not listed there, please let us know.

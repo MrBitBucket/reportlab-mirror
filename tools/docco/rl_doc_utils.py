@@ -2,7 +2,7 @@
 #Copyright ReportLab Europe Ltd. 2000-2012
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/tools/docco/rl_doc_utils.py
-__version__=''' $Id$ '''
+__version__='3.3.0'
 
 __doc__ = """
 This module contains utilities for generating guides

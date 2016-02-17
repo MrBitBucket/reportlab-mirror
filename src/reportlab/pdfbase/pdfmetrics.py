@@ -1,8 +1,8 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2016
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfbase/pdfmetrics.py
 #$Header $
-__version__=''' $Id$ '''
+__version__='3.3.0'
 __doc__="""This provides a database of font metric information and
 efines Font, Encoding and TypeFace classes aimed at end users.
 
