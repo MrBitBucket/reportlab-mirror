@@ -553,6 +553,9 @@ phonemic and <u>morphological</u> <strike>analysis</strike>.'''
         a(XPreformatted("This is a <sup rise=8 size=7><span color='red'>sup</span></sup>rise=8 size=7.",p_style))
         a(Paragraph("This is a <sup rise=9 size=7><span color='red'>sup</span></sup>rise=9 size=7.",p_style))
         a(XPreformatted("This is a <sup rise=9 size=7><span color='red'>sup</span></sup>rise=9 size=7.",p_style))
+        a(Paragraph("This is a <sup rise=90% size=70%><span color='red'>sup</span></sup>rise=90% size=70%.",p_style))
+        a(Paragraph("This is a <sup rise=-2 size=-2><span color='red'>sup</span></sup>rise=-2 size=-2.",p_style))
+        a(Paragraph("This is a <sup rise=-4 size=-3><span color='red'>sup</span></sup>rise=-4 size=-3.",p_style))
         a(PageBreak())
 
         a(Paragraph('<br/><b>Some Paragraph tests of &lt;img width="x%" height="x%"</b>...', normal))

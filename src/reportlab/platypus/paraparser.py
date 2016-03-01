@@ -99,6 +99,27 @@ class _PCT:
         normalizer = normalizer or getattr(self,'_normalizer')
         return normalizer*self._value
 
+def fontSizeNormalize(frag,attr,default):
+    if not hasattr(frag,attr): return default
+    v = _numpct(getattr(frag,attr),allowRelative=True)
+    return (v[1]+frag.fontSize) if isinstance(v,tuple) else v.normalizedValue(frag.fontSize) if isinstance(v,_PCT) else v
+
+class _CheckSup:
+    '''class for syntax checking <sup> attributes
+    if the check succeeds then we always return the string for later evaluation
+    '''
+    def __init__(self,kind):
+        self.kind = kind
+        self.fontSize = 10
+
+    def __call__(self,s):
+        setattr(self,self.kind,s)
+        try:
+            fontSizeNormalize(self,self.kind,None)
+            return s
+        except:
+            raise ValueError('<sup> invalid value %r for attribute %s' % (s,self.kind))
+
 def _valignpc(s):
     s = s.lower()
     if s in ('baseline','sub','super','top','text-top','middle','bottom','text-bottom'):
@@ -251,8 +272,8 @@ _indexAttrMap = {
                 'format': ('format',None),
                 }
 _supAttrMap = {
-                'rise': ('supr', _num),
-                'size': ('sups', _num),
+                'rise': ('supr', _CheckSup('rise')),
+                'size': ('sups', _CheckSup('size')),
                 }
 
 def _addAttributeNames(m):
@@ -791,6 +812,8 @@ class ParaParser(HTMLParser):
 
     def _syntax_error(self,message):
         if message[:10]=="attribute " and message[-17:]==" value not quoted": return
+        if self._crashOnError:
+            raise ValueError('paraparser: syntax error: %s' % message)
         self.errors.append(message)
 
     def start_greek(self, attr):
@@ -1064,18 +1087,14 @@ class ParaParser(HTMLParser):
             if k in attrMap:
                 j = attrMap[k]
                 func = j[1]
-                try:
-                    A[j[0]] = v if func is None else func(v)
-                except:
-                    self._syntax_error('%s: invalid value %s'%(k,v))
+                A[j[0]] = v if func is None else func(v)
             else:
-                raise ValueError('invalid attribute name %s attrMap=%r'% (k,list(sorted(attrMap.keys()))))
-                self._syntax_error('invalid attribute name %s'%k)
+                self._syntax_error('invalid attribute name %s attrMap=%r'% (k,list(sorted(attrMap.keys()))))
         return A
 
     #----------------------------------------------------------------
 
-    def __init__(self,verbose=0, caseSensitive=0, ignoreUnknownTags=1):
+    def __init__(self,verbose=0, caseSensitive=0, ignoreUnknownTags=1, crashOnError=True):
         HTMLParser.__init__(self,
             **(dict(convert_charrefs=False) if sys.version_info>=(3,4) else {}))
         self.verbose = verbose
@@ -1083,6 +1102,7 @@ class ParaParser(HTMLParser):
         #all start/end_ methods should have a lower case version for HMTMParser
         self.caseSensitive = caseSensitive
         self.ignoreUnknownTags = ignoreUnknownTags
+        self._crashOnError = crashOnError
 
     def _iReset(self):
         self.fragList = []
@@ -1121,11 +1141,11 @@ class ParaParser(HTMLParser):
                 frag.sup = 0
 
             if frag.sub:
-                frag.rise = -getattr(frag,'supr',frag.fontSize*subFraction)
-                frag.fontSize = getattr(frag,'sups',frag.fontSize-min(sizeDelta,0.2*frag.fontSize))
+                frag.rise = -fontSizeNormalize(frag,'supr',frag.fontSize*subFraction)
+                frag.fontSize = fontSizeNormalize(frag,'sups',frag.fontSize-min(sizeDelta,0.2*frag.fontSize))
             elif frag.sup:
-                frag.rise = getattr(frag,'supr',frag.fontSize*supFraction)
-                frag.fontSize = getattr(frag,'sups',frag.fontSize-min(sizeDelta,0.2*frag.fontSize))
+                frag.rise = fontSizeNormalize(frag,'supr',frag.fontSize*supFraction)
+                frag.fontSize = fontSizeNormalize(frag,'sups',frag.fontSize-min(sizeDelta,0.2*frag.fontSize))
 
             if frag.greek:
                 frag.fontName = 'symbol'
