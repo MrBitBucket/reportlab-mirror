@@ -92,19 +92,20 @@ class ECC200DataMatrix(Barcode):
     This is the size and encoding that Royal Mail wants on all mail from October 1st 2015.
     see https://bitbucket.org/rptlab/reportlab/issues/69/implementations-of-code-128-auto-and-data
     '''
+    barWidth = 4
+
     def __init__(self, *args, **kwargs):
-        # These values are hardcoded for a Type 12 44x44 data matrix
+        Barcode.__init__(self,*args, **kwargs)
+
+        # These values below are hardcoded for a Type 12 44x44 data matrix
         self.row_modules = 44
         self.col_modules = 44
         self.row_regions = 2
         self.col_regions = 2
         self.cw_data = 144
         self.cw_ecc = 56
-        self.barWidth = 4
-
         self.row_usable_modules = self.row_modules - self.row_regions * 2
         self.col_usable_modules = self.col_modules - self.col_regions * 2
-        Barcode.__init__(self,*args, **kwargs)
 
     def validate(self):
         self.valid = 1
