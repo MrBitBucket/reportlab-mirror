@@ -728,12 +728,7 @@ class Table(Flowable):
                 for rowNo in xrange(self._nrows):
                     value = self._cellvalues[rowNo][colNo]
                     style = self._cellStyles[rowNo][colNo]
-                    pad = style.leftPadding+style.rightPadding
-                    new = elementWidth(value,style)
-                    if new:
-                        new += pad
-                    else:
-                        new = pad
+                    new = elementWidth(value,style) or 0
                     new += style.leftPadding+style.rightPadding
                     final = max(final, new)
                     siz = siz and self._canGetWidth(value) # irrelevant now?
