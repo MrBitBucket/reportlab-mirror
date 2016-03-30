@@ -153,7 +153,7 @@ heading3("""$TableStyle$ Cell Formatting Commands""")
 disc("""The cell formatting commands all begin with an identifier, followed by
 the start and stop cell definitions and the perhaps other arguments.
 the cell formatting commands are:""")
-eg("""
+npeg("""
 FONT                    - takes fontname, optional fontsize and optional leading.
 FONTNAME (or FACE)      - takes fontname.
 FONTSIZE (or SIZE)      - takes fontsize in points; leading may get out of sync.
@@ -164,7 +164,10 @@ LEFTPADDING             - takes an integer, defaults to 6.
 RIGHTPADDING            - takes an integer, defaults to 6.
 BOTTOMPADDING           - takes an integer, defaults to 3.
 TOPPADDING              - takes an integer, defaults to 3.
-BACKGROUND              - takes a color.
+BACKGROUND              - takes a color defined by an object, string name or numeric tuple/list,
+                          or takes a list/tuple describing a desired gradient fill which should
+                          contain three elements of the form [DIRECTION, startColor, endColor]
+                          where DIRECTION is either VERTICAL or HORIZONTAL.
 ROWBACKGROUNDS          - takes a list of colors to be used cyclically.
 COLBACKGROUNDS          - takes a list of colors to be used cyclically.
 VALIGN                  - takes one of TOP, MIDDLE or the default BOTTOM
@@ -309,7 +312,7 @@ eg("""
 SPAN, (sc,sr), (ec,er)
 """)
 disc("""indicates that the cells in columns $sc$ - $ec$ and rows $sr$ - $er$ should be combined into a super cell
-with contents determined by the cell $(sc, sr)$. The other cells should be present, but should contain empty strings 
+with contents determined by the cell $(sc, sr)$. The other cells should be present, but should contain empty strings
 or you may get unexpected results.
 """)
 EmbeddedCode("""
@@ -340,7 +343,7 @@ disc("""demands that the cells in columns $sc$ - $ec$ and rows $sr$ - $er$ may n
 heading3("""Special $TableStyle$ Indeces""")
 disc("""In any style command the first row index may be set to one of the special strings
 $'splitlast'$ or $'splitfirst'$ to indicate that the style should be used only for the last row of
-a split table, or the first row of a continuation. This allows splitting tables with nicer effects around the split.""")  
+a split table, or the first row of a continuation. This allows splitting tables with nicer effects around the split.""")
 
 heading1("""Programming $Flowables$""")
 
@@ -353,7 +356,7 @@ disc("""Assigns a variable of name $var$ to the expression $expr$. E.g.:""")
 eg("""
 DocAssign('i',3)
 """)
-                
+
 heading2("""$DocExec(self, stmt, lifetime='forever')$""")
 
 disc("""Executes the statement $stmt$. E.g.:""")
@@ -425,7 +428,7 @@ disc("""
 The line will be split on any single character defined in $splitChars$. If no value is provided for this property, the line will be split on any of the following standard characters: space, colon, full stop, semi-colon, coma, hyphen, forward slash, back slash, left parenthesis, left square bracket and left curly brace
 """)
 disc("""
-Characters can be automatically inserted at the beginning of each line that has been created. You can set the property $newLineChars$ to the characters you want to use. 
+Characters can be automatically inserted at the beginning of each line that has been created. You can set the property $newLineChars$ to the characters you want to use.
 """)
 EmbeddedCode("""
 from reportlab.lib.styles import getSampleStyleSheet

@@ -135,10 +135,13 @@ def bullet(text):
     P = Paragraph(text, BU)
     getStory().append(P)
 
-def eg(text,before=0.1,after=0):
+def eg(text,before=0.1,after=0,klass=PythonPreformatted):
     space(before)
-    disc(text, klass=PythonPreformatted, style=exampletextstyle)
+    disc(text, klass=klass, style=exampletextstyle)
     space(after)
+
+def npeg(text,before=0.1,after=0):
+    eg(text,before=before,after=after,klass=XPreformatted)
 
 def space(inches=1./6):
     if inches: getStory().append(Spacer(0,inches*inch))

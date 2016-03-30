@@ -504,7 +504,7 @@ class Table(Flowable):
                 if isinstance(w,(float,int)): return w
             except AttributeError:
                 pass
-        if v is None: 
+        if v is None:
             return 0
         else:
             try:
@@ -642,7 +642,7 @@ class Table(Flowable):
 
     def _culprit(self):
         """Return a string describing the tallest element.
-        
+
         Usually this is what causes tables to fail to split.  Currently
         tables are the only items to have a '_culprit' method. Doctemplate
         checks for it.
@@ -652,10 +652,10 @@ class Table(Flowable):
         rowNum = rh.index(tallest)
         #rowNum of limited interest as usually it's a split one
         #and we see row #1.  Text might be a nice addition.
-        
+
         return 'tallest cell %0.1f points' % tallest
-        
-        
+
+
 
     def _hasVariWidthElements(self, upToRow=None):
         """Check for flowables in table cells and warn up front.
@@ -955,7 +955,7 @@ class Table(Flowable):
         Based on self._spanRanges, which is already known,
         and the widths which were given or previously calculated,
         self._spanRects shows the real coords for drawing:
-            
+
             (col, row) -> (x, y, width, height)
 
         for each cell.  Any cell which 'does not exist' as another
@@ -1470,15 +1470,40 @@ class Table(Flowable):
                         canv.rect(x0, y0, w, h, stroke=0,fill=1)
                     x0 = x0 +w
             else:   #cmd=='BACKGROUND'
-                color = colors.toColorOrNone(arg)
-                if color:
+                if arg and isinstance(arg,(list,tuple)) and arg[0] in ('VERTICAL','HORIZONTAL'):
+                    #
+                    # Arg is a list, assume we are going for a gradient fill
+                    # where we expect a containing a direction for the gradient
+                    # and the starting an final gradient colors. For example:
+                    # ['HORIZONTAL', colors.white, colors.grey]   or
+                    # ['VERTICAL', colors.red, colors.blue]
+                    #
+                    canv.saveState()
+
                     if ec==sc and er==sr and spanRects:
                         xywh = spanRects.get((sc,sr))
                         if xywh:
                             #it's a single cell
                             x0, y0, w, h = xywh
-                    canv.setFillColor(color)
-                    canv.rect(x0, y0, w, h, stroke=0,fill=1)
+                    p = canv.beginPath()
+                    p.rect(x0, y0, w, h)
+                    canv.clipPath(p, stroke=0)
+                    direction=arg.pop(0)
+                    if direction=="HORIZONTAL":
+                        canv.linearGradient(x0,y0,x0+w,y0,arg,extend=False)
+                    else:   #VERTICAL
+                        canv.linearGradient(x0,y0,x0,y0+h,arg,extend=False)
+                    canv.restoreState()
+                else:
+                    color = colors.toColorOrNone(arg)
+                    if color:
+                        if ec==sc and er==sr and spanRects:
+                            xywh = spanRects.get((sc,sr))
+                            if xywh:
+                                #it's a single cell
+                                x0, y0, w, h = xywh
+                        canv.setFillColor(color)
+                        canv.rect(x0, y0, w, h, stroke=0,fill=1)
 
     def _drawCell(self, cellval, cellstyle, pos, size):
         colpos, rowpos = pos
