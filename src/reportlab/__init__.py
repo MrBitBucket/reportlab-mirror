@@ -5,7 +5,7 @@ Version = "3.3.3"
 __version__=Version
 __date__='20160330'
 
-import sys, os, imp
+import sys, os
 
 if sys.version_info[0:2]!=(2, 7) and sys.version_info<(3, 3):
     raise ImportError("""reportlab requires Python 2.7+ or 3.3+; 3.0-3.2 are not supported.""")
@@ -20,11 +20,23 @@ if isPy3:
     builtins.cmp = cmp
     builtins.xrange = range
     del cmp, builtins
+    def _fake_import(fn,name):
+        from importlib import machinery
+        m = machinery.SourceFileLoader(name,fn)
+        try:
+            return m.load_module(name)
+        except FileNotFoundError:
+            raise ImportError('file %s not found' % ascii(fn))
 else:
     from future_builtins import ascii
     import __builtin__
     __builtin__.ascii = ascii
     del ascii, __builtin__
+    def _fake_import(fn,name):
+        if os.path.isfile(fn):
+            import imp
+            with open(fn,'rb') as f:
+                imp.load_source(name,fn,f)
 
 #try to use dynamic modifications from
 #reportlab.local_rl_mods.py
@@ -33,11 +45,6 @@ try:
     import reportlab.local_rl_mods
 except ImportError:
     pass
-
-def _fake_import(fn,name):
-    if os.path.isfile(fn):
-        with open(fn,'rb') as f:
-            imp.load_source(name,fn,f)
 
 try:
     import reportlab_mods   #application specific modifications can be anywhere on python path
