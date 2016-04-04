@@ -24,7 +24,7 @@ if isPy3:
         from importlib import machinery
         m = machinery.SourceFileLoader(name,fn)
         try:
-            return m.load_module(name)
+            sys.modules[name] = m.load_module(name)
         except FileNotFoundError:
             raise ImportError('file %s not found' % ascii(fn))
 else:
@@ -36,7 +36,7 @@ else:
         if os.path.isfile(fn):
             import imp
             with open(fn,'rb') as f:
-                imp.load_source(name,fn,f)
+                sys.modules[name] = imp.load_source(name,fn,f)
 
 #try to use dynamic modifications from
 #reportlab.local_rl_mods.py
