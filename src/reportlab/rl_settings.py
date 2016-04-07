@@ -51,7 +51,8 @@ CMapSearchPath
 baseUnderlineProportion
 decimalSymbol
 errorOnDuplicatePageLabelPage
-autoGenerateMissingTTFName'''.split())
+autoGenerateMissingTTFName
+allowTTFSubsetting'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -107,13 +108,20 @@ decimalSymbol=              '.'                     #what we use to align floats
 errorOnDuplicatePageLabelPage= 0                    #if True will cause repeated PageLabel page numbers to raise an error.
 autoGenerateMissingTTFName=0                        #if true we try to auto generate any missing TTF font name
 
+allowTTFSubsetting=         []                      #list of font file names that will be subsetted even when they
+                                                    #have the no subsetting flag set. These should be fonts for which
+                                                    #the user has explicit permission from the rights holder(s). 
+                                                    #This flag could already be overcome by hacking the code.
+                                                    #ReportLab takes no responsibility for the use of this setting.
+
+
 # places to look for T1Font information
 T1SearchPath =  (
                 'c:/Program Files/Adobe/Acrobat 9.0/Resource/Font', 
                 'c:/Program Files/Adobe/Acrobat 8.0/Resource/Font', 
                 'c:/Program Files/Adobe/Acrobat 7.0/Resource/Font', 
                 'c:/Program Files/Adobe/Acrobat 6.0/Resource/Font', #Win32, Acrobat 6
-                'c:/Program Files/Adobe/Acrobat 5.0/Resource/Font',     #Win32, Acrobat 5
+                'c:/Program Files/Adobe/Acrobat 5.0/Resource/Font', #Win32, Acrobat 5
                 'c:/Program Files/Adobe/Acrobat 4.0/Resource/Font', #Win32, Acrobat 4
                 '%(disk)s/Applications/Python %(sys_version)s/reportlab/fonts', #Mac?
                 '/usr/lib/Acrobat9/Resource/Font',      #Linux, Acrobat 5?

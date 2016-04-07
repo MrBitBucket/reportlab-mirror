@@ -57,7 +57,7 @@ from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
 from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF
 from collections import namedtuple
-import time
+import os, time
 
 class TTFError(pdfdoc.PDFError):
     "TrueType font exception"
@@ -559,8 +559,9 @@ class TTFontFile(TTFontParser):
             usWeightClass = self.read_ushort()
             self.skip(2)
             fsType = self.read_ushort()
-            if fsType == 0x0002 or (fsType & 0x0300) != 0:
-                raise TTFError('Font does not allow subsetting/embedding (%04X)' % fsType)
+            if fsType==0x0002 or (fsType & 0x0300):
+                if os.path.basename(self.filename) not in rl_config.allowTTFSubsetting:
+                    raise TTFError('Font does not allow subsetting/embedding (%04X)' % fsType)
             self.skip(58)   #11*2 + 10 + 4*4 + 4 + 3*2
             sTypoAscender = self.read_short()
             sTypoDescender = self.read_short()
