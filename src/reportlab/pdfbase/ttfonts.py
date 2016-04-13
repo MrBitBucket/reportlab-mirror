@@ -552,6 +552,7 @@ class TTFontFile(TTFontParser):
 
         # OS/2 - OS/2 and Windows metrics table
         # (needs data from head table)
+        subsettingAllowed = True
         if "OS/2" in self.table:
             self.seek_table("OS/2")
             version = self.read_ushort()
@@ -560,8 +561,7 @@ class TTFontFile(TTFontParser):
             self.skip(2)
             fsType = self.read_ushort()
             if fsType==0x0002 or (fsType & 0x0300):
-                if os.path.basename(self.filename) not in rl_config.allowTTFSubsetting:
-                    raise TTFError('Font does not allow subsetting/embedding (%04X)' % fsType)
+                subsettingAllowed = os.path.basename(self.filename) not in rl_config.allowTTFSubsetting
             self.skip(58)   #11*2 + 10 + 4*4 + 4 + 3*2
             sTypoAscender = self.read_short()
             sTypoDescender = self.read_short()
@@ -631,6 +631,13 @@ class TTFontFile(TTFontParser):
         if ver_maj != 1:
             raise TTFError('Unknown maxp table version %d.%04x' % (ver_maj, ver_min))
         self.numGlyphs = numGlyphs = self.read_ushort()
+        if not subsettingAllowed:
+            if self.numGlyphs>0xFF:
+                raise TTFError('Font does not allow subsetting/embedding (%04X)' % fsType)
+            else:
+                self._full_font = True
+        else:
+            self._full_font = False
 
         if not charInfo:
             self.charToGlyph = None
@@ -1094,11 +1101,22 @@ class TTFont:
     """
     class State:
         namePrefix = 'F'
-        def __init__(self,asciiReadable=None):
-            self.assignments = {}
+        def __init__(self,asciiReadable=None,ttf=None):
+            A = self.assignments = {}
             self.nextCode = 0
             self.internalName = None
             self.frozen = 0
+            if getattr(getattr(ttf,'face',None),'_full_font',None):
+                C = set(self.charToGlyph.keys())
+                for n in xrange(256):
+                    if n in C:
+                        A[n] = n
+                        C.remove(n)
+                for n in C:
+                    A[n] = n
+                self.subsets = [[n for n in A]]
+                self.frozen = True
+                return
 
             if asciiReadable is None:
                 asciiReadable = rl_config.ttfAsciiReadable
@@ -1110,11 +1128,11 @@ class TTFont:
                 subset0 = list(xrange(128))
                 self.subsets = [subset0]
                 for n in subset0:
-                    self.assignments[n] = n
+                    A[n] = n
                 self.nextCode = 128
             else:
                 self.subsets = [[32]*33]
-                self.assignments[32] = 32
+                A[32] = 32
 
     _multiByte = 1      # We want our own stringwidth
     _dynamicFont = 1    # We want dynamic subsetting
@@ -1144,7 +1162,7 @@ class TTFont:
         try:
             state = self.state[doc]
         except KeyError:
-            state = self.state[doc] = TTFont.State(asciiReadable)
+            state = self.state[doc] = TTFont.State(asciiReadable,self)
             if namePrefix is not None:
                 state.namePrefix = namePrefix
         return state
@@ -1156,7 +1174,7 @@ class TTFont:
         subsets when building different documents at the same time."""
         asciiReadable = self._asciiReadable
         try: state = self.state[doc]
-        except KeyError: state = self.state[doc] = TTFont.State(asciiReadable)
+        except KeyError: state = self.state[doc] = TTFont.State(asciiReadable,self)
         curSet = -1
         cur = []
         results = []
