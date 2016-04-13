@@ -857,11 +857,11 @@ class TablesTestCase(unittest.TestCase):
     "Make documents with tables"
 
     def test0(self):
-        "Make a document full of tables"
+        "Make a document full of tables 0"
         run()
 
     def test1(self):
-        "Make a document full of tables"
+        "Make a document full of tables 1"
         old_tables_test()
 
     def test2(self):

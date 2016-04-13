@@ -599,12 +599,18 @@ class Table(Flowable):
                 except:
                     annotateException('\nspanning problem in %s hmax=%s lim=%s avail=%s x %s\nH0=%r H=%r\nspanCons=%r' % (self.identity(),hmax,lim,availWidth,availHeight,H0,H,spanCons))
 
-        height = self._height = sum(H[:hmax])
-        self._rowpositions = [height]    # index 0 is actually topline; we skip when processing cells
-        for h in H[:hmax]:
-            height -= h
-            self._rowpositions.append(height)
-        assert abs(height)<1e-8, '!!!!!%s\ninternal height error height=%r hmax=%d Sum(H[:%d])=%r\nH=%r\nrowPositions=%r' % (self.identity(),height,hmax,hmax,self._height,H[:hmax],self._rowpositions)
+        #iterate backwards through the heights to get rowpositions in reversed order
+        self._rowpositions = j = []
+        height = c = 0
+        for i in xrange(hmax-1,-1,-1):
+            j.append(height)
+            y = H[i] - c
+            t = height + y
+            c = (t - height) - y
+            height = t
+        j.append(height)
+        self._height = height
+        j.reverse()     #reverse the reversed list of row positions
         self._hmax = hmax
 
     def _calc(self, availWidth, availHeight):

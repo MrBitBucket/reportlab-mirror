@@ -74,7 +74,7 @@ eps_ttf_embed=              1                       #set to False to disable
 eps_ttf_embed_uid=          0                       #set to 1 to enable
 overlapAttachedSpace=       1                       #if set non false then adajacent flowable space after
                                                     #and space before are merged (max space is used).
-longTableOptimize =         1                       #default don't use Henning von Bargen's long table optimizations
+longTableOptimize =         1                       #default do use Henning von Bargen's long table optimizations
 autoConvertEncoding  =      0                       #convert internally as needed (experimental)
 _FUZZ=                      1e-6                    #fuzz for layout arithmetic
 wrapA85=                    0                       #set to 1 to get old wrapped line behaviour
