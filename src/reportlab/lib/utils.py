@@ -664,7 +664,7 @@ def open_for_read(name,mode='b', urlopen=urlopen, datareader=datareader):
         return open_for_read_by_name(name,mode)
     except:
         try:
-            return getBytesIO(datareader(name) if name.startswith('data:') else urlopen(name).read())
+            return getBytesIO(datareader(name) if name[:5].lower()=='data:' else urlopen(name).read())
         except:
             raise IOError('Cannot open resource "%s"' % name)
 del urlopen, datareader
