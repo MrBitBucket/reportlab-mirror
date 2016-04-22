@@ -1,5 +1,5 @@
 /*
-* Copyright ReportLab Europe Ltd. 2000-2007
+* Copyright ReportLab Europe Ltd. 2000-2016
 * licensed under the same terms as the ReportLab Toolkit
 * see http://www.reportlab.co.uk/svn/public/reportlab/trunk/reportlab/license.txt
 * for details.
@@ -29,7 +29,7 @@
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.71"
+#define VERSION "0.72"
 #define MODULE "_rl_accel"
 
 struct module_state	{
@@ -552,12 +552,49 @@ static PyObject *_GetAttrString(PyObject *obj, char *name)
 	return res;
 }
 
+/* Get a UTF8 encoded string buffer, the return value is the PyObject
+   holding the memory for the buffer and should be decrefed to free
+   memory */
+static PyObject *_GetStringBuf(PyObject *obj, char **buf)
+{
+	PyObject *res;
+
+	if(PyUnicode_Check(obj)){
+#ifdef	isPy3
+		res = obj;
+		Py_INCREF(res);
+		*buf = PyUnicode_AsUTF8(res);
+#else
+		res = PyUnicode_AsUTF8String(obj);
+		if (!res) {
+			PyErr_SetString(PyExc_ValueError,
+					"encode to UTF8 bytes failed");
+			return NULL;
+		}
+		*buf = PyBytes_AsString(res);
+#endif
+		}
+	else if(PyBytes_Check(obj)){
+		res = obj;
+		Py_INCREF(res);
+		*buf = PyBytes_AsString(res);
+		}
+	else{
+		PyErr_SetString(PyExc_ValueError,
+				"require bytes or unicode object");
+		return NULL;
+		}
+	return res;
+}
+
+
 static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 {
 	long		i, j, _i1, _i2;
 	PyObject	*R, *font, *res, *utext=NULL, *fonts=NULL,
 				*_o1 = NULL, *_o2 = NULL, *_o3 = NULL;
 	static char *argnames[] = {"utext","fonts",NULL};
+	PyObject	*encObj = NULL;
 	char		*encStr;
 	if (!PyArg_ParseTupleAndKeywords(args, kwds, "OO", argnames, &utext, &fonts)) return NULL;
 	Py_INCREF(utext);
@@ -580,31 +617,10 @@ static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 	_o1 = _o2 = NULL;
 
 	_o2 = _GetAttrString(font, "encName"); if(!_o2) ERROR_EXIT();
-
-	if(PyUnicode_Check(_o2)){
-#ifdef	isPy3
-		encStr = PyUnicode_AsUTF8(_o2);
-#else
-		_o1 = PyUnicode_AsUTF8String(_o2);
-		if(!_o1){
-			PyErr_SetString(PyExc_ValueError,"font.encName not UTF8 encoded bytes");
-			ERROR_EXIT();
-			}
-		encStr = PyBytes_AsString(_o1);
-		Py_DECREF(_o1);
-		_o1 = NULL;
-#endif
-		}
-	else if(PyBytes_Check(_o2)){
-		encStr = PyBytes_AsString(_o2);
-		}
-	else{
-		PyErr_SetString(PyExc_ValueError,"font.encName is not bytes or unicode");
-		ERROR_EXIT();
-		}
-	if(PyErr_Occurred()) ERROR_EXIT();
+	encObj = _GetStringBuf(_o2, &encStr);
 	Py_DECREF(_o2);
 	_o2 = NULL;
+	if (!encObj) ERROR_EXIT();
 	if(strstr(encStr,"UCS-2")) encStr = "UTF16";
 
 	while((_i1=PyObject_IsTrue(utext))>0){
@@ -702,6 +718,7 @@ L_ERR:
 	Py_XDECREF(_o3);
 	res = NULL;
 L_OK:
+	Py_XDECREF(encObj);
 	Py_DECREF(R);
 	Py_DECREF(font);
 	Py_DECREF(utext);
@@ -713,36 +730,17 @@ static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObjec
 	PyObject *L=0, *t=0, *f=0, *self, *text, *size, *res,
 				*encoding = 0, *_o1 = 0, *_o2 = 0, *_o3 = 0;
 	unsigned char *b;
+	PyObject *encObj = NULL;
 	const char *encStr;
 	int n, m, i, j, s, _i1;
 	static char *argnames[]={"self","text","size","encoding",0};
 	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &self, &text, &size, &encoding)) return 0;
 	Py_INCREF(text);
 	if(!encoding) encStr="utf8";
-	else if(PyUnicode_Check(encoding)){
-#ifdef	isPy3
-		encStr = PyUnicode_AsUTF8(encoding);
-#else
-		_o1 = PyUnicode_AsUTF8String(encoding);
-		if(!_o1){
-			PyErr_SetString(PyExc_ValueError,"encoding not UTF8 encoded bytes");
-			ERROR_EXIT();
-			}
-		encStr = PyBytes_AsString(_o1);
-		Py_DECREF(_o1);
-		_o1 = NULL;
-#endif
+	else {
+		encObj = _GetStringBuf(encoding, &encStr);
+		if(!encObj) ERROR_EXIT();
 		}
-	else if(PyBytes_Check(encoding)){
-		encStr = PyBytes_AS_STRING(encoding);
-		}
-	else{
-		PyErr_SetString(PyExc_ValueError, "invalid type for encoding");
-		ERROR_EXIT();
-		}
-	L = NULL;
-	t = NULL;
-	f = NULL;
 
 	if(!PyUnicode_Check(text)){
 		if(PyBytes_Check(text)){
@@ -821,6 +819,7 @@ L_ERR:
 	Py_XDECREF(_o3);
 	res = NULL;
 L_OK:
+	Py_XDECREF(encObj);
 	Py_XDECREF(L);
 	Py_XDECREF(t);
 	Py_XDECREF(f);
