@@ -494,6 +494,7 @@ LIST_STYLE = TableStyle(
                     ('BACKGROUND', (0, 0), (0, 1), colors.pink),
                     ('BACKGROUND', (1, 1), (1, 2), colors.lavender),
                     ('BACKGROUND', (2, 2), (2, 3), colors.orange),
+                    ('TEXTCOLOR',(0,-1),(-2,-1),colors.green),
                     ])
     lst.append(Paragraph("Illustrating splits: nosplit", styleSheet['BodyText']))
     lst.append(t)
@@ -510,6 +511,18 @@ LIST_STYLE = TableStyle(
     lst.append(Paragraph("Illustrating splits: split(4in,56)", styleSheet['BodyText']))
     lst.append(Spacer(0,6))
     for s in t.split(4*inch,56):
+        lst.append(s)
+        lst.append(Spacer(0,6))
+
+    lst.append(Paragraph("Illustrating splits: repeated split(4in,30)", styleSheet['BodyText']))
+    lst.append(Spacer(0,6))
+    S = t.split(4*inch,30)
+    s = S.pop(-1)
+    S.extend(s.split(4*inch,30))
+    s = S.pop(-1)
+    S.extend(s.split(4*inch,30))
+
+    for s in S:
         lst.append(s)
         lst.append(Spacer(0,6))
 
