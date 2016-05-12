@@ -453,7 +453,7 @@ class Group(Shape):
         from reportlab.graphics.widgetbase import Widget
         obj = Group()
         if hasattr(obj,'transform'): obj.transform = self.transform[:]
-        P = self.contents[:]    # pending nodes
+        P = self.getContents()[:]   # pending nodes
         while P:
             n = P.pop(0)
             if isinstance(n, UserNode):
