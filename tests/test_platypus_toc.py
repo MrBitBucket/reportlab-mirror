@@ -187,6 +187,7 @@ class TocTestCase(unittest.TestCase):
         headerStyle = makeHeaderStyle(0)
         d, e = tableofcontents.delta, tableofcontents.epsilon
         tocLevelStyle = makeTocHeaderStyle(0, d, e)
+        bodyStyle = makeBodyStyle()
 
         # Build most of the story; we'll re-use it to 
         # make documents with different numbers of passes.
@@ -205,7 +206,7 @@ class TocTestCase(unittest.TestCase):
             #now put some lengthy body stuff in.  
             for paras in range(random.randint(1,3)):
                 txt = xmlEscape(randomtext.randomText(randomtext.PYTHON, 5))
-                para = Paragraph(txt, makeBodyStyle())
+                para = Paragraph(txt, bodyStyle)
                 story.append(para)
 
 
@@ -216,7 +217,7 @@ class TocTestCase(unittest.TestCase):
         story1 = [toc] + story
 
 
-        path = outputfile('test_platypus_toc_preload.pdf')
+        path = outputfile('test_platypus_toc_preload_1.pdf')
         doc = MyDocTemplate(path)
         passes = doc.multiBuild(story1)
         self.assertEquals(passes, 3)
@@ -235,7 +236,7 @@ class TocTestCase(unittest.TestCase):
         story2 = [toc] + story
 
 
-        path = outputfile('test_platypus_toc_preload.pdf')
+        path = outputfile('test_platypus_toc_preload_2.pdf')
         doc = MyDocTemplate(path)
         passes = doc.multiBuild(story2)
         self.assertEquals(passes, 2)
@@ -253,24 +254,25 @@ class TocTestCase(unittest.TestCase):
         for i in range(chapters):
             #add tuple of (level, text, pageNum, key)
             #with an initial guess of pageNum= 3
-            tocEntries.append((0, 'This is chapter %d' % i, 2+i, None))
+            title = ('This is chapter %d' % (i+1)) if i!=9 else '<a href="http://www.reportlab.com">onelink</a>'
+            tocEntries.append((0, title, 2+i, None))
         toc3.addEntries(tocEntries)
 
         story3 = [toc3] 
         for i in range(chapters):
             story3.append(PageBreak())
-            story3.append(Paragraph('This is chapter %d' % (i+1),
-                                   headerStyle))
+            title = ('This is chapter %d' % (i+1)) if i!=9 else '<a href="http://www.reportlab.com">onelink</a>'
+            story3.append(Paragraph(title, headerStyle))
             txt = """
                 The paragraphs in this are not at all random, because
                 we need to be absolutely, totally certain they will fit 
                 on one page.  Each chapter will be one page long.
             """
-            para = Paragraph(txt, makeBodyStyle())
+            para = Paragraph(txt, bodyStyle)
             story3.append(para)
 
 
-        path = outputfile('test_platypus_toc_preload.pdf')
+        path = outputfile('test_platypus_toc_preload_3.pdf')
         doc = MyDocTemplate(path)
         passes = doc.multiBuild(story3)
 

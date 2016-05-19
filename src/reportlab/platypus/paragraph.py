@@ -478,7 +478,7 @@ def _getFragWords(frags,maxWidth=None):
 def _fragWordIter(w):
     for f, s in w[1:]:
         if hasattr(f,'cbDefn'):
-            yield f, getattr(f,'width'), s
+            yield f, getattr(f,'width',0), s
         elif s:
             if isBytes(s):
                 s = s.decode('utf8')    #only encoding allowed
