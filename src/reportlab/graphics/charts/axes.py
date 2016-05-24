@@ -897,6 +897,9 @@ class TickLabeller:
     def __call__(self,axis,value):
         return 'Abstract class instance called'
 
+#this matches the old python str behaviour
+_defaultLabelFormatter = lambda x: '%.12g' % x
+
 # Value axes.
 class ValueAxis(_AxisG):
     "Abstract value axis, unusable in itself."
@@ -1355,7 +1358,7 @@ class ValueAxis(_AxisG):
 
         f = self._labelTextFormat       # perhaps someone already set it
         if f is None:
-            f = self.labelTextFormat or (self._allIntTicks() and '%.0f' or str)
+            f = self.labelTextFormat or (self._allIntTicks() and '%.0f' or _defaultLabelFormatter)
         elif f is str and self._allIntTicks(): f = '%.0f'
         elif hasattr(f,'calcPlaces'):
             f.calcPlaces(self._tickValues)
