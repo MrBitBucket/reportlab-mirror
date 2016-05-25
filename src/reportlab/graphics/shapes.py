@@ -62,7 +62,6 @@ STATE_DEFAULTS = {   # sensible defaults for all
     'textAnchor':  'start' # can be start, middle, end, inherited
     }
 
-
 ####################################################################
 # math utilities.  These could probably be moved into lib
 # somewhere.
@@ -171,7 +170,6 @@ def _rotatedBoxLimits( x, y, w, h, angle):
     Y = [x[1] for x in C]
     return min(X), max(X), min(Y), max(Y), C
 
-
 class _DrawTimeResizeable:
     '''Addin class to provide the horribleness of _drawTimeResize'''
     def _drawTimeResize(self,w,h):
@@ -187,7 +185,6 @@ class _SetKeyWordArgs:
         """In general properties may be supplied to the constructor."""
         for key, value in keywords.items():
             setattr(self, key, value)
-
 
 #################################################################
 #
@@ -506,7 +503,6 @@ class Group(Shape):
         """Convenience to help you set transforms"""
         self.transform = mmult(self.transform, scale(sx, sy))
 
-
     def skew(self, kx, ky):
         """Convenience to help you set transforms"""
         self.transform = mmult(mmult(self.transform, skewX(kx)),skewY(ky))
@@ -641,6 +637,8 @@ class Drawing(Group, Flowable):
         #AR temporary hack to track back up.
         #fontName = AttrMapValue(isStringOrNone),
         renderScale = AttrMapValue(isNumber,desc="Global scaling for rendering"),
+        initialFontName = AttrMapValue(isStringOrNone,desc="override the STATE_DEFAULTS value for fontName"),
+        initialFontSize = AttrMapValue(isNumberOrNone,desc="override the STATE_DEFAULTS value for fontSize"),
         )
 
     _attrMap = AttrMap(BASE=Group,
@@ -917,7 +915,6 @@ class LineShape(Shape):
         self.strokeOpacity = None
         self.setProperties(kw)
 
-
 class Line(LineShape):
     _attrMap = AttrMap(BASE=LineShape,
         x1 = AttrMapValue(isNumber,desc=""),
@@ -953,7 +950,6 @@ class SolidShape(LineShape):
         # do this at the end so keywords overwrite
         #the above settings
         LineShape.__init__(self, kw)
-
 
 # path operator  constants
 _MOVETO, _LINETO, _CURVETO, _CLOSEPATH = list(range(4))
@@ -1136,7 +1132,6 @@ class Rect(SolidShape):
 
     def getBounds(self):
         return (self.x, self.y, self.x + self.width, self.y + self.height)
-
 
 class Image(SolidShape):
     """Bitmap image."""
@@ -1445,7 +1440,6 @@ class UserNode(_DrawTimeResizeable):
 
         raise NotImplementedError("this method must be redefined by the user/programmer")
 
-
 def test():
     r = Rect(10,10,200,50)
     import pprint
@@ -1462,7 +1456,6 @@ def test():
     del r.width
     w('verifying...')
     r.verify()
-
 
 if __name__=='__main__':
     test()

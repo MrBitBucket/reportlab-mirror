@@ -20,7 +20,7 @@ from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.utils import getBytesIO
 from reportlab import rl_config
-from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
+from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing, STATE_DEFAULTS
 
 # the main entry point for users...
 def draw(drawing, canvas, x, y, showBoundary=rl_config._unset_):
@@ -36,7 +36,6 @@ class _PDFRenderer(Renderer):
     def __init__(self):
         self._stroke = 0
         self._fill = 0
-        self._tracker = StateTracker()
 
     def drawNode(self, node):
         """This is the recursive method called for each node
@@ -269,7 +268,7 @@ class GraphicsFlowable(Flowable):
     def draw(self):
         draw(self.drawing, self.canv, 0, 0)
 
-def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1):
+def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, canvasKwds={}):
     """Makes a one-page PDF with just the drawing.
 
     If autoSize=1, the PDF will be the same size as
@@ -277,7 +276,10 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1):
     an A4 page with a title above it - possibly overflowing
     if too big."""
     d = renderScaledDrawing(d)
-    c = Canvas(fn)
+    for x in ('Name','Size'):
+        a = 'initialFont'+x
+        canvasKwds[a] = getattr(d,a,canvasKwds.pop(a,STATE_DEFAULTS['font'+x]))
+    c = Canvas(fn,**canvasKwds)
     if msg:
         c.setFont(rl_config.defaultGraphicsFontName, 36)
         c.drawString(80, 750, msg)
@@ -304,10 +306,10 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1):
         except:
             pass
 
-def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1):
+def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1,canvasKwds={}):
     "Returns a PDF as a string in memory, without touching the disk"
     s = getBytesIO()
-    drawToFile(d, s, msg=msg, showBoundary=showBoundary,autoSize=autoSize)
+    drawToFile(d, s, msg=msg, showBoundary=showBoundary,autoSize=autoSize, canvasKwds=canvasKwds)
     return s.getvalue()
 
 #########################################################

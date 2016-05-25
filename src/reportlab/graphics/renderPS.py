@@ -700,9 +700,6 @@ class _PSRenderer(Renderer):
     rather than a function, as some EPS-specific state tracking is
     needed outside of the state info in the SVG model."""
 
-    def __init__(self):
-        self._tracker = StateTracker()
-
     def drawNode(self, node):
         """This is the recursive method called for each node
         in the tree"""

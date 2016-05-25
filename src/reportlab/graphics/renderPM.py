@@ -55,9 +55,6 @@ class _PMRenderer(Renderer):
     rather than a function, as some image-specific state tracking is
     needed outside of the state info in the SVG model."""
 
-    def __init__(self):
-        self._tracker = StateTracker()
-
     def pop(self):
         self._tracker.pop()
         self.applyState()
@@ -93,7 +90,7 @@ class _PMRenderer(Renderer):
         self._canvas.setFont(s['fontName'], s['fontSize'])
 
     def initState(self,x,y):
-        deltas = STATE_DEFAULTS.copy()
+        deltas = self._tracker._combined[-1]
         deltas['transform'] = self._canvas._baseCTM[0:4]+(x,y)
         self._tracker.push(deltas)
         self.applyState()

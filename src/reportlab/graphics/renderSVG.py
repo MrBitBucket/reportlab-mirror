@@ -676,7 +676,6 @@ class _SVGRenderer(Renderer):
     """
 
     def __init__(self):
-        self._tracker = StateTracker()
         self.verbose = 0
 
     def drawNode(self, node):
