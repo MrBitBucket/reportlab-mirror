@@ -9,6 +9,7 @@ from reportlab import rl_config
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
+from weakref import ref as weakref_ref
 
 class PropHolder:
     '''Base for property holders'''
@@ -202,8 +203,8 @@ class TypedPropertyCollection(PropHolder):
     create wedge no. 3 if one is needed; no error is raised if
     there are only two data points.
 
-    We try and make sensible use of tuple indeces.
-        line[(3,x)] is backed by line[(3,)], line[3] & line
+    We try and make sensible use of tuple indices.
+        line[(3,x)] is backed by line[(3,)] == line[3] & line
     """
 
     def __init__(self, exampleClass):
@@ -217,21 +218,23 @@ class TypedPropertyCollection(PropHolder):
                 try:
                     return self.__class__.__bases__[0].__getattr__(self,name)
                 except:
-                    i = self._index
-                    if i:
-                        c = self._parent._children
-                        if i in c and name in c[i].__dict__:
-                            return getattr(c[i],name)
-                        elif len(i)==1:
-                            i = i[0]
-                            if i in c and name in c[i].__dict__:
-                                return getattr(c[i],name)
-                    return getattr(self._parent,name)
+                    parent = self.__propholder_parent__()
+                    c = parent._children
+                    x = self.__propholder_index__
+                    while x:
+                        if x in c:
+                            return getattr(c[x],name)
+                        x = x[:-1]
+                    return getattr(parent,name)
         return WKlass
 
-    def __getitem__(self, index):
+    def __getitem__(self, x):
+        if isinstance(x,(tuple,list)):
+            x = tuple(x)
+        else:
+            x = (x,)
         try:
-            return self._children[index]
+            return self._children[x]
         except KeyError:
             Klass = self._value.__class__
             if Klass in _ItemWrapper:
@@ -240,23 +243,22 @@ class TypedPropertyCollection(PropHolder):
                 _ItemWrapper[Klass] = WKlass = self.wKlassFactory(Klass)
 
             child = WKlass()
-            child._parent = self
-            if type(index) in (type(()),type([])):
-                index = tuple(index)
-                if len(index)>1:
-                    child._index = tuple(index[:-1])
-                else:
-                    child._index = None
-            else:
-                child._index = None
+            
             for i in filter(lambda x,K=list(child.__dict__.keys()): x in K,list(child._attrMap.keys())):
                 del child.__dict__[i]
+            child.__dict__.update(dict(
+                                    __propholder_parent__ = weakref_ref(self),
+                                    __propholder_index__ = x[:-1])
+                                    )
 
-            self._children[index] = child
+            self._children[x] = child
             return child
 
     def __contains__(self,key):
-        if type(key) in (type(()),type([])): key = tuple(key)
+        if isinstance(key,(tuple,list)):
+            key = tuple(key)
+        else:
+            key = key,
         return key in self._children
 
     def __setitem__(self, key, value):
@@ -278,7 +280,7 @@ class TypedPropertyCollection(PropHolder):
             childProps = self._children[idx].getProperties(recur=recur)
             for key, value in childProps.items():
                 if not hasattr(self,key) or getattr(self, key)!=value:
-                    newKey = '[%s].%s' % (idx, key)
+                    newKey = '[%s].%s' % (idx if len(idx)>1 else idx[0], key)
                     props[newKey] = value
         return props
 

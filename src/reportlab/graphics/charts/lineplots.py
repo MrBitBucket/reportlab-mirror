@@ -315,7 +315,7 @@ class LinePlot(AbstractLineChart):
             if uSymbol:
                 if bubblePlot: drow = self.data[rowNo]
                 for j,xy in enumerate(row):
-                    if (styleRowNo,j) in lines._children:
+                    if (styleRowNo,j) in lines:
                         juSymbol = getattr(lines[styleRowNo,j],'symbol',uSymbol)
                     else:
                         juSymbol = uSymbol

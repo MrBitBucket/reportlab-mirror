@@ -125,6 +125,64 @@ class TPCTestCase(unittest.TestCase):
         assert a[0].b==0
         assert b[0].b==-1, "Class __getattr__ should return -1"
 
+    def test8(self):
+        "test backup of multiple indices"
+
+        t = TPC(PH)
+        t.a = 42
+
+        assert (9,1) not in t
+        #none of [9,1] [9,] [9] exists so we get the root value 
+        assert t[9,1].a == 42,"t[9,1].a=%r != 42" % t[9,1].a
+
+        #[0,0] exists, [0,1] doesn't but is backed by [0,]
+        t[0,0].a = 4242
+        t[0,].a = 43
+        assert t[0,0].a == 4242,"t[0,0].a=%r != 4242" % t[0,0].a
+        assert t[0,1].a == 43,"t[0,1].a=%r != 43" % t[0,1].a
+
+        #[1] backs [1,]
+        t[1,0].a = 37
+        t[1].a = 39
+        assert t[1,0].a == 37,"t[1,0].a=%r != 37" % t[1,0].a
+        assert t[1].a == 39,"t[1].a=%r != 39" % t[1].a
+        assert t[1,].a == 39,"t[1,].a=%r != 39" % t[1,].a
+        assert t[1,1].a == 39,"t[1,1].a=%r != 39" % t[1,1].a
+
+        #[2,] & t[2] are the same and both back [2,x]
+        t[2,0].a = 27
+        t[2,].a = 28
+        t[2].a = 29
+        assert t[2,0].a == 27,"t[2,0].a=%r != 27" % t[2,0].a
+        assert t[2].a == 29,"t[2].a=%r != 29" % t[2].a
+        assert t[2,].a == 29,"t[2,].a=%r != 29" % t[2,].a
+        assert t[2,1].a == 29,"t[2,1].a=%r != 29" % t[2,1].a
+        t[2,].a = 28
+        assert t[2].a == 28,"t[2].a=%r != 28" % t[2].a
+        assert t[2,].a == 28,"t[2,].a=%r != 28" % t[2,].a
+        assert t[2,1].a == 28,"t[2,1].a=%r != 28" % t[2,1].a
+
+        t = TPC(PH)
+        t.a = 42
+        t.b = 43
+        t[0].a = 1
+        t[0,2].a = 2
+        t[0,2,3].b = 21
+        t[0,1,3].a = 3
+        assert t[0,1].a == 1,"t[0,1].a=%r != 1" % t[0,1].a
+        assert t[0,1,0].a == 1,"t[0,1,0].a=%r != 1" % t[0,1,0].a
+        assert t[0,2].a == 2,"t[0,2].a=%r != 2" % t[0,2].a
+        assert t[0,2].b == 43,"t[0,2].b=%r != 43" % t[0,2].b
+
+def makeSuite():
+    return makeSuiteForClasses(TPCTestCase)
+
+
+#noruntests
+if __name__ == "__main__":
+    unittest.TextTestRunner().run(makeSuite())
+    printLocation()
+
 
 def makeSuite():
     return makeSuiteForClasses(TPCTestCase)
