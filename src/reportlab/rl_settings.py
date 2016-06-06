@@ -52,7 +52,8 @@ baseUnderlineProportion
 decimalSymbol
 errorOnDuplicatePageLabelPage
 autoGenerateMissingTTFName
-allowTTFSubsetting'''.split())
+allowTTFSubsetting
+spaceShrinkage'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -113,6 +114,8 @@ allowTTFSubsetting=         []                      #list of font file names tha
                                                     #the user has explicit permission from the rights holder(s). 
                                                     #This flag could already be overcome by hacking the code.
                                                     #ReportLab takes no responsibility for the use of this setting.
+
+spaceShrinkage=0.05                                 #allowable space shrinkage to make lines fit
 
 
 # places to look for T1Font information

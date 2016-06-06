@@ -234,7 +234,7 @@ much intra-paragraph markup may not need translating. The
 table below shows the allowed attributes and synonyms in the
 outermost paragraph tag.""")
 
-
+CPage(1)
 heading2("Intra-paragraph markup")
 disc("""<![CDATA[Within each paragraph, we use a basic set of XML tags
 to provide markup.  The most basic of these are bold (<b>...</b>),
@@ -385,7 +385,7 @@ disc("""The &lt;bullet&gt; tag is only allowed once in a given paragraph and its
 overrides the implied bullet style and ^bulletText^ specified in the  ^Paragraph^
 creation.
 """)
-parabox("""<bullet>\u2022</bullet>this is a bullet point.  Spam
+parabox("""<bullet>&bull;</bullet>this is a bullet point.  Spam
 spam spam spam spam spam spam spam spam spam spam spam
 spam spam spam spam spam spam spam spam spam spam """,
         styleSheet['Bullet'],

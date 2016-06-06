@@ -25,7 +25,9 @@ __all__=(
 from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from reportlab.lib.fonts import tt2ps
-from reportlab.rl_config import canvas_basefontname as _baseFontName, baseUnderlineProportion as _baseUnderlineProportion
+from reportlab.rl_config import canvas_basefontname as _baseFontName, \
+                                baseUnderlineProportion as _baseUnderlineProportion, \
+                                spaceShrinkage
 _baseFontNameB = tt2ps(_baseFontName,1,0)
 _baseFontNameI = tt2ps(_baseFontName,0,1)
 _baseFontNameBI = tt2ps(_baseFontName,1,1)
@@ -132,6 +134,7 @@ class ParagraphStyle(PropertySet):
         'bulletAnchor': 'start',    #where the bullet is anchored ie start, middle, end or numeric
         'justifyLastLine': 0,   #n allow justification on the last line for more than n words 0 means don't bother
         'justifyBreaks': 0,     #justify lines broken with <br/>
+        'spaceShrinkage': spaceShrinkage,   #allow shrinkage of percentage of space to fit on line
         }
 
 class LineStyle(PropertySet):
