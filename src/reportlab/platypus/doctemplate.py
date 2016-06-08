@@ -157,6 +157,11 @@ class ActionFlowable(Flowable):
     def identity(self, maxLen=None):
         return "ActionFlowable: %s%s" % (str(self.action),self._frameName())
 
+class NullActionFlowable(ActionFlowable):
+    '''an ActionFlowable that does nothing'''
+    def apply(self,doc):
+        pass
+
 class LCActionFlowable(ActionFlowable):
     locChanger = 1                  #we cause a frame or page change
 

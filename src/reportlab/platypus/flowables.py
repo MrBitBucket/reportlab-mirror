@@ -644,6 +644,9 @@ class _ContainerSpace:  #Abstract some common container like behaviour
 
 class KeepTogether(_ContainerSpace,Flowable):
     def __init__(self,flowables,maxHeight=None):
+        if not flowables:
+            from reportlab.platypus.doctemplate import NullActionFlowable
+            flowables = [NullActionFlowable()]
         self._content = _flowableSublist(flowables)
         self._maxHeight = maxHeight
 

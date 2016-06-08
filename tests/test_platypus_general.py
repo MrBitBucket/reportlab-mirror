@@ -16,7 +16,7 @@ setOutDir(__name__)
 import copy, sys, os
 from reportlab.pdfgen import canvas
 from reportlab import platypus
-from reportlab.platypus import BaseDocTemplate, PageTemplate, Flowable, FrameBreak
+from reportlab.platypus import BaseDocTemplate, PageTemplate, Flowable, FrameBreak, KeepTogether
 from reportlab.platypus import Paragraph, Preformatted
 from reportlab.lib.units import inch, cm
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
@@ -196,6 +196,9 @@ def getCommentary():
         """
     for text in getParagraphs(spam):
         story.append(Paragraph(text, styleSheet['BodyText']))
+
+    #this should not cause an error
+    story.append(KeepTogether([]))
 
     story.append(FrameBreak())
     #######################################################################
