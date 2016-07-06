@@ -36,13 +36,12 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions, listWrapOnFakeWidth
 import collections
 
-__all__=('TraceInfo','Flowable','XBox','Preformatted','Image','Spacer','PageBreak','SlowPageBreak',
-        'CondPageBreak','KeepTogether','Macro','CallerMacro','ParagraphAndImage',
-        'FailOnWrap','HRFlowable','PTOContainer','KeepInFrame','UseUpSpace',
-        'ListFlowable','ListItem','DDIndenter','LIIndenter',
-        'DocAssign', 'DocExec', 'DocAssert', 'DocPara', 'DocIf', 'DocWhile',
-        'PageBreakIfNotEmpty',
-        )
+__all__ = '''TraceInfo Flowable XBox Preformatted Image NullDraw Spacer UseUpSpace PageBreak SlowPageBreak
+            PageBreakIfNotEmpty CondPageBreak KeepTogether Macro CallerMacro ParagraphAndImage FailOnWrap
+            FailOnDraw HRFlowable PTOContainer KeepInFrame ImageAndFlowables AnchorFlowable FrameBG
+            FrameSplitter BulletDrawer DDIndenter LIIndenter ListItem ListFlowable TopPadder DocAssign
+            DocExec DocPara DocAssert DocIf DocWhile SetTopFlowables splitLines splitLine'''.split()
+
 class TraceInfo:
     "Holder for info about where an object originated"
     def __init__(self):
@@ -535,6 +534,7 @@ class UseUpSpace(NullDraw):
         return (availWidth,availHeight-1e-8)  #step back a point
 
 class PageBreak(UseUpSpace):
+    locChanger=1
     """Move on to the next page in the document.
        This works by consuming all remaining space in the frame!"""
     def __init__(self,nextTemplate=None):
@@ -547,6 +547,7 @@ class PageBreakIfNotEmpty(PageBreak):
     pass
 
 class CondPageBreak(Spacer):
+    locChanger=1
     """use up a frame if not enough vertical space effectively CondFrameBreak"""
     def __init__(self, height):
         self.height = height
@@ -659,7 +660,11 @@ class KeepTogether(_ContainerSpace,Flowable):
 
     def wrap(self, aW, aH):
         dims = []
-        W,H = _listWrapOn(self._content,aW,self.canv,dims=dims)
+        try:
+            W,H = _listWrapOn(self._content,aW,self.canv,dims=dims)
+        except:
+            from reportlab.lib.utils import annotateException
+            annotateException('\nraised by class %s(%s)@0x%8.8x wrap\n' % (self.__class__.__name__,self.__class__.__module__,id(self)))
         self._H = H
         self._H0 = dims and dims[0][1] or 0
         self._wrapInfo = aW,aH

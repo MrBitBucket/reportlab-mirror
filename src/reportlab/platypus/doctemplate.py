@@ -29,6 +29,7 @@ for the current frame).
 """
 
 from reportlab.platypus.flowables import *
+from reportlab.platypus.flowables import _ContainerSpace
 from reportlab.lib.units import inch
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
@@ -167,13 +168,14 @@ class LCActionFlowable(ActionFlowable):
 
     def wrap(self, availWidth, availHeight):
         '''Should never be called.'''
-        raise NotImplementedError
+        raise NotImplementedError('%s.wrap should never be called' % self.__class__.__name__)
 
     def draw(self):
         '''Should never be called.'''
-        raise NotImplementedError
+        raise NotImplementedError('%s.draw should never be called' % self.__class__.__name__)
 
 class NextFrameFlowable(ActionFlowable):
+    locChanger = 1                  #we cause a frame or page change
     def __init__(self,ix,resume=0):
         ActionFlowable.__init__(self,('nextFrame',ix,resume))
 
@@ -214,10 +216,10 @@ def _evalMeasurement(n):
 class FrameActionFlowable(Flowable):
     _fixedWidth = _fixedHeight = 1
     def __init__(self,*arg,**kw):
-        raise NotImplementedError('Abstract Class')
+        raise NotImplementedError('%s.__init__ should never be called for abstract Class'%self.__class__.__name__)
 
     def frameAction(self,frame):
-        raise NotImplementedError('Abstract Class')
+        raise NotImplementedError('%s.frameAction should never be called for abstract Class'%self.__class__.__name__)
 
 class Indenter(FrameActionFlowable):
     """Increases or decreases left and right margins of frame.
@@ -237,6 +239,7 @@ class Indenter(FrameActionFlowable):
         frame._rightExtraIndent += self.right
 
 class NotAtTopPageBreak(FrameActionFlowable):
+    locChanger = 1                  #we cause a frame or page change
     def __init__(self,nextTemplate=None):
         self.nextTemplate = nextTemplate
 
@@ -245,6 +248,7 @@ class NotAtTopPageBreak(FrameActionFlowable):
             frame.add_generated_content(PageBreak(nextTemplate=self.nextTemplate))
 
 class NextPageTemplate(ActionFlowable):
+    locChanger = 1                  #we cause a frame or page change
     """When you get to the next page, use the template specified (change to two column, for example)  """
     def __init__(self,pt):
         ActionFlowable.__init__(self,('nextPageTemplate',pt))
@@ -390,6 +394,10 @@ class PageAccumulator:
 
     def onDrawStr(self,value,*args):
         return onDrawStr(value,self,encode_label(args))
+
+def _ktAllow(f):
+    '''return true if allowed in containers like KeepTogether'''
+    return not (isinstance(f,(_ContainerSpace,DocIf,DocWhile)) or getattr(f,'locChanger',False))
 
 class BaseDocTemplate:
     """
@@ -766,9 +774,9 @@ class BaseDocTemplate:
         "implements keepWithNext"
         i = 0
         n = len(flowables)
-        while i<n and flowables[i].getKeepWithNext(): i += 1
+        while i<n and flowables[i].getKeepWithNext() and _ktAllow(flowables[i]): i += 1
         if i:
-            if i<n and not getattr(flowables[i],'locChanger',None): i += 1
+            if i<n and _ktAllow(flowables[i]): i += 1
             K = KeepTogether(flowables[:i])
             mbe = getattr(self,'_multiBuildEdits',None)
             if mbe:
