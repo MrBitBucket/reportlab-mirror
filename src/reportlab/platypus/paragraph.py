@@ -610,6 +610,7 @@ def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding='utf8'):
     '''
     #TODO fix this to use binary search for the split points
     R = []
+    aR = R.append
     maxlineno = len(maxWidths)-1
     lineWidth = 0
     wordText = u''
@@ -619,14 +620,15 @@ def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding='utf8'):
         cw = stringWidth(c,fontName,fontSize,encoding)
         newLineWidth = lineWidth+cw
         if newLineWidth>maxWidth:
-            R.append(_SplitText(wordText))
+            aR(_SplitText(wordText))
             lineno += 1
             maxWidth = maxWidths[min(maxlineno,lineno)]
             newLineWidth = cw
             wordText = u''
         wordText += c
         lineWidth = newLineWidth
-    R.append(_SplitText(wordText))
+    aR(_SplitText(wordText))
+    if not R[0]: del R[0]   #delete in special case
     return R
 
 def _split_blParaSimple(blPara,start,stop):
