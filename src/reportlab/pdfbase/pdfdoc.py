@@ -393,8 +393,8 @@ class PDFDocument(PDFObject):
         self.encrypt.prepare(self)
         cat = self.Catalog
         info = self.info
-        self.Reference(self.Catalog)
-        self.Reference(self.info)
+        self.Reference(cat)
+        self.Reference(info)
         # register the encryption dictionary if present
         encryptref = None
         encryptinfo = self.encrypt.info()
@@ -408,31 +408,27 @@ class PDFDocument(PDFObject):
         idToOb = self.idToObject
         idToOf = self.idToOffset
         ### note that new entries may be "appended" DURING FORMATTING
-        done = None
         # __accum__ allows objects to know where they are in the file etc etc
         self.__accum__ = File = PDFFile(self._pdfVersion) # output collector
-        while done is None:
+        while True:
             counter += 1 # do next object...
-            if counter in numbertoid:
-                id = numbertoid[counter]
-                #printidToOb
-                obj = idToOb[id]
-                IO = PDFIndirectObject(id, obj)
-                # register object number and version
-                #encrypt.register(id,
-                IOf = IO.format(self)
-                # add a comment to the PDF output
-                if not rl_config.invariant and rl_config.pdfComments:
-                    try:
-                        classname = obj.__class__.__name__
-                    except:
-                        classname = ascii(obj)
-                    File.add("%% %s: class %s \r\n" % (ascii(id), classname[:50]))
-                offset = File.add(IOf)
-                idToOf[id] = offset
-                ids.append(id)
-            else:
-                done = 1
+            if counter not in numbertoid: break
+            oid = numbertoid[counter]
+            #printidToOb
+            obj = idToOb[oid]
+            IO = PDFIndirectObject(oid, obj)
+            # register object number and version
+            IOf = IO.format(self)
+            # add a comment to the PDF output
+            if not rl_config.invariant and rl_config.pdfComments:
+                try:
+                    classname = obj.__class__.__name__
+                except:
+                    classname = ascii(obj)
+                File.add("%% %s: class %s \r\n" % (ascii(oid), classname[:50]))
+            offset = File.add(IOf)
+            idToOf[oid] = offset
+            ids.append(oid)
         del self.__accum__
         # sanity checks (must happen AFTER formatting)
         lno = len(numbertoid)
@@ -1001,7 +997,7 @@ class PDFCatalog(PDFObject):
     __NoDefault__ = """
         Dests Outlines Pages Threads AcroForm Names OpenAction PageMode URI
         ViewerPreferences PageLabels PageLayout JavaScript StructTreeRoot SpiderInfo""".split()
-    __Refs__ = __NoDefault__ # make these all into references, if present
+    __Refs__ = __NoDefault__
 
     def format(self, document):
         self.check_format(document)
