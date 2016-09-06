@@ -208,6 +208,9 @@ class PDFDocument(PDFObject):
         return self._ID
 
     def SaveToFile(self, filename, canvas):
+        if getattr(self,'_savedToFile',False):
+            raise RunTimeError("class %s instances can only be saved once" % self.__class__.__name__)
+        self._savedToFile = True
         if hasattr(getattr(filename, "write",None),'__call__'):
             myfile = 0
             f = filename
