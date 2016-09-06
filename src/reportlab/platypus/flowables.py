@@ -781,14 +781,14 @@ class ParagraphAndImage(Flowable):
     def draw(self):
         canv = self.canv
         if self._side=='left':
-            self.I.drawOn(canv,0,self.height-self.hI)
+            self.I.drawOn(canv,0,self.height-self.hI-self.ypad)
             self.P._offsets = self._offsets
             try:
                 self.P.drawOn(canv,0,0)
             finally:
                 del self.P._offsets
         else:
-            self.I.drawOn(canv,self.width-self.wI-self.xpad,self.height-self.hI)
+            self.I.drawOn(canv,self.width-self.wI-self.xpad,self.height-self.hI-self.ypad)
             self.P.drawOn(canv,0,0)
 
 class FailOnWrap(NullDraw):
