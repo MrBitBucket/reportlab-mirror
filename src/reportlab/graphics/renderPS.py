@@ -886,7 +886,7 @@ def drawToString(d, showBoundary=rl_config.showBoundary):
 
 #########################################################
 #
-#   test code.  First, defin a bunch of drawings.
+#   test code.  First, define a bunch of drawings.
 #   Routine to draw them comes at the end.
 #
 #########################################################

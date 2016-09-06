@@ -6,7 +6,7 @@ from xml.dom import minidom
 from xml.sax._exceptions import SAXReaderNotAvailable
 import unittest
 from reportlab.graphics.shapes import *
-from reportlab.graphics import renderSVG
+from reportlab.graphics import renderPS
 
 def warnIgnoredRestofTest():
     "Raise a warning (if possible) about a not fully completed test."
@@ -20,79 +20,35 @@ def warnIgnoredRestofTest():
         # should better also be printed only once...
         print(msg)
 
-# Check if we have a default XML parser available or not.
-try:
-    import xml
-    from xml.sax import make_parser
-    p = xml.sax.make_parser()
-    HAVE_XML_PARSER = 1
-except SAXReaderNotAvailable:
-    HAVE_XML_PARSER = 0
-
-def load(path):
-    "Helper function to read the generated SVG again."
-
-    doc = minidom.parse(path)
-    doc.normalize()
-    return doc.documentElement
-
-class RenderSvgSimpleTestCase(unittest.TestCase):
-    "Testing renderSVG module."
+class RenderPSSimpleTestCase(unittest.TestCase):
+    "Testing renderPS module."
 
     def test0(self):
         "Test two strings in drawing."
 
-        path = outputfile("test_renderSVG_simple_test0.svg")
+        path = outputfile("test_renderPS_simple_test0.ps")
 
         d = Drawing(200, 100)
         d.add(String(0, 0, "foo"))
         d.add(String(100, 0, "bar"))
-        renderSVG.drawToFile(d, path)
-
-        if not HAVE_XML_PARSER:
-            warnIgnoredRestofTest()
-            return
-
-        svg = load(path)
-        fg = svg.getElementsByTagName('g')[0]           # flipping group
-        dg = fg.getElementsByTagName('g')[0]            # diagram group
-        textChildren = dg.getElementsByTagName('text')  # text nodes
-        t0 = textChildren[0].childNodes[0].nodeValue.strip()
-        t1 = textChildren[1].childNodes[0].nodeValue.strip()
-        assert t0 == 'foo'
-        assert t1 == 'bar'
+        renderPS.drawToFile(d, path)
 
     def test1(self):
         "Test two strings in group in drawing."
 
-        path = outputfile("test_renderSVG_simple_test1.svg")
+        path = outputfile("test_renderPS_simple_test1.ps")
 
         d = Drawing(200, 100)
         g = Group()
         g.add(String(0, 0, "foo"))
         g.add(String(100, 0, "bar"))
         d.add(g)
-        renderSVG.drawToFile(d, path)
-
-        if not HAVE_XML_PARSER:
-            warnIgnoredRestofTest()
-            return
-
-        svg = load(path)
-        fg = svg.getElementsByTagName('g')[0]           # flipping group
-        dg = fg.getElementsByTagName('g')[0]            # diagram group
-        g = dg.getElementsByTagName('g')[0]             # custom group
-        textChildren = g.getElementsByTagName('text')   # text nodes
-        t0 = textChildren[0].childNodes[0].nodeValue.strip()
-        t1 = textChildren[1].childNodes[0].nodeValue.strip()
-
-        assert t0 == 'foo'
-        assert t1 == 'bar'
+        renderPS.drawToFile(d, path)
 
     def test2(self):
         "Test two strings in transformed group in drawing."
 
-        path = outputfile("test_renderSVG_simple_test2.svg")
+        path = outputfile("test_renderPS_simple_test2.ps")
 
         d = Drawing(200, 100)
         g = Group()
@@ -101,22 +57,7 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
         g.scale(1.5, 1.2)
         g.translate(50, 0)
         d.add(g)
-        renderSVG.drawToFile(d, path)
-
-        if not HAVE_XML_PARSER:
-            warnIgnoredRestofTest()
-            return
-
-        svg = load(path)
-        fg = svg.getElementsByTagName('g')[0]           # flipping group
-        dg = fg.getElementsByTagName('g')[0]            # diagram group
-        g = dg.getElementsByTagName('g')[0]             # custom group
-        textChildren = g.getElementsByTagName('text')   # text nodes
-        t0 = textChildren[0].childNodes[0].nodeValue.strip()
-        t1 = textChildren[1].childNodes[0].nodeValue.strip()
-
-        assert t0 == 'foo'
-        assert t1 == 'bar'
+        renderPS.drawToFile(d, path)
 
     def test3(self):
         from reportlab.lib.units import cm
@@ -172,92 +113,79 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
                                   strokeColor=colors.darkgreen,
                                   fillColor=colors.green))
 
-        renderSVG.drawToFile(drawing, outputfile("test_renderSVG_simple_test3.svg"))
+        renderPS.drawToFile(drawing, outputfile("test_renderPS_simple_test3.ps"))
 
     def test4(self):
         "Test character encoding."
 
-        path = outputfile("test_renderSVG_simple_test4.svg")
+        path = outputfile("test_renderPS_simple_test4.ps")
         specialChar = u'\u2019'
 
         d = Drawing(200, 100)
         d.add(String(0, 0, "foo"+specialChar))
         d.add(String(100, 0, "bar"))
-        renderSVG.drawToFile(d, path)
-
-        if not HAVE_XML_PARSER:
-            warnIgnoredRestofTest()
-            return
-
-        svg = load(path)
-        fg = svg.getElementsByTagName('g')[0]           # flipping group
-        dg = fg.getElementsByTagName('g')[0]            # diagram group
-        textChildren = dg.getElementsByTagName('text')  # text nodes
-        t0 = textChildren[0].childNodes[0].nodeValue.strip()
-        t1 = textChildren[1].childNodes[0].nodeValue.strip()
-        assert t0 == 'foo'+specialChar, "%s should equal %s" % (ascii(t0),ascii('foo'+specialChar))
-        assert t1 == 'bar'
+        renderPS.drawToFile(d, path)
 
     def test5(self):
         '''tests drawToString inspired by https://bitbucket.org/egillet/ 
         & https://bitbucket.org/johanndt/'''
         d = Drawing(1,1)
-        self.assertTrue(isStr(renderSVG.drawToString(d)),msg='renderSVG.draweToString should return bytes')
+        self.assertTrue(isStr(renderPS.drawToString(d)),msg='renderPS.draweToString should return bytes')
 
     def tearDown(self):
         "When finished, make a little index page to view them in situ"
         
         body = """<html>
-    <head><title>renderSVG test output</title></head>
+    <head><title>renderPS test output</title></head>
     <body>
-        <h1>renderSVG test output in a web page</h1>
+        <h1>renderPS test output in a web page</h1>
         <p>We have four SVG diagrams embedded in this page.  Each is within a cyan-coloured div.
         The first 3 have a native size of 400x200, thus consume a height of 200 pixels on
         the page.  The last is 300x60.</p>
 
         <div style="background-color:cyan">
-            <embed src="test_renderSVG_simple_test0.svg" type="image/svg+xml" />
+            <embed src="test_renderPS_simple_test0.ps" type="image/svg+xml" />
         </div>
         <hr/>
         <div style="background-color:cyan">
-            <embed src="test_renderSVG_simple_test1.svg" type="image/svg+xml" />
+            <embed src="test_renderPS_simple_test1.ps" type="image/svg+xml" />
         </div>
         <hr/>
         <div style="background-color:cyan">
-            <embed src="test_renderSVG_simple_test2.svg" type="image/svg+xml" />
+            <embed src="test_renderPS_simple_test2.ps" type="image/svg+xml" />
         </div>
         <hr/>
         <div style="background-color:cyan">
-            <embed src="test_renderSVG_simple_test3.svg" type="image/svg+xml" />
+            <embed src="test_renderPS_simple_test3.ps" type="image/svg+xml" />
         </div>
 
         <hr>
         <p>Test of resizing:  the ones below are sized 50%, 100%, 150%. We did this by explicitly setting
         the width and height in the <code>embed</code> tag.</p>
         <div style="background-color:cyan">
-            <embed src="test_renderSVG_simple_test3.svg" type="image/svg+xml" width="150" height="45"/>
+            <embed src="test_renderPS_simple_test3.ps" type="image/svg+xml" width="150" height="45"/>
         </div>
         <hr/>
         <div style="background-color:cyan">
-            <embed src="test_renderSVG_simple_test3.svg" type="image/svg+xml" width="300" height="60"/>
+            <embed src="test_renderPS_simple_test3.ps" type="image/svg+xml" width="300" height="60"/>
         </div>
         <hr/>
         <div style="background-color:cyan">
-            <embed src="test_renderSVG_simple_test3.svg" type="image/svg+xml" width="450" height="90"/>
+            <embed src="test_renderPS_simple_test3.ps" type="image/svg+xml" width="450" height="90"/>
         </div>
         <hr/>
 
         <p>Test of resizing again:  the ones below are sized 50%, 100%, 150% by setting width only.</p>
         <div style="background-color:cyan">
-            <embed src="test_renderSVG_simple_test3.svg" type="image/svg+xml" width="150"/>
+            <embed src="test_renderPS_simple_test3.ps" type="image/svg+xml" width="150"/>
         </div>
         <hr/>
         <div style="background-color:cyan">
-            <embed src="test_renderSVG_simple_test3.svg" type="image/svg+xml" width="300"/>
+            <embed src="test_renderPS_simple_test3.ps" type="image/svg+xml" width="300"/>
         </div>
         <hr/>
         <div style="background-color:cyan">
-            <embed src="test_renderSVG_simple_test3.svg" type="image/svg+xml" width="450"/>
+            <embed src="test_renderPS_simple_test3.ps" type="image/svg+xml" width="450"/>
         </div>
         <hr/>
 
@@ -265,23 +193,23 @@ class RenderSvgSimpleTestCase(unittest.TestCase):
     </body>
 <html>
 """
-        with open('test_renderSVG_output.html', 'w') as f:
+        with open('test_renderPS_output.html', 'w') as f:
             f.write(body)
 
-class RenderSvgAxesTestCase(unittest.TestCase):
-    "Testing renderSVG module on Axes widgets."
+class RenderPSAxesTestCase(unittest.TestCase):
+    "Testing renderPS module on Axes widgets."
 
     def test0(self):
         "Test two strings in drawing."
 
-        path = outputfile("axestest0.svg")
+        path = outputfile("axestest0.ps")
         from reportlab.graphics.charts.axes import XCategoryAxis
 
         d = XCategoryAxis().demo()
-        renderSVG.drawToFile(d, path)
+        renderPS.drawToFile(d, path)
 
 def makeSuite():
-    return makeSuiteForClasses(RenderSvgSimpleTestCase, RenderSvgAxesTestCase)
+    return makeSuiteForClasses(RenderPSSimpleTestCase, RenderPSAxesTestCase)
 
 #noruntests
 if __name__ == "__main__":

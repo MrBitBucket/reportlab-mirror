@@ -51,12 +51,13 @@ syntax: regexp
 ^tools/docco/.*\.pdf
 ^tests/test_.*\.pdf
 ^tests/test_.*\.svg
+^tests/test_.*\.ps
 ^tests/_i_am_actually_a_gif\.jpg
 ^tests/_i_am_actually_a_jpeg\.gif
-^tests/axestest0\.svg
+^tests/axestest0\.(svg|ps)
 ^tests/pythonpoint\.pdf
 ^tests/test_pdfgen_pycanvas_out\.txt
-^tests/test_renderSVG_output\.html
+^tests/test_render(SVG|PS)_output\.html
 ^tests/test_source_chars\.txt
 ^tests/barcode-out
 ^tests/render-out

@@ -18,7 +18,7 @@ from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer,
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
-from reportlab.lib.utils import getBytesIO, RLString, isPy3, isUnicode, isBytes
+from reportlab.lib.utils import getStringIO, RLString, isPy3, isUnicode, isBytes
 
 from xml.dom import getDOMImplementation
 
@@ -35,7 +35,7 @@ TEXT_STYLES = 'font-family font-weight font-style font-variant font-size id'.spl
 ### top-level user function ###
 def drawToString(d, showBoundary=rl_config.showBoundary,**kwds):
     "Returns a SVG as a string in memory, without touching the disk"
-    s = getBytesIO()
+    s = getStringIO()
     drawToFile(d, s, showBoundary=showBoundary,**kwds)
     return s.getvalue()
 
