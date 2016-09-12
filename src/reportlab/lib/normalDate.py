@@ -10,20 +10,24 @@
 # derived from an original version created
 # by Jeff Bauer of Rubicon Research and used
 # with his kind permission
-__version__='3.3.0'
+__version__='3.3.18'
 __doc__="Jeff Bauer's lightweight date class, extended by us.  Predates Python's datetime module."
-
 
 _bigBangScalar = -4345732  # based on (-9999, 1, 1) BC/BCE minimum
 _bigCrunchScalar = 2958463  # based on (9999,12,31) AD/CE maximum
 _daysInMonthNormal = [31,28,31,30,31,30,31,31,30,31,30,31]
 _daysInMonthLeapYear = [31,29,31,30,31,30,31,31,30,31,30,31]
-_dayOfWeekName = ['Monday', 'Tuesday', 'Wednesday', 'Thursday',
-                  'Friday', 'Saturday', 'Sunday']
-_monthName = ['January', 'February', 'March', 'April', 'May', 'June',
-              'July','August','September','October','November','December']
+_dayOfWeekName = '''Monday Tuesday Wednesday Thursday Friday Saturday Sunday'''
+_dayOfWeekNameLower = _dayOfWeekName.lower().split()
+_dayOfWeekName = _dayOfWeekName.split()
+_monthName = '''January February March April May June
+                July August September October November December'''
+_monthNameLower = _monthName.lower().split()
+_monthNameLower = _monthName.split()
 
-import string, re, time, datetime
+import re, time, datetime
+from .utils import isPy3
+
 if hasattr(time,'struct_time'):
     _DateSeqTypes = (list,tuple,time.struct_time)
 else:
@@ -33,13 +37,13 @@ _fmtPat = re.compile('\\{(m{1,5}|yyyy|yy|d{1,4})\\}',re.MULTILINE|re.IGNORECASE)
 _iso_re = re.compile(r'(\d\d\d\d|\d\d)-(\d\d)-(\d\d)')
 
 def getStdMonthNames():
-    return list(map(string.lower,_monthName))
+    return _monthNameLower
 
 def getStdShortMonthNames():
     return [x[:3] for x in getStdMonthNames()]
 
 def getStdDayNames():
-    return list(map(string.lower,_dayOfWeekName))
+    return _dayOfWeekNameLower
 
 def getStdShortDayNames():
     return [x[:3] for x in getStdDayNames()]
@@ -154,13 +158,44 @@ class NormalDate:
         """return a cloned instance of this normalDate"""
         return self.__class__(self.normalDate)
 
-    def __cmp__(self, target):
-        if target is None:
-            return 1
-        elif not hasattr(target, 'normalDate'):
-            return 1
-        else:
-            return cmp(self.normalDate, target.normalDate)
+    if not isPy3:
+        def __cmp__(self, target):
+            if target is None:
+                return 1
+            elif not hasattr(target, 'normalDate'):
+                return 1
+            else:
+                return cmp(self.normalDate, target.normalDate)
+    else:
+        def __lt__(self,other):
+            if not hasattr(other,'normalDate'):
+                return False
+            return self.normalDate < other.normalDate
+
+        def __le__(self,other):
+            if not hasattr(other,'normalDate'):
+                return False
+            return self.normalDate <= other.normalDate
+
+        def __eq__(self,other):
+            if not hasattr(other,'normalDate'):
+                return False
+            return self.normalDate == other.normalDate
+
+        def __ne__(self,other):
+            if not hasattr(other,'normalDate'):
+                return True
+            return self.normalDate != other.normalDate
+
+        def __ge__(self,other):
+            if not hasattr(other,'normalDate'):
+                return True
+            return self.normalDate >= other.normalDate
+
+        def __gt__(self,other):
+            if not hasattr(other,'normalDate'):
+                return True
+            return self.normalDate > other.normalDate
 
     def day(self):
         """return the day as integer 1-31"""
@@ -278,7 +313,7 @@ class NormalDate:
         while 1:
             m = _fmtPat.search(r,f)
             if m:
-                y = getattr(self,'_fmt'+string.upper(m.group()[1:-1]))()
+                y = getattr(self,'_fmt'+(m.group()[1:-1].upper()))()
                 i, j = m.span()
                 r = (r[0:i] + y) + r[j:]
                 f = i + len(y)

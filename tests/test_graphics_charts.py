@@ -24,7 +24,7 @@ from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 from reportlab.graphics.charts.linecharts import HorizontalLineChart
-from reportlab.graphics.charts.lineplots import LinePlot
+from reportlab.graphics.charts.lineplots import LinePlot, GridLinePlot
 from reportlab.graphics.charts.piecharts import Pie
 from reportlab.graphics.charts.legends import Legend
 from reportlab.graphics.charts.spider import SpiderChart
@@ -358,6 +358,16 @@ class ChartTestCase(unittest.TestCase):
                 story.append(Spacer(0, 0.5*cm))
                 story.append(code(i))
                 story.append(Spacer(0, 1*cm))
+
+    def test4c(self):
+        story = self.story
+        d=Drawing(215,115)
+        d.add(GridLinePlot(),name='chart')
+        d.chart.y = 20
+        story.append(Paragraph('GridLinePlot', h2))
+        story.append(Spacer(0, 0.5*cm))
+        story.append(d)
+        story.append(Spacer(0, 1*cm))
 
     def test5(self):
         "Test pie charts."

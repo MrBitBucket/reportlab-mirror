@@ -1663,7 +1663,7 @@ class NormalDateXValueAxis(XValueAxis):
         RBL = _rotatedBoxLimits(RBL[0],RBL[1],RBL[2],RBL[3], angle)
         xLabelW = RBL[1]-RBL[0]
         xLabelH = RBL[3]-RBL[2]
-        w = max(xLabelW,labels.width,self.minimumTickSpacing)
+        w = max(xLabelW,labels.width or 0,self.minimumTickSpacing)
 
         W = w+w*self.bottomAxisLabelSlack
         n = len(xVals)
