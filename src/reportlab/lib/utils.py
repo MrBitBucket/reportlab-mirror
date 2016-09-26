@@ -371,15 +371,18 @@ del reportlab
 #Attempt to detect if this copy of reportlab is running in a
 #file system (as opposed to mostly running in a zip or McMillan
 #archive or Jar file).  This is used by test cases, so that
-#we can write test cases that don't get activated in a compiled
+#we can write test cases that don't get activated in frozen form.
 try:
     __file__
 except:
     __file__ = sys.argv[0]
 import glob, fnmatch
 try:
-    _isFSD = not __loader__
-    _archive = os.path.normcase(os.path.normpath(__loader__.archive))
+    __rl_loader__ = __loader__
+    _isFSD = not __rl_loader__
+    if not zipImported(ldr=__rl_loader__):
+        raise NotImplementedError("can't handle compact distro type %r" % __rl_loader__)
+    _archive = os.path.normcase(os.path.normpath(__rl_loader__.archive))
     _archivepfx = _archive + os.sep
     _archivedir = os.path.dirname(_archive)
     _archivedirpfx = _archivedir + os.sep
@@ -415,11 +418,11 @@ try:
         c, pfn = __startswith_rl(pattern)
         r = glob(pfn)
         if c or r==[]:
-            r += list(map(lambda x,D=_archivepfx,pjoin=pjoin: pjoin(_archivepfx,x),list(filter(lambda x,pfn=pfn,fnmatch=fnmatch: fnmatch(x,pfn),list(__loader__._files.keys())))))
+            r += list(map(lambda x,D=_archivepfx,pjoin=pjoin: pjoin(_archivepfx,x),list(filter(lambda x,pfn=pfn,fnmatch=fnmatch: fnmatch(x,pfn),list(__rl_loader__._files.keys())))))
         return r
 except:
     _isFSD = os.path.isfile(__file__)   #slight risk of wrong path
-    __loader__ = None
+    __rl_loader__ = None
     def _startswith_rl(fn):
         return fn
     def rl_glob(pattern,glob=glob.glob):
@@ -607,11 +610,11 @@ def open_for_read_by_name(name,mode='b'):
     try:
         return open(name,mode)
     except IOError:
-        if _isFSD or __loader__ is None: raise
-        #we have a __loader__, perhaps the filename starts with
+        if _isFSD or __rl_loader__ is None: raise
+        #we have a __rl_loader__, perhaps the filename starts with
         #the dirname(reportlab.__file__) or is relative
         name = _startswith_rl(name)
-        s = __loader__.get_data(name)
+        s = __rl_loader__.get_data(name)
         if 'b' not in mode and os.linesep!='\n': s = s.replace(os.linesep,'\n')
         return getBytesIO(s)
 
@@ -683,28 +686,28 @@ def open_and_readlines(name,mode='t'):
 def rl_isfile(fn,os_path_isfile=os.path.isfile):
     if hasattr(fn,'read'): return True
     if os_path_isfile(fn): return True
-    if _isFSD or __loader__ is None: return False
+    if _isFSD or __rl_loader__ is None: return False
     fn = _startswith_rl(fn)
-    return fn in list(__loader__._files.keys())
+    return fn in list(__rl_loader__._files.keys())
 
 def rl_isdir(pn,os_path_isdir=os.path.isdir,os_path_normpath=os.path.normpath):
     if os_path_isdir(pn): return True
-    if _isFSD or __loader__ is None: return False
+    if _isFSD or __rl_loader__ is None: return False
     pn = _startswith_rl(os_path_normpath(pn))
     if not pn.endswith(os.sep): pn += os.sep
-    return len(list(filter(lambda x,pn=pn: x.startswith(pn),list(__loader__._files.keys()))))>0
+    return len(list(filter(lambda x,pn=pn: x.startswith(pn),list(__rl_loader__._files.keys()))))>0
 
 def rl_listdir(pn,os_path_isdir=os.path.isdir,os_path_normpath=os.path.normpath,os_listdir=os.listdir):
-    if os_path_isdir(pn) or _isFSD or __loader__ is None: return os_listdir(pn)
+    if os_path_isdir(pn) or _isFSD or __rl_loader__ is None: return os_listdir(pn)
     pn = _startswith_rl(os_path_normpath(pn))
     if not pn.endswith(os.sep): pn += os.sep
-    return [x[len(pn):] for x in __loader__._files.keys() if x.startswith(pn)]
+    return [x[len(pn):] for x in __rl_loader__._files.keys() if x.startswith(pn)]
 
 def rl_getmtime(pn,os_path_isfile=os.path.isfile,os_path_normpath=os.path.normpath,os_path_getmtime=os.path.getmtime,time_mktime=time.mktime):
-    if os_path_isfile(pn) or _isFSD or __loader__ is None: return os_path_getmtime(pn)
+    if os_path_isfile(pn) or _isFSD or __rl_loader__ is None: return os_path_getmtime(pn)
     p = _startswith_rl(os_path_normpath(pn))
     try:
-        e = __loader__._files[p]
+        e = __rl_loader__._files[p]
     except KeyError:
         return os_path_getmtime(pn)
     s = e[5]
@@ -975,7 +978,7 @@ class DebugMemo:
         md=None
         try:
             import marshal
-            md=marshal.loads(__loader__.get_data('meta_data.mar'))
+            md=marshal.loads(__rl_loader__.get_data('meta_data.mar'))
             project_version=md['project_version']
         except:
             pass
@@ -1001,7 +1004,7 @@ class DebugMemo:
                         'version_info': getattr(sys,'version_info','????'),
                         'winver': getattr(sys,'winver','????'),
                         'environment': '\n\t\t\t'.join(['']+['%s=%r' % (k,env[k]) for k in K]),
-                        '__loader__': repr(__loader__),
+                        '__rl_loader__': repr(__rl_loader__),
                         'project_meta_data': md,
                         'project_version': project_version,
                         })
