@@ -199,6 +199,7 @@ u with a dieresis on top &lt;unichar code=0xfc/&gt;="<unichar code="0xfc"/>" and
 should be a pound sign &amp;pound;="&pound;" and this an alpha &amp;alpha;="&alpha;". You can have links in the page <link href="http://www.reportlab.com" color="blue">ReportLab</link> &amp; <a href="http://www.reportlab.org" color="green">ReportLab.org</a>.
 Use scheme "pdf:" to indicate an external PDF link, "http:", "https:" to indicate an external link eg something to open in
 your browser. If an internal link begins with something that looks like a scheme, precede with "document:". Empty hrefs should be allowed ie <a href="">&lt;a href=""&gt;test&lt;/a&gt;</a> should be allowed. <strike>This text should have a strike through it.</strike>
+This should be a mailto link <a href="mailto:reportlab-users@lists2.reportlab.com"><font color="blue">reportlab-users at lists2.reportlab.com</font></a>.
 '''
         from reportlab.platypus.flowables import ImageAndFlowables, Image
         from reportlab.lib.testutils import testsFolder
