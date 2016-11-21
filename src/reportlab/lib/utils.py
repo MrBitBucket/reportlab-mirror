@@ -254,7 +254,7 @@ def zipImported(ldr=None):
         if not ldr:
             ldr = sys._getframe(1).f_globals['__loader__']
         from zipimport import zipimporter
-        return ldr if isinstance(ldr,zipimporter) else None
+        return ldr if isinstance(ldr,zipimporter) and len(ldr._files) else None
     except:
         return None
 
