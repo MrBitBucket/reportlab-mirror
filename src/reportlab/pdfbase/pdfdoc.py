@@ -79,7 +79,7 @@ def format(element, document, toplevel=0):
         else:
             f = element.format(document)
             if not rl_config.invariant and rl_config.pdfComments and hasattr(element, __Comment__):
-                f = pdfdocEnc("%% %s\r\n" % element.__Comment__)+f
+                f = pdfdocEnc("%% %s\n" % element.__Comment__)+f
             return f
     elif type(element) in (float, int):
         #use a controlled number formatting routine
@@ -203,8 +203,8 @@ class PDFDocument(PDFObject):
         digest = self.signature.digest()
         doc = DummyDoc()
         IDs = PDFString(digest,enc='raw').format(doc)
-        self._ID = (b'\r\n % ReportLab generated PDF document -- digest (http://www.reportlab.com)\r\n ['
-                        +IDs+b' '+IDs+b']\r\n')
+        self._ID = (b'\n % ReportLab generated PDF document -- digest (http://www.reportlab.com)\n ['
+                        +IDs+b' '+IDs+b']\n')
         return self._ID
 
     def SaveToFile(self, filename, canvas):
@@ -428,7 +428,7 @@ class PDFDocument(PDFObject):
                     classname = obj.__class__.__name__
                 except:
                     classname = ascii(obj)
-                File.add("%% %s: class %s \r\n" % (ascii(oid), classname[:50]))
+                File.add("%% %s: class %s \n" % (ascii(oid), classname[:50]))
             offset = File.add(IOf)
             idToOf[oid] = offset
             ids.append(oid)
@@ -663,7 +663,7 @@ class PDFDictionary(PDFObject):
         return a in self.dict
     def Reference(self, name, document):
         self.dict[name] = document.Reference(self.dict[name])
-    def format(self, document,IND=b'\r\n '):
+    def format(self, document,IND=b'\n '):
         dict = self.dict
         try:
             keys = list(dict.keys())
@@ -678,7 +678,7 @@ class PDFDictionary(PDFObject):
             # break up every 6 elements anyway
             t=L.insert
             for i in reversed(range(6, len(L), 6)):
-                t(i,b'\r\n ')
+                t(i,b'\n ')
             L = b" ".join(L)
         return b'<< '+L+b' >>'
 
@@ -809,14 +809,13 @@ class PDFStream(PDFObject):
         fc = format(content, document)
         dictionary["Length"] = len(content)
         fd = format(dictionary, document)
-        return fd+b'\r\nstream\r\n'+fc+b'endstream\r\n'
+        return fd+b'\nstream\n'+fc+b'endstream\n'
 
 def teststream(content=None):
     #content = "" # test
     if content is None:
         content = teststreamcontent
-    content = content.strip()
-    content = content.replace("\n", '\n\r') + '\n\r'
+    content = content.strip() + '\n'
     S = PDFStream(content = content,
                     filters=rl_config.useA85 and [PDFBase85Encode,PDFZCompress] or [PDFZCompress])
     # nothing else needed...
@@ -835,7 +834,7 @@ class PDFArray(PDFObject):
     def References(self, document):
         """make all objects in sequence references"""
         self.sequence = list(map(document.Reference, self.sequence))
-    def format(self, document, IND=b'\r\n '):
+    def format(self, document, IND=b'\n '):
         L = [format(e, document) for e in self.sequence]
         if self.multiline and rl_config.pdfMultiLine:
             L = IND.join(L)
@@ -845,7 +844,7 @@ class PDFArray(PDFObject):
                 # break up every 10 elements anyway
                 t=L.insert
                 for i in reversed(range(10, n, 10)):
-                    t(i,b'\r\n ')
+                    t(i,b'\n ')
                 L = b' '.join(L)
             else:
                 L = b' '.join(L)
@@ -865,9 +864,9 @@ class PDFIndirectObject(PDFObject):
         # set encryption parameters
         document.encrypt.register(n, v)
         fcontent = format(self.content, document, toplevel=1)   # yes this is at top level
-        return (pdfdocEnc("%s %s obj\r\n"%(n,v))
-                +fcontent+ (b'' if fcontent.endswith(b'\r\n') else b'\r\n')
-                +b'endobj\r\n')
+        return (pdfdocEnc("%s %s obj\n"%(n,v))
+                +fcontent+ (b'' if fcontent.endswith(b'\n') else b'\n')
+                +b'endobj\n')
 
 class PDFObjectReference(PDFObject):
     def __init__(self, name):
@@ -891,7 +890,7 @@ class PDFFile(PDFObject):
         # any other encoding, and we'll be able to tell if something
         # has run our PDF files through a dodgy Unicode conversion.
         self.add((pdfdocEnc("%%PDF-%s.%s" % pdfVersion) +
-            b'\r\n%\223\214\213\236 ReportLab Generated PDF document http://www.reportlab.com\r\n'
+            b'\n%\223\214\213\236 ReportLab Generated PDF document http://www.reportlab.com\n'
             ))
 
     def closeOrReset(self):
@@ -943,9 +942,9 @@ class PDFCrossReferenceSubsection(PDFObject):
         # now add the initial line
         firstline = "%s %s" % (firstentrynumber, nentries)
         entries.insert(0, firstline)
-        # make sure it ends with \r\n
+        # make sure it ends with \n
         entries.append("")
-        return pdfdocEnc('\r\n'.join(entries))
+        return pdfdocEnc('\n'.join(entries))
 
 class PDFCrossReferenceTable(PDFObject):
     def __init__(self):
@@ -957,7 +956,7 @@ class PDFCrossReferenceTable(PDFObject):
         sections = self.sections
         if not sections:
             raise ValueError("no crossref sections")
-        L = [b"xref\r\n"]
+        L = [b"xref\n"]
         for s in self.sections:
             fs = format(s, document)
             L.append(fs)
@@ -976,11 +975,11 @@ class PDFTrailer(PDFObject):
     def format(self, document):
         fdict = format(self.dict, document)
         return b''.join([
-                b'trailer\r\n',
+                b'trailer\n',
                 fdict,
-                b'\r\nstartxref\r\n',
+                b'\nstartxref\n',
                 pdfdocEnc(str(self.startxref)),
-                b'\r\n%%EOF\r\n',
+                b'\n%%EOF\n',
                 ]
                 )
 
@@ -1101,7 +1100,7 @@ class PDFPage(PDFCatalog):
         if self.Override_default_compilation:
             raise ValueError("overridden! must set stream explicitly")
         if isSeq(code):
-            code = '\r\n'.join(code)+'\r\n'
+            code = '\n'.join(code)+'\n'
         self.stream = code
 
     def setPageTransition(self, tranDict):
@@ -1292,7 +1291,7 @@ DUMMYOUTLINE = """
 
 class PDFOutlines0(PDFObject):
     __Comment__ = "TEST OUTLINE!"
-    text = DUMMYOUTLINE.replace("\n", '\r\n')
+    text = DUMMYOUTLINE.replace("\n", '\n')
     __RefOnly__ = 1
     def format(self, document):
         return pdfdocEnc(self.text)
@@ -2000,7 +1999,7 @@ class PDFFormXObject(PDFObject):
 
     def setStreamList(self, data):
         if isSeq(data):
-            data = '\r\n'.join(data)
+            data = '\n'.join(data)
         self.stream = pdfdocEnc(data)
 
     def BBoxList(self):

@@ -34,7 +34,7 @@ class PdfdocTestCase(NearTestCase):
     def testPDFIndirectObject(self):
         doc = self.doc
         doc.Reference(pdfdoc.PDFArray([0,1,2,3]),pdfdoc.PDFName('abracadabra')[1:])
-        self.assertEquals(pdfdoc.PDFIndirectObject('abracadabra',pdfdoc.PDFArray([3,2,1,0])).format(doc),b'2 0 obj\r\n[ 3 2 1 0 ]\r\nendobj\r\n')
+        self.assertEquals(pdfdoc.PDFIndirectObject('abracadabra',pdfdoc.PDFArray([3,2,1,0])).format(doc),b'2 0 obj\n[ 3 2 1 0 ]\nendobj\n')
 
     def testPDFDictionary(self):
         self.assertEquals(pdfdoc.PDFDictionary(dict(A=pdfdoc.PDFArray([1,2,3,4]))).format(self.doc),b'<< /A [ 1 2 3 4 ] >>')

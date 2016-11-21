@@ -1074,7 +1074,7 @@ class Canvas(textobject._PDFColorSetter):
         psObj = self._doc.idToObject.get(regName, None)
         if not psObj:
             #first use of this chunk of Postscript, make an object
-            psObj = pdfdoc.PDFPostScriptXObject(command + '\r\n')
+            psObj = pdfdoc.PDFPostScriptXObject(command + '\n')
             self._setXObjects(psObj)
             self._doc.Reference(psObj, regName)
             self._doc.addForm(rawName, psObj)
