@@ -37,13 +37,13 @@ class PdfdocTestCase(NearTestCase):
         self.assertEquals(pdfdoc.PDFIndirectObject('abracadabra',pdfdoc.PDFArray([3,2,1,0])).format(doc),b'2 0 obj\n[ 3 2 1 0 ]\nendobj\n')
 
     def testPDFDictionary(self):
-        self.assertEquals(pdfdoc.PDFDictionary(dict(A=pdfdoc.PDFArray([1,2,3,4]))).format(self.doc),b'<< /A [ 1 2 3 4 ] >>')
+        self.assertEquals(pdfdoc.PDFDictionary(dict(A=pdfdoc.PDFArray([1,2,3,4]))).format(self.doc),b'<<\n/A [ 1 2 3 4 ]\n>>')
 
     def testPDFPageLabels(self):
         doc = self.doc
         PL=pdfdoc.PDFPageLabels()
         PL.addPageLabel(0,pdfdoc.PDFPageLabel('D',0,'AA'))
-        self.assertEquals(PL.format(doc),b'<< /Nums [ 0 2 0 R ] >>')
+        self.assertEquals(PL.format(doc),b'<<\n/Nums [ 0 2 0 R ]\n>>')
 
     @property
     def doc(self):

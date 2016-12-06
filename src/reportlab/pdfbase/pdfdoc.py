@@ -14,7 +14,7 @@ The classes within this generally mirror structures in the PDF file
 and are not part of any public interface.  Instead, canvas and font
 classes are made available elsewhere for users to manipulate.
 """
-import types, binascii, codecs
+import types, binascii, codecs, time
 from collections import OrderedDict
 from reportlab.pdfbase import pdfutils
 from reportlab import rl_config
@@ -202,9 +202,8 @@ class PDFDocument(PDFObject):
             return self._ID
         digest = self.signature.digest()
         doc = DummyDoc()
-        IDs = PDFString(digest,enc='raw').format(doc)
-        self._ID = (b'\n % ReportLab generated PDF document -- digest (http://www.reportlab.com)\n ['
-                        +IDs+b' '+IDs+b']\n')
+        IDs = PDFText(digest,enc='raw').format(doc)
+        self._ID = (b'\n['+IDs+IDs+b']\n% ReportLab generated PDF document -- digest (http://www.reportlab.com)\n')
         return self._ID
 
     def SaveToFile(self, filename, canvas):
@@ -536,12 +535,13 @@ PDFfalse = "false"
 PDFnull = "null"
 
 class PDFText(PDFObject):
-    def __init__(self, t):
+    def __init__(self, t, enc='utf-8'):
         self.t = t
+        self.enc = enc
     def format(self, document):
         t = self.t
         if isUnicode(t):
-            t = t.encode('utf-8')
+            t = t.encode(self.enc)
         result = binascii.hexlify(document.encrypt.encode(t))
         return b"<" + result + b">"
     def __str__(self):
@@ -592,7 +592,7 @@ class PDFString(PDFObject):
     def format(self, document):
         s = self.s
         enc = getattr(self,'enc','auto')
-        if (isBytes(s)):
+        if isBytes(s):
             if enc is 'auto':
                 try:
                     u = s.decode(s.startswith(codecs.BOM_UTF16_BE) and 'utf16' or 'utf8')
@@ -672,7 +672,7 @@ class PDFDictionary(PDFObject):
             raise
         if not isinstance(dict,OrderedDict): keys.sort()
         L = [(format(PDFName(k),document)+b" "+format(dict[k],document)) for k in keys]
-        if self.multiline and rl_config.pdfMultiLine:
+        if (self.multiline and rl_config.pdfMultiLine) or self.multiline=='forced':
             L = IND.join(L)
         else:
             # break up every 6 elements anyway
@@ -680,7 +680,7 @@ class PDFDictionary(PDFObject):
             for i in reversed(range(6, len(L), 6)):
                 t(i,b'\n ')
             L = b" ".join(L)
-        return b'<< '+L+b' >>'
+        return b'<<\n'+L+b'\n>>'
 
     def copy(self):
         return PDFDictionary(self.dict)
@@ -836,7 +836,7 @@ class PDFArray(PDFObject):
         self.sequence = list(map(document.Reference, self.sequence))
     def format(self, document, IND=b'\n '):
         L = [format(e, document) for e in self.sequence]
-        if self.multiline and rl_config.pdfMultiLine:
+        if (self.multiline and rl_config.pdfMultiLine) or self.multiline=='forced':
             L = IND.join(L)
         else:
             n=len(L)
@@ -972,8 +972,9 @@ class PDFTrailer(PDFObject):
                       ("Info", Info), ("ID", ID), ("Encrypt", Encrypt)]:
             if v is not None:
                 dict[n] = v
+        dict.multiline='forced'
     def format(self, document):
-        fdict = format(self.dict, document)
+        fdict = self.dict.format(document,IND=b'\n')
         return b''.join([
                 b'trailer\n',
                 fdict,
@@ -1728,7 +1729,6 @@ _NOWT=None
 def _getTimeStamp():
     global _NOWT
     if not _NOWT:
-        import time
         _NOWT = time.time()
     return _NOWT
 
@@ -1740,11 +1740,9 @@ class PDFDate(PDFObject):
             self.dhh = 0
             self.dmm = 0
         else:
-            import time
             now = tuple(time.localtime(_getTimeStamp())[:6])
-            from time import timezone
-            self.dhh = int(timezone / (3600.0))
-            self.dmm = (timezone % 3600) % 60
+            self.dhh = int(time.timezone / (3600.0))
+            self.dmm = (time.timezone % 3600) % 60
         self.date = now[:6]
         self.dateFormatter = dateFormatter
 
