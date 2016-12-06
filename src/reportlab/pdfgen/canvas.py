@@ -1889,5 +1889,15 @@ class Canvas(textobject._PDFColorSetter):
         from reportlab.pdfbase.pdfdoc import PDFPageLabel
         PL.addPageLabel(pageNum,PDFPageLabel(style,start,prefix))
 
+    @property
+    def acroForm(self):
+        "get form from canvas, create the form if needed"
+        try:
+            return self.AcroForm
+        except AttributeError:
+            from reportlab.pdfbase.acroform import AcroForm
+            self._doc._catalog.AcroForm = self.AcroForm = AcroForm(self)
+            return self.AcroForm
+
 if __name__ == '__main__':
     print('For test scripts, look in tests')
