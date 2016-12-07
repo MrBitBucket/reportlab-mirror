@@ -907,8 +907,6 @@ class PDFFile(PDFObject):
     def format(self, document):
         return b''.join(self.strings)
 
-XREFFMT = '%0.10d %0.5d n'
-
 class PDFCrossReferenceSubsection(PDFObject):
     def __init__(self, firstentrynumber, idsequence):
         self.firstentrynumber = firstentrynumber
@@ -924,7 +922,7 @@ class PDFCrossReferenceSubsection(PDFObject):
         if firstentrynumber==0:
             taken[0] = "standard free entry"
             nentries = nentries+1
-            entries.insert(0, "0000000000 65535 f")
+            entries.insert(0, "0000000000 65535 f ")
         idToNV = document.idToObjectNumberAndVersion
         idToOffset = document.idToOffset
         lastentrynumber = firstentrynumber+nentries-1
@@ -938,7 +936,7 @@ class PDFCrossReferenceSubsection(PDFObject):
             rnum = num-firstentrynumber
             taken[num] = id
             offset = idToOffset[id]
-            entries[num] = XREFFMT % (offset, version)
+            entries[num] = '%0.10d %0.5d n ' % (offset, version)
         # now add the initial line
         firstline = "%s %s" % (firstentrynumber, nentries)
         entries.insert(0, firstline)
