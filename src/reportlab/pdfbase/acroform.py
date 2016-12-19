@@ -1,9 +1,10 @@
 __all__=('AcroForm',)
-from reportlab.pdfbase.pdfdoc import PDFObject, PDFArray, PDFDictionary, PDFString, pdfdocEnc, PDFName, PDFStreamFilterZCompress
+from reportlab.pdfbase.pdfdoc import PDFObject, PDFArray, PDFDictionary, PDFString, pdfdocEnc, PDFName, PDFStreamFilterZCompress, escapePDF
 from reportlab.pdfgen.canvas  import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.colors import Color, CMYKColor, Whiter, Blacker
 from reportlab.lib.rl_accel import fp_str
+from reportlab.lib.utils import isStr, asNative
 import weakref
 
 visibilities = dict(
@@ -37,6 +38,13 @@ fieldFlagValues = dict(
                 doNotScroll = 1<<23,        #1.4
                 comb = 1<<24,               #1.5
                 richText = 1<<25,           #1.5
+
+                #choice fields
+                combo = 1<<17,
+                edit = 1<<18,
+                sort = 1<<19,
+                multiSelect = 1<<21,        #1.4
+                commitOnSelChange = 1<<26,  #1.5
                 )
 
 annotationFlagValues = dict(
@@ -51,6 +59,27 @@ annotationFlagValues = dict(
                     lockedcontents=1<<9,    #1.7
                     )
 annotationFlagValues['print']=1<<2
+
+_bsStyles = dict(
+            solid='S',
+            dashed='D',
+            bevelled='B',
+            inset='I',
+            underlined='U',
+            )
+
+def bsPDF(borderWidth,borderStyle,dashLen):
+    d = dict(W=borderWidth,S=PDFName(_bsStyles[borderStyle]))
+    if borderStyle=='dashed':
+        if not dashLen:
+            dashLen = [3]
+        elif not isinstance(dashLen,(list,tuple)):
+            dashLen = [dashLen]
+        d['D'] = PDFArray(dashLen)
+    return PDFDictionary(d)
+
+def escPDF(s):
+    return escapePDF(s).replace('%','\\045')
 
 def makeFlags(s,d=annotationFlagValues):
     if not isinstance(s,int):
@@ -192,8 +221,7 @@ endstream
                     stream('%(streamStroke)s %(borderWidth)s w 0 %(hbw)s m %(size)s %(hbw)s l s')
                 elif borderStyle in ('dashed','inset','bevelled','solid'):
                     if borderStyle=='dashed':
-                        dashLen = fp_str(dashLen)
-                        dash = ' [%(dashLen)s ] 0 d'
+                        dash = ' [%s ] 0 d' % fp_str(dashLen)
                     else:
                         dash = ''
                     stream('%(streamStroke)s%(dash)s %(borderWidth)s w %(hbw)s %(hbw)s %(smbw)s %(smbw)s re s')
@@ -312,7 +340,7 @@ endstream
         return self.canv._doc.Reference(obj)
 
     def getRefStr(self,obj):
-        return self.getRef(obj).format(self.canv._doc)
+        return asNative(self.getRef(obj).format(self.canv._doc))
 
     @staticmethod
     def stdColors(t,b,f):
@@ -370,6 +398,7 @@ endstream
                 fieldFlags='required',
                 forceBorder=False,
                 relative=False,
+                dashLen = 3,
                 ):
         initialValue = 'Yes' if checked else 'Off'
         textColor,borderColor,fillColor=self.stdColors(textColor,borderColor,fillColor)
@@ -393,6 +422,7 @@ endstream
                                     borderWidth=borderWidth,
                                     borderStyle=borderStyle,
                                     size=size,
+                                    dashLen=dashLen,
                                     )
                 if ap in self._refMap:
                     ref = self._refMap[ap]
@@ -420,7 +450,7 @@ endstream
             CB['TU'] = PDFString(tooltip)
         if not name:
             name = 'AFF%03d' % len(self.fields)
-        #if borderWidth: CB['BS'] = PDFFromString('<</Type /Border /W %s>>' % borderWidth)
+        if borderWidth: CB['BS'] = bsPDF(borderWidth,borderStyle,dashLen)
         CB['T'] = PDFString(name)
         MK = dict(
                 CA='(%s)' % ZDSyms[buttonStyle],
@@ -452,6 +482,7 @@ endstream
                 fieldFlags='noToggleToOff required radio',
                 forceBorder=False,
                 relative=False,
+                dashLen=3,
                 ):
         if name not in self._radios:
             group = RadioGroup(name,tooltip=tooltip,fieldFlags=fieldFlags)
@@ -494,6 +525,7 @@ endstream
                                     borderWidth=borderWidth,
                                     borderStyle=borderStyle,
                                     size=size,
+                                    dashLen=dashLen,
                                     )
                 if ap in self._refMap:
                     ref = self._refMap[ap]
@@ -523,7 +555,7 @@ endstream
                 BC=PDFArray(self.colorTuple(borderColor)),
                 BG=PDFArray(self.colorTuple(fillColor)),
                 )
-        #if borderWidth: RB['BS'] = PDFFromString('<</Type /Border /W %s>>' % borderWidth)
+        if borderWidth: RB['BS'] = bsPDF(borderWidth,borderStyle,dashLen)
         RB['MK'] = PDFDictionary(MK)
         RB = PDFDictionary(RB)
         self.canv._addAnnotation(RB)
@@ -553,6 +585,11 @@ endstream
                 width=120,
                 height=36,
                 dashLen=3,
+                wkind='textfield',
+                labels=[],
+                I=[],
+                sel_bg='0.600006 0.756866 0.854904 rg',
+                sel_fg='0 g',
                 ):
         template = '''<<
 /Matrix [1.0 0.0 0.0 1.0 0.0 0.0]
@@ -568,43 +605,105 @@ stream
 endstream
 '''
         stream = [].append
-        streamFill = self.streamFillColor(fillColor)
-        stream('%(streamFill)s\n0 0 %(width)s %(height)s re\nf')
+        if fillColor:
+            streamFill = self.streamFillColor(fillColor)
+            stream('%(streamFill)s\n0 0 %(width)s %(height)s re\nf')
         if borderWidth!=None:
-            streamStroke = self.streamStrokeColor(borderColor)
             hbw = borderWidth*0.5
             bww = width - borderWidth
             bwh = height - borderWidth
-            if borderStyle=='underlined':
-                stream('%(streamStroke)s %(borderWidth)s w 0 %(hbw)s m %(width)s %(hbw)s l s')
-            elif borderStyle in ('dashed','inset','bevelled','solid'):
-                if borderStyle=='dashed':
-                    dashLen = fp_str(dashLen)
-                    dash = '\n[%(dashLen)s ] 0 d\n'
-                else:
-                    dash = ''
-                stream('%(streamStroke)s\n%(dash)s%(borderWidth)s w %(hbw)s %(hbw)s %(bww)s %(bwh)s re\ns')
+            _2bw = 2*borderWidth
             if borderStyle in ('bevelled','inset'):
-                _2bw = 2*borderWidth
                 bw2w = width - _2bw
                 bw2h = height - _2bw
-                bbs0 = Blacker(fillColor,0.5)
-                bbs1 = fillColor
-                bbs0 = self.streamFillColor(bbs0)
-                bbs1 = self.streamFillColor(bbs1)
-                stream('%(bbs0)s %(borderWidth)s %(borderWidth)s m %(borderWidth)s %(bwh)s l %(bww)s %(bwh)s l %(bw2w)s %(bw2h)s l %(_2bw)s %(bw2h)s l %(_2bw)s %(_2bw)s l f %(bbs1)s %(bww)s %(bwh)s m %(bww)s %(borderWidth)s l %(borderWidth)s %(borderWidth)s l %(_2bw)s %(_2bw)s l %(bw2w)s %(_2bw)s l %(bw2w)s %(bw2h)s l f')
+                if borderStyle == 'bevelled':
+                    bbs0 = '1 g'
+                    if fillColor or borderColor:
+                        bbs1 = '-0.250977 0.749023 -0.250977 rg'
+                    else:
+                        bbs1 = '.75293 g'
+                else:
+                    bbs0 = '.501953 g'
+                    bbs1 = '.75293 g'
+                stream('%(bbs0)s\n%(borderWidth)s %(borderWidth)s m\n%(borderWidth)s %(bwh)s l\n%(bww)s %(bwh)s l\n%(bw2w)s %(bw2h)s l\n%(_2bw)s %(bw2h)s l\n%(_2bw)s %(_2bw)s l\nf\n%(bbs1)s\n%(bww)s %(bwh)s m\n%(bww)s %(borderWidth)s l\n%(borderWidth)s %(borderWidth)s l\n%(_2bw)s %(_2bw)s l\n%(bw2w)s %(_2bw)s l\n%(bw2w)s %(bw2h)s l\nf')
         else:
             hbw = 0
             bww = width
             bwh = height
+        undash = ''
+        if borderColor:
+            streamStroke = self.streamStrokeColor(borderColor)
+            if borderStyle=='underlined':
+                stream('%(streamStroke)s %(borderWidth)s w 0 %(hbw)s m %(width)s %(hbw)s l s')
+            elif borderStyle in ('dashed','inset','bevelled','solid'):
+                if borderStyle=='dashed':
+                    dash = '\n[%s ] 0 d\n' % fp_str(dashLen)
+                    undash = '[] 0 d'
+                else:
+                    dash = '\n%s w' % borderWidth
+                stream('%(streamStroke)s\n%(dash)s\n%(hbw)s %(hbw)s %(bww)s %(bwh)s re\ns')
+        _4bw = 4*borderWidth
+        w4bw = width - _4bw
+        h4bw = height - _4bw
         textFill = self.streamFillColor(textColor)
-        stream('/Tx BMC \nq\n%(hbw)s %(hbw)s %(bww)s %(bwh)s re\nW\nn\n0 g\n0 G\nBT\n/%(iFontName)s %(fontSize)s Tf\n%(textFill)s')
+        stream('/Tx BMC \nq\n%(_2bw)s %(_2bw)s %(w4bw)s %(h4bw)s re\nW\nn')
         leading = 1.2 * fontSize
-        y = height - leading
-        for line in value.split('\n'):
-            stream('%%(borderWidth)s %s Td\n(%s) Tj' % (y,line))
-            y -= leading
-        stream('ET\nQ\nEMC\n')
+        if wkind=='listbox':
+            nopts = int(h4bw/leading)
+            leading = h4bw/float(nopts)
+            if nopts>len(labels):
+                i0 = 0
+                nopts = len(labels)
+            elif len(I)<=1:
+                i0 = I[0] if I else 0
+                if i0:
+                    if i0<nopts:
+                        i0 = 0
+                    else:
+                        i = len(labels) - nopts
+                        if i0>=i:
+                            i0 = i
+            else:   #|I|>1
+                if I[1]<nopts:
+                    i0 = 0
+                else:
+                    i0 = I[0]
+            y = len(labels)
+            i = i0 + nopts
+            if i>y: i0 = i - y
+            ilim = min(y,i0+nopts)
+            if I:
+                i = i0
+                y = height - _2bw - leading
+                stream(sel_bg)
+                while i<ilim:
+                    if i in I:
+                        #draw selected bg
+                        stream('%%(_2bw)s %s %%(w4bw)s %%(leading)s re\nf' % fp_str(y))
+                    y -= leading
+                    i += 1
+            i = i0
+            y = height - _2bw - fontSize
+            stream('0 g\n0 G\n%(undash)s')
+            while i<ilim:
+                stream('BT')
+                if i==i0:
+                    stream('/%(iFontName)s %(fontSize)s Tf')
+                stream(sel_fg if i in I else '%(textFill)s')
+                stream('%%(_4bw)s %s Td\n(%s) Tj' % (fp_str(y),escPDF(labels[i])))
+                y -= leading
+                i += 1
+                stream('ET')
+        else:
+            stream('0 g\n0 G\n%(undash)s')
+            y = height - fontSize - _2bw
+            stream('BT\n/%(iFontName)s %(fontSize)s Tf\n%(textFill)s')
+            for line in value.split('\n'):
+                stream('%%(_4bw)s %s Td\n(%s) Tj' % (y,escPDF(line)))
+                y -= leading
+            stream('ET')
+        leading = fp_str(leading)
+        stream('Q\nEMC\n')
         stream = ('\n'.join(stream.__self__) % vars()).replace('  ',' ').replace('\n\n','\n')
         filters, stream = self.compress(stream)
         streamLen = len(stream)
@@ -622,7 +721,7 @@ endstream
             self.fonts[fn] = ref
         return ref, fn
 
-    def textfield(self,
+    def _textfield(self,
                 value='',
                 fillColor=None,
                 borderColor=None,
@@ -636,12 +735,15 @@ endstream
                 tooltip=None,
                 name=None,
                 annotationFlags='print',
-                fieldFlags='required multiline',
+                fieldFlags='',
                 forceBorder=False,
                 relative=False,
                 maxlen=100,
                 fontName=None,
                 fontSize=None,
+                wkind=None,
+                options=None,
+                dashLen=3,
                 ):
         rFontName, iFontName = self.makeFont(fontName)
         if fontSize is None:
@@ -652,6 +754,64 @@ endstream
             x, y = self.canv.absolutePosition(x,y)
         doc = canv._doc
         rFontName = '<</%s %s>>' % (iFontName,rFontName)
+        Ff = makeFlags(fieldFlags,fieldFlagValues)
+        if wkind!='textfield':
+            #options must be a list of pairs (label value)
+            #value must be a list of the values
+            FT='Ch'
+            if wkind=='choice':
+                Ff |= fieldFlagValues['combo']  #just in case
+            V = []
+            Opt = []
+            AP = []
+            I = []
+            TF = []
+            if not isinstance(options,(list,tuple)):
+                raise TypeError('%s options=%r is wrong type' % (wkind,options))
+            for v in options:
+                if isStr(v):
+                    Opt.append(PDFString(v))
+                    l = v
+                elif isinstance(v,(list,tuple)):
+                    if len(v)==1:
+                        v=l=v[0]
+                    else:
+                        l,v = v
+                    Opt.append(PDFArray([PDFString(v),PDFString(l)]))
+                else:
+                    raise TypeError('%s option %r is wrong type' % (wkind,v))
+                AP.append(v)
+                TF.append(l)
+            Opt = PDFArray(Opt)
+            if value:
+                if not isinstance(value,(list,tuple)):
+                    value = [value]
+                for v in value:
+                    if v not in AP:
+                        if v not in TF:
+                            raise ValueError('%s value %r is not in option\nvalues %r\nor labels %r' % (wkind,v,AP,TF))
+                        else:
+                            v = AP[TF.index(v)]
+                    I.append(AP.index(v))
+                    V.append(PDFString(v))
+                I.sort()
+                if not (Ff & fieldFlagValues['multiSelect']) or len(value)==1:
+                    if wkind=='choice':
+                        value = TF[I[0]]
+                    else:
+                        value = value[:1]
+                    V = V[:1]
+                V = V[0] if len(V)==1 else PDFArray(V)
+                lbextras = dict(labels=TF,I=I,wkind=wkind)
+            else:
+                V = PDFString(value)
+        else:
+            I = Opt = []
+            lbextras = {}
+            FT='Tx'
+            if not isStr(value):
+                raise TypeError('textfield value=%r is wrong type' % value)
+            V = PDFString(value)
         AP = {}
         for key in 'N':
             tC,bC,fC = self.varyColors(key,textColor,borderColor,fillColor)
@@ -668,6 +828,8 @@ endstream
                             borderStyle=borderStyle,
                             width=width,
                             height=height,
+                            dashLen = dashLen,
+                            **lbextras
                             )
             if ap in self._refMap:
                 ref = self._refMap[ap]
@@ -677,37 +839,174 @@ endstream
             AP[key] = ref
 
         TF = dict(
-                FT = PDFName('Tx'),
+                FT = PDFName(FT),
                 P = doc.thisPageRef(),
-                V = PDFString(value),
+                V = V,
                 #AS = PDFName(value),
-                DV = PDFString(value),
+                DV = V,
                 Rect = PDFArray((x,y,x+width,y+height)),
                 AP = PDFDictionary(AP),
                 Subtype = PDFName('Widget'),
                 Type = PDFName('Annot'),
                 F = makeFlags(annotationFlags,annotationFlagValues),
-                Ff = makeFlags(fieldFlags,fieldFlagValues),
+                Ff = Ff,
                 #H=PDFName('N'),
                 DA=PDFString('/%s %d Tf 0 0 1 rg'%(iFontName,fontSize)),
                 )
+        if Opt: TF['Opt'] = Opt
+        if I: TF['I'] = PDFArray(I)
         if maxlen:
             TF['MaxLen'] = maxlen
         if tooltip:
             TF['TU'] = PDFString(tooltip)
         if not name:
             name = 'AFF%03d' % len(self.fields)
-        #if borderWidth: TF['BS'] = PDFFromString('<</Type /Border /W %s>>' % borderWidth)
         TF['T'] = PDFString(name)
         MK = dict(
                 BC=PDFArray(self.colorTuple(borderColor)),
                 BG=PDFArray(self.colorTuple(fillColor)),
                 )
         TF['MK'] = PDFDictionary(MK)
+        if borderWidth: TF['BS'] = bsPDF(borderWidth,borderStyle,dashLen)
         TF = PDFDictionary(TF)
         self.canv._addAnnotation(TF)
         self.fields.append(self.getRef(TF))
         self.checkForceBorder(x,y,width,height,forceBorder,'square',borderStyle,borderWidth,borderColor,fillColor)
+
+    def textfield(self,
+                value='',
+                fillColor=None,
+                borderColor=None,
+                textColor=None,
+                borderWidth=1,
+                borderStyle='solid',
+                width=120,
+                height=36,
+                x=0,
+                y=0,
+                tooltip=None,
+                name=None,
+                annotationFlags='print',
+                fieldFlags='',
+                forceBorder=False,
+                relative=False,
+                maxlen=100,
+                fontName=None,
+                fontSize=None,
+                ):
+        return self._textfield(
+                value=value,
+                fillColor=fillColor,
+                borderColor=borderColor,
+                textColor=textColor,
+                borderWidth=borderWidth,
+                borderStyle=borderStyle,
+                width=width,
+                height=height,
+                x=x,
+                y=y,
+                tooltip=tooltip,
+                name=name,
+                annotationFlags=annotationFlags,
+                fieldFlags=fieldFlags,
+                forceBorder=forceBorder,
+                relative=relative,
+                maxlen=maxlen,
+                fontName=fontName,
+                fontSize=fontSize,
+                wkind='textfield',
+                )
+
+    def listbox(self,
+                value='',
+                fillColor=None,
+                borderColor=None,
+                textColor=None,
+                borderWidth=1,
+                borderStyle='solid',
+                width=120,
+                height=36,
+                x=0,
+                y=0,
+                tooltip=None,
+                name=None,
+                annotationFlags='print',
+                fieldFlags='',
+                forceBorder=False,
+                relative=False,
+                maxlen=100,
+                fontName=None,
+                fontSize=None,
+                options=[],
+                ):
+        return self._textfield(
+                value=value,
+                fillColor=fillColor,
+                borderColor=borderColor,
+                textColor=textColor,
+                borderWidth=borderWidth,
+                borderStyle=borderStyle,
+                width=width,
+                height=height,
+                x=x,
+                y=y,
+                tooltip=tooltip,
+                name=name,
+                annotationFlags=annotationFlags,
+                fieldFlags=fieldFlags,
+                forceBorder=forceBorder,
+                relative=relative,
+                maxlen=maxlen,
+                fontName=fontName,
+                fontSize=fontSize,
+                wkind='listbox',
+                options = options,
+                )
+    def choice(self,
+                value='',
+                fillColor=None,
+                borderColor=None,
+                textColor=None,
+                borderWidth=1,
+                borderStyle='solid',
+                width=120,
+                height=36,
+                x=0,
+                y=0,
+                tooltip=None,
+                name=None,
+                annotationFlags='print',
+                fieldFlags='combo',
+                forceBorder=False,
+                relative=False,
+                maxlen=100,
+                fontName=None,
+                fontSize=None,
+                options=[],
+                ):
+        return self._textfield(
+                value=value,
+                fillColor=fillColor,
+                borderColor=borderColor,
+                textColor=textColor,
+                borderWidth=borderWidth,
+                borderStyle=borderStyle,
+                width=width,
+                height=height,
+                x=x,
+                y=y,
+                tooltip=tooltip,
+                name=name,
+                annotationFlags=annotationFlags,
+                fieldFlags=fieldFlags,
+                forceBorder=forceBorder,
+                relative=relative,
+                maxlen=maxlen,
+                fontName=fontName,
+                fontSize=fontSize,
+                wkind='choice',
+                options = options,
+                )
 
     def checkboxRelative(self, **kwds):
         "same as checkbox except the x and y are relative to the canvas coordinate transform"
@@ -720,6 +1019,15 @@ endstream
         self.radio(**kwds)
 
     def textfieldRelative(self, **kwds):
+        "same as textfield except the x and y are relative to the canvas coordinate transform"
+        kwds['relative']=True
+        self.textfield(**kwds)
+
+    def listboxRelative(self, **kwds):
+        "same as textfield except the x and y are relative to the canvas coordinate transform"
+        kwds['relative']=True
+        self.textfield(**kwds)
+    def choiceRelative(self, **kwds):
         "same as textfield except the x and y are relative to the canvas coordinate transform"
         kwds['relative']=True
         self.textfield(**kwds)
@@ -742,15 +1050,15 @@ class CBMark:
 
     def scaledRender(self,size,ds=0):
         '''
-        >>> print cbmarks['check'].scaledRender(20)
+        >>> print(cbmarks['check'].scaledRender(20))
         12.97075 14.68802 m 15.00139 17.16992 l 15.9039 18.1727 17.93454 18.67409 19.2883 18.67409 c 19.46379 18.27298 l 17.13231 15.51532 l 11.91783 8.62117 l 8.307799 3.030641 l 7.430362 1.526462 l 7.305014 1.275766 7.154596 .97493 6.9039 .824513 c 6.577994 .674095 5.825905 .674095 5.47493 .674095 c 4.672702 .674095 4.497214 .674095 4.321727 .799443 c 4.071031 .97493 3.945682 1.325905 3.770195 1.67688 c 3.218663 2.830084 2.240947 5.337047 2.240947 6.590529 c 2.240947 7.016713 2.491643 7.21727 2.817549 7.442897 c 3.344011 7.818942 4.0961 8.245125 4.747911 8.245125 c 5.249304 8.245125 5.299443 7.818942 5.449861 7.417827 c 5.951253 6.239554 l 6.026462 6.038997 6.252089 5.337047 6.527855 5.337047 c 6.778552 5.337047 7.079387 5.913649 7.179666 6.089136 c 12.97075 14.68802 l h f
-        >>> print cbmarks['cross'].scaledRender(20)
+        >>> print(cbmarks['cross'].scaledRender(20))
         19.9104 17.43931 m 12.41908 10 l 19.9104 2.534682 l 18.37572 1 l 10.9104 8.491329 l 3.445087 1 l 1.910405 2.534682 l 9.427746 10 l 1.910405 17.46532 l 3.445087 19 l 10.9104 11.50867 l 18.37572 19 l 19.9104 17.43931 l h f
-        >>> print cbmarks['circle'].scaledRender(20)
+        >>> print(cbmarks['circle'].scaledRender(20))
         1.872576 9.663435 m 1.872576 14.64958 5.936288 18.61357 10.89751 18.61357 c 15.8338 18.61357 19.87258 14.59972 19.87258 9.663435 c 19.87258 4.727147 15.8338 .688366 10.89751 .688366 c 5.936288 .688366 1.872576 4.677285 1.872576 9.663435 c h f
-        >>> print cbmarks['star'].scaledRender(20)
+        >>> print(cbmarks['star'].scaledRender(20))
         10.85542 18.3253 m 12.90361 11.84337 l 19.84337 11.84337 l 14.25301 7.650602 l 16.42169 1 l 10.85542 5.096386 l 5.289157 1 l 7.481928 7.650602 l 1.843373 11.84337 l 8.759036 11.84337 l 10.85542 18.3253 l h f
-        >>> print cbmarks['diamond'].scaledRender(20)
+        >>> print(cbmarks['diamond'].scaledRender(20))
         17.43533 9.662031 m 15.63282 7.484006 l 10.85118 .649513 l 8.422809 4.329624 l 5.919332 7.659249 l 4.267038 9.662031 l 6.16968 12.0153 l 10.85118 18.64951 l 12.75382 15.4701 15.00695 12.49096 17.43533 9.662031 c h f
         '''
         #work out the scale and translation

@@ -123,6 +123,42 @@ class PdfFormTestCase(NearTestCase):
         af.textfieldRelative(name='tf3A',tooltip='Field tf3A',value='Hello World',x=144*2+36,y=72+0*36, borderStyle='inset', borderWidth=2, borderColor=magenta, fillColor=pink, textColor=blue,forceBorder=True)
         af.textfieldRelative(name='tf3B',tooltip='Field tf3B',value='Hello World',x=144*2+36,y=72+2*36, borderStyle='inset', borderWidth=2, fontName='Courier-Bold', borderColor=magenta, fillColor=pink, textColor=blue,forceBorder=True)
         canv.showPage()
+        BS = ['solid','bevelled','inset','dashed','underlined']
+        V = ['Av','B','Cv','D','Dv','E','F','G','Gv']
+        ff = ['','edit']
+        for i in xrange(500):
+            x = 72+(i%3)*180
+            y = 800 - int(i/3)*36
+            if y<100: break
+            value=V[i%len(V)]
+            bW=i%3+1
+            af.choice(name='CH%d'%i,value=value,x=x,y=y, width=72+bW, height=20+bW, borderStyle=BS[i%5], borderWidth=bW,
+                fieldFlags=ff[i and i%9==0],
+                borderColor=red, fillColor=green, textColor=blue,forceBorder=False,
+                tooltip = 'CH%d value=%r' % (i,value),
+                options=[('A','Av'),'B',('C','Cv'),('D','Dv'),'E',('F',),('G','Gv')])
+        canv.showPage()
+        BS = ['solid','bevelled','inset','dashed','underlined']
+        V = ['Av','B','Cv','D','Dv','E','F','G','Gv','H']
+        ff = ['','multiSelect']
+        for i in xrange(500):
+            x = 72+(i%3)*180
+            y = 800 - int(i/3)*108 - 52
+            if y<100: break
+            v=i%len(V)
+            value=[V[v]]
+            if v>=5:
+                v1 = V[3+i%5]
+                if v1 not in value:
+                    value.append(v1)
+            bW=i%3+1
+            fieldFlags=ff[len(value)>1]
+            af.listbox(name='LB%d'%i,value=value,x=x,y=y, width=72+bW, height=72+bW, borderStyle=BS[i%5], borderWidth=bW,
+                fieldFlags=fieldFlags,
+                borderColor=red, fillColor=green, textColor=blue,forceBorder=False,
+                tooltip = 'LB%d value=%r' % (i,value),
+                options=[('A','Av'),'B',('C','Cv'),('D','Dv'),'E',('F',),('G','Gv'),'H'])
+        canv.showPage()
         canv.save()
 
 def makeSuite():
