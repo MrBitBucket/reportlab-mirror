@@ -192,7 +192,7 @@ def makeHtmlSection(text, bgcolor='#FFA0FF'):
 u    """
     text = htmlescape(text.expandtabs())
     result = []
-    result.append("""<TABLE WIDTH="100\%" BORDER="0">""")
+    result.append("""<TABLE WIDTH="100\\%" BORDER="0">""")
     result.append("""<TR><TD BGCOLOR="%s" VALIGN="CENTER">""" % bgcolor)
     result.append("""<H2>%s</H2>""" % text)
     result.append("""</TD></TR></TABLE>""")
@@ -208,7 +208,7 @@ def makeHtmlSubSection(text, bgcolor='#AAA0FF'):
     """
     text = htmlescape(text.expandtabs())
     result = []
-    result.append("""<TABLE WIDTH="100\%" BORDER="0">""")
+    result.append("""<TABLE WIDTH="100\\%" BORDER="0">""")
     result.append("""<TR><TD BGCOLOR="%s" VALIGN="CENTER">""" % bgcolor)
     result.append("""<H3><TT><FONT SIZE="+2">%s</FONT></TT></H3>""" % text)
     result.append("""</TD></TR></TABLE>""")

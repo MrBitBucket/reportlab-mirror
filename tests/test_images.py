@@ -4,7 +4,7 @@
 __version__='3.3.0'
 __doc__="""Tests to do with image handling.
 
-Most of them make use of test\pythonpowereed.gif."""
+Most of them make use of test\\pythonpowereed.gif."""
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 setOutDir(__name__)
 import os

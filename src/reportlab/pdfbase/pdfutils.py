@@ -108,7 +108,7 @@ def cacheImageFile(filename, returnInMemory=0, IMG=None):
 def preProcessImages(spec):
     """Preprocesses one or more image files.
 
-    Accepts either a filespec ('C:\mydir\*.jpg') or a list
+    Accepts either a filespec ('C:\\mydir\\*.jpg') or a list
     of image filenames, crunches them all to save time.  Run this
     to save huge amounts of time when repeatedly building image
     documents."""

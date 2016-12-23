@@ -783,7 +783,7 @@ class PingoIllust:
 # D = dir()
 g = globals()
 Dprime = {}
-for a,b in g.items()):
+for a,b in list(g.items()):
     if a[:4]=="test" and isinstance(b,str):
         #print 'for', a
         #print b

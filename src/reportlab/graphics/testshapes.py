@@ -52,7 +52,7 @@ def _setup():
             ('Tahoma','TAHOMA.TTF'),
             ('VerdanaMS','VERDANA.TTF'),
             ]:
-            for D in ('c:\WINNT','c:\Windows'):
+            for D in (r'c:\WINNT',r'c:\Windows'):
                 fn = os.path.join(D,'Fonts',ttf)
                 if os.path.isfile(fn):
                     try:

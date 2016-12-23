@@ -26,7 +26,7 @@ from reportlab.lib.utils import import_zlib, ImageReader, isSeq, isStr, isUnicod
 from reportlab.lib.rl_accel import fp_str, escapePDF
 from reportlab.lib.boxstuff import aspectRatioFix
 
-digitPat = re.compile('\d')  #used in decimal alignment
+digitPat = re.compile(r'\d')  #used in decimal alignment
 zlib = import_zlib()
 
 # Robert Kern

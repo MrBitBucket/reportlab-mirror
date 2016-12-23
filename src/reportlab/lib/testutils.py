@@ -136,7 +136,7 @@ def getCVSEntries(folder, files=1, folders=0):
 class ExtConfigParser(ConfigParser):
     "A slightly extended version to return lists of strings."
 
-    pat = re.compile('\s*\[.*\]\s*')
+    pat = re.compile(r'\s*\[.*\]\s*')
 
     def getstringlist(self, section, option):
         "Coerce option to a list of strings or return unchanged if that fails."
