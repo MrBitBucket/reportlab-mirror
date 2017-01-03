@@ -18,7 +18,7 @@
 #endif
 
 
-#define VERSION "2.01"
+#define VERSION "2.02"
 #define MODULENAME "_renderPM"
 #ifdef isPy3
 #	define PyInt_FromLong	PyLong_FromLong
@@ -1267,9 +1267,14 @@ static PyObject* gstate__aapixbuf(gstateObject* self, PyObject* args)
 	ArtPixBuf	src;
 
 	src.n_channels = 3;
+#ifdef isPy3
+	#define AAPIXBUFFMT "ddddy#ii|i:_aapixbuf"
+#else
+	#define AAPIXBUFFMT "ddddt#ii|i:_aapixbuf"
+#endif
 
 	/*(dstX,dstY,dstW,dstH,src,srcW,srcH[,srcD[,aff]])*/
-	if(!PyArg_ParseTuple(args,"ddddt#ii|i:_aapixbuf",
+	if(!PyArg_ParseTuple(args,AAPIXBUFFMT,
 				&dstX, &dstY, &dstW, &dstH,
 				&src.pixels,&srclen,&src.width,&src.height,&src.n_channels)) return NULL;
 	ctm[0] = dstW/src.width;

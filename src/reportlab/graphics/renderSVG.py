@@ -7,13 +7,13 @@ objects download the svglib module here:
   http://python.net/~gherman/#svglib
 """
 
-import math, types, sys, os, codecs
+import math, types, sys, os, codecs, base64
 from operator import getitem
 
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.colors import black
-from reportlab.lib.utils import asNative
+from reportlab.lib.utils import asNative, getBytesIO
 from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
@@ -483,8 +483,16 @@ class SVGCanvas:
         comment = self.doc.createComment(data)
         # self.currGroup.appendChild(comment)
 
-    def drawImage(self, image, x1, y1, x2=None, y2=None):
-        pass
+    def drawImage(self, image, x, y, width, height, embed=True):
+        buf = getBytesIO()
+        image.save(buf,'png')
+        buf = asNative(base64.b64encode(buf.getvalue()))
+        self.currGroup.appendChild(
+                transformNode(self.doc,'image',
+                    x=x,y=y,width=width,height=height,
+                    href="data:image/png;base64,"+buf,
+                    )
+                )
 
     def line(self, x1, y1, x2, y2):
         if self._strokeColor != None:
@@ -849,6 +857,21 @@ class _SVGRenderer(Renderer):
             c._fillColor = None
             link_info = None
         c._fillAndStroke([], clip=path.isClipPath, link_info=link_info)
+
+    def drawImage(self, image):
+        path = image.path
+        if isinstance(path,str):
+            if not (path and os.path.isfile(path)): return
+            im = _getImage().open(path)
+        elif hasattr(path,'convert'):
+            im = path
+        else:
+            return
+        srcW, srcH = im.size
+        dstW, dstH = image.width, image.height
+        if dstW is None: dstW = srcW
+        if dstH is None: dstH = srcH
+        self._canvas.drawImage(im, image.x, image.y, dstW, dstH, embed=True)
 
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the operators

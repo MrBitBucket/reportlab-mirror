@@ -354,6 +354,9 @@ class Renderer:
         needed to set those properties"""
         self.undefined("applyStateChanges")
 
+    def drawImage(self,*args,**kwds):
+        raise NotImplementedError('drawImage')
+
 if __name__=='__main__':
     print("this file has no script interpretation")
     print(__doc__)

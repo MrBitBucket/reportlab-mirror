@@ -15,7 +15,7 @@ but we will expand them to try and trip up any parser.
 Feel free to add more.
 '''
 
-import os, sys
+import os, sys, base64
 
 from reportlab.lib import colors
 from reportlab.lib.units import cm
@@ -452,30 +452,25 @@ def getDrawing13():
     if maxx>400 or maxy>200: _,_,D = drawit(_FONTS,maxx,maxy)
     return D
 
-##def getDrawing14():
-##    """This tests inherited properties.  Each font should be as it says."""
-##    D = Drawing(400, 200)
-##    
-##    fontSize = 12
-##    D.fontName = 'Courier'
-##    
-##    g1 = Group(
-##            Rect(0, 0, 150, 20, fillColor=colors.yellow),
-##            String(5, 5, 'Inherited Courier', fontName=inherit, fontSize = fontSize)
-##            )
-##    D.add(g1)
-##
-##    g2 = Group(g1, transform = translate(25,25))
-##    D.add(g2)
-##
-##    g3 = Group(g2, transform = translate(25,25))
-##    D.add(g3)
-##
-##    g4 = Group(g3, transform = translate(25,25))
-##    D.add(g4)
-##
-##
-##    return D
+def smallArrow():
+    '''create a small PIL image'''
+    from reportlab.graphics.renderPM import _getImage
+    from reportlab.lib.utils import getBytesIO
+    b = base64.decodestring(b'''R0lGODdhCgAHAIMAAP/////29v/d3f+ysv9/f/9VVf9MTP8iIv8ICP8AAAAAAAAAAAAAAAAAAAAA
+AAAAACwAAAAACgAHAAAIMwABCBxIsKABAQASFli4MAECAgEAJJhIceKBAQkyasx4YECBjx8TICAQ
+AIDJkwYEAFgZEAA7''')
+    return _getImage().open(getBytesIO(b))
+
+def getDrawing14():
+    '''test shapes.Image'''
+    from reportlab.graphics.shapes import Image
+    D = Drawing(400, 200)
+    im0 = smallArrow()
+    D.add(Image(x=0,y=0,width=None,height=None,path=im0))
+    im1 = smallArrow()
+    D.add(Image(x=400-20,y=200-14,width=20,height=14,path=im1))
+    return D
+
 def getAllFunctionDrawingNames(doTTF=1):
     "Get a list of drawing function names from somewhere."
 
