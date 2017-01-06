@@ -578,7 +578,7 @@ class PDFString(PDFObject):
         '''s can be unicode/utf8 or a PDFString
         if escape is true then the output will be passed through escape
         if enc is raw then the string will be left alone
-        if enc is auto we'll try and automatically adapt to utf_16_be if the
+        if enc is auto we'll try and automatically adapt to utf_16_be/utf_16_le if the
         effective string is not entirely in pdfdoc
         '''
         if isinstance(s,PDFString):
@@ -595,7 +595,12 @@ class PDFString(PDFObject):
         if isBytes(s):
             if enc is 'auto':
                 try:
-                    u = s.decode(s.startswith(codecs.BOM_UTF16_BE) and 'utf16' or 'utf8')
+                    if s.startswith(codecs.BOM_UTF16_BE):
+                        u = s.decode('utf_16_be')
+                    elif s.startswith(codecs.BOM_UTF16_LE):
+                        u = s.decode('utf_16_le')
+                    else:
+                        u = s.decode('utf8')
                     if _checkPdfdoc(u):
                         s = u.encode('pdfdoc')
                     else:

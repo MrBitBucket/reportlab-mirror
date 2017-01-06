@@ -48,6 +48,8 @@ syntax: regexp
 ^src/reportlab/graphics/barcode/.*\.pdf
 ^src/reportlab/graphics/barcode/test_cbcim\..*
 ^src/reportlab/graphics/pmout
+^src/reportlab/graphics/epsout
+^src/reportlab/graphics/pdfout
 ^tools/docco/.*\.pdf
 ^tests/test_.*\.pdf
 ^tests/test_.*\.svg
