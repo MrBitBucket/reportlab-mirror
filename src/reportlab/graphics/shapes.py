@@ -956,23 +956,33 @@ _MOVETO, _LINETO, _CURVETO, _CLOSEPATH = list(range(4))
 _PATH_OP_ARG_COUNT = (2, 2, 6, 0)  # [moveTo, lineTo, curveTo, closePath]
 _PATH_OP_NAMES=['moveTo','lineTo','curveTo','closePath']
 
-def _renderPath(path, drawFuncs):
+def _renderPath(path,drawFuncs,countOnly=False,forceClose=False):
     """Helper function for renderers."""
     # this could be a method of Path...
     points = path.points
     i = 0
     hadClosePath = 0
     hadMoveTo = 0
+    active = not countOnly
     for op in path.operators:
+        if op == _MOVETO:
+            if forceClose:
+                if hadMoveTo and pop!=_CLOSEPATH:
+                    hadClosePath += 1
+                    if active:
+                        drawFuncs[_CLOSEPATH]()
+            hadMoveTo += 1
         nArgs = _PATH_OP_ARG_COUNT[op]
-        func = drawFuncs[op]
         j = i + nArgs
-        func(*points[i:j])
+        drawFuncs[op](*points[i:j])
         i = j
         if op == _CLOSEPATH:
-            hadClosePath = hadClosePath + 1
-        if op == _MOVETO:
-            hadMoveTo += 1
+            hadClosePath += 1
+        pop = op
+    if forceClose and hadMoveTo and pop!=_CLOSEPATH:
+        hadClosePath += 1
+        if active:
+            drawFuncs[_CLOSEPATH]()
     return hadMoveTo == hadClosePath
 
 class Path(SolidShape):

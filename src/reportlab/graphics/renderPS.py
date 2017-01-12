@@ -809,10 +809,39 @@ class _PSRenderer(Renderer):
         from reportlab.graphics.shapes import _renderPath
         c = self._canvas
         drawFuncs = (c.moveTo, c.lineTo, c.curveTo, c.closePath)
-        isClosed = _renderPath(path, drawFuncs)
-        if not isClosed:
-            c._fillColor = None
-        c._fillAndStroke([], clip=path.isClipPath)
+        vg_model = getattr(path,'_vg_model','')
+        def rP(forceClose=False):
+            return _renderPath(path, drawFuncs, forceClose=forceClose)
+        fill = c._fillColor is not None
+        stroke = c._strokeColor is not None
+        pathFill = lambda : c._fillAndStroke([], stroke=0)
+        pathStroke = lambda : c._fillAndStroke([], fill=0)
+        if path.isClipPath:
+            rP()
+            c._fillAndStroke([], fill=0, stroke=0, clip=1)
+        if vg_model=='svg':
+            if fill and stroke:
+                rP(forceClose=True)
+                pathFill()
+                rP()
+                pathStroke()
+            elif fill:
+                rP(forceClose=True)
+                pathFill()
+            elif stroke:
+                rP()
+                pathStroke()
+        elif vg_model=='pdf':
+            rP(forceClose=True)
+            if fill:
+                pathFill()
+            if stroke:
+                pathStroke()
+        else:
+            if rP():
+                pathFill()
+            if stroke:
+                pathStroke()
 
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the operators

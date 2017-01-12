@@ -176,17 +176,25 @@ class _PDFRenderer(Renderer):
         from reportlab.graphics.shapes import _renderPath
         pdfPath = self._canvas.beginPath()
         drawFuncs = (pdfPath.moveTo, pdfPath.lineTo, pdfPath.curveTo, pdfPath.close)
-        isClosed = _renderPath(path, drawFuncs)
-        if isClosed:
-            fill = self._fill
+        vg_model = getattr(path,'_vg_model','')
+        fill = self._fill
+        stroke = self._stroke
+        isClosed = _renderPath(path, drawFuncs, forceClose=fill and vg_model=='pdf')
+        dP = self._canvas.drawPath
+        cP = self._canvas.clipPath if path.isClipPath else dP
+        if vg_model=='svg':
+            if fill and stroke and not isClosed:
+                cP(pdfPath, fill=fill, stroke=0)
+                dP(pdfPath, stroke=stroke, fill=0)
+            else:
+                cP(pdfPath, fill=fill, stroke=stroke)
+        elif vg_model=='pdf':
+            cP(pdfPath, fill=fill, stroke=stroke)
         else:
-            fill = 0
-        if path.isClipPath:
-            self._canvas.clipPath(pdfPath, fill=fill, stroke=self._stroke)
-        else:
-            self._canvas.drawPath(pdfPath,
-                        fill=fill,
-                        stroke=self._stroke)
+            #our old broken default
+            if not isClosed:
+                fill = 0
+            cP(pdfPath, fill=fill, stroke=stroke)
 
     def setStrokeColor(self,c):
         self._canvas.setStrokeColor(c)
