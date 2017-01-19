@@ -13,6 +13,7 @@ from reportlab.graphics.shapes import STATE_DEFAULTS
 import math
 from operator import getitem
 from reportlab import rl_config
+from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
 _ESCAPEDICT={}
 for c in xrange(256):
     if c<32 or c>=127:
@@ -107,6 +108,7 @@ class PSCanvas:
         self.setLineJoin(0)
         self.setLineWidth(1)
         self.PostScriptLevel=PostScriptLevel
+        self._fillMode = FILL_EVEN_ODD
 
     def comment(self,msg):
         if self.comments: self.code_append('%'+msg)
@@ -497,15 +499,17 @@ class PSCanvas:
             a("closepath")
         self._fillAndStroke(figureCode)
 
-    def _fillAndStroke(self,code,clip=0,fill=1,stroke=1):
+    def _fillAndStroke(self,code,clip=0,fill=1,stroke=1,fillMode=None):
         fill = self._fillColor and fill
         stroke = self._strokeColor and stroke
         if fill or stroke or clip:
             self.code.extend(code)
             if fill:
+                if fillMode is None:
+                    fillMode = self._fillMode
                 if stroke or clip: self.code_append("gsave")
                 self.setColor(self._fillColor)
-                self.code_append("eofill")
+                self.code_append("eofill" if fillMode==FILL_EVEN_ODD else "fill")
                 if stroke or clip: self.code_append("grestore")
             if stroke:
                 if clip: self.code_append("gsave")
@@ -805,43 +809,36 @@ class _PSRenderer(Renderer):
                     raise ValueError('bad value for text_anchor '+str(text_anchor))
             self._canvas.drawString(x,y,text)
 
-    def drawPath(self, path):
+    def drawPath(self, path, fillMode=None):
         from reportlab.graphics.shapes import _renderPath
         c = self._canvas
         drawFuncs = (c.moveTo, c.lineTo, c.curveTo, c.closePath)
-        vg_model = getattr(path,'_vg_model','')
-        def rP(forceClose=False):
-            return _renderPath(path, drawFuncs, forceClose=forceClose)
+        autoclose = getattr(path,'autoclose','')
+        def rP(**kwds):
+            return _renderPath(path, drawFuncs, **kwds)
+        if fillMode is None:
+            fillMode = getattr(path,'fillMode',c._fillMode)
         fill = c._fillColor is not None
         stroke = c._strokeColor is not None
-        pathFill = lambda : c._fillAndStroke([], stroke=0)
+        clip = path.isClipPath
+        fas = lambda **kwds: c._fillAndStroke([], fillMode=fillMode, **kwds)
+        pathFill = lambda : c._fillAndStroke([], stroke=0, fillMode=fillMode)
         pathStroke = lambda : c._fillAndStroke([], fill=0)
-        if path.isClipPath:
+        if autoclose=='svg':
             rP()
-            c._fillAndStroke([], fill=0, stroke=0, clip=1)
-        if vg_model=='svg':
-            if fill and stroke:
-                rP(forceClose=True)
-                pathFill()
-                rP()
-                pathStroke()
-            elif fill:
-                rP(forceClose=True)
-                pathFill()
-            elif stroke:
-                rP()
-                pathStroke()
-        elif vg_model=='pdf':
-            rP(forceClose=True)
+            fas(stroke=stroke,fill=fill,clip=clip)
+        elif autoclose=='pdf':
             if fill:
-                pathFill()
-            if stroke:
-                pathStroke()
+                rP(forceClose=True)
+                fas(stroke=stroke,fill=fill,clip=clip)
+            elif stroke or clip:
+                rP()
+                fas(stroke=stroke,fill=0,clip=clip)
         else:
-            if rP():
-                pathFill()
-            if stroke:
-                pathStroke()
+            if fill and rP(countOnly=True):
+                rP()
+            elif stroke or clip:
+                fas(stroke=stroke,fill=0,clip=clip)
 
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the operators

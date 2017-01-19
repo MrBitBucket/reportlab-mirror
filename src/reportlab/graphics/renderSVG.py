@@ -19,6 +19,7 @@ from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
 from reportlab.lib.utils import getStringIO, RLString, isPy3, isUnicode, isBytes
+from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
 
 from xml.dom import getDOMImplementation
 
@@ -132,6 +133,9 @@ class EncodedWriter(list):
         del self[:]
         return r
 
+def _fillRuleName(v):
+    return 'evenodd' if v==FILL_EVEN_ODD else 'nonzero'
+
 ### classes ###
 class SVGCanvas:
     def __init__(self, size=(300,300), encoding='utf-8', verbose=0, bom=False, **kwds):
@@ -150,6 +154,7 @@ class SVGCanvas:
         self.fontHacks = kwds.pop('fontHacks',{})
         self.extraXmlDecl = kwds.pop('extraXmlDecl','')
         scaleGroupId = kwds.pop('scaleGroupId','')
+        self._fillMode = FILL_EVEN_ODD
 
         self.width, self.height = self.size = size
         # self.height = size[1]
@@ -189,6 +194,7 @@ class SVGCanvas:
                     xmlns="http://www.w3.org/2000/svg",
                     version="1.0",
                     )
+        svgAttrs['fill-rule']=_fillRuleName(self._fillMode)
         svgAttrs["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
         svgAttrs.update(kwds.pop('svgAttrs',{}))
         for k,v in svgAttrs.items():
@@ -305,9 +311,14 @@ class SVGCanvas:
 
         return codeline % data
 
-    def _fillAndStroke(self, code, clip=0, link_info=None,styles=AREA_STYLES):
+    def _fillAndStroke(self, code, clip=0, link_info=None,styles=AREA_STYLES,fillMode=None):
+        xtra = {}
+        if fillMode:
+            xtra['fill-rule'] = _fillRuleName(fillMode)
         path = transformNode(self.doc, "path",
-            d=self.path, style=self._formatStyle(styles))
+            d=self.path, style=self._formatStyle(styles),
+            **xtra
+            )
         if link_info :
             path = self._add_link(path, link_info)
         self.currGroup.appendChild(path)
@@ -844,19 +855,35 @@ class _SVGRenderer(Renderer):
     def drawPolygon(self, p):
         self._canvas.polygon(_pointsFromList(p.points), closed=1, link_info=self._get_link_info_dict(p))
 
-    def drawPath(self, path):
+    def drawPath(self, path, fillMode=None):
         # print "### drawPath", path.points
         from reportlab.graphics.shapes import _renderPath
         c = self._canvas
         drawFuncs = (c.moveTo, c.lineTo, c.curveTo, c.closePath)
-        isClosed = _renderPath(path, drawFuncs)
-        if isClosed:
-            #Only try and add links to closed paths...
-            link_info = self._get_link_info_dict(path)
-        else :
-            c._fillColor = None
-            link_info = None
-        c._fillAndStroke([], clip=path.isClipPath, link_info=link_info)
+        if fillMode is None:
+            fillMode = getattr(path,'fillMode',None)
+        link_info = self._get_link_info_dict(path)
+        autoclose = getattr(path,'autoclose','')
+        def rP(**kwds):
+            return _renderPath(path, drawFuncs, **kwds)
+        if autoclose=='svg':
+            rP()
+            c._fillAndStroke([], clip=path.isClipPath, link_info=link_info, fillMode=fillMode)
+        elif autoclose=='pdf':
+            rP(forceClose=True)
+            c._fillAndStroke([], clip=path.isClipPath, link_info=link_info, fillMode=fillMode)
+        else:
+            isClosed = rP()
+            if not isClosed:
+                ofc = c._fillColor
+                c.setFillColor(None)
+                try:
+                    link_info = None
+                    c._fillAndStroke([], clip=path.isClipPath, link_info=link_info, fillMode=fillMode)
+                finally:
+                    c.setFillColor(ofc)
+            else:
+                c._fillAndStroke([], clip=path.isClipPath, link_info=link_info, fillMode=fillMode)
 
     def drawImage(self, image):
         path = image.path

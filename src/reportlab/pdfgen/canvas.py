@@ -354,7 +354,7 @@ class Canvas(textobject._PDFColorSetter):
         self._textMode = 0  #track if between BT/ET
         self._leading = self._initialLeading
         self._currentMatrix = (1., 0., 0., 1., 0., 0.)
-        self._fillMode = 0   #even-odd
+        self._fillMode = FILL_EVEN_ODD
 
         #text state
         self._charSpace = 0
@@ -1710,18 +1710,22 @@ class Canvas(textobject._PDFColorSetter):
         for a pathobject.PDFPathObject instance"""
         return pathobject.PDFPathObject()
 
-    def drawPath(self, aPath, stroke=1, fill=0):
+    def drawPath(self, aPath, stroke=1, fill=0, fillMode=None):
         "Draw the path object in the mode indicated"
+        if fillMode is None:
+            fillMode = getattr(aPath,'_fillMode',self._fillMode)
         self._code.append(str(aPath.getCode()))
-        self._strokeAndFill(stroke,fill)
+        self._strokeAndFill(stroke,fill,fillMode)
 
-    def _strokeAndFill(self,stroke,fill):
-        self._code.append(PATH_OPS[stroke, fill, self._fillMode])
+    def _strokeAndFill(self,stroke,fill,fillMode=None):
+        self._code.append(PATH_OPS[stroke, fill, fillMode if fillMode is not None else self._fillMode])
 
-    def clipPath(self, aPath, stroke=1, fill=0):
+    def clipPath(self, aPath, stroke=1, fill=0, fillMode=None):
         "clip as well as drawing"
-        gc = aPath.getCode(); pathops = PATH_OPS[stroke, fill, self._fillMode]
-        clip = (self._fillMode == FILL_EVEN_ODD and ' W* ' or ' W ')
+        if fillMode is None:
+            fillMode = getattr(aPath,'_fillMode',self._fillMode)
+        gc = aPath.getCode(); pathops = PATH_OPS[stroke, fill, fillMode]
+        clip = (fillMode == FILL_EVEN_ODD and ' W* ' or ' W ')
         item = "%s%s%s" % (gc, clip, pathops) # ensure string conversion
         self._code.append(item)
         #self._code.append(  aPath.getCode()

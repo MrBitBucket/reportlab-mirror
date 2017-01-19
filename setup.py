@@ -301,7 +301,6 @@ def main():
             if debug>1:
                 debug_macros.extend([('RL_DEBUG',debug), ('ROBIN_DEBUG',None)])
 
-
     SPECIAL_PACKAGE_DATA = {}
     RL_ACCEL = _find_rl_ccode('rl_accel','_rl_accel.c')
     LIBRARIES=[]
@@ -385,6 +384,7 @@ def main():
                     pjoin(LIBART_DIR,'art_svp_vpath.c'),
                     pjoin(LIBART_DIR,'art_svp_vpath_stroke.c'),
                     pjoin(LIBART_DIR,'art_svp_ops.c'),
+                    pjoin(LIBART_DIR,'art_svp_wind.c'),
                     pjoin(LIBART_DIR,'art_vpath.c'),
                     pjoin(LIBART_DIR,'art_vpath_dash.c'),
                     pjoin(LIBART_DIR,'art_affine.c'),

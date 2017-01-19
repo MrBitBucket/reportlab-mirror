@@ -201,7 +201,7 @@ class _PMRenderer(Renderer):
             return
         from reportlab.graphics.shapes import _renderPath
         drawFuncs = (c.moveTo, c.lineTo, c.curveTo, c.pathClose)
-        vg_model = getattr(path,'_vg_model','')
+        autoclose = getattr(path,'autoclose','')
         def rP(forceClose=False):
             c.pathBegin()
             return _renderPath(path, drawFuncs, forceClose=forceClose)
@@ -211,27 +211,29 @@ class _PMRenderer(Renderer):
             c._clipPaths.append(path)
         fill = c.fillColor is not None
         stroke = c.strokeColor is not None
-        if vg_model=='svg':
+        if fill:
+            fillMode = getattr(path,'fillMode',-1)
+        if autoclose=='svg':
             if fill and stroke:
                 rP(forceClose=True)
-                c.pathFill()
+                c.pathFill(fillMode)
                 rP()
                 c.pathStroke()
             elif fill:
                 rP(forceClose=True)
-                c.pathFill()
+                c.pathFill(fillMode)
             elif stroke:
                 rP()
                 c.pathStroke()
-        elif vg_model=='pdf':
+        elif autoclose=='pdf':
             rP(forceClose=True)
             if fill:
-                c.pathFill()
+                c.pathFill(fillMode)
             if stroke:
                 c.pathStroke()
         else:
             if rP():
-                c.pathFill()
+                c.pathFill(fillMode)
             c.pathStroke()
 
 def _setFont(gs,fontName,fontSize):

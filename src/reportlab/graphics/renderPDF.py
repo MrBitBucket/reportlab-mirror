@@ -176,25 +176,26 @@ class _PDFRenderer(Renderer):
         from reportlab.graphics.shapes import _renderPath
         pdfPath = self._canvas.beginPath()
         drawFuncs = (pdfPath.moveTo, pdfPath.lineTo, pdfPath.curveTo, pdfPath.close)
-        vg_model = getattr(path,'_vg_model','')
+        autoclose = getattr(path,'autoclose','')
         fill = self._fill
         stroke = self._stroke
-        isClosed = _renderPath(path, drawFuncs, forceClose=fill and vg_model=='pdf')
+        isClosed = _renderPath(path, drawFuncs, forceClose=fill and autoclose=='pdf')
         dP = self._canvas.drawPath
         cP = self._canvas.clipPath if path.isClipPath else dP
-        if vg_model=='svg':
+        fillMode = getattr(path,'fillMode',None)
+        if autoclose=='svg':
             if fill and stroke and not isClosed:
                 cP(pdfPath, fill=fill, stroke=0)
-                dP(pdfPath, stroke=stroke, fill=0)
+                dP(pdfPath, stroke=stroke, fill=0, fillMode=fillMode)
             else:
-                cP(pdfPath, fill=fill, stroke=stroke)
-        elif vg_model=='pdf':
-            cP(pdfPath, fill=fill, stroke=stroke)
+                cP(pdfPath, fill=fill, stroke=stroke, fillMode=fillMode)
+        elif autoclose=='pdf':
+            cP(pdfPath, fill=fill, stroke=stroke, fillMode=fillMode)
         else:
             #our old broken default
             if not isClosed:
                 fill = 0
-            cP(pdfPath, fill=fill, stroke=stroke)
+            cP(pdfPath, fill=fill, stroke=stroke, fillMode=fillMode)
 
     def setStrokeColor(self,c):
         self._canvas.setStrokeColor(c)
