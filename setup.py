@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2012
+#Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
 __version__='3.3.26'
 import os, sys, glob, shutil
@@ -307,15 +307,14 @@ def main():
     EXT_MODULES = []
 
     if not RL_ACCEL:
-        infoline( '***************************************************')
-        infoline( '*No rl_accel code found, you can obtain it at     *')
-        infoline( '*http://www.reportlab.org/downloads.html#_rl_accel*')
-        infoline( '***************************************************')
+        infoline( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        infoline( 'not attempting build of the _rl_accel extension')
+        infoline( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     else:
-        infoline( '################################################')
-        infoline( '#Attempting install of _rl_accel & pyHnj')
-        infoline( '#extensions from %r'%RL_ACCEL)
-        infoline( '################################################')
+        infoline( '================================================')
+        infoline( 'Attempting build of _rl_accel & pyHnj')
+        infoline( 'extensions from %r'%RL_ACCEL)
+        infoline( '================================================')
         fn = pjoin(RL_ACCEL,'hyphen.mashed')
         SPECIAL_PACKAGE_DATA = {fn: pjoin('lib','hyphen.mashed')}
         EXT_MODULES += [
@@ -346,13 +345,13 @@ def main():
     RENDERPM = _find_rl_ccode('renderPM','_renderPM.c')
     if not RENDERPM:
         infoline( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        infoline( '!No rl_accel code found, you can obtain it at     !')
-        infoline( '!http://www.reportlab.org/downloads.html          !')
+        infoline( 'not attempting build of _renderPM')
         infoline( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
     else:
-        infoline( '################################################')
-        infoline( '#Attempting install of _renderPM')
-        infoline( '#extensions from %r'%RENDERPM)
+        infoline( '================================================')
+        infoline( 'Attempting build of _renderPM')
+        infoline( 'extensions from %r'%RENDERPM)
+        infoline( '================================================')
         GT1_DIR=pjoin(RENDERPM,'gt1')
 
         #check for an installed libart

@@ -27,9 +27,10 @@ import os, sys
 try:
     from reportlab.graphics import _renderPM
 except ImportError as errMsg:
-    raise ImportError("No module named _renderPM\n" + \
-        (str(errMsg)!='No module named _renderPM' and "it may be the wrong version or badly installed!" or
-                                    "see https://www.reportlab.com/software/opensource/rl-addons/"))
+    raise ImportError("""No module named _renderPM\nit may be badly or not installed!
+You may need to install development tools
+or seek advice at the users list see
+https://pairlist2.pair.net/mailman/listinfo/reportlab-users""")
 
 def _getImage():
     try:
