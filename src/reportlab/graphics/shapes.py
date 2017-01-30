@@ -450,6 +450,8 @@ class Group(Shape):
         ''' return a fully expanded object'''
         from reportlab.graphics.widgetbase import Widget
         obj = Group()
+        if hasattr(self,'__label__'):
+            obj.__label__=self.__label__
         if hasattr(obj,'transform'): obj.transform = self.transform[:]
         P = self.getContents()[:]   # pending nodes
         while P:
@@ -610,10 +612,12 @@ def _renderGroupPy(G,pfx,I,i=0,indent='\t\t'):
     for n in C:
         if isinstance(n, Group):
             npfx = 'v%d' % i
-            i = i + 1
-            s = s + '%s%s=%s._nn(Group())\n' % (indent,npfx,pfx)
+            i += 1
+            l = getattr(n,'__label__','')
+            if l: l='#'+l
+            s = s + '%s%s=%s._nn(Group())%s\n' % (indent,npfx,pfx,l)
             s = s + _renderGroupPy(n,npfx,I,i,indent)
-            i = i - 1
+            i -= 1
         else:
             s = s + '%s%s.add(%s)\n' % (indent,pfx,_repr(n,I))
     return s
