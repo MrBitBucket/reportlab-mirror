@@ -893,6 +893,7 @@ endstream
                 maxlen=100,
                 fontName=None,
                 fontSize=None,
+                dashLen=3,
                 ):
         return self._textfield(
                 value=value,
@@ -914,6 +915,7 @@ endstream
                 maxlen=maxlen,
                 fontName=fontName,
                 fontSize=fontSize,
+                dashLen=dashLen,
                 wkind='textfield',
                 )
 
@@ -934,9 +936,10 @@ endstream
                 fieldFlags='',
                 forceBorder=False,
                 relative=False,
-                maxlen=100,
                 fontName=None,
                 fontSize=None,
+                dashLen=3,
+                maxlen=None,
                 options=[],
                 ):
         return self._textfield(
@@ -959,6 +962,7 @@ endstream
                 maxlen=maxlen,
                 fontName=fontName,
                 fontSize=fontSize,
+                dashLen=dashLen,
                 wkind='listbox',
                 options = options,
                 )
@@ -979,9 +983,10 @@ endstream
                 fieldFlags='combo',
                 forceBorder=False,
                 relative=False,
-                maxlen=100,
                 fontName=None,
                 fontSize=None,
+                dashLen=3,
+                maxlen=None,
                 options=[],
                 ):
         return self._textfield(
@@ -1004,6 +1009,7 @@ endstream
                 maxlen=maxlen,
                 fontName=fontName,
                 fontSize=fontSize,
+                dashLen=dashLen,
                 wkind='choice',
                 options = options,
                 )

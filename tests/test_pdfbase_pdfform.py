@@ -59,7 +59,7 @@ class PdfFormTestCase(NearTestCase):
         af.checkbox(name='cb1F',tooltip='Field cb1F',checked=True,x=72,y=72+5*36,buttonStyle='check', borderWidth=2, borderColor=red, fillColor=None, textColor=None,forceBorder=True)
         af.checkbox(name='cb1H',tooltip='Field cb1H',checked=True,x=72,y=72+6*36,buttonStyle='check', borderStyle='underlined',borderWidth=2, borderColor=red, fillColor=None, textColor=None,forceBorder=True)
         af.checkbox(name='cb1G',tooltip='Field cb1G',checked=True,x=72,y=72+7*36,buttonStyle='check', borderStyle='dashed',borderWidth=2, borderColor=red, fillColor=None, textColor=None,forceBorder=True)
-        af.checkbox(name='cb1I',tooltip='Field cb1I',checked=True,x=72,y=72+8*36,buttonStyle='check', borderStyle='inset',borderWidth=2, borderColor=red, fillColor=None, textColor=None,forceBorder=True)
+        af.checkbox(name='cb1I',tooltip='Field cb1I',checked=True,x=72,y=72+8*36,buttonStyle='check', borderStyle='inset',borderWidth=1, borderColor=red, fillColor=None, textColor=None,forceBorder=True)
         af.checkbox(name='cb1J',tooltip='Field cb1J',checked=True,x=72,y=72+9*36,buttonStyle='check', borderStyle='solid',shape='circle', borderWidth=2, borderColor=red, fillColor=green, textColor=blue,forceBorder=True)
         af.checkbox(name='cb1K',tooltip='Field cb1K',checked=True,x=72,y=72+10*36,buttonStyle='check', borderWidth=1, borderColor=None, fillColor=None, textColor=None,forceBorder=True)
         af.checkbox(name='cb1L',tooltip='Field cb1L',checked=False,x=72,y=800,buttonStyle='check',borderWidth=None, borderColor=None, fillColor=None, textColor=None,forceBorder=True)
