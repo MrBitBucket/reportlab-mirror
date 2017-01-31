@@ -11,6 +11,67 @@ E.g. to retrieve the changes made between release 3.1 and release 3.2, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.4  ??/02/2017
+-----------------------
+    * support for Path autoclose & fillMode; version --> 3.3.29
+    * add support for different fill policies in renderXX drawPath; version-->3.3.28
+    * allow for UTF_16_LE BOM, fix for bug contributed by Michael Poindexter mpoindexter@housecanary.com
+    * improved support for images in renderPM/renderSVG bug report from Claude Paroz
+    * add AcroForm support to canvas; version --> 3.3.22
+    * avoid cr lf line endings
+    * attempt to ensure zipImported has some files or returns None
+    * added additonal test to barcode/test.py
+    * add an invisible font test thanks https://bitbucket.org/kb/ Konstantin Baierer
+    * add mailto href test
+    * improve UPCA barcode contribution by Kyle McFarlane https://bitbucket.org/kylemacfarlane/
+    * attempt to fix __loader__ issues in pyinstaller suggested by dbrnz @ bitbucket
+    * fix NormalDate comprisons in python3.x
+    * fix ypad use in ParagraphAndImage contrib annamarianfr@bitbucket, version-->3.3.16
+    * try to prevent multiple saving contrib by Tim Meneely
+    * fix problems with svg drawToString contrib by Eric Gillet & Johann Du Toit
+    * fix issue reported by Yitzchak Scott-Thoennes <sthoenna@gmail.com>
+    * fix fake KeepTogether setup in handle_keepWithNext
+    * add NullActionFlowable, fix empty KeepTogether
+    * really merge para-measure-fix
+    * merge para-measure-fix changes
+    * fixes to TypedPropertyCollection
+    * changes to Render class; allow drawings to specify initialFontName/Size
+    * fix python>=3.2 default axis labelling to match python2.x; bugfix contributed by Robin Westin bitbucket issue #82
+    * fix AttributeError reported by Kay Schluehr bitbucket issue #81
+    * add experimental time value axis
+    * fix bug in python shapes rendering
+    * add negative span style to test_platypus_tables splitting example
+    * fix segfault in _rl_accel.c; fix contributed by Neil Schemenauer as issue #78
+    * attempt to remove quadratic performance hit when longTableOptimize is set
+    * allow DATA: scheme in open for read
+    * import Table _rowpositions calculation
+    * support small ttfs which don't allow subsets
+    * add rl_settings allowTTFSubsetting
+    * address issue #76 (deprecated immports) reported by Richard Eames
+    * add table cell support for simple background shadings, contributed by Jeffrey Creem jcreem@bitbucket
+    * fix bug in tables.py reported by Vytis Banaitis @ bitbucket; version-->3.3.2
+    * minor change to allow barWidth setting in ecc200datamatrix.py (suggested by Kyle MacFarlane @ bitbucket)
+    * make paraparser syntax errors real and fix <sup/sub> tags to have relative values; version-->3.3.1
+
+### Contributors:
+    * annamarianfr@bitbucket
+    * Dinu Gherman
+    * Claude Paroz
+    * dbrnz @ bitbucket
+    * Eric Gillet
+    * Jeffrey Creem jcreem@bitbucket
+    * Johann Du Toit
+    * Kay Schluehr bitbucket issue #81
+    * Konstantin Baierer
+    * Kyle McFarlane https://bitbucket.org/kylemacfarlane/
+    * Michael Poindexter mpoindexter@housecanary.com
+    * Neil Schemenauer
+    * Richard Eames
+    * Robin Westin
+    * Tim Meneely
+    * Vytis Banaitis @ bitbucket
+    * Yitzchak Scott-Thoennes <sthoenna@gmail.com>
+
 
 RELEASE 3.3  17/02/2016
 -----------------------

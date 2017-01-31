@@ -431,3 +431,260 @@ c.showPage()
 c.save()
 
 """)
+
+heading2("Interactive Forms")
+heading3("Overview of Interactive Forms")
+
+disc("""The PDF standard allows for various kinds of interactive elements,
+the ReportLab toolkit currently supports only a fraction of the possibilities and should be considered a work in progress.
+At present we allow choices with
+<i>checkbox</i>, <i>radio</i>, <i>choice</i> &amp; <i>listbox</i> widgets; text values can be entered with a
+<i>textfield</i> widget. All the widgets are created by calling methods on the <i>canvas.acroform</i> property."""
+)
+heading3("Example")
+disc("This shows the basic mechanism of creating an interactive element on the current page.")
+eg("""
+        canvas.acroform.checkbox(
+                name='CB0',
+                tooltip='Field CB0',
+                checked=True,
+                x=72,y=72+4*36,
+                buttonStyle='diamond',
+                borderStyle='bevelled',
+                borderWidth=2,
+                borderColor=red,
+                fillColor=green,
+                textColor=blue,
+                forceBorder=True)
+""")
+alStyle=TableStyle([
+            ('SPAN',(0,0),(-1,0)),
+            ('FONT',(0,0),(-1,0),'Helvetica-Bold',10,12),
+            ('FONT',(0,1),(-1,1),'Helvetica-BoldOblique',8,9.6),
+            ('FONT',(0,2),(0,-1),'Helvetica-Bold',7,8.4),
+            ('FONT',(1,2),(1,-1),'Helvetica',7,8.4),
+            ('FONT',(2,2),(2,-1),'Helvetica-Oblique',7,8.4),
+            ('ALIGN',(0,0),(-1,0),'CENTER'),
+            ('ALIGN',(1,1),(1,1),'CENTER'),
+            ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
+            ('BOX', (0,0), (-1,-1), 0.25, colors.black),
+            ])
+
+disc("""<b>NB</b> note that the <i>acroform</i> canvas property is created automatically on demand and that there is only one form allowd in a document.""")
+heading3("Checkbox Usage")
+disc("""The <i>canvas.acroform.checkbox</i> method creates a <i>checkbox</i> widget on the current page. The value of the checkbox is either <b>YES</b> or <b>OFF</b>.
+The arguments are""")
+t = Table([
+            ['canvas.acroform.checkbox parameters','',''],
+            ['Parameter','Meaning','Default'],
+            ["name","the parameter's name","None"],
+            ["x","the horizontal position on the page (absolute coordinates)","0"],
+            ["y","the vertical position on the page (absolute coordinates)","0"],
+            ["size","The outline dimensions size x size","20"],
+            ["checked","if True the checkbox is initially checked","False"],
+            ["buttonStyle","the checkbox style (see below)","'check'"],
+            ["shape","The outline of the widget (see below)","'square'"],
+            ["fillColor","colour to be used to fill the widget","None"],
+            ["textColor","the colour of the symbol or text","None"],
+            ["borderWidth","as it says","1"],
+            ["borderColor","the widget's border colour","None"],
+            ["borderStyle","The border style name","'solid'"],
+            ["tooltip","The text to display when hovering over the widget","None"],
+            ["annotationFlags","blank separated string of annotation flags","'print'"],
+            ["fieldFlags","Blank separated field flags (see below)","'required'"],
+            ["forceBorder","when true a border force a border to be drawn","False"],
+            ["relative","if true obey the current canvas transform","False"],
+            ["dashLen ","the dashline to be used if the borderStyle=='dashed'","3"],
+          ],[90, 260, 90],style=alStyle,repeatRows=2)
+getStory().append(t)
+
+heading3("Radio Usage")
+disc("""The <i>canvas.acroform.radio</i> method creates a <i>radio</i> widget on the current page. The value of the radio is the value of the radio group's
+selected value or <b>OFF</b> if none are selected.
+The arguments are""")
+t = Table([
+            ['canvas.acroform.radio parameters','',''],
+            ['Parameter','Meaning','Default'],
+            ["name","the radio's group (ie parameter) name","None"],
+            ["value","the radio's group name","None"],
+            ["x","the horizontal position on the page (absolute coordinates)","0"],
+            ["y","the vertical position on the page (absolute coordinates)","0"],
+            ["size","The outline dimensions size x size","20"],
+            ["selected","if True this radio is the selected one in its group","False"],
+            ["buttonStyle","the checkbox style (see below)","'check'"],
+            ["shape","The outline of the widget (see below)","'square'"],
+            ["fillColor","colour to be used to fill the widget","None"],
+            ["textColor","the colour of the symbol or text","None"],
+            ["borderWidth","as it says","1"],
+            ["borderColor","the widget's border colour","None"],
+            ["borderStyle","The border style name","'solid'"],
+            ["tooltip","The text to display when hovering over the widget","None"],
+            ["annotationFlags","blank separated string of annotation flags","'print'"],
+            ["fieldFlags","Blank separated field flags (see below)","'noToggleToOff required radio'"],
+            ["forceBorder","when true a border force a border to be drawn","False"],
+            ["relative","if true obey the current canvas transform","False"],
+            ["dashLen ","the dashline to be used if the borderStyle=='dashed'","3"],
+          ],[90, 260, 90],style=alStyle,repeatRows=2)
+getStory().append(t)
+heading3("Listbox Usage")
+disc("""The <i>canvas.acroform.listbox</i> method creates a <i>listbox</i> widget on the current page. The listbox contains a
+list of options one or more of which (depending on fieldFlags) may be selected.
+""")
+t = Table([
+            ['canvas.acroform.listbox parameters','',''],
+            ['Parameter','Meaning','Default'],
+            ["name","the radio's group (ie parameter) name","None"],
+            ["options","List or tuple of avaiable options","[]"],
+            ["value","Singleton or list of strings of selected options","[]"],
+            ["x","the horizontal position on the page (absolute coordinates)","0"],
+            ["y","the vertical position on the page (absolute coordinates)","0"],
+            ["width","The widget width","120"],
+            ["height","The widget height","36"],
+            ["fontName","The name of the type 1 font to be used","'Helvetica'"],
+            ["fontSize","The size of font to be used","12"],
+            ["fillColor","colour to be used to fill the widget","None"],
+            ["textColor","the colour of the symbol or text","None"],
+            ["borderWidth","as it says","1"],
+            ["borderColor","the widget's border colour","None"],
+            ["borderStyle","The border style name","'solid'"],
+            ["tooltip","The text to display when hovering over the widget","None"],
+            ["annotationFlags","blank separated string of annotation flags","'print'"],
+            ["fieldFlags","Blank separated field flags (see below)","'noToggleToOff required radio'"],
+            ["forceBorder","when true a border force a border to be drawn","False"],
+            ["relative","if true obey the current canvas transform","False"],
+            ["dashLen ","the dashline to be used if the borderStyle=='dashed'","3"],
+          ],[90, 260, 90],style=alStyle,repeatRows=2)
+getStory().append(t)
+heading3("Choice Usage")
+disc("""The <i>canvas.acroform.choice</i> method creates a <i>dropdown</i> widget on the current page. The dropdown contains a
+list of options one or more of which (depending on fieldFlags) may be selected. If you add <i>edit</i> to the <i>fieldFlags</i>
+then the result may be edited.
+""")
+t = Table([
+            ['canvas.acroform.choice parameters','',''],
+            ['Parameter','Meaning','Default'],
+            ["name","the radio's group (ie parameter) name","None"],
+            ["options","List or tuple of avaiable options","[]"],
+            ["value","Singleton or list of strings of selected options","[]"],
+            ["x","the horizontal position on the page (absolute coordinates)","0"],
+            ["y","the vertical position on the page (absolute coordinates)","0"],
+            ["width","The widget width","120"],
+            ["height","The widget height","36"],
+            ["fontName","The name of the type 1 font to be used","'Helvetica'"],
+            ["fontSize","The size of font to be used","12"],
+            ["fillColor","colour to be used to fill the widget","None"],
+            ["textColor","the colour of the symbol or text","None"],
+            ["borderWidth","as it says","1"],
+            ["borderColor","the widget's border colour","None"],
+            ["borderStyle","The border style name","'solid'"],
+            ["tooltip","The text to display when hovering over the widget","None"],
+            ["annotationFlags","blank separated string of annotation flags","'print'"],
+            ["fieldFlags","Blank separated field flags (see below)","'combo'"],
+            ["forceBorder","when true a border force a border to be drawn","False"],
+            ["relative","if true obey the current canvas transform","False"],
+            ["dashLen ","the dashline to be used if the borderStyle=='dashed'","3"],
+            ["maxlen ","None or maximum length of the widget value","None"],
+          ],[90, 260, 90],style=alStyle,repeatRows=2)
+getStory().append(t)
+
+heading3("Textfield Usage")
+disc("""The <i>canvas.acroform.textfield</i> method creates a <i>textfield</i> entry widget on the current page. The textfield may be edited
+to change tha value of the widget
+""")
+t = Table([
+            ['canvas.acroform.textfield parameters','',''],
+            ['Parameter','Meaning','Default'],
+            ["name","the radio's group (ie parameter) name","None"],
+            ["value","Value of the text field","''"],
+            ["maxlen ","None or maximum length of the widget value","100"],
+            ["x","the horizontal position on the page (absolute coordinates)","0"],
+            ["y","the vertical position on the page (absolute coordinates)","0"],
+            ["width","The widget width","120"],
+            ["height","The widget height","36"],
+            ["fontName","The name of the type 1 font to be used","'Helvetica'"],
+            ["fontSize","The size of font to be used","12"],
+            ["fillColor","colour to be used to fill the widget","None"],
+            ["textColor","the colour of the symbol or text","None"],
+            ["borderWidth","as it says","1"],
+            ["borderColor","the widget's border colour","None"],
+            ["borderStyle","The border style name","'solid'"],
+            ["tooltip","The text to display when hovering over the widget","None"],
+            ["annotationFlags","blank separated string of annotation flags","'print'"],
+            ["fieldFlags","Blank separated field flags (see below)","''"],
+            ["forceBorder","when true a border force a border to be drawn","False"],
+            ["relative","if true obey the current canvas transform","False"],
+            ["dashLen ","the dashline to be used if the borderStyle=='dashed'","3"],
+          ],[90, 260, 90],style=alStyle,repeatRows=2)
+getStory().append(t)
+
+heading3("Button styles")
+disc("""The button style argument indicates what style of symbol should appear in the button when it is selected. There are several choices""")
+eg("""  check
+  cross
+  circle
+  star
+  diamond
+""")
+disc("""note that the document renderer can make some of these symbols wrong for their intended application.  Acrobat reader
+prefers to use its own rendering on top of what the specification says should be shown (especially when the forms hihlighting features are used""")
+
+heading3("Widget shape")
+disc("""The shape argument describes how the outline of the checkbox or radio widget should appear you can use""")
+eg("""  circle
+  square
+""")
+
+disc("""The renderer may make its own decisions about how the widget should look; so Acrobat Reader prefers circular outlines for radios.""")
+
+heading3("Border style")
+disc("""The borderStyle argument changes the 3D appearance of the widget on the page alternatives are""")
+eg("""  solid
+  dashed
+  inset
+  bevelled
+  underlined
+    """)
+heading3("fieldFlags Argument")
+disc("""The fieldFlags arguments can be an integer or a string containing blank separate tokens the values are shown in the table below. For
+more information consult the PDF specification.""")
+t = Table([
+            ['Field Flag Tokens and values','',''],
+            ['Token','Meaning','Value'],
+            ["readOnly","The widget is read only","1<<0"],
+            ["required","the widget is required","1<<1"],
+            ["noExport","don't export the widget value","1<<2"],
+            ["noToggleToOff","radios one only must be on","1<<14"],
+            ["radio","added by the radio method","1<<15"],
+            ["pushButton","if the button is a push button","1<<16"],
+            ["radiosInUnison","radios with the same value toggle together","1<<25"],
+            ["multiline","for multiline text widget","1<<12"],
+            ["password","password textfield","1<<13"],
+            ["fileSelect","file selection widget","1<<20"],         #1.4
+            ["doNotSpellCheck","as it says","1<<22"],   #1.4
+            ["doNotScroll","text fields do not scroll","1<<23"],        #1.4
+            ["comb","make a comb style text based on the maxlen value","1<<24"],                #1.5
+            ["richText","if rich text is used","1<<25"],            #1.5
+            ["combo","for choice fields","1<<17"],
+            ["edit","if the choice is editable","1<<18"],
+            ["sort","if the values should be sorted","1<<19"],
+            ["multiSelect","if the choice allows multi-select","1<<21"],        #1.4
+            ["commitOnSelChange","not used by reportlab","1<<26"],  #1.5
+          ],[90, 260, 90],style=alStyle,repeatRows=2)
+getStory().append(t)
+heading3("annotationFlags Argument")
+disc("""PDF widgets are annotations and have annotation properties these are shown in the table below""")
+t = Table([
+            ['Annotation Flag Tokens and values','',''],
+            ['Token','Meaning','Value'],
+            ["invisible","The widget is not shown","1<<0"],
+            ["hidden","The widget is hidden","1<<1"],
+            ["print","The widget will print","1<<2"],
+            ["nozoom","The annotation will notscale with the rendered page","1<<3"],
+            ["norotate","The widget won't rotate with the page","1<<4"],
+            ["noview","Don't render the widget","1<<5"],
+            ["readonly","Widget cannot be interacted with","1<<6"],
+            ["locked","The widget cannot be changed","1<<7"],           #1.4
+            ["togglenoview","Teh widget may be viewed after some events","1<<8"],       #1.9
+            ["lockedcontents","The contents of the widget are fixed","1<<9"],   #1.7
+          ],[90, 260, 90],style=alStyle)
+getStory().append(t)

@@ -272,8 +272,8 @@ $drawText$.
 heading3("The path object methods")
 
 eg("""path = canvas.beginPath() """)
-eg("""canvas.drawPath(path, stroke=1, fill=0) """)
-eg("""canvas.clipPath(path, stroke=1, fill=0) """)
+eg("""canvas.drawPath(path, stroke=1, fill=0, fillMode=None) """)
+eg("""canvas.clipPath(path, stroke=1, fill=0, fillMode=None) """)
 
 disc("""
 Path objects are similar to text objects: they provide dedicated control
@@ -287,6 +287,10 @@ to use a path as a "clipping region" using the $clipPath$ method -- for example 
 can be used to clip away the outer parts of a rectangular image leaving
 only a circular part of the image visible on the page.
 """)
+
+disc("""If $fill=1$ is specified then the $fillMode$ argument may be used to set either 0=$even-odd$ or 1=$non-zero$ filling mode.
+which will alter the way that complex paths are filled. If the default $None$ values is used then the canvas
+$_fillMode$ attribute value is used (normally $0$ ie $even-odd$).""")
 
 heading3("Image methods")
 pencilnote()
