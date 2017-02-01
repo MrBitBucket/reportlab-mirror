@@ -549,7 +549,7 @@ t = Table([
             ["borderStyle","The border style name","'solid'"],
             ["tooltip","The text to display when hovering over the widget","None"],
             ["annotationFlags","blank separated string of annotation flags","'print'"],
-            ["fieldFlags","Blank separated field flags (see below)","'noToggleToOff required radio'"],
+            ["fieldFlags","Blank separated field flags (see below)","''"],
             ["forceBorder","when true a border force a border to be drawn","False"],
             ["relative","if true obey the current canvas transform","False"],
             ["dashLen ","the dashline to be used if the borderStyle=='dashed'","3"],
