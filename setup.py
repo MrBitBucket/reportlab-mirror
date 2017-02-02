@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-__version__='3.3.26'
+__version__='3.3.30'
 import os, sys, glob, shutil
 def specialOption(n):
     v = False

@@ -399,9 +399,16 @@ class Image(Flowable):
         self.hAlign = hAlign
         self._mask = mask
         fp = hasattr(filename,'read')
+        self._drawing = None
         if fp:
             self._file = filename
             self.filename = repr(filename)
+        elif hasattr(filename,'_renderPy'):
+            self._drawing = filename
+            self.filename=repr(filename)
+            self._file = None
+            self._img = None
+            fp = True
         else:
             self._file = self.filename = filename
         if not fp and os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
@@ -439,7 +446,10 @@ class Image(Flowable):
         height = self._height
         kind = self._kind
         img = self._img
-        if img: self.imageWidth, self.imageHeight = img.getSize()
+        if img:
+            self.imageWidth, self.imageHeight = img.getSize()
+        elif self._drawing:
+            self.imageWidth, self.imageHeight = self._drawing.width,self._drawing.height
         if self._lazy>=2: del self._img
         if kind in ['direct','absolute']:
             self.drawWidth = width or self.imageWidth
@@ -483,18 +493,31 @@ class Image(Flowable):
         return self.drawWidth, self.drawHeight
 
     def draw(self):
-        lazy = self._lazy
-        if lazy>=2: self._lazy = 1
-        self.canv.drawImage(    self._img or self.filename,
-                                getattr(self,'_offs_x',0),
-                                getattr(self,'_offs_y',0),
-                                self.drawWidth,
-                                self.drawHeight,
-                                mask=self._mask,
-                                )
-        if lazy>=2:
-            self._img = self._file = None
-            self._lazy = lazy
+        dx = getattr(self,'_offs_x',0)
+        dy = getattr(self,'_offs_y',0)
+        d = self._drawing
+        if d:
+            sx = self.drawWidth / float(self.imageWidth)
+            sy = self.drawHeight / float(self.imageHeight)
+            otrans = d.transform
+            try:
+                d.scale(sx,sy)
+                d.drawOn(self.canv,dx,dy)
+            finally:
+                d.transform = otrans
+        else:
+            lazy = self._lazy
+            if lazy>=2: self._lazy = 1
+            self.canv.drawImage(    self._img or self.filename,
+                                    dx,
+                                    dy,
+                                    self.drawWidth,
+                                    self.drawHeight,
+                                    mask=self._mask,
+                                    )
+            if lazy>=2:
+                self._img = self._file = None
+                self._lazy = lazy
 
     def identity(self,maxLen=None):
         r = Flowable.identity(self,maxLen)
