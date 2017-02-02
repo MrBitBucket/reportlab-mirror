@@ -1147,7 +1147,6 @@ class Paragraph(Flowable):
         first_line_width = availWidth - (leftIndent+style.firstLineIndent) - style.rightIndent
         later_widths = availWidth - leftIndent - style.rightIndent
         self._wrapWidths = [first_line_width, later_widths]
-
         if style.wordWrap == 'CJK':
             #use Asian text wrap algorithm to break characters
             blPara = self.breakLinesCJK(self._wrapWidths)
@@ -1311,6 +1310,7 @@ class Paragraph(Flowable):
         different first line indent; a longer list could be created to facilitate custom wraps
         around irregular objects."""
 
+        self._width_max = 0
         if not isinstance(width,(tuple,list)): maxWidths = [width]
         else: maxWidths = width
         lines = []
@@ -1367,7 +1367,7 @@ class Paragraph(Flowable):
                     cLine.append(word)
                     currentWidth = newWidth
                 else:
-                    if currentWidth > self.width: self.width = currentWidth
+                    if currentWidth > self._width_max: self._width_max = currentWidth
                     #end of line
                     lines.append((maxWidth - currentWidth, cLine))
                     cLine = [word]
@@ -1377,7 +1377,7 @@ class Paragraph(Flowable):
 
             #deal with any leftovers on the final line
             if cLine!=[]:
-                if currentWidth>self.width: self.width = currentWidth
+                if currentWidth>self._width_max: self._width_max = currentWidth
                 lines.append((maxWidth - currentWidth, cLine))
 
             return f.clone(kind=0, lines=lines,ascent=ascent,descent=descent,fontSize=fontSize)
@@ -1494,7 +1494,7 @@ class Paragraph(Flowable):
                         #del g.lineBreak
                         words.append(g)
 
-                    if currentWidth>self.width: self.width = currentWidth
+                    if currentWidth>self._width_max: self._width_max = currentWidth
                     #end of line
                     lines.append(FragLine(extraSpace=maxWidth-currentWidth, wordCount=n,
                                         lineBreak=lineBreak and njlbv, words=words, fontSize=maxSize, ascent=maxAscent, descent=minDescent, maxWidth=maxWidth))
@@ -1541,7 +1541,7 @@ class Paragraph(Flowable):
 
             #deal with any leftovers on the final line
             if words!=[]:
-                if currentWidth>self.width: self.width = currentWidth
+                if currentWidth>self._width_max: self._width_max = currentWidth
                 lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,lineBreak=False,
                                     words=words, fontSize=maxSize,ascent=maxAscent,descent=minDescent,maxWidth=maxWidth))
             return ParaLines(kind=1, lines=lines)
