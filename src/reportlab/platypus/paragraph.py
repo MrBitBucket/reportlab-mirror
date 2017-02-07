@@ -457,20 +457,19 @@ _FK_IMG = 1
 _FK_APPEND = 2
 _FK_BREAK = 3
 
-def _rescaleFrag(f):
-    w = f[0]
-    if isinstance(w,_PCT):
-        if w._normalizer!=maxWidth:
-            w._normalizer = maxWidth
-            w = w.normalizedValue(maxWidth)
-            f[0] = w
-
 def _getFragWords(frags,maxWidth=None):
     ''' given a Parafrag list return a list of fragwords
         [[size, (f00,w00), ..., (f0n,w0n)],....,[size, (fm0,wm0), ..., (f0n,wmn)]]
         each pair f,w represents a style and some string
         each sublist represents a word
     '''
+    def _rescaleFrag(f):
+        w = f[0]
+        if isinstance(w,_PCT):
+            if w._normalizer!=maxWidth:
+                w._normalizer = maxWidth
+                w = w.normalizedValue(maxWidth)
+                f[0] = w
     R = []
     R_append = R.append
     if _processed_frags(frags):
@@ -478,6 +477,7 @@ def _getFragWords(frags,maxWidth=None):
         n = len(frags)
         while i<n:
             f = frags[i]
+            _rescaleFrag(f)
             if isinstance(f,(_SplitList,_HSSplitList,_SplitListLast)):
                 #we need to re-join these to make a single word
                 W = [0]
@@ -489,12 +489,11 @@ def _getFragWords(frags,maxWidth=None):
                     i += 1
                     if i==n: break  #exceptional case when a split paragraph split in the middle of such a sequence
                     f = frags[i]
+                    _rescaleFrag(f)
                 if isinstance(f,_HSSplitList):
                     f = _HSWord(W)
                 else:
                     f = W
-            else:
-                _rescaleFrag(f)
             R_append(f)
             i += 1
     else:
