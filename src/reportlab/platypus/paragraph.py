@@ -7,7 +7,7 @@ from string import whitespace
 from operator import truth
 from unicodedata import category
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont, getAscentDescent
-from reportlab.platypus.paraparser import ParaParser
+from reportlab.platypus.paraparser import ParaParser, _PCT
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -235,7 +235,7 @@ def _putFragLine(cur_x, tx, line, last, pKind):
                 txfs = tx._fontsize
                 if txfs is None:
                     txfs = xs.style.fontSize
-                w = imgNormV(cbDefn.width,None)
+                w = imgNormV(cbDefn.width,xs.paraWidth)
                 h = imgNormV(cbDefn.height,txfs)
                 iy0,iy1 = imgVRange(h,cbDefn.valign,txfs)
                 cur_x_s = cur_x + nSpaces*ws
@@ -437,10 +437,34 @@ def _trailingSpaceLength(text, tx):
 class _HSWord(list):
     pass
 
+class _SplitList(list):
+    pass
+
+class _SplitListLast(_SplitList):
+    pass
+
+class _HSSplitList(_HSWord):
+    pass
+
+def _processed_frags(frags):
+    try:
+        return isinstance(frags[0][0],(float,int))
+    except:
+        return False
+
 _FK_TEXT = 0
 _FK_IMG = 1
 _FK_APPEND = 2
 _FK_BREAK = 3
+
+def _rescaleFrag(f):
+    w = f[0]
+    if isinstance(w,_PCT):
+        if w._normalizer!=maxWidth:
+            w._normalizer = maxWidth
+            w = w.normalizedValue(maxWidth)
+            f[0] = w
+
 def _getFragWords(frags,maxWidth=None):
     ''' given a Parafrag list return a list of fragwords
         [[size, (f00,w00), ..., (f0n,w0n)],....,[size, (fm0,wm0), ..., (f0n,wmn)]]
@@ -448,88 +472,114 @@ def _getFragWords(frags,maxWidth=None):
         each sublist represents a word
     '''
     R = []
-    W = []
-    hangingSpace = False
-    n = 0
-    hangingStrip = True
-    for f in frags:
-        text = f.text
-        if text!='':
-            f._fkind = _FK_TEXT
-            if hangingStrip:
-                text = text.lstrip()
-                if not text: continue
-                hangingStrip = False
-            S = split(text)
-            if text[0] in whitespace:
-                if W:
-                    W.insert(0,n)   #end preceding word
-                    R.append(W)
-                    whs = hangingSpace
-                    W = []
-                    hangingSpace = False
-                    n = 0
+    R_append = R.append
+    if _processed_frags(frags):
+        i = 0
+        n = len(frags)
+        while i<n:
+            f = frags[i]
+            if isinstance(f,(_SplitList,_HSSplitList,_SplitListLast)):
+                #we need to re-join these to make a single word
+                W = [0]
+                while True:
+                    W[0] += f[0]
+                    W.extend(f[1:])
+                    if isinstance(f,(_SplitListLast,_HSSplitList)):
+                        break
+                    i += 1
+                    if i==n: break  #exceptional case when a split paragraph split in the middle of such a sequence
+                    f = frags[i]
+                if isinstance(f,_HSSplitList):
+                    f = _HSWord(W)
                 else:
-                    whs = R and isinstance(R[-1],_HSWord)
-                if not whs:
-                    S.insert(0,'')
-                elif not S:
-                    continue
+                    f = W
+            else:
+                _rescaleFrag(f)
+            R_append(f)
+            i += 1
+    else:
+        W = []
+        hangingSpace = False
+        n = 0
+        hangingStrip = True
+        for f in frags:
+            text = f.text
+            if text!='':
+                f._fkind = _FK_TEXT
+                if hangingStrip:
+                    text = text.lstrip()
+                    if not text: continue
+                    hangingStrip = False
+                S = split(text)
+                if text[0] in whitespace:
+                    if W:
+                        W.insert(0,n)   #end preceding word
+                        R_append(W)
+                        whs = hangingSpace
+                        W = []
+                        hangingSpace = False
+                        n = 0
+                    else:
+                        whs = R and isinstance(R[-1],_HSWord)
+                    if not whs:
+                        S.insert(0,'')
+                    elif not S:
+                        continue
 
-            for w in S[:-1]:
+                for w in S[:-1]:
+                    W.append((f,w))
+                    n += stringWidth(w, f.fontName, f.fontSize)
+                    W.insert(0,n)
+                    R_append(_HSWord(W))
+                    W = []
+                    n = 0
+
+                hangingSpace = False
+                w = S[-1]
                 W.append((f,w))
                 n += stringWidth(w, f.fontName, f.fontSize)
-                W.insert(0,n)
-                R.append(_HSWord(W))
-                W = []
-                n = 0
-
-            hangingSpace = False
-            w = S[-1]
-            W.append((f,w))
-            n += stringWidth(w, f.fontName, f.fontSize)
-            if text and text[-1] in whitespace:
-                W.insert(0,n)
-                R.append(_HSWord(W))
-                W = []
-                n = 0
-        elif hasattr(f,'cbDefn'):
-            cb = f.cbDefn
-            w = getattr(cb,'width',0)
-            if w:
-                if hasattr(w,'normalizedValue'):
-                    w._normalizer = maxWidth
-                    w = w.normalizedValue(maxWidth)
+                if text and text[-1] in whitespace:
+                    W.insert(0,n)
+                    R_append(_HSWord(W))
+                    W = []
+                    n = 0
+            elif hasattr(f,'cbDefn'):
+                cb = f.cbDefn
+                w = getattr(cb,'width',0)
+                if w:
+                    if hasattr(w,'normalizedValue'):
+                        w._normalizer = maxWidth
+                        w = w.normalizedValue(maxWidth)
+                    if W:
+                        W.insert(0,n)
+                        R_append(_HSWord(W) if hangingSpace else W)
+                        W = []
+                        hangingSpace = False
+                        n = 0
+                    f._fkind = _FK_IMG
+                    R_append([w,(f,'')])
+                    hangingStrip = False
+                else:
+                    f._fkind = _FK_APPEND
+                    if not W and R and isinstance(R[-1],_HSWord):
+                        R[-1].append((f,''))
+                    else:
+                        W.append((f,''))
+            elif hasattr(f, 'lineBreak'):
+                #pass the frag through.  The line breaker will scan for it.
                 if W:
                     W.insert(0,n)
-                    R.append(_HSWord(W) if hangingSpace else W)
+                    R_append(W)
                     W = []
-                    hangingSpace = False
                     n = 0
-                f._fkind = _FK_IMG
-                R.append([w,(f,'')])
-                hangingStrip = False
-            else:
-                f._fkind = _FK_APPEND
-                if not W and R and isinstance(R[-1],_HSWord):
-                    R[-1].append((f,''))
-                else:
-                    W.append((f,''))
-        elif hasattr(f, 'lineBreak'):
-            #pass the frag through.  The line breaker will scan for it.
-            if W:
-                W.insert(0,n)
-                R.append(W)
-                W = []
-                n = 0
-                hangingSpace = False
-            f._fkind = _FK_BREAK
-            R.append([0,(f,'')])
-            hangingStrip = True
+                    hangingSpace = False
+                f._fkind = _FK_BREAK
+                R_append([0,(f,'')])
+                hangingStrip = True
 
-    if W:
-        W.insert(0,n)
-        R.append(W)
+        if W:
+            W.insert(0,n)
+            R_append(W)
 
     return R
 
@@ -545,12 +595,6 @@ def _fragWordIter(w):
         else:
             yield f, 0, s
 
-class _SplitList(list):
-    pass
-
-class _HSSplitList(_HSWord):
-    pass
-
 def _splitFragWord(w,maxWidth,maxWidths,lineno):
     '''given a frag word, w, as returned by getFragWords
     split it into frag words that fit in lines of length
@@ -559,7 +603,9 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     .....
     maxWidths[lineno+n]
 
-    return the new word list
+    return the new word list which is either 
+    _SplitList....._SPlitList or
+    _splitList....._HSSplitList if the word is hanging space.
     '''
     R = []
     maxlineno = len(maxWidths)-1
@@ -582,15 +628,15 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
                 lineno += 1
                 maxWidth = maxWidths[min(maxlineno,lineno)]
                 W = []
-                newLineWidth = wordWidth = cw
+                newLineWidth = cw
+                wordWidth = 0
             fragText = u''
             f = g
-            wordWidth = 0
         wordWidth += cw
         fragText += c
         lineWidth = newLineWidth
     W.append((f,fragText))
-    W = _HSSplitList([wordWidth]+W) if isinstance(w,_HSWord) else _SplitList([wordWidth]+W)
+    W = _HSSplitList([wordWidth]+W) if isinstance(w,_HSWord) else _SplitListLast([wordWidth]+W)
 
     R.append(W)
     return R
@@ -983,7 +1029,7 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
         w = u.width
         if hasattr(w,'normalizedValue'):
             w._normalizer = maxWidth
-            w = w.normalizedValue(None)
+            w = w.normalizedValue(maxWidth)
         widthUsed += w
         lineBreak = hasattr(u.frag,'lineBreak')
         endLine = (widthUsed>maxWidth + _FUZZ and widthUsed>0) or lineBreak
@@ -1134,7 +1180,7 @@ class Paragraph(Flowable):
 
         #AR hack
         self.text = text
-        self.frags = frags
+        self.frags = frags  #either the parse fragments or frag word list
         self.style = style
         self.bulletText = bulletText
         self.debug = 0  #turn this on to see a pretty one with all the margins etc.
@@ -1182,7 +1228,7 @@ class Paragraph(Flowable):
         frags = self.frags
         nFrags= len(frags)
         if not nFrags: return 0
-        if nFrags==1:
+        if nFrags==1 and not _processed_frags(frags):
             f = frags[0]
             fS = f.fontSize
             fN = f.fontName
@@ -1190,8 +1236,17 @@ class Paragraph(Flowable):
         else:
             return max(w[0] for w in _getFragWords(frags))
 
+    def _split_blParaProcessed(self,blPara,start,stop):
+        if not stop: return []
+        lines = blPara.lines
+        sFW = lines[start].sFW
+        sFWN = lines[stop].sFW if stop!=len(lines) else len(self.frags)
+        return self.frags[sFW:sFWN]
+
     def _get_split_blParaFunc(self):
-        return self.blPara.kind==0 and _split_blParaSimple or _split_blParaHard
+        return (_split_blParaSimple if self.blPara.kind==0 
+                    else (_split_blParaHard if not _processed_frags(self.frags)
+                        else self._split_blParaProcessed))
 
     def split(self,availWidth, availHeight):
         if len(self.frags)<=0: return []
@@ -1229,7 +1284,7 @@ class Paragraph(Flowable):
                 l = max(leading,1.2*style.fontSize)
             elif autoLeading=='min':
                 l = 1.2*style.fontSize
-            s = int(availHeight/(l*1.0))
+            s = int(availHeight/float(l))
             height = s*l
 
         allowOrphans = getattr(self,'allowOrphans',getattr(style,'allowOrphans',0))
@@ -1303,6 +1358,7 @@ class Paragraph(Flowable):
                             - words=word list
                                 each word is itself a fragment with
                                 various settings
+            in addition frags becomes a frag word list
 
         This structure can be used to easily draw paragraphs with the various alignments.
         You can supply either a single width or a list of widths; the latter will have its
@@ -1330,7 +1386,9 @@ class Paragraph(Flowable):
         calcBounds = autoLeading not in ('','off')
         frags = self.frags
         nFrags= len(frags)
-        if nFrags==1 and not (style.endDots or hasattr(frags[0],'cbDefn') or hasattr(frags[0],'backColor')):
+        if (nFrags==1 
+                and not (style.endDots or hasattr(frags[0],'cbDefn') or hasattr(frags[0],'backColor')
+                            or _processed_frags(frags))):
             f = frags[0]
             fontSize = f.fontSize
             fontName = f.fontName
@@ -1386,15 +1444,15 @@ class Paragraph(Flowable):
                             textColor=style.textColor, ascent=style.fontSize,descent=-0.2*style.fontSize,
                             lines=[])
         else:
-            if hasattr(self,'blPara') and getattr(self,'_splitpara',0):
-                #NB this is an utter hack that awaits the proper information
-                #preserving splitting algorithm
-                return self.blPara
             njlbv = not style.justifyBreaks
             words = []
+            FW = []
+            aFW = FW.append
             _words = _getFragWords(frags,maxWidth)
+            sFW = 0
             while _words:
                 w = _words.pop(0)
+                aFW(w)
                 f = w[-1][0]
                 fontName = f.fontName
                 fontSize = f.fontSize
@@ -1419,6 +1477,7 @@ class Paragraph(Flowable):
                     if wordWidth>max(maxWidths[nmw:nmw+1]):
                         #a long word
                         _words[0:0] = _splitFragWord(w,maxWidth-spaceWidth-currentWidth,maxWidths,lineno)
+                        FW.pop(-1)  #remove this as we are doing this one again
                         self._splitLongWordCount += 1
                         continue
                 endLine = (newWidth>(maxWidth+space*spaceShrinkage) and n>0) or lineBreak
@@ -1497,7 +1556,9 @@ class Paragraph(Flowable):
                     if currentWidth>self._width_max: self._width_max = currentWidth
                     #end of line
                     lines.append(FragLine(extraSpace=maxWidth-currentWidth, wordCount=n,
-                                        lineBreak=lineBreak and njlbv, words=words, fontSize=maxSize, ascent=maxAscent, descent=minDescent, maxWidth=maxWidth))
+                                        lineBreak=lineBreak and njlbv, words=words, fontSize=maxSize, ascent=maxAscent, descent=minDescent, maxWidth=maxWidth,
+                                        sFW=sFW))
+                    sFW = len(FW)-1
 
                     #start new line
                     lineno += 1
@@ -1540,13 +1601,12 @@ class Paragraph(Flowable):
                         minDescent = min(minDescent,descent)
 
             #deal with any leftovers on the final line
-            if words!=[]:
+            if words:
                 if currentWidth>self._width_max: self._width_max = currentWidth
                 lines.append(ParaLines(extraSpace=(maxWidth - currentWidth),wordCount=n,lineBreak=False,
-                                    words=words, fontSize=maxSize,ascent=maxAscent,descent=minDescent,maxWidth=maxWidth))
+                                    words=words, fontSize=maxSize,ascent=maxAscent,descent=minDescent,maxWidth=maxWidth,sFW=sFW))
+            self.frags = FW
             return ParaLines(kind=1, lines=lines)
-
-        return lines
 
     def breakLinesCJK(self, maxWidths):
         """Initially, the dumbest possible wrapping algorithm.
@@ -1805,6 +1865,7 @@ class Paragraph(Flowable):
                 xs.f = f
                 xs.style = style
                 xs.autoLeading = autoLeading
+                xs.paraWidth = self.width
 
                 tx._fontname,tx._fontsize = None, None
                 line = lines[0]
@@ -1832,9 +1893,17 @@ class Paragraph(Flowable):
         frags = getattr(self,'frags',None)
         if frags:
             plains = []
-            for frag in frags:
-                if hasattr(frag, 'text'):
-                    plains.append(frag.text)
+            plains_append = plains.append
+            if _processed_frags(frags):
+                for word in frags:
+                    for style,text in word[1:]:
+                        plains_append(text)
+                    if isinstance(word,_HSWord):
+                        plains_append(' ')
+            else:
+                for frag in frags:
+                    if hasattr(frag, 'text'):
+                        plains_append(frag.text)
             return ''.join(plains)
         elif identify:
             text = getattr(self,'text',None)
@@ -2005,7 +2074,10 @@ umfassend zu sein."""
         dumpParagraphLines(P)
         S = P.split(6*72,h/2.0)
         print(len(S))
+        dumpParagraphFrags(S[0])
         dumpParagraphLines(S[0])
+        S[1].wrap(6*72, 9.7*72)
+        dumpParagraphFrags(S[1])
         dumpParagraphLines(S[1])
 
 

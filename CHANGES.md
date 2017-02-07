@@ -13,6 +13,7 @@ mentioned. If we missed you, please let us know!
 
 RELEASE 3.4  ??/02/2017
 -----------------------
+    * fix split paragraph rendering bug (reported by Olivia Zhang & Echo Bell)
     * support for Path autoclose & fillMode; version --> 3.3.29
     * add support for different fill policies in renderXX drawPath; version-->3.3.28
     * allow for UTF_16_LE BOM, fix for bug contributed by Michael Poindexter mpoindexter@housecanary.com
@@ -45,7 +46,7 @@ RELEASE 3.4  ??/02/2017
     * attempt to remove quadratic performance hit when longTableOptimize is set
     * allow DATA: scheme in open for read
     * import Table _rowpositions calculation
-    * support small ttfs which don't allow subsets
+    * support small ttfs which do not allow subsets
     * add rl_settings allowTTFSubsetting
     * address issue #76 (deprecated immports) reported by Richard Eames
     * add table cell support for simple background shadings, contributed by Jeffrey Creem jcreem@bitbucket
@@ -58,6 +59,7 @@ RELEASE 3.4  ??/02/2017
     * Dinu Gherman
     * Claude Paroz
     * dbrnz @ bitbucket
+    * Echo Bell
     * Eric Gillet
     * Jeffrey Creem jcreem@bitbucket
     * Johann Du Toit
@@ -66,6 +68,7 @@ RELEASE 3.4  ??/02/2017
     * Kyle McFarlane https://bitbucket.org/kylemacfarlane/
     * Michael Poindexter mpoindexter@housecanary.com
     * Neil Schemenauer
+    * Olivia Zhang
     * Richard Eames
     * Robin Westin
     * Tim Meneely

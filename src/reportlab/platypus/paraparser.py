@@ -91,13 +91,20 @@ def _numpct(s,unit=1,allowRelative=False):
     else:
         return _num(s,unit,allowRelative)
 
-class _PCT:
-    def __init__(self,v):
-        self._value = v*0.01
+class _PCT(float):
+    def __new__(cls,v):
+        self = float.__new__(cls,v*0.01)
+        self._normalizer = 1.0
+        self._value = v
+        return self
 
     def normalizedValue(self,normalizer):
-        normalizer = normalizer or getattr(self,'_normalizer')
-        return normalizer*self._value
+        if not normalizer:
+            normaliser = self._normalizer
+        r = _PCT(normalizer*self._value)
+        r._value = self._value
+        r._normalizer = normalizer
+        return r
 
 def fontSizeNormalize(frag,attr,default):
     if not hasattr(frag,attr): return default

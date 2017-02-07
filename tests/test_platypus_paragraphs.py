@@ -699,6 +699,105 @@ phonemic and morphological analysis.'''
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_AutoNextPageTemplate.pdf'))
         doc.build(story)
 
+    def testParaBrFlowing(self):
+        from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, PageBegin
+        from reportlab.lib.units import inch
+        class MyDocTemplate(BaseDocTemplate):
+            _invalidInitArgs = ('pageTemplates',)
+
+            def __init__(self, filename, **kw):
+                self.allowSplitting = 0
+                BaseDocTemplate.__init__(self, filename, **kw)
+                self.addPageTemplates(
+                        [
+                        PageTemplate('normal',
+                                [
+                                Frame(inch, 4.845*inch, 3*inch, 3.645*inch, id='first',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red")),
+                                Frame(4.27*inch, 4.845*inch, 3*inch, 3.645*inch, id='second',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red")),
+                                Frame(inch, inch, 3*inch, 3.645*inch, id='third',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red")),
+                                Frame(4.27*inch, inch, 3*inch, 3.645*inch, id='fourth',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red"))
+                                ],
+                                ),
+                        ])
+        styleSheet = getSampleStyleSheet()
+        normal = ParagraphStyle(name='normal',fontName='Helvetica',fontSize=10,leading=12,parent=styleSheet['Normal'])
+        bold = ParagraphStyle(name='bold',fontName='Helvetica-Bold',fontSize=12,leading=14.4,parent=normal)
+        brText="""
+Clearly, the natural general principle that will subsume this case is
+not subject to a parasitic gap construction.  Presumably, most of the
+methodological work in modern linguistics can be defined in such a way
+as to impose the system of base rules exclusive of the lexicon.  In the
+discussion of resumptive pronouns following (81), the fundamental error
+of regarding functional notions as categorial is to be regarded as a
+descriptive <span color="red">fact</span>.<br/>So far, the earlier discussion of deviance is not
+quite equivalent to a parasitic gap construction.  To characterize a
+linguistic level L, a case of semigrammaticalness of a different sort
+may remedy and, at the same time, eliminate irrelevant intervening
+contexts in selectional <span color="red">rules</span>.<br/>
+Summarizing, then, we assume that the descriptive power of the base
+component can be defined in such a way as to impose nondistinctness in
+the sense of distinctive feature theory.  A lot of sophistication has
+been developed about the utilization of machines for complex purposes,
+the notion of level of grammaticalness delimits an abstract underlying
+<span color="red">order</span>.<br/>To provide a constituent structure for T(Z,K), a subset of
+English sentences interesting on quite independent grounds appears to
+correlate rather closely with problems of phonemic and morphological
+analysis.  For one thing, this analysis of a formative as a pair of sets
+of features is rather different from a general convention regarding the
+forms of the grammar.  A lot of sophistication has been developed about
+the utilization of machines for complex purposes, a case of
+semigrammaticalness of a different sort is not to be considered in
+determining an important distinction in language <span color="red">use</span>.<br/>
+We will bring evidence in favor of the following thesis:  a subset of
+English sentences interesting on quite independent grounds delimits a
+descriptive <span color="red">fact</span>.<br/>To characterize a linguistic level L, the notion of
+level of grammaticalness is not to be considered in determining a
+parasitic gap construction.  It must be emphasized, once again, that the
+speaker-hearer's linguistic intuition can be defined in such a way as to
+impose a stipulation to place the constructions into these various
+categories.  On our assumptions, the appearance of parasitic gaps in
+domains relatively inaccessible to ordinary extraction raises serious
+doubts about problems of phonemic and morphological analysis.  For one
+thing, the fundamental error of regarding functional notions as
+categorial is not quite equivalent to a stipulation to place the
+constructions into these various <span color="red">categories</span>.<br/>
+Thus the descriptive power of the base component is unspecified with
+respect to the strong generative capacity of the theory.  Presumably,
+the theory of syntactic features developed earlier appears to correlate
+rather closely with a corpus of utterance tokens upon which conformity
+has been defined by the paired utterance test.  To provide a constituent
+structure for T(Z,K), a case of semigrammaticalness of a different sort
+is not to be considered in determining the ultimate standard that
+determines the accuracy of any proposed grammar.  For any transformation
+which is sufficiently diversified in application to be of any interest,
+a subset of English sentences interesting on quite independent grounds
+raises serious doubts about the requirement that branching is not
+tolerated within the dominance scope of a complex symbol.  We will bring
+evidence in favor of the following thesis:  an important property of
+these three types of EC is not to be considered in determining the
+system of base rules exclusive of the <span color="red">lexicon</span>.<br/>
+With this clarification, the descriptive power of the base component is
+not subject to the requirement that branching is not tolerated within
+the dominance scope of a complex <span color="red">symbol</span>.<br/>In the discussion of
+resumptive pronouns following (81), this selectionally introduced
+contextual feature does not readily tolerate a parasitic gap
+construction.  Another superficial similarity is the interest in
+simulation of behavior, a descriptively adequate grammar does not affect
+the structure of a corpus of utterance tokens upon which conformity has
+been defined by the paired utterance <span color="red">test</span>.<br/>From C1, it follows that the
+speaker-hearer's linguistic intuition is not to be considered in
+determining the traditional practice of grammarians.  Let us continue to
+suppose that the notion of level of grammaticalness is necessary to
+impose an interpretation on the system of base rules exclusive of the
+<span color="red">lexicon</span>.<br/>
+"""
+        story =[]
+        a = story.append
+        a(Paragraph('Paragraph Flowing', bold))
+        a(Paragraph(brText, normal))
+        doc = MyDocTemplate(outputfile('test_platypus_paragraphs_para_br_flowing.pdf'))
+        doc.build(story)
+
 #noruntests
 def makeSuite():
     return makeSuiteForClasses(ParagraphCorners,SplitFrameParagraphTest,FragmentTestCase, ParagraphSplitTestCase, ULTestCase, JustifyTestCase,
