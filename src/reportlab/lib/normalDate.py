@@ -26,7 +26,7 @@ _monthNameLower = _monthName.lower().split()
 _monthNameLower = _monthName.split()
 
 import re, time, datetime
-from .utils import isPy3
+from .utils import isPy3, isStr
 
 if hasattr(time,'struct_time'):
     _DateSeqTypes = (list,tuple,time.struct_time)
@@ -496,7 +496,7 @@ class NormalDate:
         (year, month, day, ...)"""
         if isinstance(normalDate,int):
             self.normalDate = normalDate
-        elif isinstance(normalDate,str):
+        elif isStr(normalDate):
             try:
                 self.normalDate = int(normalDate)
             except:
@@ -511,6 +511,8 @@ class NormalDate:
             self.normalDate = normalDate.normalDate
         elif isinstance(normalDate,(datetime.datetime,datetime.date)):
             self.normalDate = (normalDate.year*100+normalDate.month)*100+normalDate.day
+        else:
+            self.normalDate = None
         if not self._isValidNormalDate(self.normalDate):
             raise NormalDateException("unable to setNormalDate(%s)" % repr(normalDate))
 
