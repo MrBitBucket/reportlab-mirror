@@ -14,6 +14,7 @@ mentioned. If we missed you, please let us know!
 RELEASE 3.4  ??/02/2017
 -----------------------
     * fix split paragraph rendering bug (reported by Olivia Zhang & Echo Bell)
+    * Allow Image to have a drawing as argument
     * support for Path autoclose & fillMode; version --> 3.3.29
     * add support for different fill policies in renderXX drawPath; version-->3.3.28
     * allow for UTF_16_LE BOM, fix for bug contributed by Michael Poindexter mpoindexter@housecanary.com

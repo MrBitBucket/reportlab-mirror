@@ -472,7 +472,8 @@ t=XPreformatted(text,normalStyle,dedent=3)
 """)
 
 heading2("""$Image(filename, width=None, height=None)$""")
-disc("""Create a flowable which will contain the image defined by the data in file $filename$.
+disc("""Create a flowable which will contain the image defined by the data in file $filename$ which can be
+filepath, file like object or an instance of a $reportlab.graphics.shapes.Drawing$.
 The default <b>PDF</b> image type <i>jpeg</i> is supported and if the <b>PIL</b> extension to <b>Python</b>
 is installed the other image types can also be handled. If $width$ and or $height$ are specified
 then they determine the dimension of the displayed image in <i>points</i>. If either dimension is

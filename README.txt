@@ -27,9 +27,9 @@ Contents of this file:
 
    2.2 Manual Installation without C Compiler (e.g. Windows)
 
-   2.3 easy_install
+   2.3 Windows packages
 
-   2.4 Windows .exe Installer
+   2.4 Mac OSX installation
 
    2.5 Ubuntu and other Debian-based Systems
 
