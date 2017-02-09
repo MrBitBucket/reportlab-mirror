@@ -1648,13 +1648,14 @@ class NormalDateXValueAxis(XValueAxis):
         Yes please says Andy :-(.  Modified on 19 June 2006 to attempt to allow
         a mode where one can specify recurring days and months.
         """
+        VC = self._valueClass
         axisLength = self._length
         formatter = self._dateFormatter
         if isinstance(formatter,TickLabeller):
             def formatter(tick):
                 return self._dateFormatter(self,tick)
-        firstDate = xVals[0]
-        endDate = xVals[-1]
+        firstDate = xVals[0] if self.valueMin is not None else VC(self.valueMin)
+        endDate = xVals[-1] if self.valueMax is not None else VC(self.valueMax)
         labels = self.labels
         fontName, fontSize, leading = labels.fontName, labels.fontSize, labels.leading
         textAnchor, boxAnchor, angle = labels.textAnchor, labels.boxAnchor, labels.angle
@@ -1666,13 +1667,12 @@ class NormalDateXValueAxis(XValueAxis):
         w = max(xLabelW,labels.width or 0,self.minimumTickSpacing)
 
         W = w+w*self.bottomAxisLabelSlack
-        n = len(xVals)
+        n = endDate - firstDate + 1
         ticks = []
         labels = []
         maximumTicks = self.maximumTicks
 
         if self.specifiedTickDates:
-            VC = self._valueClass
             ticks = [VC(x) for x in self.specifiedTickDates]
             labels = [formatter(d) for d in ticks]
             if self.forceFirstDate and firstDate==ticks[0] and (axisLength/float(ticks[-1]-ticks[0]))*(ticks[1]-ticks[0])<=W:
@@ -1817,10 +1817,11 @@ class NormalDateXValueAxis(XValueAxis):
                 xVals.add(dv[0])
         xVals = list(xVals)
         xVals.sort()
+        VC = self._valueClass
         steps,labels = self._getStepsAndLabels(xVals)
         valueMin, valueMax = self.valueMin, self.valueMax
-        if valueMin is None: valueMin = xVals[0]
-        if valueMax is None: valueMax = xVals[-1]
+        valueMin = xVals[0]  if valueMin is None else VC(valueMin)
+        valueMax = xVals[-1] if valueMax is None else VC(valueMax)
         self._valueMin, self._valueMax = valueMin, valueMax
         self._tickValues = steps
         self._labelTextFormat = labels
