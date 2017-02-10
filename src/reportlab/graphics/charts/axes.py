@@ -79,6 +79,36 @@ def _allInt(values):
             return 0
     return 1
 
+class AxisLabelAnnotation:
+    '''Create a grid like line using the given user value to draw the line
+    v       value to use
+    kwds may contain
+    scaleValue  True/not given --> scale the value
+                otherwise use the absolute value
+    labelClass  the label class to use default Label
+    all Label keywords are acceptable (including say _text)
+    '''
+    def __init__(self,v,**kwds):
+        self._v = v
+        self._kwds = kwds
+
+    def __call__(self,axis):
+        kwds = self._kwds.copy()
+        labelClass = kwds.pop('labelClass',Label)
+        scaleValue = kwds.pop('scaleValue',True)
+        if not hasattr(axis,'_tickValues'):
+            axis._pseudo_configure()
+        sv = (axis.scale if scaleValue else lambda x: x)(self._v)
+        if axis.isYAxis:
+            y = axis._x
+            x = sv
+        else:
+            x = sv
+            y = axis._y
+        kwds['x'] = x
+        kwds['y'] = y
+        return labelClass(**kwds)
+
 class AxisLineAnnotation:
     '''Create a grid like line using the given user value to draw the line
     kwds may contain
@@ -100,7 +130,7 @@ class AxisLineAnnotation:
         kwds = self._kwds.copy()
         scaleValue = kwds.pop('scaleValue',True)
         endOffset = kwds.pop('endOffset',False)
-        startOffset = kwds.pop('endOffset',False)
+        startOffset = kwds.pop('startOffset',False)
         if axis.isYAxis:
             offs = axis._x
             d0 = axis._y
@@ -1654,8 +1684,8 @@ class NormalDateXValueAxis(XValueAxis):
         if isinstance(formatter,TickLabeller):
             def formatter(tick):
                 return self._dateFormatter(self,tick)
-        firstDate = xVals[0] if self.valueMin is not None else VC(self.valueMin)
-        endDate = xVals[-1] if self.valueMax is not None else VC(self.valueMax)
+        firstDate = xVals[0] if not self.valueMin else VC(self.valueMin)
+        endDate = xVals[-1] if not self.valueMax else VC(self.valueMax)
         labels = self.labels
         fontName, fontSize, leading = labels.fontName, labels.fontSize, labels.leading
         textAnchor, boxAnchor, angle = labels.textAnchor, labels.boxAnchor, labels.angle
@@ -1667,7 +1697,6 @@ class NormalDateXValueAxis(XValueAxis):
         w = max(xLabelW,labels.width or 0,self.minimumTickSpacing)
 
         W = w+w*self.bottomAxisLabelSlack
-        n = endDate - firstDate + 1
         ticks = []
         labels = []
         maximumTicks = self.maximumTicks
@@ -1686,10 +1715,6 @@ class NormalDateXValueAxis(XValueAxis):
                 else:
                     del ticks[-2], labels[-2]
             return ticks, labels
-
-        def addTick(i, xVals=xVals, formatter=formatter, ticks=ticks, labels=labels):
-            ticks.insert(0,xVals[i])
-            labels.insert(0,formatter(xVals[i]))
 
         #AR 20060619 - first we try the approach where the user has explicitly
         #specified the days of year to be ticked.  Other explicit routes may
@@ -1734,6 +1759,11 @@ class NormalDateXValueAxis(XValueAxis):
             #print 'xVals found on forced dates =', ticks
             return ticks, labels
 
+        def addTick(i, xVals=xVals, formatter=formatter, ticks=ticks, labels=labels):
+            ticks.insert(0,xVals[i])
+            labels.insert(0,formatter(xVals[i]))
+
+        n = len(xVals)
         #otherwise, we apply the 'magic algorithm...' which looks for nice spacing
         #based on the size and separation of the labels.
         for d in _NDINTM:
