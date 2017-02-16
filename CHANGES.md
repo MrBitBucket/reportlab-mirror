@@ -13,6 +13,8 @@ mentioned. If we missed you, please let us know!
 
 RELEASE 3.4  ??/02/2017
 -----------------------
+    * add support for automatic bullet rotation in ListFlowables.
+    * fix acroform annotation bug in radios (reported by Olivia Zhang)
     * fix split paragraph rendering bug (reported by Olivia Zhang & Echo Bell)
     * Allow Image to have a drawing as argument
     * support for Path autoclose & fillMode; version --> 3.3.29

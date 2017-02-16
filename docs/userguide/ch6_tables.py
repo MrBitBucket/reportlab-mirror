@@ -738,3 +738,8 @@ Paragraph("Item no.4", style),
 bulletType='i'
 )
              """)
+
+disc("""To cope with nesting the $start$ parameter can be set to a list of possible starts; for $ul$ acceptable starts are any unicode character or specific names known to flowables.py eg
+$bulletchar$, $circle$, $square$, $disc$, $diamond$, $diamondwx$, $rarrowhead$, $sparkle$, $squarelrs$ or  $blackstar$. For $ol$ the $start$ can be any character from $'1iaAI'$ to indicate different number styles.
+""")
+
