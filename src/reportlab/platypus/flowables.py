@@ -1445,7 +1445,11 @@ _bulletNames = dict(
                 square=u'\u25a0',
                 disc=u'\u25cf',
                 diamond=u'\u25c6',
+                diamondwx=u'\u2756',
                 rarrowhead=u'\u27a4',
+                sparkle=u'\u2747',
+                squarelrs=u'\u274f',
+                blackstar=u'\u2605',
                 )
 
 def _bulletFormat(value,type='1',format=None):
@@ -1679,23 +1683,34 @@ class ListFlowable(_Container,Flowable):
 
         for k,v in ListStyle.defaults.items():
             setattr(self,'_'+k,kwds.get(k,getattr(style,k,v)))
-        if start is None:
-            start = getattr(self,'_start',None)
-            if start is None:
-                if getattr(self,'_bulletType','1')=='bullet':
-                    start = 'bulletchar'
-                else:
-                    start = '1'
-        self._start = start
 
         for k in ('spaceBefore','spaceAfter'):
             v = kwds.get(k,getattr(style,k,None))
             if v is not None:
                 setattr(self,k,v)
 
-        self._content = self._getContent()
-        del self._flowables
+        auto = False
+        if start is None:
+            start = getattr(self,'_start',None)
+            if start is None:
+                if getattr(self,'_bulletType','1')=='bullet':
+                    start = 'bulletchar'
+                    auto = True
+                else:
+                    start = '1'
+                    auto = True
+        self._start = start
+        self._auto = auto or isinstance(start,(list,tuple))
+
+        self._list_content = None
         self._dims = None
+
+    @property
+    def _content(self):
+        if self._list_content is None:
+            self._list_content = self._getContent()
+            del self._flowables
+        return self._list_content
 
     def wrap(self,aW,aH):
         if self._dims!=aW:
@@ -1772,10 +1787,17 @@ class ListFlowable(_Container,Flowable):
                     )
 
     def _getContent(self):
-        value = self._start
         bt = self._bulletType
+        value = self._start
+        if isinstance(value,(list,tuple)):
+            values = value
+            value = values[0]
+        else:
+            values = [value]
+        autov = values[0]
         inc = int(bt in '1aAiI')
-        if inc: value = int(value)
+        if inc:
+            value = int(value)
 
         bd = self._bulletDedent
         if bd=='auto':
@@ -1818,6 +1840,18 @@ class ListFlowable(_Container,Flowable):
         aS = S.append
         i=0
         for d,f in self._flowablesIter():
+            if isinstance(f,ListFlowable):
+                fstart = f._start
+                if isinstance(fstart,(list,tuple)):
+                    fstart = fstart[0]
+                if fstart in values:
+                    #my kind of ListFlowable
+                    if f._auto:
+                        autov = values.index(autov)+1
+                        f._start = values[autov:]+values[:autov]
+                        autov = f._start[0]
+                    else:
+                        autov = fstart
             fparams = {}
             if not i:
                 i += 1

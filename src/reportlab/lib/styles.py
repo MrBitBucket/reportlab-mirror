@@ -161,7 +161,7 @@ class ListStyle(PropertySet):
                 bulletDedent='auto',
                 bulletDir='ltr',
                 bulletFormat=None,
-                start=None,         #starting value for a list
+                start=None,         #starting value for a list; if a list then the start sequence
                 )
 
 _stylesheet1_undefined = object()
@@ -360,4 +360,39 @@ def getSampleStyleSheet():
                                   firstLineIndent=0,
                                   leftIndent=36))
 
+    stylesheet.add(ListStyle(name='UnorderedList',
+                                parent=None,
+                                leftIndent=18,
+                                rightIndent=0,
+                                bulletAlign='left',
+                                bulletType='1',
+                                bulletColor=black,
+                                bulletFontName='Helvetica',
+                                bulletFontSize=12,
+                                bulletOffsetY=0,
+                                bulletDedent='auto',
+                                bulletDir='ltr',
+                                bulletFormat=None,
+                                #start='circle square blackstar sparkle disc diamond'.split(),
+                                start=None,
+                            ),
+                   alias='ul')
+
+    stylesheet.add(ListStyle(name='OrderedList',
+                                parent=None,
+                                leftIndent=18,
+                                rightIndent=0,
+                                bulletAlign='left',
+                                bulletType='1',
+                                bulletColor=black,
+                                bulletFontName='Helvetica',
+                                bulletFontSize=12,
+                                bulletOffsetY=0,
+                                bulletDedent='auto',
+                                bulletDir='ltr',
+                                bulletFormat=None,
+                                #start='1 a A i I'.split(),
+                                start=None,
+                            ),
+                   alias='ol')
     return stylesheet
