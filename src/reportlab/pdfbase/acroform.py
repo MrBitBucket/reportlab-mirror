@@ -544,7 +544,7 @@ endstream
                 AP = PDFDictionary(AP),
                 Subtype = PDFName('Widget'),
                 Type = PDFName('Annot'),
-                #F = makeFlags(annotationFlags,annotationFlagValues),
+                F = makeFlags(annotationFlags,annotationFlagValues),
                 Parent = group._ref,
                 #DA = PDFString('1 g '+(self.streamFillColor(fillColor) if fillColor else '-0.25 0.75 -0.25 rg'))
                 H=PDFName('N'),
