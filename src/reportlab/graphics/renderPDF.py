@@ -94,7 +94,7 @@ class _PDFRenderer(Renderer):
             self._canvas.circle(
                     circle.cx, circle.cy, circle.r,
                     fill=self._fill,
-                    stroke=self._stroke
+                    stroke=self._stroke,
                     )
 
     def drawPolyLine(self, polyline):
@@ -129,7 +129,8 @@ class _PDFRenderer(Renderer):
             path.close()
             self._canvas.drawPath(path,
                         fill=self._fill,
-                        stroke=self._stroke)
+                        stroke=self._stroke,
+                        )
 
     def drawEllipse(self, ellipse):
         #need to convert to pdfgen's bounding box representation
@@ -150,7 +151,7 @@ class _PDFRenderer(Renderer):
         self._canvas.drawPath(
                             path,
                             stroke=self._stroke,
-                            fill=self._fill
+                            fill=self._fill,
                             )
 
     def drawString(self, stringObj):
@@ -265,6 +266,8 @@ class _PDFRenderer(Renderer):
                 self._canvas.setStrokeOverprint(value)
             elif key=='overprintMask':
                 self._canvas.setOverprintMask(value)
+            elif key=='fillMode':
+                self._canvas._fillMode = value
 
 from reportlab.platypus import Flowable
 class GraphicsFlowable(Flowable):

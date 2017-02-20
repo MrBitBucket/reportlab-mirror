@@ -212,6 +212,9 @@ class PSCanvas:
         self._fillColor = color
         self.setColor(color)
 
+    def setFillMode(self, v):
+        self._fillMode = v
+
     def setLineWidth(self, width):
         if width != self._lineWidth:
             self._lineWidth = width

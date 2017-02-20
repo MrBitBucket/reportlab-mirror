@@ -56,7 +56,7 @@ STATE_DEFAULTS = {   # sensible defaults for all
     'overprintMask': 0,
 
     'fillColor': colors.black,   #...or text will be invisible
-    #'fillRule': NON_ZERO_WINDING, - these can be done later
+    'fillMode': FILL_EVEN_ODD,      #same as pdfgen.canvas
 
     'fontSize': 10,
     'fontName': _baseGFontName,
@@ -959,6 +959,7 @@ class SolidShape(LineShape):
         fillOpacity = AttrMapValue(isOpacity,desc="the level of transparency of the color, any real number between 0 and 1"),
         fillOverprint = AttrMapValue(isBoolean,desc='Turn on fill overprinting'),
         overprintMask = AttrMapValue(isBoolean,desc='overprinting for ordinary CMYK',advancedUsage=1),
+        fillMode = AttrMapValue(OneOf(FILL_EVEN_ODD,FILL_NON_ZERO)),
         )
 
     def __init__(self, kw):
@@ -1020,7 +1021,7 @@ class Path(SolidShape):
         operators = AttrMapValue(isListOfNumbers),
         isClipPath = AttrMapValue(isBoolean),
         autoclose = AttrMapValue(NoneOr(OneOf('svg','pdf'))),
-        fillMode = AttrMapValue(NoneOr(OneOf(FILL_EVEN_ODD,FILL_NON_ZERO))),
+        fillMode = AttrMapValue(OneOf(FILL_EVEN_ODD,FILL_NON_ZERO)),
         )
 
     def __init__(self, points=None, operators=None, isClipPath=0, autoclose=None, fillMode=None, **kw):
@@ -1034,7 +1035,6 @@ class Path(SolidShape):
         self.operators = operators
         self.isClipPath = isClipPath
         self.autoclose=autoclose
-        self.fillMode=_fillModeMap[fillMode]
 
     def copy(self):
         new = self.__class__(self.points[:], self.operators[:])
@@ -1330,7 +1330,7 @@ class Wedge(SolidShape):
                 a(centerx+radius1*c)
                 a(centery+yradius1*s)
         if self.annular:
-            P = Path()
+            P = Path(fillMode=self.fillMode)
             P.moveTo(points[0],points[1])
             for x in xrange(2,2*n,2):
                 P.lineTo(points[x],points[x+1])

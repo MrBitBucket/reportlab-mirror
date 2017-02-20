@@ -75,6 +75,7 @@ class _PMRenderer(Renderer):
         self._canvas.setStrokeColor(s['strokeColor'])
         self._canvas.lineCap = s['strokeLineCap']
         self._canvas.lineJoin = s['strokeLineJoin']
+        self._canvas.fillMode = s['fillMode']
         da = s['strokeDashArray']
         if not da:
             da = None

@@ -133,8 +133,14 @@ class EncodedWriter(list):
         del self[:]
         return r
 
-def _fillRuleName(v):
-    return 'evenodd' if v==FILL_EVEN_ODD else 'nonzero'
+_fillRuleMap = {
+        FILL_NON_ZERO: 'nonzero',
+        'non-zero': 'nonzero',
+        'nonzero': 'nonzero',
+        FILL_EVEN_ODD: 'evenodd',
+        'even-odd': 'evenodd',
+        'evenodd': 'evenodd',
+        }
 
 ### classes ###
 class SVGCanvas:
@@ -163,7 +169,7 @@ class SVGCanvas:
         self.path = ''
         self._strokeColor = self._fillColor = self._lineWidth = \
             self._font = self._fontSize = self._lineCap = \
-            self._lineJoin = self._color = None
+            self._lineJoin = None
 
         implementation = getDOMImplementation('minidom')
         #Based on official example here http://www.w3.org/TR/SVG10/linking.html want:
@@ -194,7 +200,7 @@ class SVGCanvas:
                     xmlns="http://www.w3.org/2000/svg",
                     version="1.0",
                     )
-        svgAttrs['fill-rule']=_fillRuleName(self._fillMode)
+        svgAttrs['fill-rule'] = _fillRuleMap[self._fillMode]
         svgAttrs["xmlns:xlink"] = "http://www.w3.org/1999/xlink"
         svgAttrs.update(kwds.pop('svgAttrs',{}))
         for k,v in svgAttrs.items():
@@ -317,7 +323,6 @@ class SVGCanvas:
             xtra['fill-rule'] = _fillRuleName(fillMode)
         path = transformNode(self.doc, "path",
             d=self.path, style=self._formatStyle(styles),
-            **xtra
             )
         if link_info :
             path = self._add_link(path, link_info)
@@ -349,7 +354,6 @@ class SVGCanvas:
 
     def setStrokeColor(self, color):
         self._strokeColor = color
-        self.setColor(color)
         if color == None:
             self.style['stroke'] = 'none'
         else:
@@ -361,13 +365,8 @@ class SVGCanvas:
             elif 'stroke-opacity' in self.style:
                 del self.style['stroke-opacity']
 
-    def setColor(self, color):
-        if self._color != color:
-            self._color = color
-
     def setFillColor(self, color):
         self._fillColor = color
-        self.setColor(color)
         if color == None:
             self.style['fill'] = 'none'
         else:
@@ -378,6 +377,10 @@ class SVGCanvas:
                 self.style['fill-opacity'] = '%s' % alpha
             elif 'fill-opacity' in self.style:
                 del self.style['fill-opacity']
+
+    def setFillMode(self, v):
+        self._fillMode = v
+        self.style['fill-rule'] = _fillRuleMap[v]
 
     def setLineWidth(self, width):
         if width != self._lineWidth:
@@ -435,7 +438,6 @@ class SVGCanvas:
         These should have x1<x2, y1<y2, rx>0, and ry>0.
         """
 
-        kwds = {}
         rect = transformNode(self.doc, "rect",
             x=x1, y=y1, width=x2-x1, height=y2-y1, rx=rx, ry=ry,
             style=self._formatStyle(AREA_STYLES), **_svgAttrs)
@@ -450,7 +452,6 @@ class SVGCanvas:
         if self.verbose: print("+++ SVGCanvas.drawString")
 
         if self._fillColor != None:
-            self.setColor(self._fillColor)
             s = self._escape(s)
             st = self._formatStyle(TEXT_STYLES)
             if angle != 0:
@@ -522,7 +523,6 @@ class SVGCanvas:
 
         These should have x1<x2 and y1<y2.
         """
-
         ellipse = transformNode(self.doc, "ellipse",
             cx=(x1+x2)/2.0, cy=(y1+y2)/2.0, rx=(x2-x1)/2.0, ry=(y2-y1)/2.0,
             style=self._formatStyle(AREA_STYLES))
@@ -549,10 +549,8 @@ class SVGCanvas:
         codeline = '%s m %s curveto'
         data = (fp_str(x1, y1), fp_str(x2, y2, x3, y3, x4, y4))
         if self._fillColor != None:
-            self.setColor(self._fillColor)
             self.code.append((codeline % data) + ' eofill')
         if self._strokeColor != None:
-            self.setColor(self._strokeColor)
             self.code.append((codeline % data)
                             + ((closed and ' closepath') or '')
                             + ' stroke')
@@ -593,8 +591,7 @@ class SVGCanvas:
     def polygon(self, points, closed=0, link_info=None):
         assert len(points) >= 2, 'Polygon must have 2 or more points'
 
-        if self._strokeColor != None:
-            self.setColor(self._strokeColor)
+        if self._strokeColor!=None or self._fillColor!=None:
             pairs = []
             for i in range(len(points)):
                 pairs.append("%f %f" % (points[i]))
@@ -614,7 +611,6 @@ class SVGCanvas:
         return
 
         if self._strokeColor != None:
-            self._setColor(self._strokeColor)
             codeline = '%s m %s l stroke'
             for line in lineList:
                 self.code.append(codeline % (fp_str(line[0]), fp_str(line[1])))
@@ -623,7 +619,6 @@ class SVGCanvas:
         assert len(points) >= 1, 'Polyline must have 1 or more points'
 
         if self._strokeColor != None:
-            self.setColor(self._strokeColor)
             pairs = []
             for i in range(len(points)):
                 pairs.append("%f %f" % (points[i]))
@@ -704,7 +699,6 @@ class _SVGRenderer(Renderer):
         if self.verbose: print("### begin _SVGRenderer.drawNode(%r)" % node)
 
         self._canvas.comment('begin node %r'%node)
-        color = self._canvas._color
         style = self._canvas.style.copy()
         if not (isinstance(node, Path) and node.isClipPath):
             pass # self._canvas.saveState()
@@ -721,7 +715,6 @@ class _SVGRenderer(Renderer):
         if not (isinstance(node, Path) and node.isClipPath):
             pass #self._canvas.restoreState()
         self._canvas.comment('end node %r'%node)
-        self._canvas._color = color
 
         #restore things we might have lost (without actually doing anything).
         for k, v in rDeltas.items():
@@ -932,6 +925,8 @@ class _SVGRenderer(Renderer):
                 fontname = delta.get('fontName', self._canvas._font)
                 fontsize = delta.get('fontSize', self._canvas._fontSize)
                 self._canvas.setFont(fontname, fontsize)
+            elif key == 'fillMode':
+                self._canvas.setFillMode(value)
 
 def test(outDir='out-svg'):
     # print all drawings and their doc strings from the test
