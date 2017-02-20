@@ -213,8 +213,7 @@ class _PMRenderer(Renderer):
             c._clipPaths.append(path)
         fill = c.fillColor is not None
         stroke = c.strokeColor is not None
-        if fill:
-            fillMode = getattr(path,'fillMode',-1)
+        fillMode = getattr(path,'fillMode',-1)
         if autoclose=='svg':
             if fill and stroke:
                 rP(forceClose=True)
