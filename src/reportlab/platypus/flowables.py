@@ -1797,7 +1797,10 @@ class ListFlowable(_Container,Flowable):
         autov = values[0]
         inc = int(bt in '1aAiI')
         if inc:
-            value = int(value)
+            try:
+                value = int(value)
+            except:
+                value = 1
 
         bd = self._bulletDedent
         if bd=='auto':
@@ -1850,6 +1853,7 @@ class ListFlowable(_Container,Flowable):
                         autov = values.index(autov)+1
                         f._start = values[autov:]+values[:autov]
                         autov = f._start[0]
+                        if inc: f._bulletType = autov
                     else:
                         autov = fstart
             fparams = {}
