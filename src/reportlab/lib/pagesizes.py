@@ -23,6 +23,15 @@ A0 = (_W*4, _H*4)
 LETTER = (8.5*inch, 11*inch)
 LEGAL = (8.5*inch, 14*inch)
 ELEVENSEVENTEEN = (11*inch, 17*inch)
+
+# From https://en.wikipedia.org/wiki/Paper_size
+JUNIOR_LEGAL = (5*inch, 8*inch)
+HALF_LETTER = (5.5*inch, 8*inch)
+GOV_LETTER = (8*inch, 10.5*inch)
+GOV_LEGAL = (8.5*inch, 13*inch)
+TABLOID = ELEVENSEVENTEEN
+LEDGER = (17*inch, 11*inch)
+
 # lower case is deprecated as of 12/2001, but here
 # for compatability
 letter=LETTER

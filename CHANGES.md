@@ -13,7 +13,8 @@ mentioned. If we missed you, please let us know!
 
 RELEASE 3.4  ??/02/2017
 -----------------------
-    * add in fillMode (fill-rule) variable to the graphics sstate for drawings
+    * More pagesizes from https://en.wikipedia.org/wiki/Paper_size (contributed by https://bitbucket.org/alainchiasson/)
+    * add in fillMode (fill-rule) variable to the graphics state for drawings
     * add support for automatic bullet rotation in ListFlowables.
     * fix acroform annotation bug in radios (reported by Olivia Zhang)
     * fix split paragraph rendering bug (reported by Olivia Zhang & Echo Bell)
@@ -59,10 +60,11 @@ RELEASE 3.4  ??/02/2017
     * make paraparser syntax errors real and fix <sup/sub> tags to have relative values; version-->3.3.1
 
 ### Contributors:
+    * Alain Chiasson https://bitbucket.org/alainchiasson/
     * annamarianfr@bitbucket
-    * Dinu Gherman
     * Claude Paroz
     * dbrnz @ bitbucket
+    * Dinu Gherman
     * Echo Bell
     * Eric Gillet
     * Jeffrey Creem jcreem@bitbucket
