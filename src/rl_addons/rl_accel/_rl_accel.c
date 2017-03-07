@@ -1,5 +1,5 @@
 /*
-* Copyright ReportLab Europe Ltd. 2000-2016
+* Copyright ReportLab Europe Ltd. 2000-2017
 * licensed under the same terms as the ReportLab Toolkit
 * see http://www.reportlab.co.uk/svn/public/reportlab/trunk/reportlab/license.txt
 * for details.

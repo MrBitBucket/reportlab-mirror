@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2016
+#Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
 #history www.reportlab.co.uk/rl-cgi/viewcvs.cgi/rlextra/rlj/jpsupport.py
 # Temporary japanese support for ReportLab.

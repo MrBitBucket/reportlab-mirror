@@ -11,7 +11,7 @@ E.g. to retrieve the changes made between release 3.1 and release 3.2, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-RELEASE 3.4  ??/02/2017
+RELEASE 3.4  07/03/2017
 -----------------------
     * More pagesizes from https://en.wikipedia.org/wiki/Paper_size (contributed by https://bitbucket.org/alainchiasson/)
     * add in fillMode (fill-rule) variable to the graphics state for drawings
@@ -58,6 +58,7 @@ RELEASE 3.4  ??/02/2017
     * fix bug in tables.py reported by Vytis Banaitis @ bitbucket; version-->3.3.2
     * minor change to allow barWidth setting in ecc200datamatrix.py (suggested by Kyle MacFarlane @ bitbucket)
     * make paraparser syntax errors real and fix <sup/sub> tags to have relative values; version-->3.3.1
+    * ReportLab now runs all tests under Python 2.7, 3.3, 3.4, 3.5 & 3.6.
 
 ### Contributors:
     * Alain Chiasson https://bitbucket.org/alainchiasson/

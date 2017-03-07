@@ -1,5 +1,5 @@
 #!/bin/env python
-#Copyright ReportLab Europe Ltd. 2000-2016
+#Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
 __version__='3.3.0'
 __doc__="""Testing to encrypt a very minimal pdf using a Canvas and a DocTemplate.
