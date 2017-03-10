@@ -69,7 +69,7 @@ disc("""<para lindent="+36">pc.slices[3] actually lazily creates a little object
 
 disc("<i>Only expose things you should change </i>")
 disc("""<para lindent="+36">It would be wrong from a statistical viewpoint to let you directly
-       adjust the angle of one of the pie wedges in the above example, since
+       adjust the angle of one of the pie slices in the above example, since
        that is determined by the data. So not everything will be exposed
        through the public properties. There may be 'back doors' to let you
        violate this when you really need to, or methods to provide advanced
@@ -1148,7 +1148,7 @@ draw(d, 'A bare bones pie chart')
 
 disc("""
 Properties are covered below.
-The pie has a 'wedges' collection and we document wedge properties
+The pie has a 'slices' collection and we document wedge properties
 in the same table.
 """)
 
@@ -1159,7 +1159,7 @@ data=[["Property", "Meaning"],
       ["x, y, width, height", """Bounding box of the pie.
 Note that x and y do NOT specify the centre but the bottom left
 corner, and that width and height do not have to be equal;
-pies may be elliptical and wedges will be drawn correctly."""],
+pies may be elliptical and slices will be drawn correctly."""],
       ["labels", """None, or a list of strings.
 Make it None if you don't want labels around the edge of the pie.
 Since it is impossible to know the size of slices, we generally
@@ -1175,17 +1175,17 @@ one on either side."""],
 distance between the pie and the columns of labels."""],
       ["simpleLabels", """Default is 1. Set to 0 to enable the use of customizable labels 
 and of properties prefixed by label_ in the collection slices."""],
-      ["wedges", """Collection of wedges.
+      ["slices", """Collection of slices.
 This lets you customise each wedge, or individual ones. See below"""],
-      ["wedges.strokeWidth", "Border width for wedge"],
-      ["wedges.strokeColor", "Border color"],
-      ["wedges.strokeDashArray", "Solid or dashed line configuration"],
-      ["wedges.popout", """How far out should the slice(s) stick from the centre of the pie?
+      ["slices.strokeWidth", "Border width for wedge"],
+      ["slices.strokeColor", "Border color"],
+      ["slices.strokeDashArray", "Solid or dashed line configuration"],
+      ["slices.popout", """How far out should the slice(s) stick from the centre of the pie?
 Default is zero."""],
-      ["wedges.fontName", "Name of the label font"],
-      ["wedges.fontSize", "Size of the label font"],
-      ["wedges.fontColor", "Color of the label text"],
-      ["wedges.labelRadius", """This controls the anchor point for a text label.
+      ["slices.fontName", "Name of the label font"],
+      ["slices.fontSize", "Size of the label font"],
+      ["slices.fontColor", "Color of the label text"],
+      ["slices.labelRadius", """This controls the anchor point for a text label.
 It is a fraction of the radius; 0.7 will place the text inside the
 pie, 1.2 will place it slightly outside. (note that if we add labels,
 we will keep this to specify their anchor point)"""]]
@@ -1205,7 +1205,7 @@ heading3("Customizing Labels")
 
 disc("""
 Each slide label can be customized individually by changing
-the properties prefixed by $label_$ in the collection $wedges$.
+the properties prefixed by $label_$ in the collection $slices$.
 For example $pc.slices[2].label_angle = 10$ changes the angle 
 of the third label.
 """)
@@ -1251,7 +1251,7 @@ t.setStyle(TableStyle([
             ('BOX', (0,0), (-1,-1), 0.25, colors.black),
             ]))
 getStory().append(t)
-caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Pie.wedges label customization properties""")
+caption("""Table <seq template="%(Chapter)s-%(Table+)s"/> - Pie.slices label customization properties""")
 
 heading3("Side Labels")
 

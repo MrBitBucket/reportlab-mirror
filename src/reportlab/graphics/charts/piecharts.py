@@ -1643,17 +1643,19 @@ def sample9():
 
     return d
 
-
-
 if __name__=='__main__':
     """Normally nobody will execute this
 
     It's helpful for reportlab developers to put a 'main' block in to execute
     the most recently edited feature.
     """
-    drawing = sample7()
+    import sys
     from reportlab.graphics import renderPDF
-    renderPDF.drawToFile(drawing, 'side_labelled_pie.pdf', 'Side Labelled Pie')
+    argv = sys.argv[1:] or ['7']
+    for a in argv:
+        name = a if a.startswith('sample') else 'sample%s' % a
+        drawing = globals()[name]()
+        renderPDF.drawToFile(drawing, '%s.pdf' % name)
 
     
 

@@ -315,7 +315,7 @@ disc("""For simple widgets it is recommended that you do what we did above:
        $__init__$ and construct everything when $draw()$ is called. You can
        instead have $__setattr__$ hooks and have things updated when certain
        attributes are set. Consider a pie chart. If you want to expose the
-       individual wedges, you might write code like this:""")
+       individual slices, you might write code like this:""")
 
 eg("""
 from reportlab.graphics.charts import piecharts
@@ -326,8 +326,8 @@ pc.slices[7].strokeWidth = 5
 """)
 #removed 'pc.backColor = yellow' from above code example
 
-disc("""The last line is problematic as we have only created four wedges - in
-       fact we might not have created them yet. Does $pc.wedges[7]$ raise an
+disc("""The last line is problematic as we have only created four slices - in
+       fact we might not have created them yet. Does $pc.slices[7]$ raise an
        error? Is it a prescription for what should happen if a seventh wedge
        is defined, used to override the default settings? We dump this
        problem squarely on the widget author for now, and recommend that you
@@ -336,7 +336,7 @@ disc("""The last line is problematic as we have only created four wedges - in
 
 disc("""We also discussed rules by which parent widgets could pass properties
        to their children. There seems to be a general desire for a global way
-       to say that 'all wedges get their lineWidth from the lineWidth of
+       to say that 'all slices get their lineWidth from the lineWidth of
        their parent' without a lot of repetitive coding. We do not have a
        universal solution, so again leave that to widget authors. We hope
        people will experiment with push-down, pull-down and pattern-matching
@@ -375,10 +375,10 @@ pc3.x = 275
 pc3.y = 50
 pc3.data = [10,20,30,40,50,60]
 pc3.labels = ['a','b','c','d','e','f']
-pc3.wedges.labelRadius = 0.65
-pc3.wedges.fontName = "Helvetica-Bold"
-pc3.wedges.fontSize = 16
-pc3.wedges.fontColor = colors.yellow
+pc3.slices.labelRadius = 0.65
+pc3.slices.fontName = "Helvetica-Bold"
+pc3.slices.fontSize = 16
+pc3.slices.fontColor = colors.yellow
 d.add(pc3, 'pie3')
 """)
 
