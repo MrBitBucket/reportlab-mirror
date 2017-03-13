@@ -40,7 +40,8 @@ __all__ = '''TraceInfo Flowable XBox Preformatted Image NullDraw Spacer UseUpSpa
             PageBreakIfNotEmpty CondPageBreak KeepTogether Macro CallerMacro ParagraphAndImage FailOnWrap
             FailOnDraw HRFlowable PTOContainer KeepInFrame ImageAndFlowables AnchorFlowable FrameBG
             FrameSplitter BulletDrawer DDIndenter LIIndenter ListItem ListFlowable TopPadder DocAssign
-            DocExec DocPara DocAssert DocIf DocWhile SetTopFlowables splitLines splitLine'''.split()
+            DocExec DocPara DocAssert DocIf DocWhile SetTopFlowables splitLines splitLine
+            BalancedColumns'''.split()
 
 class TraceInfo:
     "Holder for info about where an object originated"
@@ -59,11 +60,11 @@ class TraceInfo:
 #############################################################
 class Flowable:
     """Abstract base class for things to be drawn.  Key concepts:
-    
+
     1. It knows its size
     2. It draws in its own coordinate system (this requires the
        base API to provide a translate() function.
-    
+
     """
     _fixedWidth = 0         #assume wrap results depend on arguments?
     _fixedHeight = 0
@@ -265,7 +266,7 @@ def splitLines(lines, maximum_length, split_characters, new_line_characters):
 
 def splitLine(line_to_split, lines_splitted, maximum_length, \
 split_characters, new_line_characters):
-    # Used to implement the characters added 
+    # Used to implement the characters added
     #at the beginning of each new line created
     first_line = True
 
@@ -277,7 +278,7 @@ split_characters, new_line_characters):
 
         # Check if the line length still exceeds the maximum length
         if len(line_to_split) <= maximum_length:
-            # Return the remaining of the line                
+            # Return the remaining of the line
             split_index = len(line_to_split)
         else:
             # Iterate for each character of the line
@@ -286,7 +287,7 @@ split_characters, new_line_characters):
                 # of allowed characters to split on
                 if line_to_split[line_index] in split_characters:
                     split_index = line_index + 1
-        
+
         # If the end of the line was reached
         # with no character to split on
         if split_index==0:
@@ -299,7 +300,7 @@ split_characters, new_line_characters):
         else:
             lines_splitted.append(new_line_characters + \
             line_to_split[0:split_index])
-        
+
         # Remaining text to split
         line_to_split = line_to_split[split_index:]
 
@@ -307,7 +308,7 @@ class Preformatted(Flowable):
     """This is like the HTML <PRE> tag.
     It attempts to display text exactly as you typed it in a fixed width "typewriter" font.
     By default the line breaks are exactly where you put them, and it will not be wrapped.
-    You can optionally define a maximum line length and the code will be wrapped; and 
+    You can optionally define a maximum line length and the code will be wrapped; and
     extra characters to be inserted at the beginning of each wrapped line (e.g. '> ').
     """
     def __init__(self, text, style, bulletText = None, dedent=0, maxLineLength=None, splitChars=None, newLineChars=""):
@@ -320,9 +321,9 @@ class Preformatted(Flowable):
         self.lines = _dedenter(text,dedent)
         if text and maxLineLength:
             self.lines = splitLines(
-                                self.lines, 
-                                maxLineLength, 
-                                splitChars, 
+                                self.lines,
+                                maxLineLength,
+                                splitChars,
                                 newLineChars
                         )
 
@@ -1183,7 +1184,51 @@ class KeepInFrame(_Container,Flowable):
         _Container.drawOn(self, canv, x, y, _sW=_sW, scale=scale)
         if ss: canv.restoreState()
 
-class ImageAndFlowables(_Container,Flowable):
+
+class _FindSplitterMixin:
+    def _findSplit(self,canv,availWidth,availHeight,mergeSpace=1,obj=None,content=None,paraFix=True):
+        '''return max width, required height for a list of flowables F'''
+        W = 0
+        H = 0
+        pS = sB = 0
+        atTop = 1
+        F = content or self._content
+        for i,f in enumerate(F):
+            w,h = f.wrapOn(canv,availWidth,0xfffffff)
+            if w<=_FUZZ or h<=_FUZZ: continue
+            W = max(W,w)
+            if not atTop:
+                s = f.getSpaceBefore()
+                if mergeSpace: s = max(s-pS,0)
+                H += s
+            else:
+                if obj is not None: obj._spaceBefore = f.getSpaceBefore()
+                atTop = 0
+            if H>=availHeight or w>availWidth:
+                return W, availHeight, F[:i],F[i:]
+            H += h
+            if H>availHeight:
+                aH = availHeight-(H-h)
+                if paraFix:
+                    from reportlab.platypus.paragraph import Paragraph
+                    if isinstance(f,(Paragraph,Preformatted)):
+                        leading = f.style.leading
+                        nH = leading*int(aH/float(leading))+_FUZZ
+                        if nH<aH: nH += leading
+                        availHeight += nH-aH
+                        aH = nH
+                S = cdeepcopy(f).splitOn(canv,availWidth,aH)
+                if not S:
+                    return W, availHeight, F[:i],F[i:]
+                else:
+                    return W,availHeight,F[:i]+S[:1],S[1:]+F[i+1:]
+            pS = f.getSpaceAfter()
+            H += pS
+
+        if obj is not None: obj._spaceAfter = pS
+        return W, H-pS, F, []
+
+class ImageAndFlowables(_Container,_FindSplitterMixin,Flowable):
     '''combine a list of flowables and an Image'''
     def __init__(self,I,F,imageLeftPadding=0,imageRightPadding=3,imageTopPadding=0,imageBottomPadding=3,
                     imageSide='right', imageHref=None):
@@ -1303,45 +1348,178 @@ class ImageAndFlowables(_Container,Flowable):
             aW, aH = self._wrapArgs
             _Container.drawOn(self, canv, x, y-self._aH,content=self._C1, aW=aW)
 
-    def _findSplit(self,canv,availWidth,availHeight,mergeSpace=1,obj=None):
-        '''return max width, required height for a list of flowables F'''
-        W = 0
-        H = 0
-        pS = sB = 0
-        atTop = 1
-        F = self._content
-        for i,f in enumerate(F):
-            w,h = f.wrapOn(canv,availWidth,0xfffffff)
-            if w<=_FUZZ or h<=_FUZZ: continue
-            W = max(W,w)
-            if not atTop:
-                s = f.getSpaceBefore()
-                if mergeSpace: s = max(s-pS,0)
-                H += s
+class BalancedColumns(_FindSplitterMixin,NullDraw):
+    '''combine a list of flowables and an Image'''
+    def __init__(self, F, nCols=2, needed=72, spaceBefore=0, spaceAfter=0, showBoundary=None,
+            leftPadding=None, innerPadding=None, rightPadding=None, topPadding=None, bottomPadding=None,
+            name=''):
+        self.name = name
+        if nCols <2:
+            raise ValueError('nCols should be at least 2 not %r in %s' % (nCols,self.identitity()))
+        self._content = _flowableSublist(F)
+        self._nCols = nCols
+        self.spaceAfter = spaceAfter
+        self._leftPadding = leftPadding
+        self._innerPadding = innerPadding
+        self._rightPadding = rightPadding
+        self._topPadding = topPadding
+        self._bottomPadding = bottomPadding
+        self.spaceBefore = spaceBefore
+        self._needed = needed - _FUZZ
+        self.showBoundary = showBoundary
+
+    def identity(self, maxLen=None):
+        return "<%s nCols=%r at %s%s%s>" % (self.__class__.__name__, self._nCols, hex(id(self)), self._frameName(),
+                getattr(self,'name','') and (' name="%s"'% getattr(self,'name','')) or '',
+                )
+
+    def getSpaceAfter(self):
+        return self.spaceAfter
+
+    def getSpaceBefore(self):
+        return self.spaceBefore
+
+    def _generated_content(self,aW,aH):
+        G = []
+        frame = self._frame
+        from reportlab.platypus.doctemplate import CurrentFrameFlowable,LayoutError, ActionFlowable
+        from reportlab.platypus.frames import Frame
+        from reportlab.platypus.doctemplate import FrameBreak
+        lpad = frame._leftPadding if self._leftPadding is None else self._leftPadding
+        rpad = frame._rightPadding if self._rightPadding is None else self._rightPadding
+        tpad = frame._topPadding if self._topPadding is None else self._topPadding
+        bpad = frame._bottomPadding if self._bottomPadding is None else self._bottomPadding
+        gap = max(lpad,rpad) if self._innerPadding is None else self._innerPadding
+        hgap = gap*0.5
+        canv = self.canv
+        nCols = self._nCols
+        cw = (aW - gap*(nCols-1))/float(nCols)
+        aH += frame._bottomPadding - bpad + frame._topPadding - tpad
+        W,H0,_C0,C2 = self._findSplit(canv,cw,nCols*aH,paraFix=False)
+        if not _C0:
+            raise ValueError(
+                    "%s cannot make initial split aW=%r aH=%r ie cw=%r ah=%r\ncontent=%s" % (
+                        self.identity(),aW,aH,cw,nCols*aH,
+                        [f.__class__.__name__ for f in self._content],
+                        ))
+        _fres = {}
+        def splitFunc(ah):
+            if ah not in _fres:
+                c = []
+                w = 0
+                h = 0
+                cn = None
+                for i in xrange(nCols):
+                    wi, hi, c0, c1 = self._findSplit(canv,cw,ah,content=cn,paraFix=False)
+                    w = max(w,wi)
+                    h = max(h,hi)
+                    c.append(c0)
+                    cn = c1
+                _fres[ah] = ah+100000*int(cn!=[]),cn==[],(w,h,c,cn)
+            return _fres[ah][2]
+        if C2:
+            H = aH
+        else:
+            #we are short so use H0 to figure out what to use
+            import math
+
+            def func(ah):
+                splitFunc(ah)
+                return _fres[ah][0]
+
+            def gss(f, a, b, tol=1, gr=(math.sqrt(5) + 1) / 2):
+                c = b - (b - a) / gr
+                d = a + (b - a) / gr
+                while abs(a - b) > tol:
+                    if f(c) < f(d):
+                        b = d
+                    else:
+                        a = c
+
+                    # we recompute both c and d here to avoid loss of precision which may lead to incorrect results or infinite loop
+                    c = b - (b - a) / gr
+                    d = a + (b - a) / gr
+
+                F = [(x,tf,v) for x,tf,v in _fres.values() if tf]
+                F.sort()
+                return F[0][2]
+
+            H = min(int(H0/float(nCols)+self.spaceAfter*0.4),aH)
+            splitFunc(H)
+            if not _fres[H][1]:
+                W, H0, _C0, C2 = gss(func,H,aH)
+                H = H0
             else:
-                if obj is not None: obj._spaceBefore = f.getSpaceBefore()
-                atTop = 0
-            if H>=availHeight or w>availWidth:
-                return W, availHeight, F[:i],F[i:]
-            H += h
-            if H>availHeight:
-                from reportlab.platypus.paragraph import Paragraph
-                aH = availHeight-(H-h)
-                if isinstance(f,(Paragraph,Preformatted)):
-                    leading = f.style.leading
-                    nH = leading*int(aH/float(leading))+_FUZZ
-                    if nH<aH: nH += leading
-                    availHeight += nH-aH
-                    aH = nH
-                S = cdeepcopy(f).splitOn(canv,availWidth,aH)
-                if not S:
-                    return W, availHeight, F[:i],F[i:]
-                else:
-                    return W,availHeight,F[:i]+S[:1],S[1:]+F[i+1:]
-            pS = f.getSpaceAfter()
-            H += pS
-        if obj is not None: obj._spaceAfter = pS
-        return W, H-pS, F, []
+                H1 = H0/float(nCols)
+                splitFunc(H1)
+                if not _fres[H1][1]:
+                    W, H0, _C0, C2 = gss(func,H1,H)
+                    H = H0
+            assert not C2, "unexpected non-empty C2"
+        W1, H1, C, C1 = splitFunc(H)
+        _fres.clear()
+
+        x1 = frame._x1
+        y1 = frame._y1
+        fw = frame._width
+        ftop = y1+bpad+tpad+aH
+        fh = H1 + bpad + tpad
+        y2 = ftop - fh
+        dx = fw / float(nCols)
+
+        showBoundary=self.showBoundary if self.showBoundary is not None else frame.showBoundary
+        F = [Frame(x1+i*dx,y2,cw+(lpad+hgap if not i else rpad+hgap if i==nCols-1 else gap),fh,
+                leftPadding=lpad if not i else hgap, bottomPadding=bpad,
+                rightPadding=rpad if i==nCols-1 else hgap, topPadding=tpad,
+                id=i,
+                showBoundary=showBoundary,
+                overlapAttachedSpace=frame._oASpace,
+                _debug=frame._debug) for i in xrange(nCols)]
+
+
+        #we are going to modify the current template
+        T=self._doctemplateAttr('pageTemplate')
+        if T is None:
+            raise LayoutError('%s used in non-doctemplate environment' % self.identity())
+        class Unwrapper(ActionFlowable):
+            def __init__(self):
+                Flowable.__init__(self)
+            def apply(canv,doc,T=T,oldFrames=T.frames):
+                T.frames=oldFrames
+        T.frames=F
+        G.append(CurrentFrameFlowable(F[0].id))
+        for i in xrange(nCols):
+            G.append(KeepInFrame(W1,H1,C[i],mode='shrink'))
+            if i!=nCols-1:
+                G.append(FrameBreak)
+            else:
+                G.append(Unwrapper())
+                G.append(CurrentFrameFlowable(frame.id))
+        if C1:
+            G.append(
+                BalancedColumns(C1, nCols=nCols,
+                    needed=self._needed, spaceBefore=self.spaceBefore, spaceAfter=self.spaceAfter,
+                    showBoundary=self.showBoundary,
+                    leftPadding=self._leftPadding,
+                    innerPadding=self._innerPadding,
+                    rightPadding=self._rightPadding,
+                    topPadding=self._topPadding,
+                    bottomPadding=self._bottomPadding,
+                    )
+                )
+        return H1, G
+
+    def wrap(self,aW,aH):
+        #here's where we mess with everything
+        if aH<self.spaceBefore+self._needed-_FUZZ:
+            #we are going straight to the nextTemplate with no attempt to modify the frames
+            G = [PageBreak(), self]
+            H1 = 0
+        else:
+            H1, G = self._generated_content(aW,aH)
+
+        self._frame.add_generated_content(*G)
+        return 0,min(H1,aH)
 
 class AnchorFlowable(Spacer):
     '''create a bookmark in the pdf'''
@@ -1390,7 +1568,7 @@ class FrameSplitter(NullDraw):
     '''When encountered this flowable should either switch directly to nextTemplate
     if remaining space in the current frame is less than gap+required or it should
     temporarily modify the current template to have the frames from nextTemplate
-    that are listed in nextFrames and switch to the first of those frames. 
+    that are listed in nextFrames and switch to the first of those frames.
     '''
     _ZEROSIZE=1
     def __init__(self,nextTemplate,nextFrames=[],gap=10,required=72):

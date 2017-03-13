@@ -16,8 +16,9 @@ setOutDir(__name__)
 import copy, sys, os
 from reportlab.pdfgen import canvas
 from reportlab import platypus
-from reportlab.platypus import BaseDocTemplate, PageTemplate, Flowable, FrameBreak, KeepTogether
+from reportlab.platypus import BaseDocTemplate, PageTemplate, Flowable, FrameBreak, KeepTogether, PageBreak, Spacer
 from reportlab.platypus import Paragraph, Preformatted
+from reportlab.platypus import SimpleDocTemplate
 from reportlab.lib.units import inch, cm
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
@@ -572,7 +573,6 @@ class PlatypusTestCase(unittest.TestCase):
         #test from Wietse Jacobs
         from reportlab.lib.styles import ParagraphStyle
         from reportlab.graphics.shapes import Drawing, Rect
-        from reportlab.platypus import SimpleDocTemplate
         normal = ParagraphStyle(name='Normal', fontName='Helvetica', fontSize=8.5, leading=11)
         header = ParagraphStyle(name='Heading1', parent=normal, fontSize=14, leading=19,
                     spaceAfter=6, keepWithNext=1)
@@ -593,6 +593,142 @@ class PlatypusTestCase(unittest.TestCase):
         assert bool(ShowBoundaryValue(width=1)) == True
         assert bool(ShowBoundaryValue(color=None,width=1)) == False
         assert bool(ShowBoundaryValue(width=-1)) == False
+
+    def test3(Self):
+        from reportlab.platypus import BalancedColumns, IndexingFlowable, ShowBoundaryValue, NullDraw
+        doc = SimpleDocTemplate(outputfile('test_balancedcolumns.pdf'))
+        styleSheet = getSampleStyleSheet()
+
+        class MyIndexingNull(IndexingFlowable, NullDraw):
+            _ZEROSIZE = True
+            def __init__(self,*args,**kwds):
+                IndexingFlowable.__init__(self,*args,**kwds)
+                self._n = 2
+
+            def isSatisfied(self):
+                if self._n>0: self._n -= 1
+                return self._n==0
+
+        story = [MyIndexingNull()]
+
+        def first():
+            spam = """
+            Welcome to PLATYPUS!
+
+            Platypus stands for "Page Layout and Typography Using Scripts".  It is a high
+            level page layout library which lets you programmatically create complex
+            documents with a minimum of effort.
+
+            This document is both the user guide &amp; the output of the test script.
+            In other words, a script used platypus to create the document you are now
+            reading, and the fact that you are reading it proves that it works.  Or
+            rather, that it worked for this script anyway.  It is a first release!
+
+            Platypus is built 'on top of' PDFgen, the Python library for creating PDF
+            documents.  To learn about PDFgen, read the document testpdfgen.pdf.
+
+            """
+            for text in getParagraphs(spam):
+                story.append(Paragraph(text, styleSheet['BodyText']))
+
+        
+        def balanced(spam=None):
+            L = [Paragraph("""
+                What concepts does PLATYPUS deal with?
+                """, styleSheet['Heading2']),
+                Paragraph("""
+                The central concepts in PLATYPUS are Flowable Objects, Frames, Flow
+                Management, Styles and Style Sheets, Paragraphs and Tables.  This is
+                best explained in contrast to PDFgen, the layer underneath PLATYPUS.
+                PDFgen is a graphics library, and has primitive commans to draw lines
+                and strings.  There is nothing in it to manage the flow of text down
+                the page.  PLATYPUS works at the conceptual level fo a desktop publishing
+                package; you can write programs which deal intelligently with graphic
+                objects and fit them onto the page.
+                """, styleSheet['BodyText']),
+
+                Paragraph("""
+                How is this document organized?
+                """, styleSheet['Heading2']),
+
+                Paragraph("""
+                Since this is a test script, we'll just note how it is organized.
+                the top of each page contains commentary.  The bottom half contains
+                example drawings and graphic elements to whicht he commentary will
+                relate.  Down below, you can see the outline of a text frame, and
+                various bits and pieces within it.  We'll explain how they work
+                on the next page.
+                """, styleSheet['BodyText']),
+                ]
+            if spam:
+                for text in getParagraphs(spam):
+                    L.append(Paragraph(text, styleSheet['BodyText']))
+            story.append(BalancedColumns(L,spaceBefore=20,spaceAfter=30, showBoundary=ShowBoundaryValue(color=colors.lightgreen,width=2)))
+
+        def second():
+            spam = '''The concept of an integrated one box solution for advanced voice and
+    data applications began with the introduction of the IMACS. The
+    IMACS 200 carries on that tradition with an integrated solution
+    optimized for smaller port size applications that the IMACS could not
+    economically address. An array of the most popular interfaces and
+    features from the IMACS has been bundled into a small 2U chassis
+    providing the ultimate in ease of installation.
+
+    With this clarification, an important property of these three types of
+    EC can be defined in such a way as to impose problems of phonemic and
+    morphological analysis.  Another superficial similarity is the interest
+    in simulation of behavior, this analysis of a formative as a pair of
+    sets of features does not readily tolerate a stipulation to place the
+    constructions into these various categories.
+
+    We will bring evidence in
+    favor of the following thesis:  the earlier discussion of deviance is
+    not to be considered in determining the extended c-command discussed in
+    connection with (34).  Another superficial similarity is the interest in
+    simulation of behavior, relational information may remedy and, at the
+    same time, eliminate a descriptive fact.
+
+    There is also a different
+    approach to the [unification] problem, the descriptive power of the base
+    component delimits the traditional practice of grammarians.'''
+            for text in getParagraphs(spam):
+                story.append(Paragraph(text, styleSheet['BodyText']))
+
+        xtra_spam='''If you imagine that the box of X's tothe left is
+an image, what I want to be able to do is flow a
+series of paragraphs around the image
+so that once the bottom of the image is reached, then text will flow back to the
+left margin. I know that it would be possible to something like this
+using tables, but I can't see how to have a generic solution.
+There are two examples of this in the demonstration section of the reportlab
+site.
+
+If you look at the "minimal" euro python conference brochure, at the end of the
+timetable section (page 8), there are adverts for "AdSu" and "O'Reilly". I can
+see how the AdSu one might be done generically, but the O'Reilly, unsure...
+I guess I'm hoping that I've missed something, and that
+it's actually easy to do using platypus.We can do greek letters <greek>mDngG</greek>.
+
+This should be a u with a dieresis on top &lt;unichar code=0xfc/&gt;="<unichar code="0xfc"/>" and this &amp;#xfc;="&#xfc;" and this \\xc3\\xbc="\xc3\xbc". On the other hand this
+should be a pound sign &amp;pound;="&pound;" and this an alpha &amp;alpha;="&alpha;".
+You can have links in the page <link href="http://www.reportlab.com" color="blue">ReportLab</link> &amp; <a href="http://www.reportlab.org" color="green">ReportLab.org</a>.
+Use scheme "pdf:" to indicate an external PDF link, "http:", "https:" to indicate an external link eg something to open in
+your browser. If an internal link begins with something that looks like a scheme, precede with "document:".
+
+Empty hrefs should be allowed ie <a href="">&lt;a href=""&gt;test&lt;/a&gt;</a> should be allowed. <strike>This text should have a strike through it.</strike>
+This should be a mailto link <a href="mailto:reportlab-users@lists2.reportlab.com"><font color="blue">reportlab-users at lists2.reportlab.com</font></a>.'''
+
+        story.append(Paragraph("""Testing the BalancedColumns""", styleSheet['Heading1']))
+        first()
+        balanced()
+        second()
+        story.append(PageBreak())
+        story.append(Paragraph("""Testing the BalancedColumns Breaking""", styleSheet['Heading1']))
+        story.append(Spacer(0,200))
+        first()
+        balanced(spam=xtra_spam)
+        second()
+        doc.build(story)
 
 def makeSuite():
     return makeSuiteForClasses(PlatypusTestCase)
