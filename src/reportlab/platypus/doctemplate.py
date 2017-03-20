@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/doctemplate.py
 
-__version__='3.3.0'
+__version__='3.4.2'
 
 __doc__="""
 This module contains the core structure of platypus.
@@ -1130,15 +1130,10 @@ class BaseDocTemplate:
                 raise ValueError('bad lifetime %r not in %r'%(lifetime,self._allowedLifetimes))
             exec(stmt, {},NS)
         except:
-            exc = sys.exc_info()[1]
-            args = list(exc.args)
-            msg = '\ndocExec %s lifetime=%r failed!' % (stmt,lifetime)
-            args.append(msg)
-            exc.args = tuple(args)
             for k in NS.keys():
                 if k not in K0:
                     del NS[k]
-            raise
+            annotateException('\ndocExec %s lifetime=%r failed!\n' % (stmt,lifetime))
         self._addVars([k for k in NS.keys() if k not in K0],lifetime)
 
     def _addVars(self,vars,lifetime):
@@ -1166,11 +1161,7 @@ class BaseDocTemplate:
         try:
             return eval(expr.strip(),{},self._nameSpace)
         except:
-            exc = sys.exc_info()[1]
-            args = list(exc.args)
-            args[-1] += '\ndocEval %s failed!' % expr
-            exc.args = tuple(args)
-            raise
+            annotateException('\ndocEval %s failed!\n' % expr)
 
 class SimpleDocTemplate(BaseDocTemplate):
     """A special case document template that will handle many simple documents.
