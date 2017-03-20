@@ -1,5 +1,5 @@
 __all__=('AcroForm',)
-from reportlab.pdfbase.pdfdoc import PDFObject, PDFArray, PDFDictionary, PDFString, pdfdocEnc, PDFName, PDFStreamFilterZCompress, escapePDF
+from reportlab.pdfbase.pdfdoc import PDFObject, PDFArray, PDFDictionary, PDFString, pdfdocEnc, PDFName, PDFStream, PDFStreamFilterZCompress, escapePDF
 from reportlab.pdfgen.canvas  import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.colors import Color, CMYKColor, Whiter, Blacker
@@ -91,6 +91,8 @@ def makeFlags(s,d=annotationFlagValues):
 
 class PDFFromString(PDFObject):
     def __init__(self,s):
+        if not isStr(s):
+            raise ValueError('need a unicode/bytes argument not %r' % s)
         self._s = s
 
     def format(self,document):
@@ -123,6 +125,13 @@ class RadioGroup(PDFObject):
         r = PDFDictionary(d).format(doc)
         return r
 
+
+def _pdfObjToStr(obj):
+    if isinstance(obj,PDFArray):
+        return '[%s]' % ''.join((_pdfObjToStr(e) for e in obj.sequence))
+    if isinstance(obj,PDFFromString):
+        return obj._s
+    return str(obj)
 
 class AcroForm(PDFObject):
     formFontNames = {
@@ -193,19 +202,6 @@ class AcroForm(PDFObject):
                 size=20,
                 dashLen=3,
                 ):
-        template = '''<<
-/Matrix [1.0 0.0 0.0 1.0 0.0 0.0]
-/Subtype /Form
-/Length %(streamLen)d
-/Resources << /ProcSet [/PDF] >>
-/FormType 1
-/BBox [0.0 0.0 %(size)s %(size)s]
-/Type /XObject%(filters)s
->>
-stream
-%(stream)s
-endstream
-'''
         stream = [].append
         ds = size
         if shape=='square':
@@ -292,9 +288,10 @@ endstream
                 stream(cbm.scaledRender(size,size-ds))
             stream('Q')
         stream = ('\n'.join(stream.__self__) % vars()).replace('  ',' ').replace('\n\n','\n')
-        filters, stream = self.compress(stream)
-        streamLen = len(stream)
-        return template % vars()
+        return self.makeStream(
+                size, size, stream,
+                Resources = PDFFromString('<< /ProcSet [/PDF] >>'),
+                )
 
     @staticmethod
     def circleArcStream(size, r, arcs=(0,1,2,3), rotated=False):
@@ -424,11 +421,11 @@ endstream
                                     size=size,
                                     dashLen=dashLen,
                                     )
-                if ap in self._refMap:
-                    ref = self._refMap[ap]
+                if ap._af_refstr in self._refMap:
+                    ref = self._refMap[ap._af_refstr]
                 else:
-                    ref = self.getRef(PDFFromString(ap))
-                    self._refMap[ap] = ref
+                    ref = self.getRef(ap)
+                    self._refMap[ap._af_refstr] = ref
                 APV[value]=ref
             AP[key] = PDFDictionary(APV)
             del APV
@@ -527,11 +524,11 @@ endstream
                                     size=size,
                                     dashLen=dashLen,
                                     )
-                if ap in self._refMap:
-                    ref = self._refMap[ap]
+                if ap._af_refstr in self._refMap:
+                    ref = self._refMap[ap._af_refstr]
                 else:
-                    ref = self.getRef(PDFFromString(ap))
-                    self._refMap[ap] = ref
+                    ref = self.getRef(ap)
+                    self._refMap[ap._af_refstr] = ref
                 APV[v]=ref
             AP[key] = PDFDictionary(APV)
             del APV
@@ -562,13 +559,26 @@ endstream
         group.kids.append(self.getRef(RB))
         self.checkForceBorder(x,y,size,size,forceBorder,shape,borderStyle,borderWidth,borderColor,fillColor)
 
-    def compress(self,stream):
-        if self.canv._doc.compression:
-            filters='\n/Filter /FlateDecode'
-            stream = PDFStreamFilterZCompress().encode(stream)
-        else:
-            filters=''
-        return filters, stream
+    def makeStream(self,
+                width,
+                height,
+                stream,
+                **D
+                ):
+        D['Matrix'] = PDFArray([1.0,0.0,0.0,1.0,0.0,0.0])
+        D['BBox'] = PDFArray([0,0,width,height])
+        D['Subtype'] = PDFName('Form')
+        D['Type'] = PDFName('XObject')
+        D['FormType'] = 1
+
+        s = PDFStream(
+                PDFDictionary(D),
+                stream,
+                filters = [PDFStreamFilterZCompress()] if self.canv._doc.compression else None,
+                )
+        #compute a lookup string
+        s._af_refstr = stream+'\n'.join(('%s=%r' % (k,_pdfObjToStr(v)) for k,v in sorted(D.items())))
+        return s
 
     def txAP(self,
                 key,                    #N/D/R
@@ -591,19 +601,6 @@ endstream
                 sel_bg='0.600006 0.756866 0.854904 rg',
                 sel_fg='0 g',
                 ):
-        template = '''<<
-/Matrix [1.0 0.0 0.0 1.0 0.0 0.0]
-/Subtype /Form
-/Length %(streamLen)d
-/Resources << /ProcSet [/PDF /Text] /Font %(rFontName)s >>
-/FormType 1
-/BBox [0.0 0.0 %(width)s %(height)s]
-/Type /XObject%(filters)s
->>
-stream
-%(stream)s
-endstream
-'''
         stream = [].append
         if fillColor:
             streamFill = self.streamFillColor(fillColor)
@@ -705,9 +702,10 @@ endstream
         leading = fp_str(leading)
         stream('Q\nEMC\n')
         stream = ('\n'.join(stream.__self__) % vars()).replace('  ',' ').replace('\n\n','\n')
-        filters, stream = self.compress(stream)
-        streamLen = len(stream)
-        return template % vars()
+        return self.makeStream(
+                width, height, stream,
+                Resources = PDFFromString('<< /ProcSet [/PDF /Text] /Font %(rFontName)s >>' % vars()),
+                )
 
     def makeFont(self,fontName):
         if fontName is None:
@@ -716,7 +714,7 @@ endstream
             raise ValueError('form font name, %r, is not one of the standard 14 fonts' % fontName)
         fn = self.formFontNames[fontName]
         ref = self.getRefStr(PDFFromString('<< /BaseFont /%s /Subtype /Type1 /Name /%s /Type /Font /Encoding %s >>' % (
-                            fontName,fn,self.encRefStr)))
+                        fontName,fn,self.encRefStr)))
         if fn not in self.fonts:
             self.fonts[fn] = ref
         return ref, fn
@@ -831,11 +829,11 @@ endstream
                             dashLen = dashLen,
                             **lbextras
                             )
-            if ap in self._refMap:
-                ref = self._refMap[ap]
+            if ap._af_refstr in self._refMap:
+                ref = self._refMap[ap._af_refstr]
             else:
-                ref = self.getRef(PDFFromString(ap))
-                self._refMap[ap] = ref
+                ref = self.getRef(ap)
+                self._refMap[ap._af_refstr] = ref
             AP[key] = ref
 
         TF = dict(
