@@ -7,10 +7,11 @@ from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 setOutDir(__name__)
 import os, time, sys
 import reportlab
+from reportlab import rl_config
 import unittest
 from reportlab.lib import colors
 from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetAttr, rl_isfile, \
-                                isCompactDistro, isPy3, isPyPy
+                                isCompactDistro, isPy3, isPyPy, TimeStamp
 
 def _rel_open_and_read(fn):
     from reportlab.lib.utils import open_and_read
@@ -156,6 +157,44 @@ class ImporterTestCase(unittest.TestCase):
                             else ('division by zero' if isPy3
                                  else 'integer division or modulo by zero'))
                         ,str(e))
+    def test14(self):
+        "test the TimeStamp behaviour"
+        oinvariant = rl_config.invariant
+        sden = 'SOURCE_DATE_EPOCH'
+        if sden in os.environ:
+            sde = os.environ[sden]
+            del os.environ[sden]
+        else:
+            sde = self
+
+        try:
+            rl_config.invariant = False
+            t = time.time()
+            ts = TimeStamp()
+            self.assertTrue(abs(t-ts.t)<1)
+            ts = TimeStamp(invariant=True)
+            self.assertEqual(ts.t,946684800.0)
+            self.assertEqual(ts.YMDhms,(2000, 1, 1, 0, 0, 0))
+            self.assertEqual(ts.tzname,'UTC')
+            os.environ[sden] = '1490003100'
+            ts = TimeStamp(invariant=True)  #debian variable takes precedence here
+            self.assertEqual(ts.t,1490003100)
+            self.assertEqual(ts.YMDhms,(2017, 3, 20, 9, 45, 0))
+            self.assertEqual(ts.tzname,'UTC')
+            rl_config.invariant = True
+            ts = TimeStamp()                #still takes precedence
+            self.assertEqual(ts.t,1490003100)
+            self.assertEqual(ts.YMDhms,(2017, 3, 20, 9, 45, 0))
+            self.assertEqual(ts.tzname,'UTC')
+            del os.environ[sden]
+            ts = TimeStamp()                #now rl_config takes precedence
+            self.assertEqual(ts.t,946684800.0)
+            self.assertEqual(ts.YMDhms,(2000, 1, 1, 0, 0, 0))
+            self.assertEqual(ts.tzname,'UTC')
+        finally:
+            if sde is not self:
+                os.environ[sden] = sde
+            rl_config.invariant = oinvariant
  
 def makeSuite():
     return makeSuiteForClasses(ImporterTestCase)

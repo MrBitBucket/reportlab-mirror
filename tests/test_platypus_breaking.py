@@ -19,7 +19,7 @@ from reportlab.lib.randomtext import randomText, PYTHON
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, Indenter, SimpleDocTemplate
 from reportlab.platypus.paragraph import *
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.rl_config import invariant, paraFontSizeHeightOffset
+from reportlab.rl_config import paraFontSizeHeightOffset
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
 def myMainPageFrame(canvas, doc):
@@ -83,11 +83,13 @@ def _test0(self):
     btj = ParagraphStyle('bodyText1j',parent=bt,alignment=TA_JUSTIFY)
     btr = ParagraphStyle('bodyText1r',parent=bt,alignment=TA_RIGHT)
     btc = ParagraphStyle('bodyText1c',parent=bt,alignment=TA_CENTER)
+    from reportlab.lib.utils import TimeStamp
+    ts = TimeStamp()
     a(Paragraph("""
         <a name='top'/>Subsequent pages test pageBreakBefore, frameBreakBefore and
         keepTogether attributes.  Generated at %s.  The number in brackets
         at the end of each paragraph is its position in the story. (%d)""" % (
-            time.ctime(946684800.0 if invariant else time.time()), len(story)), bt))
+            ts.asctime, len(story)), bt))
 
     for i in range(10):
         a(Paragraph('Heading 1 always starts a new page (%d)' % len(story), h1))

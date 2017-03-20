@@ -3,14 +3,13 @@
 __version__ = '$Id$'
 from tools.docco.rl_doc_utils import *
 from reportlab.platypus.tableofcontents import TableOfContents
-from datetime import datetime
 import reportlab
-from reportlab.rl_config import invariant
+from reportlab.lib.utils import TimeStamp
 
 title("ReportLab PDF Library")
 title("User Guide")
 centred('ReportLab Version ' + reportlab.Version)
-centred((datetime(2000,1,1,0,0,0) if invariant else datetime.now()).strftime('Document generated on %Y/%m/%d %H:%M:%S %Z'))
+centred(TimeStamp().datetime.strftime('Document generated on %Y/%m/%d %H:%M:%S %Z'))
 
 nextTemplate("TOC")
 
@@ -49,7 +48,7 @@ where to go for orientation.
 disc("""
 This manual does not cover 100% of the features, but should explain all
 the main concepts and help you get started, and point you at other
-learning resources. 
+learning resources.
 After working your way through this, you should be ready to begin
 writing programs to produce sophisticated reports.
 """)

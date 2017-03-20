@@ -43,7 +43,7 @@ heading4("$class ParagraphStyle$")
 eg("""
 class ParagraphStyle(PropertySet):
     defaults = {
-        'fontName':'Times-Roman',
+        'fontName':_baseFontName,
         'fontSize':10,
         'leading':12,
         'leftIndent':0,
@@ -52,7 +52,7 @@ class ParagraphStyle(PropertySet):
         'alignment':TA_LEFT,
         'spaceBefore':0,
         'spaceAfter':0,
-        'bulletFontName':'Times-Roman',
+        'bulletFontName':_baseFontName,
         'bulletFontSize':10,
         'bulletIndent':0,
         'textColor': black,
@@ -69,6 +69,9 @@ class ParagraphStyle(PropertySet):
         'splitLongWords':1,
         'underlineProportion': _baseUnderlineProportion,
         'bulletAnchor': 'start',
+        'justifyLastLine': 0,
+        'justifyBreaks': 0,
+        'spaceShrinkage': spaceShrinkage,
         }
 """)
 

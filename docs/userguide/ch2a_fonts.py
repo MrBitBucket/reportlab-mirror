@@ -49,7 +49,7 @@ includes converters for all the common encodings, including Asian ones.
 
 
 
-disc("""
+disc(u"""
 If your data is not encoded as UTF8, you will get a UnicodeDecodeError as
 soon as you feed in a non-ASCII character.  For example, this snippet below is
 attempting to read in and print a series of names, including one with a French
@@ -57,7 +57,7 @@ accent:  ^Marc-Andr\u00e9 Lemburg^.  The standard error is quite helpful and tel
 what character it doesn't like:
 """)
 
-eg("""
+eg(u"""
 >>> from reportlab.pdfgen.canvas import Canvas
 >>> c = Canvas('temp.pdf')
 >>> y = 700
@@ -402,7 +402,7 @@ pdfmetrics.registerFont(UnicodeCIDFont('HeiseiMin-W3'))
 canvas.setFont('HeiseiMin-W3', 16)
 
 # the two unicode characters below are "Tokyo"
-msg = u'\u6771\u4EAC : Unicode font, unicode input'
+msg = u'\\u6771\\u4EAC : Unicode font, unicode input'
 canvas.drawString(100, 675, msg)
 """)
 #had to double-escape the slashes above to get escapes into the PDF

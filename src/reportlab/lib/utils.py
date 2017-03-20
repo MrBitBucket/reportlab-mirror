@@ -4,7 +4,7 @@
 __version__='3.3.0'
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
-import os, sys, imp, time, types
+import os, sys, imp, time, types, datetime
 from base64 import decodestring as base64_decodestring, encodestring as base64_encodestring
 from reportlab import isPy3
 from reportlab.lib.logger import warnOnce
@@ -1446,3 +1446,52 @@ def makeFileName(s):
     if not isUnicode(s):
         s = s.decode('utf8')
     return s
+
+class FixedOffsetTZ(datetime.tzinfo):
+    """Fixed offset in minutes east from UTC."""
+
+    def __init__(self, h, m, name):
+        self.__offset = datetime.timedelta(hours=h, minutes = m)
+        self.__name = name
+
+    def utcoffset(self, dt):
+        return self.__offset
+
+    def tzname(self, dt):
+        return self.__name
+
+    def dst(self, dt):
+        return datetime.timedelta(0)
+
+class TimeStamp(object):
+    def __init__(self,invariant=None):
+        if invariant is None:
+            from reportlab.rl_config import invariant
+        t = os.environ.get('SOURCE_DATE_EPOCH','').strip()
+        if invariant or t:
+            t = int(t) if t else 946684800.0
+            lt = time.gmtime(t)
+            dhh = dmm = 0
+            self.tzname = 'UTC'
+        else:
+            t = time.time()
+            lt = tuple(time.localtime(t))
+            dhh = int(time.timezone / (3600.0))
+            dmm = (time.timezone % 3600) % 60
+            self.tzname = '' 
+        self.t = t
+        self.lt = lt
+        self.YMDhms = tuple(lt)[:6]
+        self.dhh = dhh
+        self.dmm = dmm
+
+    @property
+    def datetime(self):
+        if self.tzname:
+            return datetime.datetime.fromtimestamp(self.t,FixedOffsetTZ(self.dhh,self.dmm,self.tzname))
+        else:
+            return datetime.datetime.now()
+
+    @property
+    def asctime(self):
+        return time.asctime(self.lt)

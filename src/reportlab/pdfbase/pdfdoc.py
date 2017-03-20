@@ -1,7 +1,7 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
 #history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfbase/pdfdoc.py
-__version__='3.3.0'
+__version__='3.4.1'
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -18,7 +18,7 @@ import types, binascii, codecs, time
 from collections import OrderedDict
 from reportlab.pdfbase import pdfutils
 from reportlab import rl_config
-from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester, isStr, bytestr, isPy3, annotateException
+from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester, isStr, bytestr, isPy3, annotateException, TimeStamp
 from reportlab.lib.rl_accel import escapePDF, fp_str, asciiBase85Encode, asciiBase85Decode
 from reportlab.pdfbase import pdfmetrics
 from hashlib import md5
@@ -148,10 +148,8 @@ class PDFDocument(PDFObject):
         # signature for creating PDF ID
         sig = self.signature = md5()
         sig.update(b"a reportlab document")
-        if not self.invariant:
-            cat = _getTimeStamp()
-        else:
-            cat = 946684800.0
+        self._timeStamp = TimeStamp(self.invariant)
+        cat = self._timeStamp.t
         cat = ascii(cat)
         sig.update(bytestr(cat)) # initialize with timestamp digest
         # mapping of internal identifier ("Page001") to PDF objectnumber and generation number (34, 0)
@@ -172,7 +170,6 @@ class PDFDocument(PDFObject):
         self.Outlines = self.outline = outlines
         cat.Outlines = outlines
         self.info = PDFInfo()
-        self.info.invariant = self.invariant
         #self.Reference(self.Catalog)
         #self.Reference(self.Info)
         self.fontMapping = {}
@@ -870,8 +867,8 @@ class PDFIndirectObject(PDFObject):
         document.encrypt.register(n, v)
         fcontent = format(self.content, document, toplevel=1)   # yes this is at top level
         return (pdfdocEnc("%s %s obj\n"%(n,v))
-                +fcontent+ (b'' if fcontent.endswith(b'\n') else b'\n')
-                +b'endobj\n')
+            +fcontent+ (b'' if fcontent.endswith(b'\n') else b'\n')
+            +b'endobj\n')
 
 class PDFObjectReference(PDFObject):
     def __init__(self, name):
@@ -1538,7 +1535,6 @@ class PDFInfo(PDFObject):
     _dateFormatter = None
 
     def __init__(self):
-        self.invariant = rl_config.invariant
         self.trapped = 'False'  #could be 'True' or 'Unknown'
 
     def digest(self, md5object):
@@ -1550,7 +1546,7 @@ class PDFInfo(PDFObject):
         D = {}
         D["Title"] = PDFString(self.title)
         D["Author"] = PDFString(self.author)
-        D['ModDate'] = D["CreationDate"] = PDFDate(invariant=self.invariant,dateFormatter=self._dateFormatter)
+        D['ModDate'] = D["CreationDate"] = PDFDate(ts=document._timeStamp,dateFormatter=self._dateFormatter)
         D["Producer"] = PDFString(self.producer)
         D["Creator"] = PDFString(self.creator)
         D["Subject"] = PDFString(self.subject)
@@ -1728,26 +1724,18 @@ class PDFRectangle(PDFObject):
         A = PDFArray([self.llx, self.lly, self.ulx, self.ury])
         return format(A, document)
 
-_NOWT=None
-def _getTimeStamp():
-    global _NOWT
-    if not _NOWT:
-        _NOWT = time.time()
-    return _NOWT
-
 class PDFDate(PDFObject):
     # gmt offset now suppported properly
-    def __init__(self, invariant=rl_config.invariant, dateFormatter=None):
-        if invariant:
-            now = (2000,1,1,0,0,0,0)
-            self.dhh = 0
-            self.dmm = 0
-        else:
-            now = tuple(time.localtime(_getTimeStamp())[:6])
-            self.dhh = int(time.timezone / (3600.0))
-            self.dmm = (time.timezone % 3600) % 60
-        self.date = now[:6]
+    def __init__(self, ts=None, dateFormatter=None):
+        if ts is None:
+            ts = TimeStamp()
+        self._init(ts)
         self.dateFormatter = dateFormatter
+
+    def _init(self,ts):
+        self.date = ts.YMDhms
+        self.dhh = ts.dhh
+        self.dmm = ts.dmm
 
     def format(self, doc):
         dfmt = self.dateFormatter or (
