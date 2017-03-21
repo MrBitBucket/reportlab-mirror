@@ -30,7 +30,7 @@ from reportlab.lib.colors import red, gray, lightgrey
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 from reportlab.lib.styles import _baseFontName
-from reportlab.lib.utils import strTypes
+from reportlab.lib.utils import isStr
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions, listWrapOnFakeWidth
@@ -480,7 +480,7 @@ class Image(Flowable):
         if a=='_img':
             from reportlab.lib.utils import ImageReader  #this may raise an error
             self._img = ImageReader(self._file)
-            if not isinstance(self._file,strTypes):
+            if not isStr(self._file):
                 self._file = None
                 if self._lazy>=2: self._lazy = 1    #here we're assuming we cannot read again
             return self._img
@@ -852,7 +852,7 @@ class HRFlowable(Flowable):
 
     def wrap(self, availWidth, availHeight):
         w = self.width
-        if type(w) is type(''):
+        if isStr(w):
             w = w.strip()
             if w.endswith('%'): w = availWidth*float(w[:-1])*0.01
             else: w = float(w)
