@@ -46,7 +46,7 @@ epsilon.
 
 from reportlab.lib import enums
 from reportlab.lib.units import cm
-from reportlab.lib.utils import commasplit, escapeOnce, encode_label, decode_label, strTypes, asUnicode
+from reportlab.lib.utils import commasplit, escapeOnce, encode_label, decode_label, strTypes, asUnicode, asNative
 from reportlab.lib.styles import ParagraphStyle, _baseFontName
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.doctemplate import IndexingFlowable
@@ -349,6 +349,7 @@ class SimpleIndex(IndexingFlowable):
         self.offset = offset
 
     def __call__(self,canv,kind,label):
+        label = asNative(label,'latin1')
         try:
             terms, format, offset = decode_label(label)
         except:
@@ -417,11 +418,10 @@ class SimpleIndex(IndexingFlowable):
 
     def _getlastEntries(self, dummy=[(['Placeholder for index'],enumerate((None,)*3))]):
         '''Return the last run's entries!  If there are none, returns dummy.'''
-        if not self._lastEntries:
-            if self._entries:
-                return list(self._entries.items())
+        lE = self._lastEntries or self._entries
+        if not lE:
             return dummy
-        return list(self._lastEntries.items())
+        return list(sorted(lE.items()))
 
     def _build(self,availWidth,availHeight):
         _tempEntries = [(tuple(asUnicode(t) for t in texts),pageNumbers)

@@ -209,7 +209,7 @@ def getAttrs(A):
         else:
             S[a] = "%s, %s" %(S[a],k)
 
-    K = list(S.keys())
+    K = list(sorted(S.keys()))
     K.sort()
     D=[('Attribute','Synonyms')]
     for k in K:
