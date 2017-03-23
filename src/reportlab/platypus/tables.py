@@ -183,7 +183,9 @@ def spanFixDim(V0,V,spanCons,lim=None,FUZZ=rl_config._FUZZ):
     #assign required space to variable rows equally to existing calculated values
     M = {}
     if not lim: lim = len(V0)   #in longtables the row calcs may be truncated
-    for (x0,x1),v in spanCons.items():
+
+    #we assign the largest spaces first hoping to get a smaller result
+    for v,(x0,x1) in reversed(sorted(((iv,ik) for ik,iv in spanCons.items()))):
         if x0>=lim: continue
         x1 += 1
         t = sum([V[x]+M.get(x,0) for x in xrange(x0,x1)])
