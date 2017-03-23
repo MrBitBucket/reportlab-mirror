@@ -175,7 +175,7 @@ def imgNormV(v,nv):
 
 def _getDotsInfo(style):
     dots = style.endDots
-    if isinstance(dots,str):
+    if isinstance(dots,strTypes):
         text = dots
         fontName = style.fontName
         fontSize = style.fontSize
