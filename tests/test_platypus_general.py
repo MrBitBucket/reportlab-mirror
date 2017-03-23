@@ -23,7 +23,7 @@ from reportlab.lib.units import inch, cm
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.rl_config import defaultPageSize
-from reportlab.lib.utils import haveImages, _RL_DIR, rl_isfile, open_for_read, fileName2FSEnc
+from reportlab.lib.utils import haveImages, _RL_DIR, rl_isfile, open_for_read, fileName2FSEnc, asNative
 import unittest
 from reportlab.lib.testutils import testsFolder
 if haveImages:
@@ -694,7 +694,7 @@ class PlatypusTestCase(unittest.TestCase):
             for text in getParagraphs(spam):
                 story.append(Paragraph(text, styleSheet['BodyText']))
 
-        xtra_spam='''If you imagine that the box of X's tothe left is
+        xtra_spam=asNative(b'''If you imagine that the box of X's tothe left is
 an image, what I want to be able to do is flow a
 series of paragraphs around the image
 so that once the bottom of the image is reached, then text will flow back to the
@@ -716,7 +716,7 @@ Use scheme "pdf:" to indicate an external PDF link, "http:", "https:" to indicat
 your browser. If an internal link begins with something that looks like a scheme, precede with "document:".
 
 Empty hrefs should be allowed ie <a href="">&lt;a href=""&gt;test&lt;/a&gt;</a> should be allowed. <strike>This text should have a strike through it.</strike>
-This should be a mailto link <a href="mailto:reportlab-users@lists2.reportlab.com"><font color="blue">reportlab-users at lists2.reportlab.com</font></a>.'''
+This should be a mailto link <a href="mailto:reportlab-users@lists2.reportlab.com"><font color="blue">reportlab-users at lists2.reportlab.com</font></a>.''')
 
         story.append(Paragraph("""Testing the BalancedColumns""", styleSheet['Heading1']))
         first()

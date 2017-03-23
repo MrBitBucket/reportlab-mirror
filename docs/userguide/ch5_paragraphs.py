@@ -205,15 +205,15 @@ def getAttrs(A):
     for k, v in A.items():
         a = v[0]
         if a not in S:
-            S[a] = k
+            S[a] = [k]
         else:
-            S[a] = "%s, %s" %(S[a],k)
+            S[a].append(k)
 
     K = list(sorted(S.keys()))
     K.sort()
     D=[('Attribute','Synonyms')]
     for k in K:
-        D.append((k,S[k]))
+        D.append((k,", ".join(list(sorted(S[k])))))
     cols=2*[None]
     rows=len(D)*[None]
     return D,cols,rows

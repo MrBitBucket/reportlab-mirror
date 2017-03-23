@@ -182,7 +182,7 @@ it's actually easy to do using platypus.
         styleSheet = getSampleStyleSheet()
         h3 = styleSheet['Heading3']
         bt = styleSheet['BodyText']
-        text = '''If you imagine that the box of X's tothe left is
+        text = b'''If you imagine that the box of X's to the left is
 an image, what I want to be able to do is flow a
 series of paragraphs around the image
 so that once the bottom of the image is reached, then text will flow back to the
@@ -339,7 +339,7 @@ class SplitFrameParagraphTest(unittest.TestCase):
         normal.leading = 16
         normal.alignment = TA_JUSTIFY
     
-        text = "Bedauerlicherweise ist ein Donaudampfschiffkapit\xc3\xa4n auch <font color='red'>nur</font> <font color='green'>ein</font> Dampfschiffkapit\xc3\xa4n."
+        text = b"Bedauerlicherweise ist ein Donaudampfschiffkapit\xc3\xa4n auch <font color='red'>nur</font> <font color='green'>ein</font> Dampfschiffkapit\xc3\xa4n."
         tagFormat = '%s'
         # strange behaviour when using next code line
         # (same for '<a href="http://www.reportlab.org">%s</a>'
@@ -347,7 +347,7 @@ class SplitFrameParagraphTest(unittest.TestCase):
 
         #text = " ".join([tagFormat % w for w in text.split()])
         
-        story = [Paragraph((text + " ") * 3, style=normal)]
+        story = [Paragraph((text.decode('utf8') + u" ") * 3, style=normal)]
 
         from reportlab.lib import pagesizes
         PAGESIZE = pagesizes.landscape(pagesizes.A4)
@@ -796,6 +796,37 @@ impose an interpretation on the system of base rules exclusive of the
         a(Paragraph('Paragraph Flowing', bold))
         a(Paragraph(brText, normal))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_para_br_flowing.pdf'))
+        doc.build(story)
+
+    def testParaNBSP(self):
+        from reportlab.platypus import BaseDocTemplate, PageTemplate, Frame, PageBegin
+        from reportlab.lib.units import inch
+        class MyDocTemplate(BaseDocTemplate):
+            _invalidInitArgs = ('pageTemplates',)
+
+            def __init__(self, filename, **kw):
+                self.allowSplitting = 0
+                BaseDocTemplate.__init__(self, filename, **kw)
+                self.addPageTemplates(
+                        [
+                        PageTemplate('normal',
+                                [
+                                Frame(inch, 4.845*inch, 3*inch, 3.645*inch, id='first',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red")),
+                                Frame(4.27*inch, 4.845*inch, 3*inch, 3.645*inch, id='second',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red")),
+                                Frame(inch, inch, 3*inch, 3.645*inch, id='third',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red")),
+                                Frame(4.27*inch, inch, 3*inch, 3.645*inch, id='fourth',topPadding=0,rightPadding=0,leftPadding=0,bottomPadding=0,showBoundary=ShowBoundaryValue(color="red"))
+                                ],
+                                ),
+                        ])
+        styleSheet = getSampleStyleSheet()
+        normal = ParagraphStyle(name='normal',fontName='Helvetica',fontSize=10,leading=12,parent=styleSheet['Normal'])
+        bold = ParagraphStyle(name='bold',fontName='Helvetica-Bold',fontSize=12,leading=14.4,parent=normal)
+        story =[]
+        a = story.append
+        a(Paragraph('Paragraph Hard Space Handling', bold))
+        a(Paragraph(''' <span backcolor="pink">ABCDEFGHI</span> ''', normal))
+        a(Paragraph(''' <span backcolor="palegreen">&nbsp;ABCDEFGHI&nbsp;</span> ''', normal))
+        doc = MyDocTemplate(outputfile('test_platypus_paragraphs_nbsp.pdf'))
         doc.build(story)
 
 #noruntests

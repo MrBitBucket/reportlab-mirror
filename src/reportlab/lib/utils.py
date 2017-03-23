@@ -1494,4 +1494,9 @@ class TimeStamp(object):
 
     @property
     def asctime(self):
-        return time.asctime(self.lt)
+        a = time.asctime(self.lt)
+        if not isPy3:
+            a = a.split()
+            a[2] = a[2].lstrip('0')
+            a = ' '.join(a)
+        return a

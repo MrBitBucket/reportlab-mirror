@@ -204,7 +204,7 @@ def makeDocument(filename, pageCallBack=None):
 
     #quickie encoding test: when canvas encoding not set,
     #the following should do (tm), (r) and (c)
-    msg_uni = 'copyright\u00A9 trademark\u2122 registered\u00AE scissors\u2702: ReportLab in unicode!'
+    msg_uni = u'copyright\u00A9 trademark\u2122 registered\u00AE scissors\u2702: ReportLab in unicode!'
     msg_utf8 = msg_uni.replace('unicode','utf8').encode('utf8')
     c.drawString(100, 100, msg_uni)
     c.drawString(100, 80, msg_utf8)
@@ -1119,6 +1119,7 @@ class PdfgenTestCase(unittest.TestCase):
 
     def test5(self,uopw=None):
         from reportlab.lib.pagesizes import A4,LETTER
+        from reportlab.lib.rl_accel import fp_str
         if uopw:
             from reportlab.lib import pdfencrypt
             encrypt = pdfencrypt.StandardEncryption(uopw[0], uopw[1])
@@ -1128,31 +1129,33 @@ class PdfgenTestCase(unittest.TestCase):
             canv._doc.encrypt = encrypt
         else:
             canv = canvas.Canvas(outputfile('test_pdfgen_general_page_sizes.pdf'),pagesize=A4)
+        def tstr(*args):
+            return tuple((fp_str(a) for a in args))
         canv.setFont('Helvetica',10)
         S = A4
-        canv.drawString(0,S[1]-10,'Top Left=(%s,%s) Page Size=%s x %s' % (0,S[1],S[0],S[1]))
-        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % (0.5*S[0],0.5*S[1],S[0],S[1]))
-        canv.drawRightString(S[0],2,'Bottom Right=(%s,%s) Page Size=%s x %s' % (S[0],0,S[0],S[1]))
+        canv.drawString(0,S[1]-10,'Top Left=(%s,%s) Page Size=%s x %s' % tstr(0,S[1],S[0],S[1]))
+        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % tstr(0.5*S[0],0.5*S[1],S[0],S[1]))
+        canv.drawRightString(S[0],2,'Bottom Right=(%s,%s) Page Size=%s x %s' % tstr(S[0],0,S[0],S[1]))
         canv.showPage()
         S = LETTER
         canv.setPageSize(S)
-        canv.drawString(0,S[1]-10,'Top Left=(%s,%s) Page Size=%s x %s' % (0,S[1],S[0],S[1]))
-        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % (0.5*S[0],0.5*S[1],S[0],S[1]))
-        canv.drawRightString(S[0],2,'Bottom Right=(%s,%s) Page Size=%s x %s' % (S[0],0,S[0],S[1]))
+        canv.drawString(0,S[1]-10,'Top Left=(%s,%s) Page Size=%s x %s' % tstr(0,S[1],S[0],S[1]))
+        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % tstr(0.5*S[0],0.5*S[1],S[0],S[1]))
+        canv.drawRightString(S[0],2,'Bottom Right=(%s,%s) Page Size=%s x %s' % tstr(S[0],0,S[0],S[1]))
         canv.showPage()
         S = A4
         canv.setPageSize(S)
         canv.setPageRotation(180)
-        canv.drawString(0,S[1]-10,'Top Left=(%s,%s) Page Size=%s x %s' % (0,S[1],S[0],S[1]))
-        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % (0.5*S[0],0.5*S[1],S[0],S[1]))
-        canv.drawRightString(S[0],2,'Bottom Right=(%s,%s) Page Size=%s x %s' % (S[0],0,S[0],S[1]))
+        canv.drawString(0,S[1]-10,'Top Left=(%s,%s) Page Size=%s x %s' % tstr(0,S[1],S[0],S[1]))
+        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % tstr(0.5*S[0],0.5*S[1],S[0],S[1]))
+        canv.drawRightString(S[0],2,'Bottom Right=(%s,%s) Page Size=%s x %s' % tstr(S[0],0,S[0],S[1]))
         canv.showPage()
         S = A4[1],A4[0]
         canv.setPageSize(S)
         canv.setPageRotation(0)
-        canv.drawString(0,S[1]-30,'Top Left=(%s,%s) Page Size=%s x %s' % (0,S[1],S[0],S[1]))
-        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % (0.5*S[0],0.5*S[1],S[0],S[1]))
-        canv.drawRightString(S[0],32,'Bottom Right=(%s,%s) Page Size=%s x %s' % (S[0],0,S[0],S[1]))
+        canv.drawString(0,S[1]-30,'Top Left=(%s,%s) Page Size=%s x %s' % tstr(0,S[1],S[0],S[1]))
+        canv.drawCentredString(0.5*S[0],0.5*S[1],'Center =(%s,%s) Page Size=%s x %s' % tstr(0.5*S[0],0.5*S[1],S[0],S[1]))
+        canv.drawRightString(S[0],32,'Bottom Right=(%s,%s) Page Size=%s x %s' % tstr(S[0],0,S[0],S[1]))
         canv.showPage()
         canv.save()
 
