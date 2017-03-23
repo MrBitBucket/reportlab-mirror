@@ -285,7 +285,7 @@ class TableOfContents(IndexingFlowable):
         self._table.drawOn(canvas, x, y, _sW)
 
 def makeTuple(x):
-    if hasattr(x, '__iter__'):
+    if isinstance(x,(list,tuple)):
         return tuple(x)
     return (x,)
 
