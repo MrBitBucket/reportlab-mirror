@@ -806,9 +806,11 @@ class BaseDocTemplate:
         #the object(s) about to be processed
         self.filterFlowables(flowables)
 
-        self.handle_breakBefore(flowables)
-        self.handle_keepWithNext(flowables)
         f = flowables[0]
+        if f:
+            self.handle_breakBefore(flowables)
+            self.handle_keepWithNext(flowables)
+            f = flowables[0]
         del flowables[0]
         if f is None:
             return
