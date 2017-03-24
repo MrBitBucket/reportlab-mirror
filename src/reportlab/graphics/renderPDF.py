@@ -207,7 +207,7 @@ class _PDFRenderer(Renderer):
     def applyStateChanges(self, delta, newState):
         """This takes a set of states, and outputs the PDF operators
         needed to set those properties"""
-        for key, value in delta.items():
+        for key, value in (sorted(delta.items()) if rl_config.invariant else delta.items()):
             if key == 'transform':
                 self._canvas.transform(value[0], value[1], value[2],
                                  value[3], value[4], value[5])

@@ -722,7 +722,7 @@ phonemic and morphological analysis.'''
         styleSheet = getSampleStyleSheet()
         normal = ParagraphStyle(name='normal',fontName='Helvetica',fontSize=10,leading=12,parent=styleSheet['Normal'])
         bold = ParagraphStyle(name='bold',fontName='Helvetica-Bold',fontSize=12,leading=14.4,parent=normal)
-        brText="""
+        brText=u"""
 Clearly, the natural general principle that will subsume this case is
 not subject to a parasitic gap construction.  Presumably, most of the
 methodological work in modern linguistics can be defined in such a way

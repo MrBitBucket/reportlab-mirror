@@ -172,8 +172,9 @@ class AcroForm(PDFObject):
                 Fields = PDFArray([self.getRef(f) for f in self.fields]),
                 )
         if self.fonts:
-            F = [self.fontRef(f) for f in self.fonts]
-            d['DA'] = PDFString('/%s 0 Tf 0 g' % list(self.fonts.keys())[0])
+            FK = list(sorted(self.fonts.keys()))
+            F = [self.fontRef(f) for f in FK]
+            d['DA'] = PDFString('/%s 0 Tf 0 g' % FK[0])
             d['DR'] = PDFFromString('<< /Encoding\n<<\n/RLAFencoding\n%s\n>>\n%s\n>>' % (self.encRefStr,'\n'.join(F)))
         r = PDFDictionary(d).format(doc)
         return r
