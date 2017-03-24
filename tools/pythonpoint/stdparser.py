@@ -451,9 +451,9 @@ class PPMLParser(HTMLParser):
         bt = self._arg('para',args,'bullettext')
         if bt == '':
             if self._curPara.style == 'Bullet':
-                bt = '\u2022'  # Symbol Font bullet character, reasonable default
+                bt = u'\u2022'  # Symbol Font bullet character, reasonable default
             elif self._curPara.style == 'Bullet2':
-                bt = '\u2022'  # second-level bullet
+                bt = u'\u2022'  # second-level bullet
             else:
                 bt = None
 

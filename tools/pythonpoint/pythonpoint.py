@@ -71,13 +71,13 @@ Recently added features are:
 - add pyRXP support (TODO)
 """
 __version__='3.3.0'
-import os, sys, imp, pprint, getopt, glob
+import os, sys, imp, pprint, getopt, glob, re
 
 from reportlab import rl_config
 from reportlab.lib import styles
 from reportlab.lib import colors
 from reportlab.lib.units import cm
-from reportlab.lib.utils import getBytesIO, isStr
+from reportlab.lib.utils import getBytesIO, isStr, isPy3, isBytes, isUnicode
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
@@ -971,14 +971,45 @@ def validate(rawdata):
         _pyRXP_Parser = pyRXP.Parser(eoCB=eocb)
     return _pyRXP_Parser.parse(rawdata)
 
+
+def _re_match(pat,text,flags=re.M|re.I):
+    if isPy3 and isBytes(text):
+            pat = pat.encode('latin1')
+    return re.match(pat,text,flags)
+
 def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None, datafilename=None, fx=1):
     "Process one PythonPoint source file."
     if not hasattr(datafile, "read"):
         if not datafilename: datafilename = datafile
-        datafile = open(datafile)
+        datafile = open(datafile,'rb')
     else:
         if not datafilename: datafilename = "PseudoFile"
     rawdata = datafile.read()
+    if not isUnicode(rawdata):
+        encs = ['utf8','iso-8859-1']
+        m=_re_match(r'^\s*(<\?xml[^>]*\?>)',rawdata)
+        if m:
+            m1=_re_match(r"""^.*\sencoding\s*=\s*("[^"]*"|'[^']*')""",m.group(1))
+            if m1:
+                enc = m1.group(1)[1:-1]
+                if enc:
+                    if enc in encs:
+                        encs.remove(enc)
+                    encs.insert(0,enc)
+        for enc in encs:
+            try:
+                udata = rawdata.decode(enc)
+                break
+            except:
+                pass
+        else:
+            raise ValueError('cannot decode input data')
+    else:
+        udata = rawdata
+    if isPy3:
+        rawdata = udata
+    else:
+        rawdata = udata.encode('utf8')
 
     #if pyRXP present, use it to check and get line numbers for errors...
     validate(rawdata)

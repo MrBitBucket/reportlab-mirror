@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<?xml version="1.0" encoding="utf8" standalone="no"?>
 <!DOCTYPE presentation SYSTEM "../pythonpoint.dtd">
 <presentation filename="pythonpoint.pdf" pageDuration="3">
   <stylesheet module="standard" function="getParagraphStyles"/>
@@ -48,7 +48,7 @@
         <para/>
         <para/>
         <para style="Heading1">
-                    Part 1 &#150; Feature Overview
+                    Part 1 &#x2013; Feature Overview
                 </para>
       </frame>
     </slide>
@@ -108,7 +108,7 @@
     <slide title="Reuse" id="Slide004" effectname="Wipe" outlinelevel="1">
       <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
-                    Reuse and Consistency &#150; Sections
+                    Reuse and Consistency &#x2013; Sections
                 </para>
         <para style="BodyText">
                     You can create a 'section' spanning some or all tags in the presentation 
@@ -256,7 +256,7 @@
                     PIDDLE drawings
                 </para>
         <para style="Bullet">
-                    PINGO drawings &#150; 'Object Graphics' tags with grouping and coordinate transformations
+                    PINGO drawings &#x2013; 'Object Graphics' tags with grouping and coordinate transformations
                 </para>
         <para style="Bullet">
                     Speaker notes and a mode to print them
@@ -275,7 +275,7 @@
         <para/>
         <para/>
         <para style="Heading1">
-                    Part 2 &#150; Reference
+                    Part 2 &#x2013; Reference
                 </para>
         <para/>
         <para style="Centered">
@@ -485,12 +485,12 @@
                 </para>
         <para style="Indent">
                     leftmargin, rightmargin, topmargin, bottommargin 
-                    (optional, default to zero) &#150; define the 'inner rectangle' within
+                    (optional, default to zero) &#x2013; define the 'inner rectangle' within
                     which content flows
                 </para>
         <para style="Indent">
                     border (defaults to 'false'): whether to show
-                    a frame border &#150; useful when designing pages.
+                    a frame border &#x2013; useful when designing pages.
                 </para>
         <para style="Italic">
                     Contained By:
@@ -502,14 +502,14 @@
                     Can Contain:
                 </para>
         <para style="Indent">
-                    all 'flowable objects' &#150; paragraphs, images
+                    all 'flowable objects' &#x2013; paragraphs, images
                 </para>
       </frame>
     </slide>
     <slide title="Flowable Objects" id="Slide206" effectname="Blinds" effectdirection="0" outlinelevel="1">
       <frame height="510" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading2">
-                    Tag family &#150; "Flowable Objects"
+                    Tag family &#x2013; "Flowable Objects"
                 </para>
         <para style="BodyText">
                     Flowable Objects currently include Paragraphs, Preformatted text
@@ -535,11 +535,11 @@
     <slide title="Tag: para" id="Slide207" effectname="Blinds" effectdirection="0" outlinelevel="2">
       <frame height="510" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading2">
-                    Tag "para" &#150; Paragraphs
+                    Tag "para" &#x2013; Paragraphs
                 </para>
         <para style="BodyText">
                     Paragraphs are used for wrapping text.  They are very simple 
-                    &#150; they have a style attribute,
+                    &#x2013; they have a style attribute,
                     and the stylesheet defines most attributes externally. 
                     Currently we use a hack to handle 'bullets', which may be in
                     a different font (such as 'ZapfDingbats, specified in style) 
@@ -552,11 +552,11 @@
                     Attributes:
                 </para>
         <para style="Indent">
-                    style (defaults to 'Normal') &#150; 
+                    style (defaults to 'Normal') &#x2013; 
                     reference to stylesheet
                 </para>
         <para style="Indent">
-                    bullettext &#150; 
+                    bullettext &#x2013; 
                     text for the optional 'bullet' section. To be deprecated.
                 </para>
         <para style="Italic">
@@ -586,7 +586,7 @@
                     Attributes:
                 </para>
         <para style="Indent">
-                    style (defaults to 'Normal') &#150; 
+                    style (defaults to 'Normal') &#x2013; 
                     reference to stylesheet
                 </para>
         <para style="Italic">
@@ -606,7 +606,7 @@
     <slide title="Tag: image" id="Slide208" effectname="Blinds" effectdirection="0" outlinelevel="2">
       <frame height="510" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading2">
-                    Tag "image" &#150; flowing images
+                    Tag "image" &#x2013; flowing images
                 </para>
         <para style="BodyText">
                     This is used for an image to be displayed inline within
@@ -643,7 +643,7 @@
     <slide title="Tag: table" id="Slide208a" effectname="Blinds" effectdirection="0" outlinelevel="2">
       <frame height="510" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading2">
-                    Tag "table" &#150; tables
+                    Tag "table" &#x2013; tables
                 </para>
         <para style="BodyText">
                     This lets you draw tables with a wide variety of formatting
@@ -668,21 +668,21 @@
           <b>
                         style
                     </b>
-                    (optional) &#150; name of a ReportLab
+                    (optional) &#x2013; name of a ReportLab
                         tablestyle  defined in the stylesheet.
                 </para>
         <para style="Indent">
           <b>
                         colDelim
                     </b>
-                    (optional) &#150; the column
+                    (optional) &#x2013; the column
                       delimiter string for bulk data; defaults to a comma.
                 </para>
         <para style="Indent">
           <b>
                         rowDelim
                     </b>
-                    (optional) &#150; the line
+                    (optional) &#x2013; the line
                       delimiter string for bulk data; defaults to a carriage 
                     return.
                 </para>
@@ -704,7 +704,7 @@
     <slide title="Drawable Objects" id="Slide209" effectname="Blinds" effectdirection="0" outlinelevel="1">
       <frame height="510" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading2">
-                    Tag family &#150; "Drawable Objects"
+                    Tag family &#x2013; "Drawable Objects"
                 </para>
         <para style="BodyText">
                     These are objects which know how to draw themselves directly on
@@ -728,7 +728,7 @@
                 </para>
         <para style="Indent">
                     Will include the full PINGO object
-                    model &#150; a subset of SVG &#150; allowing any vector graphics
+                    model &#x2013; a subset of SVG &#x2013; allowing any vector graphics
                     at all.
                 </para>
       </frame>
@@ -739,7 +739,7 @@
                     Tag "fixedimage"
                 </para>
         <para style="BodyText">
-                    This is an image draw directly at a fixed position &#150; 
+                    This is an image draw directly at a fixed position &#x2013; 
                     for example, the logo at top left of the page.
                 </para>
         <para style="Italic">
@@ -809,7 +809,7 @@
         <para style="BodyText">
                     This is exactly like Rectangle,
                     but with an extra 'radius' attribute defining the corner
-                    radius in points &#150; default is 6 points.
+                    radius in points &#x2013; default is 6 points.
                 </para>
       </frame>
     </slide>
@@ -1014,7 +1014,7 @@
     <slide title="To Do" id="Part3" effectname="Blinds" effectdirection="0">
       <frame height="468" x="120" y="72" rightmargin="36" width="700" leftmargin="36">
         <para style="Heading1">
-                    Part 3 &#150; To Do
+                    Part 3 &#x2013; To Do
                 </para>
         <para style="Bullet">
                     Lots of testing
