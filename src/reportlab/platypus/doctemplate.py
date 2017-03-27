@@ -529,6 +529,7 @@ class BaseDocTemplate:
         self._leftExtraIndent = 0.0
         self._rightExtraIndent = 0.0
         self._topFlowables = []
+        self._pageTopFlowables = []
         self._frameBGs = []
 
         self._calc()
@@ -585,7 +586,7 @@ class BaseDocTemplate:
             del self._nextFrameIndex
         self.frame = self.pageTemplate.frames[0]
         self.frame._debug = self._debug
-        self.handle_frameBegin()
+        self.handle_frameBegin(pageTopFlowables=self._pageTopFlowables)
 
     def _setPageTemplate(self):
         if hasattr(self,'_nextPageTemplateCycle'):
@@ -652,7 +653,7 @@ class BaseDocTemplate:
             while len(self._hanging)==n:
                 self.handle_frameEnd()
 
-    def handle_frameBegin(self,resume=0):
+    def handle_frameBegin(self,resume=0,pageTopFlowables=None):
         '''What to do at the beginning of a frame'''
         f = self.frame
         if f._atTop:
@@ -661,6 +662,8 @@ class BaseDocTemplate:
         f._leftExtraIndent = self._leftExtraIndent
         f._rightExtraIndent = self._rightExtraIndent
         f._frameBGs = self._frameBGs
+        if pageTopFlowables:
+            self._hanging.extend(pageTopFlowables)
         if self._topFlowables:
             self._hanging.extend(self._topFlowables)
 

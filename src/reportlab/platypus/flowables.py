@@ -40,7 +40,7 @@ __all__ = '''TraceInfo Flowable XBox Preformatted Image NullDraw Spacer UseUpSpa
             PageBreakIfNotEmpty CondPageBreak KeepTogether Macro CallerMacro ParagraphAndImage FailOnWrap
             FailOnDraw HRFlowable PTOContainer KeepInFrame ImageAndFlowables AnchorFlowable FrameBG
             FrameSplitter BulletDrawer DDIndenter LIIndenter ListItem ListFlowable TopPadder DocAssign
-            DocExec DocPara DocAssert DocIf DocWhile SetTopFlowables splitLines splitLine
+            DocExec DocPara DocAssert DocIf DocWhile SetTopFlowables splitLines splitLine SetPageTopFlowables
             BalancedColumns'''.split()
 
 class TraceInfo:
@@ -2237,7 +2237,21 @@ class SetTopFlowables(NullDraw):
     def wrap(self,aW,aH):
         doc = getattr(getattr(self,'canv',None),'_doctemplate',None)
         if doc:
-            doc._topFlowables=self._F
+            doc._topFlowables = self._F
+            if self._show and self._F:
+                doc.frame._generated_content = self._F
+        return 0,0
+
+class SetPageTopFlowables(NullDraw):
+    _ZEROZSIZE = 1
+    def __init__(self,F,show=False):
+        self._F = F
+        self._show = show
+
+    def wrap(self,aW,aH):
+        doc = getattr(getattr(self,'canv',None),'_doctemplate',None)
+        if doc:
+            doc._pageTopFlowables = self._F
             if self._show and self._F:
                 doc.frame._generated_content = self._F
         return 0,0
