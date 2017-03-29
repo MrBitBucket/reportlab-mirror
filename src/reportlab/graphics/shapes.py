@@ -1330,7 +1330,7 @@ class Wedge(SolidShape):
                 a(centerx+radius1*c)
                 a(centery+yradius1*s)
         if self.annular:
-            P = Path(fillMode=self.fillMode)
+            P = Path(fillMode=getattr(self,'fillMode',None))
             P.moveTo(points[0],points[1])
             for x in xrange(2,2*n,2):
                 P.lineTo(points[x],points[x+1])

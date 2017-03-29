@@ -486,7 +486,16 @@ class ChartTestCase(unittest.TestCase):
         global FINISHED
         FINISHED = 1
 
-
+    def test_801(self):
+        '''test for bitbucket issue 105 reported by Johann Du Toit
+        from reportlab.graphics.charts.doughnut import Doughnut
+        from reportlab.graphics import renderSVG
+        d = Drawing(500, 500)
+        pie = Doughnut()
+        pie.data = [5]
+        pie.labels = ['Only 1 Value','']
+        d.add(pie)
+        s = renderSVG.drawToString(d)
 
 def makeSuite():
     return makeSuiteForClasses(ChartTestCase)
