@@ -1192,7 +1192,7 @@ class _FindSplitterMixin:
         H = 0
         pS = sB = 0
         atTop = 1
-        F = content or self._content
+        F = self._getContent(content)
         for i,f in enumerate(F):
             w,h = f.wrapOn(canv,availWidth,0xfffffff)
             if w<=_FUZZ or h<=_FUZZ: continue
@@ -1227,6 +1227,16 @@ class _FindSplitterMixin:
 
         if obj is not None: obj._spaceAfter = pS
         return W, H-pS, F, []
+
+    def _getContent(self,content=None):
+        F = []
+        C = content if content is not None else self._content
+        for f in C:
+            if isinstance(f,ListFlowable):
+                F.extend(self._getContent(f._content))
+            else:
+                F.append(f)
+        return F
 
 class ImageAndFlowables(_Container,_FindSplitterMixin,Flowable):
     '''combine a list of flowables and an Image'''
@@ -1834,9 +1844,10 @@ class _LIParams:
         self.first= first
 
 class ListFlowable(_Container,Flowable):
+    _numberStyles = '1aAiI'
     def __init__(self,
                     flowables,  #the initial flowables
-                    start=1,
+                    start=None,
                     style=None,
                     #leftIndent=18,
                     #rightIndent=0,
@@ -1871,12 +1882,16 @@ class ListFlowable(_Container,Flowable):
         if start is None:
             start = getattr(self,'_start',None)
             if start is None:
-                if getattr(self,'_bulletType','1')=='bullet':
+                if self._bulletType=='bullet':
                     start = 'bulletchar'
                     auto = True
                 else:
-                    start = '1'
+                    start = self._bulletType
                     auto = True
+        if self._bulletType!='bullet':
+            for v in start:
+                if v not in self._numberStyles:
+                    raise ValueError('invalid start %r' % start)
         self._start = start
         self._auto = auto or isinstance(start,(list,tuple))
 
