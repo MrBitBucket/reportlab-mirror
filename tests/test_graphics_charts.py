@@ -486,7 +486,7 @@ class ChartTestCase(unittest.TestCase):
         global FINISHED
         FINISHED = 1
 
-    def test_801(self):
+    def test801(self):
         '''test for bitbucket issue 105 reported by Johann Du Toit'''
         from reportlab.graphics.charts.doughnut import Doughnut
         from reportlab.graphics import renderSVG
