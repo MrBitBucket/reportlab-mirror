@@ -10,6 +10,7 @@ For a list of available lexers see http://pygments.org/docs/
 """
 __all__ = ('pygments2xpre',)
 from reportlab.lib.utils import isPy3, asBytes, getBytesIO, getStringIO, asUnicode, isUnicode
+import re
 
 def _2xpre(s,styles):
     "Helper to transform Pygments HTML output to ReportLab markup"
@@ -19,6 +20,8 @@ def _2xpre(s,styles):
     s = s.replace('</pre>','')
     for k,c in styles+[('p','#000000'),('n','#000000'),('err','#000000')]:
         s = s.replace('<span class="%s">' % k,'<span color="%s">' % c)
+        s = re.sub(r'<span class="%s\s+.*">'% k,'<span color="%s">' % c,s)
+    s = re.sub(r'<span class=".*">','<span color="#0f0f0f">',s)
     return s
 
 def pygments2xpre(s, language="python"):
