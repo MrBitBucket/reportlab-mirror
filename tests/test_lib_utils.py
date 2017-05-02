@@ -11,7 +11,7 @@ from reportlab import rl_config
 import unittest
 from reportlab.lib import colors
 from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetAttr, rl_isfile, \
-                                isCompactDistro, isPy3, isPyPy, TimeStamp
+                                isCompactDistro, isPy3, isPyPy, TimeStamp, rl_get_module
 
 def _rel_open_and_read(fn):
     from reportlab.lib.utils import open_and_read
@@ -25,26 +25,26 @@ def _rel_open_and_read(fn):
 
 class ImporterTestCase(unittest.TestCase):
     "Test import utilities"
-    count = 0
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         from reportlab.lib.utils import get_rl_tempdir
-        s = repr(int(time.time())) + repr(self.count)
-        self.__class__.count += 1
-        self._tempdir = get_rl_tempdir('reportlab_test','tmp_%s' % s)
-        if not os.path.isdir(self._tempdir):
-            os.makedirs(self._tempdir,0o700)
-        _testmodulename = os.path.join(self._tempdir,'test_module_%s.py' % s)
-        f = open(_testmodulename,'w')
-        f.write('__all__=[]\n')
-        f.close()
+        cls._value = float(repr(time.time()))
+        s = int(cls._value)
+        cls._tempdir = get_rl_tempdir('reportlab_test','tmp_%s' % s)
+        if not os.path.isdir(cls._tempdir):
+            os.makedirs(cls._tempdir,0o700)
+        _testmodulename = os.path.join(cls._tempdir,'test_module_%s.py' % s)
+        with open(_testmodulename,'w') as f:
+            f.write('__all__=[]\nvalue=%s\n' % repr(cls._value))
         if sys.platform=='darwin' and isPy3:
             time.sleep(0.3)
-        self._testmodulename = os.path.splitext(os.path.basename(_testmodulename))[0]
+        cls._testmodulename = os.path.splitext(os.path.basename(_testmodulename))[0]
 
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         from shutil import rmtree
-        rmtree(self._tempdir,1)
+        rmtree(cls._tempdir,1)
 
     def test1(self):
         "try stuff known to be in the path"
@@ -195,6 +195,10 @@ class ImporterTestCase(unittest.TestCase):
             if sde is not self:
                 os.environ[sden] = sde
             rl_config.invariant = oinvariant
+
+    def test15(self):
+        m = rl_get_module(self._testmodulename,self._tempdir)
+        self.assertEqual(self._value,m.value)
  
 def makeSuite():
     return makeSuiteForClasses(ImporterTestCase)

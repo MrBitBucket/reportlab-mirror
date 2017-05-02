@@ -4,7 +4,7 @@
 __version__='3.3.0'
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
-import os, sys, imp, time, types, datetime
+import os, sys, time, types, datetime
 from base64 import decodestring as base64_decodestring, encodestring as base64_encodestring
 from reportlab import isPy3
 from reportlab.lib.logger import warnOnce
@@ -714,6 +714,25 @@ def rl_getmtime(pn,os_path_isfile=os.path.isfile,os_path_normpath=os.path.normpa
     d = e[6]
     return time_mktime((((d>>9)&0x7f)+1980,(d>>5)&0xf,d&0x1f,(s>>11)&0x1f,(s>>5)&0x3f,(s&0x1f)<<1,0,0,0))
 
+if isPy3 and sys.version_info[:2]>=(3,4):
+    from importlib import util as importlib_util
+    def __rl_get_module__(name,dir):
+        for ext in ('.py','.pyw','.pyo','.pyc','.pyd'):
+            path = os.path.join(dir,name+ext)
+            if os.path.isfile(path):
+                spec = importlib_util.spec_from_file_location(name,path)
+                return spec.loader.load_module()
+        raise ImportError('no suitable file found')
+else:
+    import imp
+    def __rl_get_module__(name,dir):
+        f, p, desc= imp.find_module(name,[dir])
+        try:
+            return imp.load_module(name,f,p,desc)
+        finally:
+            if f:
+                f.close()
+
 def rl_get_module(name,dir):
     if name in sys.modules:
         om = sys.modules[name]
@@ -721,10 +740,8 @@ def rl_get_module(name,dir):
     else:
         om = None
     try:
-        f = None
         try:
-            f, p, desc= imp.find_module(name,[dir])
-            return imp.load_module(name,f,p,desc)
+            return __rl_get_module__(name,dir)
         except:
             if isCompactDistro():
                 #attempt a load from inside the zip archive
@@ -736,8 +753,6 @@ def rl_get_module(name,dir):
             raise ImportError('%s[%s]' % (name,dir))
     finally:
         if om: sys.modules[name] = om
-        del om
-        if f: f.close()
 
 def _isPILImage(im):
     try:
