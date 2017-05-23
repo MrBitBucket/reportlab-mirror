@@ -539,7 +539,7 @@ def main():
                 ],
             
             #this probably only works for setuptools, but distutils seems to ignore it
-            install_requires=['pillow>=2.4.0','pip>=1.4.1', 'setuptools>=2.2'],
+            install_requires=['pillow>=2.4.0'],
             )
         print()
         print('########## SUMMARY INFO #########')
