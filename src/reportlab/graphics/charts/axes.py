@@ -100,8 +100,8 @@ class AxisLabelAnnotation:
             axis._pseudo_configure()
         sv = (axis.scale if scaleValue else lambda x: x)(self._v)
         if axis.isYAxis:
-            y = axis._x
-            x = sv
+            x = axis._x
+            y = sv
         else:
             x = sv
             y = axis._y
