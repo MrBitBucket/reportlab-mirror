@@ -1,0 +1,5 @@
+/*this comment is here to alleviate a tool issue in ubuntu document production
+ * see https://bugs.launchpad.net/ubuntu/+source/python-reportlab/+bug/1692123
+ * apparently zero length files cause a problem because their packager ignores
+ * them :(
+ */
