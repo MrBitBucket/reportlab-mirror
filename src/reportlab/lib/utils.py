@@ -882,11 +882,12 @@ class ImageReader(object):
                 else:
                     im = self._image
                     mode = self.mode = im.mode
-                    if mode=='RGBA':
+                    if mode in ('LA','RGBA'):
                         if Image.VERSION.startswith('1.1.7'): im.load()
-                        self._dataA = ImageReader(im.split()[3])
-                        im = im.convert('RGB')
-                        self.mode = 'RGB'
+                        self._dataA = ImageReader(im.split()[3 if mode=='RGBA' else 1])
+                        nm = mode[:-1]
+                        im = im.convert(nm)
+                        self.mode = nm
                     elif mode not in ('L','RGB','CMYK'):
                         if im.format=='PNG' and im.mode=='P' and 'transparency' in im.info:
                             im = im.convert('RGBA')

@@ -15,6 +15,7 @@ from reportlab.lib.pagesizes import A4
 IMAGES = []
 IMAGENAME = 'pythonpowered.gif'
 GSIMAGE = 'pythonpowered-gs.gif'
+GAIMAGE = 'gray-alpha.png'
 
 
 class ImageTestCase(unittest.TestCase):
@@ -84,6 +85,15 @@ class ImageTestCase(unittest.TestCase):
         img = Image(0, 0, 110, 44, GSIMAGE)
         d.add(img)
         d.translate(0,2*72)
+        IMAGES.append(d)
+
+    def test5(self):
+        "Test convert a greyscale +alpha bitmap file as Image shape into a tmp. PDF file."
+
+        d = Drawing(48, 48)
+        img = Image(0, 0, 48, 48, GAIMAGE)
+        d.add(img)
+        d.translate(72,4*72)
         IMAGES.append(d)
         IMAGES.append(None) # used to indicate last test
 

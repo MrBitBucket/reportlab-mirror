@@ -29,9 +29,12 @@ from reportlab.lib.testutils import testsFolder
 if haveImages:
     _GIF = os.path.join(testsFolder,'pythonpowered.gif')
     if not rl_isfile(_GIF): _GIF = None
+    _GAPNG = os.path.join(testsFolder,'gray-alpha.png')
+    if not rl_isfile(_GAPNG): _GAPNG = None
 else:
     _GIF = None
 if _GIF: _GIFFSEnc=fileName2FSEnc(_GIF)
+if _GAPNG: _GAPNGFSEnc=fileName2FSEnc(_GAPNG)
 
 _JPG = os.path.join(testsFolder,'..','docs','images','lj8100.jpg')
 if not rl_isfile(_JPG): _JPG = None
@@ -326,6 +329,14 @@ def getCommentary():
         code('''    img = platypus.Image('http://www.reportlab.com/rsrc/encryption.gif')
     story.append(img)''')
         story.append(FrameBreak())
+    if _GAPNG:
+        story.append(Paragraph("""We can use images via the file name""", styleSheet['BodyText']))
+        code('''    story.append(platypus.Image('%s'))'''%_GAPNGFSEnc)
+        code('''    story.append(platypus.Image(fileName2FSEnc('%s')))''' % _GAPNGFSEnc)
+        story.append(Paragraph("""They can also be used with a file URI or from an open python file!""", styleSheet['BodyText']))
+        code('''    story.append(platypus.Image('%s'))'''% getFurl(_GAPNGFSEnc))
+        code('''    story.append(platypus.Image(open_for_read('%s','b')))''' % _GAPNGFSEnc)
+        story.append(FrameBreak())
 
     if _JPG:
         story.append(Paragraph("""JPEGs are a native PDF image format. They should be available even if PIL cannot be used.""", styleSheet['BodyText']))
@@ -512,6 +523,17 @@ def getExamples():
             story.append(img)
         except:
             story.append(Paragraph("The image could not be obtained from a string http url.",styleSheet['Italic']))
+        story.append(FrameBreak())
+
+    if _GAPNG:
+        story.append(Paragraph("Here is an Image flowable obtained from a string filename.",styleSheet['Italic']))
+        story.append(platypus.Image(_GAPNG))
+        story.append(Paragraph( "Here is an Image flowable obtained from a utf8 filename.", styleSheet['Italic']))
+        #story.append(platypus.Image(fileName2FSEnc(_GAPNG)))
+        story.append(Paragraph("Here is an Image flowable obtained from a string file url.",styleSheet['Italic']))
+        story.append(platypus.Image(getFurl(_GAPNG)))
+        story.append(Paragraph("Here is an Image flowable obtained from an open file.",styleSheet['Italic']))
+        story.append(platypus.Image(open_for_read(_GAPNG,'b')))
         story.append(FrameBreak())
 
     if _JPG:
