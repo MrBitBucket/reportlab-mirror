@@ -1362,7 +1362,7 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
     '''combine a list of flowables and an Image'''
     def __init__(self, F, nCols=2, needed=72, spaceBefore=0, spaceAfter=0, showBoundary=None,
             leftPadding=None, innerPadding=None, rightPadding=None, topPadding=None, bottomPadding=None,
-            name=''):
+            name='', endSlack=0.1):
         self.name = name
         if nCols <2:
             raise ValueError('nCols should be at least 2 not %r in %s' % (nCols,self.identitity()))
@@ -1377,6 +1377,7 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
         self.spaceBefore = spaceBefore
         self._needed = needed - _FUZZ
         self.showBoundary = showBoundary
+        self.endSlack = endSlack    #what we might allow as a lastcolumn overrun
 
     def identity(self, maxLen=None):
         return "<%s nCols=%r at %s%s%s>" % (self.__class__.__name__, self._nCols, hex(id(self)), self._frameName(),
@@ -1413,20 +1414,30 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
                         [f.__class__.__name__ for f in self._content],
                         ))
         _fres = {}
-        def splitFunc(ah):
+        def splitFunc(ah,endSlack=0):
             if ah not in _fres:
                 c = []
                 w = 0
                 h = 0
                 cn = None
+                icheck = nCols-2 if endSlack else -1
                 for i in xrange(nCols):
                     wi, hi, c0, c1 = self._findSplit(canv,cw,ah,content=cn,paraFix=False)
                     w = max(w,wi)
                     h = max(h,hi)
                     c.append(c0)
+                    if i==icheck:
+                        wc, hc, cc0, cc1 = self._findSplit(canv,cw,2*ah,content=c1,paraFix=False)
+                        if hc<=(1+endSlack)*ah:
+                            c.append([KeepInFrame(cw,ah,c1,mode='shrink')])
+                            h = ah-1e-6
+                            cn = []
+                            break
                     cn = c1
                 _fres[ah] = ah+100000*int(cn!=[]),cn==[],(w,h,c,cn)
             return _fres[ah][2]
+
+        endSlack = 0
         if C2:
             H = aH
         else:
@@ -1451,22 +1462,36 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
                     d = a + (b - a) / gr
 
                 F = [(x,tf,v) for x,tf,v in _fres.values() if tf]
-                F.sort()
-                return F[0][2]
+                if F:
+                    F.sort()
+                    return F[0][2]
+                return None
 
             H = min(int(H0/float(nCols)+self.spaceAfter*0.4),aH)
             splitFunc(H)
             if not _fres[H][1]:
-                W, H0, _C0, C2 = gss(func,H,aH)
-                H = H0
+                H = gss(func,H,aH)
+                if H:
+                    W, H0, _C0, C2 = H
+                    H = H0
+                    endSlack = False
+                else:
+                    H = aH
+                    endSlack = self.endSlack
             else:
                 H1 = H0/float(nCols)
                 splitFunc(H1)
                 if not _fres[H1][1]:
-                    W, H0, _C0, C2 = gss(func,H1,H)
-                    H = H0
+                    H = gss(func,H,aH)
+                    if H:
+                        W, H0, _C0, C2 = H
+                        H = H0
+                        endSlack = False
+                    else:
+                        H = aH
+                        endSlack = self.endSlack
             assert not C2, "unexpected non-empty C2"
-        W1, H1, C, C1 = splitFunc(H)
+        W1, H1, C, C1 = splitFunc(H, endSlack)
         _fres.clear()
 
         x1 = frame._x1

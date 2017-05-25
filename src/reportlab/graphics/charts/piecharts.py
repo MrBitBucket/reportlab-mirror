@@ -23,7 +23,8 @@ from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
                                     isBoolean, isListOfColors, isNumberOrNone,\
                                     isNoneOrListOfNoneOrStrings, isTextAnchor,\
                                     isNoneOrListOfNoneOrNumbers, isBoxAnchor,\
-                                    isStringOrNone, NoneOr
+                                    isStringOrNone, NoneOr, EitherOr,\
+                                    isNumberInRange
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.attrmap import *
 from reportlab.pdfgen.canvas import Canvas
@@ -256,19 +257,20 @@ def findOverlapRun(B,wrap=1):
     '''determine a set of overlaps in bounding boxes B or return None'''
     n = len(B)
     if n>1:
-        for i in range(n-1):
+        for i in xrange(n-1):
             R = _findOverlapRun(B,i,wrap)
             if len(R)>1: return R
     return None
 
-def fixLabelOverlaps(L, sideLabels=False):
+def fixLabelOverlaps(L, sideLabels=False, mult0=1.0):
     nL = len(L)
     if nL<2: return
     B = [l._origdata['bounds'] for l in L]
     OK = 1
     RP = []
     iter = 0
-    mult = 1.
+    mult0 = float(mult0 + 0)
+    mult = mult0
 
     if not sideLabels:
         while iter<30:
@@ -277,7 +279,7 @@ def fixLabelOverlaps(L, sideLabels=False):
             nR = len(R)
             if nR==nL: break
             if not [r for r in RP if r in R]:
-                mult = 1.0
+                mult = mult0
             da = 0
             r0 = R[0]
             rL = R[-1]
@@ -285,7 +287,7 @@ def fixLabelOverlaps(L, sideLabels=False):
             taa = aa = _360(L[r0]._pmv)
             for r in R[1:]:
                 b = B[r]
-                da = max(da,min(b[3]-bi[1],bi[3]-b[1]))
+                da = max(da,min(b[2]-bi[0],bi[2]-b[0]))
                 bi = b
                 aa += L[r]._pmv
             aa = aa/float(nR)
@@ -515,7 +517,7 @@ class Pie(AbstractPieChart):
         slices = AttrMapValue(None, desc="Collection of wedge descriptor objects"),
         simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use a simple String not an advanced WedgeLabel. A WedgeLabel is customisable using the properties prefixed label_ in the collection slices."),
         other_threshold = AttrMapValue(isNumber, desc='A value for doing threshholding, not used yet.',advancedUsage=1),
-        checkLabelOverlap = AttrMapValue(isBoolean, desc="If true check and attempt to fix\n standard label overlaps(default off)",advancedUsage=1),
+        checkLabelOverlap = AttrMapValue(EitherOr((isNumberInRange(0.05,1),isBoolean)), desc="If true check and attempt to fix\n standard label overlaps(default off)",advancedUsage=1),
         pointerLabelMode = AttrMapValue(OneOf(None,'LeftRight','LeftAndRight'), desc='',advancedUsage=1),
         sameRadii = AttrMapValue(isBoolean, desc="If true make x/y radii the same(default off)",advancedUsage=1),
         orderMode = AttrMapValue(OneOf('fixed','alternate'),advancedUsage=1),
@@ -821,7 +823,7 @@ class Pie(AbstractPieChart):
                         if checkLabelOverlap:
                             l._origdata = { 'x': labelX, 'y':labelY, 'angle': averageAngle,
                                             'rx': rx, 'ry':ry, 'cx':cx, 'cy':cy,
-                                            'bounds': l.getBounds(),
+                                            'bounds': l.getBounds(), 'angles':(a1,a2),
                                             }
                     elif plMode and PL_data:
                         l = PL_data[i]
@@ -875,7 +877,7 @@ class Pie(AbstractPieChart):
                         x1,y1,x2,y2 = l.getBounds()
         
         if checkLabelOverlap and L:
-            fixLabelOverlaps(L, sideLabels)
+            fixLabelOverlaps(L, sideLabels, mult0=checkLabelOverlap)
         for l in L: g_add(l)
 
         if not plMode:
