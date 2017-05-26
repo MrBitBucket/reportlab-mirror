@@ -1,9 +1,9 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
 __doc__="""The Reportlab PDF generation library."""
-Version = "3.4.13"
+Version = "3.4.14"
 __version__=Version
-__date__='20170525'
+__date__='20170526'
 
 import sys, os
 
@@ -46,10 +46,13 @@ try:
 except ImportError:
     pass
 
+if not isPy3:
+    PermissionError = ImportError
+
 try:
     import reportlab_mods   #application specific modifications can be anywhere on python path
 except ImportError:
     try:
         _fake_import(os.path.expanduser(os.path.join('~','.reportlab_mods')),'reportlab_mods')
-    except (ImportError,KeyError):
+    except (ImportError,KeyError,PermissionError):
         pass
