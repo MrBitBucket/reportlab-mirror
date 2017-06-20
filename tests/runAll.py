@@ -93,7 +93,9 @@ def main(pattern='test_*.py'):
     cleanOnly = '--clean' in sys.argv
     if not cleanOnly:
         testSuite = makeSuite(folder,nonImportable=NI,pattern=pattern+(not haveSRC and 'c' or ''))
-        unittest.TextTestRunner().run(testSuite)
+        result = unittest.TextTestRunner().run(testSuite)
+    else:
+        result = None
 
     if haveSRC: cleanup(folder,patterns=('*.pyc','*.pyo'))
     if not cleanOnly:
@@ -102,6 +104,8 @@ def main(pattern='test_*.py'):
             for f,tb in NI:
                 print('file: "%s"\n%s\n' % (f,''.join(tb)))
         printLocation()
+    if __name__=='__main__':
+        sys.exit(1 if result and not result.wasSuccessful() else 0)
 
 def mainEx():
     '''for use in subprocesses'''
