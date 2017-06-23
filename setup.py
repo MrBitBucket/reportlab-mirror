@@ -278,17 +278,16 @@ def get_fonts(PACKAGE_DIR, reportlab_files):
 
 def main():
     #test to see if we've a special command
-    if 'tests' in sys.argv or 'tests-preinstall' in sys.argv:
+    if 'test' in sys.argv or 'tests' in sys.argv or 'tests-preinstall' in sys.argv:
         if len(sys.argv)!=2:
             raise ValueError('tests commands may only be used alone')
         cmd = sys.argv[-1]
-        PYTHONPATH=[pkgDir]
+        PYTHONPATH = [pkgDir] if cmd!='test' else []
         if cmd=='tests-preinstall':
             PYTHONPATH.insert(0,pjoin(pkgDir,'src'))
-        os.environ['PYTHONPATH']=os.pathsep.join(PYTHONPATH)
+        if PYTHONPATH: os.environ['PYTHONPATH']=os.pathsep.join(PYTHONPATH)
         os.chdir(pjoin(pkgDir,'tests'))
-        os.system("%s runAll.py" % sys.executable)
-        return
+        sys.exit(os.system("%s runAll.py" % sys.executable))
 
     debug_compile_args = []
     debug_link_args = []
