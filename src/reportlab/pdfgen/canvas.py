@@ -16,7 +16,7 @@ import hashlib
 from string import digits
 import tempfile
 from math import sin, cos, tan, pi, ceil
-from reportlab import rl_config
+from reportlab import rl_config, ascii
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics

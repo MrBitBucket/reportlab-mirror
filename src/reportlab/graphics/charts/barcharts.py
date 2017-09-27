@@ -25,6 +25,7 @@ from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis, YCategoryA
 from reportlab.graphics.charts.textlabels import BarChartLabel, NA_Label, NoneOrInstanceOfNA_Label
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.charts.legends import _objStr
+from reportlab import xrange, cmp
 
 class BarChartProperties(PropHolder):
     _attrMap = AttrMap(

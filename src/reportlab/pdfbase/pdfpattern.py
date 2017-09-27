@@ -1,6 +1,7 @@
 __doc__="""helper for importing pdf structures into a ReportLab generated document
 """
 from reportlab.pdfbase.pdfdoc import format, PDFObject, pdfdocEnc
+from reportlab import ascii
 from reportlab.lib.utils import strTypes
 
 def _patternSequenceCheck(pattern_sequence):

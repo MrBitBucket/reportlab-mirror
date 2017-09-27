@@ -2,6 +2,7 @@
 #see license.txt for license details
 # tests some paragraph styles
 __version__='3.3.0'
+from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import unittest

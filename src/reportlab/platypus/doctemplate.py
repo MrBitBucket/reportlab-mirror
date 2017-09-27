@@ -37,6 +37,7 @@ from reportlab.rl_config import defaultPageSize, verbose
 import reportlab.lib.sequencer
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import isSeq, encode_label, decode_label, annotateException, strTypes
+from reportlab import ascii
 
 try:
     set

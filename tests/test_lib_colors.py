@@ -3,6 +3,7 @@
 """Tests for the reportlab.lib.colors module.
 """
 __version__='3.3.0'
+from reportlab import ascii
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import os, math

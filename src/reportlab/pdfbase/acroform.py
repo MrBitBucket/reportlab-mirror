@@ -5,6 +5,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.colors import Color, CMYKColor, Whiter, Blacker
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.utils import isStr, asNative
+from reportlab import xrange
 import weakref
 
 visibilities = dict(

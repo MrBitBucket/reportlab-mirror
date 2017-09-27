@@ -25,6 +25,7 @@ from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, ope
 from reportlab.rl_config import defaultEncoding, T1SearchPath
 from reportlab.lib.rl_accel import unicode2T1, instanceStringWidthT1
 from reportlab.pdfbase import rl_codecs
+from reportlab import ascii
 _notdefChar = b'n'
 
 rl_codecs.RL_Codecs.register()

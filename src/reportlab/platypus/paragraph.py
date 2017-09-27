@@ -18,6 +18,7 @@ from reportlab.lib.abag import ABag
 from reportlab.rl_config import platypus_link_underline, decimalSymbol, _FUZZ, paraFontSizeHeightOffset
 from reportlab.lib.utils import _className, isBytes, unicodeT, bytesT, strTypes
 from reportlab.lib.rl_accel import sameFrag
+from reportlab import xrange
 import re
 from types import MethodType
 

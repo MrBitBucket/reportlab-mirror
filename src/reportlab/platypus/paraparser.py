@@ -10,6 +10,7 @@ import os
 import copy
 import base64
 from pprint import pprint as pp
+from reportlab import ascii
 import unicodedata
 import reportlab.lib.sequencer
 

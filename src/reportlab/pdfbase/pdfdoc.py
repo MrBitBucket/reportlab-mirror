@@ -17,7 +17,7 @@ classes are made available elsewhere for users to manipulate.
 import types, binascii, codecs, time
 from collections import OrderedDict
 from reportlab.pdfbase import pdfutils
-from reportlab import rl_config
+from reportlab import rl_config, ascii
 from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester, isStr, bytestr, isPy3, annotateException, TimeStamp
 from reportlab.lib.rl_accel import escapePDF, fp_str, asciiBase85Encode, asciiBase85Decode
 from reportlab.pdfbase import pdfmetrics

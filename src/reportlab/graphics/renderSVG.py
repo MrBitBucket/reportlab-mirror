@@ -17,7 +17,7 @@ from reportlab.lib.utils import asNative, getBytesIO
 from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
-from reportlab import rl_config
+from reportlab import rl_config, ascii
 from reportlab.lib.utils import getStringIO, RLString, isPy3, isUnicode, isBytes
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
 

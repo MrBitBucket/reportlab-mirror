@@ -34,6 +34,7 @@ from reportlab.lib.utils import strTypes
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions, listWrapOnFakeWidth
+from reportlab import xrange
 import collections
 
 __all__ = '''TraceInfo Flowable XBox Preformatted Image NullDraw Spacer UseUpSpace PageBreak SlowPageBreak

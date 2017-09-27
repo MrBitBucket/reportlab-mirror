@@ -12,7 +12,7 @@ from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta,
 from reportlab.graphics.shapes import STATE_DEFAULTS
 import math
 from operator import getitem
-from reportlab import rl_config
+from reportlab import rl_config, xrange, ascii
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
 _ESCAPEDICT={}
 for c in xrange(256):

@@ -20,6 +20,7 @@ from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.utils import isSeq, find_locals
 from reportlab.graphics.shapes import _baseGFontName
 from functools import reduce
+from reportlab import xrange
 
 def _transMax(n,A):
     X = n*[0]

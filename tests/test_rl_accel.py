@@ -1,5 +1,6 @@
 __version__='3.3.0'
 __doc__='''basic tests.'''
+from reportlab import xrange, ascii
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 from reportlab.lib.utils import asBytes, isPyPy
 setOutDir(__name__)

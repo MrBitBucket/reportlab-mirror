@@ -30,7 +30,7 @@ class Rect(SolidShape):
 '''
 from reportlab.lib.validators import isAnything, DerivedValue
 from reportlab.lib.utils import isSeq
-from reportlab import rl_config
+from reportlab import rl_config, ascii
 
 class CallableValue:
     '''a class to allow callable initial values'''

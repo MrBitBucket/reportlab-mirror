@@ -19,6 +19,7 @@ except ImportError:
     from ConfigParser import ConfigParser
 import unittest
 from reportlab.lib.utils import isCompactDistro, __rl_loader__, rl_isdir, asUnicode
+from reportlab import ascii
 
 # Helper functions.
 def isWritable(D):

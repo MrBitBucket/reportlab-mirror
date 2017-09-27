@@ -21,6 +21,7 @@ from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.fonts import tt2ps
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
+from reportlab import xrange
 _baseGFontNameB = tt2ps(_baseGFontName,1,0)
 _baseGFontNameI = tt2ps(_baseGFontName,0,1)
 _baseGFontNameBI = tt2ps(_baseGFontName,1,1)

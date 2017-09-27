@@ -18,7 +18,7 @@ See the test output from running this module as a script for a discussion of the
 tables and table styles.
 """
 from reportlab.platypus.flowables import Flowable, Preformatted, Spacer
-from reportlab import rl_config
+from reportlab import rl_config, xrange, ascii
 from reportlab.lib.styles import PropertySet, ParagraphStyle, _baseFontName
 from reportlab.lib import colors
 from reportlab.lib.utils import annotateException, IdentStr, flatten, isStr, asNative, strTypes

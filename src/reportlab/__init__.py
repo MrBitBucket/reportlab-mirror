@@ -1,9 +1,9 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
 __doc__="""The Reportlab PDF generation library."""
-Version = "3.4.14"
+Version = "3.4.15"
 __version__=Version
-__date__='20170526'
+__date__='20170927'
 
 import sys, os
 
@@ -15,11 +15,9 @@ isPy3 = sys.version_info[0]==3
 if isPy3:
     def cmp(a,b):
         return -1 if a<b else (1 if a>b else 0)
+    xrange = range
+    ascii = ascii
 
-    import builtins
-    builtins.cmp = cmp
-    builtins.xrange = range
-    del cmp, builtins
     def _fake_import(fn,name):
         from importlib import machinery
         m = machinery.SourceFileLoader(name,fn)
@@ -29,9 +27,8 @@ if isPy3:
             raise ImportError('file %s not found' % ascii(fn))
 else:
     from future_builtins import ascii
-    import __builtin__
-    __builtin__.ascii = ascii
-    del ascii, __builtin__
+    xrange = xrange
+    cmp = cmp
     def _fake_import(fn,name):
         if os.path.isfile(fn):
             import imp

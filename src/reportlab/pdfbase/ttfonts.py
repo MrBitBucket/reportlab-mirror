@@ -54,7 +54,7 @@ Canvas and TextObject have special support for dynamic fonts.
 from struct import pack, unpack, error as structError
 from reportlab.lib.utils import getBytesIO, isPy3, bytestr, isUnicode, char2int
 from reportlab.pdfbase import pdfmetrics, pdfdoc
-from reportlab import rl_config
+from reportlab import rl_config, xrange, ascii
 from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF
 from collections import namedtuple
 import os, time

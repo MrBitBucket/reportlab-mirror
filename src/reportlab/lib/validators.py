@@ -7,6 +7,7 @@ __doc__="""Standard verifying functions used by attrmap."""
 import sys, codecs
 from reportlab.lib.utils import isSeq, isBytes, isStr, isPy3
 from reportlab.lib import colors
+from reportlab import ascii
 
 class Percentage(float):
     pass

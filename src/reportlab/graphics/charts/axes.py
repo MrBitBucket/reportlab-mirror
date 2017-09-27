@@ -44,6 +44,7 @@ from reportlab.graphics.charts.utils import nextRoundNumber
 from reportlab.graphics.widgets.grids import ShadedRect
 from reportlab.lib.colors import Color
 from reportlab.lib.utils import isSeq
+from reportlab import xrange
 import copy
 try:
     reduce  # Python 2.x

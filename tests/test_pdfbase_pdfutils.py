@@ -3,6 +3,7 @@
 """Tests for utility functions in reportlab.pdfbase.pdfutils.
 """
 __version__='3.3.0'
+from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 setOutDir(__name__)
 import os
