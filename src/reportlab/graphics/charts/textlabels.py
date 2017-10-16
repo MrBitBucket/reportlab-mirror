@@ -5,11 +5,11 @@ __version__='3.3.0'
 import string
 
 from reportlab.lib import colors
-from reportlab.lib.utils import simpleSplit, _simpleSplit
+from reportlab.lib.utils import simpleSplit, _simpleSplit, isBytes
 from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, \
         isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf, isNoneOrString, isNoneOrCallable
 from reportlab.lib.attrmap import *
-from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent
+from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent, getFont, unicode2T1
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
 from reportlab.graphics.shapes import _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, definePath
 from reportlab.graphics.widgetbase import Widget, PropHolder
@@ -61,17 +61,39 @@ def _processGlyph(G, truncate=1, pathReverse=0):
 def _text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
                             anchor='start', truncate=1, pathReverse=0):
     from reportlab.graphics import renderPM, _renderPM
-    _gs = _renderPM.gstate(1,1)
-    renderPM._setFont(_gs,fontName,fontSize)
+    font = getFont(fontName)
+    if font._multiByte:
+        raise ValueError("_text2PathDescription doesn't support multi byte fonts like %r" % fontName)
     P = []
     if not anchor=='start':
-        textLen = stringWidth(text, fontName,fontSize)
+        textLen = stringWidth(text, fontName, fontSize)
         if anchor=='end':
             x = x-textLen
         elif anchor=='middle':
             x = x - textLen/2.
-    for g in _gs._stringPath(text,x,y):
-        P.extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
+    _gs = _renderPM.gstate(1,1)
+    renderPM._setFont(_gs,fontName,fontSize)
+    if font._dynamicFont:
+        for g in _gs._stringPath(text,x,y):
+            P.extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
+    else:
+        if isBytes(text):
+            try:
+                text = text.decode('utf8')
+            except UnicodeDecodeError as e:
+                i,j = e.args[2:4]
+                raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[max(i-10,0):i],text[i:j],text[j:j+10]),)))
+        fc = font
+        FT = unicode2T1(text,[font]+font.substitutionFonts)
+        nm1 = len(FT)-1
+        for i, (f, t) in enumerate(FT):
+            if f!=fc:
+                renderPM._setFont(_gs,f.fontName,fontSize)
+                fc = f
+            for g in _gs._stringPath(t,x,y):
+                P.extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
+            if i!=nm1:
+                x += f.stringWidth(t.decode(f.encName), fontSize)
     return P
 
 def _text2Path(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
