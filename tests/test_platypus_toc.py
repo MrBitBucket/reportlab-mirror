@@ -157,7 +157,7 @@ class TocTestCase(unittest.TestCase):
         description = '<font color=red>%s</font>' % self.test0.__doc__
         story.append(XPreformatted(description, bt))
 
-        toc = tableofcontents.TableOfContents()
+        toc = tableofcontents.TableOfContents(dotsMinLevel=1)
         toc.levelStyles = tocLevelStyles
         story.append(toc)
 

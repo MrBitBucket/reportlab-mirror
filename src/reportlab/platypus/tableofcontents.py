@@ -159,11 +159,11 @@ class TableOfContents(IndexingFlowable):
     """
 
     def __init__(self,**kwds):
-        self.rightColumnWidth = kwds.get('rightColumnWidth',72)
-        self.levelStyles = kwds.get('levelStyles',defaultLevelStyles)
-        self.tableStyle = kwds.get('tableStyle',defaultTableStyle)
-        self.dotsMinLevel = kwds.get('dotsMinLevel',1)
-        self.formatter = kwds.get('formatter',None)
+        self.rightColumnWidth = kwds.pop('rightColumnWidth',72)
+        self.levelStyles = kwds.pop('levelStyles',defaultLevelStyles)
+        self.tableStyle = kwds.pop('tableStyle',defaultTableStyle)
+        self.dotsMinLevel = kwds.pop('dotsMinLevel',1)
+        self.formatter = kwds.pop('formatter',None)
         if kwds: raise ValueError('unexpected keyword arguments %s' % ', '.join(kwds.keys()))
         self._table = None
         self._entries = []
