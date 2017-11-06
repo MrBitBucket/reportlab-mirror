@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/figures.py
+#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/platypus/figures.py
 """This includes some demos of platypus for use in the API proposal"""
 __version__='3.3.0'
 

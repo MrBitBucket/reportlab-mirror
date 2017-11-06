@@ -1,5 +1,5 @@
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/graphics/widgets/flags.py
+#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/graphics/widgets/flags.py
 # Flag Widgets - a collection of flags as widgets
 # author: John Precedo (johnp@reportlab.com)
 

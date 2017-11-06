@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/tableofcontents.py
+#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/platypus/tableofcontents.py
 
 __version__='3.3.0'
 __doc__="""Experimental class to generate Tables of Contents easily

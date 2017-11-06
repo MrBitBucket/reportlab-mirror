@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfbase/_cidfontdata.py
+#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/pdfbase/_cidfontdata.py
 #$Header $
 __version__='3.3.0'
 __doc__="""

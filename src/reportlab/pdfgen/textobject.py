@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfgen/textobject.py
+#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/pdfgen/textobject.py
 __version__='3.3.0'
 __doc__="""
 PDFTextObject is an efficient way to add text to a Canvas. Do not

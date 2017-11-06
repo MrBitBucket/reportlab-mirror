@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/tools/docco/rltemplate.py
+#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/tools/docco/rltemplate.py
 # doc template for RL manuals.  Currently YAML is hard-coded
 #to use this, which is wrong.
 

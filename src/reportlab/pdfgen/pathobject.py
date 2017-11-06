@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/pdfgen/pathobject.py
+#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/pdfgen/pathobject.py
 __version__='3.3.0'
 __doc__="""
 PDFPathObject is an efficient way to draw paths on a Canvas. Do not

@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/platypus/doctemplate.py
+#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/platypus/doctemplate.py
 
 __version__='3.4.2'
 
