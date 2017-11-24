@@ -206,7 +206,7 @@ class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None,
                 hAlign=None,vAlign=None, normalizedData=0, cellStyles=None, rowSplitRange=None,
-                spaceBefore=None,spaceAfter=None, longTableOptimize=None):
+                spaceBefore=None,spaceAfter=None, longTableOptimize=None, minRowHeights=None):
         self.ident = ident
         self.hAlign = hAlign or 'CENTER'
         self.vAlign = vAlign or 'MIDDLE'
@@ -296,6 +296,14 @@ class Table(Flowable):
             self.spaceBefore = spaceBefore
         if spaceAfter is not None:
             self.spaceAfter = spaceAfter
+            
+        if minRowHeights != None:
+            lmrh = len(minRowHeights)
+            if not lmrh:
+                raise ValueError("%s Supplied mismatching minimum row heights of length %d" % (self.identity(),lmrh))
+            elif lmrh<nrows:
+                minRowHeights = minRowHeights+(nrows-lmrh)*minRowHeights.__class__((0,))
+        self._minRowHeights = minRowHeights
 
     def __repr__(self):
         "incomplete, but better than nothing"
@@ -526,6 +534,7 @@ class Table(Flowable):
         longTable = self._longTableOptimize
 
         if None in H:
+            minRowHeights = self._minRowHeights
             canv = getattr(self,'canv',None)
             saved = None
             #get a handy list of any cells which span rows. should be ignored for sizing
@@ -583,7 +592,8 @@ class Table(Flowable):
                                 spanCons[x] = max(spanCons.get(x,t),t)
                                 t = 0
                     if t>h: h = t   #record a new maximum
-                H[i] = h
+                # If a minimum height has been specified use that, otherwise allow the cell to grow
+                H[i] = max(minRowHeights[i],h) if minRowHeights else h
                 # we can stop if we have filled up all available room
                 if longTable:
                     hmax = i+1      #we computed H[i] so known len == i+1

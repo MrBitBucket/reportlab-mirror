@@ -122,6 +122,23 @@ def run():
     ('BACKGROUND',(0,2), (0,3),['VERTICAL', colors.blue, colors.green])
     ])
     t.setStyle(style)
+    lst.append(t)
+
+    #illustrate usage of minRowHeights idea from Jon Hinton inivatajon @ bitbucket.org
+    t=Table([['VERTICAL Red --> grey  minRowHeights[0]=30','Horizontal Gradient Blue left, green right'],
+             ['HORIZONTAL Gradient Span grey left red right', ''],
+             ['VERTICAL Gradiant Span Blue top green bottom',''],
+             ['','CLEAR']],[3.5*inch, 2.7*inch],minRowHeights=(30,), spaceBefore=15)
+    style=TableStyle([
+    ('SPAN', (0,1),(1,1)),
+    ('SPAN', (0,2),(0,3)),
+    ('VALIGN', (0,0),(-1,0),'MIDDLE'),
+    ('BACKGROUND',(0,0), (0,0),['VERTICAL', colors.grey, colors.red]),
+    ('BACKGROUND',(1,0), (1,0),['HORIZONTAL', colors.blue, colors.green]),
+    ('BACKGROUND',(0,1), (1,1),['HORIZONTAL', colors.grey, colors.red]),
+    ('BACKGROUND',(0,2), (0,3),['VERTICAL', colors.blue, colors.green])
+    ])
+    t.setStyle(style)
 
     lst.append(t)
     doc.build(lst)
