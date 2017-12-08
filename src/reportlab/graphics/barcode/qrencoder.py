@@ -96,7 +96,7 @@ class QRNumber(QR):
     lengthbits = (10, 12, 14)
 
 class QRAlphaNum(QR):
-    valid = re.compile(u'[-0-9A-Z $%*+-./:]*$').match
+    valid = re.compile(u'[-0-9A-Z $%*+./:]*$').match
     chars = u'0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:'
     bits = (6,5)
     group = 2

@@ -54,6 +54,22 @@ class BarcodeWidgetTestCase(unittest.TestCase):
             for t in getattr(d.__class__,'_tests',[]):
                 createBarcodeDrawing(name,value=t)
 
+    def test_qr_code_with_comma(self):
+        from reportlab.graphics.barcode.qr import QrCodeWidget
+        from reportlab.graphics.shapes import Drawing
+        i = QrCodeWidget("VALUE WITH A COMMA,")
+        x0, y0, x1, y1 = i.getBounds()
+        D = Drawing(x1-x0, y1-y0)
+        D.add(i)
+        D.save(['gif','pict','pdf'], outDir=self.outDir, fnRoot="QR_with_comma")
+
+    def test_qr_character_set_valid(self):
+        from reportlab.graphics.barcode.qrencoder import QRNumber, QRAlphaNum
+        for klass in (QRNumber,QRAlphaNum):
+            for c in klass.chars:
+                if not klass.valid(c):
+                    raise ValueError('%s.valid(%r) does not match' % (klass.__name__,c))
+
 def makeSuite():
     return makeSuiteForClasses(BarcodeWidgetTestCase)
 
