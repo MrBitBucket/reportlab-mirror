@@ -282,6 +282,7 @@ class Table(Flowable):
         self._linecmds = []
         self._spanCmds = []
         self._nosplitCmds = []
+        self._srflcmds = []
         # NB repeatRows can be a list or tuple eg (1,) reapesat only the second row of a table
         # or an integer eg 2 to repeat both rows 0 & 1
         self.repeatRows = repeatRows
@@ -1078,13 +1079,16 @@ class Table(Flowable):
             self._linecmds.append(tuple(cmd))
         else:
             (op, (sc, sr), (ec, er)), values = cmd[:3] , cmd[3:]
-            if sc < 0: sc = sc + self._ncols
-            if ec < 0: ec = ec + self._ncols
-            if sr < 0: sr = sr + self._nrows
-            if er < 0: er = er + self._nrows
-            for i in xrange(sr, er+1):
-                for j in xrange(sc, ec+1):
-                    _setCellStyle(self._cellStyles, i, j, op, values)
+            if sr in ('splitfirst','splitlast'):
+                self._srflcmds.append(cmd)
+            else:
+                if sc < 0: sc = sc + self._ncols
+                if ec < 0: ec = ec + self._ncols
+                if sr < 0: sr = sr + self._nrows
+                if er < 0: er = er + self._nrows
+                for i in xrange(sr, er+1):
+                    for j in xrange(sc, ec+1):
+                        _setCellStyle(self._cellStyles, i, j, op, values)
 
     def _drawLines(self):
         ccap, cdash, cjoin = None, None, None
@@ -1204,28 +1208,33 @@ class Table(Flowable):
         '''
         pass
 
-    def _cr_0(self,n,cmds,nr0):
+    def _cr_0(self,n,cmds,nr0,_srflMode=False):
         for c in cmds:
-            c = tuple(c)
             (sc,sr), (ec,er) = c[1:3]
-            if isinstance(sr,strTypes): continue
+            if sr in ('splitfirst','splitlast'):
+                if not _srflMode: continue
+                self._addCommand(c)             #re-append the command
+                if sr=='splitfirst': continue
+                sr = er = n-1
             if sr<0: sr += nr0
             if sr>=n: continue
             if er>=n: er = n-1
-            self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
+            self._addCommand((c[0],)+((sc, sr), (ec, er))+tuple(c[3:]))
 
-    def _cr_1_1(self,n,repeatRows, cmds):
+    def _cr_1_1(self,n,repeatRows, cmds,_srflMode=False):
         for c in cmds:
-            c = tuple(c)
             (sc,sr), (ec,er) = c[1:3]
-            if sr in ('splitfirst','splitlast'): self._addCommand(c)
-            else:
-                if sr>=0 and sr>=repeatRows and sr<n and er>=0 and er<n: continue
-                if sr>=repeatRows and sr<n: sr=repeatRows
-                elif sr>=repeatRows and sr>=n: sr=sr+repeatRows-n
-                if er>=repeatRows and er<n: er=repeatRows
-                elif er>=repeatRows and er>=n: er=er+repeatRows-n
-                self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
+            if sr in ('splitfirst','splitlast'):
+                if not _srflMode: continue
+                self._addCommand(c)
+                if sr=='splitlast': continue
+                sr = er = n
+            if sr>=0 and sr>=repeatRows and sr<n and er>=0 and er<n: continue
+            if sr>=repeatRows and sr<n: sr=repeatRows
+            elif sr>=repeatRows and sr>=n: sr=sr+repeatRows-n
+            if er>=repeatRows and er<n: er=repeatRows
+            elif er>=repeatRows and er>=n: er=er+repeatRows-n
+            self._addCommand((c[0],)+((sc, sr), (ec, er))+tuple(c[3:]))
         sr = self._rowSplitRange
         if sr:
             sr, er = sr
@@ -1238,17 +1247,19 @@ class Table(Flowable):
                 elif er>=repeatRows and er>=n: er=er+repeatRows-n
                 self._rowSplitRange = sr,er
 
-    def _cr_1_0(self,n,cmds):
+    def _cr_1_0(self,n,cmds,_srflMode=False):
         for c in cmds:
-            c = tuple(c)
             (sc,sr), (ec,er) = c[1:3]
-            if sr in ('splitfirst','splitlast'): self._addCommand(c)
-            else:
-                if er>=0 and er<n: continue
-                if sr>=0 and sr<n: sr=0
-                if sr>=n: sr -= n
-                if er>=n: er -= n
-                self._addCommand((c[0],)+((sc, sr), (ec, er))+c[3:])
+            if sr in ('splitfirst','splitlast'):
+                if not _srflMode: continue
+                self._addCommand(c)
+                if sr=='splitlast': continue
+                sr = er = n
+            if er>=0 and er<n: continue
+            if sr>=0 and sr<n: sr=0
+            if sr>=n: sr -= n
+            if er>=n: er -= n
+            self._addCommand((c[0],)+((sc, sr), (ec, er))+tuple(c[3:]))
 
     def _splitRows(self,availHeight):
         n=self._getFirstPossibleSplitRowPosition(availHeight)
@@ -1335,9 +1346,14 @@ class Table(Flowable):
                 A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
 
         R0._cr_0(n,A,nrows)
-        R0._cr_0(n,self._bkgrndcmds,nrows)
+        R0._cr_0(n,self._bkgrndcmds,nrows,_srflMode=True)
         R0._cr_0(n,self._spanCmds,nrows)
         R0._cr_0(n,self._nosplitCmds,nrows)
+        for c in self._srflcmds:
+            R0._addCommand(c)
+            if c[1][1]!='splitlast': continue
+            (sc,sr), (ec,er) = c[1:3]
+            R0._addCommand((c[0],)+((sc, n-1), (ec, n-1))+tuple(c[3:]))
 
         if ident: ident = IdentStr(ident)
         if repeatRows:
@@ -1363,7 +1379,7 @@ class Table(Flowable):
                     longTableOptimize=lto,
                     )
             R1._cr_1_1(n,nRepeatRows,A)
-            R1._cr_1_1(n,nRepeatRows,self._bkgrndcmds)
+            R1._cr_1_1(n,nRepeatRows,self._bkgrndcmds,_srflMode=True)
             R1._cr_1_1(n,nRepeatRows,self._spanCmds)
             R1._cr_1_1(n,nRepeatRows,self._nosplitCmds)
         else:
@@ -1376,9 +1392,14 @@ class Table(Flowable):
                     longTableOptimize=lto,
                     )
             R1._cr_1_0(n,A)
-            R1._cr_1_0(n,self._bkgrndcmds)
+            R1._cr_1_0(n,self._bkgrndcmds,_srflMode=True)
             R1._cr_1_0(n,self._spanCmds)
             R1._cr_1_0(n,self._nosplitCmds)
+        for c in self._srflcmds:
+            R1._addCommand(c)
+            if c[1][1]!='splitfirst': continue
+            (sc,sr), (ec,er) = c[1:3]
+            R1._addCommand((c[0],)+((sc, 0), (ec, 0))+tuple(c[3:]))
 
         R0.hAlign = R1.hAlign = self.hAlign
         R0.vAlign = R1.vAlign = self.vAlign
@@ -1458,6 +1479,7 @@ class Table(Flowable):
         colWidths = self._colWidths
         spanRects = getattr(self,'_spanRects',None)
         for cmd, (sc, sr), (ec, er), arg in self._bkgrndcmds:
+            if sr in ('splitfirst','splitlast'): continue
             if sc < 0: sc = sc + ncols
             if ec < 0: ec = ec + ncols
             if sr < 0: sr = sr + nrows

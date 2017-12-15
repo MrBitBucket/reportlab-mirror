@@ -684,10 +684,19 @@ LIST_STYLE = TableStyle(
             #span 'AAA'down entire left column
             ('SPAN',(0,0), (0, 1)),
             ('BACKGROUND',(0,0),(0,0),colors.cyan),
-            ('LINEBELOW', (0,'splitlast'), (-1,'splitlast'), 1, colors.white,'butt'),
+            ('TEXTCOLOR', (0,'splitfirst'), (-1,'splitfirst'), colors.cyan),
+            ('TEXTCOLOR', (0,'splitlast'), (-1,'splitlast'), colors.red),
+            ('BACKGROUND', (0,'splitlast'), (-1,'splitlast'), colors.pink),
+            ('LINEBELOW', (0,'splitlast'), (-1,'splitlast'), 1, colors.grey,'butt'),
            ]
     t=Table(data,style=sty, colWidths = [20] * 5, rowHeights = [20]*5)
     lst.append(t)
+    lst.append(Spacer(18,18))
+
+    t=Table(data,style=sty, colWidths = [20] * 5, rowHeights = [20]*5)
+    for s in t.split(4*inch,72):
+        lst.append(s)
+        lst.append(Spacer(0,6))
 
     # now for an attempt at percentage widths
     lst.append(Spacer(18,18))
