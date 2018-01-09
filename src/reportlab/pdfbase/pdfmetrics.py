@@ -341,16 +341,14 @@ class Font:
     _multiByte = 0      # do not want our own stringwidth
     _dynamicFont = 0    # do not want dynamic subsetting
 
-    def __init__(self, name, faceName, encName):
+    def __init__(self, name, faceName, encName, substitutionFonts=None):
         self.fontName = name
         face = self.face = getTypeFace(faceName)
         self.encoding= getEncoding(encName)
         self.encName = encName
-        if face.builtIn and face.requiredEncoding is None:
-            _ = standardT1SubstitutionFonts
-        else:
-            _ = []
-        self.substitutionFonts = _
+        self.substitutionFonts = (standardT1SubstitutionFonts
+                                    if face.builtIn and face.requiredEncoding is None
+                                    else substitutionFonts or [])
         self._calcWidths()
         self._notdefChar = _notdefChar
         self._notdefFont = name=='ZapfDingbats' and self or _notdefFont
@@ -455,6 +453,7 @@ else:
             raise ValueError('Bad pfb file\'%s\' needed %d+%d bytes have only %d!' % (fn,p,l,len(d)))
         return p, p+l
 
+_postScriptNames2Unicode = None
 class EmbeddedType1Face(TypeFace):
     """A Type 1 font other than one of the basic 14.
 
@@ -524,11 +523,32 @@ class EmbeddedType1Face(TypeFace):
         # for font-specific encodings like Symbol, Dingbats, Carta we
         # need to make a new encoding as well....
         if topLevel.get('EncodingScheme', None) == 'FontSpecific':
+            global _postScriptNames2Unicode
+            if _postScriptNames2Unicode is None:
+                try:
+                    from reportlab.pdfbase._glyphlist import _glyphname2unicode
+                    _postScriptNames2Unicode = _glyphname2unicode
+                    del _glyphname2unicode
+                except:
+                    _postScriptNames2Unicode = {}
+                    raise ValueError(
+                            "cannot import module reportlab.pdfbase._glyphlist module\n"
+                            "you can obtain a version from here\n"
+                            "https://www.reportlab.com/ftp/_glyphlist.py\n"
+                            )
+
             names = [None] * 256
+            ex = {}
+            rex  = {}
             for (code, width, name) in glyphData:
-                if code >=0 and code <=255:
+                if 0<=code<=255:
                     names[code] = name
-            encName = self.name + 'Encoding'
+                    u = _postScriptNames2Unicode.get(name,None)
+                    if u is not None:
+                        rex[code] = u
+                        ex[u] = code
+            encName = 'rl-dynamic-%s-encoding' % self.name.lower()
+            rl_codecs.RL_Codecs.add_dynamic_codec(encName,ex,rex)
             self.requiredEncoding = encName
             enc = Encoding(encName, names)
             registerEncoding(enc)
@@ -804,6 +824,7 @@ def _reset(
         d=globals()[k]
         d.clear()
         d.update(v)
+    rl_codecs.RL_Codecs.reset_dynamic_codecs()
 
 from reportlab.rl_config import register_reset
 register_reset(_reset)

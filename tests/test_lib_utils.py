@@ -140,7 +140,7 @@ class ImporterTestCase(unittest.TestCase):
             self.fail("Imported a nonexistent module")
         except ImportError as e:
             self.assertIn('reportlab.pdfgen.brush',str(e))
-            
+
         try:
             m1 = recursiveImport('totally.non.existent')
             self.fail("Imported a nonexistent module")
@@ -153,7 +153,7 @@ class ImporterTestCase(unittest.TestCase):
             self.fail("Imported a buggy module")
         except Exception as e:
             self.assertIn(("integer division by zeroException raised while importing 'unimportable': integer division by zero"
-                            if isPyPy 
+                            if isPyPy
                             else ('division by zero' if isPy3
                                  else 'integer division or modulo by zero'))
                         ,str(e))
@@ -199,7 +199,14 @@ class ImporterTestCase(unittest.TestCase):
     def test15(self):
         m = rl_get_module(self._testmodulename,self._tempdir)
         self.assertEqual(self._value,m.value)
- 
+
+    def test16(self):
+        from reportlab.lib import fontfinder
+        ff = fontfinder.FontFinder(useCache=False,recur=True)
+        ff.addDirectories(rl_config.T1SearchPath + rl_config.TTFSearchPath)
+        ff.search()
+        ff.getFamilyNames()
+
 def makeSuite():
     return makeSuiteForClasses(ImporterTestCase)
 

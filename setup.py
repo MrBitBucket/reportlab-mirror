@@ -241,39 +241,83 @@ reportlab_files= [
         'fonts/zd______.pfb',
         'fonts/zx______.pfb',
         'fonts/zy______.pfb',
+        'fonts/callig15.pfb',
+        'fonts/callig15.afm',
         ]
 
-def get_fonts(PACKAGE_DIR, reportlab_files):
-    import sys, os, os.path, zipfile, io
+def url2data(url,returnRaw=False):
+    import io
     if isPy3:
         import urllib.request as ureq
     else:
         import urllib2 as ureq
-    rl_dir = PACKAGE_DIR['reportlab']
-    if not [x for x in reportlab_files if not os.path.isfile(pjoin(rl_dir,x))]:
-        infoline("Standard T1 font curves already downloaded")
-        return
-    elif not dlt1:
-        infoline('not downloading T1 font curve files')
-        return
+    remotehandle = ureq.urlopen(url)
     try:
-        infoline("Downloading standard T1 font curves")
-
-        remotehandle = ureq.urlopen("http://www.reportlab.com/ftp/pfbfer-20070710.zip")
-        zipdata = io.BytesIO(remotehandle.read())
+        raw = remotehandle.read()
+        return raw if returnRaw else io.BytesIO(raw)
+    finally:
         remotehandle.close()
-        archive = zipfile.ZipFile(zipdata)
-        dst = pjoin(rl_dir, 'fonts')
 
-        for name in archive.namelist():
-            if not name.endswith('/'):
-                outfile = open(os.path.join(dst, name), 'wb')
-                outfile.write(archive.read(name))
-                outfile.close()
-        xitmsg = "Finished download of standard T1 font curves"
+def get_fonts(PACKAGE_DIR, reportlab_files):
+    import zipfile
+    rl_dir = PACKAGE_DIR['reportlab']
+    if not [x for x in reportlab_files if not isfile(pjoin(rl_dir,x))]:
+        xitmsg = "Standard T1 font curves already downloaded"
+    elif not dlt1:
+        xitmsg = "not downloading T1 font curve files"
+    else:
+        try:
+            infoline("Downloading standard T1 font curves")
+            zipdata = url2data("http://www.reportlab.com/ftp/pfbfer-20180109.zip")
+            archive = zipfile.ZipFile(zipdata)
+            dst = pjoin(rl_dir, 'fonts')
+
+            for name in archive.namelist():
+                if not name.endswith('/'):
+                    with open(pjoin(dst, name), 'wb') as outfile:
+                        outfile.write(archive.read(name))
+            xitmsg = "Finished download of standard T1 font curves"
+        except:
+            xitmsg = "Failed to download standard T1 font curves"
+    infoline(xitmsg)
+
+def get_glyphlist_module(PACKAGE_DIR):
+    try:
+        lfn = pjoin("pdfbase","_glyphlist.py")
+        fn = pjoin(PACKAGE_DIR['reportlab'],lfn)
+        if isfile(fn):
+            xitmsg = "The _glyphlist module already exists"
+        else:
+            text = url2data("https://raw.githubusercontent.com/adobe-type-tools/agl-aglfn/master/glyphlist.txt",True)
+            comments = ['#see https://github.com/adobe-type-tools/agl-aglfn\n'].append
+            G2U = [].append
+            G2Us = [].append
+            for line in str(text).split('\n'):
+                line = line.strip()
+                if not line: continue
+                if line.startswith('#'):
+                    comments(line+'\n')
+                else:
+                    gu = line.split(';')
+                    if len(gu)==2:
+                        v = gu[1].split()
+                        if len(v)==1:
+                            G2U('\t%r: 0x%s,\n' % (gu[0],gu[1]))
+                        else:
+                            G2Us('\t%r: (%s),\n' % (gu[0],','.join('0x%s'%u for u in v)))
+                    else:
+                        infoline('!!!!! bad glyphlist line %r' % line)
+            with open(fn,'w') as f:
+                f.write(''.join(comments.__self__))
+                f.write('_glyphname2unicode = {\n')
+                f.write(''.join(G2U.__self__))
+                f.write('\t}\n')
+                f.write('_glyphname2unicodes = {\n')
+                f.write(''.join(G2Us.__self__))
+                f.write('\t}\n')
+            xitmsg = "Finished creation of _glyphlist.py"
     except:
-        xitmsg = "Failed to download standard T1 font curves"
-    reportlab_files = [x for x in reportlab_files if os.path.isfile(pjoin(rl_dir,x))]
+        xitmsg = "Failed to download glyphlist.txt"
     infoline(xitmsg)
 
 def main():
@@ -496,6 +540,7 @@ def main():
         shutil.copyfile(fn,pjoin(PACKAGE_DIR['reportlab'],dst))
         reportlab_files.append(dst)
     get_fonts(PACKAGE_DIR, reportlab_files)
+    get_glyphlist_module(PACKAGE_DIR)
     try:
         setup(
             name="reportlab",

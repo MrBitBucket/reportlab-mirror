@@ -1,6 +1,7 @@
 #codecs support
 __all__=['RL_Codecs']
 from collections import namedtuple
+import codecs
 StdCodecData=namedtuple('StdCodecData','exceptions rexceptions')
 ExtCodecData=namedtuple('ExtCodecData','baseName exceptions rexceptions')
 class RL_Codecs:
@@ -986,15 +987,13 @@ class RL_Codecs:
     #   __rl_codecs_data[k+'enc'] = __rl_codecs_data[k+'encoding'] = v
     #del k,v
 
+    __rl_dynamic_codecs = []
+
     def __init__(self):
         raise NotImplementedError
 
-    def _256_exception_codec(name,exceptions,rexceptions,baseRange=range(32,256)):
-        import codecs
-        decoding_map = codecs.make_identity_dict(baseRange)
-        decoding_map.update(exceptions)
-        encoding_map = codecs.make_encoding_map(decoding_map)
-        if rexceptions: encoding_map.update(rexceptions)
+    @staticmethod
+    def _makeCodecInfo(name,encoding_map,decoding_map):
         ### Codec APIs
         class Codec(codecs.Codec):
             def encode(self,input,errors='strict',charmap_encode=codecs.charmap_encode,encoding_map=encoding_map):
@@ -1010,11 +1009,19 @@ class RL_Codecs:
             pass
         C = Codec()
         return codecs.CodecInfo(C.encode,C.decode,streamreader=StreamReader,streamwriter=StreamWriter,name=name)
-    _256_exception_codec=staticmethod(_256_exception_codec)
+
+    @staticmethod
+    def _256_exception_codec(name,exceptions,rexceptions,baseRange=range(32,256)):
+        decoding_map = codecs.make_identity_dict(baseRange)
+        decoding_map.update(exceptions)
+        encoding_map = codecs.make_encoding_map(decoding_map)
+        if rexceptions: encoding_map.update(rexceptions)
+        return RL_Codecs._makeCodecInfo(name,encoding_map,decoding_map)
 
     __rl_codecs_cache = {}
 
-    def __rl_codecs(name,cache=__rl_codecs_cache,data=__rl_codecs_data,extension_codecs=__rl_extension_codecs):
+    @staticmethod
+    def __rl_codecs(name,cache=__rl_codecs_cache,data=__rl_codecs_data,extension_codecs=__rl_extension_codecs,_256=True):
         try:
             return cache[name]
         except KeyError:
@@ -1035,20 +1042,39 @@ class RL_Codecs:
                         r = x.exceptions
             else:
                 e,r = data[name]
-            cache[name] = c = RL_Codecs._256_exception_codec(name,e,r)
+            cache[name] = c = RL_Codecs._256_exception_codec(name,e,r) if _256 else RL_Codecs._makeCodecInfo(name, e,r or {})
         return c
-    __rl_codecs=staticmethod(__rl_codecs)
 
+    @staticmethod
     def _rl_codecs(name):
         name = name.lower()
         from reportlab.pdfbase.pdfmetrics import standardEncodings
         for e in standardEncodings+('ExtPdfdocEncoding',):
             e = e[:-8].lower()
             if name.startswith(e): return RL_Codecs.__rl_codecs(e)
+        if name in RL_Codecs.__rl_dynamic_codecs:
+            return RL_Codecs.__rl_codecs(name,_256=False)
         return None
-    _rl_codecs=staticmethod(_rl_codecs)
 
+    @staticmethod
     def register():
-        import codecs
         codecs.register(RL_Codecs._rl_codecs)
-    register=staticmethod(register)
+
+    @staticmethod
+    def add_dynamic_codec(name,exceptions,rexceptions):
+        name = name.lower()
+        RL_Codecs.remove_dynamic_codec(name)
+        RL_Codecs.__rl_codecs_data[name] = (exceptions,rexceptions)
+        RL_Codecs.__rl_dynamic_codecs.append(name)
+
+    @staticmethod
+    def remove_dynamic_codec(name):
+        name = name.lower()
+        if name in RL_Codecs.__rl_dynamic_codecs:
+            RL_Codecs.__rl_codecs_data.pop(name,None)
+            RL_Codecs.__rl_codecs_cache.pop(name,None)
+            RL_Codecs.__rl_dynamic_codecs.remove(name)
+
+    @staticmethod
+    def reset_dynamic_codecs():
+        map(RL_Codecs.remove_dynamic_codec, RL_Codecs.__rl_dynamic_codecs)

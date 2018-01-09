@@ -73,6 +73,25 @@ class EmbeddingTestCase(unittest.TestCase):
             makeWidthTestForAllGlyphs(canv, fontName, outlining=0)
 
         testNamedFont(c, 'DarkGardenMK')
+        c.showPage()
+
+        #this tests FontSpecificEncoding
+        afmFile = 'callig15.afm'
+        pfbFile = 'callig15.pfb'
+        face = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
+        faceName = 'CALLIG15'
+        pdfmetrics.registerTypeFace(face)
+        font = pdfmetrics.Font(faceName, faceName, face.requiredEncoding,
+                            substitutionFonts = pdfmetrics.standardT1SubstitutionFonts)
+        pdfmetrics.registerFont(font)
+
+        c.setFont('CALLIG15', 20)
+        c.drawString(10, y, 'This should be in CALLIG15')
+        c.drawString(10, y-24, b'This should be drawn in')
+        c.drawString(10, y-48, u'This should be drawn in')
+        c.drawString(10, y-72, 'the font Callig15')
+
+        testNamedFont(c, 'CALLIG15')
 
         c.save()
 

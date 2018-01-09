@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-__version__='3.3.0'
+__version__='3.4.22'
 
 #modification of users/robin/ttflist.py.
 __doc__="""This provides some general-purpose tools for finding fonts.
@@ -61,6 +61,7 @@ update itself smartly on repeated instantiation.
 import sys, time, os, tempfile
 from reportlab.lib.utils import pickle
 from xml.sax.saxutils import quoteattr
+from reportlab.lib.utils import asBytes
 try:
     from hashlib import md5
 except ImportError:
@@ -114,11 +115,16 @@ class FontDescriptor:
 
 from reportlab.lib.utils import rl_isdir, rl_isfile, rl_listdir, rl_getmtime
 class FontFinder:
-    def __init__(self, dirs=[], useCache=True, validate=False):
+    def __init__(self, dirs=[], useCache=True, validate=False, recur=False, fsEncoding=None):
         self.useCache = useCache
         self.validate = validate
+        if fsEncoding is None:
+            fsEncoding = sys.getfilesystemencoding()
+        self._fsEncoding = fsEncoding or 'utf8'
 
-        self._dirs = set(dirs)
+        self._dirs = set()
+        self._recur = recur
+        self.addDirectories(dirs)
         self._fonts = []
 
         self._skippedFiles = [] #list of filenames we did not handle
@@ -128,28 +134,33 @@ class FontFinder:
         self._fontsByFamily = {}
         self._fontsByFamilyBoldItalic = {}   #indexed by bold, italic
 
-    def addDirectory(self, dirName):
+    def addDirectory(self, dirName, recur=None):
         #aesthetics - if there are 2 copies of a font, should the first or last
         #be picked up?  might need reversing
         if rl_isdir(dirName):
             self._dirs.add(dirName)
+            if recur if recur is not None else self._recur:
+                for r,D,F in os.walk(dirName):
+                    for d in D:
+                        self._dirs.add(os.path.join(r,d))
 
-    def addDirectories(self, dirNames):
+    def addDirectories(self, dirNames,recur=None):
         for dirName in dirNames:
-            self.addDirectory(dirName)
+            self.addDirectory(dirName,recur=recur)
 
     def getFamilyNames(self):
         "Returns a list of the distinct font families found"
-
         if not self._fontsByFamily:
             fonts = self._fonts
             for font in fonts:
                 fam = font.familyName
+                if fam is None: continue
                 if fam in self._fontsByFamily:
                     self._fontsByFamily[fam].append(font)
                 else:
                     self._fontsByFamily[fam] = [font]
-        names = list(self._fontsByFamily.keys())
+        fsEncoding = self._fsEncoding
+        names = list(asBytes(_,enc=fsEncoding) for _ in self._fontsByFamily.keys())
         names.sort()
         return names
 
@@ -200,18 +211,19 @@ class FontFinder:
     def _getCacheFileName(self):
         """Base this on the directories...same set of directories
         should give same cache"""
-        hash = md5(''.join(self._dirs)).hexdigest()
+        fsEncoding = self._fsEncoding
+        hash = md5(b''.join(asBytes(_,enc=fsEncoding) for _ in sorted(self._dirs))).hexdigest()
         from reportlab.lib.utils import get_rl_tempfile
         fn = get_rl_tempfile('fonts_%s.dat' % hash)
         return fn
 
     def save(self, fileName):
-        f = open(fileName, 'w')
+        f = open(fileName, 'wb')
         pickle.dump(self, f)
         f.close()
 
     def load(self, fileName):
-        f = open(fileName, 'r')
+        f = open(fileName, 'rb')
         finder2 = pickle.load(f)
         f.close()
         self.__dict__.update(finder2.__dict__)
@@ -233,14 +245,21 @@ class FontFinder:
 
         from stat import ST_MTIME
         for dirName in self._dirs:
-            fileNames = rl_listdir(dirName)
+            try:
+                fileNames = rl_listdir(dirName)
+            except:
+                continue
             for fileName in fileNames:
                 root, ext = os.path.splitext(fileName)
                 if ext.lower() in EXTENSIONS:
                     #it's a font
                     f = FontDescriptor()
                     f.fileName = os.path.normpath(os.path.join(dirName, fileName))
-                    f.timeModified = rl_getmtime(f.fileName)
+                    try:
+                        f.timeModified = rl_getmtime(f.fileName)
+                    except:
+                        self._skippedFiles.append(fileName)
+                        continue
 
                     ext = ext.lower()
                     if ext[0] == '.':
