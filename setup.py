@@ -292,7 +292,9 @@ def get_glyphlist_module(PACKAGE_DIR):
             comments = ['#see https://github.com/adobe-type-tools/agl-aglfn\n'].append
             G2U = [].append
             G2Us = [].append
-            for line in str(text).split('\n'):
+            if isPy3 and not isinstance(text,str):
+                text = text.decode('latin1')
+            for line in text.split('\n'):
                 line = line.strip()
                 if not line: continue
                 if line.startswith('#'):
