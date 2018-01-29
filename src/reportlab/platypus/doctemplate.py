@@ -486,6 +486,7 @@ class BaseDocTemplate:
                     'artBox': None,
                     'trimBox': None,
                     'bleedBox': None,
+                    'keepTogetherClass': KeepTogether,
                     }
     _invalidInitArgs = ()
     _firstPageTemplateIndex = 0
@@ -677,19 +678,20 @@ class BaseDocTemplate:
         self._rightExtraIndent = self.frame._rightExtraIndent
         self._frameBGs = self.frame._frameBGs
 
-        f = self.frame
         if hasattr(self,'_nextFrameIndex'):
             self.frame = self.pageTemplate.frames[self._nextFrameIndex]
             self.frame._debug = self._debug
             del self._nextFrameIndex
             self.handle_frameBegin(resume)
-        elif hasattr(f,'lastFrame') or f is self.pageTemplate.frames[-1]:
-            self.handle_pageEnd()
-            self.frame = None
         else:
-            self.frame = self.pageTemplate.frames[self.pageTemplate.frames.index(f) + 1]
-            self.frame._debug = self._debug
-            self.handle_frameBegin()
+            f = self.frame
+            if hasattr(f,'lastFrame') or f is self.pageTemplate.frames[-1]:
+                self.handle_pageEnd()
+                self.frame = None
+            else:
+                self.frame = self.pageTemplate.frames[self.pageTemplate.frames.index(f) + 1]
+                self.frame._debug = self._debug
+                self.handle_frameBegin()
 
     def handle_nextPageTemplate(self,pt):
         '''On endPage change to the page template with name or index pt'''
@@ -727,6 +729,56 @@ class BaseDocTemplate:
             self._nextPageTemplateCycle = c
         else:
             raise TypeError("argument pt should be string or integer or list")
+
+    def _peekNextPageTemplate(self,pt):
+        if isinstance(pt,strTypes):
+            for t in self.pageTemplates:
+                if t.id == pt:
+                    return t
+            raise ValueError("can't find template('%s')"%pt)
+        elif isinstance(pt,int):
+            self.pageTemplates[pt]
+        elif isSeq(pt):
+            #used for alternating left/right pages
+            #collect the refs to the template objects, complain if any are bad
+            c = PTCycle()
+            for ptn in pt:
+                found = 0
+                if ptn=='*':    #special case name used to short circuit the iteration
+                    c._restart = len(c)
+                    continue
+                for t in self.pageTemplates:
+                    if t.id == ptn:
+                        c.append(t)
+                        found = 1
+                if not found:
+                    raise ValueError("Cannot find page template called %s" % ptn)
+            if not c:
+                raise ValueError("No valid page templates in cycle")
+            elif c._restart>len(c):
+                raise ValueError("Invalid cycle restart position")
+            return c.peek
+        else:
+            raise TypeError("argument pt should be string or integer or list")
+
+    def _peekNextFrame(self):
+        '''intended to be used by extreme flowables'''
+        if hasattr(self,'_nextFrameIndex'):
+            return self.pageTemplate.frames[self._nextFrameIndex]
+        f = self.frame
+        if hasattr(f,'lastFrame') or f is self.pageTemplate.frames[-1]:
+            if hasattr(self,'_nextPageTemplateCycle'):
+                #they are cycling through pages'; we keep the index
+                pageTemplate = self._nextPageTemplateCycle.peek
+            elif hasattr(self,'_nextPageTemplateIndex'):
+                pageTemplate = self.pageTemplates[self._nextPageTemplateIndex]
+            elif self.pageTemplate.autoNextPageTemplate:
+                pageTemplate = self._peekNextPageTemplate(self.pageTemplate.autoNextPageTemplate)
+            else:
+                pageTemplate = self.pageTemplate
+            return pageTemplate.frames[0]
+        else:
+            return self.pageTemplate.frames[self.pageTemplate.frames.index(f) + 1]
 
     def handle_nextFrame(self,fx,resume=0):
         '''On endFrame change to the frame with name or index fx'''
@@ -781,7 +833,7 @@ class BaseDocTemplate:
         while i<n and flowables[i].getKeepWithNext() and _ktAllow(flowables[i]): i += 1
         if i:
             if i<n and _ktAllow(flowables[i]): i += 1
-            K = KeepTogether(flowables[:i])
+            K = self.keepTogetherClass(flowables[:i])
             mbe = getattr(self,'_multiBuildEdits',None)
             if mbe:
                 for f in K._content[:-1]:

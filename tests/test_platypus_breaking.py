@@ -8,7 +8,7 @@ setOutDir(__name__)
 import sys, os, time, re
 from operator import truth
 import unittest
-from reportlab.platypus.flowables import Flowable
+from reportlab.platypus.flowables import Flowable, KeepTogether, KeepTogetherSplitAtTop
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -62,98 +62,106 @@ virtual gibberish (e.g. (98d)).
 def _test0(self):
     "This makes one long multi-page paragraph."
 
+    def RT(k,theme='PYTHON',sentences=1,cache={}):
+        if k not in cache:
+            cache[k] = randomText(theme=theme,sentences=sentences)
+        return cache[k]
+
     # Build story.
-    story = []
-    a = story.append
+    def makeStory():
+        story = []
+        a = story.append
 
-    styleSheet = getSampleStyleSheet()
-    h1 = styleSheet['Heading1']
-    h1.pageBreakBefore = 1
-    h1.keepWithNext = 1
+        styleSheet = getSampleStyleSheet()
+        h1 = styleSheet['Heading1']
+        h1.pageBreakBefore = 1
+        h1.keepWithNext = 1
 
-    h2 = styleSheet['Heading2']
-    h2.frameBreakBefore = 1
-    h2.keepWithNext = 1
+        h2 = styleSheet['Heading2']
+        h2.frameBreakBefore = 1
+        h2.keepWithNext = 1
 
-    h3 = styleSheet['Heading3']
-    h3.backColor = colors.cyan
-    h3.keepWithNext = 1
+        h3 = styleSheet['Heading3']
+        h3.backColor = colors.cyan
+        h3.keepWithNext = 1
 
-    bt = styleSheet['BodyText']
-    btj = ParagraphStyle('bodyText1j',parent=bt,alignment=TA_JUSTIFY)
-    btr = ParagraphStyle('bodyText1r',parent=bt,alignment=TA_RIGHT)
-    btc = ParagraphStyle('bodyText1c',parent=bt,alignment=TA_CENTER)
-    from reportlab.lib.utils import TimeStamp
-    ts = TimeStamp()
-    a(Paragraph("""
-        <a name='top'/>Subsequent pages test pageBreakBefore, frameBreakBefore and
-        keepTogether attributes.  Generated at %s.  The number in brackets
-        at the end of each paragraph is its position in the story. (%d)""" % (
-            ts.asctime, len(story)), bt))
+        bt = styleSheet['BodyText']
+        btj = ParagraphStyle('bodyText1j',parent=bt,alignment=TA_JUSTIFY)
+        btr = ParagraphStyle('bodyText1r',parent=bt,alignment=TA_RIGHT)
+        btc = ParagraphStyle('bodyText1c',parent=bt,alignment=TA_CENTER)
+        from reportlab.lib.utils import TimeStamp
+        ts = TimeStamp()
+        a(Paragraph("""
+            <a name='top'/>Subsequent pages test pageBreakBefore, frameBreakBefore and
+            keepTogether attributes.  Generated at %s.  The number in brackets
+            at the end of each paragraph is its position in the story. (%d)""" % (
+                ts.asctime, len(story)), bt))
 
-    for i in range(10):
-        a(Paragraph('Heading 1 always starts a new page (%d)' % len(story), h1))
-        for j in range(3):
-            a(Paragraph('Heading1 paragraphs should always'
-                            'have a page break before.  Heading 2 on the other hand'
-                            'should always have a FRAME break before (%d)' % len(story), bt))
-            a(Paragraph('Heading 2 always starts a new frame (%d)' % len(story), h2))
-            a(Paragraph('Heading1 paragraphs should always'
-                            'have a page break before.  Heading 2 on the other hand'
-                            'should always have a FRAME break before (%d)' % len(story), bt))
+        for i in range(10):
+            a(Paragraph('Heading 1 always starts a new page (%d)' % len(story), h1))
             for j in range(3):
-                a(Paragraph(randomText(theme=PYTHON, sentences=2)+' (%d)' % len(story), bt))
-                a(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h3))
-                a(Paragraph(randomText(theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))
+                a(Paragraph('Heading1 paragraphs should always'
+                                'have a page break before.  Heading 2 on the other hand'
+                                'should always have a FRAME break before (%d)' % len(story), bt))
+                a(Paragraph('Heading 2 always starts a new frame (%d)' % len(story), h2))
+                a(Paragraph('Heading1 paragraphs should always'
+                                'have a page break before.  Heading 2 on the other hand'
+                                'should always have a FRAME break before (%d)' % len(story), bt))
+                for j in range(3):
+                    a(Paragraph(RT((i,j,0),theme=PYTHON, sentences=2)+' (%d)' % len(story), bt))
+                    a(Paragraph('I should never be at the bottom of a frame (%d)' % len(story), h3))
+                    a(Paragraph(RT((i,j,1),theme=PYTHON, sentences=1)+' (%d)' % len(story), bt))
 
-    for align,bts in [('left',bt),('JUSTIFIED',btj),('RIGHT',btr),('CENTER',btc)]:
-        a(Paragraph('Now we do &lt;br/&gt; tests(align=%s)' % align, h1))
-        a(Paragraph('First off no br tags',h3))
-        a(Paragraph(_text1,bts))
-        a(Paragraph("&lt;br/&gt; after 'the' in line 4",h3))
-        a(Paragraph(_text1.replace('forms of the','forms of the<br/>',1),bts))
-        a(Paragraph("2*&lt;br/&gt; after 'the' in line 4",h3))
-        a(Paragraph(_text1.replace('forms of the','forms of the<br/><br/>',1),bts))
-        a(Paragraph("&lt;br/&gt; after 'I suggested ' in line 5",h3))
-        a(Paragraph(_text1.replace('I suggested ','I suggested<br/>',1),bts))
-        a(Paragraph("2*&lt;br/&gt; after 'I suggested ' in line 5",h3))
-        a(Paragraph(_text1.replace('I suggested ','I suggested<br/><br/>',1),bts))
-        a(Paragraph("&lt;br/&gt; at the end of the paragraph!",h3))
-        a(Paragraph("""text one<br/>text two<br/>""",bts))
-        a(Paragraph("Border with &lt;br/&gt; at the end of the paragraph!",h3))
-        bt1 = ParagraphStyle('bodyText1',bts)
-        bt1.borderWidth = 0.5
-        bt1.borderColor = colors.toColor('red')
-        bt1.backColor = colors.pink
-        bt1.borderRadius = 2
-        bt1.borderPadding = 3
-        a(Paragraph("""text one<br/>text two<br/>""",bt1))
-        a(Paragraph("Border no &lt;br/&gt; at the end of the paragraph!",h3))
-        bt1 = ParagraphStyle('bodyText1',bts)
-        bt1.borderWidth = 0.5
-        bt1.borderColor = colors.toColor('red')
-        bt1.backColor = colors.pink
-        bt1.borderRadius = 2
-        bt1.borderPadding = 3
-        a(Paragraph("""text one<br/>text two""",bt1))
-        a(Paragraph("Different border style!",h3))
-        bt2 = ParagraphStyle('bodyText1',bt1)
-        bt2.borderWidth = 1.5
-        bt2.borderColor = colors.toColor('blue')
-        bt2.backColor = colors.gray
-        bt2.borderRadius = 3
-        bt2.borderPadding = 3
-        a(Paragraph("""text one<br/>text two<br/>""",bt2))
-    for i in 0, 1, 2:
-        P = Paragraph("""This is a paragraph with <font color='blue'><a href='#top'>with an incredibly
+        for align,bts in [('left',bt),('JUSTIFIED',btj),('RIGHT',btr),('CENTER',btc)]:
+            a(Paragraph('Now we do &lt;br/&gt; tests(align=%s)' % align, h1))
+            a(Paragraph('First off no br tags',h3))
+            a(Paragraph(_text1,bts))
+            a(Paragraph("&lt;br/&gt; after 'the' in line 4",h3))
+            a(Paragraph(_text1.replace('forms of the','forms of the<br/>',1),bts))
+            a(Paragraph("2*&lt;br/&gt; after 'the' in line 4",h3))
+            a(Paragraph(_text1.replace('forms of the','forms of the<br/><br/>',1),bts))
+            a(Paragraph("&lt;br/&gt; after 'I suggested ' in line 5",h3))
+            a(Paragraph(_text1.replace('I suggested ','I suggested<br/>',1),bts))
+            a(Paragraph("2*&lt;br/&gt; after 'I suggested ' in line 5",h3))
+            a(Paragraph(_text1.replace('I suggested ','I suggested<br/><br/>',1),bts))
+            a(Paragraph("&lt;br/&gt; at the end of the paragraph!",h3))
+            a(Paragraph("""text one<br/>text two<br/>""",bts))
+            a(Paragraph("Border with &lt;br/&gt; at the end of the paragraph!",h3))
+            bt1 = ParagraphStyle('bodyText1',bts)
+            bt1.borderWidth = 0.5
+            bt1.borderColor = colors.toColor('red')
+            bt1.backColor = colors.pink
+            bt1.borderRadius = 2
+            bt1.borderPadding = 3
+            a(Paragraph("""text one<br/>text two<br/>""",bt1))
+            a(Paragraph("Border no &lt;br/&gt; at the end of the paragraph!",h3))
+            bt1 = ParagraphStyle('bodyText1',bts)
+            bt1.borderWidth = 0.5
+            bt1.borderColor = colors.toColor('red')
+            bt1.backColor = colors.pink
+            bt1.borderRadius = 2
+            bt1.borderPadding = 3
+            a(Paragraph("""text one<br/>text two""",bt1))
+            a(Paragraph("Different border style!",h3))
+            bt2 = ParagraphStyle('bodyText1',bt1)
+            bt2.borderWidth = 1.5
+            bt2.borderColor = colors.toColor('blue')
+            bt2.backColor = colors.gray
+            bt2.borderRadius = 3
+            bt2.borderPadding = 3
+            a(Paragraph("""text one<br/>text two<br/>""",bt2))
+        for i in 0, 1, 2:
+            P = Paragraph("""This is a paragraph with <font color='blue'><a href='#top'>with an incredibly
 long and boring link in side of it that
 contains lots and lots of stupidly boring and worthless information.
 So that we can split the link and see if we get problems like Dinu's.
 I hope we don't, but you never do Know.</a></font>""",bt)
-        a(P)
+            a(P)
+        return story
 
-    doc = MyDocTemplate(outputfile('test_platypus_breaking.pdf'))
-    doc.multiBuild(story)
+    for sfx,klass in (('',KeepTogether),('_ktsat',KeepTogetherSplitAtTop)):
+        doc = MyDocTemplate(outputfile('test_platypus_breaking%s.pdf'%sfx),keepTogetherClass=klass)
+        doc.multiBuild(makeStory())
 
 class BreakingTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."

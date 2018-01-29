@@ -669,10 +669,20 @@ class _ContainerSpace:  #Abstract some common container like behaviour
         return 0
 
 class KeepTogether(_ContainerSpace,Flowable):
+    splitAtTop = False
+
     def __init__(self,flowables,maxHeight=None):
-        if not flowables:
+        if not hasattr(KeepTogether,'NullActionFlowable'):
+            #cache these on the class
             from reportlab.platypus.doctemplate import NullActionFlowable
-            flowables = [NullActionFlowable()]
+            from reportlab.platypus.doctemplate import FrameBreak
+            from reportlab.lib.utils import annotateException
+            KeepTogether.NullActionFlowable = NullActionFlowable
+            KeepTogether.FrameBreak = FrameBreak
+            KeepTogether.annotateException = annotateException
+
+        if not flowables:
+            flowables = [self.NullActionFlowable()]
         self._content = _flowableSublist(flowables)
         self._maxHeight = maxHeight
 
@@ -688,8 +698,7 @@ class KeepTogether(_ContainerSpace,Flowable):
         try:
             W,H = _listWrapOn(self._content,aW,self.canv,dims=dims)
         except:
-            from reportlab.lib.utils import annotateException
-            annotateException('\nraised by class %s(%s)@0x%8.8x wrap\n' % (self.__class__.__name__,self.__class__.__module__,id(self)))
+            self.annotateException('\nraised by class %s(%s)@0x%8.8x wrap\n' % (self.__class__.__name__,self.__class__.__module__,id(self)))
         self._H = H
         self._H0 = dims and dims[0][1] or 0
         self._wrapInfo = aW,aH
@@ -698,18 +707,23 @@ class KeepTogether(_ContainerSpace,Flowable):
     def split(self, aW, aH):
         if getattr(self,'_wrapInfo',None)!=(aW,aH): self.wrap(aW,aH)
         S = self._content[:]
-        atTop = getattr(self,'_frame',None)
-        if atTop: atTop = getattr(atTop,'_atTop',None)
+        cf = getattr(self,'_frame',None)
+        if cf: atTop = getattr(cf,'_atTop',None)
         C0 = self._H>aH and (not self._maxHeight or aH>self._maxHeight)
         C1 = (self._H0>aH) or C0 and atTop
         if C0 or C1:
-            if C0:
-                from reportlab.platypus.doctemplate import FrameBreak
-                A = FrameBreak
+            fb = False
+            if C0 and not (self.splitAtTop and atTop):
+                fb = True
             else:
-                from reportlab.platypus.doctemplate import NullActionFlowable
-                A = NullActionFlowable
-            S.insert(0,A())
+                panf = self._doctemplateAttr('_peekNextFrame')
+                if cf and panf:
+                    nf = panf()
+                    nAW = nf._width
+                    nAH = nf._height
+                    if nAW>=cf._width and nAH>=self._H:
+                        fb = True
+            S.insert(0,(self.FrameBreak if fb else self.NullActionFlowable)())
         return S
 
     def identity(self, maxLen=None):
@@ -718,6 +732,13 @@ class KeepTogether(_ContainerSpace,Flowable):
             return msg[0:maxLen]
         else:
             return msg
+
+class KeepTogetherSplitAtTop(KeepTogether):
+    '''
+    Same as KeepTogether, but it will split content immediately if it cannot
+    fit at the top of a frame.
+    '''
+    splitAtTop = True
 
 class Macro(Flowable):
     """This is not actually drawn (i.e. it has zero height)
