@@ -56,7 +56,9 @@ class Doughnut(AbstractPieChart):
         simpleLabels = AttrMapValue(isBoolean, desc="If true(default) use String not super duper WedgeLabel"),
         # advanced usage
         checkLabelOverlap = AttrMapValue(isBoolean, desc="If true check and attempt to fix\n standard label overlaps(default off)",advancedUsage=1),
-        sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make chart with labels along side and pointers", advancedUsage=1)
+        sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make chart with labels along side and pointers", advancedUsage=1),
+        innerRadiusFraction = AttrMapValue(isNumberOrNone,
+                desc='None or the fraction of the radius to be used as the inner hole.\nIf not a suitable default will be used.'),
         )
 
     def __init__(self):
@@ -71,6 +73,7 @@ class Doughnut(AbstractPieChart):
         self.simpleLabels = 1
         self.checkLabelOverlap = 0
         self.sideLabels = 0
+        self.innerRadiusFraction = None
 
         self.slices = TypedPropertyCollection(SectorProperties)
         self.slices[0].fillColor = colors.darkcyan
@@ -173,11 +176,16 @@ class Doughnut(AbstractPieChart):
         
         startAngle = self.startAngle #% 360
         styleCount = len(self.slices)
+        irf = self.innerRadiusFraction
         if isinstance(self.data[0],(list,tuple)):
             #multi-series doughnut
             ndata = len(self.data)
-            yir = (yradius/2.5)/ndata
-            xir = (xradius/2.5)/ndata
+            if irf is None:
+                yir = (yradius/2.5)/ndata
+                xir = (xradius/2.5)/ndata
+            else:
+                yir = yradius*irf
+                xir = xradius*irf
             ydr = (yradius-yir)/ndata
             xdr = (xradius-xir)/ndata
             for sn,series in enumerate(normData):
@@ -244,8 +252,12 @@ class Doughnut(AbstractPieChart):
 
         else:
             #single series doughnut
-            yir = yradius/2.5
-            xir = xradius/2.5
+            if irf is None:
+                yir = yradius/2.5
+                xir = xradius/2.5
+            else:
+                yir = yradius*irf
+                xir = xradius*irf
             for i,angle in enumerate(normData):
                 endAngle = (startAngle + (angle * whichWay)) #% 360
                 if abs(startAngle-endAngle)<1e-5:
