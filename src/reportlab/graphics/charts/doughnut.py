@@ -232,7 +232,7 @@ class Doughnut(AbstractPieChart):
 
                     g.add(theSector)
 
-                    if sn == 0:
+                    if sn == 0 and sectorStyle.visible and sectorStyle.label_visible:
                         text = self.getSeriesName(i,'')
                         if text:
                             averageAngle = (a1+a2)/2.0
@@ -298,7 +298,7 @@ class Doughnut(AbstractPieChart):
                 g.add(theSector)
 
                 # now draw a label
-                if labels[i] != "":
+                if labels[i] and sectorStyle.visible and sectorStyle.label_visible:
                     averageAngle = (a1+a2)/2.0
                     aveAngleRadians = averageAngle*pi/180.0
                     labelRadius = sectorStyle.labelRadius
