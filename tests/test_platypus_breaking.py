@@ -10,17 +10,18 @@ from operator import truth
 import unittest
 from reportlab.platypus.flowables import Flowable, KeepTogether, KeepTogetherSplitAtTop
 from reportlab.lib import colors
-from reportlab.lib.units import cm
+from reportlab.lib.units import cm, mm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.lib.randomtext import randomText, PYTHON
-from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, Indenter, SimpleDocTemplate
+from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, Indenter, SimpleDocTemplate, LayoutError
 from reportlab.platypus.paragraph import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.rl_config import paraFontSizeHeightOffset
 from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.lib.pagesizes import A4, portrait
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
@@ -393,6 +394,39 @@ class BreakingTestCase(unittest.TestCase):
         canv.save()
         if errors:
             raise ValueError('\n'.join(errors))
+    
+    def test5(self):
+        '''extreme test inspired by Moritz Pfeiffer https://bitbucket.org/moritzpfeiffer/'''
+        with self.assertRaises(LayoutError):
+            text="""
+            Clearly, the natural general principle that will subsume this case is
+            not subject to a parasitic gap construction.  Presumably, most of the
+            methodological work in modern linguistics can be defined in such a way
+            as to impose the system of base rules exclusive of the lexicon.  In the
+            discussion of resumptive pronouns following (81), the fundamental error
+            of regarding functional notions as categorial is to be regarded as a
+            descriptive <span color="red">fact</span>.<br/>So far, the earlier discussion of deviance is not
+            quite equivalent to a parasitic gap construction.  To characterize a
+            linguistic level L, a case of semigrammaticalness of a different sort
+            may remedy and, at the same time, eliminate irrelevant intervening
+            contexts in selectional <span color="red">rules</span>.<br/>
+            Summarizing, then, we assume that the descriptive power of the base
+            component can be defined in such a way as to impose nondistinctness in
+            the sense of distinctive feature theory.
+            """
+            styleSheet = getSampleStyleSheet()
+            story = []
+            story.append(Paragraph(text, styleSheet['Normal']))
+            doc = BaseDocTemplate(
+                outputfile('test_platypus_much_too_large.pdf'),
+                pagesize=portrait(A4),
+                pageTemplates=[PageTemplate(
+                    'page_template',
+                    [Frame(0, 0, 0, 0, leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0, id='DUMMY_FRAME')],
+                    )],
+                )
+            doc.build(story)
+
 
 def makeSuite():
     return makeSuiteForClasses(BreakingTestCase)

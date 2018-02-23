@@ -1186,6 +1186,9 @@ class Paragraph(Flowable):
         self.debug = 0  #turn this on to see a pretty one with all the margins etc.
 
     def wrap(self, availWidth, availHeight):
+        if availWidth<_FUZZ:
+            #we cannot fit here
+            return 0, 0x7fffffff
         # work out widths array for breaking
         self.width = availWidth
         style = self.style
@@ -1249,7 +1252,7 @@ class Paragraph(Flowable):
                         else self._split_blParaProcessed))
 
     def split(self,availWidth, availHeight):
-        if len(self.frags)<=0: return []
+        if len(self.frags)<=0 or availWidth<_FUZZ or availHeight<_FUZZ: return []
 
         #the split information is all inside self.blPara
         if not hasattr(self,'blPara'):

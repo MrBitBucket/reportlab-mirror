@@ -221,10 +221,13 @@ class Frame:
             s = flowable.getSpaceBefore()
             if self._oASpace:
                 s = max(s-self._prevASpace,0)
+        h = y-p-s
+        if h<=0 and not getattr(flowable,'_ZEROSIZE',False):
+            return []
         flowable._frame = self                  #some flowables might need these
-        flowable.canv = canv        
+        flowable.canv = canv
         try:
-            r = flowable.split(self._aW, y-p-s)
+            r = flowable.split(self._aW, h)
         finally:
             #sometimes canv/_frame aren't still on the flowable
             for a in ('canv', '_frame'):
