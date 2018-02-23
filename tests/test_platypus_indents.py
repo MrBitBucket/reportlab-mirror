@@ -20,8 +20,6 @@ from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.doctemplate \
      import PageTemplate, BaseDocTemplate, Indenter, FrameBreak, NextPageTemplate
-from reportlab.platypus import tableofcontents
-from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.paragraph import *
 from reportlab.platypus.paragraph import _getFragWords
