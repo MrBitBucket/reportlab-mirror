@@ -170,6 +170,11 @@ class SVGCanvas:
         self._strokeColor = self._fillColor = self._lineWidth = \
             self._font = self._fontSize = self._lineCap = \
             self._lineJoin = None
+        if kwds.pop('use_fp_str',False):
+            self.fp_str = fp_str
+        else:
+            self.fp_str = lambda *args: (' '.join(len(args)*['%f'])) % args
+        self.cfp_str = lambda *args: self.fp_str(*args).replace(' ',',')
 
         implementation = getDOMImplementation('minidom')
         #Based on official example here http://www.w3.org/TR/SVG10/linking.html want:
@@ -455,7 +460,7 @@ class SVGCanvas:
             s = self._escape(s)
             st = self._formatStyle(TEXT_STYLES)
             if angle != 0:
-               st = st + " rotate(%f %f %f);" % (angle, x, y)
+               st = st + " rotate(%s);" % self.fp_str(angle, x, y)
             st = st + " fill: %s;" % self.style['fill']
             text = transformNode(self.doc, "text",
                 x=x, y=y, style=st,
@@ -514,7 +519,7 @@ class SVGCanvas:
                     style=self._formatStyle(LINE_STYLES))
                 self.currGroup.appendChild(line)
             path = transformNode(self.doc, "path",
-                d="M %f,%f L %f,%f Z" % (x1,y1,x2,y2),
+                d="M %s L %s Z" % (self.cfp_str(x1,y1),self.cfp_str(x2,y2)),
                 style=self._formatStyle(LINE_STYLES))
             self.currGroup.appendChild(path)
 
@@ -570,32 +575,30 @@ class SVGCanvas:
         ax = rx * cos((startAng+extent)*pi/180) + cx
         ay = ry * sin((startAng+extent)*pi/180) + cy
 
-        str = ''
+        cfp_str = self.cfp_str
+        s = [].append
         if fromcenter:
-            str = str + "M %f, %f L %f, %f " % (cx, cy, ax, ay)
+            s("M %s L %s" % (cfp_str(cx, cy), cfp_str(ax, ay)))
 
         if fromcenter:
-            str = str + "A %f, %f %d %d %d %f, %f " % \
-              (rx, ry, 0, extent>=180, 0, mx, my)
+            s("A %s %d %d %d %s" % \
+              (cfp_str(rx, ry), 0, extent>=180, 0, cfp_str(mx, my)))
         else:
-            str = str + "M %f, %f A %f, %f %d %d %d %f, %f Z " % \
-              (mx, my, rx, ry, 0, extent>=180, 0, mx, my)
+            s("M %s A %s %d %d %d %s Z" % \
+              (cfp_str(mx, my), cfp_str(rx, ry), 0, extent>=180, 0, cfp_str(mx, my)))
 
         if fromcenter:
-            str = str + "L %f, %f Z " % (cx, cy)
+            s("L %s Z" % cfp_str(cx, cy))
 
         path = transformNode(self.doc, "path",
-            d=str, style=self._formatStyle())
+            d=' '.join(s.__self__), style=self._formatStyle())
         self.currGroup.appendChild(path)
 
     def polygon(self, points, closed=0, link_info=None):
         assert len(points) >= 2, 'Polygon must have 2 or more points'
 
         if self._strokeColor!=None or self._fillColor!=None:
-            pairs = []
-            for i in range(len(points)):
-                pairs.append("%f %f" % (points[i]))
-            pts = ', '.join(pairs)
+            pts = ', '.join([fp_str(*p) for p in points])
             polyline = transformNode(self.doc, "polygon",
                 points=pts, style=self._formatStyle(AREA_STYLES))
 
@@ -619,10 +622,7 @@ class SVGCanvas:
         assert len(points) >= 1, 'Polyline must have 1 or more points'
 
         if self._strokeColor != None:
-            pairs = []
-            for i in range(len(points)):
-                pairs.append("%f %f" % (points[i]))
-            pts = ', '.join(pairs)
+            pts = ', '.join([fp_str(*p) for p in points])
             polyline = transformNode(self.doc, "polyline",
                 points=pts, style=self._formatStyle(AREA_STYLES,fill=None))
             self.currGroup.appendChild(polyline)
@@ -644,8 +644,8 @@ class SVGCanvas:
     def transform(self, a, b, c, d, e, f):
         if self.verbose: print("!!! begin SVGCanvas.transform", a, b, c, d, e, f)
         tr = self.currGroup.getAttribute("transform")
-        t = 'matrix(%f, %f, %f, %f, %f, %f)' % (a,b,c,d,e,f)
         if (a, b, c, d, e, f) != (1, 0, 0, 1, 0, 0):
+            t = 'matrix(%s)' % self.cfp_str(a,b,c,d,e,f)
             self.currGroup.setAttribute("transform", "%s %s" % (tr, t))
 
     def translate(self, x, y):
@@ -654,7 +654,7 @@ class SVGCanvas:
         return
 
         tr = self.currGroup.getAttribute("transform")
-        t = 'translate(%f, %f)' % (x, y)
+        t = 'translate(%s)' % self.cfp_str(x, y)
         self.currGroup.setAttribute("transform", "%s %s" % (tr, t))
 
     def scale(self, x, y):
@@ -663,18 +663,18 @@ class SVGCanvas:
         return
 
         tr = self.groups[-1].getAttribute("transform")
-        t = 'scale(%f, %f)' % (x, y)
+        t = 'scale(%s)' % self.cfp_str(x, y)
         self.currGroup.setAttribute("transform", "%s %s" % (tr, t))
 
     ### paths ###
     def moveTo(self, x, y):
-        self.path = self.path + 'M %f %f ' % (x, y)
+        self.path = self.path + 'M %s ' % self.fp_str(x, y)
 
     def lineTo(self, x, y):
-        self.path = self.path + 'L %f %f ' % (x, y)
+        self.path = self.path + 'L %s ' % self.fp_str(x, y)
 
     def curveTo(self, x1, y1, x2, y2, x3, y3):
-        self.path = self.path + 'C %f %f %f %f %f %f ' % (x1, y1, x2, y2, x3, y3)
+        self.path = self.path + 'C %s ' % self.fp_str(x1, y1, x2, y2, x3, y3)
 
     def closePath(self):
         self.path = self.path + 'Z '
