@@ -876,13 +876,22 @@ def _do_post_text(tx):
     xs = tx.XtraState
     leading = xs.style.leading
     autoLeading = xs.autoLeading
+    y0 = xs.cur_y
     f = xs.f
+    ff = 0.125*f.fontSize
+    yl = y0 + f.fontSize
     if autoLeading=='max':
         leading = max(leading,1.2*f.fontSize)
     elif autoLeading=='min':
         leading = 1.2*f.fontSize
-    ff = 0.125*f.fontSize
-    y0 = xs.cur_y
+    ydesc = yl - leading
+
+    for x1,x2,c in xs.backColors:
+        tx._canvas.setFillColor(c)
+        tx._canvas.rect(x1,ydesc,x2-x1,leading,stroke=0,fill=1)
+    xs.backColors=[]
+    xs.backColor=None
+
     y = y0 - ff
     csc = None
     for x1,x2,c in xs.underlines:
@@ -904,8 +913,6 @@ def _do_post_text(tx):
     xs.strike=0
     xs.strikeColor=None
 
-    yl = y0 + f.fontSize
-    ydesc = yl - leading
     for x1,x2,link,c in xs.links:
         if platypus_link_underline:
             if c!=csc:
@@ -917,12 +924,6 @@ def _do_post_text(tx):
     xs.link=None
     xs.linkColor=None
 
-    for x1,x2,c in xs.backColors:
-        tx._canvas.setFillColor(c)
-        tx._canvas.rect(x1,ydesc,x2-x1,leading,stroke=0,fill=1)
-
-    xs.backColors=[]
-    xs.backColor=None
     xs.cur_y -= leading
 
 def textTransformFrags(frags,style):
