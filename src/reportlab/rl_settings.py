@@ -48,12 +48,17 @@ listWrapOnFakeWidth
 T1SearchPath
 TTFSearchPath
 CMapSearchPath
-baseUnderlineProportion
 decimalSymbol
 errorOnDuplicatePageLabelPage
 autoGenerateMissingTTFName
 allowTTFSubsetting
-spaceShrinkage'''.split())
+spaceShrinkage
+underlineWidth
+underlineOffset
+underlineGap
+strikeWidth
+strikeOffset
+strikeGap'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -103,7 +108,21 @@ debug=                      0                       #for debugging code
 rtlSupport=                 0                       #set to 1 to attempt import of RTL assistance eg fribidi etc etc
 listWrapOnFakeWidth=        1                       #set to 0/False to force platypus.flowables._listWrapOn to report correct widths
                                                     #else it reports minimum(required,available) width
-baseUnderlineProportion=    0.0                     #non-zero for doing font size proportional lines in Paragraph.py
+
+underlineWidth=             ''                      #empty to use canvas strokeWidth or a distance or number*<letter>
+                                                    #   num * <letter> make value proportional to a font size
+                                                    #   P paragraph font size
+                                                    #   L line max font size
+                                                    #   f first use font size
+                                                    #   F max fontsize in the tag
+
+underlineOffset=            '-0.125*F'              #fraction of fontSize from baseline to draw underlines at.
+underlineGap=               '1'                     #gap for double/triple underline
+
+strikeWidth=                ''
+strikeOffset=               '0.25*F'                #fraction of fontSize from baseline to draw strike through at.
+strikeGap=                  '1'                     #gap for double/triple strike
+
                                                     #by default typical value 0.05. may be overridden on a parastyle.
 decimalSymbol=              '.'                     #what we use to align floats numerically
 errorOnDuplicatePageLabelPage= 0                    #if True will cause repeated PageLabel page numbers to raise an error.

@@ -7,7 +7,7 @@ from string import whitespace
 from operator import truth
 from unicodedata import category
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont, getAscentDescent
-from reportlab.platypus.paraparser import ParaParser, _PCT
+from reportlab.platypus.paraparser import ParaParser, _PCT, _num as _parser_num, _re_us_value
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -15,8 +15,9 @@ from reportlab.lib.geomutils import normalizeTRBL
 from reportlab.lib.textsplit import wordSplit, ALL_CANNOT_START
 from copy import deepcopy
 from reportlab.lib.abag import ABag
-from reportlab.rl_config import platypus_link_underline, decimalSymbol, _FUZZ, paraFontSizeHeightOffset
-from reportlab.lib.utils import _className, isBytes, unicodeT, bytesT, strTypes
+from reportlab.rl_config import platypus_link_underline, decimalSymbol, _FUZZ, paraFontSizeHeightOffset, \
+                                strikeGap, underlineGap
+from reportlab.lib.utils import _className, isBytes, unicodeT, bytesT, isStr
 from reportlab.lib.rl_accel import sameFrag
 from reportlab import xrange
 import re
@@ -59,6 +60,20 @@ _wsc = ''.join((
     ))
 _wsc_re_split=re.compile('[%s]+'% re.escape(_wsc)).split
 _wsc_end_search=re.compile('[%s]+$'% re.escape(_wsc)).search
+
+def _usConv(s, vMap, default=None):
+    '''convert a strike/underline distance to a number'''
+    if isStr(s):
+        s = s.strip()
+        if s:
+            m = _re_us_value.match(s)
+            if m:
+                return float(m.group(1))*vMap[m.group(2)]
+            else:
+                return _parser_num(s,allowRelative=False)
+        elif default:
+            return default
+    return s
 
 def split(text, delim=None):
     if isBytes(text): text = text.decode('utf8')
@@ -176,7 +191,7 @@ def imgNormV(v,nv):
 
 def _getDotsInfo(style):
     dots = style.endDots
-    if isinstance(dots,strTypes):
+    if isStr(dots):
         text = dots
         fontName = style.fontName
         fontSize = style.fontSize
@@ -227,6 +242,10 @@ def _putFragLine(cur_x, tx, line, last, pKind):
     ws = getattr(tx,'_wordSpace',0)
     nSpaces = 0
     words = line.words
+    AL = []
+    LL = []
+    us_lines = xs.us_lines
+    links = xs.links
     for i, f in enumerate(words):
         if hasattr(f,'cbDefn'):
             cbDefn = f.cbDefn
@@ -264,59 +283,55 @@ def _putFragLine(cur_x, tx, line, last, pKind):
         else:
             cur_x_s = cur_x + nSpaces*ws
             end_x = cur_x_s
+            fontSize = f.fontSize
+            textColor = f.textColor
+            rise = f.rise
             if i > 0:
                 end_x = cur_x_s - _trailingSpaceLength(words[i-1].text, tx)
-            if (tx._fontname,tx._fontsize)!=(f.fontName,f.fontSize):
-                tx._setFont(f.fontName, f.fontSize)
-            if xs.textColor!=f.textColor:
-                xs.textColor = f.textColor
-                tx.setFillColor(f.textColor)
-            if xs.rise!=f.rise:
-                xs.rise=f.rise
-                tx.setRise(f.rise)
+            if (tx._fontname,tx._fontsize)!=(f.fontName,fontSize):
+                tx._setFont(f.fontName, fontSize)
+            if xs.textColor!=textColor:
+                xs.textColor = textColor
+                tx.setFillColor(textColor)
+            if xs.rise!=rise:
+                xs.rise=rise
+                tx.setRise(rise)
             text = f.text
             tx._textOut(text,f is words[-1])    # cheap textOut
-            if not xs.underline and f.underline:
-                xs.underline = 1
-                xs.underline_x = cur_x_s
-                xs.underlineColor = f.textColor
-            elif xs.underline:
-                if not f.underline:
-                    xs.underline = 0
-                    xs.underlines.append( (xs.underline_x, end_x, xs.underlineColor) )
-                    xs.underlineColor = None
-                elif xs.textColor!=xs.underlineColor:
-                    xs.underlines.append( (xs.underline_x, end_x, xs.underlineColor) )
-                    xs.underlineColor = xs.textColor
-                    xs.underline_x = cur_x_s
-            if not xs.strike and f.strike:
-                xs.strike = 1
-                xs.strike_x = cur_x_s
-                xs.strikeColor = f.textColor
-            elif xs.strike:
-                if not f.strike:
-                    xs.strike = 0
-                    xs.strikes.append( (xs.strike_x, end_x, xs.strikeColor) )
-                    xs.strikeColor = None
-                elif xs.textColor!=xs.strikeColor:
-                    xs.strikes.append( (xs.strike_x, end_x, xs.strikeColor) )
-                    xs.strikeColor = xs.textColor
-                    xs.strike_x = cur_x_s
-            if f.link and not xs.link:
-                if not xs.link:
-                    xs.link = f.link
-                    xs.link_x = cur_x_s
-                    xs.linkColor = xs.textColor
-            elif xs.link:
-                if not f.link:
-                    xs.links.append( (xs.link_x, end_x, xs.link, xs.linkColor) )
-                    xs.link = None
-                    xs.linkColor = None
-                elif f.link!=xs.link or xs.textColor!=xs.linkColor:
-                    xs.links.append( (xs.link_x, end_x, xs.link, xs.linkColor) )
-                    xs.link = f.link
-                    xs.link_x = cur_x_s
-                    xs.linkColor = xs.textColor
+            if LL != f.us_lines:
+                S = set(LL)
+                NS = set(f.us_lines)
+                nL = NS - S #new lines
+                eL = S - NS #ending lines
+                for l in eL:
+                    us_lines[l] = us_lines[l],end_x
+                for l in nL:
+                    us_lines[l] = (l,fontSize,textColor,cur_x),fontSize
+                LL = f.us_lines
+            if LL:
+                for l in LL:
+                    l0, fsmax = us_lines[l]
+                    if fontSize>fsmax:
+                        us_lines[l] = l0, fontSize
+
+            nlo = rise - 0.2*fontSize
+            nhi = rise + fontSize
+            if AL != f.link:
+                S = set(AL)
+                NS = set(f.link)
+                nL = NS - S #new linkis
+                eL = S - NS #ending links
+                for l in eL:
+                    links[l] = links[l],end_x
+                for l in nL:
+                    links[l] = (l,cur_x),nlo,nhi
+                AL = f.link
+            if AL:
+                for l in AL:
+                    l0, lo, hi = links[l]
+                    if nlo<lo or nhi>hi:
+                        links[l] = l0,min(nlo,lo),max(nhi,hi)
+
             bg = getattr(f,'backColor',None)
             if bg and not xs.backColor:
                 xs.backColor = bg
@@ -332,15 +347,19 @@ def _putFragLine(cur_x, tx, line, last, pKind):
             txtlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
             cur_x += txtlen
             nSpaces += text.count(' ')+_nbspCount(text)
+
     cur_x_s = cur_x+(nSpaces-1)*ws
     if last and pKind!='right' and xs.style.endDots:
         _do_dots_frag(cur_x,cur_x_s,line.maxWidth,xs,tx)
-    if xs.underline:
-        xs.underlines.append( (xs.underline_x, cur_x_s, xs.underlineColor) )
-    if xs.strike:
-        xs.strikes.append( (xs.strike_x, cur_x_s, xs.strikeColor) )
-    if xs.link:
-        xs.links.append( (xs.link_x, cur_x_s, xs.link,xs.linkColor) )
+
+    if LL:
+        for l in LL:
+            us_lines[l] = us_lines[l], cur_x_s
+
+    if AL:
+        for l in AL:
+            links[l] = links[l], cur_x_s
+
     if xs.backColor:
         xs.backColors.append( (xs.backColor_x, cur_x_s, xs.backColor) )
     if tx._x0!=x0:
@@ -708,7 +727,7 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style, rtl):
     bulletAnchor = style.bulletAnchor
     if rtl or style.bulletAnchor!='start':
         numeric = bulletAnchor=='numeric'
-        if isinstance(bulletText,strTypes):
+        if isStr(bulletText):
             t =  bulletText
             q = numeric and decimalSymbol in t
             if q: t = t[:t.index(decimalSymbol)]
@@ -738,7 +757,7 @@ def _drawBullet(canvas, offset, cur_y, bulletText, style, rtl):
         tx2 = canvas.beginText(bulletStart, cur_y)
     tx2.setFont(style.bulletFontName, style.bulletFontSize)
     tx2.setFillColor(getattr(style,'bulletColor',style.textColor))
-    if isinstance(bulletText,strTypes):
+    if isStr(bulletText):
         tx2.textOut(bulletText)
     else:
         for f in bulletText:
@@ -758,7 +777,7 @@ def _handleBulletWidth(bulletText,style,maxWidths):
     '''work out bullet width and adjust maxWidths[0] if neccessary
     '''
     if bulletText:
-        if isinstance(bulletText,strTypes):
+        if isStr(bulletText):
             bulletWidth = stringWidth( bulletText, style.bulletFontName, style.bulletFontSize)
         else:
             #it's a list of fragments
@@ -832,23 +851,38 @@ def splitLines0(frags,widths):
             if j==lim:
                 i += 1
 
-def _old_do_line(tx, x1, y1, x2, y2):
-    tx._canvas.line(x1, y1, x2, y2)
-
-def _do_line(tx, x1, y1, x2, y2):
-    olw = tx._canvas._lineWidth
-    nlw = tx._underlineProportion*tx._fontsize
+def _do_line(tx, x1, y1, x2, y2, nlw, nsc):
+    canv = tx._canvas
+    olw = canv._lineWidth
     if nlw!=olw:
-        tx._canvas.setLineWidth(nlw)
-        tx._canvas.line(x1, y1, x2, y2)
-        tx._canvas.setLineWidth(olw)
-    else:
-        tx._canvas.line(x1, y1, x2, y2)
+        canv.setLineWidth(nlw)
+    osc = canv._strokeColorObj
+    if nsc!=osc:
+        canv.setStrokeColor(nsc)
+    canv.line(x1, y1, x2, y2)
 
-def _do_under_line(i, t_off, ws, tx, lm=-0.125):
-    y = tx.XtraState.cur_y - i*tx.XtraState.style.leading + lm*tx.XtraState.f.fontSize
-    textlen = tx._canvas.stringWidth(' '.join(tx.XtraState.lines[i][1]), tx._fontname, tx._fontsize)
-    tx._do_line(t_off, y, t_off+textlen, y)
+def _do_under_line(i, x1, ws, tx, us_lines):
+    xs = tx.XtraState
+    style = xs.style
+    y0 = xs.cur_y - i*style.leading
+    f = xs.f
+    fs = f.fontSize
+    tc = f.textColor
+    values = dict(L=fs,F=fs,f=fs)
+    dw = tx._defaultLineWidth
+    x2 = x1 + tx._canvas.stringWidth(' '.join(tx.XtraState.lines[i][1]), tx._fontname, fs)
+    for n,k,c,w,o,r,m,g in us_lines:
+        underline = k=='underline'
+        lw = _usConv(w,values,default=tx._defaultLineWidth)
+        lg = _usConv(g,values,default=1)
+        dy = lg+lw
+        if not underline: dy = -dy
+        y = y0 + r + _usConv(('-0.125*L' if underline else '0.25*L') if o=='' else o,values)
+        if not c: c = tc
+        while m>0:
+            tx._do_line(x1, y, x2, y, lw, c)
+            y -= dy
+            m -= 1
 
 _scheme_re = re.compile('^[a-zA-Z][-+a-zA-Z0-9]+$')
 def _doLink(tx,link,rect):
@@ -859,6 +893,7 @@ def _doLink(tx,link,rect):
         if kind=='GoToR': link = parts[1]
         tx._canvas.linkURL(link, rect, relative=1, kind=kind)
     else:
+        if not link: return
         if link[0]=='#':
             link = link[1:]
             scheme=''
@@ -870,59 +905,55 @@ def _do_link_line(i, t_off, ws, tx):
     y = xs.cur_y - i*leading - xs.f.fontSize/8.0 # 8.0 factor copied from para.py
     text = ' '.join(xs.lines[i][1])
     textlen = tx._canvas.stringWidth(text, tx._fontname, tx._fontsize)
-    _doLink(tx, xs.link, (t_off, y, t_off+textlen, y+leading))
+    for n, link in xs.link:
+        _doLink(tx, link, (t_off, y, t_off+textlen, y+leading))
 
 def _do_post_text(tx):
     xs = tx.XtraState
-    leading = xs.style.leading
-    autoLeading = xs.autoLeading
     y0 = xs.cur_y
     f = xs.f
-    ff = 0.125*f.fontSize
-    yl = y0 + f.fontSize
+    leading = xs.style.leading
+    autoLeading = xs.autoLeading
+    fontSize = f.fontSize
     if autoLeading=='max':
-        leading = max(leading,1.2*f.fontSize)
+        leading = max(leading,1.2*fontSize)
     elif autoLeading=='min':
-        leading = 1.2*f.fontSize
-    ydesc = yl - leading
+        leading = 1.2*fontSize
 
-    for x1,x2,c in xs.backColors:
-        tx._canvas.setFillColor(c)
-        tx._canvas.rect(x1,ydesc,x2-x1,leading,stroke=0,fill=1)
-    xs.backColors=[]
-    xs.backColor=None
+    if xs.backColors:
+        yl = y0 + fontSize
+        ydesc = yl - leading
 
-    y = y0 - ff
-    csc = None
-    for x1,x2,c in xs.underlines:
-        if c!=csc:
-            tx._canvas.setStrokeColor(c)
-            csc = c
-        tx._do_line(x1, y, x2, y)
-    xs.underlines = []
-    xs.underline=0
-    xs.underlineColor=None
+        for x1,x2,c in xs.backColors:
+            tx._canvas.setFillColor(c)
+            tx._canvas.rect(x1,ydesc,x2-x1,leading,stroke=0,fill=1)
+        xs.backColors=[]
+        xs.backColor=None
 
-    ys = y0 + 2*ff
-    for x1,x2,c in xs.strikes:
-        if c!=csc:
-            tx._canvas.setStrokeColor(c)
-            csc = c
-        tx._do_line(x1, ys, x2, ys)
-    xs.strikes = []
-    xs.strike=0
-    xs.strikeColor=None
+    for (((n,link),x1),lo,hi),x2 in sorted(xs.links.values()):
+        _doLink(tx, link, (x1, y0+lo, x2, y0+hi))
+    xs.links = {}
 
-    for x1,x2,link,c in xs.links:
-        if platypus_link_underline:
-            if c!=csc:
-                tx._canvas.setStrokeColor(c)
-                csc = c
-            tx._do_line(x1, y, x2, y)
-        _doLink(tx, link, (x1, ydesc, x2, yl))
-    xs.links = []
-    xs.link=None
-    xs.linkColor=None
+    if xs.us_lines:
+        #print 'lines'
+        dw = tx._defaultLineWidth
+        values = dict(L=fontSize)
+        for (((n,k,c,w,o,r,m,g),fs,tc,x1),fsmax),x2 in sorted(xs.us_lines.values()):
+            underline = k=='underline'
+            values['f'] = fs
+            values['F'] = fsmax
+            lw = _usConv(w,values,default=tx._defaultLineWidth)
+            lg = _usConv(g,values,default=1)
+            dy = lg+lw
+            if not underline: dy = -dy
+            y = y0 + r + _usConv(o if o!='' else ('-0.125*L' if underline else '0.25*L'),values)
+            #print 'n=%s k=%s x1=%s x2=%s r=%s c=%s w=%r o=%r fs=%r tc=%s y=%s lW=%r offs=%r' % (n,k,x1,x2,r,(c.hexval() if c else ''),w,o,fs,tc.hexval(),y,lW,y-y0-r)
+            if not c: c = tc
+            while m>0:
+                tx._do_line(x1, y, x2, y, lw, c)
+                y -= dy
+                m -= 1
+        xs.us_lines = {}
 
     xs.cur_y -= leading
 
@@ -1102,6 +1133,10 @@ class Paragraph(Flowable):
 
         The paragraph Text can contain XML-like markup including the tags:
         <b> ... </b> - bold
+        < u [color="red"] [width="pts"] [offset="pts"]> < /u > - underline
+            width and offset can be empty meaning use existing canvas line width
+            or with an f/F suffix regarded as a fraction of the font size
+        < strike > < /strike > - strike through has the same parameters as underline
         <i> ... </i> - italics
         <u> ... </u> - underline
         <strike> ... </strike> - strike through
@@ -1112,19 +1147,21 @@ class Paragraph(Flowable):
         <onDraw name=callable label="a label"/>
         <index [name="callablecanvasattribute"] label="a label"/>
         <link>link text</link>
-        attributes of links
-        size/fontSize=num
-        name/face/fontName=name
-        fg/textColor/color=color
-        backcolor/backColor/bgcolor=color
-        dest/destination/target/href/link=target
+            attributes of links
+                size/fontSize/uwidth/uoffset=num
+                name/face/fontName=name
+                fg/textColor/color/ucolor=color
+                backcolor/backColor/bgcolor=color
+                dest/destination/target/href/link=target
+                underline=bool turn on underline
         <a>anchor text</a>
-        attributes of anchors
-        fontSize=num
-        fontName=name
-        fg/textColor/color=color
-        backcolor/backColor/bgcolor=color
-        href=href
+            attributes of anchors
+                size/fontSize/uwidth/uoffset=num
+                fontName=name
+                fg/textColor/color/ucolor=color
+                backcolor/backColor/bgcolor=color
+                href=href
+                underline="yes|no"
         <a name="anchorpoint"/>
         <unichar name="unicode character name"/>
         <unichar value="unicode code point"/>
@@ -1744,12 +1781,6 @@ class Paragraph(Flowable):
                 canvas.setFillColor(f.textColor)
 
                 tx = self.beginText(cur_x, cur_y)
-                if style.underlineProportion:
-                    tx._underlineProportion = style.underlineProportion
-                    tx._do_line = _do_line
-                else:
-                    tx._do_line = _old_do_line
-                tx._do_line = MethodType(tx._do_line,tx)
                 if autoLeading=='max':
                     leading = max(leading,blPara.ascent-blPara.descent)
                 elif autoLeading=='min':
@@ -1766,29 +1797,22 @@ class Paragraph(Flowable):
                 if lastLine and jllwc and len(words)>jllwc:
                     lastLine=False
                 t_off = dpl( tx, offset, ws, words, lastLine)
-                if f.underline or f.link or f.strike or style.endDots:
-                    xs = tx.XtraState = ABag()
+                if f.us_lines or f.link or style.endDots:
+                    tx._do_line = MethodType(_do_line,tx)
+                    tx.xs = xs = tx.XtraState = ABag()
+                    tx._defaultLineWidth = canvas._lineWidth
                     xs.cur_y = cur_y
                     xs.f = f
                     xs.style = style
                     xs.lines = lines
-                    xs.underlines=[]
-                    xs.underlineColor=None
-                    xs.strikes=[]
-                    xs.strikeColor=None
-                    xs.links=[]
                     xs.link=f.link
                     xs.textColor = f.textColor
                     xs.backColors = []
-                    canvas.setStrokeColor(f.textColor)
                     dx = t_off+leftIndent
                     if dpl!=_justifyDrawParaLine: ws = 0
-                    underline = f.underline or (f.link and platypus_link_underline)
-                    strike = f.strike
-                    link = f.link
-                    if underline: _do_under_line(0, dx, ws, tx)
-                    if strike: _do_under_line(0, dx, ws, tx, lm=0.125)
-                    if link: _do_link_line(0, dx, ws, tx)
+                    if f.us_lines:
+                        _do_under_line(0, t_off, ws, tx, f.us_lines)
+                    if f.link: _do_link_line(0, dx, ws, tx)
                     if lastLine and style.endDots and dpl!=_rightDrawParaLine: _do_dots(0, dx, ws, xs, tx, dpl)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
@@ -1801,9 +1825,9 @@ class Paragraph(Flowable):
                         t_off = dpl( tx, _offsets[i], ws, words, lastLine)
                         dx = t_off+leftIndent
                         if dpl!=_justifyDrawParaLine: ws = 0
-                        if underline: _do_under_line(i, dx, ws, tx)
-                        if strike: _do_under_line(i, dx, ws, tx, lm=0.125)
-                        if link: _do_link_line(i, dx, ws, tx)
+                        if f.us_lines:
+                            _do_under_line(i, t_off, ws, tx, f.us_lines)
+                        if f.link: _do_link_line(i, dx, ws, tx)
                         if lastLine and style.endDots and dpl!=_rightDrawParaLine: _do_dots(i, dx, ws, xs, tx, dpl)
                 else:
                     for i in xrange(1, nLines):
@@ -1839,12 +1863,12 @@ class Paragraph(Flowable):
 
                 #set up the font etc.
                 tx = self.beginText(cur_x, cur_y)
-                if style.underlineProportion:
-                    tx._underlineProportion = style.underlineProportion
-                    tx._do_line = _do_line
-                else:
-                    tx._do_line = _old_do_line
-                tx._do_line = MethodType(tx._do_line,tx)
+                tx._defaultLineWidth = canvas._lineWidth
+                tx._underlineWidth = getattr(style,'underlineWidth','')
+                tx._underlineOffset = getattr(style,'underlineOffset','') or '-0.125f'
+                tx._strikeWidth = getattr(style,'strikeWidth','')
+                tx._strikeOffset = getattr(style,'strikeOffset','') or '0.25f'
+                tx._do_line = MethodType(_do_line,tx)
                 # set the paragraph direction
                 tx.direction = self.style.wordWrap
 
@@ -1852,15 +1876,10 @@ class Paragraph(Flowable):
                 xs.textColor=None
                 xs.backColor=None
                 xs.rise=0
-                xs.underline=0
-                xs.underlines=[]
-                xs.underlineColor=None
-                xs.strike=0
-                xs.strikes=[]
-                xs.strikeColor=None
                 xs.backColors=[]
-                xs.links=[]
-                xs.link=None
+                xs.us_lines = {}
+                xs.links = {}
+                xs.link={}
                 xs.leading = style.leading
                 xs.leftIndent = leftIndent
                 tx._leading = None

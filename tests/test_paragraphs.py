@@ -253,7 +253,7 @@ class ParagraphTestCase(unittest.TestCase):
             SA(Paragraph('A very much' +50*' longer'+' justified complex <font color="green">paragraph</font> with equals', i and styDotsJCJK or styDotsJ))
             SA(Paragraph('A very much' +50*' longer'+' justified complex <font color="green">indented paragraph</font> with equals', i and istyDotsJCJK or istyDotsJ))
 
-        SA(Paragraph('<para>This image has the image data embedded in the src attribute: <img src="DATA:image/gif;base64,R0lGODdhDwAMAIACAAAAAPf/EiwAAAAADwAMAAACHIyPqcvtCl4ENEQzbc3XnjtV2Dd247mBnva0SwEAOw==" />', styNormal))
+        SA(Paragraph('<para>This image has the image data embedded in the src attribute: <img src="DATA:image/gif;base64,R0lGODdhDwAMAIACAAAAAPf/EiwAAAAADwAMAAACHIyPqcvtCl4ENEQzbc3XnjtV2Dd247mBnva0SwEAOw==" /></para>', styNormal))
         template = SimpleDocTemplate(outputfile('test_paragraphs.pdf'),
                                      showBoundary=1)
         template.build(story,

@@ -20,6 +20,7 @@ from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.units import inch,mm,cm,pica
+from reportlab.rl_config import platypus_link_underline
 if isPy3:
     from html.parser import HTMLParser
     from html.entities import name2codepoint
@@ -47,29 +48,18 @@ def _convnum(s, unit=1, allowRelative=True):
         except ValueError:
             return float(s)*unit
 
-def _num(s, unit=1, allowRelative=True):
+def _num(s, unit=1, allowRelative=True,
+        _unit_map = {'i':inch,'in':inch,'pt':1,'cm':cm,'mm':mm,'pica':pica },
+        _re_unit = re.compile('^\s*(.*)(i|in|cm|mm|pt|pica)\s*$'),
+        ):
     """Convert a string like '10cm' to an int or float (in points).
        The default unit is point, but optionally you can use other
        default units like mm.
     """
-    if s.endswith('cm'):
-        unit=cm
-        s = s[:-2]
-    if s.endswith('in'):
-        unit=inch
-        s = s[:-2]
-    if s.endswith('pt'):
-        unit=1
-        s = s[:-2]
-    if s.endswith('i'):
-        unit=inch
-        s = s[:-1]
-    if s.endswith('mm'):
-        unit=mm
-        s = s[:-2]
-    if s.endswith('pica'):
-        unit=pica
-        s = s[:-4]
+    m = _re_unit.match(s)
+    if m:
+        unit = _unit_map[m.group(2)]
+        s = m.group(1)
     return _convnum(s,unit,allowRelative)
 
 def _int(s):
@@ -112,21 +102,53 @@ def fontSizeNormalize(frag,attr,default):
     v = _numpct(getattr(frag,attr),allowRelative=True)
     return (v[1]+frag.fontSize) if isinstance(v,tuple) else v.normalizedValue(frag.fontSize) if isinstance(v,_PCT) else v
 
-class _CheckSup:
-    '''class for syntax checking <sup> attributes
-    if the check succeeds then we always return the string for later evaluation
+class _ExValidate:
+    '''class for syntax checking attributes
     '''
-    def __init__(self,kind):
-        self.kind = kind
-        self.fontSize = 10
+    def __init__(self,tag,attr):
+        self.tag = tag
+        self.attr = attr
 
-    def __call__(self,s):
-        setattr(self,self.kind,s)
+    def invalid(self,s):
+        raise ValueError('<%s> invalid value %r for attribute %s' % (self.tag,s,self.attr))
+
+    def validate(self, parser,s):
+        raise ValueError('abstract method called')
+        return s
+
+    def __call__(self, parser, s):
         try:
-            fontSizeNormalize(self,self.kind,None)
-            return s
+            return self.validate(parser, s)
         except:
-            raise ValueError('<sup> invalid value %r for attribute %s' % (s,self.kind))
+            self.invalid(s)
+
+class _CheckSup(_ExValidate):
+    '''class for syntax checking <sup|sub> attributes
+    if the check succeeds then we always return the string for later evaluation'''
+    def validate(self,parser,s):
+        self.fontSize = parser._stack[-1].fontSize
+        fontSizeNormalize(self,self.attr,'')
+        return s
+
+    def __call__(self, parser, s):
+        setattr(self,self.attr,s)
+        return _ExValidate.__call__(self,parser,s)
+
+_lineRepeats = dict(single=1,double=2,triple=3)
+_re_us_value = re.compile(r'^\s*(.*)\s*\*\s*(P|L|f|F)\s*$')
+class _CheckUS(_ExValidate):
+    '''class for syntax checking <u|strike> width/offset attributes'''
+    def validate(self,parser,s):
+        s = s.strip()
+        if s:
+            m = _re_us_value.match(s)
+            if m:
+                v = float(m.group(1))
+                if m.group(2)=='P':
+                    return parser._stack[0].fontSize*v
+            else:
+                _num(s,allowRelative=False)
+        return s
 
 def _valignpc(s):
     s = s.lower()
@@ -211,7 +233,14 @@ _paraAttrMap = {'font': ('fontName', None),
                 'borderradius': ('borderRadius',_num),
                 'texttransform':('textTransform',_textTransformConv),
                 'enddots':('endDots',None),
-                'underlineproportion':('underlineProportion',_num),
+                'underlinewidth':('underlineWidth',_CheckUS('para','underlineWidth')),
+                'underlinecolor':('underlineColor',toColor),
+                'underlineoffset':('underlineOffset',_CheckUS('para','underlineOffset')),
+                'underlinegap':('underlineGap',_CheckUS('para','underlineGap')),
+                'strikewidth':('strikeWidth',_CheckUS('para','strikeWidth')),
+                'strikecolor':('strikeColor',toColor),
+                'strikeoffset':('strikeOffset',_CheckUS('para','strikeOffset')),
+                'strikegap':('strikeGap',_CheckUS('para','strikeGap')),
                 'spaceshrinkage':('spaceShrinkage',_num),
                 }
 
@@ -258,15 +287,15 @@ _linkAttrMap = {'size': ('fontSize', _num),
                 'destination': ('link', None),
                 'target': ('link', None),
                 'href': ('link', None),
+                'ucolor': ('underlineColor', toColor),
+                'uoffset': ('underlineOffset', _CheckUS('link','underlineOffset')),
+                'uwidth': ('underlineWidth', _CheckUS('link','underlineWidth')),
+                'ugap': ('underlineGap', _CheckUS('link','underlineGap')),
+                'underline': ('underline',_bool),
+                'ukind': ('underlineKind',None),
                 }
-_anchorAttrMap = {'fontSize': ('fontSize', _num),
-                'fontName': ('fontName', None),
+_anchorAttrMap = {
                 'name': ('name', None),
-                'fg':   ('textColor', toColor),
-                'color':('textColor', toColor),
-                'backcolor':('backColor',toColor),
-                'bgcolor':('backColor',toColor),
-                'href': ('href', None),
                 }
 _imgAttrMap = {
                 'src': ('src', None),
@@ -281,9 +310,23 @@ _indexAttrMap = {
                 'format': ('format',None),
                 }
 _supAttrMap = {
-                'rise': ('supr', _CheckSup('rise')),
-                'size': ('sups', _CheckSup('size')),
+                'rise': ('supr', _CheckSup('sup|sub','rise')),
+                'size': ('sups', _CheckSup('sup|sub','size')),
                 }
+_uAttrMap = {
+            'color':('underlineColor', toColor),
+            'width':('underlineWidth', _CheckUS('underline','underlineWidth')),
+            'offset':('underlineOffset', _CheckUS('underline','underlineOffset')),
+            'gap':('underlineGap', _CheckUS('underline','underlineGap')),
+            'kind':('underlineKind',None),
+            }
+_strikeAttrMap = {
+            'color':('strikeColor', toColor),
+            'width':('strikeWidth', _CheckUS('strike','strikeWidth')),
+            'offset':('strikeOffset', _CheckUS('strike','strikeOffset')),
+            'gap':('strikeGap', _CheckUS('strike','strikeGap')),
+            'kind':('strikeKind',None),
+            }
 
 def _addAttributeNames(m):
     K = list(m.keys())
@@ -613,8 +656,10 @@ def _greekConvert(data):
 # tags:
 #       < /b > - bold
 #       < /i > - italics
-#       < u > < /u > - underline
-#       < strike > < /strike > - strike through
+#       < u [color="red"] [width="pts"] [offset="pts"]> < /u > - underline
+#           width and offset can be empty meaning use existing canvas line width
+#           or with an f/F suffix regarded as a fraction of the font size
+#       < strike > < /strike > - strike through has the same parameters as underline
 #       < super [size="pts"] [rise="pts"]> < /super > - superscript
 #       < sup ="pts"] [rise="pts"]> < /sup > - superscript
 #       < sub ="pts"] [rise="pts"]> < /sub > - subscript
@@ -624,14 +669,15 @@ def _greekConvert(data):
 #       <onDraw name=callable label="a label"/>
 #       <index [name="callablecanvasattribute"] label="a label"/>
 #       <link>link text</link>
-#           attributes of links 
-#               size/fontSize=num
+#           attributes of links
+#               size/fontSize/uwidth/uoffset=num
 #               name/face/fontName=name
-#               fg/textColor/color=color
+#               fg/textColor/color/ucolor=color
 #               backcolor/backColor/bgcolor=color
 #               dest/destination/target/href/link=target
+#               underline=bool turn on underline
 #       <a>anchor text</a>
-#           attributes of anchors 
+#           attributes of anchors
 #               fontSize=num
 #               fontName=name
 #               fg/textColor/color=color
@@ -698,23 +744,53 @@ class ParaParser(HTMLParser):
     def end_em( self ):
         self._pop('em')
 
+    def _new_line(self,k):
+        frag = self._stack[-1]
+        frag.us_lines = frag.us_lines + [(
+                    self.nlines,
+                    k,
+                    getattr(frag,k+'Color',None),
+                    getattr(frag,k+'Width',self._defaultLineWidths[k]),
+                    getattr(frag,k+'Offset',self._defaultLineOffsets[k]),
+                    frag.rise,
+                    _lineRepeats[getattr(frag,k+'Kind','single')],
+                    getattr(frag,k+'Gap',self._defaultLineGaps[k]),
+                    )]
+        self.nlines += 1
+
     #### underline
     def start_u( self, attributes ):
-        self._push('u',underline=1)
+        A = self.getAttributes(attributes,_uAttrMap)
+        self._push('u',**A)
+        self._new_line('underline')
 
     def end_u( self ):
         self._pop('u')
 
     #### strike
     def start_strike( self, attributes ):
-        self._push('strike',strike=1)
+        A = self.getAttributes(attributes,_strikeAttrMap)
+        self._push('strike',strike=1,**A)
+        self._new_line('strike')
 
     def end_strike( self ):
         self._pop('strike')
 
     #### link
-    def start_link(self, attributes):
-        self._push('link',**self.getAttributes(attributes,_linkAttrMap))
+    def _handle_link(self, tag, attributes):
+        A = self.getAttributes(attributes,_linkAttrMap)
+        underline = A.pop('underline',self._defaultLinkUnderline)
+        A['link'] = self._stack[-1].link + [(
+                        self.nlinks,
+                        A.pop('link','').strip(),
+                        )]
+        self.nlinks += 1
+        self._push(tag,**A)
+        if underline:
+            self._new_line('underline')
+
+    def start_link(self,attributes):
+        self._handle_link('link',attributes)
 
     def end_link(self):
         if self._pop('link').link is None:
@@ -722,9 +798,10 @@ class ParaParser(HTMLParser):
 
     #### anchor
     def start_a(self, attributes):
-        A = self.getAttributes(attributes,_anchorAttrMap)
-        name = A.get('name',None)
-        if name is not None:
+        anchor = 'name' in attributes
+        if anchor:
+            A = self.getAttributes(attributes,_anchorAttrMap)
+            name = A.get('name',None)
             name = name.strip()
             if not name:
                 self._syntax_error('<a name="..."/> anchor variant requires non-blank name')
@@ -732,11 +809,9 @@ class ParaParser(HTMLParser):
                 self._syntax_error('<a name="..."/> anchor variant only allows name attribute')
                 A = dict(name=A['name'])
             A['_selfClosingTag'] = 'anchor'
+            self._push('a',**A)
         else:
-            href = A.get('href','').strip()
-            A['link'] = href    #convert to our link form
-            A.pop('href',None)
-        self._push('a',**A)
+            self._handle_link('a',attributes)
 
     def end_a(self):
         frag = self._stack[-1]
@@ -780,25 +855,25 @@ class ParaParser(HTMLParser):
     #### super script
     def start_super( self, attributes ):
         A = self.getAttributes(attributes,_supAttrMap)
-        A['sup']=1
+        #A['sup']=1
         self._push('super',**A)
+        frag = self._stack[-1]
+        frag.rise += fontSizeNormalize(frag,'supr',frag.fontSize*supFraction)
+        frag.fontSize = fontSizeNormalize(frag,'sups',frag.fontSize-min(sizeDelta,0.2*frag.fontSize))
 
     def end_super( self ):
         self._pop('super')
 
-    def start_sup( self, attributes ):
-        A = self.getAttributes(attributes,_supAttrMap)
-        A['sup']=1
-        self._push('sup',**A)
-
-    def end_sup( self ):
-        self._pop('sup')
+    start_sup = start_super
+    end_sup = end_super
 
     #### sub script
     def start_sub( self, attributes ):
         A = self.getAttributes(attributes,_supAttrMap)
-        A['sub']=1
         self._push('sub',**A)
+        frag = self._stack[-1]
+        frag.rise -= fontSizeNormalize(frag,'supr',frag.fontSize*subFraction)
+        frag.fontSize = fontSizeNormalize(frag,'sups',frag.fontSize-min(sizeDelta,0.2*frag.fontSize))
 
     def end_sub( self ):
         self._pop('sub')
@@ -888,7 +963,7 @@ class ParaParser(HTMLParser):
 
     def start_br(self, attr):
         self._push('br',_selfClosingTag='br',lineBreak=True,text='')
-        
+
     def end_br(self):
         #print('\nend_br called, %d frags in list' % len(self.fragList))
         frag = self._stack[-1]
@@ -907,13 +982,9 @@ class ParaParser(HTMLParser):
 
         # initialize semantic values
         frag = ParaFrag()
-        frag.sub = 0
-        frag.sup = 0
         frag.rise = 0
-        frag.underline = 0
-        frag.strike = 0
         frag.greek = 0
-        frag.link = None
+        frag.link = []
         if bullet:
             frag.fontName, frag.bold, frag.italic = ps2tt(style.bulletFontName)
             frag.fontSize = style.bulletFontSize
@@ -922,6 +993,21 @@ class ParaParser(HTMLParser):
             frag.fontName, frag.bold, frag.italic = ps2tt(style.fontName)
             frag.fontSize = style.fontSize
             frag.textColor = style.textColor
+        frag.us_lines = []
+        self.nlinks = self.nlines = 0
+        self._defaultLineWidths = dict(
+                                    underline = getattr(style,'underlineWidth',''),
+                                    strike = getattr(style,'strikeWidth',''),
+                                    )
+        self._defaultLineOffsets = dict(
+                                    underline = getattr(style,'underlineOffset',''),
+                                    strike = getattr(style,'strikeOffset',''),
+                                    )
+        self._defaultLineGaps = dict(
+                                    underline = getattr(style,'underlineGap',''),
+                                    strike = getattr(style,'strikeGap',''),
+                                    )
+        self._defaultLinkUnderline = getattr(style,'linkUnderline',platypus_link_underline)
         return frag
 
     def start_para(self,attr):
@@ -1041,7 +1127,7 @@ class ParaParser(HTMLParser):
         self._push('ondraw',cbDefn=defn)
         self.handle_data('')
         self._pop('ondraw')
-    start_onDraw=start_ondraw 
+    start_onDraw=start_ondraw
     end_onDraw=end_ondraw=end_seq
 
     def start_index(self,attr):
@@ -1096,7 +1182,10 @@ class ParaParser(HTMLParser):
             if k in attrMap:
                 j = attrMap[k]
                 func = j[1]
-                A[j[0]] = v if func is None else func(v)
+                if func is not None:
+                    #it's a function
+                    v = func(self,v) if isinstance(func,_ExValidate) else func(v)
+                A[j[0]] = v
             else:
                 self._syntax_error('invalid attribute name %s attrMap=%r'% (k,list(sorted(attrMap.keys()))))
         return A
@@ -1144,23 +1233,12 @@ class ParaParser(HTMLParser):
             if data!='': self._syntax_error('No content allowed in %s tag' % frag._selfClosingTag)
             return
         else:
-            # if sub and sup are both on they will cancel each other out
-            if frag.sub == 1 and frag.sup == 1:
-                frag.sub = 0
-                frag.sup = 0
-
-            if frag.sub:
-                frag.rise = -fontSizeNormalize(frag,'supr',frag.fontSize*subFraction)
-                frag.fontSize = fontSizeNormalize(frag,'sups',frag.fontSize-min(sizeDelta,0.2*frag.fontSize))
-            elif frag.sup:
-                frag.rise = fontSizeNormalize(frag,'supr',frag.fontSize*supFraction)
-                frag.fontSize = fontSizeNormalize(frag,'sups',frag.fontSize-min(sizeDelta,0.2*frag.fontSize))
-
+            #get the right parameters for the
             if frag.greek:
                 frag.fontName = 'symbol'
                 data = _greekConvert(data)
 
-        # bold, italic, and underline
+        # bold, italic
         frag.fontName = tt2ps(frag.fontName,frag.bold,frag.italic)
 
         #save our data
@@ -1181,6 +1259,8 @@ class ParaParser(HTMLParser):
 
     def _complete_parse(self):
         "Reset after parsing, to be ready for next paragraph"
+        if self._stack:
+            self._syntax_error('parse ended with %d unclosed tags\n %s' % (len(self._stack),'\n '.join((x.__tag__ for x in reversed(self._stack)))))
         del self._seq
         style = self._style
         del self._style
@@ -1267,7 +1347,7 @@ class ParaParser(HTMLParser):
             start = self.start_unknown
         #call it
         start(attrs or {})
-        
+
     def handle_endtag(self, tag):
         "Called by HTMLParser when a tag ends"
         #find the existing end_tagname method

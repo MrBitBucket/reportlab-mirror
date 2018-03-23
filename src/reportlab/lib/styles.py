@@ -26,8 +26,13 @@ from reportlab.lib.colors import white, black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from reportlab.lib.fonts import tt2ps
 from reportlab.rl_config import canvas_basefontname as _baseFontName, \
-                                baseUnderlineProportion as _baseUnderlineProportion, \
-                                spaceShrinkage
+                                underlineWidth as _baseUnderlineWidth, \
+                                underlineOffset as _baseUnderlineOffset, \
+                                underlineGap as _baseUnderlineGap, \
+                                strikeWidth as _baseStrikeWidth, \
+                                strikeOffset as _baseStrikeOffset, \
+                                strikeGap as _baseStrikeGap, \
+                                spaceShrinkage, platypus_link_underline
 _baseFontNameB = tt2ps(_baseFontName,1,0)
 _baseFontNameI = tt2ps(_baseFontName,0,1)
 _baseFontNameBI = tt2ps(_baseFontName,1,1)
@@ -130,11 +135,19 @@ class ParagraphStyle(PropertySet):
                                 #string or object with text and optional fontName, fontSize, textColor & backColor
                                 #dy
         'splitLongWords':1,     #make best efforts to split long words
-        'underlineProportion': _baseUnderlineProportion,    #set to non-zero to get proportional
+        'underlineWidth': _baseUnderlineWidth,  #underline width
         'bulletAnchor': 'start',    #where the bullet is anchored ie start, middle, end or numeric
         'justifyLastLine': 0,   #n allow justification on the last line for more than n words 0 means don't bother
         'justifyBreaks': 0,     #justify lines broken with <br/>
         'spaceShrinkage': spaceShrinkage,   #allow shrinkage of percentage of space to fit on line
+        'strikeWidth': _baseStrikeWidth,    #stroke width
+        'underlineOffset': _baseUnderlineOffset,    #fraction of fontsize to offset underlines
+        'underlineGap': _baseUnderlineGap,      #gap for double/triple underline
+        'strikeOffset': _baseStrikeOffset,  #fraction of fontsize to offset strikethrough
+        'strikeGap': _baseStrikeGap,        #gap for double/triple strike
+        'linkUnderline': platypus_link_underline,
+        #'underlineColor':  None,
+        #'strikeColor': None,
         }
 
 class LineStyle(PropertySet):

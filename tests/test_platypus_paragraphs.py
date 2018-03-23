@@ -120,7 +120,7 @@ class ParagraphCorners(unittest.TestCase):
         sty.wordWrap = 'CJK'
         p0=Paragraph('ABCDEFGHIJKL]N',sty)
         p1=Paragraph('AB<font color="red">C</font>DEFGHIJKL]N',sty)
-        canv = Canvas('test_platypus_paragraph_cjk3.pdf')
+        canv = Canvas(outputfile('test_platypus_paragraph_cjk3.pdf'))
         ix = len(canv._code)
         aW = pdfmetrics.stringWidth('ABCD','Courier',15)
         w,h=p0.wrap(aW,1000000)
@@ -199,14 +199,17 @@ u with a dieresis on top &lt;unichar code=0xfc/&gt;="<unichar code="0xfc"/>" and
 should be a pound sign &amp;pound;="&pound;" and this an alpha &amp;alpha;="&alpha;". You can have links in the page <link href="http://www.reportlab.com" color="blue">ReportLab</link> &amp; <a href="http://www.reportlab.org" color="green">ReportLab.org</a>.
 Use scheme "pdf:" to indicate an external PDF link, "http:", "https:" to indicate an external link eg something to open in
 your browser. If an internal link begins with something that looks like a scheme, precede with "document:". Empty hrefs should be allowed ie <a href="">&lt;a href=""&gt;test&lt;/a&gt;</a> should be allowed.
-<u>This text should be underlined.</u>
-<strike>This text should have a strike through it.</strike>
-<span backcolor="yellow"><strike>This text should have a strike through it and be highlighted.</strike></span>
-<span backcolor="yellow"><strike><u>This text should have a strike through it and be highlighted and underlined.</u></strike></span>
-This should be a mailto link <a href="mailto:reportlab-users@lists2.reportlab.com"><font color="blue">reportlab-users at lists2.reportlab.com</font></a>.
-This should be an underlined mailto link <a href="mailto:reportlab-users@lists2.reportlab.com"><font color="blue">reportlab-users at lists2.reportlab.com</font></a>.
-This should be a highlighted mailto link <span backcolor="yellow"><a href="mailto:reportlab-users@lists2.reportlab.com"><font color="blue">reportlab-users at lists2.reportlab.com</font></a></span>.
-This should be a highlighted &amp; undelined mailto link <span backcolor="yellow"><a href="mailto:reportlab-users@lists2.reportlab.com"><u><font color="blue">reportlab-users at lists2.reportlab.com</font></u></a></span>.
+<u>This text should be underlined.</u><br/>
+<strike>This text should have a strike through it.</strike><br/>
+<span backcolor="yellow"><strike>This text should have a strike through it and be highlighted.</strike></span><br/>
+<span backcolor="yellow"><strike><u>This text should have a strike through it and be highlighted and underlined.</u></strike></span><br/>
+This should be a mailto link <a href="mailto:reportlab-users@lists2.reportlab.com"><font color="blue">reportlab-users at lists2.reportlab.com</font></a>.<br/>
+This should be an underlined mailto link <a underline="1" href="mailto:reportlab-users@lists2.reportlab.com"><font color="blue">reportlab-users at lists2.reportlab.com</font></a>.<br/>
+This should be a highlighted mailto link <span backcolor="yellow"><a href="mailto:reportlab-users@lists2.reportlab.com"><font color="blue">reportlab-users at lists2.reportlab.com</font></a></span>.<br/>
+This should be a highlighted &amp; underlined mailto link <span backcolor="yellow"><a underline="1" ucolor="red" uwidth="0.01*F" href="mailto:reportlab-users@lists2.reportlab.com"><font color="blue">reportlab-users at lists2.reportlab.com</font></a></span>.<br/>
+<u offset="-.125*F">Underlined <font size="-1">Underlined</font></u><br/>
+This is A<sup><u>underlined</u></sup> as is A<u><sup>this</sup></u>
+<u color="red">This is A<sup><u>underlined</u></sup> as is A<u><sup>this</sup></u></u>
 '''
         from reportlab.platypus.flowables import ImageAndFlowables, Image
         from reportlab.lib.testutils import testsFolder
@@ -459,6 +462,30 @@ phonemic and morphological analysis.''']
                             t,' '.join((n+1)*['A']),t,text0,t,' '.join((n+1)*['A']),t,text1),
                             style=s))
         a(Paragraph("The jump at the beginning should come here &lt;a name=\"theEnd\"/&gt;<a name=\"theEnd\"/>!",style=normal))
+        a(Paragraph('Underlining <span fontSize="11"><u color="red">A<u color="green">B</u><u color="blue">C</u>D<sup><strike width="0.5" color="magenta">2</strike><sup><u color="darkgreen" width="0.2">3</u></sup></sup></u></span>',normal))
+        a(Paragraph('<para autoLeading="max" spaceAfter="10">this is in 12 <font size=30>this is in 30</font> <u offset="-0.5" width="0.5" color="red"><u offset="-1.5" width="0.5" color="blue">and</u></u> <link underline="1" ucolor="blue" href="http://google.com/">the link box<sup><a color="red" ucolor="green" underline="1" href="https://www.reportlab.com">2</a></sup> is right (twice).</link></para>''',normal))
+        a(Paragraph('<para autoLeading="max" spaceAfter="10">this is in 12 <font size=30>this is in 30</font> and <link underline="1" ucolor="blue" href="http://google.com/">the link box is right.</link></para>''',normal))
+        a(Paragraph('Underlining <u><span color="red">underlined in red? <span color="blue"><u>or blue</u></span> or red again?</span></u>',normal))
+        a(Paragraph('Link <a href="#theEnd" color="blue">jump</a> to end.<br/>Underlined link <a href="#theEnd" underline="1" ucolor="red" color="blue">jump</a> to end!',style=normal))
+        a(Paragraph('<para autoleading=""><u>A</u>. Furthermore, a subset of <font size="14">English sentences</font> interesting on quite\nindependent grounds is not quite equivalent to a stipulation to place\nthe constructions into these various categories. <u>A</u>. We will bring evidence in favor of\nThe following thesis: most of the methodological work in modern\nlinguistics can be defined in such a way as to impose problems of\nphonemic and morphological analysis.</para>',normal))
+        a(Paragraph('<para autoleading=""><u>A</u>. Furthermore, a subset of <font size="14">English sentences</font> interesting on quite<br/><u>A</u>.</para>',normal))
+        a(Paragraph(u"<para>This is a <sup rise=5><span color='red'>sup</span></sup>rise=5.</para>",normal))
+        a(Paragraph('<span fontSize="11"><u color="green"><strike color="blue">AAAAAA</strike></u></span>',normal))
+        a(Paragraph("Underlining &amp; width proportional to first use font size ('f' suffix) <u offset='-0.125*f' width='0.05*f'>underlined <span size=14>underlined</span></u>!",style=normal))
+        a(Paragraph("Underlining &amp; width proportional to first use font size ('F' suffix) <u offset='-0.125*F' width='0.05*F'>underlined <span size=14>underlined</span></u>!",style=normal))
+        a(Paragraph('''<para spaceBefore="10">This is underlined &lt;sup&gt;: a<sup><u><span color="red">sup</span></u></sup></para>''',style=normal))
+        a(Paragraph('''<para spaceBefore="10">This is <u>underlined</u></para>''',style=normal))
+        a(Paragraph('''<para spaceBefore="10">This is <u kind="double">underlined double</u></para>''',style=normal))
+        a(Paragraph('''<para spaceBefore="10">This is <strike>striken</strike></para>''',style=normal))
+        a(Paragraph('''<para spaceBefore="10">This is <strike><u>both</u></strike></para>''',style=normal))
+        a(Paragraph('''<para spaceBefore="10">This is <u width="0.5" offset="-1" kind="double">underlined kind="double"</u></para>''',style=normal))
+        a(Paragraph('''<para spaceBefore="10">This is <u width="0.25" offset="-1" kind="double">double underlined with thinner lines</u></para>''',style=normal))
+        a(Paragraph('''<para spaceBefore="10">This is <u width="0.5" offset="-0.5" color="red">underlined in red</u></para>''',style=normal))
+        a(Paragraph('''<para spaceBefore="10">This is <strike width="0.5" color="red">overstruck in red</strike></para>''',style=normal))
+        a(Paragraph('''<para spaceBefore="10">This is <strike width="0.5" color="red" kind="double">doubly overstruck in red</strike></para>''',style=normal))
+        a(Paragraph('''<para spaceBefore="10">This is <strike width="0.5" offset="0.125*F" color="red" kind="triple" gap="0.5">triply overstruck in red</strike></para>''',style=normal))
+        a(Paragraph('''<para autoLeading="max" spaceAfter="10" spaceBefore="30">this is in 12 <font size="30">this is in 30</font> <u offset="-0.5" width="0.5" color="red"><u offset="-1.5" width="0.5" color="blue">and</u></u> <link underline="1" ucolor="blue" href="http://google.com/">the link box<sup><a color="red" ucolor="green" underline="1" href="https://www.reportlab.com">2</a></sup> is right (twice).</link></para>''',style=normal))
+        a(Paragraph("",style=normal))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_ul.pdf'))
         doc.build(story)
 
