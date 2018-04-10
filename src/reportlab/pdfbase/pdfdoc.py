@@ -163,12 +163,7 @@ class PDFDocument(PDFObject):
         cat = self.Catalog = self._catalog = PDFCatalog()
         pages = self.Pages = PDFPages()
         cat.Pages = pages
-        if dummyoutline:
-            outlines = PDFOutlines0()
-        else:
-            outlines = PDFOutlines()
-        self.Outlines = self.outline = outlines
-        cat.Outlines = outlines
+        self.outline = self.Outlines = cat.Outlines = PDFOutlines0() if dummyoutline else PDFOutlines()
         self.info = PDFInfo()
         #self.Reference(self.Catalog)
         #self.Reference(self.Info)
@@ -238,8 +233,9 @@ class PDFDocument(PDFObject):
         # prepare outline
         self.Reference(self.Catalog)
         self.Reference(self.info)
-        outline = self.outline
-        outline.prepare(self, canvas)
+        self.Outlines.prepare(self, canvas)
+        if self.Outlines.ready<0:
+            self.Catalog.Outlines = None
         return self.format()
 
     def inPage(self):
@@ -1384,13 +1380,12 @@ class PDFOutlines(PDFObject):
         self.mydestinations = destinationtree
 
     def format(self, document):
+        #this should never be called if None in (self.first,self.last)
         D = {}
         D["Type"] = PDFName("Outlines")
-        c = self.count
-        D["Count"] = c
-        if c!=0:
-            D["First"] = self.first
-            D["Last"] = self.last
+        D["Count"] = self.count
+        D["First"] = self.first
+        D["Last"] = self.last
         PD = PDFDictionary(D)
         return PD.format(document)
 
@@ -1441,7 +1436,7 @@ class PDFOutlines(PDFObject):
             else:
                 self.first = self.last = None
                 self.count = 0
-                self.ready = 1
+                self.ready = -1
                 return
         #self.first = document.objectReference("Outline.First")
         #self.last = document.objectReference("Outline.Last")
@@ -1455,7 +1450,7 @@ class PDFOutlines(PDFObject):
             levelname = "Outline"
             Parent = document.Reference(document.Outlines)
         else:
-            self.count = self.count+1
+            self.count += 1
             levelname = "Outline.%s" % self.count
             if Parent is None:
                 raise ValueError("non-top level outline elt parent must be specified")
