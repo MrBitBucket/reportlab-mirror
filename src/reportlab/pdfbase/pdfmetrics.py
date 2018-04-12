@@ -301,12 +301,13 @@ class Encoding:
         from reportlab.pdfbase import pdfdoc
 
         D = {}
-        baseEnc = getEncoding(self.baseEncodingName)
+        baseEncodingName = self.baseEncodingName
+        baseEnc = getEncoding(baseEncodingName)
         differences = self.getDifferences(baseEnc) #[None] * 256)
 
         # if no differences, we just need the base name
         if differences == []:
-            return pdfdoc.PDFName(self.baseEncodingName)
+            return pdfdoc.PDFName(baseEncodingName)
         else:
             #make up a dictionary describing the new encoding
             diffArray = []
@@ -319,7 +320,9 @@ class Encoding:
 
             #print 'diffArray = %s' % diffArray
             D["Differences"] = pdfdoc.PDFArray(diffArray)
-            D["BaseEncoding"] = pdfdoc.PDFName(self.baseEncodingName)
+            if baseEncodingName in ('MacRomanEncoding','MacExpertEncoding','WinAnsiEncoding'):
+                #https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/PDF32000_2008.pdf page 263
+                D["BaseEncoding"] = pdfdoc.PDFName(baseEncodingName)
             D["Type"] = pdfdoc.PDFName("Encoding")
             PD = pdfdoc.PDFDictionary(D)
             return PD
@@ -403,7 +406,10 @@ class Font:
         pdfFont.Name = internalName
         pdfFont.BaseFont = self.face.name
         pdfFont.__Comment__ = 'Font %s' % self.fontName
-        pdfFont.Encoding = self.encoding.makePDFObject()
+        e = self.encoding.makePDFObject()
+        if not isStr(e) or e in ('MacRomanEncoding','MacExpertEncoding','WinAnsiEncoding'):
+            #https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/PDF32000_2008.pdf page 255
+            pdfFont.Encoding = e
 
         # is it a built-in one?  if not, need more stuff.
         if not self.face.name in standardFonts:
