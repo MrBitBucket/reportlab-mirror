@@ -254,7 +254,7 @@ class FontFinder:
                 if ext.lower() in EXTENSIONS:
                     #it's a font
                     f = FontDescriptor()
-                    f.fileName = filename = os.path.normpath(os.path.join(dirName, fileName))
+                    f.fileName = fileName = os.path.normpath(os.path.join(dirName, fileName))
                     try:
                         f.timeModified = rl_getmtime(fileName)
                     except:
