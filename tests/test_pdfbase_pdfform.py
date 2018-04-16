@@ -73,6 +73,7 @@ class PdfFormTestCase(NearTestCase):
         af.radio(name='rb1C',tooltip='Field rb1C', value='V2', selected=True,x=144*2,y=72+1*36,buttonStyle='circle', borderStyle='inset',shape='circle', borderWidth=2, borderColor=magenta, fillColor=pink, textColor=blue,forceBorder=True)
         af.textfield(name='tf1A',tooltip='Field tf1A',value='Hello World',x=144*2+36,y=72+0*36, borderStyle='inset', borderWidth=2, borderColor=magenta, fillColor=pink, textColor=blue,forceBorder=True)
         af.textfield(name='tf1B',tooltip='Field tf1B',value='Hello World',x=144*2+36,y=72+2*36, borderStyle='inset', borderWidth=2, fontName='Courier-Bold', borderColor=magenta, fillColor=pink, textColor=blue,forceBorder=True)
+        af.textfield(name='tf1C',tooltip='Field tf1C',value='Hello World',x=144*2+36,y=72+3*36, borderStyle='inset', borderWidth=0, fontName='Courier-Bold', borderColor=green, fillColor=red, textColor=black)
         canv.showPage()
         canv.translate(72,0)    #shift matrix
         #these are absolute in changed matrix
@@ -98,6 +99,7 @@ class PdfFormTestCase(NearTestCase):
         af.radio(name='rb2C',tooltip='Field rb2C', value='V2', selected=True,x=144*2,y=72+1*36,buttonStyle='circle', borderStyle='inset',shape='circle', borderWidth=2, borderColor=magenta, fillColor=pink, textColor=blue,forceBorder=True)
         af.textfield(name='tf2A',tooltip='Field tf2A',value='Hello World',x=144*2+36,y=72+0*36, borderStyle='inset', borderWidth=2, borderColor=magenta, fillColor=pink, textColor=blue,forceBorder=True)
         af.textfield(name='tf2B',tooltip='Field tf2B',value='Hello World',x=144*2+36,y=72+2*36, borderStyle='inset', borderWidth=2, fontName='Courier-Bold', borderColor=magenta, fillColor=pink, textColor=blue,forceBorder=True)
+        af.textfield(name='tf2C',tooltip='Field tf2C',value='Hello World',x=144*2+36,y=72+3*36, borderStyle='inset', borderWidth=0, fontName='Courier-Bold', borderColor=green, fillColor=red, textColor=black)
         canv.showPage()
         canv.translate(72,0)    #shift matrix
         #these are relative in changed matrix
@@ -123,6 +125,7 @@ class PdfFormTestCase(NearTestCase):
         af.radioRelative(name='rb3C',tooltip='Field rb3C', value='V2', selected=True,x=144*2,y=72+1*36,buttonStyle='circle', borderStyle='inset',shape='circle', borderWidth=2, borderColor=magenta, fillColor=pink, textColor=blue,forceBorder=True)
         af.textfieldRelative(name='tf3A',tooltip='Field tf3A',value='Hello World',x=144*2+36,y=72+0*36, borderStyle='inset', borderWidth=2, borderColor=magenta, fillColor=pink, textColor=blue,forceBorder=True)
         af.textfieldRelative(name='tf3B',tooltip='Field tf3B',value='Hello World',x=144*2+36,y=72+2*36, borderStyle='inset', borderWidth=2, fontName='Courier-Bold', borderColor=magenta, fillColor=pink, textColor=blue,forceBorder=True)
+        af.textfieldRelative(name='tf3C',tooltip='Field tf3C',value='Hello World',x=144*2+36,y=72+3*36, borderStyle='inset', borderWidth=0, fontName='Courier-Bold', borderColor=green, fillColor=red, textColor=black)
         canv.showPage()
         BS = ['solid','bevelled','inset','dashed','underlined']
         V = ['Av','B','Cv','D','Dv','E','F','G','Gv']

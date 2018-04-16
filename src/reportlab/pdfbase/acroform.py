@@ -2,7 +2,7 @@ __all__=('AcroForm',)
 from reportlab.pdfbase.pdfdoc import PDFObject, PDFArray, PDFDictionary, PDFString, pdfdocEnc, PDFName, PDFStream, PDFStreamFilterZCompress, escapePDF
 from reportlab.pdfgen.canvas  import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.lib.colors import Color, CMYKColor, Whiter, Blacker
+from reportlab.lib.colors import Color, CMYKColor, Whiter, Blacker, opaqueColor
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.utils import isStr, asNative
 from reportlab import xrange
@@ -181,6 +181,13 @@ class AcroForm(PDFObject):
         return r
 
     def colorTuple(self,c):
+        # ISO-32000-1, Table 189: An array of numbers that shall be in ther
+        #  range 0.0 to 1.0 specifying the colour [..]. The number of array
+        #  elements determines the colour space in which the colour shall
+        #  be defined:
+        #  0 No colour; transparent 1 DeviceGray 3 DeviceRGB 4 DeviceCMYK
+        if c is None or c.alpha == 0:
+            return ()
         return c.cmyk() if isinstance(c,CMYKColor) else c.rgb()
 
     def streamFillColor(self,c):
@@ -604,10 +611,10 @@ class AcroForm(PDFObject):
                 sel_fg='0 g',
                 ):
         stream = [].append
-        if fillColor:
+        if opaqueColor(fillColor):
             streamFill = self.streamFillColor(fillColor)
             stream('%(streamFill)s\n0 0 %(width)s %(height)s re\nf')
-        if borderWidth!=None:
+        if borderWidth!=None and borderWidth>0 and opaqueColor(borderColor):
             hbw = borderWidth*0.5
             bww = width - borderWidth
             bwh = height - borderWidth
@@ -626,11 +633,11 @@ class AcroForm(PDFObject):
                     bbs1 = '.75293 g'
                 stream('%(bbs0)s\n%(borderWidth)s %(borderWidth)s m\n%(borderWidth)s %(bwh)s l\n%(bww)s %(bwh)s l\n%(bw2w)s %(bw2h)s l\n%(_2bw)s %(bw2h)s l\n%(_2bw)s %(_2bw)s l\nf\n%(bbs1)s\n%(bww)s %(bwh)s m\n%(bww)s %(borderWidth)s l\n%(borderWidth)s %(borderWidth)s l\n%(_2bw)s %(_2bw)s l\n%(bw2w)s %(_2bw)s l\n%(bw2w)s %(bw2h)s l\nf')
         else:
-            hbw = 0
+            hbw = _2bw = borderWidth = 0
             bww = width
             bwh = height
         undash = ''
-        if borderColor:
+        if opaqueColor(borderColor) and borderWidth:
             streamStroke = self.streamStrokeColor(borderColor)
             if borderStyle=='underlined':
                 stream('%(streamStroke)s %(borderWidth)s w 0 %(hbw)s m %(width)s %(hbw)s l s')
@@ -851,7 +858,7 @@ class AcroForm(PDFObject):
                 F = makeFlags(annotationFlags,annotationFlagValues),
                 Ff = Ff,
                 #H=PDFName('N'),
-                DA=PDFString('/%s %d Tf 0 0 1 rg'%(iFontName,fontSize)),
+                DA=PDFString('/%s %d Tf %s' % (iFontName,fontSize, self.streamFillColor(textColor))),
                 )
         if Opt: TF['Opt'] = Opt
         if I: TF['I'] = PDFArray(I)
@@ -863,11 +870,15 @@ class AcroForm(PDFObject):
             name = 'AFF%03d' % len(self.fields)
         TF['T'] = PDFString(name)
         MK = dict(
-                BC=PDFArray(self.colorTuple(borderColor)),
                 BG=PDFArray(self.colorTuple(fillColor)),
                 )
+        # Acrobat seems to draw a thin border when BS is defined, so only
+        # include this if there actually is a border to draw
+        if borderWidth:
+            TF['BS'] = bsPDF(borderWidth,borderStyle,dashLen)
+            MK['BC'] = PDFArray(self.colorTuple(borderColor))
         TF['MK'] = PDFDictionary(MK)
-        if borderWidth: TF['BS'] = bsPDF(borderWidth,borderStyle,dashLen)
+
         TF = PDFDictionary(TF)
         self.canv._addAnnotation(TF)
         self.fields.append(self.getRef(TF))

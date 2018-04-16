@@ -148,6 +148,10 @@ class Color:
         return self.alpha
 if isPy3: Color = functools.total_ordering(Color)
 
+def opaqueColor(c):
+    '''utility to check we have a color that's not fully transparent'''
+    return isinstance(c,Color) and c.alpha>0
+
 class CMYKColor(Color):
     """This represents colors using the CMYK (cyan, magenta, yellow, black)
     model commonly used in professional printing.  This is implemented
