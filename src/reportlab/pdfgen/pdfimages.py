@@ -169,7 +169,7 @@ class PDFImage:
         self.width = self.width or imgwidth
         self.height = self.height or imgheight
 
-    def drawInlineImage(self, canvas, preserveAspectRatio=False,anchor='sw'):
+    def drawInlineImage(self, canvas, preserveAspectRatio=False,anchor='sw', anchorAtXY=False, showBoundary=False):
         """Draw an Image into the specified rectangle.  If width and
         height are omitted, they are calculated from the image size.
         Also allow file names as well as images.  This allows a
@@ -177,7 +177,7 @@ class PDFImage:
         width = self.width
         height = self.height
         if width<1e-6 or height<1e-6: return False
-        x,y,self.width,self.height, scaled = aspectRatioFix(preserveAspectRatio,anchor,self.x,self.y,width,height,self.imgwidth,self.imgheight)
+        x,y,self.width,self.height, scaled = aspectRatioFix(preserveAspectRatio,anchor,self.x,self.y,width,height,self.imgwidth,self.imgheight,anchorAtXY)
         # this says where and how big to draw it
         if not canvas.bottomup: y = y+height
         canvas._code.append('q %s 0 0 %s cm' % (fp_str(self.width), fp_str(self.height, x, y)))
@@ -185,6 +185,8 @@ class PDFImage:
         for line in self.imageData:
             canvas._code.append(line)
         canvas._code.append('Q')
+        if showBoundary:
+            canvas.rect(x,y,width,height,stroke=1,fill=0)
         return True
 
     def format(self, document):

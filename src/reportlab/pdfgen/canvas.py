@@ -833,7 +833,7 @@ class Canvas(textobject._PDFColorSetter):
     #
     ######################################################
     def drawInlineImage(self, image, x,y, width=None,height=None,
-            preserveAspectRatio=False,anchor='c'):
+            preserveAspectRatio=False,anchor='c', anchorAtXY=False, showBoundary=False):
         """See drawImage, which should normally be used instead... 
         
         drawInlineImage behaves like drawImage, but stores the image content
@@ -852,11 +852,11 @@ class Canvas(textobject._PDFColorSetter):
         img_obj = PDFImage(image, x,y, width, height)
         img_obj.drawInlineImage(self,
             preserveAspectRatio=preserveAspectRatio, 
-            anchor=anchor)
+            anchor=anchor,anchorAtXY=anchorAtXY,showBoundary=showBoundary)
         return (img_obj.width, img_obj.height)
 
     def drawImage(self, image, x, y, width=None, height=None, mask=None, 
-            preserveAspectRatio=False, anchor='c'):
+            preserveAspectRatio=False, anchor='c', anchorAtXY=False, showBoundary=False):
         """Draws the image (ImageReader object or filename) as specified.
 
         "image" may be an image filename or an ImageReader object. 
@@ -960,7 +960,7 @@ class Canvas(textobject._PDFColorSetter):
                 del imgObj._smask
 
         # ensure we have a size, as PDF will make it 1x1 pixel otherwise!
-        x,y,width,height,scaled = aspectRatioFix(preserveAspectRatio,anchor,x,y,width,height,imgObj.width,imgObj.height)
+        x,y,width,height,scaled = aspectRatioFix(preserveAspectRatio,anchor,x,y,width,height,imgObj.width,imgObj.height,anchorAtXY)
 
         # scale and draw
         self.saveState()
@@ -968,6 +968,8 @@ class Canvas(textobject._PDFColorSetter):
         self.scale(width, height)
         self._code.append("/%s Do" % regName)
         self.restoreState()
+        if showBoundary:
+            self.rect(x,y,width,height,stroke=1,fill=0)
 
         # track what's been used on this page
         self._formsinuse.append(name)

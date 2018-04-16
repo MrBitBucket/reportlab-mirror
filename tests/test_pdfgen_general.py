@@ -12,6 +12,7 @@ from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
 from reportlab.lib.utils import haveImages, fileName2FSEnc
+from reportlab.lib.boxstuff import rectCorner
 
 #################################################################
 #
@@ -845,31 +846,63 @@ cost to performance.""")
         c.drawString(inch, 5.75*inch,
         'anchored by respective corners - use both a wide and a tall one as tests')
         x = 0.25 * inch
-        for anchor in ['nw','n','ne','w','c','e','sw','s','se']:
+        y = 5*inch
+        for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
             x += 0.75*inch
-            c.rect(x, 5*inch, 0.6*inch, 0.6*inch)
+            c.rect(x, y, 0.6*inch, 0.6*inch)
             c.drawImage(
-                    gif, x, 5*inch,
+                    gif, x, y,
                     width=0.6*inch, height=0.6*inch,
                     preserveAspectRatio=True,
                     anchor=anchor
                     )
-            c.drawString(x, 4.9*inch, anchor)
+            c.drawString(x, y-0.1*inch, anchor)
 
         x = 0.25 * inch
+        y = 4*inch
         tall_red = os.path.join(testsFolder,'tall_red.png')
-        for anchor in ['nw','n','ne','w','c','e','sw','s','se']:
+        for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
             x += 0.75*inch
-            c.rect(x, 4*inch, 0.6*inch, 0.6*inch)
+            c.rect(x, y, 0.6*inch, 0.6*inch)
             c.drawImage(
-                    tall_red, x, 4*inch,
+                    tall_red, x, y,
                     width=0.6*inch, height=0.6*inch,
                     preserveAspectRatio=True,
                     anchor=anchor
                     )
-            c.drawString(x, 3.9*inch, anchor)
+            c.drawString(x, y-0.1*inch, anchor)
 
+        #Andy's positioning code fails for this case when the image is not reaching the limit
+        x = 0.25 * inch
+        y = 3*inch
+        tall_red = os.path.join(testsFolder,'tall_red.png')
+        for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
+            x += 0.75*inch
+            c.rect(x, 3*inch, 0.7*inch, 0.7*inch)
+            c.drawImage(
+                    tall_red, x, 3*inch,
+                    width=0.6*inch, height=0.6*inch,
+                    preserveAspectRatio=True,
+                    anchor=anchor
+                    )
+            c.drawString(x, y-0.1*inch, anchor)
 
+        #fix by using anchorAtXY
+        x = 0.25 * inch
+        y = 2*inch
+        tall_red = os.path.join(testsFolder,'tall_red.png')
+        for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
+            x += 0.75*inch
+            c.rect(x, y, 0.7*inch, 0.7*inch)
+            ax, ay = rectCorner(x, y, 0.7*inch, 0.7*inch, anchor)
+            c.drawImage(
+                    tall_red, ax, ay,
+                    width=0.6*inch, height=0.6*inch,
+                    preserveAspectRatio=True,
+                    anchor=anchor,
+                    anchorAtXY=True,
+                    )
+            c.drawString(x, y-0.1*inch, anchor)
 
         c.showPage()
 
