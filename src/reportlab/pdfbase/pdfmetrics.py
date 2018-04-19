@@ -407,7 +407,7 @@ class Font:
         pdfFont.BaseFont = self.face.name
         pdfFont.__Comment__ = 'Font %s' % self.fontName
         e = self.encoding.makePDFObject()
-        if not isStr(e) or e in ('MacRomanEncoding','MacExpertEncoding','WinAnsiEncoding'):
+        if not isStr(e) or e in ('/MacRomanEncoding','/MacExpertEncoding','/WinAnsiEncoding'):
             #https://www.adobe.com/content/dam/acom/en/devnet/acrobat/pdfs/PDF32000_2008.pdf page 255
             pdfFont.Encoding = e
 
