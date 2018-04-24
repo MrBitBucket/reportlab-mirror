@@ -18,10 +18,14 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.rl_config import rtlSupport
 
 log2vis = None
+def fribidiText(text,direction):
+    return text
 if rtlSupport:
     try:
         from pyfribidi2 import log2vis, ON as DIR_ON, LTR as DIR_LTR, RTL as DIR_RTL
         directionsMap = dict(LTR=DIR_LTR,RTL=DIR_RTL)
+        def fribidiText(text,direction):
+            return log2vis(text, directionsMap.get(direction,DIR_ON),clean=True) if direction in ('LTR','RTL') else text
     except:
         import warnings
         warnings.warn('pyfribidi is not installed - RTL not supported')
@@ -375,7 +379,7 @@ class PDFTextObject(_PDFColorSetter):
         "Generates PDF text output operator(s)"
         if log2vis and self.direction in ('LTR','RTL'):
             # Use pyfribidi to write the text in the correct visual order.
-            text = log2vis(text, directionsMap.get(self.direction.upper(),DIR_ON),clean=True)
+            text = log2vis(text, directionsMap.get(self.direction,DIR_ON),clean=True)
         canv = self._canvas
         font = pdfmetrics.getFont(self._fontname)
         R = []
