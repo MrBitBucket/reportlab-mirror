@@ -62,7 +62,7 @@ def _text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000
                             anchor='start', truncate=1, pathReverse=0):
     from reportlab.graphics import renderPM, _renderPM
     font = getFont(fontName)
-    if font._multiByte:
+    if font._multiByte and not font._dynamicFont:
         raise ValueError("_text2PathDescription doesn't support multi byte fonts like %r" % fontName)
     P = []
     if not anchor=='start':
