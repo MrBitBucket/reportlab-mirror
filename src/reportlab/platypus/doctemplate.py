@@ -939,41 +939,52 @@ class BaseDocTemplate:
     _handle_currentFrame = handle_currentFrame
     _handle_nextFrame = handle_nextFrame
 
+    def _makeCanvas(self, filename=None, canvasmaker=canvas.Canvas):
+        '''make and return a sample canvas. As suggested by 
+        Chris Jerdonek cjerdonek @ bitbucket this allows testing of stringWidths
+        etc.
+
+        *NB* only the canvases created in self._startBuild will actually be used
+        in the build process.
+        '''
+        canv = canvasmaker(filename or self.filename,
+                            pagesize=self.pagesize,
+                            invariant=self.invariant,
+                            pageCompression=self.pageCompression,
+                            enforceColorSpace=self.enforceColorSpace,
+                            initialFontName = self.initialFontName,
+                            initialFontSize = self.initialFontSize,
+                            initialLeading = self.initialLeading,
+                            cropBox = self.cropBox,
+                            artBox = self.artBox,
+                            trimBox = self.trimBox,
+                            bleedBox = self.bleedBox,
+                            )
+
+        getattr(canv,'setEncrypt',lambda x: None)(self.encrypt)
+
+        canv._cropMarks = self.cropMarks
+        canv.setAuthor(self.author)
+        canv.setTitle(self.title)
+        canv.setSubject(self.subject)
+        canv.setCreator(self.creator)
+        canv.setKeywords(self.keywords)
+        if self.displayDocTitle is not None:
+            canv.setViewerPreference('DisplayDocTitle',['false','true'][self.displayDocTitle])
+        if self.lang:
+            canv.setCatalogEntry('Lang',self.lang)
+
+        if self._onPage:
+            canv.setPageCallBack(self._onPage)
+        return canv
+
     def _startBuild(self, filename=None, canvasmaker=canvas.Canvas):
         self._calc()
 
         #each distinct pass gets a sequencer
-        self.seq = reportlab.lib.sequencer.Sequencer()
+        #self.seq = reportlab.lib.sequencer.Sequencer()
 
-        self.canv = canvasmaker(filename or self.filename,
-                                pagesize=self.pagesize,
-                                invariant=self.invariant,
-                                pageCompression=self.pageCompression,
-                                enforceColorSpace=self.enforceColorSpace,
-                                initialFontName = self.initialFontName,
-                                initialFontSize = self.initialFontSize,
-                                initialLeading = self.initialLeading,
-                                cropBox = self.cropBox,
-                                artBox = self.artBox,
-                                trimBox = self.trimBox,
-                                bleedBox = self.bleedBox,
-                                )
-
-        getattr(self.canv,'setEncrypt',lambda x: None)(self.encrypt)
-
-        self.canv._cropMarks = self.cropMarks
-        self.canv.setAuthor(self.author)
-        self.canv.setTitle(self.title)
-        self.canv.setSubject(self.subject)
-        self.canv.setCreator(self.creator)
-        self.canv.setKeywords(self.keywords)
-        if self.displayDocTitle is not None:
-            self.canv.setViewerPreference('DisplayDocTitle',['false','true'][self.displayDocTitle])
-        if self.lang:
-            self.canv.setCatalogEntry('Lang',self.lang)
-
-        if self._onPage:
-            self.canv.setPageCallBack(self._onPage)
+        self.canv = self._makeCanvas(filename=filename,canvasmaker=canvasmaker)
         self.handle_documentBegin()
 
     def _endBuild(self):
