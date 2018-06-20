@@ -120,46 +120,80 @@ def setXPos(tx,dx):
     if dx>1e-6 or dx<-1e-6:
         tx.setXPos(dx)
 
-def _leftDrawParaLine( tx, offset, extraspace, words, last=0):
-    setXPos(tx,offset)
-    tx._textOut(' '.join(words),1)
-    setXPos(tx,-offset)
-    return offset
-
-def _centerDrawParaLine( tx, offset, extraspace, words, last=0):
-    m = offset + 0.5 * extraspace
-    setXPos(tx,m)
-    tx._textOut(' '.join(words),1)
-    setXPos(tx,-m)
-    return m
-
-def _rightDrawParaLine( tx, offset, extraspace, words, last=0):
-    m = offset + extraspace
-    setXPos(tx,m)
-    tx._textOut(' '.join(words),1)
-    setXPos(tx,-m)
-    return m
-
 def _nbspCount(w):
     if isBytes(w):
         return w.count(b'\xc2\xa0')
     else:
         return w.count(u'\xa0')
 
+def _leftDrawParaLine( tx, offset, extraspace, words, last=0):
+    simple = extraspace>-1e-8 or getattr(tx,'preformatted',False)
+    text = ' '.join(words)
+    setXPos(tx,offset)
+    if not simple:
+        nSpaces = len(words)+_nbspCount(text)-1
+        simple = not nSpaces
+    if simple:
+        tx._textOut(text,1)
+    else:
+        tx.setWordSpace(extraspace / float(nSpaces))
+        tx._textOut(text,1)
+        tx.setWordSpace(0)
+    setXPos(tx,-offset)
+    return offset
+
+def _centerDrawParaLine( tx, offset, extraspace, words, last=0):
+    simple = extraspace>-1e-8 or getattr(tx,'preformatted',False)
+    text = ' '.join(words)
+    if not simple:
+        nSpaces = len(words)+_nbspCount(text)-1
+        simple = not nSpaces
+    if simple:
+        m = offset + 0.5 * extraspace
+        setXPos(tx,m)
+        tx._textOut(text,1)
+    else:
+        m = offset
+        tx.setWordSpace(extraspace / float(nSpaces))
+        setXPos(tx,m)
+        tx._textOut(text,1)
+        tx.setWordSpace(0)
+    setXPos(tx,-m)
+    return m
+
+def _rightDrawParaLine( tx, offset, extraspace, words, last=0):
+    simple = extraspace>-1e-8 or getattr(tx,'preformatted',False)
+    text = ' '.join(words)
+    if not simple:
+        nSpaces = len(words)+_nbspCount(text)-1
+        simple = not nSpaces
+    if simple:
+        m = offset + extraspace
+        setXPos(tx,m)
+        tx._textOut(' '.join(words),1)
+    else:
+        m = offset
+        tx.setWordSpace(extraspace / float(nSpaces))
+        setXPos(tx,m)
+        tx._textOut(text,1)
+        tx.setWordSpace(0)
+    setXPos(tx,-m)
+    return m
+
 def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,offset)
     text  = ' '.join(words)
-    if last or extraspace<=1e-8:
-        #last one, left align
+    simple = last or (-1e-8<extraspace<=1e-8) or getattr(tx,'preformatted',False)
+    if not simple:
+        nSpaces = len(words)+_nbspCount(text)-1
+        simple = not nSpaces
+    if simple:
+        #last one or no extra space so left align
         tx._textOut(text,1)
     else:
-        nSpaces = len(words)+sum([_nbspCount(w) for w in words])-1
-        if nSpaces:
-            tx.setWordSpace(extraspace / float(nSpaces))
-            tx._textOut(text,1)
-            tx.setWordSpace(0)
-        else:
-            tx._textOut(text,1)
+        tx.setWordSpace(extraspace / float(nSpaces))
+        tx._textOut(text,1)
+        tx.setWordSpace(0)
     setXPos(tx,-offset)
     return offset
 
@@ -1447,6 +1481,8 @@ class Paragraph(Flowable):
                 else:
                     return f.clone(kind=0, lines=[],ascent=ascent,descent=descent,fontSize=fontSize)
             spaceWidth = stringWidth(' ', fontName, fontSize, self.encoding)
+            dSpaceShrink = spaceShrinkage*spaceWidth
+            spaceShrink = 0
             cLine = []
             currentWidth = -spaceWidth   # hack to get around extra space for word 1
             while words:
@@ -1454,22 +1490,24 @@ class Paragraph(Flowable):
                 #this underscores my feeling that Unicode throughout would be easier!
                 wordWidth = stringWidth(word, fontName, fontSize, self.encoding)
                 newWidth = currentWidth + spaceWidth + wordWidth
-                if newWidth>maxWidth:
+                if newWidth>maxWidth+spaceShrink:
                     nmw = min(lineno,maxlineno)
                     if wordWidth>max(maxWidths[nmw:nmw+1]) and not isinstance(word,_SplitText) and splitLongWords:
                         #a long word
                         words[0:0] = _splitWord(word,maxWidth-spaceWidth-currentWidth,maxWidths,lineno,fontName,fontSize,self.encoding)
                         self._splitLongWordCount += 1
                         continue
-                if newWidth <= maxWidth or not len(cLine):
+                if newWidth <= (maxWidth+spaceShrink) or not len(cLine):
                     # fit one more on this line
                     cLine.append(word)
                     currentWidth = newWidth
+                    spaceShrink += dSpaceShrink
                 else:
                     if currentWidth > self._width_max: self._width_max = currentWidth
                     #end of line
                     lines.append((maxWidth - currentWidth, cLine))
                     cLine = [word]
+                    spaceShrink = 0
                     currentWidth = wordWidth
                     lineno += 1
                     maxWidth = maxWidths[min(maxlineno,lineno)]
@@ -1499,7 +1537,7 @@ class Paragraph(Flowable):
                 fontSize = f.fontSize
 
                 if not words:
-                    n = space = spaceWidth = currentWidth = 0
+                    n = dSpaceShrink = spaceShrink = spaceWidth = currentWidth = 0
                     maxSize = fontSize
                     maxAscent, minDescent = getAscentDescent(fontName,fontSize)
 
@@ -1513,7 +1551,7 @@ class Paragraph(Flowable):
                 #test to see if this frag is a line break. If it is we will only act on it
                 #if the current width is non-negative or the previous thing was a deliberate lineBreak
                 lineBreak = f._fkind==_FK_BREAK
-                if not lineBreak and newWidth>(maxWidth+space*spaceShrinkage) and not isinstance(w,_SplitList) and splitLongWords:
+                if not lineBreak and newWidth>(maxWidth+spaceShrink) and not isinstance(w,_SplitList) and splitLongWords:
                     nmw = min(lineno,maxlineno)
                     if wordWidth>max(maxWidths[nmw:nmw+1]):
                         #a long word
@@ -1521,7 +1559,7 @@ class Paragraph(Flowable):
                         FW.pop(-1)  #remove this as we are doing this one again
                         self._splitLongWordCount += 1
                         continue
-                endLine = (newWidth>(maxWidth+space*spaceShrinkage) and n>0) or lineBreak
+                endLine = (newWidth>(maxWidth+spaceShrink) and n>0) or lineBreak
                 if not endLine:
                     if lineBreak: continue      #throw it away
                     nText = w[1][1]
@@ -1550,7 +1588,7 @@ class Paragraph(Flowable):
                                 if wi._fkind==_FK_TEXT:
                                     if not wi.text.endswith(' '):
                                         wi.text += ' '
-                                        space += spaceWidth
+                                        spaceShrink += dSpaceShrink
                                     break
                         g = f.clone()
                         words.append(g)
@@ -1558,13 +1596,14 @@ class Paragraph(Flowable):
                     elif spaceWidth:
                         if not g.text.endswith(' '):
                             g.text += ' ' + nText
-                            space += spaceWidth
+                            spaceShrink += dSpaceShrink
                         else:
                             g.text += nText
                     else:
                         g.text += nText
 
                     spaceWidth = stringWidth(' ',fontName,fontSize) if isinstance(w,_HSWord) else 0 #of the space following this word
+                    dSpaceShrink = spaceWidth*spaceShrinkage
 
                     ni = 0
                     for i in w[2:]:
@@ -1610,9 +1649,10 @@ class Paragraph(Flowable):
                         continue
 
                     spaceWidth = stringWidth(' ',fontName,fontSize) if isinstance(w,_HSWord) else 0 #of the space following this word
+                    dSpaceShrink = spaceWidth*spaceShrinkage
                     currentWidth = wordWidth
                     n = 1
-                    space = 0
+                    spaceShrink = 0
                     g = f.clone()
                     maxSize = g.fontSize
                     if calcBounds:
@@ -1781,6 +1821,7 @@ class Paragraph(Flowable):
                 canvas.setFillColor(f.textColor)
 
                 tx = self.beginText(cur_x, cur_y)
+                tx.preformatted = 'preformatted' in self.__class__.__name__.lower()
                 if autoLeading=='max':
                     leading = max(leading,blPara.ascent-blPara.descent)
                 elif autoLeading=='min':
