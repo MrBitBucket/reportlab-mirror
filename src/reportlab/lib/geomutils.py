@@ -23,6 +23,9 @@ def normalizeTRBL(p):
     '''
     if not isinstance(p, (tuple, list)):
         return (p,)*4
+    elif len(p)==1:
+        return (p[0],)*4
+
     l = len(p)
     if l < 2 or l > 4:
         raise ValueError('A padding must have between 2 and 4 values but got %d.' % l)
