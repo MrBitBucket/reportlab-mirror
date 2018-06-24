@@ -1530,10 +1530,11 @@ class Paragraph(Flowable):
         self.height = lineno = 0
         maxlineno = len(maxWidths)-1
         style = self.style
-        hyphenator = getattr(self,'hyphenator',getattr(style,'hyphenationLang','').strip())
+        hyphenator = getattr(self,'hyphenator',getattr(style,'hyphenationLang',''))
         if hyphenator:
             if isStr(hyphenator):
-                if pyphen:
+                hyphenator = hyphenator.strip()
+                if hyphenator and pyphen:
                     hyphenator = pyphen.Pyphen(lang=hyphenator).iterate
                 else:
                     hyphenator = None
