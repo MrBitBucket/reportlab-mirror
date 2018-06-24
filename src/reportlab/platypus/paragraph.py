@@ -1534,7 +1534,7 @@ class Paragraph(Flowable):
         if hyphenator:
             if isStr(hyphenator):
                 if pyphen:
-                    hyphenator = lambda s, i=pyphen.Pyphen(lang=hyphenator).iterate: i(s)
+                    hyphenator = pyphen.Pyphen(lang=hyphenator).iterate
                 else:
                     hyphenator = None
             elif not callable(hyphenator):
@@ -1922,7 +1922,7 @@ class Paragraph(Flowable):
                 else:
                     cur_y = self.height - getattr(f,'ascent',f.fontSize)
                 if bulletText:
-                    gffset = _drawBullet(canvas,offset,cur_y,bulletText,style,rtl=style.wordWrap=='RTL' and self._wrapWidths or False)
+                    offset = _drawBullet(canvas,offset,cur_y,bulletText,style,rtl=style.wordWrap=='RTL' and self._wrapWidths or False)
 
                 #set up the font etc.
                 canvas.setFillColor(f.textColor)
