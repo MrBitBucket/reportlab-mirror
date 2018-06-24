@@ -97,6 +97,15 @@ class _PCT(float):
         r._normalizer = normalizer
         return r
 
+    def __copy__(self):
+        r = _PCT(float(self))
+        r._value = self._value
+        r._normalizer = normalizer
+        return r
+
+    def __deepcopy__(self,mem):
+        return self.__copy__()
+
 def fontSizeNormalize(frag,attr,default):
     if not hasattr(frag,attr): return default
     v = _numpct(getattr(frag,attr),allowRelative=True)

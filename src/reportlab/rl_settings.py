@@ -58,7 +58,8 @@ underlineOffset
 underlineGap
 strikeWidth
 strikeOffset
-strikeGap'''.split())
+strikeGap
+hyphenationLang'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -135,7 +136,8 @@ allowTTFSubsetting=         []                      #list of font file names tha
                                                     #ReportLab takes no responsibility for the use of this setting.
 
 spaceShrinkage=0.05                                 #allowable space shrinkage to make lines fit
-
+hyphenationLang=''                                  #if pyphen installed set this to the language of your choice
+                                                    #eg 'en_GB'
 
 # places to look for T1Font information
 T1SearchPath =  (
