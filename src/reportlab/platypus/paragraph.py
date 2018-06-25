@@ -712,29 +712,91 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     R.append(W)
     return R
 
+_hy_pfx_pat = re.compile(ur"""^['"(\[{\xbf\u2018\u201A\u201C\u201E]+""")
+_hy_sfx_pat = re.compile(ur"""['")\]}?!.,;:\u2019\u201B\u201D\u201F]+$""")
+_hy_shy_pat = re.compile(ur"""([-\xad])""")
+#valid letters determine by inspection of
+#    https://en.wikipedia.org/wiki/List_of_Unicode_characters#Latin_script
+_hy_letters_pat=re.compile(ur"^[A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\u024f\u1e80-\u1e85\u1e00-\u1eff\u1e02\u1e03\u1e0a\u1e0b\u1e1e\u1e1f\u1e40\u1e41\u1e56\u1e57\u1e60\u1e61\u1e6a\u1e6b\u1e9b\u1ef2\u1ef3]+$")
+_hy_sly_letters_pat=re.compile(ur"^[-\xadA-Za-z\xc0-\xd6\xd8-\xf6\xf8-\u024f\u1e80-\u1e85\u1e00-\u1eff\u1e02\u1e03\u1e0a\u1e0b\u1e1e\u1e1f\u1e40\u1e41\u1e56\u1e57\u1e60\u1e61\u1e6a\u1e6b\u1e9b\u1ef2\u1ef3]+$")
+
+if __name__=='__main__':
+    import sys
+    fn = sys.argv[1]
+    with open(fn,'rb') as f:
+        lines = f.readlines()
+    
+    n = 0
+    for i,line in enumerate(lines):
+        assert line[:2]=='U+' and line[6] in ' \t', 'failed checks in line %d' % i+1
+        num = int(line[2:6],16)
+        u = unichr(num)
+        m = letters_pat.match(u)
+        if not m:
+            print('U+%4.4x = %r fails' % (num,u))
+        else:
+            n += 1
+
+    print('%d unicode characters were matched' % n)
+def _hyGenPairs(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize):
+    if isBytes(s): s = s.decode('utf8') #only encoding allowed
+    m = _hy_pfx_pat.match(s)
+    if m:
+        pfx = m.group(0)
+        s = s[len(pfx):]
+    else:
+        pfx = u''
+    m = _hy_sfx_pat.search(s)
+    if m:
+        sfx = m.group(0)
+        s = s[:-len(sfx)]
+    else:
+        sfx = u''
+    if len(s) < 5: return
+    R = []
+    aR = R.append
+    H = _hy_shy_pat.split(s)
+    n = len(H)
+    w0 = newWidth - ww
+    if n>1:
+        if n<3 or u'' in H: return
+        if not _hy_sly_letters_pat.match(s): return
+        for i in xrange(0,n-1,2):
+            h = pfx + ''.join(H[:i+2])
+            t = ''.join(H[i+2:]) + sfx
+            hw = stringWidth(h,fontName,fontSize)
+            tw = hw+w0
+            if tw<=maxWidth:
+                aR((hw,ww-hw,h,t))
+        if R: return (u'', 0, R)
+    else:
+        if not _hy_letters_pat.match(s): return
+        hylen = stringWidth(u'-',fontName,fontSize)
+        w0 += hylen
+        for h,t in hyphenator(s):
+            h = pfx + h
+            t = t + sfx
+            hw = stringWidth(h,fontName,fontSize)
+            tw = hw+w0
+            if tw<=maxWidth:
+                aR((hw,ww-hw,h,t))
+        if R: return u'-', hylen, R
+
 def _hyphenateFragWord(hyphenator,w,newWidth,maxWidth):
     ww = w[0]
     if ww==0 or len(w)>2 or w[1][0].rise!=0: return []
     f,s = w[1]
-    if isBytes(s): s = s.decode('utf8') #only encoding allowed
-    fn = f.fontName
-    fs = f.fontSize
-    hylen = stringWidth(u'-',fn,fs)
-    R = []
-    w0 = newWidth - ww + hylen
-    for h,t in hyphenator(s):
-        hw = stringWidth(h,fn,fs)
-        tw = hw+w0
-        if tw<=maxWidth:
-            R.append((hw,ww-hw,h,t))
+    R = _hyGenPairs(hyphenator, s, ww, newWidth, maxWidth, f.fontName, f.fontSize)
     if R:
+        jc, jclen, R = R
         if len(R)>1:
             R = [(abs(r[0]-r[1]),r) for r in R]
             R.sort()
             hw, tw, h, t = R[0][1]
         else:
             hw, tw, h, t = R[0]
-        return [_SplitFragHY([hw+hylen,(f,h+u'-')]),(_SplitFragHS if isinstance(w,_HSFrag) else _SplitFrag)([tw,(f,t)])]
+        import rgb_debug;rgb_debug('%r --> %r + %r' % (s,h+jc,t))
+        return [(_SplitFragHY if jc else _SplitFrag)([hw+jclen,(f,h+jc)]),(_SplitFragHS if isinstance(w,_HSFrag) else _SplitFrag)([tw,(f,t)])]
 
 class _SplitWord(unicodeT):
     pass
@@ -745,23 +807,16 @@ class _SplitWordHY(_SplitWord):
 
 def _hyphenateWord(hyphenator,fontName,fontSize,w,ww,newWidth,maxWidth):
     if ww==0: return []
-    s = s.decode('utf8') if isBytes(w) else w
-    hylen = stringWidth('-',fontName,fontSize)
-    R = []
-    w0 = newWidth - ww + hylen
-    for h,t in hyphenator(s):
-        hw = stringWidth(h,fontName,fontSize)
-        tw = hw+w0
-        if tw<=maxWidth:
-            R.append((hw,ww-hw,h,t))
+    R = _hyGenPairs(hyphenator, w, ww, newWidth, maxWidth, fontName, fontSize)
     if R:
+        jc, jclen, R = R
         if len(R)>1:
             R = [(abs(r[0]-r[1]),r) for r in R]
             R.sort()
             hw, tw, h, t = R[0][1]
         else:
             hw, tw, h, t = R[0]
-        return [_SplitWordHY(h+u'-'),_SplitWord(t)]
+        return [(_SplitWordHY if jc else _SplitWord)(h+jc),_SplitWord(t)]
 
 def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding='utf8'):
     '''
@@ -1530,7 +1585,7 @@ class Paragraph(Flowable):
         self.height = lineno = 0
         maxlineno = len(maxWidths)-1
         style = self.style
-        hyphenator = getattr(self,'hyphenator',getattr(style,'hyphenationLang',''))
+        hyphenator = getattr(style,'hyphenationLang','')
         if hyphenator:
             if isStr(hyphenator):
                 hyphenator = hyphenator.strip()
@@ -1586,7 +1641,7 @@ class Paragraph(Flowable):
                 wordWidth = stringWidth(word, fontName, fontSize, self.encoding)
                 newWidth = currentWidth + spaceWidth + wordWidth
                 if newWidth>maxWidth+spaceShrink:
-                    if hyphenator:
+                    if hyphenator and not getattr(f,'nobr',False):
                         hsw = _hyphenateWord(hyphenator, fontName, fontSize, word, wordWidth, newWidth, maxWidth+spaceShrink)
                         if hsw:
                             words[0:0] = hsw
@@ -1653,7 +1708,7 @@ class Paragraph(Flowable):
                 #if the current width is non-negative or the previous thing was a deliberate lineBreak
                 lineBreak = f._fkind==_FK_BREAK
                 if not lineBreak and newWidth>(maxWidth+spaceShrink) and not isinstance(w,_SplitFrag) and splitLongWords:
-                    if hyphenator and not isinstance(w,_SplitFragHY):
+                    if hyphenator and not isinstance(w,_SplitFragHY) and not getattr(f,'nobr',False):
                         hsw = _hyphenateFragWord(hyphenator,w,newWidth,maxWidth+spaceShrink)
                         if hsw:
                             _words[0:0] = hsw
