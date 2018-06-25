@@ -373,7 +373,8 @@ def getSampleStyleSheet():
                                   fontSize=8,
                                   leading=8.8,
                                   firstLineIndent=0,
-                                  leftIndent=36))
+                                  leftIndent=36,
+                                  hyphenationLang=''))
 
     stylesheet.add(ListStyle(name='UnorderedList',
                                 parent=None,
