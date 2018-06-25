@@ -719,25 +719,6 @@ _hy_shy_pat = re.compile(ur"""([-\xad])""")
 #    https://en.wikipedia.org/wiki/List_of_Unicode_characters#Latin_script
 _hy_letters_pat=re.compile(ur"^[A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\u024f\u1e80-\u1e85\u1e00-\u1eff\u1e02\u1e03\u1e0a\u1e0b\u1e1e\u1e1f\u1e40\u1e41\u1e56\u1e57\u1e60\u1e61\u1e6a\u1e6b\u1e9b\u1ef2\u1ef3]+$")
 _hy_sly_letters_pat=re.compile(ur"^[-\xadA-Za-z\xc0-\xd6\xd8-\xf6\xf8-\u024f\u1e80-\u1e85\u1e00-\u1eff\u1e02\u1e03\u1e0a\u1e0b\u1e1e\u1e1f\u1e40\u1e41\u1e56\u1e57\u1e60\u1e61\u1e6a\u1e6b\u1e9b\u1ef2\u1ef3]+$")
-
-if __name__=='__main__':
-    import sys
-    fn = sys.argv[1]
-    with open(fn,'rb') as f:
-        lines = f.readlines()
-    
-    n = 0
-    for i,line in enumerate(lines):
-        assert line[:2]=='U+' and line[6] in ' \t', 'failed checks in line %d' % i+1
-        num = int(line[2:6],16)
-        u = unichr(num)
-        m = letters_pat.match(u)
-        if not m:
-            print('U+%4.4x = %r fails' % (num,u))
-        else:
-            n += 1
-
-    print('%d unicode characters were matched' % n)
 def _hyGenPairs(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize):
     if isBytes(s): s = s.decode('utf8') #only encoding allowed
     m = _hy_pfx_pat.match(s)
