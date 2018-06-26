@@ -712,13 +712,27 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     R.append(W)
     return R
 
-_hy_pfx_pat = re.compile(ur"""^['"(\[{\xbf\u2018\u201A\u201C\u201E]+""")
-_hy_sfx_pat = re.compile(ur"""['")\]}?!.,;:\u2019\u201B\u201D\u201F]+$""")
-_hy_shy_pat = re.compile(ur"""([-\xad])""")
-#valid letters determine by inspection of
+#valid letters determined by inspection of
 #    https://en.wikipedia.org/wiki/List_of_Unicode_characters#Latin_script
-_hy_letters_pat=re.compile(ur"^[A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\u024f\u1e80-\u1e85\u1e00-\u1eff\u1e02\u1e03\u1e0a\u1e0b\u1e1e\u1e1f\u1e40\u1e41\u1e56\u1e57\u1e60\u1e61\u1e6a\u1e6b\u1e9b\u1ef2\u1ef3]+$")
-_hy_sly_letters_pat=re.compile(ur"^[-\xadA-Za-z\xc0-\xd6\xd8-\xf6\xf8-\u024f\u1e80-\u1e85\u1e00-\u1eff\u1e02\u1e03\u1e0a\u1e0b\u1e1e\u1e1f\u1e40\u1e41\u1e56\u1e57\u1e60\u1e61\u1e6a\u1e6b\u1e9b\u1ef2\u1ef3]+$")
+_hy_letters=u'A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\u024f\u1e80-\u1e85\u1e00-\u1eff\u1e02\u1e03\u1e0a\u1e0b\u1e1e\u1e1f\u1e40\u1e41\u1e56\u1e57\u1e60\u1e61\u1e6a\u1e6b\u1e9b\u1ef2\u1ef3'
+#explicit hyphens
+_hy_shy = u'-\xad'
+
+_hy_pfx_pat = re.compile(u'^[\'"([{\xbf\u2018\u201a\u201c\u201e]+')
+_hy_sfx_pat = re.compile(u'[]\'")}?!.,;:\u2019\u201b\u201d\u201f]+$')
+_hy_letters_pat=re.compile(u''.join((u"^[",_hy_letters,u"]+$")))
+_hy_shy_letters_pat=re.compile(u''.join((u"^[",_hy_shy,_hy_letters,"]+$")))
+_hy_shy_pat = re.compile(u''.join((u"([",_hy_shy,u"])")))
+
+def _hyBestPair(hy,hylen,R):
+    if len(R)>1:
+        R = [(abs(r[0]-r[1]),r) for r in R]
+        R.sort()
+        hw, tw, h, t = R[0][1]
+    else:
+        hw, tw, h, t = R[0]
+    return hy, hylen, hw, tw, h, t
+    
 def _hyGenPairs(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize):
     if isBytes(s): s = s.decode('utf8') #only encoding allowed
     m = _hy_pfx_pat.match(s)
@@ -741,7 +755,7 @@ def _hyGenPairs(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize):
     w0 = newWidth - ww
     if n>1:
         if n<3 or u'' in H: return
-        if not _hy_sly_letters_pat.match(s): return
+        if not _hy_shy_letters_pat.match(s): return
         for i in xrange(0,n-1,2):
             h = pfx + ''.join(H[:i+2])
             t = ''.join(H[i+2:]) + sfx
@@ -749,7 +763,7 @@ def _hyGenPairs(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize):
             tw = hw+w0
             if tw<=maxWidth:
                 aR((hw,ww-hw,h,t))
-        if R: return (u'', 0, R)
+        if R: return _hyBestPair(u'', 0, R)
     else:
         if not _hy_letters_pat.match(s): return
         hylen = stringWidth(u'-',fontName,fontSize)
@@ -761,22 +775,46 @@ def _hyGenPairs(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize):
             tw = hw+w0
             if tw<=maxWidth:
                 aR((hw,ww-hw,h,t))
-        if R: return u'-', hylen, R
+        if R: return _hyBestPair(u'-', hylen, R)
 
+def _fragWordSplitRep(w):
+    '''takes a frag word and assembles a unicode word from it
+    if a rise is seen or a non-zerowidth cbdefn then we return
+    None. Otherwise we return (word,([i0,len0, plen0, None],[i1,...],...])
+    where each ii is the index of the word fragment, pleni is the sum
+    of string lengths for frags <i; leni is the length of fragment i
+    the None is reserved for use as the hypenation string length.
+    '''
+    plen = 0
+    X = []
+    eX = X.extend
+    U = []
+    aU = U.append
+    for i,(f,t) in enumerate(w[1]):
+        if f.rise!=0: return None
+        if hasattr(f,'cbDefn') and getattr(f.cbDefn,'width',0): return
+        if isBytes(t): t = t.decode('utf8')
+        if not t: continue
+        aU(t)
+        clen = stringWidth(t,f.fontName,f.fontSize)
+        eX(len(t)*[[i,plen,clen,None]])
+        plen += clen
+    return u''.join(U),tuple(X)
+            
 def _hyphenateFragWord(hyphenator,w,newWidth,maxWidth):
     ww = w[0]
-    if ww==0 or len(w)>2 or w[1][0].rise!=0: return []
-    f,s = w[1]
-    R = _hyGenPairs(hyphenator, s, ww, newWidth, maxWidth, f.fontName, f.fontSize)
+    if ww==0: return []
+    if len(w[1])==1:
+        f, s = w[1][0]
+        R = _hyGenPairs(hyphenator, s, ww, newWidth, maxWidth, f.fontName, f.fontSize)
+    else:
+        return []
+
     if R:
-        jc, jclen, R = R
-        if len(R)>1:
-            R = [(abs(r[0]-r[1]),r) for r in R]
-            R.sort()
-            hw, tw, h, t = R[0][1]
-        else:
-            hw, tw, h, t = R[0]
-        return [(_SplitFragHY if jc else _SplitFrag)([hw+jclen,(f,h+jc)]),(_SplitFragHS if isinstance(w,_HSFrag) else _SplitFrag)([tw,(f,t)])]
+        hy, hylen, hw, tw, h, t = R
+        return [(_SplitFragHY if hy else _SplitFrag)([hw+hylen,(f,h+jc)]),(_SplitFragHS if isinstance(w,_HSFrag) else _SplitFrag)([tw,(f,t)])]
+    else:
+        return []
 
 class _SplitWord(unicodeT):
     pass
@@ -789,14 +827,8 @@ def _hyphenateWord(hyphenator,fontName,fontSize,w,ww,newWidth,maxWidth):
     if ww==0: return []
     R = _hyGenPairs(hyphenator, w, ww, newWidth, maxWidth, fontName, fontSize)
     if R:
-        jc, jclen, R = R
-        if len(R)>1:
-            R = [(abs(r[0]-r[1]),r) for r in R]
-            R.sort()
-            hw, tw, h, t = R[0][1]
-        else:
-            hw, tw, h, t = R[0]
-        return [(_SplitWordHY if jc else _SplitWord)(h+jc),_SplitWord(t)]
+        hy, hylen, hw, tw, h, t = R
+        return [(_SplitWordHY if hy else _SplitWord)(h+hy),_SplitWord(t)]
 
 def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding='utf8'):
     '''
