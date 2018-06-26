@@ -776,7 +776,6 @@ def _hyphenateFragWord(hyphenator,w,newWidth,maxWidth):
             hw, tw, h, t = R[0][1]
         else:
             hw, tw, h, t = R[0]
-        import rgb_debug;rgb_debug('%r --> %r + %r' % (s,h+jc,t))
         return [(_SplitFragHY if jc else _SplitFrag)([hw+jclen,(f,h+jc)]),(_SplitFragHS if isinstance(w,_HSFrag) else _SplitFrag)([tw,(f,t)])]
 
 class _SplitWord(unicodeT):
