@@ -205,7 +205,9 @@ class PDFDocument(PDFObject):
         if hasattr(getattr(filename, "write",None),'__call__'):
             myfile = 0
             f = filename
-            filename = makeFileName(getattr(filename,'name',''))
+            filename = getattr(f,'name','')
+            if isinstance(filename,int): filename = '<os fd:%d>'% filename
+            filename = makeFileName(filename)
         else :
             myfile = 1
             filename = makeFileName(filename)
