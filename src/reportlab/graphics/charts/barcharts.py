@@ -14,7 +14,8 @@ import copy, functools
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isNumberOrNone, isColor, isColorOrNone, isString,\
             isListOfStrings, SequenceOf, isBoolean, isNoneOrShape, isStringOrNone,\
-            NoneOr, isListOfNumbersOrNone, EitherOr, OneOf
+            NoneOr, isListOfNumbersOrNone, EitherOr, OneOf, isInt
+from reportlab.lib.utils import flatten
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.formatters import Formatter
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
@@ -79,6 +80,7 @@ class BarChart(PlotArea):
     valueAxisGrid=6,
     annotations=7'''),
         categoryNALabel = AttrMapValue(NoneOrInstanceOfNA_Label, desc='Label to use for a group of N/A values.',advancedUsage=1),
+        seriesOrder = AttrMapValue(SequenceOf(SequenceOf(isInt,emptyOK=0,NoneOK=0,lo=1),emptyOK=0,NoneOK=1,lo=1),"dynamic 'mixed' category style case"),
         )
 
     def makeSwatchSample(self, rowNo, x, y, width, height):
@@ -108,6 +110,7 @@ class BarChart(PlotArea):
         else:
             self.categoryAxis = XCategoryAxis()
             self.valueAxis = YValueAxis()
+        self.categoryAxis._attrMap['style'].validate = OneOf('stacked','parallel','parallel_3d','mixed')
 
         PlotArea.__init__(self)
         self.barSpacing = 0
@@ -168,21 +171,49 @@ class BarChart(PlotArea):
         drawing.add(bc)
         return drawing
 
+    def getSeriesOrder(self):
+        bs = getattr(self,'seriesOrder',None)
+        n = len(self.data)
+        if not bs: 
+            R = [(ss,) for ss in xrange(n)]
+        else:
+            unseen = set(range(n))
+            R = []
+            for s in bs:
+                g = [ss for ss in s if 0<=ss<=n]
+                if g:
+                    R.append(tuple(g))
+                    unseen -= set(g)
+            if unseen:
+                R.extend((ss,) for ss in sorted(unseen))
+        self._seriesOrder = R
+
     def _getConfigureData(self):
-        cA = self.categoryAxis
+        cAStyle = self.categoryAxis.style
         data = self.data
-        if cA.style not in ('parallel','parallel_3d'):
-            _data = data
-            data = max(list(map(len,_data)))*[0]
-            ndata = data[:]
-            for d in _data:
-                for i in xrange(len(d)):
-                    v = d[i] or 0
-                    if v<=-1e-6:
-                        ndata[i] += v
-                    else:
-                        data[i] += v
-            data = list(_data) + [data] + [ndata]
+        cc = max(list(map(len,data)))   #category count
+        _data = data
+        if cAStyle not in ('parallel','parallel_3d'):
+            #stacked or mixed
+            data = []
+            def _accumulate(*D):
+                pdata = max((len(d) for d in D))*[0]
+                ndata = pdata[:]
+                for d in D:
+                    for i in xrange(len(d)):
+                        v = d[i] or 0
+                        if v<=-1e-6:
+                            ndata[i] += v
+                        else:
+                            pdata[i] += v
+                data.append(ndata)
+                data.append(pdata)
+            if cAStyle=='stacked':
+                _accumulate(*_data)
+            else:
+                self.getSeriesOrder()
+                for b in self._seriesOrder:
+                    _accumulate(*(_data[j] for j in b))
         self._configureData = data
 
     def _getMinMax(self):
@@ -276,7 +307,6 @@ class BarChart(PlotArea):
         del self._configureData
         return g
 
-
     def calcBarPositions(self):
         """Works out where they go. default vertical.
 
@@ -293,6 +323,7 @@ class BarChart(PlotArea):
         cScale = cA.scale
 
         data = self.data
+
         seriesCount = self._seriesCount = len(data)
         self._rowLength = rowLength = max(list(map(len,data)))
         wG = self.groupSpacing
@@ -303,16 +334,31 @@ class BarChart(PlotArea):
         if clbo=='auto': clbo = flipXY and 'last' or 'first'
         clbo = clbo=='first'
         style = cA.style
-        if style=='parallel':
+        if style=='mixed':
+            ss = self._seriesOrder
+            barsPerGroup = len(ss)
+            wB = barsPerGroup*barWidth
+            wS = (barsPerGroup-1)*barSpacing
+            if barsPerGroup>1:
+                bGapB = barWidth
+                bGapS = barSpacing
+            else:
+                bGapB = bGapS = 0
+            accumNeg = barsPerGroup*rowLength*[0]
+            accumPos = accumNeg[:]
+        elif style in ('parallel','parallel_3d'):
+            barsPerGroup = 1
             wB = seriesCount*barWidth
             wS = (seriesCount-1)*barSpacing
             bGapB = barWidth
             bGapS = barSpacing
         else:
+            barsPerGroup = seriesCount
             accumNeg = rowLength*[0]
-            accumPos = rowLength*[0]
+            accumPos = accumNeg[:]
             wB = barWidth
             wS = bGapB = bGapS = 0
+            
         self._groupWidth = groupWidth = wG+wB+wS
         useAbsolute = self.useAbsolute
 
@@ -366,8 +412,6 @@ class BarChart(PlotArea):
             baseLine = vScale(vM)
         self._baseLine = baseLine
 
-        nC = max(list(map(len,data)))
-
         width = barWidth*fB
         offs = 0.5*wG*fG
         bGap = bGapB*fB+bGapS*fS
@@ -383,48 +427,59 @@ class BarChart(PlotArea):
         self._barPositions = []
         aBP = self._barPositions.append
         reversePlotOrder = self.reversePlotOrder
-        for rowNo in xrange(seriesCount):
-            barRow = []
-            if reversePlotOrder:
-                xVal = seriesCount-1 - rowNo
+
+        def _addBar(colNo,accx):
+            datum = row[colNo]
+            # Ufff...
+            if useAbsolute==7:
+                x = groupWidth*_cscale(colNo) + xVal + org
             else:
-                xVal = rowNo
-            xVal = offs + xVal*bGap
-            row = data[rowNo]
-            for colNo in xrange(nC):
-                datum = row[colNo]
+                (g, _) = cScale(colNo)
+                x = g + xVal
 
-                # Ufff...
-                if useAbsolute==7:
-                    x = groupWidth*_cscale(colNo) + xVal + org
-                else:
-                    (g, _) = cScale(colNo)
-                    x = g + xVal
-
-                if datum is None:
-                    height = None
-                    y = baseLine
-                else:
-                    if style not in ('parallel','parallel_3d'):
-                        if datum<=-1e-6:
-                            y = vScale(accumNeg[colNo])
-                            if y>baseLine: y = baseLine
-                            accumNeg[colNo] = accumNeg[colNo] + datum
-                            datum = accumNeg[colNo]
-                        else:
-                            y = vScale(accumPos[colNo])
-                            if y<baseLine: y = baseLine
-                            accumPos[colNo] = accumPos[colNo] + datum
-                            datum = accumPos[colNo]
+            if datum is None:
+                height = None
+                y = baseLine
+            else:
+                if style not in ('parallel','parallel_3d'):
+                    if datum<=-1e-6:
+                        y = vScale(accumNeg[accx])
+                        if y>baseLine: y = baseLine
+                        accumNeg[accx] += datum
+                        datum = accumNeg[accx]
                     else:
-                        y = baseLine
-                    height = vScale(datum) - y
-                    if -1e-8<height<=1e-8:
-                        height = 1e-8
-                        if datum<-1e-8: height = -1e-8
-                barRow.append(flipXY and (y,x,height,width) or (x,y,width,height))
+                        y = vScale(accumPos[accx])
+                        if y<baseLine: y = baseLine
+                        accumPos[accx] += datum
+                        datum = accumPos[accx]
+                else:
+                    y = baseLine
+                height = vScale(datum) - y
+                if -1e-8<height<=1e-8:
+                    height = 1e-8
+                    if datum<-1e-8: height = -1e-8
+            barRow.append(flipXY and (y,x,height,width) or (x,y,width,height))
 
-            aBP(barRow)
+        if style!='mixed':
+            for rowNo in xrange(seriesCount):   #iterate over the separate series
+                barRow = []
+                xVal = barsPerGroup - 1 - rowNo if reversePlotOrder else rowNo
+                xVal = offs + xVal*bGap
+                row = data[rowNo]
+                for colNo in xrange(rowLength): #iterate over categories
+                    _addBar(colNo,colNo)
+                aBP(barRow)
+        else:
+            for sb,sg in enumerate(self._seriesOrder):  #the sub bar nos and series groups
+                style = 'parallel' if len(sg)<=1 else 'stacked'
+                xVal = barsPerGroup - 1 - sb if reversePlotOrder else sb
+                xVal = offs + xVal*bGap
+                for rowNo in sg:    #the individual series
+                    barRow = []
+                    row = data[rowNo]
+                    for colNo in xrange(rowLength): #iterate over categories
+                        _addBar(colNo,colNo*barsPerGroup + sb)
+                    aBP(barRow)
 
     def _getLabelText(self, rowNo, colNo):
         '''return formatted label text'''
@@ -559,15 +614,13 @@ class BarChart(PlotArea):
             CBL = []
             rowNoL = lenData - 1
             #find all the categories that have at least one value
-            for rowNo in xrange(lenData):
-                row = BP[rowNo]
+            for rowNo, row in enumerate(BP):
                 for colNo in xrange(len(row)):
                     x, y, width, height = row[colNo]
                     if None not in (width,height):
                         catNNA[colNo] = 1
 
-        for rowNo in xrange(lenData):
-            row = BP[rowNo]
+        for rowNo, row in enumerate(BP):
             styleCount = len(bars)
             styleIdx = rowNo % styleCount
             rowStyle = bars[styleIdx]
@@ -908,9 +961,14 @@ class BarChart3D(BarChart):
         g = Group()
         theta_x = self.theta_x
         theta_y = self.theta_y
-        if self.categoryAxis.style == 'stacked':
-          fg_value=fg.value().reverse()
-        for t in fg.value():
+        fg_value = fg.value()
+        cAStyle = self.categoryAxis.style
+        if cAStyle=='stacked':
+            fg_value=fg_value.reverse()
+        elif cAStyle=='mixed':
+            fg_value = [_[1] for _ in sorted((((t[1],t[2],t[3],t[4]),t) for t in fg_value))]
+
+        for t in fg_value:
             if t[0]==0:
                 z0,z1,x,y,width,height,rowNo,style = t[1:]
                 dz = z1 - z0
@@ -918,8 +976,8 @@ class BarChart3D(BarChart):
                             fillColor=style.fillColor, fillColorShaded=None,
                             strokeColor=style.strokeColor, strokeWidth=style.strokeWidth,
                             shading=0.45)
-        for t in fg.value():
-            if t[0]==1:
+        for t in fg_value:
+            if t==1:
                 z0,z1,x,y,width,height,rowNo,colNo = t[1:]
                 BarChart._addBarLabel(self,g,rowNo,colNo,x,y,width,height)
         return g
