@@ -17,12 +17,6 @@ environment:
     - python: 27-x64
       ARCH: AMD64
 
-    - python: 33
-      ARCH: X86
-
-    - python: 33-x64
-      ARCH: AMD64
-
     - python: 34
       ARCH: X86
 
@@ -39,6 +33,12 @@ environment:
       ARCH: X86
 
     - python: 36-x64
+      ARCH: AMD64
+
+    - python: 37
+      ARCH: X86
+
+    - python: 37-x64
       ARCH: AMD64
 
 matrix:
