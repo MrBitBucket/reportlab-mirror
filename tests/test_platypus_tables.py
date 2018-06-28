@@ -140,6 +140,7 @@ def run():
     ])
     t.setStyle(style)
 
+    t=Table([],[3.5*inch, 2.7*inch],minRowHeights=(30,), spaceBefore=15, style=style, emptyTableAction='ignore')
     lst.append(t)
     doc.build(lst)
 

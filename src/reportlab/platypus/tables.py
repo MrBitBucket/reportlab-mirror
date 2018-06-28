@@ -17,7 +17,7 @@ cause the value to wrap (ie are like a traditional linefeed).
 See the test output from running this module as a script for a discussion of the method for constructing
 tables and table styles.
 """
-from reportlab.platypus.flowables import Flowable, Preformatted, Spacer
+from reportlab.platypus.flowables import Flowable, Preformatted
 from reportlab import rl_config, xrange, ascii
 from reportlab.lib.styles import PropertySet, ParagraphStyle, _baseFontName
 from reportlab.lib import colors
@@ -25,7 +25,7 @@ from reportlab.lib.utils import annotateException, IdentStr, flatten, isStr, asN
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.abag import ABag as CellFrame
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.platypus.doctemplate import Indenter
+from reportlab.platypus.doctemplate import Indenter, NullActionFlowable
 from reportlab.platypus.flowables import LIIndenter
 
 LINECAPS={None: None, 'butt':0,'round':1,'projecting':2,'squared':2}
@@ -234,8 +234,7 @@ class Table(Flowable):
                     _emptyTableStyle.backColor = colors.yellow
                 Preformatted.__init__(self,'%s(%d,%d)' % (self.__class__.__name__,nrows,ncols), _emptyTableStyle)
             elif emptyTableAction=='ignore':
-                self.__class__ = Spacer
-                Spacer.__init__(self,0,0)
+                self.__class__ = NullActionFlowable
             else:
                 raise ValueError('%s bad emptyTableAction: "%s"' % (self.identity(),emptyTableAction))
             return
