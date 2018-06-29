@@ -180,7 +180,7 @@ Python is copyrighted but <b>freely usable and distributable, even for commercia
 heading2("Acknowledgements")
 disc("""Many people have contributed to ReportLab.  We would like to thank in particular 
 (in alphabetical order): 
-Albertas Agejevas, 
+<nobr>Albertas Agejevas, 
 Alex Buck, 
 Andre Reitz, 
 Andrew Cutler,
@@ -244,7 +244,7 @@ Tim Roberts,
 Tomasz Swiderski,
 Ty Sarna,
 Volker Haas,
-Yoann Roman,
+Yoann Roman,</nobr>
 and many more.""")
 
 

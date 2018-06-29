@@ -581,11 +581,11 @@ class FragmentTestCase(unittest.TestCase):
         BF = ABag(rise=0,fontName='Helvetica',fontSize=12)
         nF = BF.clone
         ww = 'unused width'
-        W = [ww,[(nF(cbDefn='index',width=0),''),(BF,'a'),(nF(fontSize=10),'bbb'),(nF(fontName='Helvetica-Bold'),'ccccc')]]
-        self.assertEqual(_fragWordSplitRep(W),(u'abbbccccc',([1, 0, 6.672000000000001, None], [2, 6.672000000000001, 16.68, None], [2, 6.672000000000001, 16.68, None], [2, 6.672000000000001, 16.68, None], [3, 23.352, 33.36, None], [3, 23.352, 33.36, None], [3, 23.352, 33.36, None], [3, 23.352, 33.36, None], [3, 23.352, 33.36, None])))
-        W[1][1][0].rise=2
+        W = [ww,(nF(cbDefn=ABag(kind='index',width=0)),''),(BF,'a'),(nF(fontSize=10),'bbb'),(nF(fontName='Helvetica-Bold'),'ccccc')]
+        self.assertEqual(_fragWordSplitRep(W),(u'abbbccccc',((2, 0), (3, 1), (3, 1), (3, 1), (4, 4), (4, 4), (4, 4), (4, 4), (4, 4))))
+        W[1][0].rise=2
         self.assertEqual(_fragWordSplitRep(W),None)
-        W = [ww,[(nF(cbDefn='img',width=1),''),(BF,'a'),(BF,'bbb'),(BF,'ccccc')]]
+        W = [ww,(nF(cbDefn=ABag(kind='img',width=1)),''),(BF,'a'),(BF,'bbb'),(BF,'ccccc')]
         self.assertEqual(_fragWordSplitRep(W),None)
 
     def test4(self):
