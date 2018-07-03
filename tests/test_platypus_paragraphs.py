@@ -602,6 +602,23 @@ class FragmentTestCase(unittest.TestCase):
         self.assertIsNotNone(m,'sfx pattern should match')
         self.assertEqual(len(m.group(0)),len(sfx),'sfx pattern should match %d characters not %d' %(len(sfx),len(m.group(0))))
 
+    def test5(self):
+        from reportlab.platypus.paragraph import _hyphenateWord, stringWidth
+        w ='https://www.reportlab.com/pypi/packages'
+        fontName = 'Helvetica'
+        fontSize = 12
+        ww = stringWidth(w,fontName,fontSize)
+        self.assertEqual(_hyphenateWord(None,fontName,fontSize,w,ww,ww+10,ww+5, 0.3),[u'https://www.reportlab.com/pypi/', u'packages'])
+        w ='https://www.repor-tlab.com/pypi/packages'
+        ww = stringWidth(w,fontName,fontSize)
+        self.assertEqual(_hyphenateWord(None,fontName,fontSize,w,ww,ww+10,ww+5, 0.3),[u'https://www.repor-tlab.com/pypi/', u'packages'])
+        w ='https//www.repor-tlab.com/pypi/packages'
+        ww = stringWidth(w,fontName,fontSize)
+        self.assertEqual(_hyphenateWord(None,fontName,fontSize,w,ww,ww+10,ww+5, 0.3),None) #contains - and non letters
+        w ='httpsSSwwwDrepor-tlabDcomSpypiSpackages'    #should succeed because '-' with no non-letters
+        ww = stringWidth(w,fontName,fontSize)
+        self.assertEqual(_hyphenateWord(None,fontName,fontSize,w,ww,ww+10,ww+5, 0.3),[u'httpsSSwwwDrepor-', u'tlabDcomSpypiSpackages'])
+
 class ULTestCase(unittest.TestCase):
     "Test underlining and overstriking of paragraphs."
     def testUl(self):

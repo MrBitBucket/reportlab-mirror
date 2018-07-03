@@ -59,7 +59,8 @@ underlineGap
 strikeWidth
 strikeOffset
 strikeGap
-hyphenationLang'''.split())
+hyphenationLang
+uriWasteReduce'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -138,6 +139,9 @@ allowTTFSubsetting=         []                      #list of font file names tha
 spaceShrinkage=0.05                                 #allowable space shrinkage to make lines fit
 hyphenationLang=''                                  #if pyphen installed set this to the language of your choice
                                                     #eg 'en_GB'
+
+uriWasteReduce=0.3                                  #split URI if we would waste 0.3 of a line or if the URI#
+                                                    #would not fit on the next line
 
 # places to look for T1Font information
 T1SearchPath =  (

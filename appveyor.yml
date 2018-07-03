@@ -7,7 +7,7 @@ environment:
     CITOOLS_PASSWORD:
       secure: xbq9uLuFeus1N1x8xSF9f5kAYXY4lkvU4UveYwgcMkM=
     FIRST: 27
-    LAST: 36-x64
+    LAST: 37-x64
     RLCACHE: windows/reportlab
 
   matrix:
@@ -15,12 +15,6 @@ environment:
       ARCH: X86
 
     - python: 27-x64
-      ARCH: AMD64
-
-    - python: 33
-      ARCH: X86
-
-    - python: 33-x64
       ARCH: AMD64
 
     - python: 34
@@ -41,11 +35,19 @@ environment:
     - python: 36-x64
       ARCH: AMD64
 
+    - python: 37
+      ARCH: X86
+
+    - python: 37-x64
+      ARCH: AMD64
+
 matrix:
   fast_finish: true
 
 install:
   - cmd: echo "=============================== Python%PYTHON% install FIRST='%FIRST%' LAST='%LAST%'"
+  - cmd: if not exist C:\Python%PYTHON%\python.exe ( echo "!!!!!!!!!!!!!!!!!!!!!!! C:\Python%PYTHON%\python.exe not found" && exit 1 )
+  - cmd: if not exist C:\Python%PYTHON%\scripts\pip.exe ( echo "!!!!!!!!!!!!!!!!!!!!!!! C:\Python%PYTHON%\scripts\pip.exe not found" && exit 1 )
   - "SET PATH=C:\\Python%PYTHON%;c:\\Python%PYTHON%\\scripts;%PATH%"
   - cmd: echo "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 > "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64\vcvars64.bat"
   - cmd: c:\Python27-x64\python.exe -mvirtualenv myenv
@@ -53,7 +55,7 @@ install:
   - cmd: myenv\scripts\pip.exe install https://bitbucket.org/MrRLBitBucket/rl_ci_tools/get/tip.tar.gz
   - cmd: mkdir winstuff
   - cmd: myenv\scripts\python.exe -mrl_ci_tools download-resources --dst=winstuff winstuff.zip
-  - cmd: python -c"import zipfile;zipfile.ZipFile('winstuff/winstuff.zip','r').extractall('winstuff')"
+  - cmd: myenv\scripts\python.exe -c"import zipfile;zipfile.ZipFile('winstuff/winstuff.zip','r').extractall('winstuff')"
   - cmd: myenv\scripts\python.exe -mrl_ci_tools info --recur winstuff
 
 build_script:
@@ -61,9 +63,9 @@ build_script:
   - set FT_INC=winstuff\include\freetype2
   - set FT_LIB=winstuff\libs\%ARCH%\freetype.lib
   - cmd: echo "=============================== Python%PYTHON% install FT_INC='%FT_INC%' FT_LIB='%FT_LIB%'"
-  - cmd: pip --version
-  - cmd: pip install wheel
-  - cmd: python -W ignore setup.py bdist_wheel
+  - cmd: c:\Python%PYTHON%\scripts\pip.exe --version
+  - cmd: c:\Python%PYTHON%\scripts\pip.exe install wheel
+  - cmd: c:\Python%PYTHON%\python.exe -W ignore setup.py bdist_wheel
 
 on_success:
   - echo "=============================== Python%PYTHON% on_success"

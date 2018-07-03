@@ -33,7 +33,7 @@ from reportlab.rl_config import canvas_basefontname as _baseFontName, \
                                 strikeOffset as _baseStrikeOffset, \
                                 strikeGap as _baseStrikeGap, \
                                 spaceShrinkage, platypus_link_underline, \
-                                hyphenationLang
+                                hyphenationLang, uriWasteReduce
 _baseFontNameB = tt2ps(_baseFontName,1,0)
 _baseFontNameI = tt2ps(_baseFontName,0,1)
 _baseFontNameBI = tt2ps(_baseFontName,1,1)
@@ -150,6 +150,7 @@ class ParagraphStyle(PropertySet):
         #'underlineColor':  None,
         #'strikeColor': None,
         'hyphenationLang': hyphenationLang,
+        'uriWasteReduce': uriWasteReduce,
         }
 
 class LineStyle(PropertySet):

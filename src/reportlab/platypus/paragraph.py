@@ -712,6 +712,37 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     R.append(W)
     return R
 
+
+#derived from Django validator
+#https://github.com/django/django/blob/master/django/core/validators.py
+uri_pat = re.compile(u'(^(?:[a-z0-9\\.\\-\\+]*)://)(?:\\S+(?::\\S*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\.]+\\]|([a-z\xa1-\uffff0-9](?:[a-z\xa1-\uffff0-9-]{0,61}[a-z\xa1-\uffff0-9])?(?:\\.(?!-)[a-z\xa1-\uffff0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xa1-\uffff-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z', re.I)
+
+def _slash_parts(uri,scheme,slash):
+    tail = u''
+    while uri.endswith(slash):
+        tail += slash
+        uri = uri[:-1]
+
+    i = 2
+    while True:
+        i = uri.find(slash,i)
+        if i<0: break
+        i += 1
+        yield scheme+uri[:i],uri[i:]+tail
+
+def _uri_split_pairs(uri):
+    if isBytes(uri): uri = uri.decode('utf8')
+    m = uri_pat.match(uri)
+    if not m: return None
+    scheme = m.group(1)
+    uri = uri[len(scheme):]
+
+    slash = (u'\\' if not scheme and u'/' not in uri #might be a microsoft pattern
+            else u'/')
+    R = ([(scheme, uri)] if scheme and uri else []) + list(_slash_parts(uri,scheme,slash))
+    R.reverse()
+    return R
+
 #valid letters determined by inspection of
 #    https://en.wikipedia.org/wiki/List_of_Unicode_characters#Latin_script
 _hy_letters=u'A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\u024f\u1e80-\u1e85\u1e00-\u1eff\u1e02\u1e03\u1e0a\u1e0b\u1e1e\u1e1f\u1e40\u1e41\u1e56\u1e57\u1e60\u1e61\u1e6a\u1e6b\u1e9b\u1ef2\u1ef3'
@@ -733,7 +764,7 @@ def _hyBestPair(hy,hylen,R):
         hw, tw, h, t = R[0]
     return hy, hylen, hw, tw, h, t
     
-def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize):
+def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize, uriWasteReduce):
     if isBytes(s): s = s.decode('utf8') #only encoding allowed
     m = _hy_pfx_pat.match(s)
     if m:
@@ -748,11 +779,26 @@ def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize):
     else:
         sfx = u''
     if len(s) < 5: return
+
+    w0 = newWidth - ww
+    R = _uri_split_pairs(s)
+    if R is not None:
+        #a uri match was seen
+        if ww>maxWidth or (uriWasteReduce and w0 <= (1-uriWasteReduce)*maxWidth):
+            #we matched a uri and it makes sense to split
+            for h, t in R:
+                h = pfx+h
+                t = t + sfx
+                hw = stringWidth(h,fontName,fontSize)
+                tw = w0 + hw
+                if tw<=maxWidth:
+                    return u'',0,hw,tw,h,t
+        return
+
     R = []
     aR = R.append
     H = _hy_shy_pat.split(s)
     n = len(H)
-    w0 = newWidth - ww
     if n>1:
         if n<3 or u'' in H: return
         if not _hy_shy_letters_pat.match(s): return
@@ -861,12 +907,12 @@ def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth):
                 aR((hw,ww-hw,h,t))
         if R: return _hyBestPair(u'-', hylen, R)
             
-def _hyphenateFragWord(hyphenator,FW,newWidth,maxWidth):
+def _hyphenateFragWord(hyphenator,FW,newWidth,maxWidth,uriWasteReduce):
     ww = FW[0]
     if ww==0: return []
     if len(FW)==2:
         f, s = FW[1]
-        R = _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, f.fontName, f.fontSize)
+        R = _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, f.fontName, f.fontSize,uriWasteReduce)
         if R:
             jc, hylen, hw, tw, h, t = R
             return [(_SplitFragHY if jc else _SplitFrag)([hw+hylen,(f,h+jc)]),(_SplitFragHS if isinstance(FW,_HSFrag) else _SplitFrag)([tw,(f,t)])]
@@ -885,9 +931,9 @@ class _SplitWordHY(_SplitWord):
     '''head part of a hyphenation word pair'''
     pass
 
-def _hyphenateWord(hyphenator,fontName,fontSize,w,ww,newWidth,maxWidth):
+def _hyphenateWord(hyphenator,fontName,fontSize,w,ww,newWidth,maxWidth, uriWasteReduce):
     if ww==0: return []
-    R = _hyGenPair(hyphenator, w, ww, newWidth, maxWidth, fontName, fontSize)
+    R = _hyGenPair(hyphenator, w, ww, newWidth, maxWidth, fontName, fontSize, uriWasteReduce)
     if R:
         hy, hylen, hw, tw, h, t = R
         return [(_SplitWordHY if hy else _SplitWord)(h+hy),_SplitWord(t)]
@@ -1672,6 +1718,7 @@ class Paragraph(Flowable):
                 
         else:
             hyphenator = None
+        uriWasteReduce = style.uriWasteReduce
         spaceShrinkage = style.spaceShrinkage
         splitLongWords = style.splitLongWords
         self._splitLongWordCount = self._hyphenations = 0
@@ -1716,7 +1763,7 @@ class Paragraph(Flowable):
                 newWidth = currentWidth + spaceWidth + wordWidth
                 if newWidth>maxWidth+spaceShrink:
                     if hyphenator and not getattr(f,'nobr',False):
-                        hsw = _hyphenateWord(hyphenator, fontName, fontSize, word, wordWidth, newWidth, maxWidth+spaceShrink)
+                        hsw = _hyphenateWord(hyphenator, fontName, fontSize, word, wordWidth, newWidth, maxWidth+spaceShrink, uriWasteReduce)
                         if hsw:
                             words[0:0] = hsw
                             self._hyphenations += 1
@@ -1783,7 +1830,7 @@ class Paragraph(Flowable):
                 lineBreak = f._fkind==_FK_BREAK
                 if not lineBreak and newWidth>(maxWidth+spaceShrink) and not isinstance(w,_SplitFrag) and splitLongWords:
                     if hyphenator and not isinstance(w,_SplitFragHY) and not getattr(f,'nobr',False):
-                        hsw = _hyphenateFragWord(hyphenator,w,newWidth,maxWidth+spaceShrink)
+                        hsw = _hyphenateFragWord(hyphenator,w,newWidth,maxWidth+spaceShrink,uriWasteReduce)
                         if hsw:
                             _words[0:0] = hsw
                             FW.pop(-1)  #remove this as we are doing this one again
