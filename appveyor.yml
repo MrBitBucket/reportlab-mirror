@@ -83,7 +83,7 @@ test_script:
   - c:\Python%PYTHON%\python.exe -mvirtualenv testenv
   - testenv\scripts\pip.exe --version
   - testenv\scripts\pip.exe install "pillow<5.0.0"
-  - testenv\scripts\pip.exe install --cache-dir=dist --find-links file:dist reportlab
+  - testenv\scripts\pip.exe install --cache-dir=dist --find-links file:dist --pre reportlab
   #- myenv\scripts\python.exe -mrl_ci_tools info --recur testenv\Lib\site-packages
   #- myenv\scripts\python.exe -mrl_ci_tools info --recur testenv\Lib\site-packages\reportlab\fonts
   - set OLDCD=%CD%
