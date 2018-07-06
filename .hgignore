@@ -66,3 +66,4 @@ syntax: regexp
 ^tests/render-out
 ^tmp/
 ^patches/
+^src/reportlab/pdfbase/_glyphlist.py

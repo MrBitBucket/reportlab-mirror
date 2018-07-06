@@ -32,7 +32,11 @@ from reportlab.rl_config import canvas_basefontname as _baseFontName, \
                                 strikeWidth as _baseStrikeWidth, \
                                 strikeOffset as _baseStrikeOffset, \
                                 strikeGap as _baseStrikeGap, \
-                                spaceShrinkage, platypus_link_underline
+                                spaceShrinkage as _spaceShrinkage, \
+                                platypus_link_underline as _platypus_link_underline, \
+                                hyphenationLang as _hyphenationLang, \
+                                uriWasteReduce as _uriWasteReduce, \
+                                embeddedHyphenation as _embeddedHyphenation
 _baseFontNameB = tt2ps(_baseFontName,1,0)
 _baseFontNameI = tt2ps(_baseFontName,0,1)
 _baseFontNameBI = tt2ps(_baseFontName,1,1)
@@ -139,15 +143,18 @@ class ParagraphStyle(PropertySet):
         'bulletAnchor': 'start',    #where the bullet is anchored ie start, middle, end or numeric
         'justifyLastLine': 0,   #n allow justification on the last line for more than n words 0 means don't bother
         'justifyBreaks': 0,     #justify lines broken with <br/>
-        'spaceShrinkage': spaceShrinkage,   #allow shrinkage of percentage of space to fit on line
+        'spaceShrinkage': _spaceShrinkage,  #allow shrinkage of percentage of space to fit on line
         'strikeWidth': _baseStrikeWidth,    #stroke width
         'underlineOffset': _baseUnderlineOffset,    #fraction of fontsize to offset underlines
         'underlineGap': _baseUnderlineGap,      #gap for double/triple underline
         'strikeOffset': _baseStrikeOffset,  #fraction of fontsize to offset strikethrough
         'strikeGap': _baseStrikeGap,        #gap for double/triple strike
-        'linkUnderline': platypus_link_underline,
+        'linkUnderline': _platypus_link_underline,
         #'underlineColor':  None,
         #'strikeColor': None,
+        'hyphenationLang': _hyphenationLang,
+        'embeddedHyphenation': _embeddedHyphenation,
+        'uriWasteReduce': _uriWasteReduce,
         }
 
 class LineStyle(PropertySet):
@@ -371,7 +378,8 @@ def getSampleStyleSheet():
                                   fontSize=8,
                                   leading=8.8,
                                   firstLineIndent=0,
-                                  leftIndent=36))
+                                  leftIndent=36,
+                                  hyphenationLang=''))
 
     stylesheet.add(ListStyle(name='UnorderedList',
                                 parent=None,

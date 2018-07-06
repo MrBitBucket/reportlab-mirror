@@ -37,7 +37,8 @@ stylesheet=getSampleStyleSheet()
 normalStyle = stylesheet['Normal']
 """)
 disc("""
-The options which can be set for a $Paragraph$ can be seen from the $ParagraphStyle$ defaults.
+The options which can be set for a $Paragraph$ can be seen from the $ParagraphStyle$ defaults. The values with leading underscore ('_') are derived from the defaults in module $reportlab.rl_config$ which are derived from
+module $reportlab.rl_settings$.
 """)
 heading4("$class ParagraphStyle$")
 eg("""
@@ -67,11 +68,22 @@ class ParagraphStyle(PropertySet):
         'textTransform':None,
         'endDots':None,
         'splitLongWords':1,
-        'underlineProportion': _baseUnderlineProportion,
+        'underlineWidth': _baseUnderlineWidth,
         'bulletAnchor': 'start',
         'justifyLastLine': 0,
         'justifyBreaks': 0,
-        'spaceShrinkage': spaceShrinkage,
+        'spaceShrinkage': _spaceShrinkage,
+        'strikeWidth': _baseStrikeWidth,    #stroke width
+        'underlineOffset': _baseUnderlineOffset,    #fraction of fontsize to offset underlines
+        'underlineGap': _baseUnderlineGap,      #gap for double/triple underline
+        'strikeOffset': _baseStrikeOffset,  #fraction of fontsize to offset strikethrough
+        'strikeGap': _baseStrikeGap,        #gap for double/triple strike
+        'linkUnderline': _platypus_link_underline,
+        #'underlineColor':  None,
+        #'strikeColor': None,
+        'hyphenationLang': _hyphenationLang,
+        'uriWasteReduce': _uriWasteReduce,
+        'embeddedHyphenation': _embeddedHyphenation,
         }
 """)
 
@@ -177,8 +189,22 @@ disc("""The $textTransform$ attribute can be <b><i>None</i></b>, <i>'upper'</i> 
 disc("""Attribute $endDots$ can be <b><i>None</i></b>, a string, or an object with attributes text and optional fontName, fontSize, textColor,  backColor
 and dy(y offset) to specify trailing matter on the last line of left/right justified paragraphs.""")
 disc("""The $splitLongWords$ attribute can be set to a false value to avoid splitting very long words.""")
-disc("""The $underLineProportion$ attribute can be set to a true or false value to control whether underlines are proportional to the font size.""")
 disc("""Attribute $bulletAnchor$ can be <i>'start'</i>, <i>'middle'</i>, <i>'end'</i> or <i>'numeric'</i> to control where the bullet is anchored.""")
+disc("""The $justifyBreaks$ attribute controls whether lines deliberately broken with a $&lt;br/&gt;$ tag should be justified""")
+disc("""Attribute $spaceShrinkage$ is a fractional number specifiying by how much the space of a paragraph
+line may be shrunk in order to make it fit; typically it is something like 0.05""")
+disc("""The $underlineWidth$, $underlineOffset$, $underlineGap$ &amp; $underlineColor$ attributes control the underline behaviour when the $&lt;u&gt;$ or
+a linking tag is used. Those tags can have override values of these attributes. The attribute value  for width &amp; offset
+is a $fraction * Letter$ where letter can be one of $P$, $L$, $f$ or $F$ representing fontSize proportions. $P$ uses the fontsize at the tag, $F$ is the maximum fontSize in the tag, $f$ is the initial fontsize inside the tag.
+$L$ means the global (paragrpah style) font size.
+$strikeWidth$, $strikeOffset$, $strikeGap$ &amp; $strikeColor$ attributes do the same for strikethrough lines.
+""")
+disc("""Attribute $linkUnderline$ controls whether link tags are automatically underlined.""") 
+disc("""If the $pyphen$ python module is installed attribute $hyphenationLang$ controls which language will be used to hyphenate words without explicit embedded hyphens.""")
+disc("""If $embeddedHyphenation$ is set then attempts will be made to split words with embedded hyphens.""")
+disc("""Attribute $uriWasteReduce$ controls how we attempt to split long uri's. It is the fraction of a line that we regard as too much waste. The default in module
+$reportlab.rl_settings$ is <i>0.5</i> which means that we will try and split a word that looks like a uri if we would waste at least half of the line.""")
+
 
 heading2("Paragraph XML Markup Tags")
 disc("""XML markup can be used to modify or specify the
@@ -311,6 +337,14 @@ This &lt;img/&gt; <img src="../images/testimg.gif" valign="-4"/> is aligned <b>-
 This &lt;img/&gt; <img src="../images/testimg.gif" valign="+4"/> is aligned <b>+4</b>.<br/><br/>
 This &lt;img/&gt; <img src="../images/testimg.gif" width="10"/> has width <b>10</b>.<br/><br/>
 </para>""","Inline images")
+
+heading3("The $&lt;u&gt;$ &amp; $&lt;strike&gt;$ tags")
+disc("""These tags can be used to carry out explicit underlineing or strikethroughs. These tags have
+attributes $width$, $offset$, $color$, $gap$ &amp; $kind$. The $kind$ attribute controls how many
+lines will be drawn (default $kind=1$) and when $kind>1$ the $gap$ attribute controls the disatnce between lines.""")
+
+heading3("The $&lt;nobr&gt;$ tag")
+disc("""If hyphenation is in operation the $&lt;nobr&gt;$ tag suppresses it so $&lt;nobr&gt;averylongwordthatwontbebroken&lt;/nobr&gt;$ won't be broken.""")
 
 heading3("Numbering Paragraphs and Lists")
 disc("""The $&lt;seq&gt;$ tag provides comprehensive support

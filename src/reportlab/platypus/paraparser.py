@@ -97,6 +97,15 @@ class _PCT(float):
         r._normalizer = normalizer
         return r
 
+    def __copy__(self):
+        r = _PCT(float(self))
+        r._value = self._value
+        r._normalizer = normalizer
+        return r
+
+    def __deepcopy__(self,mem):
+        return self.__copy__()
+
 def fontSizeNormalize(frag,attr,default):
     if not hasattr(frag,attr): return default
     v = _numpct(getattr(frag,attr),allowRelative=True)
@@ -242,6 +251,9 @@ _paraAttrMap = {'font': ('fontName', None),
                 'strikeoffset':('strikeOffset',_CheckUS('para','strikeOffset')),
                 'strikegap':('strikeGap',_CheckUS('para','strikeGap')),
                 'spaceshrinkage':('spaceShrinkage',_num),
+                'hyphenationLanguage': ('hyphenationLang',None),
+                'uriWasteReduce': ('uriWasteReduce',_num),
+                'embeddedHyphenation': ('embeddedHyphenation',_bool),
                 }
 
 _bulletAttrMap = {
@@ -690,6 +702,7 @@ def _greekConvert(data):
 #               width="w%" --> fontSize*w/100   idea from Roberto Alsina
 #               height="h%" --> linewidth*h/100 <ralsina@netmanagers.com.ar>
 #       <greek> - </greek>
+#       <nobr> ... </nobr> turn off word breaking and hyphenation
 #
 #       The whole may be surrounded by <para> </para> tags
 #
@@ -877,6 +890,13 @@ class ParaParser(HTMLParser):
 
     def end_sub( self ):
         self._pop('sub')
+
+    def start_nobr(self, attrs):
+        self.getAttributes(attrs,{})
+        self._push('nobr',nobr=True)
+
+    def end_nobr(self ):
+        self._pop('nobr')
 
     #### greek script
     #### add symbol encoding

@@ -4,12 +4,59 @@ CHANGES
 This is a summary of changes made to the reportlab source code for each release.
 Please refer to subversion backlogs (using the release dates) for more details
 or for releases which we have not provide a higher level changes list for.
-E.g. to retrieve the changes made between release 3.1 and release 3.2, type::
+E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 
-  $ hg log -r adb3f0d
+  $ hg log -r 54ce2469ba5c
 
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
+
+RELEASE 3.5  07/07/2018
+-----------------------
+    * BalancedColumns flowable added
+    * primitive hyphenation functionality (with Pyphen installed)
+    * simple paragraphs now allow space shrinkage
+    * mixed parallel / stacked barcharts mechanism
+    * makeStream compression fix for python 3.x
+    * reproducibility fixes
+    * Bugfix for KeepWithNext and None
+    * Fix pie chart issue
+    * allow canvas filename to be a wrapped OS level file
+    * added DocTemplate._makeCanvas
+    * _text2Path fix
+    * AcroForm improvements
+    * added anchorAtXY parameter for images
+    * fix PDF syntax error with no Outlines
+    * fix bullet code
+    * qrencoder fix
+    * table minRowHeights support
+    * stopped abusing builtins to aid compatibility
+    * fix embedded font & fontfinder bugs
+    * fix zero width paragraph layout error
+    * doughnut charts support innerRadiusFraction
+    * more controllable under and strike lines
+
+### Contributors:
+    * Axel P. Kielhorn
+    * ben @ readingtype.org.uk
+    * Chris Jerdonek cjerdonek @ bitbucket
+    * Dan Palmer danpalmer @ bitbucket
+    * Garry Williams gary_williams @ bit_bucket
+    * Greg Svitak
+    * htgoebel @ bitbucket
+    * Johann Du Toit https://bitbucket.org/johanndt/ 
+    * Jon Hinton (inivatajon @ bitbucket.org)
+    * Lele Gaifax
+    * lisandrija @ bitbucket.org
+    * lostbard @ bitbucket
+    * Martin J. Laubach bitbucket issue #140
+    * Moritz Pfeiffer moritzpfeiffer @ bitbucket
+    * Raji Sundar
+    * Silas Sewell silassewell @ bitbucket
+    * simonkagwe @ bitbucket
+    * Tom Alexander @ bitbucket
+    * Trevor Bullock
+    * Waldemar Osuch
 
 RELEASE 3.4  07/03/2017
 -----------------------

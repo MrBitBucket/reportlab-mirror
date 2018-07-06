@@ -29,7 +29,7 @@
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.73"
+#define VERSION "0.74"
 #define MODULE "_rl_accel"
 
 struct module_state	{
@@ -444,7 +444,7 @@ static PyObject *escapePDF(PyObject *module, PyObject* args)
 static PyObject *sameFrag(PyObject *module, PyObject* args)
 {
 	PyObject *f, *g;
-	static char *names[] = {"fontName", "fontSize", "textColor", "rise", "us_lines", "link", "backColor", NULL};
+	static char *names[] = {"fontName", "fontSize", "textColor", "rise", "us_lines", "link", "backColor", "nobr", NULL};
 	int	r=0, t;
 	char **p;
 	if (!PyArg_ParseTuple(args, "OO:sameFrag", &f, &g)) return NULL;

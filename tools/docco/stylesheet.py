@@ -116,7 +116,8 @@ def getStyleSheet():
                                   fontSize=8,
                                   leading=8.8,
                                   leftIndent=36,
-                                  firstLineIndent=0))
+                                  firstLineIndent=0,
+                                  hyphenationLang=''))
     
     stylesheet.add(ParagraphStyle(name='Link',
                                   parent=stylesheet['Code'],

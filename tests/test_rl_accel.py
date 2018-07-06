@@ -157,9 +157,9 @@ class RlAccelTestCase(unittest.TestCase):
 
         for func,kind in getFuncs('sameFrag'):
             if not func: continue
-            a=ABag(fontName='Helvetica',fontSize=12, textColor="red", rise=0, us_lines=0, link="aaaa")
-            b=ABag(fontName='Helvetica',fontSize=12, textColor="red", rise=0, us_lines=0, link="aaaa")
-            for name in ("fontName", "fontSize", "textColor", "rise", "us_lines", "link"):
+            a=ABag(fontName='Helvetica',fontSize=12, textColor="red", rise=0, us_lines=0, link="aaaa", nobr=1)
+            b=ABag(fontName='Helvetica',fontSize=12, textColor="red", rise=0, us_lines=0, link="aaaa", nobr=1)
+            for name in ("fontName", "fontSize", "textColor", "rise", "us_lines", "link", "nobr"):
                 old = getattr(a,name)
                 assert func(a,b)==1, "%s sameFrag(%s,%s)!=1" % (kind,a,b)
                 assert func(b,a)==1, "%s sameFrag(%s,%s)!=1" % (kind,b,a)

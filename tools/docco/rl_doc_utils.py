@@ -37,8 +37,8 @@ appmode=0
 from .t_parse import Template
 QFcodetemplate = Template("X$X$", "X")
 QFreptemplate = Template("X^X^", "X")
-codesubst = "%s<font name=Courier>%s</font>"
-QFsubst = "%s<font name=Courier><i>%s</i></font>"
+codesubst = "%s<font name=Courier><nobr>%s</nobr></font>"
+QFsubst = "%s<font name=Courier><i><nobr>%s</nobr></i></font>"
 
 def quickfix(text):
     """inside text find any subsequence of form $subsequence$.

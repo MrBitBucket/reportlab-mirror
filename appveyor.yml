@@ -46,8 +46,6 @@ matrix:
 
 install:
   - cmd: echo "=============================== Python%PYTHON% install FIRST='%FIRST%' LAST='%LAST%'"
-  - cmd: if not exist C:\Python%PYTHON%\python.exe ( echo "!!!!!!!!!!!!!!!!!!!!!!! C:\Python%PYTHON%\python.exe not found" && exit 1 )
-  - cmd: if not exist C:\Python%PYTHON%\scripts\pip.exe ( echo "!!!!!!!!!!!!!!!!!!!!!!! C:\Python%PYTHON%\scripts\pip.exe not found" && exit 1 )
   - "SET PATH=C:\\Python%PYTHON%;c:\\Python%PYTHON%\\scripts;%PATH%"
   - cmd: echo "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 > "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64\vcvars64.bat"
   - cmd: c:\Python27-x64\python.exe -mvirtualenv myenv
@@ -57,9 +55,13 @@ install:
   - cmd: myenv\scripts\python.exe -mrl_ci_tools download-resources --dst=winstuff winstuff.zip
   - cmd: myenv\scripts\python.exe -c"import zipfile;zipfile.ZipFile('winstuff/winstuff.zip','r').extractall('winstuff')"
   - cmd: myenv\scripts\python.exe -mrl_ci_tools info --recur winstuff
+  - cmd: if not exist C:\Python%PYTHON%\python.exe ( echo "!!!!!!!!!!!!!!!!!!!!!!! C:\Python%PYTHON%\python.exe not found" && exit 1 )
+  - cmd: if not exist C:\Python%PYTHON%\scripts\pip.exe ( echo "!!!!!!!!!!!!!!!!!!!!!!! C:\Python%PYTHON%\scripts\pip.exe not found" && exit 1 )
 
 build_script:
   - if "%PYTHON%" == "%FIRST%" myenv\scripts\python.exe -mrl_ci_tools clear-cache %RLCACHE%
+  - cmd: if not exist C:\Python%PYTHON%\python.exe ( echo "!!!!!!!!!!!!!!!!!!!!!!! C:\Python%PYTHON%\python.exe not found" && exit 1 )
+  - cmd: if not exist C:\Python%PYTHON%\scripts\pip.exe ( echo "!!!!!!!!!!!!!!!!!!!!!!! C:\Python%PYTHON%\scripts\pip.exe not found" && exit 1 )
   - set FT_INC=winstuff\include\freetype2
   - set FT_LIB=winstuff\libs\%ARCH%\freetype.lib
   - cmd: echo "=============================== Python%PYTHON% install FT_INC='%FT_INC%' FT_LIB='%FT_LIB%'"
