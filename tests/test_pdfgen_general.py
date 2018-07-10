@@ -1218,8 +1218,8 @@ class PdfgenTestCase(unittest.TestCase):
 
     def testOSFile(self):
         import io
-        fd = os.open(outputfile('test_pdfgen_osfile.pdf'),os.O_WRONLY|os.O_CREAT)
-        fn = io.FileIO(fd,'w')
+        fd = os.open(outputfile('test_pdfgen_osfile.pdf'),os.O_BINARY|os.O_WRONLY|os.O_CREAT)
+        fn = io.FileIO(fd,'wb')
         c = canvas.Canvas(fn)
         c.drawString(100, 700, 'Hello World my filedescriptor is %d!' % fd)
         c.showPage()

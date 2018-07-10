@@ -141,9 +141,10 @@ spaceShrinkage=0.05                                 #allowable space shrinkage t
 hyphenationLang=''                                  #if pyphen installed set this to the language of your choice
                                                     #eg 'en_GB'
 
-uriWasteReduce=0.3                                  #split URI if we would waste 0.3 of a line or if the URI#
-                                                    #would not fit on the next line
-embeddedHyphenation=1                               #if true attempt hypenation of words with embededd hyphens
+uriWasteReduce=0                                    #split URI if we would waste 0.3 of a line or if the URI#
+                                                    #would not fit on the next line; if zero then no splitting
+                                                    #is attempted. suggested value = 0.3
+embeddedHyphenation=0                               #if true attempt hypenation of words with embededd hyphens
 
 # places to look for T1Font information
 T1SearchPath =  (

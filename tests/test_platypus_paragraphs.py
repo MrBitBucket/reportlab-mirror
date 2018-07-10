@@ -632,6 +632,75 @@ class FragmentTestCase(unittest.TestCase):
             applyTest('httpsSSwwwDrepor-tlabDcomSpypiSpackages', 0.3, True, [u'httpsSSwwwDrepor-', u'tlabDcomSpypiSpackages'],split=split) #should succeed because '-' with no non-letters
             applyTest('httpsSSwwwDrepor-tlabDcomSpypiSpackages', 0.3, False, None, split=split) #fails because embeddedHyphenation=False
 
+    @unittest.skipUnless(pyphen,'s')
+    def test6(self):
+        bt = getSampleStyleSheet()['BodyText']
+        bt.fontName = 'Helvetica'
+        bt.fontSize = 10
+        bt.leading = 12
+        bt.alignment = TA_JUSTIFY
+        from reportlab.pdfgen.canvas import Canvas
+        canv = Canvas(outputfile('test_platypus_paragraphs_hyphenations.pdf'))
+        x = 72
+        y = canv._pagesize[1] - 72
+
+        def _t(p,x,y,aW,aH=0x7fffffff,dy=5):
+            w, h = p.wrap(aW,aH)
+            y0 = y
+            y -= h
+            canv.saveState()
+            canv.setLineWidth(0.5)
+            if aH!=0x7fffffff:
+                canv.setLineWidth(1)
+                canv.setStrokeColor((1,0,0))
+                canv.rect(x,y0-aH,aW,aH)
+                ny = y0 - max(aH,h)
+            else:
+                ny = y
+            canv.setLineWidth(0.5)
+            canv.setStrokeColor((0.5,0.5,0.5))
+            canv.rect(x,y,w,h)
+            p.drawOn(canv,x,y)
+            canv.restoreState()
+            return ny-dy
+        def t(x,y,aW,aH=0x7fffffff,style=bt):
+            p = Paragraph(text,style=style)
+            return _t(p,x,y,aW,aH=aH)
+
+        raw = """This is a splittable word 'disestablishment'!"""
+        for text in ("""This is a splittable word '<span color="red">dis</span><span color="blue">estab</span><span color="green">lish</span><span color="magenta">ment</span>'!""",
+                     """This is a splittable word 'd<span color="red">ise</span><span color="blue">stabl</span><span color="green">ishm</span><span color="magenta">ent</span>'!""",
+                     """This is a splittable word 'di<span color="red">ses</span><span color="blue">tabli</span><span color="green">shme</span><span color="magenta">ent</span>'!""",
+                    """This is a splittable word 'disestablishment'!""",
+                     ):
+            aW = stringWidth("This is a splittable word 'dis",bt.fontName,bt.fontSize)
+            y = t(x,y,aW)
+            aW = stringWidth("This is a splittable word 'dise",bt.fontName,bt.fontSize)
+            y = t(x,y,aW)
+            aW = stringWidth("This is a splittable word 'disestabl",bt.fontName,bt.fontSize)
+            y = t(x,y,aW)
+            aW = stringWidth("This is a splittable word 'disestabli",bt.fontName,bt.fontSize)
+            y = t(x,y,aW)
+            aW = stringWidth("This is a splittable word 'disestablishm",bt.fontName,bt.fontSize)
+            y = t(x,y,aW)
+
+        canv.showPage()
+        y = canv._pagesize[1] - 72
+        nt = bt.clone('nt',fontName='Helvetica', fontSize = 12,leading = 16, alignment = TA_JUSTIFY)
+        naW, naH = 342.992125984252, 56.69291338582681
+        for ntext in (  b"Bedauerlicherweise ist ein Donaudampfschiffkapit\xc3\xa4n auch <font color='red'>nur</font> <font color='green'>ein</font> Dampfschiffkapit\xc3\xa4n.",
+                        b"Bedauerlicherweise ist ein Donaudampfschiffkapit\xc3\xa4n auch nur ein Dampfschiffkapit\xc3\xa4n.",
+                        ):
+            ntext = (ntext.decode('utf8') + u" ") * 3
+            p = Paragraph(ntext,style=nt)
+            y = _t(p,x,y,naW,aH=naH)
+
+            S = p.split(naW,naH)
+            self.assertEqual(len(S),2)
+            y = _t(S[0],x,y,naW,aH=naH)
+            y = _t(S[1],x,y,naW,aH=naH)
+        canv.save()
+
 class ULTestCase(unittest.TestCase):
     "Test underlining and overstriking of paragraphs."
     def testUl(self):
