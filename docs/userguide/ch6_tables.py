@@ -743,3 +743,33 @@ disc("""To cope with nesting the $start$ parameter can be set to a list of possi
 $bulletchar$, $circle$, $square$, $disc$, $diamond$, $diamondwx$, $rarrowhead$, $sparkle$, $squarelrs$ or  $blackstar$. For $ol$ the $start$ can be any character from $'1iaAI'$ to indicate different number styles.
 """)
 
+heading2("""$BalancedColumns()$""")
+disc("""Use the $BalancedColumns$ class to make a flowable that splits its content flowables into two or more roughly equal sized columns.
+Effectively $n$ frames are synthesized to take the content and the flowable tries to balance the content between them. The created frames
+will be split when the total height is too large and the split will maintain the balance. 
+""")
+eg("""
+from reportlab.platypus.flowables import BalancedColumns
+from reportlab.platypus.frames import ShowBoundaryValue
+F = [
+    list of flowables........
+    ]
+story.append(
+    Balanced(
+        F,          #the flowables we are balancing
+        nCols = 2,  #the number of columns
+        needed = 72,#the minimum space needed by the flowable
+        spacBefore = 0,
+        spaceAfter = 0,
+        showBoundary = None,    #optional boundary showing
+        leftPadding=None,       #these override the created frame
+        rightPadding=None,      #paddings if specified else the
+        topPadding=None,        #default frame paddings
+        bottomPadding=None,     #are used
+        innerPadding=None,      #the gap between frames if specified else
+                                #use max(leftPadding,rightPadding)
+        name='',                #for identification purposes when stuff goes awry
+        endSlack=0.1,           #height disparity allowance ie 10% of available height
+        )
+    )   
+""")

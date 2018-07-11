@@ -204,6 +204,13 @@ disc("""If the $pyphen$ python module is installed attribute $hyphenationLang$ c
 disc("""If $embeddedHyphenation$ is set then attempts will be made to split words with embedded hyphens.""")
 disc("""Attribute $uriWasteReduce$ controls how we attempt to split long uri's. It is the fraction of a line that we regard as too much waste. The default in module
 $reportlab.rl_settings$ is <i>0.5</i> which means that we will try and split a word that looks like a uri if we would waste at least half of the line.""")
+disc("""Currently the hyphenation and uri splitting are turned off by default. You need to modify the default settings by using the file $~/.rl_settings$ or adding a module $reportlab_settings.py$ to the python path. Suitable values are""")
+eg("""
+    hyphenationLanguage='en_GB'
+    embeddedHyphenation=1
+    uriWasteReduce=0.3
+    """)
+
 
 
 heading2("Paragraph XML Markup Tags")
