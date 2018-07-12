@@ -242,6 +242,8 @@ reportlab_files= [
         'fonts/zx______.pfb',
         'fonts/zy______.pfb',
         'fonts/callig15.pfb',
+        'fonts/callig15.afm',
+        'license.txt',
         ]
 
 def url2data(url,returnRaw=False):
@@ -566,7 +568,7 @@ def main():
                     'reportlab.platypus',
                     ],
             package_dir = PACKAGE_DIR,
-            package_data = {'reportlab': reportlab_files+['license.txt']},
+            package_data = {'reportlab': reportlab_files},
             ext_modules =   EXT_MODULES,
             classifiers = [
                 'Development Status :: 5 - Production/Stable',
