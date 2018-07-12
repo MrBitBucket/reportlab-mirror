@@ -242,7 +242,7 @@ reportlab_files= [
         'fonts/zx______.pfb',
         'fonts/zy______.pfb',
         'fonts/callig15.pfb',
-        'fonts/callig15.afm',
+        'license.txt',
         ]
 
 def url2data(url,returnRaw=False):
@@ -361,7 +361,7 @@ def main():
         infoline( 'extensions from %r'%RL_ACCEL)
         infoline( '================================================')
         fn = pjoin(RL_ACCEL,'hyphen.mashed')
-        SPECIAL_PACKAGE_DATA = {fn: pjoin('lib','hyphen.mashed')}
+        SPECIAL_PACKAGE_DATA[fn] = pjoin('lib','hyphen.mashed')
         EXT_MODULES += [
                     Extension( 'reportlab.lib._rl_accel',
                                 [pjoin(RL_ACCEL,'_rl_accel.c')],
@@ -542,12 +542,13 @@ def main():
         shutil.copyfile(fn,pjoin(PACKAGE_DIR['reportlab'],dst))
         reportlab_files.append(dst)
     get_fonts(PACKAGE_DIR, reportlab_files)
+    print 'files=====\n','\n'.join(reportlab_files)
     get_glyphlist_module(PACKAGE_DIR)
     try:
         setup(
             name="reportlab",
             version=get_version(),
-            license="BSD license (see license.txt for details), Copyright (c) 2000-2015, ReportLab Inc.",
+            license="BSD license (see license.txt for details), Copyright (c) 2000-2018, ReportLab Inc.",
             description="The Reportlab Toolkit",
             long_description="""The ReportLab Toolkit. An Open Source Python library for generating PDFs and graphics.""",
 
