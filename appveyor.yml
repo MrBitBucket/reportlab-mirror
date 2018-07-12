@@ -80,7 +80,7 @@ on_failure:
 
 test_script:
   - echo "=============================== Python%PYTHON% TEST START"
-  - c:\Python%PYTHON%\python.exe -mvirtualenv testenv
+  - myenv\scripts\python.exe -mvirtualenv -p C:\Python%PYTHON%\python.exe testenv
   - testenv\scripts\pip.exe --version
   - testenv\scripts\pip.exe install "pillow<5.0.0"
   - testenv\scripts\pip.exe install --cache-dir=dist --find-links file:dist --pre reportlab
