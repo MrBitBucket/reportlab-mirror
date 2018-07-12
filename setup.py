@@ -242,7 +242,6 @@ reportlab_files= [
         'fonts/zx______.pfb',
         'fonts/zy______.pfb',
         'fonts/callig15.pfb',
-        'license.txt',
         ]
 
 def url2data(url,returnRaw=False):
@@ -542,7 +541,6 @@ def main():
         shutil.copyfile(fn,pjoin(PACKAGE_DIR['reportlab'],dst))
         reportlab_files.append(dst)
     get_fonts(PACKAGE_DIR, reportlab_files)
-    print 'files=====\n','\n'.join(reportlab_files)
     get_glyphlist_module(PACKAGE_DIR)
     try:
         setup(
@@ -568,7 +566,7 @@ def main():
                     'reportlab.platypus',
                     ],
             package_dir = PACKAGE_DIR,
-            package_data = {'reportlab': reportlab_files},
+            package_data = {'reportlab': reportlab_files+['license.txt']},
             ext_modules =   EXT_MODULES,
             classifiers = [
                 'Development Status :: 5 - Production/Stable',
