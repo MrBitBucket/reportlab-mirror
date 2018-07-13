@@ -1,6 +1,6 @@
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, NearTestCase
 setOutDir(__name__)
-import unittest
+import unittest, sys
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
@@ -85,6 +85,7 @@ class TextEncodingTestCase(NearTestCase):
         self.assertNear(pdfmetrics.stringWidth(testUTF8, 'Vera', 10),279.809570313)
         self.assertNear(pdfmetrics.stringWidth(testUni, 'Vera', 10),279.809570313)
 
+    @unittest.skipIf(sys.getfilesystemencoding().lower()=='ascii','s')
     def testUtf8FileName(self):
         fn=outputfile('test_pdfbase_utf8_filename')
         if not isUnicode(fn): fn = fn.decode('utf8')
