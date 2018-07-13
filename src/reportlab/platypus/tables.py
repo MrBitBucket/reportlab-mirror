@@ -573,7 +573,7 @@ class Table(Flowable):
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
                             if ji in colSpanCells:
                                 if not span: continue
-                                w = max(colpositions[span[2]+1]-colpositions[span[0]],w)
+                                w = max(colpositions[span[2]+1]-colpositions[span[0]],w or 0)
                             dW,t = self._listCellGeom(v,w or self._listValueWidth(v),s)
                             if canv: canv._fontname, canv._fontsize, canv._leading = saved
                             dW = dW + s.leftPadding + s.rightPadding
