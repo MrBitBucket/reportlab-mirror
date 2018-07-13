@@ -85,7 +85,7 @@ class TextEncodingTestCase(NearTestCase):
         self.assertNear(pdfmetrics.stringWidth(testUTF8, 'Vera', 10),279.809570313)
         self.assertNear(pdfmetrics.stringWidth(testUni, 'Vera', 10),279.809570313)
 
-    @unittest.skipIf(sys.getfilesystemencoding().lower()=='ascii','s')
+    @unittest.skipIf(sys.getfilesystemencoding().lower() in ('ascii','ansi_x3.4-1968'),'s')
     def testUtf8FileName(self):
         fn=outputfile('test_pdfbase_utf8_filename')
         if not isUnicode(fn): fn = fn.decode('utf8')
