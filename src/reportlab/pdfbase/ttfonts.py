@@ -527,7 +527,10 @@ class TTFontFile(TTFontParser):
         self.uniqueFontID = names[3] or psName
 
         # head - Font header table
-        self.seek_table("head")
+        try:
+            self.seek_table("head")
+        except:
+            raise TTFError('head table not found ttf name=%s' % self.name)
         ver_maj, ver_min = self.read_ushort(), self.read_ushort()
         if ver_maj != 1:
             raise TTFError('Unknown head table version %d.%04x' % (ver_maj, ver_min))
