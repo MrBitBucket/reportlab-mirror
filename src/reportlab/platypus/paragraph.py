@@ -1006,8 +1006,7 @@ def _splitWord(w,maxWidth,maxWidths,lineno,fontName,fontSize,encoding='utf8'):
         wordText += c
         lineWidth = newLineWidth
     aR(_SplitWord(wordText))
-    if not R[0]: del R[0]   #delete in special case
-    return R
+    return [c for c in R if c]
 
 def _yieldBLParaWords(blPara,start,stop):
     state = 0
@@ -1812,7 +1811,7 @@ class Paragraph(Flowable):
                             words[0:0] = hsw
                             self._hyphenations += 1
                             continue
-                    if splitLongWords:
+                    if splitLongWords and not isinstance(word,_SplitWord):
                         nmw = min(lineno,maxlineno)
                         if wordWidth>max(maxWidths[nmw:nmw+1]):
                             #a long word
@@ -1885,7 +1884,7 @@ class Paragraph(Flowable):
                             FW.pop(-1)  #remove this as we are doing this one again
                             self._hyphenations += 1
                             continue
-                    if splitLongWords:
+                    if splitLongWords and not isinstance(w,_SplitFrag):
                         nmw = min(lineno,maxlineno)
                         if wordWidth>max(maxWidths[nmw:nmw+1]):
                             #a long word
