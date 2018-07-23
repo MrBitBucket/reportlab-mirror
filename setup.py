@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-__version__='3.3.30'
+__version__='3.5.2'
 import os, sys, glob, shutil
 def specialOption(n):
     v = False
@@ -25,6 +25,7 @@ isPy3 = sys.version_info[0]==3
 platform = sys.platform
 pjoin = os.path.join
 abspath = os.path.abspath
+path = os.path.abspath
 isfile = os.path.isfile
 isdir = os.path.isdir
 dirname = os.path.dirname
@@ -193,7 +194,9 @@ def _find_rl_ccode(dn='rl_accel',cn='_rl_accel.c'):
         _ = list(filter(_rl_dir_info(cn),_))
         if len(_):
             _.sort(key=_rl_dir_info)
-            return abspath(_[0])
+            _ = abspath(_[0])
+            return _[_.index(os.sep.join(('','src','rl_addons')))+1:]
+
     return None
 
 
@@ -215,6 +218,7 @@ def infoline(t):
 reportlab_files= [
         'fonts/00readme.txt',
         'fonts/bitstream-vera-license.txt',
+        'fonts/DarkGarden-changelog.txt',
         'fonts/DarkGarden-copying-gpl.txt',
         'fonts/DarkGarden-copying.txt',
         'fonts/DarkGarden-readme.txt',
@@ -243,6 +247,8 @@ reportlab_files= [
         'fonts/zy______.pfb',
         'fonts/callig15.pfb',
         'fonts/callig15.afm',
+        'reportlab/graphics/barcode/README'
+        'reportlab/graphics/barcode/TODO'
         'license.txt',
         ]
 

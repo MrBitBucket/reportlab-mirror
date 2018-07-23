@@ -11,6 +11,15 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.2  23/07/2018
+-------------------------
+    * Bug fix release to make th sdist work properly
+
+RELEASE 3.5.1  17/07/2018
+-------------------------
+    * Bug fix for infinite looping in Paragraph (likely caused by small available Widths).
+      Reported by Kayley.Lane @ oracle.com
+
 RELEASE 3.5  07/07/2018
 -----------------------
     * BalancedColumns flowable added
