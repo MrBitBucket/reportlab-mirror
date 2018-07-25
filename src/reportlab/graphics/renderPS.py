@@ -113,12 +113,12 @@ class PSCanvas:
     def comment(self,msg):
         if self.comments: self.code_append('%'+msg)
 
-    def drawImage(self, image, x1,y1, x2=None,y2=None): # Postscript Level2 version
+    def drawImage(self, image, x1,y1, width=None,height=None): # Postscript Level2 version
         # select between postscript level 1 or level 2
         if self.PostScriptLevel==1:
-            self._drawImageLevel1(image, x1,y1, x2=None,y2=None)
+            self._drawImageLevel1(image, x1,y1, width, height)
         elif self.PostScriptLevel==2:
-            self._drawImageLevel2(image, x1,y1, x2=None,y2=None)
+            self._drawImageLevel2(image, x1, y1, width, height)
         else :
             raise ValueError('Unsupported Postscript Level %s' % self.PostScriptLevel)
 
@@ -536,25 +536,17 @@ class PSCanvas:
         '''if this is used we're probably in the wrong world'''
         self.width, self.height = w, h
 
-    ############################################################################################
-    # drawImage(self. image, x1, y1, x2=None, y2=None) is now defined by either _drawImageLevel1
-    #    ._drawImageLevel2, the choice is made in .__init__ depending on option
-    def _drawImageLevel1(self, image, x1, y1, x2=None,y2=None):
+    def _drawImageLevel1(self, image, x1, y1, width=None, height=None):
         # Postscript Level1 version available for fallback mode when Level2 doesn't work
-        """drawImage(self,image,x1,y1,x2=None,y2=None) : If x2 and y2 are ommitted, they are
-        calculated from image size. (x1,y1) is upper left of image, (x2,y2) is lower right of
-        image in piddle coordinates."""
         # For now let's start with 24 bit RGB images (following piddlePDF again)
         component_depth = 8
         myimage = image.convert('RGB')
         imgwidth, imgheight = myimage.size
-        if not x2:
-            x2 = imgwidth + x1
-        if not y2:
-            y2 = y1 + imgheight
-        drawwidth = x2 - x1
-        drawheight = y2 - y1
-        #print 'Image size (%d, %d); Draw size (%d, %d)' % (imgwidth, imgheight, drawwidth, drawheight)
+        if not width:
+            width = imgwidth
+        if not height:
+            height = imgheight
+        #print 'Image size (%d, %d); Draw size (%d, %d)' % (imgwidth, imgheight, width, height)
         # now I need to tell postscript how big image is
 
         # "image operators assume that they receive sample data from
@@ -574,8 +566,8 @@ class PSCanvas:
 
         self.code.extend([
             'gsave',
-            '%s %s translate' % (x1,-y1 - drawheight), # need to start are lower left of image
-            '%s %s scale' % (drawwidth,drawheight),
+            '%s %s translate' % (x1,y1), # need to start are lower left of image
+            '%s %s scale' % (width,height),
             '/scanline %d 3 mul string def' % imgwidth  # scanline by multiples of image width
             ])
 
@@ -613,7 +605,7 @@ class PSCanvas:
             output.write('%02x' % char2int(char))
         return output.getvalue()
 
-    def _drawImageLevel2(self, image, x1,y1, x2=None,y2=None): # Postscript Level2 version
+    def _drawImageLevel2(self, image, x1,y1, width=None,height=None): # Postscript Level2 version
         '''At present we're handling only PIL'''
         ### what sort of image are we to draw
         if image.mode=='L' :
@@ -630,16 +622,14 @@ class PSCanvas:
             imBitsPerComponent = 8
 
         imwidth, imheight = myimage.size
-        if not x2:
-            x2 = imwidth + x1
-        if not y2:
-            y2 = y1 + imheight
-        drawwidth = x2 - x1
-        drawheight = y2 - y1
+        if not width:
+            width = imwidth
+        if not height:
+            height = imheight
         self.code.extend([
             'gsave',
-            '%s %s translate' % (x1,-y1 - drawheight), # need to start are lower left of image
-            '%s %s scale' % (drawwidth,drawheight)])
+            '%s %s translate' % (x1,y1), # need to start are lower left of image
+            '%s %s scale' % (width,height)])
 
         if imNumComponents == 3 :
             self.code_append('/DeviceRGB setcolorspace')
@@ -893,13 +883,7 @@ class _PSRenderer(Renderer):
     def drawImage(self, image):
         from reportlab.lib.utils import ImageReader
         im = ImageReader(image.path)
-        x0 = image.x
-        y0 = image.y
-        x1 = image.width
-        if x1 is not None: x1 += x0
-        y1 = image.height
-        if y1 is not None: y1 += y0
-        self._canvas.drawImage(im._image,x0,y0,x1,y1)
+        self._canvas.drawImage(im._image,image.x,image.y,image.width,image.height)
 
 def drawToFile(d,fn, showBoundary=rl_config.showBoundary,**kwd):
     d = renderScaledDrawing(d)
