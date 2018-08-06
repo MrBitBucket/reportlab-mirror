@@ -11,6 +11,13 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.3  06/07/2018
+-------------------------
+    * Bug fix release to make really simple paras work OK 
+      Reported by Kayley.Lane @ oracle.com
+    * Use local libart by default
+    * Use upgrade libart source to 2.3.21-3 https://salsa.debian.org/gnome-team/libart-lgpl@aa059539
+
 RELEASE 3.5.2  23/07/2018
 -------------------------
     * Bug fix release to make th sdist work properly
@@ -243,12 +250,12 @@ There has been a substantial internal rewrite to ensure consistent use of unicod
   * __init__.py allow the import of on optional reportlab.local_rl_mods to allow monkey patching etc.
   * rl_config now imports rl_settings & optionally local_rl_settings
   * ReportLab C extensions now live inside reportlab; _rl_accel is no longer required; All _rl_accel imports now 
-	pass through reportlab.lib.rl_accel
+    pass through reportlab.lib.rl_accel
   * xmllib is gone, alongside the paraparser stuff that caused issues in favour of HTMLParser.
   * some obsolete C extensions (sgmlop and pyHnj) are gone
   * Improved support for multi-threaded systems to the _rl_accel extension module.
   * Removed reportlab/lib/ para.py & pycanvas.py;  these would better belong in third party packages, 
-	which can make use of the monkeypatching feature above.
+    which can make use of the monkeypatching feature above.
 
 
 ### New features
@@ -268,7 +275,7 @@ RELEASE 2.7  04/04/2013
   * added in lineStyle (for bars)
   * improved SVG rendering
   * Pie Chart now has an `innerRadiusFraction` to allow doughnut-like appearance for 2d charts  (it has no effect with 3d charts). 
-	 The separate 'doughnut' chart lacks many pie chart features and should only be used if you wanted multiple nested doughnuts. 
+    The separate 'doughnut' chart lacks many pie chart features and should only be used if you wanted multiple nested doughnuts. 
 
 #### Charts/graphics bug fixes
   * piecharts.py: fix Pie3d __init__ to call its superclass
@@ -745,24 +752,24 @@ Older releases
 
 Please refer to subversion backlogs for a low level change list
 
-	RELEASE 1.20 at 18:00 GMT  25/Nov/2004
-	RELEASE 1.19 at 18:00 GMT  21/Jan/2004
-	RELEASE 1.18 at 12:00 GMT  9/Jul/2003
-	RELEASE 1.17 at 16:00 GMT  3/Jan/2003
-	RELEASE 1.16 at 16:00 GMT  7/Nov/2002
-	RELEASE 1.15 at 14:00 GMT  9/Aug/2002
-	RELEASE 1.14 at 18:00 GMT 28/May/2002
-	RELEASE 1.13 at 15:00 GMT 27/March/2002
-	RELEASE 1.12 at 17:00 GMT 28/February/2002
-	RELEASE 1.11 at 14:00 GMT 12/December/2001
-	RELEASE 1.10 at 14:00 GMT 06/November/2001
-	RELEASE 1.09 at 14:00 BST 13/August/2001
-	RELEASE 1.08 at 12:00 BST 19/June/2001
-	RELEASE 1.07 at 11:54 BST 2001/05/02
-	RELEASE 1.06 at 14:00 BST 2001/03/30
-	RELEASE 1.03 on 2001/02/09
-	RELEASE 1.02 on 2000/12/11
-	RELEASE 1.01 on 2000/10/10
-	RELEASE 1.00 on 2000/07/20
-	RELEASE 0.95 on 2000/07/14
-	RELEASE 0.94 on 2000/06/20
+    RELEASE 1.20 at 18:00 GMT  25/Nov/2004
+    RELEASE 1.19 at 18:00 GMT  21/Jan/2004
+    RELEASE 1.18 at 12:00 GMT  9/Jul/2003
+    RELEASE 1.17 at 16:00 GMT  3/Jan/2003
+    RELEASE 1.16 at 16:00 GMT  7/Nov/2002
+    RELEASE 1.15 at 14:00 GMT  9/Aug/2002
+    RELEASE 1.14 at 18:00 GMT 28/May/2002
+    RELEASE 1.13 at 15:00 GMT 27/March/2002
+    RELEASE 1.12 at 17:00 GMT 28/February/2002
+    RELEASE 1.11 at 14:00 GMT 12/December/2001
+    RELEASE 1.10 at 14:00 GMT 06/November/2001
+    RELEASE 1.09 at 14:00 BST 13/August/2001
+    RELEASE 1.08 at 12:00 BST 19/June/2001
+    RELEASE 1.07 at 11:54 BST 2001/05/02
+    RELEASE 1.06 at 14:00 BST 2001/03/30
+    RELEASE 1.03 on 2001/02/09
+    RELEASE 1.02 on 2000/12/11
+    RELEASE 1.01 on 2000/10/10
+    RELEASE 1.00 on 2000/07/20
+    RELEASE 0.95 on 2000/07/14
+    RELEASE 0.94 on 2000/06/20

@@ -14,7 +14,7 @@ from reportlab.platypus.flowables import Flowable, DocAssert
 from reportlab.lib.colors import Color
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
-from reportlab.lib.utils import _className
+from reportlab.lib.utils import _className, asBytes, asUnicode
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame, ShowBoundaryValue
@@ -926,6 +926,44 @@ phonemic and <u>morphological</u> <strike>analysis</strike>.'''
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_autoleading.pdf'))
         doc.build(story)
 
+DEJAVUSANS = ('DejaVuSans','DejaVuSans-Bold','DejaVuSans-Oblique','DejaVuSans-BoldOblique')
+def haveDejaVu():
+    from reportlab.pdfbase.ttfonts import TTFont
+    for x in DEJAVUSANS:
+        try:
+            TTFont(x,x+'.ttf')
+        except:
+            return False
+    return True
+
+DEJAVUSANS = ('DejaVuSans','DejaVuSans-Bold','DejaVuSans-Oblique','DejaVuSans-BoldOblique')
+def alphaSortedItems(d):
+    return (i[1] for i in sorted((j[0].lower(),j) for j in d.items()))
+
+def tentities(title, b, fn):
+    from reportlab.platypus.paraparser import greeks
+    from reportlab.platypus.doctemplate import SimpleDocTemplate
+    from reportlab.pdfbase.pdfmetrics import stringWidth, registerFont, registerFontFamily
+    from reportlab.pdfbase.ttfonts import TTFont
+    from reportlab.platypus.tables import TableStyle, Table
+    from reportlab.platypus.paragraph import Paragraph
+    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+    from reportlab import ascii
+
+    for v in DEJAVUSANS:
+        registerFont(TTFont(v,v+'.ttf'))
+    registerFontFamily(*(DEJAVUSANS[:1]+DEJAVUSANS))
+
+    def bu(s):
+        return asUnicode(s) if not b else asBytes(s)
+
+    bt = getSampleStyleSheet()['BodyText']
+    bt.fontName = 'DejaVuSans'
+    doc = SimpleDocTemplate(fn)
+    story = [Paragraph('<b>%s</b>' % title,bt)]
+    story.extend([Paragraph(bu('&amp;%s; = <span color="red">&%s;</span>' % (k,k)), bt) for k, v in alphaSortedItems(greeks)])
+    doc.build(story)
+
 class JustifyTestCase(unittest.TestCase):
     "Test justification of paragraphs."
     def testUl(self):
@@ -1162,14 +1200,26 @@ impose an interpretation on the system of base rules exclusive of the
                         ])
         styleSheet = getSampleStyleSheet()
         normal = ParagraphStyle(name='normal',fontName='Helvetica',fontSize=10,leading=12,parent=styleSheet['Normal'])
-        bold = ParagraphStyle(name='bold',fontName='Helvetica-Bold',fontSize=12,leading=14.4,parent=normal)
+        bold = ParagraphStyle(name='normal',fontName='Helvetica-Bold',fontSize=10,leading=12,parent=styleSheet['Normal'])
+        registerFontFamily('Helvetica','Helvetica','Helvetica-Bold','Helvetica-Oblique','Helvetica-BoldOblique')
         story =[]
         a = story.append
         a(Paragraph('Paragraph Hard Space Handling', bold))
         a(Paragraph(''' <span backcolor="pink">ABCDEFGHI</span> ''', normal))
         a(Paragraph(''' <span backcolor="palegreen">&nbsp;ABCDEFGHI&nbsp;</span> ''', normal))
+        a(Paragraph('''<span backcolor="lightblue">&nbsp;</span>''', normal))
+        a(Paragraph('''<span backcolor="lightblue">&nbsp;</span><span backcolor="palegreen">&nbsp;</span> ''', normal))
+        a(Paragraph('''<span backcolor="pink"><b>A</b></span><span backcolor="lightblue"> </span><span backcolor="pink"><b>B</b></span>''', normal))
+        a(Paragraph('''<span backcolor="pink"><b>A</b></span> <span backcolor="lightblue"> </span><span backcolor="pink"><b>B</b></span>''', normal))
+        a(Paragraph('''<span backcolor="pink"><b>A</b></span><span backcolor="lightblue">&nbsp;</span><span backcolor="pink"><b>B</b></span>''', normal))
+        a(Paragraph('''<span backcolor="pink"><b>A</b></span> <span backcolor="lightblue">&nbsp;</span><span backcolor="pink"><b>B</b></span>''', normal))
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_nbsp.pdf'))
         doc.build(story)
+
+    @unittest.skipUnless(haveDejaVu(),'s')
+    def testParaEntities(self):
+        tentities(b'unicode formatted paragraphs',False,outputfile('test_platypus_unicode_paragraph_entities.pdf'))
+        tentities(b'byte formatted paragraphs',True,outputfile('test_platypus_bytes_paragraph_entities.pdf'))
 
 #noruntests
 def makeSuite():

@@ -87,6 +87,14 @@ def strip(text):
     if isBytes(text): text = text.decode('utf8')
     return text.strip(_wsc)
 
+def lstrip(text):
+    if isBytes(text): text = text.decode('utf8')
+    return text.lstrip(_wsc)
+
+def rstrip(text):
+    if isBytes(text): text = text.decode('utf8')
+    return text.rstrip(_wsc)
+
 class ParaLines(ABag):
     """
     class ParaLines contains the broken into lines representation of Paragraphs
@@ -537,8 +545,8 @@ def _getFragWords(frags,maxWidth=None):
                 f[0] = w
     R = []
     aR = R.append
+    W = []
     if _processed_frags(frags):
-        W = []
         aW = W.append
         for f in frags:
             _rescaleFrag(f)
@@ -573,7 +581,6 @@ def _getFragWords(frags,maxWidth=None):
             #must end a joining
             aR((_HSFrag if isinstance(lf,_HSFrag) else list)([W0t(Wlen)]+W))
     else:
-        W = []
         hangingSpace = False
         n = 0
         hangingStrip = True
@@ -582,11 +589,11 @@ def _getFragWords(frags,maxWidth=None):
             if text!='':
                 f._fkind = _FK_TEXT
                 if hangingStrip:
-                    text = text.lstrip()
+                    text = lstrip(text)
                     if not text: continue
                     hangingStrip = False
                 S = split(text)
-                if text[0] in whitespace:
+                if text[0] in whitespace or not S:
                     if W:
                         W.insert(0,n)   #end preceding word
                         aR(W)
@@ -655,6 +662,11 @@ def _getFragWords(frags,maxWidth=None):
         if W:
             W.insert(0,n)
             aR(W)
+    if not R:
+        if frags:
+            f = frags[0]
+            f._fkind = _FK_TEXT
+            R = [[0,(f,u'')]]
 
     return R
 
