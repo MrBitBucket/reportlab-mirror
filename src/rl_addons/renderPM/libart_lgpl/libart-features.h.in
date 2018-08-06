@@ -6,8 +6,18 @@
 #define LIBART_MICRO_VERSION (@LIBART_MICRO_VERSION@)
 #define LIBART_VERSION "@LIBART_VERSION@"
 
-extern const unsigned int libart_major_version, libart_minor_version, libart_micro_version;
-extern const char *libart_version;
+#ifdef _WIN32
+#  ifdef LIBART_COMPILATION
+#    define LIBART_VAR __declspec(dllexport)
+#  else
+#    define LIBART_VAR extern __declspec(dllimport)
+#  endif
+#else
+#  define LIBART_VAR extern
+#endif
+
+LIBART_VAR const unsigned int libart_major_version, libart_minor_version, libart_micro_version;
+LIBART_VAR const char *libart_version;
 
 void libart_preinit(void *app, void *modinfo);
 void libart_postinit(void *app, void *modinfo);

@@ -28,6 +28,9 @@
 #include "art_rect_uta.h"
 #include "art_uta_rect.h"
 
+#undef LIBART_COMPILATION
+#include "libart-features.h"
+
 #define TEST_UTA
 #define noTEST_UTA_SPEED
 
@@ -156,6 +159,8 @@ main (int argc, char **argv)
 
 #ifdef TEST_UTA
   printf ("%%!PS-Adobe\n");
+  printf ("%% libart version: %d.%d.%d\n",
+	  libart_major_version, libart_minor_version, libart_micro_version);
   printf ("/Helvetica findfont 12 scalefont setfont\n");
   printf ("0.5 setlinewidth\n");
 
@@ -180,7 +185,7 @@ main (int argc, char **argv)
     uta = art_uta_from_irect (&bbox);
   }
 #endif
-  rbuf = 0;
+  rbuf = NULL;
 #else
   uta = art_uta_new_coords (0, 0, 500, 500);
 

@@ -1,21 +1,29 @@
-noinst_PROGRAMS = testart testuta gen_art_config
+noinst_PROGRAMS = testart testuta
 
 bin_SCRIPTS = \
 	libart2-config
+	
+noinst_SCRIPTS = gen_art_config.sh
 
 BUILT_SOURCES = art_config.h
 
-art_config.h:	gen_art_config
-	./gen_art_config > art_config.h
+art_config.h:
+	./gen_art_config.sh > art_config.h
 
 EXTRA_DIST = 			\
+	libart.def		\
 	libart-config.in	\
-	libart-2.0.pc.in
+	libart-2.0.pc.in	\
+	libart-2.0-uninstalled.pc.in
 
 lib_LTLIBRARIES = libart_lgpl_2.la
 
-if OS_WIN32
+if PLATFORM_WIN32
 no_undefined = -no-undefined
+endif
+
+if OS_WIN32
+export_symbols = -export-symbols libart.def
 
 install-libtool-import-lib:
 	$(INSTALL) .libs/libart_lgpl_2.dll.a $(DESTDIR)$(libdir)
@@ -24,6 +32,8 @@ uninstall-libtool-import-lib:
 else
 install-libtool-import-lib:
 uninstall-libtool-import-lib:
+
+libm = -lm
 endif
 
 if MS_LIB_AVAILABLE
@@ -36,7 +46,7 @@ uninstall-ms-lib:
 	-rm $(DESTDIR)$(libdir)/art_lgpl_2.lib
 
 art_lgpl_2.lib : libart_lgpl_2.la
-	lib -name:libart_lgpl_2-@LIBART_MAJOR_VERSION@.dll -def:.libs/libart_lgpl_2-@LIBART_MAJOR_VERSION@.dll-def -out:$@
+	lib -name:libart_lgpl_2-@LIBART_MAJOR_VERSION@.dll -def:libart.def -out:$@
 
 else
 install-ms-lib:
@@ -86,8 +96,8 @@ libart_lgpl_2_la_SOURCES = \
 	art_vpath_svp.c	\
 	libart-features.c
 
-libart_lgpl_2_la_LDFLAGS = -version-info @LIBART_VERSION_INFO@ $(no_undefined)
-libart_lgpl_2_la_LIBADD = -lm
+libart_lgpl_2_la_LDFLAGS = -version-info @LIBART_VERSION_INFO@ $(no_undefined) $(export_symbols)
+libart_lgpl_2_la_LIBADD = $(libm)
 
 libart_lgplincdir = $(includedir)/libart-2.0/libart_lgpl
 libart_lgplinc_HEADERS = \
@@ -144,12 +154,12 @@ LDADDS = $(top_builddir)/libart_lgpl_2.la
 testart_SOURCES=testart.c
 testart_LDFLAGS =
 testart_DEPENDENCIES = $(DEPS)
-testart_LDADD = $(LDADDS) -lm
+testart_LDADD = $(LDADDS) $(libm)
 
 testuta_SOURCES=testuta.c
 testuta_LDFLAGS =
 testuta_DEPENDENCIES = $(DEPS)
-testuta_LDADD = $(LDADDS) -lm
+testuta_LDADD = $(LDADDS) $(libm)
 
 tests:	testart testuta
 
@@ -162,3 +172,6 @@ libart2-config: libart-config
 install-data-local: install-ms-lib install-libtool-import-lib
 
 uninstall-local: uninstall-ms-lib uninstall-libtool-import-lib
+
+CLEANFILES = $(BUILT_SOURCES) $(bin_SCRIPTS)
+DISTCLEANFILES = $(BUILT_SOURCES) $(bin_SCRIPTS)

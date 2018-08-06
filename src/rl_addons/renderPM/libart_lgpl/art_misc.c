@@ -80,3 +80,17 @@ art_dprint (const char *fmt, ...)
   va_end (ap);
 }
 
+void *art_alloc(size_t size)
+{
+  return malloc(size);
+}
+
+void art_free(void *ptr)
+{
+  free(ptr);
+}
+
+void *art_realloc(void *ptr, size_t size)
+{
+  return realloc(ptr, size);
+}

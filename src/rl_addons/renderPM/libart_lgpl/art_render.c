@@ -411,7 +411,7 @@ art_render_composite (ArtRenderCallback *self, ArtRender *render,
 		}
 	      else /* (depth == 16) */
 		{
-		  tmp = ((art_u16 *)bufptr)[n_chan];
+		  tmp = ((art_u16 *)dstptr)[n_chan];
 		  dst_alpha = (tmp + (tmp >> 15));
 		}
 	      if (alpha_type == ART_ALPHA_SEPARATE)
@@ -487,7 +487,7 @@ art_render_composite (ArtRenderCallback *self, ArtRender *render,
 	      for (j = 0; j < n_chan; j++)
 		((art_u16 *)dstptr)[j] = (dst[j] * dst_mul + 0x8000) >> 16;
 	      if (alpha_type != ART_ALPHA_NONE)
-		dstptr[n_chan] = (dst_alpha * 0xffff + 0x8000) >> 16;
+		((art_u16 *)dstptr)[n_chan] = (dst_alpha * 0xffff + 0x8000) >> 16;
 	    }
 	  dstptr += dst_pixstride;
 	}

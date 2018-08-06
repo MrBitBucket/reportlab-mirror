@@ -1,3 +1,184 @@
+2009-01-14  Fridrich Strba  <fridrich.strba@bluewin.ch>
+
+	* gen_art_config.c: remove
+	* gen_art_config.sh.in: add
+	* configure.in, Makefile.am: use a shell script together
+	with autotools to create the art-config.h. This way is cross-compile
+	friendly and gives the same result.
+
+2008-01-30  Alexander Larsson  <alexl@redhat.com>
+
+	* configure.in:
+	* NEWS: 
+	Release 2.3.20
+
+2007-03-01  Frederic Crozat  <fcrozat@mandriva.com>
+
+	reviewed by: Dom Lachowicz <cinamod@hotmail.com>
+
+	* art_misc.h: Fix header when included in C++.
+	Patch from Goetz Waschk and Laurent Montel.
+
+2007-02-28  Kjartan Maraas  <kmaraas@gnome.org>
+
+	configure.in: Release 2.3.19
+
+2007-02-28  Kjartan Maraas  <kmaraas@gnome.org>
+
+	* configure.in: Fix a typo introduced with the bug fix
+	for bug #131478. Noticed by Yanko Kaneti.
+
+2007-02-26  Kjartan Maraas  <kmaraas@gnome.org>
+
+	* configure.in: 2.3.18.
+
+2006-12-06  Kjartan Maraas  <kmaraas@gnome.org>
+
+	* .cvsignore:
+	* Makefile.am:
+	* autogen.sh:
+	* configure.in:
+	Port to automake 1.9. Patch from Christian Persch.
+	Closes bug #131478
+
+2005-10-26  Alexander Larsson  <alexl@redhat.com>
+
+	* Makefile.am:
+	* configure.in:
+	Cygwin build fixes from Cygwin Ports maintainer (#317562)
+
+2005-10-05  Dom Lachowicz <cinamod@hotmail.com>
+
+	* art-misc.[ch]: Turn memory-managing macros into proper functions
+	instead of preprocessor wrappers around malloc. Win32 ships multiple 
+	runtimes, and an art_alloc'd block from one runtime can't be 
+	art_free'd by a different runtime.
+
+	* libart.def: Export the 3 new functions
+	
+2005-05-27  Alexander Larsson  <alexl@redhat.com>
+
+	* art_vpath_bpath.c: (art_vpath_render_bez):
+	Handle the case where start and endpoint are very near
+	in a better way. (#301750)
+
+	Patch from Bernhard Herzog  
+
+2005-03-24  Tor Lillqvist  <tml@novell.com>
+
+	* art_misc.h (ART_GNUC_PRINTF, ART_GNUC_NORETURN): Use __format__,
+	__printf__ and __noreturn__ to avoid warnings in case "format",
+	"printf" or "noreturn" are #defined to something else. For example
+	GNU libintl.h (at least some versions of it) #defines printf as
+	libintl_printf.
+
+2005-01-24  Kjartan Maraas  <kmaraas@gnome.org>
+
+	* art_render_gradient.c: (art_render_gradient_radial_render):
+	* testart.c:
+	* testuta.c: (main): Fix some compiler warnings etc.
+
+2005-01-21  Kjartan Maraas  <kmaraas@gnome.org>
+
+	* Release 2.3.17
+
+2004-03-22  Michael Meeks  <michael@ximian.com>
+
+	* Makefile.am (EXTRA_DIST): add libart.def.
+
+2004-03-04  Glynn Foster  <glynn.foster@sun.com>
+
+	* Makefile.am, configure.in, libart-2.0-uninstalled.pc.in:
+	Add uninstalled pkg-config file.
+
+Tue Sep 09 16:30:31 2003  George Lebl <jirka@5z.com>
+
+	* Release 2.3.16
+
+	* art_render_gradient.c: revert the double comparison test in the
+	  asserts and comment out the two asserts causing crashes
+	  everywhere, see bug #121850
+
+2003-09-02  Alexander Larsson  <alexl@redhat.com>
+
+	* configure.in: 2.3.15
+
+2003-08-26  Morten Welinder  <terra@gnome.org>
+
+	* art_render_gradient.c (art_render_gradient_linear_render_8): Fix
+	vertical gradients.  Fix yet more floating point comparisons using
+	!=.  For the record, Gnumeric is a heavy user.
+
+2003-08-14  Tor Lillqvist  <tml@iki.fi>
+
+	Some nitpicking changes for Win32:
+
+	* libart-features.h.in: Declare the variables from the library as
+	dlimport/dllexport on Win32.
+
+	* Makefile.am: Don't use -lm on Win32. Use the libart.def file.
+
+	* makefile.msc: Update to generate same name DLL and import
+	library as auto* and libtool. Add missing objects. (But dunno if
+	it is useful to maintain this file. It isn't distributed in the
+	source tarballs (should it be?). And, if it were distributed, and
+	the intention was to support random people really building libart
+	with MSVC, one should distribute also prebuilt config.h(.win32)
+	and libart-features.h(.win32) files.)
+
+	* libart-zip.in (DEVZIP): Fix typo.
+	(DLLDIR): libtool 1.5 installs DLLs in $(prefix)/bin, so look
+	there, too.
+
+	* libart.def: Add missing entry points.
+
+	* testuta.c: To check that the export/import of the version
+	variables work, print out them in a comment. Undefine
+	LIBART_COMPILATION before including libart-features.h.
+
+2003-08-08  Alexander Larsson  <alexl@redhat.com>
+
+	* configure.in: 2.3.14
+
+Fri Jul 25 12:29:35 2003  George Lebl <jirka@5z.com>
+
+	* art_render_gradient.c (art_render_gradient_linear_render_8)
+	  (art_render_gradient_linear_render) (art_render_gradient_linear)
+	  (art_render_gradient_radial_render) (art_render_gradient_radial):
+	  Redo the checks where float was compared by == or != to using
+	  the EPSILON define.  Also copy the ArtGradientLinear and
+	  ArtGradientRadial into the source structure, pretending that
+	  these are constants that will never change or be freed by
+	  the caller is utterly evil and in fact for librsvg it is
+	  not constant.  This fixes some more very random crashes
+	  when using librsvg with libart (which seems to be the
+	  only usage of the gradient stuff)
+
+Fri Jul 18 12:57:36 2003  George Lebl <jirka@5z.com>
+
+	* art_render_gradient.c: Fix more comparison-of-doubles by == bugs,
+	  this code is uber ugly.  Should fix the fairly random crashes
+	  on asserts I've been having.
+
+2003-07-11  Michael Meeks  <michael@ximian.com>
+
+	* Version 2.3.13
+
+2003-07-11  Federico Mena Quintero  <federico@ximian.com>
+
+	* art_svp_ops.c (art_svp_minus): impl.
+
+Tue Jul 08 01:15:02 2003  George Lebl <jirka@5z.com>
+
+	* art_render_gradient.c: fix comment as pointed out by alex
+
+Tue Jul 08 01:13:48 2003  George Lebl <jirka@5z.com>
+
+	* art_render_gradient.c (art_render_gradient_linear_render_8):
+	  when we wish to find the current segment and we go beyond the
+	  last stop due to float fun, use the last segment as that's
+	  really what we want.  Avoids a very abrupt assert death.
+
 2003-05-05  Alexander Larsson  <alexl@redhat.com>
 
 	* configure.in:
