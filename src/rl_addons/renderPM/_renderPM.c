@@ -1535,10 +1535,10 @@ static PyObject* gstate_getattr(gstateObject *self, char *name)
 	else if(!strcmp(name,"dashArray")) return _get_gstateDashArray(self);
 	else if(!strcmp(name,"pixBuf")){
 		pixBufT* p = self->pixBuf;
-		int	nw = p->width*p->nchan;
+		int	nw = p->rowstride;
 		PyObject *v = PyBytes_FromStringAndSize((char *)p->buf, p->height*nw);
 		char	*r1 = PyBytes_AS_STRING(v);
-		char	*r2 = r1 + (p->height-1)*p->rowstride;
+		char	*r2 = r1 + (p->height-1)*nw;
 		while(r1<r2){
 			int	i;
 			for(i=0;i<nw;i++){
