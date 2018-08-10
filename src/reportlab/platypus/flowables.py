@@ -1936,9 +1936,14 @@ class ListFlowable(_Container,Flowable):
                     start = self._bulletType
                     auto = True
         if self._bulletType!='bullet':
-            for v in start:
-                if v not in self._numberStyles:
-                    raise ValueError('invalid start %r' % start)
+            if auto:
+                for v in start:
+                    if v not in self._numberStyles:
+                        raise ValueError('invalid start=%r or bullettype=%r' % (start,self._bulletType))
+            else:
+                for v in self._bulletType:
+                    if v not in self._numberStyles:
+                        raise ValueError('invalid bullettype=%r' % self._bulletType)
         self._start = start
         self._auto = auto or isinstance(start,(list,tuple))
 

@@ -130,6 +130,32 @@ http://www.biometricassociates.com/downloads/user-guides/make-the-url-even-longe
             Paragraph(TEXTS[1], normal),
             ])
         story.append(OL)
+
+        story.append(
+            ListFlowable(
+                    [
+                    Paragraph("Level 0.1", normal),
+                    Paragraph("Level 0.2", normal),
+                    ListFlowable(
+                            [
+                            Paragraph("Level 1.1", normal),
+                            Paragraph("Level 1.1", normal),
+                            ListFlowable(
+                                    [
+                                    Paragraph("Level 2.1", normal),
+                                    Paragraph("Level 2.1", normal),
+                                    Paragraph("Level 2.3", normal),
+                                    ],
+                                ),
+                            Paragraph("Level 1.4", normal),
+                            ],
+                        ),
+                    Paragraph("Level 0.4", normal),
+                    ],
+                    bulletType='1',
+                    start='10',
+                    ),
+            )
         
         
         
