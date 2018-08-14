@@ -1221,6 +1221,18 @@ impose an interpretation on the system of base rules exclusive of the
         tentities(b'unicode formatted paragraphs',False,outputfile('test_platypus_unicode_paragraph_entities.pdf'))
         tentities(b'byte formatted paragraphs',True,outputfile('test_platypus_bytes_paragraph_entities.pdf'))
 
+    def testXPreUnderlining(self):
+        styleSheet = getSampleStyleSheet()
+        bt = styleSheet['BodyText']
+        story = [
+                XPreformatted("xpre<u><font size='1' color='red'>SS</font>        </u>",bt),
+                XPreformatted("xpre<u><font size='1' color='red'>SS</font>        </u>|",bt),
+                XPreformatted("<u><font size='1' color='red'>SS</font>        </u>",bt),
+                XPreformatted("<u><font size='1' color='red'>SS</font>        </u>|",bt),
+                ]
+        doc = MyDocTemplate(outputfile('test_platypus_XPreUnderlining.pdf'))
+        doc.build(story)
+
 #noruntests
 def makeSuite():
     return makeSuiteForClasses(ParagraphCorners,SplitFrameParagraphTest,FragmentTestCase, ParagraphSplitTestCase, ULTestCase, JustifyTestCase,

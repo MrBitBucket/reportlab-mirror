@@ -255,6 +255,7 @@ def _getDotsInfo(style):
 _56=5./6
 _16=1./6
 def _putFragLine(cur_x, tx, line, last, pKind):
+    preformatted = tx.preformatted
     xs = tx.XtraState
     cur_y = xs.cur_y
     x0 = tx._x0
@@ -332,7 +333,7 @@ def _putFragLine(cur_x, tx, line, last, pKind):
             textColor = f.textColor
             rise = f.rise
             if i > 0:
-                end_x = cur_x_s - _trailingSpaceLength(words[i-1].text, tx)
+                end_x = cur_x_s - (0 if preformatted else _trailingSpaceLength(words[i-1].text, tx))
             if (tx._fontname,tx._fontsize)!=(f.fontName,fontSize):
                 tx._setFont(f.fontName, fontSize)
             if xs.textColor!=textColor:
@@ -1286,7 +1287,7 @@ def _do_post_text(tx):
             dy = lg+lw
             if not underline: dy = -dy
             y = y0 + r + _usConv(o if o!='' else ('-0.125*L' if underline else '0.25*L'),values)
-            #print 'n=%s k=%s x1=%s x2=%s r=%s c=%s w=%r o=%r fs=%r tc=%s y=%s lW=%r offs=%r' % (n,k,x1,x2,r,(c.hexval() if c else ''),w,o,fs,tc.hexval(),y,lW,y-y0-r)
+            #print 'n=%s k=%s x1=%s x2=%s r=%s c=%s w=%r o=%r fs=%r tc=%s y=%s lw=%r offs=%r' % (n,k,x1,x2,r,(c.hexval() if c else ''),w,o,fs,tc.hexval(),y,lw,y-y0-r)
             if not c: c = tc
             while m>0:
                 tx._do_line(x1, y, x2, y, lw, c)
@@ -2249,6 +2250,7 @@ class Paragraph(Flowable):
 
                 #set up the font etc.
                 tx = self.beginText(cur_x, cur_y)
+                tx.preformatted = 'preformatted' in self.__class__.__name__.lower()
                 tx._defaultLineWidth = canvas._lineWidth
                 tx._underlineWidth = getattr(style,'underlineWidth','')
                 tx._underlineOffset = getattr(style,'underlineOffset','') or '-0.125f'

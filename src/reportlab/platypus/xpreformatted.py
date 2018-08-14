@@ -65,10 +65,10 @@ def _getFragWord(frags,maxWidth):
             _w = getattr(cb,'width',0)
             if hasattr(_w,'normalizedValue'):
                 _w._normalizer = maxWidth
-        n = n + stringWidth(text, f.fontName, f.fontSize)
+        n += stringWidth(text, f.fontName, f.fontSize)
 
         #s = s + _countSpaces(text)
-        s = s + text.count(' ') # much faster for many blanks
+        s += text.count(' ') # much faster for many blanks
 
         #del f.text # we can't do this until we sort out splitting
                     # of paragraphs
