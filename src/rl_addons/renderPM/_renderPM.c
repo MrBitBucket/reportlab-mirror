@@ -630,9 +630,8 @@ static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse, int fi
 {
 
 	if(self->fillColor.valid){
-		ArtVpath	*vpath, *trVpath;
+		ArtVpath	*vpath, *trVpath, *tmp_vpath;
 		ArtSVP		*svp, *tmp_svp;
-#		define tmp_vpath ((ArtVpath*)tmp_svp)
 		ArtWindRule	wrule;
 		pixBufT*	p;
 		double		a;
