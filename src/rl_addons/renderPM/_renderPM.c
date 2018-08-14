@@ -632,6 +632,7 @@ static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse, int fi
 	if(self->fillColor.valid){
 		ArtVpath	*vpath, *trVpath;
 		ArtSVP		*svp, *tmp_svp;
+#		define tmp_vpath ((ArtVpath*)tmp_svp)
 		ArtWindRule	wrule;
 		pixBufT*	p;
 		double		a;
@@ -643,6 +644,9 @@ static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse, int fi
 		a = _vpath_area(trVpath);
 		if(fabs(a)>1e-7){
 			/*fill only larger things*/
+			tmp_vpath =  art_vpath_perturb(trVpath);
+			trVpath =  art_vpath_perturb(tmp_vpath);
+			art_free(tmp_vpath);
 			svp = art_svp_from_vpath(trVpath);
 			dump_svp("fill svp from vpath",svp);
 			if(fillMode==0){

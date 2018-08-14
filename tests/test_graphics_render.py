@@ -11,8 +11,8 @@ try:
     from reportlab.graphics import _renderPM
 except:
     _renderPM = None
-from reportlab.graphics.shapes import _DrawingEditorMixin, Drawing, Group, Rect, Path, String
-from reportlab.lib.colors import Color, CMYKColor, PCMYKColor
+from reportlab.graphics.shapes import _DrawingEditorMixin, Drawing, Group, Rect, Path, String, Polygon
+from reportlab.lib.colors import Color, CMYKColor, PCMYKColor, toColor
 
 class FillModeDrawing(_DrawingEditorMixin,Drawing):
     def __init__(self,width=600.0,height=200.0,fillMode='even-odd',*args,**kw):
@@ -90,6 +90,15 @@ class _410Drawing(_DrawingEditorMixin,Drawing):
         v1.transform = (1,0,0,-1,0,136)
         v1.add(String(50,68,u'410',textAnchor=u'middle',fontName='Helvetica',fontSize=48,fillColor=Color(1,1,1,1)))
 
+class SVGLibIssue104(_DrawingEditorMixin,Drawing):
+    def __init__(self,width=224,height=124,*args,**kw):
+        Drawing.__init__(self,width,height,*args,**kw)
+        points = [122.0, 87.0, 122.0, 88.0, 123.0, 88.0, 123.0, 89.0, 124.0, 89.0, 124.0, 90.0, 126.0, 90.0, 126.0, 89.0, 128.0, 88.0, 128.0, 89.0, 129.0, 89.0, 129.0, 91.0, 128.0, 91.0, 128.0, 92.0, 130.0, 99.0, 130.0, 100.0, 129.0, 100.0, 126.0, 103.0, 125.0, 103.0, 125.0, 104.0, 126.0, 106.0, 130.0, 87.0, 129.0, 87.0, 129.0, 86.0, 126.0, 86.0, 126.0, 87.0]
+        grp = Group(Polygon(points, fillColor=toColor('red')))
+        grp.scale(1, -1)
+        grp.translate(0, -124)
+        self.add(grp)
+
 class AutoCloseDrawing(_DrawingEditorMixin,Drawing):
     def __init__(self,width=100.0,height=100.0,autoclose='',*args,**kw):
         Drawing.__init__(self,width,height,*args,**kw)
@@ -135,6 +144,14 @@ class RenderTestCase(unittest.TestCase):
         _410Drawing().save(formats=formats,outDir=self.outDir,fnRoot='410')
         for ac in (None,'pdf','svg'):
             AutoCloseDrawing(autoclose=ac).save(formats=formats,outDir=self.outDir,fnRoot='autoclose-'+(ac or 'none'))
+
+    @unittest.skipIf(not _renderPM,'no _renderPM')
+    def testSVGLibIssues(self):
+        SVGLibIssue104().save(formats=['pdf','png'],outDir=self.outDir, fnRoot='svglib-issue104')
+        from PIL import Image
+        im = Image.open(os.path.join(self.outDir,'svglib-issue104.png'))
+        lastColWhite = [y for y in range(124) if im.getpixel((223,y))==(255,255,255)]
+        self.assertEqual(len(lastColWhite),124)
 
 def makeSuite():
     return makeSuiteForClasses(RenderTestCase)
