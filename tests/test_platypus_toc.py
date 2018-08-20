@@ -278,6 +278,7 @@ class TocTestCase(unittest.TestCase):
 
         # I can't get one pass yet'
         #self.assertEquals(passes, 1)
+        self.assertTrue(hasattr(doc,'seq'))
 
     def test2(self):
         chapters = 20   #so we know we use only one page

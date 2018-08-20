@@ -20,7 +20,7 @@
 #endif
 
 
-#define VERSION "3.00"
+#define VERSION "3.01"
 #define MODULENAME "_renderPM"
 #ifdef isPy3
 #	define PyInt_FromLong	PyLong_FromLong

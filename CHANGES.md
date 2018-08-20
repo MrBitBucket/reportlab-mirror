@@ -11,6 +11,20 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.6  20/08/2018
+-------------------------
+	* Restore DocTemplate seq attribute lost in rev c985bd7093ad (4405)
+      version 3.4.41 bug report from Jim Parinisi jimandkimparinisi@yahoo.com
+
+RELEASE 3.5.5  14/08/2018
+-------------------------
+    * Bug fix underlined space in XPreformatted
+
+RELEASE 3.5.4  06/08/2018
+-------------------------
+    * Bug fix for Paragraph space bugs reported by Kayley Lane
+    * Use local libart code by default (libart 2.3.21-3)
+
 RELEASE 3.5.3  06/07/2018
 -------------------------
     * Bug fix release to make really simple paras work OK 

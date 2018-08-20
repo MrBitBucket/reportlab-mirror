@@ -947,6 +947,8 @@ class BaseDocTemplate:
         *NB* only the canvases created in self._startBuild will actually be used
         in the build process.
         '''
+        #each distinct pass gets a sequencer
+        self.seq = reportlab.lib.sequencer.Sequencer()
         canv = canvasmaker(filename or self.filename,
                             pagesize=self.pagesize,
                             invariant=self.invariant,
@@ -980,10 +982,6 @@ class BaseDocTemplate:
 
     def _startBuild(self, filename=None, canvasmaker=canvas.Canvas):
         self._calc()
-
-        #each distinct pass gets a sequencer
-        #self.seq = reportlab.lib.sequencer.Sequencer()
-
         self.canv = self._makeCanvas(filename=filename,canvasmaker=canvasmaker)
         self.handle_documentBegin()
 
