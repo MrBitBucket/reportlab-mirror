@@ -60,17 +60,17 @@ class CellStyle(PropertySet):
 class TableStyle:
     def __init__(self, cmds=None, parent=None, **kw):
         #handle inheritance from parent first.
-        commands = []
         if parent:
             # copy the parents list at construction time
-            commands = commands + parent.getCommands()
+            pcmds = parent.getCommands()[:]
             self._opts = parent._opts
             for a in ('spaceBefore','spaceAfter'):
                 if hasattr(parent,a):
                     setattr(self,a,getattr(parent,a))
-        if cmds:
-            commands = commands + list(cmds)
-        self._cmds = commands
+        else:
+            pcmds = []
+
+        self._cmds = pcmds + list(cmds or [])
         self._opts={}
         self._opts.update(kw)
 
@@ -1328,7 +1328,7 @@ class Table(Flowable):
                         A.append(('INNERGRID',(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
                 else:
                     A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
-            elif op in ('INNERGRID','LINEABOVE'):
+            elif op == 'INNERGRID':
                 if sr<n and er>=n:
                     A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join, count, space))
                     A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join, count, space))
@@ -1336,7 +1336,7 @@ class Table(Flowable):
             elif op == 'LINEBELOW':
                 if sr<n and er>=(n-1):
                     A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join, count, space))
-                A.append((op,(sc,sr), (ec,er), weight, color))
+                A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
             elif op == 'LINEABOVE':
                 if sr<=n and er>=n:
                     A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join, count, space))

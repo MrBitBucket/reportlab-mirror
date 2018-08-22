@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.7  22/08/2018
+-------------------------
+	* Fix tables.py splitting for line comands.
+
 RELEASE 3.5.6  20/08/2018
 -------------------------
 	* Restore DocTemplate seq attribute lost in rev c985bd7093ad (4405)
