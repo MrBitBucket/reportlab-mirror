@@ -61,7 +61,7 @@ class BarChart(PlotArea):
         categoryAxis = AttrMapValue(None, desc='Handle of the category axis.'),
         data = AttrMapValue(None, desc='Data to be plotted, list of (lists of) numbers.'),
         barLabels = AttrMapValue(None, desc='Handle to the list of bar labels.'),
-        barLabelFormat = AttrMapValue(None, desc='Formatting string or function used for bar labels.'),
+        barLabelFormat = AttrMapValue(None, desc='Formatting string or function used for bar labels. Can be a list or list of lists of such.'),
         barLabelCallOut = AttrMapValue(None, desc='Callout function(label)\nlabel._callOutInfo = (self,g,rowNo,colNo,x,y,width,height,x00,y00,x0,y0)',advancedUsage=1),
         barLabelArray = AttrMapValue(None, desc='explicit array of bar label values, must match size of data if present.'),
         reversePlotOrder = AttrMapValue(isBoolean, desc='If true, reverse common category plot order.',advancedUsage=1),
@@ -484,6 +484,10 @@ class BarChart(PlotArea):
     def _getLabelText(self, rowNo, colNo):
         '''return formatted label text'''
         labelFmt = self.barLabelFormat
+        if isinstance(labelFmt,(list,tuple)):
+            labelFmt = labelFmt[rowNo]
+            if isinstance(labelFmt,(list,tuple)):
+                labelFmt = labelFmt[colNo]
         if labelFmt is None:
             labelText = None
         elif labelFmt == 'values':
