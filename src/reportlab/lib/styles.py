@@ -35,6 +35,7 @@ from reportlab.rl_config import canvas_basefontname as _baseFontName, \
                                 spaceShrinkage as _spaceShrinkage, \
                                 platypus_link_underline as _platypus_link_underline, \
                                 hyphenationLang as _hyphenationLang, \
+                                hyphenationMinWordLength as _hyphenationMinWordLength, \
                                 uriWasteReduce as _uriWasteReduce, \
                                 embeddedHyphenation as _embeddedHyphenation
 _baseFontNameB = tt2ps(_baseFontName,1,0)
@@ -153,6 +154,7 @@ class ParagraphStyle(PropertySet):
         #'underlineColor':  None,
         #'strikeColor': None,
         'hyphenationLang': _hyphenationLang,
+        #'hyphenationMinWordLength': _hyphenationMinWordLength,
         'embeddedHyphenation': _embeddedHyphenation,
         'uriWasteReduce': _uriWasteReduce,
         }

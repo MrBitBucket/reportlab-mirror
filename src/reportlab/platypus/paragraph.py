@@ -15,7 +15,8 @@ from reportlab.lib.geomutils import normalizeTRBL
 from reportlab.lib.textsplit import wordSplit, ALL_CANNOT_START
 from copy import deepcopy
 from reportlab.lib.abag import ABag
-from reportlab.rl_config import platypus_link_underline, decimalSymbol, _FUZZ, paraFontSizeHeightOffset
+from reportlab.rl_config import platypus_link_underline, decimalSymbol, _FUZZ,\
+        paraFontSizeHeightOffset, hyphenationMinWordLength
 from reportlab.lib.utils import _className, isBytes, unicodeT, bytesT, isStr
 from reportlab.lib.rl_accel import sameFrag
 from reportlab import xrange
@@ -772,7 +773,7 @@ _hy_letters_pat=re.compile(u''.join((u"^[",_hy_letters,u"]+$")))
 _hy_shy_letters_pat=re.compile(u''.join((u"^[",_hy_shy,_hy_letters,"]+$")))
 _hy_shy_pat = re.compile(u''.join((u"([",_hy_shy,u"])")))
 
-def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize, uriWasteReduce, embeddedHyphenation):
+def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize, uriWasteReduce, embeddedHyphenation, hymwl):
     if isBytes(s): s = s.decode('utf8') #only encoding allowed
     m = _hy_pfx_pat.match(s)
     if m:
@@ -786,7 +787,7 @@ def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize, uriWas
         s = s[:-len(sfx)]
     else:
         sfx = u''
-    if len(s) < 5: return
+    if len(s) < hymwl: return
 
     w0 = newWidth - ww
     R = _uri_split_pairs(s)
@@ -858,7 +859,7 @@ def _rebuildFragWord(F):
     '''F are the frags'''
     return [sum((stringWidth(u,s.fontName,s.fontSize) for s,u in F))]+F
 
-def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth, uriWasteReduce, embeddedHyphenation):
+def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth, uriWasteReduce, embeddedHyphenation, hymwl):
     X = _fragWordSplitRep(FW)
     if not X: return
     s, X = X
@@ -875,7 +876,7 @@ def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth, uriWasteReduce, embedded
         s = s[:-len(sfx)]
     else:
         sfx = u''
-    if len(s) < 5: return
+    if len(s) < hymwl: return
     ww = FW[0]
     w0 = newWidth - ww
 
@@ -955,17 +956,18 @@ def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth, uriWasteReduce, embedded
             if tw<=maxWidth:
                 return u'',0,hw,ww-hw,h,t
 
-def _hyphenateFragWord(hyphenator,FW,newWidth,maxWidth,uriWasteReduce,embeddedHyphenation):
+def _hyphenateFragWord(hyphenator,FW,newWidth,maxWidth,uriWasteReduce,embeddedHyphenation,
+                        hymwl=hyphenationMinWordLength):
     ww = FW[0]
     if ww==0: return []
     if len(FW)==2:
         f, s = FW[1]
-        R = _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, f.fontName, f.fontSize,uriWasteReduce,embeddedHyphenation)
+        R = _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, f.fontName, f.fontSize,uriWasteReduce,embeddedHyphenation, hymwl)
         if R:
             jc, hylen, hw, tw, h, t = R
             return [(_SplitFragHY if jc else _SplitFragH)([hw+hylen,(f,h+jc)]),(_SplitFragHS if isinstance(FW,_HSFrag) else _SplitFrag)([tw,(f,t)])]
     else:
-        R = _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth,uriWasteReduce,embeddedHyphenation)
+        R = _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth,uriWasteReduce,embeddedHyphenation, hymwl)
         if R:
             jc, hylen, hw, tw, h, t = R
             return [(_SplitFragHY if jc else _SplitFragH)(h),(_SplitFragHS if isinstance(FW,_HSFrag) else _SplitFrag)(t)]
@@ -982,9 +984,10 @@ class _SplitWordHY(_SplitWordH):
     '''head part of a hyphenation word pair'''
     pass
 
-def _hyphenateWord(hyphenator,fontName,fontSize,w,ww,newWidth,maxWidth, uriWasteReduce,embeddedHyphenation):
+def _hyphenateWord(hyphenator,fontName,fontSize,w,ww,newWidth,maxWidth, uriWasteReduce,embeddedHyphenation,
+                    hymwl=hyphenationMinWordLength):
     if ww==0: return []
-    R = _hyGenPair(hyphenator, w, ww, newWidth, maxWidth, fontName, fontSize, uriWasteReduce,embeddedHyphenation)
+    R = _hyGenPair(hyphenator, w, ww, newWidth, maxWidth, fontName, fontSize, uriWasteReduce,embeddedHyphenation, hymwl)
     if R:
         hy, hylen, hw, tw, h, t = R
         return [(_SplitWordHY if hy else _SplitWordH)(h+hy),_SplitWord(t)]
@@ -1765,7 +1768,6 @@ class Paragraph(Flowable):
                     hyphenator = None
             elif not callable(hyphenator):
                 raise ValueError('hyphenator should be a language spec or a callable unicode -->  pairs not %r' % hyphenator) 
-                
         else:
             hyphenator = None
         uriWasteReduce = style.uriWasteReduce
@@ -1773,6 +1775,8 @@ class Paragraph(Flowable):
         spaceShrinkage = style.spaceShrinkage
         splitLongWords = style.splitLongWords
         attemptHyphenation = hyphenator or uriWasteReduce or embeddedHyphenation
+        if attemptHyphenation:
+            hymwl = getattr(style,'hyphenationMinWordLength',hyphenationMinWordLength)
         self._splitLongWordCount = self._hyphenations = 0
 
         #for bullets, work out width and ensure we wrap the right amount onto line one
@@ -1819,7 +1823,7 @@ class Paragraph(Flowable):
                         hsw = _hyphenateWord(hyphenator if hyOk else None,
                                 fontName, fontSize, word, wordWidth, newWidth, maxWidth+spaceShrink,
                                     uriWasteReduce if hyOk else False,
-                                    embeddedHyphenation and hyOk)
+                                    embeddedHyphenation and hyOk, hymwl)
                         if hsw:
                             words[0:0] = hsw
                             self._hyphenations += 1
@@ -1891,7 +1895,7 @@ class Paragraph(Flowable):
                         hsw = _hyphenateFragWord(hyphenator if hyOk else None,
                                     w,newWidth,maxWidth+spaceShrink,
                                     uriWasteReduce if hyOk else False,
-                                    embeddedHyphenation and hyOk)
+                                    embeddedHyphenation and hyOk, hymwl)
                         if hsw:
                             _words[0:0] = hsw
                             FW.pop(-1)  #remove this as we are doing this one again

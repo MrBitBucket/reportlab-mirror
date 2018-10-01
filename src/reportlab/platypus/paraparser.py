@@ -252,6 +252,8 @@ _paraAttrMap = {'font': ('fontName', None),
                 'strikegap':('strikeGap',_CheckUS('para','strikeGap')),
                 'spaceshrinkage':('spaceShrinkage',_num),
                 'hyphenationLanguage': ('hyphenationLang',None),
+                'hyphenationOverflow': ('hyphenationOverflow',_bool),
+                'hyphenationMinWordLength': ('hyphenationMinWordLength',_int),
                 'uriWasteReduce': ('uriWasteReduce',_num),
                 'embeddedHyphenation': ('embeddedHyphenation',_bool),
                 }

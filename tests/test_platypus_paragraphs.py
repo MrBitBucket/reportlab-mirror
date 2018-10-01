@@ -701,6 +701,42 @@ class FragmentTestCase(unittest.TestCase):
             y = _t(S[1],x,y,naW,aH=naH)
         canv.save()
 
+    @unittest.skipUnless(pyphen,'s')
+    def test7(self):
+        """test various ways to adjust the hypenationMinWordLength"""
+        registerFont(TTFont("Vera", "Vera.ttf"))
+        aW = 51.0236220472
+        text  = u'\u0440\u044b\u0431\u0430 \u043f\u0438\u043b\u0430 \u0438 \u0431\u0430\u0431\u0443 \u0434\u0430\u0436\u0435 \u0432\u0435\u043b\u0430 \u043d\u0430 \u043c\u0430\u044f\u043a'
+        text1 = u'\u0440\u044b\u0431\u0430 <span color="blue">\u043f\u0438\u043b\u0430</span> \u0438 \u0431\u0430\u0431\u0443 \u0434\u0430\u0436\u0435 \u0432\u0435\u043b\u0430 \u043d\u0430 \u043c\u0430\u044f\u043a'
+        tmpls = [
+                u'%(text)s',
+                u'<para hyphenationMinWordLength="%(hymwl)d">%(text)s</para>',
+                u'<para>%(text)s</para>',
+                u'%(text1)s',
+                u'<para hyphenationMinWordLength="%(hymwl)d">%(text1)s</para>',
+                u'<para>%(text1)s</para>',
+                ]
+        for ex,x,hymwl in [
+                (72,0,None),    #default is 5
+                (72,0,5),
+                (60,0,4),
+                (72,2,None),    #default is 5
+                (72,1,5),
+                (60,1,4),
+                (72,3,None),    #default is 5
+                (72,4,5),
+                (60,5,4),
+                ]:
+            kwds = dict(hyphenationMinWordLength=hymwl) if hymwl!=None else {}
+            template = tmpls[x]
+            t = template % locals()
+            p = Paragraph(
+                    template % locals(),
+                    style = ParagraphStyle('P10H5', fontSize=10, fontName="Vera", hyphenationLang="ru_RU",**kwds),
+                    )
+            w,h = p.wrap(aW,0x7fffffff)
+            self.assertEqual(h,ex,'Russion hyphenation test failed for ex=%(ex)s template=%(template)r hymwl=%(hymwl)r h=%(h)s\ntext=%(t)r' % locals())
+
 class ULTestCase(unittest.TestCase):
     "Test underlining and overstriking of paragraphs."
     def testUl(self):
