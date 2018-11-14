@@ -830,6 +830,10 @@ phonemic and morphological analysis.''']
         a(Paragraph('''<para spaceBefore="10">This is <strike width="0.5" offset="0.125*F" color="red" kind="triple" gap="0.5">triply overstruck in red</strike></para>''',style=normal))
         a(Paragraph('''<para autoLeading="max" spaceAfter="10" spaceBefore="30">this is in 12 <font size="30">this is in 30</font> <u offset="-0.5" width="0.5" color="red"><u offset="-1.5" width="0.5" color="blue">and</u></u> <link underline="1" ucolor="blue" href="http://google.com/">the link box<sup><a color="red" ucolor="green" underline="1" href="https://www.reportlab.com">2</a></sup> is right (twice).</link></para>''',style=normal))
         a(Paragraph("",style=normal))
+        # 3.5.x had a bug with leftIndent and underlines, check that
+        left_indent = ParagraphStyle(name='left_indent',leftIndent=80,parent=styleSheet['Normal'])
+        a(Paragraph("<u>Replicating a left indent underline bug.</u>",style=left_indent))
+
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_ul.pdf'))
         doc.build(story)
 

@@ -2202,7 +2202,7 @@ class Paragraph(Flowable):
                     dx = t_off+leftIndent
                     if dpl!=_justifyDrawParaLine: ws = 0
                     if f.us_lines:
-                        _do_under_line(0, t_off, ws, tx, f.us_lines)
+                        _do_under_line(0, dx, ws, tx, f.us_lines)
                     if f.link: _do_link_line(0, dx, ws, tx)
                     if lastLine and style.endDots and dpl!=_rightDrawParaLine: _do_dots(0, dx, ws, xs, tx, dpl)
 
