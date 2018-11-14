@@ -601,48 +601,6 @@ class _XTicks:
             self._drawTicksInner(tU,tD,g)
         return g
 
-    def _calcSubTicks(self):
-        if not hasattr(self,'_tickValues'):
-            self._pseudo_configure()
-        otv = self._tickValues
-        if not hasattr(self,'_subTickValues'):
-            acn = self.__class__.__name__
-            if acn[:11]=='NormalDateX':
-                iFuzz = 0
-                dCnv = int
-            else:
-                iFuzz = 1e-8
-                dCnv = lambda x:x
-
-            OTV = [tv for tv in otv if getattr(tv,'_doSubTicks',1)]
-            T = [].append
-            nst = int(self.subTickNum)
-            i = len(OTV)
-            if i<2:
-                self._subTickValues = []
-            else:
-                if i==2:
-                    dst = OTV[1]-OTV[0]
-                elif i==3:
-                    dst = max(OTV[1]-OTV[0],OTV[2]-OTV[1])
-                else:
-                    i >>= 1
-                    dst = OTV[i+1] - OTV[i]
-                fuzz = dst*iFuzz
-                vn = self._valueMin+fuzz
-                vx = self._valueMax-fuzz
-                if OTV[0]>vn: OTV.insert(0,OTV[0]-dst)
-                if OTV[-1]<vx: OTV.append(OTV[-1]+dst)
-                dst /= float(nst+1)
-                for i,x in enumerate(OTV[:-1]):
-                    for j in range(nst):
-                        t = x+dCnv((j+1)*dst)
-                        if t<=vn or t>=vx: continue
-                        T(t)
-                self._subTickValues = T.__self__
-        self._tickValues = self._subTickValues
-        return otv
-
     def _drawSubTicks(self,tU,tD,g):
         if getattr(self,'visibleSubTicks',0) and self.subTickNum>0:
             otv = self._calcSubTicks()
@@ -1362,6 +1320,48 @@ class ValueAxis(_AxisG):
 
     def _calcTickPositions(self):
         return self._calcStepAndTickPositions()[1]
+
+    def _calcSubTicks(self):
+        if not hasattr(self,'_tickValues'):
+            self._pseudo_configure()
+        otv = self._tickValues
+        if not hasattr(self,'_subTickValues'):
+            acn = self.__class__.__name__
+            if acn[:11]=='NormalDateX':
+                iFuzz = 0
+                dCnv = int
+            else:
+                iFuzz = 1e-8
+                dCnv = lambda x:x
+
+            OTV = [tv for tv in otv if getattr(tv,'_doSubTicks',1)]
+            T = [].append
+            nst = int(self.subTickNum)
+            i = len(OTV)
+            if i<2:
+                self._subTickValues = []
+            else:
+                if i==2:
+                    dst = OTV[1]-OTV[0]
+                elif i==3:
+                    dst = max(OTV[1]-OTV[0],OTV[2]-OTV[1])
+                else:
+                    i >>= 1
+                    dst = OTV[i+1] - OTV[i]
+                fuzz = dst*iFuzz
+                vn = self._valueMin+fuzz
+                vx = self._valueMax-fuzz
+                if OTV[0]>vn: OTV.insert(0,OTV[0]-dst)
+                if OTV[-1]<vx: OTV.append(OTV[-1]+dst)
+                dst /= float(nst+1)
+                for i,x in enumerate(OTV[:-1]):
+                    for j in range(nst):
+                        t = x+dCnv((j+1)*dst)
+                        if t<=vn or t>=vx: continue
+                        T(t)
+                self._subTickValues = T.__self__
+        self._tickValues = self._subTickValues
+        return otv
 
     def _calcTickmarkPositions(self):
         """Calculate a list of tick positions on the axis.  Returns a list of numbers."""
