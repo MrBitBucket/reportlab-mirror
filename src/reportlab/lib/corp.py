@@ -436,7 +436,7 @@ class RL_BusinessCard(Widget):
         return g
 
 
-def test():
+def test(formats=['pdf','eps','jpg','gif','svg']):
     """This function produces a pdf with examples. """
 
     #white on blue
@@ -446,7 +446,7 @@ def test():
     D = Drawing(rl.width,rl.height)
     D.add(rl)
     D.__dict__['verbose'] = 1
-    D.save(fnRoot='corplogo_whiteonblue',formats=['pdf','eps','jpg','gif'])
+    D.save(fnRoot='corplogo_whiteonblue',formats=formats)
 
 
     #blue on white
@@ -456,7 +456,7 @@ def test():
     D = Drawing(rl.width,rl.height)
     D.add(rl)
     D.__dict__['verbose'] = 1
-    D.save(fnRoot='corplogo_blueonwhite',formats=['pdf','eps','jpg','gif'])
+    D.save(fnRoot='corplogo_blueonwhite',formats=formats)
 
     #gray on white
     rl = RL_CorpLogoReversed()
@@ -466,7 +466,7 @@ def test():
     D = Drawing(rl.width,rl.height)
     D.add(rl)
     D.__dict__['verbose'] = 1
-    D.save(fnRoot='corplogo_grayonwhite',formats=['pdf','eps','jpg','gif'])
+    D.save(fnRoot='corplogo_grayonwhite',formats=formats)
 
 
     rl = RL_BusinessCard()
@@ -476,7 +476,7 @@ def test():
     D = Drawing(rl.width+50,rl.height+50)
     D.add(rl)
     D.__dict__['verbose'] = 1
-    D.save(fnRoot='RL_BusinessCard',formats=['pdf'])
+    D.save(fnRoot='RL_BusinessCard',formats=formats)
 
 if __name__=='__main__':
     test()
