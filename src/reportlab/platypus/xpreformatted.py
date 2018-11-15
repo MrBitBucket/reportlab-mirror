@@ -112,6 +112,7 @@ class XPreformatted(Paragraph):
         different first line indent; a longer list could be created to facilitate custom wraps
         around irregular objects."""
 
+        self._width_max = 0
         if not isSeq(width): maxWidths = [width]
         else: maxWidths = width
         lines = []
@@ -139,6 +140,7 @@ class XPreformatted(Paragraph):
                 L=f.text.split('\n')
                 for l in L:
                     currentWidth = stringWidth(l,fontName,fontSize)
+                    if currentWidth > self._width_max: self._width_max = currentWidth
                     requiredWidth = max(currentWidth,requiredWidth)
                     extraSpace = maxWidth-currentWidth
                     lines.append((extraSpace,l.split(' '),currentWidth))
@@ -192,6 +194,7 @@ class XPreformatted(Paragraph):
                 maxWidth = lineno<len(maxWidths) and maxWidths[lineno] or maxWidths[-1]
                 requiredWidth = max(currentWidth,requiredWidth)
                 extraSpace = maxWidth - currentWidth
+                if currentWidth > self._width_max: self._width_max = currentWidth
                 lines.append(ParaLines(extraSpace=extraSpace,wordCount=n, words=words, fontSize=maxSize, ascent=maxAscent,descent=minDescent,currentWidth=currentWidth,preformatted=True))
 
             self.width = max(self.width,requiredWidth)
