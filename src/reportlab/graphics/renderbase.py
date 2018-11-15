@@ -282,6 +282,8 @@ class Renderer:
                 self.drawGroup(node)
             elif isinstance(node, Wedge):
                 self.drawWedge(node)
+            elif isinstance(node, DirectDraw):
+                node.drawDirectly(self)
             else:
                 print('DrawingError','Unexpected element %s in drawing!' % str(node))
         finally:

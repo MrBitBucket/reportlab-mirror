@@ -1482,6 +1482,11 @@ class UserNode(_DrawTimeResizeable):
 
         raise NotImplementedError("this method must be redefined by the user/programmer")
 
+class DirectDraw(Shape):
+    """try to draw directly on the canvas"""
+    def drawDirectly(self,canvas):
+        raise NotImplementedError("this method must be redefined by the user/programmer")
+
 def test():
     r = Rect(10,10,200,50)
     import pprint
