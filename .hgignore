@@ -64,6 +64,7 @@ syntax: regexp
 ^tests/test_source_chars\.txt
 ^tests/barcode-out
 ^tests/render-out
+^tests/charts-out
 ^tmp/
 ^patches/
 ^src/reportlab/pdfbase/_glyphlist.py

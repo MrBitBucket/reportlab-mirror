@@ -497,6 +497,470 @@ class ChartTestCase(unittest.TestCase):
         d.add(pie)
         s = renderSVG.drawToString(d)
 
+    def test_axes(self):
+        from reportlab.graphics.charts.axes import YValueAxis, XValueAxis, LogYValueAxis, LogXValueAxis, LogYValueAxis, XCategoryAxis, YCategoryAxis
+        # Sample functions.
+        def sample0a():
+            "Sample drawing with one xcat axis and two buckets."
+
+            drawing = Drawing(400, 200)
+
+            data = [(10, 20)]
+
+            xAxis = XCategoryAxis()
+            xAxis.setPosition(75, 75, 300)
+            xAxis.configure(data)
+            xAxis.categoryNames = ['Ying', 'Yang']
+            xAxis.labels.boxAnchor = 'n'
+            drawing.add(xAxis)
+            return drawing
+
+        def sample0b():
+            "Sample drawing with one xcat axis and one bucket only."
+
+            drawing = Drawing(400, 200)
+
+            data = [(10,)]
+
+            xAxis = XCategoryAxis()
+            xAxis.setPosition(75, 75, 300)
+            xAxis.configure(data)
+            xAxis.categoryNames = ['Ying']
+            xAxis.labels.boxAnchor = 'n'
+            drawing.add(xAxis)
+            return drawing
+
+        def sample1():
+            "Sample drawing containing two unconnected axes."
+            from reportlab.graphics.shapes import _baseGFontNameB
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            xAxis = XCategoryAxis()
+            xAxis.setPosition(75, 75, 300)
+            xAxis.configure(data)
+            xAxis.categoryNames = ['Beer','Wine','Meat','Cannelloni']
+            xAxis.labels.boxAnchor = 'n'
+            xAxis.labels[3].dy = -15
+            xAxis.labels[3].angle = 30
+            xAxis.labels[3].fontName = _baseGFontNameB
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample4a():
+            "Sample drawing, xvalue/yvalue axes, y connected at 100 pts to x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.configure(data)
+            xAxis = XValueAxis()
+            xAxis._length = 300
+            xAxis.joinAxis = yAxis
+            xAxis.joinAxisMode = 'points'
+            xAxis.joinAxisPos = 100
+            xAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample4b():
+            "Sample drawing, xvalue/yvalue axes, y connected at value 35 of x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.configure(data)
+            xAxis = XValueAxis()
+            xAxis._length = 300
+            xAxis.joinAxis = yAxis
+            xAxis.joinAxisMode = 'value'
+            xAxis.joinAxisPos = 35
+            xAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample4c():
+            "Sample drawing, xvalue/yvalue axes, y connected to bottom of x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.configure(data)
+            xAxis = XValueAxis()
+            xAxis._length = 300
+            xAxis.joinAxis = yAxis
+            xAxis.joinAxisMode = 'bottom'
+            xAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample4c1():
+            "xvalue/yvalue axes, without drawing axis lines/ticks."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.configure(data)
+            yAxis.visibleAxis = 0
+            yAxis.visibleTicks = 0
+            xAxis = XValueAxis()
+            xAxis._length = 300
+            xAxis.joinAxis = yAxis
+            xAxis.joinAxisMode = 'bottom'
+            xAxis.configure(data)
+            xAxis.visibleAxis = 0
+            xAxis.visibleTicks = 0
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample4d():
+            "Sample drawing, xvalue/yvalue axes, y connected to top of x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.configure(data)
+            xAxis = XValueAxis()
+            xAxis._length = 300
+            xAxis.joinAxis = yAxis
+            xAxis.joinAxisMode = 'top'
+            xAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample5a():
+            "Sample drawing, xvalue/yvalue axes, y connected at 100 pts to x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            xAxis = XValueAxis()
+            xAxis.setPosition(50, 50, 300)
+            xAxis.configure(data)
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.joinAxis = xAxis
+            yAxis.joinAxisMode = 'points'
+            yAxis.joinAxisPos = 100
+            yAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample5b():
+            "Sample drawing, xvalue/yvalue axes, y connected at value 35 of x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            xAxis = XValueAxis()
+            xAxis.setPosition(50, 50, 300)
+            xAxis.configure(data)
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.joinAxis = xAxis
+            yAxis.joinAxisMode = 'value'
+            yAxis.joinAxisPos = 35
+            yAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample5c():
+            "Sample drawing, xvalue/yvalue axes, y connected at right of x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            xAxis = XValueAxis()
+            xAxis.setPosition(50, 50, 300)
+            xAxis.configure(data)
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.joinAxis = xAxis
+            yAxis.joinAxisMode = 'right'
+            yAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample5d():
+            "Sample drawing, xvalue/yvalue axes, y connected at left of x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            xAxis = XValueAxis()
+            xAxis.setPosition(50, 50, 300)
+            xAxis.configure(data)
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.joinAxis = xAxis
+            yAxis.joinAxisMode = 'left'
+            yAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample6a():
+            "Sample drawing, xcat/yvalue axes, x connected at top of y."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.configure(data)
+            xAxis = XCategoryAxis()
+            xAxis._length = 300
+            xAxis.configure(data)
+            xAxis.joinAxis = yAxis
+            xAxis.joinAxisMode = 'top'
+            xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+            xAxis.labels.boxAnchor = 'n'
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample6b():
+            "Sample drawing, xcat/yvalue axes, x connected at bottom of y."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.configure(data)
+            xAxis = XCategoryAxis()
+            xAxis._length = 300
+            xAxis.configure(data)
+            xAxis.joinAxis = yAxis
+            xAxis.joinAxisMode = 'bottom'
+            xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+            xAxis.labels.boxAnchor = 'n'
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample6c():
+            "Sample drawing, xcat/yvalue axes, x connected at 100 pts to y."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.configure(data)
+            xAxis = XCategoryAxis()
+            xAxis._length = 300
+            xAxis.configure(data)
+            xAxis.joinAxis = yAxis
+            xAxis.joinAxisMode = 'points'
+            xAxis.joinAxisPos = 100
+            xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+            xAxis.labels.boxAnchor = 'n'
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample6d():
+            "Sample drawing, xcat/yvalue axes, x connected at value 20 of y."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            yAxis = YValueAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.configure(data)
+            xAxis = XCategoryAxis()
+            xAxis._length = 300
+            xAxis.configure(data)
+            xAxis.joinAxis = yAxis
+            xAxis.joinAxisMode = 'value'
+            xAxis.joinAxisPos = 20
+            xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+            xAxis.labels.boxAnchor = 'n'
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample7a():
+            "Sample drawing, xvalue/ycat axes, y connected at right of x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            xAxis = XValueAxis()
+            xAxis._length = 300
+            xAxis.configure(data)
+            yAxis = YCategoryAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.joinAxis = xAxis
+            yAxis.joinAxisMode = 'right'
+            yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+            yAxis.labels.boxAnchor = 'e'
+            yAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample7b():
+            "Sample drawing, xvalue/ycat axes, y connected at left of x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            xAxis = XValueAxis()
+            xAxis._length = 300
+            xAxis.configure(data)
+            yAxis = YCategoryAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.joinAxis = xAxis
+            yAxis.joinAxisMode = 'left'
+            yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+            yAxis.labels.boxAnchor = 'e'
+            yAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample7c():
+            "Sample drawing, xvalue/ycat axes, y connected at value 30 of x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            xAxis = XValueAxis()
+            xAxis._length = 300
+            xAxis.configure(data)
+            yAxis = YCategoryAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.joinAxis = xAxis
+            yAxis.joinAxisMode = 'value'
+            yAxis.joinAxisPos = 30
+            yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+            yAxis.labels.boxAnchor = 'e'
+            yAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample7d():
+            "Sample drawing, xvalue/ycat axes, y connected at 200 pts to x."
+            drawing = Drawing(400, 200)
+            data = [(10, 20, 30, 42)]
+            xAxis = XValueAxis()
+            xAxis._length = 300
+            xAxis.configure(data)
+            yAxis = YCategoryAxis()
+            yAxis.setPosition(50, 50, 125)
+            yAxis.joinAxis = xAxis
+            yAxis.joinAxisMode = 'points'
+            yAxis.joinAxisPos = 200
+            yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
+            yAxis.labels.boxAnchor = 'e'
+            yAxis.configure(data)
+            drawing.add(xAxis)
+            drawing.add(yAxis)
+            return drawing
+
+        def sample8a():
+            "Sample drawing with one xlog axis"
+            drawing = Drawing(400,200)
+
+            data = [[float(i)**2. for i in range(10, 1001, 10)], ]
+
+            xAxis = LogXValueAxis()
+            xAxis.configure(data)
+
+            drawing.add(xAxis)
+
+            return drawing
+
+        def sample8b():
+            "Sample drawing with one xlog axis"
+            drawing = Drawing(400,200)
+
+            data = [[float(i)**2. for i in range(10, 1001, 10)], ]
+
+            yAxis = LogYValueAxis()
+            yAxis.configure(data)
+
+            drawing.add(yAxis)
+
+            return drawing
+
+        def sample9a():
+            lp = LinePlot()
+            lp.yValueAxis = LogYValueAxis()
+            lp.x += 20
+            lp.y += 20
+            data = [[(i, float(i)**2.) for i in range(10, 1001, 10)], ]
+            data.append([(i, float(i)**3.) for i in range(10, 1001, 10)])
+            data.append([(i, float(i)**1.6) for i in range(10, 1001, 10)])
+            lp.data = data
+            lp.lines.strokeWidth = .2
+            lp.lines[0].strokeColor = colors.red
+            lp.lines[1].strokeColor = colors.blue
+            lp.lines[2].strokeColor = colors.green
+
+            drawing = Drawing(400,200)
+            drawing.add(lp)
+
+            return drawing
+
+        def sample9b():
+            lp = LinePlot()
+            lp.yValueAxis = LogYValueAxis()
+            lp.x += 20
+            lp.y += 20
+            lp.height = 250
+            lp.width = 350
+            data = [[(i, float(i)**2.) for i in range(10, 1001, 10)], ]
+            data.append([(i, float(i)**3.) for i in range(10, 1001, 10)])
+            data.append([(i, float(i)**1.6) for i in range(10, 1001, 10)])
+            lp.data = data
+            lp.lines.strokeWidth = .2
+            lp.lines[0].strokeColor = colors.red
+            lp.lines[1].strokeColor = colors.blue
+            lp.lines[2].strokeColor = colors.green
+
+            lp.xValueAxis.visibleGrid = 1
+            lp.xValueAxis.gridStrokeDashArray = [1, 1]
+            lp.yValueAxis.visibleGrid = 1
+            lp.yValueAxis.visibleSubTicks = 1
+            lp.yValueAxis.visibleSubGrid = 1
+            lp.yValueAxis.gridStrokeDashArray = [1, 1]
+            lp.yValueAxis.subGridStrokeDashArray = [1, 1]
+
+            drawing = Drawing(400,300)
+            drawing.add(lp)
+
+            return drawing
+
+        def sample9c():
+            lp = LinePlot()
+            lp.yValueAxis = LogYValueAxis()
+            lp.x += 20
+            lp.y += 20
+            lp.height = 250
+            lp.width = 350
+            data = [[(i, float(i)**2.) for i in range(10, 1001, 10)], ]
+            data.append([(i, float(i)**3.) for i in range(10, 1001, 10)])
+            data.append([(i, float(i)**1.6) for i in range(10, 1001, 10)])
+            lp.data = data
+            lp.lines.strokeWidth = .2
+            lp.lines[0].strokeColor = colors.red
+            lp.lines[1].strokeColor = colors.blue
+            lp.lines[2].strokeColor = colors.green
+
+            lp.xValueAxis.visibleGrid = 1
+            lp.xValueAxis.gridStrokeDashArray = [1, 1]
+            lp.yValueAxis.visibleGrid = 1
+            lp.yValueAxis.visibleSubTicks = 1
+            lp.yValueAxis.visibleSubGrid = 1
+            lp.yValueAxis.subTickNum = 4
+            lp.yValueAxis.gridStrokeDashArray = [.3, 1]
+            lp.yValueAxis.subGridStrokeDashArray = [.15, 1]
+
+            drawing = Drawing(400,300)
+            drawing.add(lp)
+
+            return drawing
+
+        outDir = outputfile('charts-out')
+        L=locals()
+        for f in L:
+            if f.startswith('sample'):
+                d = L[f]()
+                d.save(formats=['pdf','gif'],outDir=outDir, fnRoot='test_graphics_charts_axes_%s' % f)
+
 def makeSuite():
     return makeSuiteForClasses(ChartTestCase)
 

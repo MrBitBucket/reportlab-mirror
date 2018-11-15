@@ -31,6 +31,7 @@ at any absolute value (specified in points) or at some value of
 the former axes in its own coordinate system.
 """
 
+from math import log10 as math_log10
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
                                         isString, EitherOr, Validator, NoneOr, isInstanceOf, \
@@ -39,7 +40,7 @@ from reportlab.lib.attrmap import *
 from reportlab.lib import normalDate
 from reportlab.graphics.shapes import Drawing, Line, PolyLine, Rect, Group, STATE_DEFAULTS, _textBoxLimits, _rotatedBoxLimits
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection
-from reportlab.graphics.charts.textlabels import Label, PMVLabel
+from reportlab.graphics.charts.textlabels import Label, PMVLabel, XLabel,  DirectDrawFlowable
 from reportlab.graphics.charts.utils import nextRoundNumber
 from reportlab.graphics.widgets.grids import ShadedRect
 from reportlab.lib.colors import Color
@@ -2093,353 +2094,138 @@ class AdjYValueAxis(YValueAxis):
                         pass
             L[0] = ''
 
-# Sample functions.
-def sample0a():
-    "Sample drawing with one xcat axis and two buckets."
+class LogValueAxis(ValueAxis):
 
-    drawing = Drawing(400, 200)
+    def _calcScaleFactor(self):
+        """Calculate the axis' scale factor.
+        This should be called only *after* the axis' range is set.
+        Returns a number.
+        """
+        self._scaleFactor = self._length / float(
+            math_log10(self._valueMax) - math_log10(self._valueMin))
+        return self._scaleFactor
 
-    data = [(10, 20)]
+    def _calcTickPositions(self):
+        self._calcValueStep()
+        T = [].append
+        valueMin = math_log10(self._valueMin)
+        valueMax = math_log10(self._valueMax)
+        valueStep = round(valueMin)
+        T(10**valueStep)
+        valueStep += 1
+        while valueStep <= valueMax:
+            T(10**valueStep)
+            valueStep += 1
+        return T.__self__
 
-    xAxis = XCategoryAxis()
-    xAxis.setPosition(75, 75, 300)
-    xAxis.configure(data)
-    xAxis.categoryNames = ['Ying', 'Yang']
-    xAxis.labels.boxAnchor = 'n'
-    drawing.add(xAxis)
-    return drawing
+    def _calcSubTicks(self):
+        if not hasattr(self,'_tickValues'):
+            self._pseudo_configure()
+        if not hasattr(self,'_subTickValues'):
+            T = [].append
+            valueMin = math_log10(self._valueMin)-1
+            valueMax = math_log10(self._valueMax)+1
+            valueStep = round(valueMin)-1
+            fact = 10. / float(self.subTickNum)
+            start = 1
+            if self.subTickNum == 10: start = 2
+            while valueStep < valueMax:
+                for i in range(start,self.subTickNum):
+                    val = fact*i*(10**valueStep)
+                    if val > self._valueMin and val < self._valueMax:
+                        T(val)
+                valueStep += 1
+            self._subTickValues = T.__self__
+        return self._subTickValues
 
-def sample0b():
-    "Sample drawing with one xcat axis and one bucket only."
 
-    drawing = Drawing(400, 200)
+class LogAxisTickLabeller(TickLabeller):
+    def __call__(self,axis,value):
+        e = math_log10(value)
+        e = int(e-0.001 if e<0 else e+0.001)
+        if e==0: return '1'
+        if e==1: return '10'
+        return '10<sup>%s</sup>' % e
 
-    data = [(10,)]
+class LogAxisLabellingSetup:
+    def __init__(self):
+        if DirectDrawFlowable is not None:
+            self.labels = TypedPropertyCollection(XLabel)
+            if self._dataIndex==1:
+                self.labels.boxAnchor = 'e'
+                self.labels.dx = -5
+                self.labels.dy = 0
+            else:
+                self.labels.boxAnchor = 'n'
+                self.labels.dx = 0
+                self.labels.dy = -5
+            self.labelTextFormat = LogAxisTickLabeller()
+        else:
+            self.labelTextFormat = "%.0e"
 
-    xAxis = XCategoryAxis()
-    xAxis.setPosition(75, 75, 300)
-    xAxis.configure(data)
-    xAxis.categoryNames = ['Ying']
-    xAxis.labels.boxAnchor = 'n'
-    drawing.add(xAxis)
-    return drawing
+class LogXValueAxis(LogValueAxis,LogAxisLabellingSetup,XValueAxis):
+    _attrMap = AttrMap(BASE=XValueAxis)
 
-def sample1():
-    "Sample drawing containing two unconnected axes."
-    from reportlab.graphics.shapes import _baseGFontNameB
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    xAxis = XCategoryAxis()
-    xAxis.setPosition(75, 75, 300)
-    xAxis.configure(data)
-    xAxis.categoryNames = ['Beer','Wine','Meat','Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-    xAxis.labels[3].dy = -15
-    xAxis.labels[3].angle = 30
-    xAxis.labels[3].fontName = _baseGFontNameB
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+    def __init__(self):
+        XValueAxis.__init__(self)
+        LogAxisLabellingSetup.__init__(self)
 
-def sample4a():
-    "Sample drawing, xvalue/yvalue axes, y connected at 100 pts to x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    xAxis = XValueAxis()
-    xAxis._length = 300
-    xAxis.joinAxis = yAxis
-    xAxis.joinAxisMode = 'points'
-    xAxis.joinAxisPos = 100
-    xAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+    def scale(self, value):
+        """Converts a numeric value to a Y position.
 
-def sample4b():
-    "Sample drawing, xvalue/yvalue axes, y connected at value 35 of x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    xAxis = XValueAxis()
-    xAxis._length = 300
-    xAxis.joinAxis = yAxis
-    xAxis.joinAxisMode = 'value'
-    xAxis.joinAxisPos = 35
-    xAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+        The chart first configures the axis, then asks it to
+        work out the x value for each point when plotting
+        lines or bars.  You could override this to do
+        logarithmic axes.
+        """
 
-def sample4c():
-    "Sample drawing, xvalue/yvalue axes, y connected to bottom of x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    xAxis = XValueAxis()
-    xAxis._length = 300
-    xAxis.joinAxis = yAxis
-    xAxis.joinAxisMode = 'bottom'
-    xAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+        msg = "Axis cannot scale numbers before it is configured"
+        assert self._configured, msg
+        if value is None:
+            value = 0
+        if value == 0.:
+            return self._x - self._scaleFactor * math_log10(self._valueMin)
+        return self._x + self._scaleFactor * (math_log10(value) - math_log10(self._valueMin))
 
-def sample4c1():
-    "xvalue/yvalue axes, without drawing axis lines/ticks."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    yAxis.visibleAxis = 0
-    yAxis.visibleTicks = 0
-    xAxis = XValueAxis()
-    xAxis._length = 300
-    xAxis.joinAxis = yAxis
-    xAxis.joinAxisMode = 'bottom'
-    xAxis.configure(data)
-    xAxis.visibleAxis = 0
-    xAxis.visibleTicks = 0
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+    def demo(self):
+        "Sample drawing with one xlog axis"
+        data = [Numeric.arange(10.,101.)**10.]
+        xAxis.configure(data)
 
-def sample4d():
-    "Sample drawing, xvalue/yvalue axes, y connected to top of x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    xAxis = XValueAxis()
-    xAxis._length = 300
-    xAxis.joinAxis = yAxis
-    xAxis.joinAxisMode = 'top'
-    xAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+        drawing = Drawing(400,200)
+        drawing.add(xAxis)
 
-def sample5a():
-    "Sample drawing, xvalue/yvalue axes, y connected at 100 pts to x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    xAxis = XValueAxis()
-    xAxis.setPosition(50, 50, 300)
-    xAxis.configure(data)
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.joinAxis = xAxis
-    yAxis.joinAxisMode = 'points'
-    yAxis.joinAxisPos = 100
-    yAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+        return drawing
 
-def sample5b():
-    "Sample drawing, xvalue/yvalue axes, y connected at value 35 of x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    xAxis = XValueAxis()
-    xAxis.setPosition(50, 50, 300)
-    xAxis.configure(data)
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.joinAxis = xAxis
-    yAxis.joinAxisMode = 'value'
-    yAxis.joinAxisPos = 35
-    yAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+class LogYValueAxis(LogValueAxis,LogAxisLabellingSetup,YValueAxis):
+    _attrMap = AttrMap(BASE=YValueAxis)
+    def __init__(self):
+        YValueAxis.__init__(self)
+        LogAxisLabellingSetup.__init__(self)
 
-def sample5c():
-    "Sample drawing, xvalue/yvalue axes, y connected at right of x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    xAxis = XValueAxis()
-    xAxis.setPosition(50, 50, 300)
-    xAxis.configure(data)
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.joinAxis = xAxis
-    yAxis.joinAxisMode = 'right'
-    yAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+    def scale(self, value):
+        """Converts a numeric value to a Y position.
 
-def sample5d():
-    "Sample drawing, xvalue/yvalue axes, y connected at left of x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    xAxis = XValueAxis()
-    xAxis.setPosition(50, 50, 300)
-    xAxis.configure(data)
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.joinAxis = xAxis
-    yAxis.joinAxisMode = 'left'
-    yAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+        The chart first configures the axis, then asks it to
+        work out the x value for each point when plotting
+        lines or bars.  You could override this to do
+        logarithmic axes.
+        """
 
-def sample6a():
-    "Sample drawing, xcat/yvalue axes, x connected at top of y."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    xAxis = XCategoryAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    xAxis.joinAxis = yAxis
-    xAxis.joinAxisMode = 'top'
-    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+        msg = "Axis cannot scale numbers before it is configured"
+        assert self._configured, msg
+        if value is None:
+            value = 0
+        if value == 0.:
+            return self._y - self._scaleFactor * math_log10(self._valueMin)
+        return self._y + self._scaleFactor * (math_log10(value) - math_log10(self._valueMin))
 
-def sample6b():
-    "Sample drawing, xcat/yvalue axes, x connected at bottom of y."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    xAxis = XCategoryAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    xAxis.joinAxis = yAxis
-    xAxis.joinAxisMode = 'bottom'
-    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+    def demo(self):
+        "Sample drawing with one xlog axis"
+        data = [Numeric.arange(10.,101.)**10.]
+        yAxis.configure(data)
 
-def sample6c():
-    "Sample drawing, xcat/yvalue axes, x connected at 100 pts to y."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    xAxis = XCategoryAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    xAxis.joinAxis = yAxis
-    xAxis.joinAxisMode = 'points'
-    xAxis.joinAxisPos = 100
-    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+        drawing = Drawing(400,200)
+        drawing.add(yAxis)
 
-def sample6d():
-    "Sample drawing, xcat/yvalue axes, x connected at value 20 of y."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    yAxis = YValueAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.configure(data)
-    xAxis = XCategoryAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    xAxis.joinAxis = yAxis
-    xAxis.joinAxisMode = 'value'
-    xAxis.joinAxisPos = 20
-    xAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    xAxis.labels.boxAnchor = 'n'
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
-
-def sample7a():
-    "Sample drawing, xvalue/ycat axes, y connected at right of x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    xAxis = XValueAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    yAxis = YCategoryAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.joinAxis = xAxis
-    yAxis.joinAxisMode = 'right'
-    yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    yAxis.labels.boxAnchor = 'e'
-    yAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
-
-def sample7b():
-    "Sample drawing, xvalue/ycat axes, y connected at left of x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    xAxis = XValueAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    yAxis = YCategoryAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.joinAxis = xAxis
-    yAxis.joinAxisMode = 'left'
-    yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    yAxis.labels.boxAnchor = 'e'
-    yAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
-
-def sample7c():
-    "Sample drawing, xvalue/ycat axes, y connected at value 30 of x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    xAxis = XValueAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    yAxis = YCategoryAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.joinAxis = xAxis
-    yAxis.joinAxisMode = 'value'
-    yAxis.joinAxisPos = 30
-    yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    yAxis.labels.boxAnchor = 'e'
-    yAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
-
-def sample7d():
-    "Sample drawing, xvalue/ycat axes, y connected at 200 pts to x."
-    drawing = Drawing(400, 200)
-    data = [(10, 20, 30, 42)]
-    xAxis = XValueAxis()
-    xAxis._length = 300
-    xAxis.configure(data)
-    yAxis = YCategoryAxis()
-    yAxis.setPosition(50, 50, 125)
-    yAxis.joinAxis = xAxis
-    yAxis.joinAxisMode = 'points'
-    yAxis.joinAxisPos = 200
-    yAxis.categoryNames = ['Beer', 'Wine', 'Meat', 'Cannelloni']
-    yAxis.labels.boxAnchor = 'e'
-    yAxis.configure(data)
-    drawing.add(xAxis)
-    drawing.add(yAxis)
-    return drawing
+        return drawing
