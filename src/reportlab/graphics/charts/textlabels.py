@@ -222,51 +222,53 @@ class Label(Widget):
             ba = _A2BA[ba[-1]][na]
         return ba
 
-    def computeSize(self):
-        # the thing will draw in its own coordinate system
-        self._lineWidths = []
-        topPadding = self.topPadding
-        leftPadding = self.leftPadding
-        rightPadding = self.rightPadding
-        bottomPadding = self.bottomPadding
-        self._lines = simpleSplit(self._text,self.fontName,self.fontSize,self.maxWidth)
-        if not self.width:
-            self._width = leftPadding+rightPadding
-            if self._lines:
-                self._lineWidths = [stringWidth(line,self.fontName,self.fontSize) for line in self._lines]
-                self._width += max(self._lineWidths)
-        else:
-            self._width = self.width
+    def _getBaseLineRatio(self):
         if self.useAscentDescent:
             self._ascent, self._descent = getAscentDescent(self.fontName,self.fontSize)
             self._baselineRatio = self._ascent/(self._ascent-self._descent)
         else:
             self._baselineRatio = 1/1.2
+
+    def _computeSizeEnd(self,objH):
+        self._height = self.height or (objH + self.topPadding + self.bottomPadding)
+        self._ewidth = (self._width-self.leftPadding-self.rightPadding)
+        self._eheight = (self._height-self.topPadding-self.bottomPadding)
+        boxAnchor = self._getBoxAnchor()
+        if boxAnchor in ['n','ne','nw']:
+            self._top = -self.topPadding
+        elif boxAnchor in ['s','sw','se']:
+            self._top = self._height-self.topPadding
+        else:
+            self._top = 0.5*self._eheight
+        self._bottom = self._top - self._eheight
+
+        if boxAnchor in ['ne','e','se']:
+            self._left = self.leftPadding - self._width
+        elif boxAnchor in ['nw','w','sw']:
+            self._left = self.leftPadding
+        else:
+            self._left = -self._ewidth*0.5
+        self._right = self._left+self._ewidth
+
+    def computeSize(self):
+        # the thing will draw in its own coordinate system
+        self._lineWidths = []
+        self._lines = simpleSplit(self._text,self.fontName,self.fontSize,self.maxWidth)
+        if not self.width:
+            self._width = self.leftPadding+self.rightPadding
+            if self._lines:
+                self._lineWidths = [stringWidth(line,self.fontName,self.fontSize) for line in self._lines]
+                self._width += max(self._lineWidths)
+        else:
+            self._width = self.width
+        self._getBaseLineRatio()
         if self.leading:
             self._leading = self.leading
         elif self.useAscentDescent:
             self._leading = self._ascent - self._descent
         else:
             self._leading = self.fontSize*1.2
-        self._height = self.height or (self._leading*len(self._lines) + topPadding + bottomPadding)
-        self._ewidth = (self._width-leftPadding-rightPadding)
-        self._eheight = (self._height-topPadding-bottomPadding)
-        boxAnchor = self._getBoxAnchor()
-        if boxAnchor in ['n','ne','nw']:
-            self._top = -topPadding
-        elif boxAnchor in ['s','sw','se']:
-            self._top = self._height-topPadding
-        else:
-            self._top = 0.5*self._eheight
-        self._bottom = self._top - self._eheight
-
-        if boxAnchor in ['ne','e','se']:
-            self._left = leftPadding - self._width
-        elif boxAnchor in ['nw','w','sw']:
-            self._left = leftPadding
-        else:
-            self._left = -self._ewidth*0.5
-        self._right = self._left+self._ewidth
+        self._computeSizeEnd(self._leading*len(self._lines))
 
     def _getTextAnchor(self):
         '''This can be overridden to allow special effects'''
@@ -486,3 +488,86 @@ class RedNegativeChanger(CustomDrawChanger):
             R['fillColor'] = obj.fillColor
             obj.fillColor = self.fillColor
         return R
+
+from reportlab.platypus import XPreformatted, Paragraph
+from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER
+_ta2al = dict(start=TA_LEFT,end=TA_RIGHT,middle=TA_RIGHT)
+try:
+    from rlextra.graphics.canvasadapter import DirectDrawFlowable
+except ImportError:
+    DirectDrawFlowable = None
+
+class XLabel(Label):
+    '''like label but uses XPreFormatted/Paragraph to draw the _text'''
+    _attrMap = AttrMap(BASE=Label,
+            )
+
+    def __init__(self,*args,**kwds):
+        self._flowableClass = kwds.pop('flowableClass',XPreformatted)
+        ddf = kwds.pop('directDrawClass',DirectDrawFlowable)
+        if ddf is None:
+            raise RuntimeError('DirectDrawFlowable class is not available you need the rlextra package as well as reportlab')
+        self._ddf = ddf
+        Label.__init__(self,*args,**kwds)
+
+    def computeSize(self):
+        # the thing will draw in its own coordinate system
+        self._lineWidths = []
+        sty = self._style = ParagraphStyle('xlabel-generated',
+                fontName=self.fontName,
+                fontSize=self.fontSize,
+                fillColor=self.fillColor,
+                strokeColor=self.strokeColor,
+                )
+        self._getBaseLineRatio()
+        if self.useAscentDescent:
+            sty.autoLeading = True
+            sty.leading = self._ascent - self._descent
+        else:
+            sty.leading = self.leading if self.leading else self.fontSize*1.2
+        self._leading = sty.leading
+        sty.alignment = _ta2al[self._getTextAnchor()]
+        self._obj = obj = self._flowableClass(self._text,style=sty)
+        _, objH = obj.wrap(self.maxWidth or 0x7fffffff,0x7fffffff)
+
+        if not self.width:
+            self._width = self.leftPadding+self.rightPadding
+            self._width += self._obj._width_max
+        else:
+            self._width = self.width
+        self._computeSizeEnd(objH)
+
+    def _rawDraw(self):
+        _text = self._text
+        self._text = _text or ''
+        self.computeSize()
+        self._text = _text
+        g = Group()
+        g.translate(self.x + self.dx, self.y + self.dy)
+        g.rotate(self.angle)
+
+        textAnchor = self._getTextAnchor()
+        if textAnchor == 'start':
+            x = self._left
+        elif textAnchor == 'middle':
+            x = self._left + self._ewidth*0.5
+        else:
+            x = self._right
+
+        # paint box behind text just in case they
+        # fill it
+        if self.boxFillColor or (self.boxStrokeColor and self.boxStrokeWidth):
+            g.add(Rect( self._left-self.leftPadding,
+                        self._bottom-self.bottomPadding,
+                        self._width,
+                        self._height,
+                        strokeColor=self.boxStrokeColor,
+                        strokeWidth=self.boxStrokeWidth,
+                        fillColor=self.boxFillColor)
+                        )
+        g1 = Group()
+        g1.translate(x,self._top-self._eheight)
+        g1.add(self._ddf(self._obj))
+        g.add(g1)
+        return g
