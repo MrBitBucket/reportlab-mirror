@@ -430,13 +430,13 @@ def _do_dots_frag(cur_x, cur_x_s, maxWidth, xs, tx):
         if dy: tx.setTextOrigin(tx._x0,xs.cur_y-dy)
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
+    setXPos(tx,offset)
     extraSpace = line.extraSpace
     simple = extraSpace>-1e-8 or getattr(line,'preformatted',False)
     if not simple:
         nSpaces = line.wordCount+sum([_nbspCount(w.text) for w in line.words if not hasattr(w,'cbDefn')])-1
         simple = not nSpaces
     if simple:
-        setXPos(tx,offset)
         _putFragLine(offset, tx, line, last, 'left')
     else:
         tx.setWordSpace(extraSpace / float(nSpaces))
