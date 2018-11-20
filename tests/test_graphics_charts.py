@@ -266,6 +266,12 @@ h2 = styleSheet['Heading2']
 h3 = styleSheet['Heading3']
 FINISHED = 0
 
+def run_samples(S,kind='axes'):
+    outDir = outputfile('charts-out')
+    for f in S:
+        if f.startswith('sample'):
+            d = S[f]()
+            d.save(formats=['pdf', 'gif', 'svg'],outDir=outDir, fnRoot='test_graphics_charts_%s_%s' % (kind,f))
 
 class ChartTestCase(unittest.TestCase):
     "Test chart classes."
@@ -954,12 +960,119 @@ class ChartTestCase(unittest.TestCase):
 
             return drawing
 
-        outDir = outputfile('charts-out')
-        L=locals()
-        for f in L:
-            if f.startswith('sample'):
-                d = L[f]()
-                d.save(formats=['pdf','gif'],outDir=outDir, fnRoot='test_graphics_charts_axes_%s' % f)
+        run_samples(locals())
+
+    def test_legends(self):
+        from reportlab.graphics.charts.legends import Legend, LineLegend, LineSwatch
+
+        def sample1c():
+            "Make sample legend."
+
+            d = Drawing(200, 100)
+
+            legend = Legend()
+            legend.alignment = 'right'
+            legend.x = 0
+            legend.y = 100
+            legend.dxTextSpace = 5
+            items = 'red green blue yellow pink black white'.split()
+            items = [(getattr(colors, i), i) for i in items]
+            legend.colorNamePairs = items
+
+            d.add(legend, 'legend')
+
+            return d
+
+
+        def sample2c():
+            "Make sample legend."
+
+            d = Drawing(200, 100)
+
+            legend = Legend()
+            legend.alignment = 'right'
+            legend.x = 20
+            legend.y = 90
+            legend.deltax = 60
+            legend.dxTextSpace = 10
+            legend.columnMaximum = 4
+            items = 'red green blue yellow pink black white'.split()
+            items = [(getattr(colors, i), i) for i in items]
+            legend.colorNamePairs = items
+
+            d.add(legend, 'legend')
+
+            return d
+
+        def sample3():
+            "Make sample legend with line swatches."
+
+            d = Drawing(200, 100)
+
+            legend = LineLegend()
+            legend.alignment = 'right'
+            legend.x = 20
+            legend.y = 90
+            legend.deltax = 60
+            legend.dxTextSpace = 10
+            legend.columnMaximum = 4
+            items = 'red green blue yellow pink black white'.split()
+            items = [(getattr(colors, i), i) for i in items]
+            legend.colorNamePairs = items
+            d.add(legend, 'legend')
+
+            return d
+
+
+        def sample3a():
+            "Make sample legend with line swatches and dasharrays on the lines."
+            d = Drawing(200, 100)
+            legend = LineLegend()
+            legend.alignment = 'right'
+            legend.x = 20
+            legend.y = 90
+            legend.deltax = 60
+            legend.dxTextSpace = 10
+            legend.columnMaximum = 4
+            items = 'red green blue yellow pink black white'.split()
+            darrays = ([2,1], [2,5], [2,2,5,5], [1,2,3,4], [4,2,3,4], [1,2,3,4,5,6], [1])
+            cnp = []
+            for i in range(0, len(items)):
+                l =  LineSwatch()
+                l.strokeColor = getattr(colors, items[i])
+                l.strokeDashArray = darrays[i]
+                cnp.append((l, items[i]))
+            legend.colorNamePairs = cnp
+            d.add(legend, 'legend')
+
+            return d
+
+        def sample4a():
+            '''Satish Darade failure''' 
+            from reportlab.graphics.charts.legends import LegendSwatchCallout
+            from reportlab.graphics import shapes
+            class LSwatchCallout(LegendSwatchCallout):
+                def __init__(self,texts,fontName,fontSize):
+                    self._texts = texts
+                    self._fontName = fontName
+                    self._fontSize = fontSize
+
+                def __call__(self,legend,g,thisx,y,i,colName,swatch):
+                    g.add(shapes.String(swatch.x-2,y,self._texts[i],textAnchor='end',fontName=self._fontName,fontSize=self._fontSize))
+
+            d = Drawing(200, 100)
+            legend = LineLegend()
+            d.add(legend, 'legend')
+            items = 'red green blue yellow pink black white'
+            sw_names = items.upper().split()
+            items = items.split()
+            legend.colorNamePairs = [(getattr(colors, i), i) for i in items]
+            legend.x = 20
+            legend.y = 90
+            d.legend.swatchCallout = LSwatchCallout(sw_names,'Helvetica',12)
+            return d
+
+        run_samples(locals(),'legends')
 
 def makeSuite():
     return makeSuiteForClasses(ChartTestCase)

@@ -11,28 +11,34 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.11  20/11/2018
+--------------------------
+    * Improve log axis ticks & grids
+    * move some samples into tests
+
+
 RELEASE 3.5.10  15/11/2018
 --------------------------
-	* Bug fix for underline (contrib. Lennart Regebro @ bitbucket)
-	* Paragraph indentation bug fix
-	* Initial support for richtext graphics text labels
-	* Initial support for log axes (ideas from hoel@germanlloyd.org)
+    * Bug fix for underline (contrib. Lennart Regebro @ bitbucket)
+    * Paragraph indentation bug fix
+    * Initial support for richtext graphics text labels
+    * Initial support for log axes (ideas from hoel@germanlloyd.org)
 
 RELEASE 3.5.9  01/10/2018
 -------------------------
-	* add hyphenationMinWordLength to address PR #44 (contrib Michael V. Reztsov)
+    * add hyphenationMinWordLength to address PR #44 (contrib Michael V. Reztsov)
 
 RELEASE 3.5.8  21/09/2018
 -------------------------
-	* Allow structured barLabelFormat (suggestion from Ravinder Baid)
+    * Allow structured barLabelFormat (suggestion from Ravinder Baid)
 
 RELEASE 3.5.7  22/08/2018
 -------------------------
-	* Fix tables.py splitting for line comands.
+    * Fix tables.py splitting for line comands.
 
 RELEASE 3.5.6  20/08/2018
 -------------------------
-	* Restore DocTemplate seq attribute lost in rev c985bd7093ad (4405)
+    * Restore DocTemplate seq attribute lost in rev c985bd7093ad (4405)
       version 3.4.41 bug report from Jim Parinisi jimandkimparinisi@yahoo.com
 
 RELEASE 3.5.5  14/08/2018

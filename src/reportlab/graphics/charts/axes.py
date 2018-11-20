@@ -32,6 +32,7 @@ the former axes in its own coordinate system.
 """
 
 from math import log10 as math_log10
+from reportlab import xrange
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
                                         isString, EitherOr, Validator, NoneOr, isInstanceOf, \
@@ -221,7 +222,7 @@ class AxisBackgroundAnnotation:
         G = Group()
         ncolors = len(colors)
         v0 = axis._get_line_pos(tv[0])
-        for i in range(1,len(tv)):
+        for i in xrange(1,len(tv)):
             v1 = axis._get_line_pos(tv[i])
             c = colors[(i-1)%ncolors]
             if c:
@@ -563,12 +564,12 @@ class CategoryAxis(_AxisG):
     def _calcTickmarkPositions(self):
         n = self._catCount
         if self.tickShift:
-            self._tickValues = [t+0.5 for t in range(n)]
+            self._tickValues = [t+0.5 for t in xrange(n)]
         else:
             if self.reverseDirection:
-                self._tickValues = list(range(-1,n))
+                self._tickValues = list(xrange(-1,n))
             else:
-                self._tickValues = list(range(n+1))
+                self._tickValues = list(xrange(n+1))
 
     def _scale(self,idx):
         if self.reverseDirection: idx = self._catCount-idx-1
@@ -744,7 +745,7 @@ class XCategoryAxis(_XTicks,CategoryAxis):
             _x = self._x
             pmv = self._pmv if self.labelAxisMode=='axispmv' else None
 
-            for i in range(catCount):
+            for i in xrange(catCount):
                 if reverseDirection: ic = catCount-i-1
                 else: ic = i
                 if ic>=n: continue
@@ -858,7 +859,7 @@ class YCategoryAxis(_YTicks,CategoryAxis):
             _y = self._y
             pmv = self._pmv if self.labelAxisMode=='axispmv' else None
 
-            for i in range(catCount):
+            for i in xrange(catCount):
                 if reverseDirection: ic = catCount-i-1
                 else: ic = i
                 if ic>=n: continue
@@ -1271,6 +1272,7 @@ class ValueAxis(_AxisG):
     def _pseudo_configure(self):
         self._valueMin = self.valueMin
         self._valueMax = self.valueMax
+        if hasattr(self,'_subTickValues'): del self._subTickValues
         self._configure_end()
 
     def _rangeAdjust(self):
@@ -1317,7 +1319,7 @@ class ValueAxis(_AxisG):
         if rangeRound in ('both','ceiling'):
             if v<valueMax-fuzz: i1 += 1
         elif v>valueMax+fuzz: i1 -= 1
-        return valueStep,[i*valueStep for i in range(i0,i1+1)]
+        return valueStep,[i*valueStep for i in xrange(i0,i1+1)]
 
     def _calcTickPositions(self):
         return self._calcStepAndTickPositions()[1]
@@ -1356,7 +1358,7 @@ class ValueAxis(_AxisG):
                 if OTV[-1]<vx: OTV.append(OTV[-1]+dst)
                 dst /= float(nst+1)
                 for i,x in enumerate(OTV[:-1]):
-                    for j in range(nst):
+                    for j in xrange(nst):
                         t = x+dCnv((j+1)*dst)
                         if t<=vn or t>=vx: continue
                         T(t)
@@ -1818,7 +1820,7 @@ class NormalDateXValueAxis(XValueAxis):
 
         VC = self._valueClass
         for D in data:
-            for i in range(len(D)):
+            for i in xrange(len(D)):
                 x, y = D[i]
                 if not isinstance(x,VC):
                     D[i] = (VC(x),y)
@@ -2110,33 +2112,56 @@ class LogValueAxis(ValueAxis):
         T = [].append
         valueMin = math_log10(self._valueMin)
         valueMax = math_log10(self._valueMax)
-        valueStep = round(valueMin)
-        T(10**valueStep)
-        valueStep += 1
-        while valueStep <= valueMax:
-            T(10**valueStep)
-            valueStep += 1
+        tv = round(valueMin)
+        n = int(valueMax) - int(tv) + 1
+        i = max(int(n/self.maximumTicks),1)
+        if i*n>self.maximumTicks: i += 1
+        self._powerInc = i
+        while True:
+            if tv>valueMax: break
+            T(10**tv)
+            tv += i
         return T.__self__
 
     def _calcSubTicks(self):
         if not hasattr(self,'_tickValues'):
             self._pseudo_configure()
+        otv = self._tickValues
         if not hasattr(self,'_subTickValues'):
             T = [].append
-            valueMin = math_log10(self._valueMin)-1
+            valueMin = math_log10(self._valueMin)
             valueMax = math_log10(self._valueMax)+1
-            valueStep = round(valueMin)-1
-            fact = 10. / float(self.subTickNum)
-            start = 1
-            if self.subTickNum == 10: start = 2
-            while valueStep < valueMax:
-                for i in range(start,self.subTickNum):
-                    val = fact*i*(10**valueStep)
-                    if val > self._valueMin and val < self._valueMax:
-                        T(val)
-                valueStep += 1
+            tv = round(valueMin)
+            i = self._powerInc
+            if i==1:
+                fac = 10 / float(self.subTickNum)
+                start = 1
+                if self.subTickNum == 10: start = 2
+                while tv < valueMax:
+                    for j in xrange(start,self.subTickNum):
+                        v = fac*j*(10**tv)
+                        if v > self._valueMin and v < self._valueMax:
+                            T(v)
+                    tv += i
+            else:
+                ng = min(self.subTickNum+1,i-1)
+                while ng:
+                    if (i % ng)==0:
+                        i /= ng
+                        break
+                    ng -= 1
+                else:
+                    i = 1
+                tv = round(valueMin)
+                while True:
+                    v = 10**tv
+                    if v >= self._valueMax: break
+                    if v not in otv:
+                        T(v)
+                    tv += i
             self._subTickValues = T.__self__
-        return self._subTickValues
+        self._tickValues = self._subTickValues
+        return otv
 
 
 class LogAxisTickLabeller(TickLabeller):
@@ -2187,16 +2212,6 @@ class LogXValueAxis(LogValueAxis,LogAxisLabellingSetup,XValueAxis):
             return self._x - self._scaleFactor * math_log10(self._valueMin)
         return self._x + self._scaleFactor * (math_log10(value) - math_log10(self._valueMin))
 
-    def demo(self):
-        "Sample drawing with one xlog axis"
-        data = [Numeric.arange(10.,101.)**10.]
-        xAxis.configure(data)
-
-        drawing = Drawing(400,200)
-        drawing.add(xAxis)
-
-        return drawing
-
 class LogYValueAxis(LogValueAxis,LogAxisLabellingSetup,YValueAxis):
     _attrMap = AttrMap(BASE=YValueAxis)
     def __init__(self):
@@ -2219,13 +2234,3 @@ class LogYValueAxis(LogValueAxis,LogAxisLabellingSetup,YValueAxis):
         if value == 0.:
             return self._y - self._scaleFactor * math_log10(self._valueMin)
         return self._y + self._scaleFactor * (math_log10(value) - math_log10(self._valueMin))
-
-    def demo(self):
-        "Sample drawing with one xlog axis"
-        data = [Numeric.arange(10.,101.)**10.]
-        yAxis.configure(data)
-
-        drawing = Drawing(400,200)
-        drawing.add(yAxis)
-
-        return drawing

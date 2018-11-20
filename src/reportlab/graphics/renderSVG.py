@@ -489,7 +489,7 @@ class SVGCanvas:
                     x -= numericXShift(text_anchor,s,textLen,self._font,self._fontSize)
                 else:
                     raise ValueError('bad value for text_anchor ' + str(text_anchor))
-        self.drawString(x,y,text,angle=angle, link_info=link_info)
+        self.drawString(s,x,y,angle=angle, link_info=link_info)
 
     def drawRightString(self, text, x, y, angle=0, link_info=None):
         self.drawCentredString(text,x,y,angle=angle,text_anchor='end', link_info=link_info)
@@ -628,9 +628,10 @@ class SVGCanvas:
             self.currGroup.appendChild(polyline)
 
     ### groups ###
-    def startGroup(self):
+    def startGroup(self,attrDict=dict(transform="")):
         if self.verbose: print("+++ begin SVGCanvas.startGroup")
-        currGroup, group = self.currGroup, transformNode(self.doc, "g", transform="")
+        currGroup = self.currGroup
+        group = transformNode(self.doc, "g", **attrDict)
         currGroup.appendChild(group)
         self.currGroup = group
         if self.verbose: print("+++ end SVGCanvas.startGroup")
@@ -649,22 +650,16 @@ class SVGCanvas:
             self.currGroup.setAttribute("transform", "%s %s" % (tr, t))
 
     def translate(self, x, y):
-        # probably never used
-        print("!!! begin SVGCanvas.translate")
-        return
+        if (x,y) != (0,0):
+            self.currGroup.setAttribute("transform", "%s %s"
+                % (self.currGroup.getAttribute("transform"),
+                    'translate(%s)' % self.cfp_str(x,y)))
 
-        tr = self.currGroup.getAttribute("transform")
-        t = 'translate(%s)' % self.cfp_str(x, y)
-        self.currGroup.setAttribute("transform", "%s %s" % (tr, t))
-
-    def scale(self, x, y):
-        # probably never used
-        print("!!! begin SVGCanvas.scale")
-        return
-
-        tr = self.groups[-1].getAttribute("transform")
-        t = 'scale(%s)' % self.cfp_str(x, y)
-        self.currGroup.setAttribute("transform", "%s %s" % (tr, t))
+    def scale(self, sx, sy):
+        if (sx,sy) != (1,1):
+            self.currGroup.setAttribute("transform", "%s %s" 
+                    % (self.groups[-1].getAttribute("transform"),
+                        'scale(%s)' % self.cfp_str(sx, sy)))
 
     ### paths ###
     def moveTo(self, x, y):
