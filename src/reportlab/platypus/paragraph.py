@@ -353,7 +353,7 @@ def _putFragLine(cur_x, tx, line, last, pKind):
                 for l in eL:
                     us_lines[l] = us_lines[l],end_x
                 for l in nL:
-                    us_lines[l] = (l,fontSize,textColor,cur_x),fontSize
+                    us_lines[l] = (l,fontSize,textColor,cur_x_s),fontSize
                 LL = f.us_lines
             if LL:
                 for l in LL:
