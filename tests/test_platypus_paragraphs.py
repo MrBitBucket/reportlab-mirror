@@ -805,7 +805,6 @@ phonemic and morphological analysis.''']
                             (s==normal_indent_lv_2 and '<seq id="document" inc="no"/>.<seq id="document_lv_2"/>' or ''),
                             t,' '.join((n+1)*['A']),t,text0,t,' '.join((n+1)*['A']),t,text1),
                             style=s))
-        a(Paragraph("This paragraph contains <strike>really</strike> large <u>spaces</u> between words. ThisLongWordDoesntFitIntoPreviousLineCausingWordsSpread",style=normal_just))
         a(Paragraph("The jump at the beginning should come here &lt;a name=\"theEnd\"/&gt;<a name=\"theEnd\"/>!",style=normal))
         a(Paragraph('Underlining <span fontSize="11"><u color="red">A<u color="green">B</u><u color="blue">C</u>D<sup><strike width="0.5" color="magenta">2</strike><sup><u color="darkgreen" width="0.2">3</u></sup></sup></u></span>',normal))
         a(Paragraph('<para autoLeading="max" spaceAfter="10">this is in 12 <font size=30>this is in 30</font> <u offset="-0.5" width="0.5" color="red"><u offset="-1.5" width="0.5" color="blue">and</u></u> <link underline="1" ucolor="blue" href="http://google.com/">the link box<sup><a color="red" ucolor="green" underline="1" href="https://www.reportlab.com">2</a></sup> is right (twice).</link></para>''',normal))
@@ -834,6 +833,9 @@ phonemic and morphological analysis.''']
         # 3.5.x had a bug with leftIndent and underlines, check that
         left_indent = ParagraphStyle(name='left_indent',leftIndent=80,parent=styleSheet['Normal'])
         a(Paragraph("<u>Replicating a left indent underline bug.</u>",style=left_indent))
+
+        #testing PR 49
+        a(Paragraph("This paragraph contains <strike>really</strike> large <u>spaces</u> <strike color='blue' offset='1' width='0.5'><u color='red' offset='-1' width='0.5'>between words</u></strike>. ThisLongWordDoesntFitIntoPreviousLineCausingWordsSpread",style=normal_just))
 
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_ul.pdf'))
         doc.build(story)
