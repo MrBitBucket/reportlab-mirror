@@ -10,8 +10,8 @@ from operator import truth
 import unittest
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.paraparser import ParaParser
-from reportlab.platypus.flowables import Flowable
-from reportlab.lib.colors import Color
+from reportlab.platypus.flowables import Flowable, PageBreak
+from reportlab.lib.colors import Color, lightgreen, lightblue
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import _className
@@ -24,6 +24,7 @@ from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.paragraph import *
 from reportlab.platypus.paragraph import _getFragWords
 from reportlab.platypus.flowables import Spacer
+from reportlab.platypus import FrameBG
 
 
 def myMainPageFrame(canvas, doc):
@@ -119,6 +120,46 @@ class IndentTestCase(unittest.TestCase):
 
         story.append(Indenter(-36,-72))
         story.append(Paragraph("This should be back to normal at each edge. " + ("spam " * 25),bt))
+        story.append(PageBreak())
+
+        story.append(PageBreak())
+        story.append(Paragraph("Below we should colour the background lightgreen",bt))
+        story.append(FrameBG(start=True,color=lightgreen))
+        story.append(Paragraph("We should have a light green background here",bt))
+        story.append(Paragraph("We should have a light green background here",bt))
+        story.append(Paragraph("We should have a light green background here",bt))
+        story.append(FrameBG(start=False))
+
+        story.append(PageBreak())
+        story.append(Paragraph("Below we should colour the background lightgreen",bt))
+        story.append(FrameBG(start="frame",color=lightgreen))
+        story.append(Paragraph("We should have a light green background here",bt))
+
+        story.append(PageBreak())
+        story.append(Paragraph("Here we should have no background.",bt))
+
+        story.append(PageBreak())
+        story.append(FrameBG(start="frame",color=lightblue))
+        story.append(Paragraph("We should have a light blue background here and the whole frame should be filled in.",bt))
+
+        story.append(PageBreak())
+        story.append(Paragraph("Here we should have no background again.",bt))
+
+        story.append(Paragraph("Below we should colour the background lightgreen",bt))
+        story.append(FrameBG(start="frame-permanent",color=lightgreen))
+        story.append(Paragraph("We should have a light green background here",bt))
+
+        story.append(PageBreak())
+        story.append(Paragraph("Here we should still have a lightgreen background.",bt))
+
+        story.append(PageBreak())
+        story.append(FrameBG(start="frame",color=lightblue, left=36, right=36))
+        story.append(Paragraph("We should have a lighgreen/lightblue background.",bt))
+
+        story.append(PageBreak())
+        story.append(Paragraph("Here we should have only light green background.",bt))
+
+
         doc = MyDocTemplate(outputfile('test_platypus_indents.pdf'))
         doc.multiBuild(story)
 

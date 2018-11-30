@@ -1598,6 +1598,8 @@ class AnchorFlowable(Spacer):
 class FrameBG(AnchorFlowable):
     """Start or stop coloring the frame background
     left & right are distances from the edge of the frame to start stop colouring.
+    if start in ('frame','frame-permanent') then the background is filled from here to the bottom of the frame and immediately discarded
+    for the frame case.
     """
     _ZEROSIZE=1
     def __init__(self, color=None, left=0, right=0, start=True):
@@ -1617,7 +1619,7 @@ class FrameBG(AnchorFlowable):
         if frame is None: return
         if self.start:
             w = getattr(frame,'_lineWidth',0)
-            frame._frameBGs.append((self.left,self.right,self.color))
+            frame._frameBGs.append((self.left,self.right,self.color, self.start) if self.start in ('frame','frame-permanent') else (self.left,self.right,self.color))
         elif frame._frameBGs:
             frame._frameBGs.pop()
 

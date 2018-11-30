@@ -179,28 +179,49 @@ class Frame:
                 return 0
             else:
                 #now we can draw it, and update the current point.
-                s = flowable.getSpaceAfter()
+                sa = flowable.getSpaceAfter()
                 fbg = getattr(self,'_frameBGs',None)
                 if fbg:
-                    fbgl, fbgr, fbgc = fbg[-1]
+                    bg = fbg[-1]
+                    special = len(bg)>3
+                    if special:
+                        fbgl, fbgr, fbgc, bgm = bg
+                    else:
+                        fbgl, fbgr, fbgc = bg
+                        bgm = None
+
                     fbw = self._width-fbgl-fbgr
-                    fbh = y + h + s
-                    fby = max(p,y-s)
-                    fbh = max(0,fbh-fby)
+                    if not bgm:
+                        fbh = y + h + sa
+                        fby = max(p,y-sa)
+                        fbh = max(0,fbh-fby)
+                    else:
+                        fbh = y + h - s
+                        att = fbh>=self._y2 - self._topPadding
+                        if bgm=='frame' or bgm=='frame-permanent' or (att and bgm=='frame-permanent-1'):
+                            #first time or att top use
+                            fbh = max(0,(self._y2 if att else fbh)-self._y1)
+                            fby = self._y1
+                            if bgm=='frame-permanent':
+                                fbg[-1] = fbgl, fbgr, fbgc, 'frame-permanent-1'
+                        else:
+                            fbw = fbh = 0
                     if abs(fbw)>_FUZZ and abs(fbh)>_FUZZ:
                         canv.saveState()
                         canv.setFillColor(fbgc)
                         canv.rect(self._x1+fbgl,fby,fbw,fbh,stroke=0,fill=1)
                         canv.restoreState()
+                    if bgm=='frame':
+                        fbg.pop()
 
                 flowable.drawOn(canv, self._x + self._leftExtraIndent, y, _sW=aW-w)
                 flowable.canv=canv
                 if self._debug: logger.debug('drew %s' % flowable.identity())
-                y -= s
+                y -= sa
                 if self._oASpace:
                     if getattr(flowable,'_SPACETRANSFER',False):
-                        s = self._prevASpace
-                    self._prevASpace = s
+                        sa = self._prevASpace
+                    self._prevASpace = sa
                 if y!=self._y: self._atTop = 0
                 self._y = y
                 return 1
