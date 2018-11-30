@@ -2107,20 +2107,60 @@ class LogValueAxis(ValueAxis):
             math_log10(self._valueMax) - math_log10(self._valueMin))
         return self._scaleFactor
 
+
+    def _setRange(self,dataSeries):
+        valueMin = self.valueMin
+        valueMax = self.valueMax
+        aMin = _findMin(dataSeries,self._dataIndex,0)
+        aMax = _findMax(dataSeries,self._dataIndex,0)
+        if valueMin is None: valueMin = aMin
+        if valueMax is None: valueMax = aMax
+        if valueMin>valueMax:
+            raise ValueError('%s: valueMin=%r should not be greater than valueMax=%r!' % (self.__class__.__name__valueMin, valueMax))
+        if valueMin<=0:
+            raise ValueError('%s: valueMin=%r negative values are not allowed!' % valueMin)
+        abS = self.avoidBoundSpace
+        if abS:
+            lMin = math_log10(aMin)
+            lMax = math_log10(aMax)
+            if not isSeq(abS): abS = abS, abS
+            a0 = abS[0] or 0
+            a1 = abS[1] or 0
+            L = self._length - (a0 + a1)
+            sf = (lMax-lMin)/float(L)
+            lMin -= a0*sf
+            lMax += a1*sf
+            valueMin = min(valueMin,10**lMin)
+            valueMax = max(valueMax,10**lMax)
+        self._valueMin = valueMin
+        self._valueMax = valueMax
+
     def _calcTickPositions(self):
-        self._calcValueStep()
+        #self._calcValueStep()
+        valueMin = cMin = math_log10(self._valueMin)
+        valueMax = cMax = math_log10(self._valueMax)
+        rr = self.rangeRound
+        if rr:
+            if rr in ('both','ceiling'):
+                i = int(valueMax)
+                valueMax =  i + 1 if i<valueMax else i
+            if rr in ('both','floor'):
+                i = int(valueMin)
+                valueMin =  i - 1 if i>valueMin else i
+                
         T = [].append
-        valueMin = math_log10(self._valueMin)
-        valueMax = math_log10(self._valueMax)
-        tv = round(valueMin)
-        n = int(valueMax) - int(tv) + 1
+        tv = int(valueMin)
+        if tv<valueMin: tv += 1
+        n = int(valueMax) - tv + 1
         i = max(int(n/self.maximumTicks),1)
         if i*n>self.maximumTicks: i += 1
         self._powerInc = i
         while True:
             if tv>valueMax: break
-            T(10**tv)
+            if tv>=valueMin: T(10**tv)
             tv += i
+        if valueMin!=cMin: self._valueMin = 10**valueMin
+        if valueMax!=cMax: self._valueMax = 10**valueMax
         return T.__self__
 
     def _calcSubTicks(self):
