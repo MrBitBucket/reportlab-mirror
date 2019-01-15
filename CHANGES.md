@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.13  15/01/2019
+--------------------------
+    * added rl_setting.reserveTTFNotdef inspired by e3office at bitbucket (pr #50)
+
 RELEASE 3.5.12  30/11/2018
 --------------------------
     * log axis handles rangeRound & avoidBoundspace

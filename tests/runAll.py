@@ -105,7 +105,7 @@ def main(pattern='test_*.py'):
                 print('file: "%s"\n%s\n' % (f,''.join(tb)))
         printLocation()
     if __name__=='__main__':
-        sys.exit(1 if result and not result.wasSuccessful() else 0)
+        sys.exit(not result.wasSuccessful())
 
 def mainEx():
     '''for use in subprocesses'''

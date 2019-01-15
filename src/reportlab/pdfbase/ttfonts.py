@@ -1185,6 +1185,7 @@ class TTFont:
             text = text.decode('utf-8')     # encoding defaults to utf-8
         assignments = state.assignments
         subsets = state.subsets
+        reserveTTFNotdef = rl_config.reserveTTFNotdef
         for code in map(ord,text):
             if code in assignments:
                 n = assignments[code]
@@ -1197,13 +1198,20 @@ class TTFont:
                     if n!=32: subsets[n >> 8].append(32)
                     state.nextCode += 1
                     n = state.nextCode
-                state.nextCode += 1
-                assignments[code] = n
                 if n>32:
-                    if not(n&0xFF): subsets.append([])
+                    if not(n&0xFF):
+                        if reserveTTFNotdef:
+                            subsets.append([0]) #force code 0 in as notdef
+                            state.nextCode += 1
+                            n = state.nextCode
+                        else:
+                            subsets.append([])
                     subsets[n >> 8].append(code)
                 else:
                     subsets[0][n] = code
+                state.nextCode += 1
+                assignments[code] = n
+                #subsets[n>>8].append(code)
             if (n >> 8) != curSet:
                 if cur:
                     results.append((curSet,bytes(cur) if isPy3 else ''.join(chr(c) for c in cur)))
