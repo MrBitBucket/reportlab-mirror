@@ -318,7 +318,8 @@ class TTFontTestCase(NearTestCase):
         self.assertEqual(font.splitString(text, doc), chunks)
 
         text = b"".join(utf8(i) for i in range(510, -1, -1))
-        chunks = [(i[0],b"".join(reversed(list(i[1])))) for i in reversed(chunks)]
+        revver = (lambda b: map(int2Byte,reversed(b))) if isPy3 else (lambda b: reversed(list(b)))
+        chunks = [(i[0],b"".join(revver(i[1]))) for i in reversed(chunks)]
         self.assertEqual(font.splitString(text, doc), chunks)
 
     def testSplitStringSpaces(self):
