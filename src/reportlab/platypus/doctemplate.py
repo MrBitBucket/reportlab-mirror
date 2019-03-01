@@ -912,7 +912,7 @@ class BaseDocTemplate:
                         flowables[0:0] = S[1:]  # put rest of splitted flowables back on the list
                         _addGeneratedContent(flowables,frame)
                     else:
-                        flowables[0:0] = S  # put splitted flowables back on the list
+                        flowables[0:0] = S  # put split flowables back on the list
                 else:
                     if hasattr(f,'_postponed'):
                         ident = "Flowable %s%s too large on page %d in frame %r%s of template %r" % \
