@@ -485,6 +485,8 @@ class CategoryAxis(_AxisG):
         style = AttrMapValue(OneOf('parallel','stacked','parallel_3d'),"How common category bars are plotted"),
         labelAxisMode = AttrMapValue(OneOf('high','low','axis', 'axispmv'), desc="Like joinAxisMode, but for the axis labels"),
         tickShift = AttrMapValue(isBoolean, desc='Tick shift typically'),
+        tickStrokeWidth = AttrMapValue(isNumberOrNone, desc='Width of ticks if specified.'),
+        tickStrokeColor = AttrMapValue(isColorOrNone, desc='Color of ticks if specified.'),
         loPad = AttrMapValue(isNumber, desc='extra inner space before start of the axis'),
         hiPad = AttrMapValue(isNumber, desc='extra inner space after end of the axis'),
         annotations = AttrMapValue(None,desc='list of annotations'),
@@ -583,19 +585,27 @@ def _assertXAxis(axis):
 class _XTicks:
     _tickTweaks = 0 #try 0.25-0.5
 
+    @property
+    def actualTickStrokeWidth(self):
+        return getattr(self,'tickStrokeWidth',self.strokeWidth)
+
+    @property
+    def actualTickStrokeColor(self):
+        return getattr(self,'tickStrokeColor',self.strokeColor)
+
     def _drawTicksInner(self,tU,tD,g):
         itd = getattr(self,'innerTickDraw',None)
         if itd:
             itd(self,tU,tD,g)
         elif tU or tD:
-            sW = self.strokeWidth
+            sW = self.actualTickStrokeWidth
             tW = self._tickTweaks
             if tW:
                 if tU and not tD:
                     tD = tW*sW
                 elif tD and not tU:
                     tU = tW*sW
-            self._makeLines(g,tU,-tD,self.strokeColor,sW,self.strokeDashArray,self.strokeLineJoin,self.strokeLineCap,self.strokeMiterLimit)
+            self._makeLines(g,tU,-tD,self.actualTickStrokeColor,sW,self.strokeDashArray,self.strokeLineJoin,self.strokeLineCap,self.strokeMiterLimit)
 
     def _drawTicks(self,tU,tD,g=None):
         g = g or Group()
@@ -956,6 +966,10 @@ class ValueAxis(_AxisG):
         subGridStrokeMiterLimit = AttrMapValue(isNumber,desc="Grid miter limit control miter line joins"),
         subGridStart = AttrMapValue(isNumberOrNone, desc='Start of grid lines wrt axis origin'),
         subGridEnd = AttrMapValue(isNumberOrNone, desc='End of grid lines wrt axis origin'),
+        tickStrokeWidth = AttrMapValue(isNumber, desc='Width of ticks if specified.'),
+        subTickStrokeWidth = AttrMapValue(isNumber, desc='Width of sub ticks if specified.'),
+        subTickStrokeColor = AttrMapValue(isColorOrNone, desc='Color of sub ticks if specified.'),
+        tickStrokeColor = AttrMapValue(isColorOrNone, desc='Color of ticks if specified.'),
         keepTickLabelsInside = AttrMapValue(isBoolean, desc='Ensure tick labels do not project beyond bounds of axis if true'),
         skipGrid = AttrMapValue(OneOf('none','top','both','bottom'),"grid lines to skip top bottom both none"),
         requiredRange = AttrMapValue(isNumberOrNone, desc='Minimum required value range.'),
