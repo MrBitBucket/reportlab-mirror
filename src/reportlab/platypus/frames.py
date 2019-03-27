@@ -2,16 +2,22 @@
 #see license.txt for license details
 #history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/platypus/frames.py
 
-__version__='3.3.0'
+__version__='3.5.14'
 
 __doc__="""A frame is a container for content on a page.
 """
+
+__all__ = (
+            'ShowBoundaryValue',
+            'Frame',
+            )
 
 import logging
 logger = logging.getLogger('reportlab.platypus')
 
 _geomAttr=('x1', 'y1', 'width', 'height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
 from reportlab import rl_config, isPy3
+from reportlab.lib.rl_accel import fp_str
 _FUZZ=rl_config._FUZZ
 
 class ShowBoundaryValue:
@@ -207,10 +213,32 @@ class Frame:
                         else:
                             fbw = fbh = 0
                     if abs(fbw)>_FUZZ and abs(fbh)>_FUZZ:
-                        canv.saveState()
-                        canv.setFillColor(fbgc)
-                        canv.rect(self._x1+fbgl,fby,fbw,fbh,stroke=0,fill=1)
-                        canv.restoreState()
+                        sc = fbgc._fbgInfo
+                        edit = False
+                        sv = 0
+                        if sc:
+                            sv = 1
+                            sc, sw = sc
+                            pageInfo = getattr(fbgc,'_pageInfo',None)
+                            pn = canv.getPageNumber()
+                            if pageInfo and pageInfo[0]==id(self) and pageInfo[1]==id(canv) and pageInfo[2]==pn:
+                                edit = True
+                                codePos = pageInfo[3]
+                        fbx = self._x1+fbgl
+                        if edit:
+                            inst = canv._code[codePos].split()
+                            ox,oy,ow,oh = map(float,inst[1:5])
+                            inst[1:5] = [fp_str(ox,fby,ow,oh+oy-fby)]
+                            canv._code[codePos] = ' '.join(inst)
+                        else:
+                            canv.saveState()
+                            canv.setFillColor(fbgc)
+                            if sc:
+                                canv.setStrokeColor(sc)
+                                canv.setLineWidth(sw)
+                                fbgc._pageInfo = id(self), id(canv), pn, len(canv._code)
+                            canv.rect(fbx,fby,fbw,fbh,stroke=1 if sc else 0,fill=1)
+                            canv.restoreState()
                     if bgm=='frame':
                         fbg.pop()
 

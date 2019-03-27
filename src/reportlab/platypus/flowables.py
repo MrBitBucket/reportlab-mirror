@@ -37,12 +37,12 @@ from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActi
 from reportlab import xrange
 import collections
 
-__all__ = '''TraceInfo Flowable XBox Preformatted Image NullDraw Spacer UseUpSpace PageBreak SlowPageBreak
-            PageBreakIfNotEmpty CondPageBreak KeepTogether Macro CallerMacro ParagraphAndImage FailOnWrap
-            FailOnDraw HRFlowable PTOContainer KeepInFrame ImageAndFlowables AnchorFlowable FrameBG
-            FrameSplitter BulletDrawer DDIndenter LIIndenter ListItem ListFlowable TopPadder DocAssign
-            DocExec DocPara DocAssert DocIf DocWhile SetTopFlowables splitLines splitLine SetPageTopFlowables
-            BalancedColumns'''.split()
+__all__ = '''AnchorFlowable BalancedColumns BulletDrawer CallerMacro CondPageBreak DDIndenter DocAssert
+        DocAssign DocExec DocIf DocPara DocWhile FailOnDraw FailOnWrap Flowable FrameBG FrameSplitter
+        HRFlowable Image ImageAndFlowables KeepInFrame KeepTogether LIIndenter ListFlowable ListItem
+        Macro NullDraw PTOContainer PageBreak PageBreakIfNotEmpty ParagraphAndImage Preformatted
+        SetPageTopFlowables SetTopFlowables SlowPageBreak Spacer TopPadder TraceInfo UseUpSpace XBox
+        splitLine splitLines'''.split()
 
 class TraceInfo:
     "Holder for info about where an object originated"
@@ -652,18 +652,14 @@ def _flowableSublist(V):
     return V
 
 class _ContainerSpace:  #Abstract some common container like behaviour
-    def getSpaceBefore(self):
-        for c in self._content:
+    def getSpaceBefore(self,content=None):
+        for c in (self._content if content is None else content):
             if not hasattr(c,'frameAction'):
                 return c.getSpaceBefore()
         return 0
 
     def getSpaceAfter(self,content=None):
-        #this needs 2.4
-        #for c in reversed(content or self._content):
-        reverseContent = (content or self._content)[:]
-        reverseContent.reverse()
-        for c in reverseContent:
+        for c in reversed(self._content if content is None else content):
             if not hasattr(c,'frameAction'):
                 return c.getSpaceAfter()
         return 0
@@ -1602,7 +1598,7 @@ class FrameBG(AnchorFlowable):
     for the frame case.
     """
     _ZEROSIZE=1
-    def __init__(self, color=None, left=0, right=0, start=True):
+    def __init__(self, color=None, left=0, right=0, start=True, strokeWidth=None, strokeColor=None):
         Spacer.__init__(self,0,0)
         self.start = start
         if start:
@@ -1610,6 +1606,8 @@ class FrameBG(AnchorFlowable):
             self.left = _evalMeasurement(left)
             self.right = _evalMeasurement(right)
             self.color = color
+            self.strokeWidth = strokeWidth
+            self.strokeColor = strokeColor
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__,', '.join(['%s=%r' % (i,getattr(self,i,None)) for i in 'start color left right'.split()]))
@@ -1618,7 +1616,10 @@ class FrameBG(AnchorFlowable):
         frame = getattr(self,'_frame',None)
         if frame is None: return
         if self.start:
-            w = getattr(frame,'_lineWidth',0)
+            sc = self.strokeColor
+            sw = self.strokeWidth
+            sw = -1 if sw is None else sw
+            self.color._fbgInfo = (sc,sw) if sc and sw>=0 else None
             frame._frameBGs.append((self.left,self.right,self.color, self.start) if self.start in ('frame','frame-permanent') else (self.left,self.right,self.color))
         elif frame._frameBGs:
             frame._frameBGs.pop()
@@ -1630,11 +1631,12 @@ class FrameSplitter(NullDraw):
     that are listed in nextFrames and switch to the first of those frames.
     '''
     _ZEROSIZE=1
-    def __init__(self,nextTemplate,nextFrames=[],gap=10,required=72):
-        self.nextTemplate=nextTemplate
-        self.nextFrames=nextFrames or []
-        self.gap=gap
-        self.required=required
+    def __init__(self, nextTemplate, nextFrames=[], gap=10, required=72, adjustHeight=True):
+        self.nextTemplate = nextTemplate
+        self.nextFrames = nextFrames or []
+        self.gap = gap
+        self.required = required
+        self.adjustHeight = adjustHeight
 
     def wrap(self,aW,aH):
         frame = self._frame
@@ -1666,7 +1668,7 @@ class FrameSplitter(NullDraw):
             h=aH-self.gap
             for i,f in enumerate(F):
                 f=copy(f)
-                f.height=h
+                if self.adjustHeight: f.height=h
                 f._reset()
                 F[i]=f
             T.frames=F
