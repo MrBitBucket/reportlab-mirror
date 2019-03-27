@@ -189,13 +189,10 @@ class Frame:
                 fbg = getattr(self,'_frameBGs',None)
                 if fbg:
                     bg = fbg[-1]
-                    special = len(bg)>3
-                    if special:
-                        fbgl, fbgr, fbgc, bgm = bg
-                    else:
-                        fbgl, fbgr, fbgc = bg
-                        bgm = None
-
+                    fbgl = bg.left
+                    fbgr = bg.right
+                    fbgc = bg.fillColor
+                    bgm = bg.start
                     fbw = self._width-fbgl-fbgr
                     if not bgm:
                         fbh = y + h + sa
@@ -209,21 +206,19 @@ class Frame:
                             fbh = max(0,(self._y2 if att else fbh)-self._y1)
                             fby = self._y1
                             if bgm=='frame-permanent':
-                                fbg[-1] = fbgl, fbgr, fbgc, 'frame-permanent-1'
+                                fbg[-1].start = 'frame-permanent-1'
                         else:
                             fbw = fbh = 0
                     if abs(fbw)>_FUZZ and abs(fbh)>_FUZZ:
-                        sc = fbgc._fbgInfo
+                        sc = bg.strokeColor
+                        sw = bg.strokeWidth
+                        if sw is None or sw<0: sc = None
                         edit = False
-                        sv = 0
                         if sc:
-                            sv = 1
-                            sc, sw = sc
-                            pageInfo = getattr(fbgc,'_pageInfo',None)
                             pn = canv.getPageNumber()
-                            if pageInfo and pageInfo[0]==id(self) and pageInfo[1]==id(canv) and pageInfo[2]==pn:
+                            if bg.fid==id(self) and bg.cid==id(canv) and bg.pn==pn:
                                 edit = True
-                                codePos = pageInfo[3]
+                                codePos = bg.codePos
                         fbx = self._x1+fbgl
                         if edit:
                             inst = canv._code[codePos].split()
@@ -236,7 +231,10 @@ class Frame:
                             if sc:
                                 canv.setStrokeColor(sc)
                                 canv.setLineWidth(sw)
-                                fbgc._pageInfo = id(self), id(canv), pn, len(canv._code)
+                                bg.fid = id(self)
+                                bg.cid = id(canv)
+                                bg.pn = pn
+                                bg.codePos = len(canv._code)
                             canv.rect(fbx,fby,fbw,fbh,stroke=1 if sc else 0,fill=1)
                             canv.restoreState()
                     if bgm=='frame':

@@ -31,6 +31,7 @@ from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 from reportlab.lib.styles import _baseFontName
 from reportlab.lib.utils import strTypes
+from reportlab.lib.abag import ABag
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions, listWrapOnFakeWidth
@@ -916,7 +917,7 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
         frame = getattr(self,'_frame',None)
         for c in content:
             if not ignoreContainerActions and isinstance(c,ActionFlowable):
-                c.apply(self.canv._doctemplate)
+                c.apply(canv._doctemplate)
                 continue
             if isinstance(c,Indenter):
                 x += c.left*scale
@@ -935,16 +936,42 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
                 s = pS
             pS = s
             if fbg:
-                fbgl, fbgr, fbgc = fbg[-1]
+                bg = fbg[-1]
+                fbgl = bg.left
+                fbgr = bg.right
+                fbgc = bg.fillColor
+                bgm = bg.start
                 fbw = scale*(frame._width-fbgl-fbgr)
                 fbh = y + h + pS
                 fby = max(y0,y-pS)
                 fbh = max(0,fbh-fby)
                 if abs(fbw)>_FUZZ and abs(fbh)>_FUZZ:
-                    canv.saveState()
-                    canv.setFillColor(fbgc)
-                    canv.rect(x0+scale*(fbgl-frame._leftPadding)-0.1,fby-0.1,fbw+0.2,fbh+0.2,stroke=0,fill=1)
-                    canv.restoreState()
+                    sc = bg.strokeColor
+                    sw = bg.strokeWidth
+                    if sw is None or sw<0: sc = None
+                    edit = False
+                    if sc:
+                        pn = canv.getPageNumber()
+                        if bg.fid==id(frame) and bg.cid==id(canv) and bg.pn==pn:
+                            edit = True
+                            codePos = bg.codePos
+                    if edit:
+                        inst = canv._code[codePos].split()
+                        ox,oy,ow,oh = map(float,inst[1:5])
+                        inst[1:5] = [fp_str(ox,fby,ow,oh+oy-fby)]
+                        canv._code[codePos] = ' '.join(inst)
+                    else:
+                        canv.saveState()
+                        canv.setFillColor(fbgc)
+                        if sc:
+                            canv.setStrokeColor(sc)
+                            canv.setLineWidth(sw)
+                            bg.fid = id(frame)
+                            bg.cid = id(canv)
+                            bg.pn = pn
+                            bg.codePos = len(canv._code)
+                        canv.rect(x0+scale*(fbgl-frame._leftPadding),fby,fbw,fbh,stroke=1 if sc else 0,fill=1)
+                        canv.restoreState()
             c._frame = frame
             c.drawOn(canv,x,y,_sW=aW-w)
             if c is not content[-1] and not getattr(c,'_SPACETRANSFER',None):
@@ -1598,7 +1625,7 @@ class FrameBG(AnchorFlowable):
     for the frame case.
     """
     _ZEROSIZE=1
-    def __init__(self, color=None, left=0, right=0, start=True, strokeWidth=None, strokeColor=None):
+    def __init__(self, color=None, left=0, right=0, start=True, strokeWidth=None, strokeColor=None, strokeDashArray=None):
         Spacer.__init__(self,0,0)
         self.start = start
         if start:
@@ -1608,6 +1635,7 @@ class FrameBG(AnchorFlowable):
             self.color = color
             self.strokeWidth = strokeWidth
             self.strokeColor = strokeColor
+            self.strokeDashArray = strokeDashArray
 
     def __repr__(self):
         return "%s(%s)" % (self.__class__.__name__,', '.join(['%s=%r' % (i,getattr(self,i,None)) for i in 'start color left right'.split()]))
@@ -1619,8 +1647,19 @@ class FrameBG(AnchorFlowable):
             sc = self.strokeColor
             sw = self.strokeWidth
             sw = -1 if sw is None else sw
-            self.color._fbgInfo = (sc,sw) if sc and sw>=0 else None
-            frame._frameBGs.append((self.left,self.right,self.color, self.start) if self.start in ('frame','frame-permanent') else (self.left,self.right,self.color))
+            frame._frameBGs.append(
+                        ABag(   left=self.left,
+                                right=self.right,
+                                fillColor=self.color,
+                                start=self.start if self.start in ('frame','frame-permanent') else None,
+                                strokeColor=self.strokeColor,
+                                strokeWidth=self.strokeWidth,
+                                strokeDashArray=self.strokeDashArray,
+                                fid = 0,
+                                cid = 0,
+                                pn = -1,
+                                codePos = None,
+                                ))
         elif frame._frameBGs:
             frame._frameBGs.pop()
 
