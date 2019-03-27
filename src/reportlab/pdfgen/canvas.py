@@ -980,9 +980,7 @@ class Canvas(_PDFColorSetter):
     def _restartAccumulators(self):
         if self._codeStack:
             # restore the saved code
-            saved = self._codeStack[-1]
-            del self._codeStack[-1]
-            self._code, self._formsinuse, self._annotationrefs, self._formData,self._colorsUsed, self._shadingUsed = saved
+            self._code, self._formsinuse, self._annotationrefs, self._formData,self._colorsUsed, self._shadingUsed = self._codeStack.pop(-1)
         else:
             self._code = []    # ready for more...
             self._psCommandsAfterPage = []
