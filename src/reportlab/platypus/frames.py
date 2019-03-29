@@ -21,9 +21,10 @@ from reportlab.lib.rl_accel import fp_str
 _FUZZ=rl_config._FUZZ
 
 class ShowBoundaryValue:
-    def __init__(self,color=(0,0,0),width=0.1):
+    def __init__(self,color=(0,0,0),width=0.1,dashArray=None):
         self.color = color
         self.width = width
+        self.dashArray = dashArray
 
     if isPy3:
         def __bool__(self):
@@ -187,7 +188,7 @@ class Frame:
                 #now we can draw it, and update the current point.
                 sa = flowable.getSpaceAfter()
                 fbg = getattr(self,'_frameBGs',None)
-                if fbg:
+                if fbg and fbg[-1].active:
                     bg = fbg[-1]
                     fbgl = bg.left
                     fbgr = bg.right
@@ -227,7 +228,8 @@ class Frame:
                             canv._code[codePos] = ' '.join(inst)
                         else:
                             canv.saveState()
-                            canv.setFillColor(fbgc)
+                            if fbgc:
+                                canv.setFillColor(fbgc)
                             if sc:
                                 canv.setStrokeColor(sc)
                                 canv.setLineWidth(sw)
@@ -235,7 +237,7 @@ class Frame:
                                 bg.cid = id(canv)
                                 bg.pn = pn
                                 bg.codePos = len(canv._code)
-                            canv.rect(fbx,fby,fbw,fbh,stroke=1 if sc else 0,fill=1)
+                            canv.rect(fbx,fby,fbw,fbh,stroke=1 if sc else 0,fill=1 if fbgc else 0)
                             canv.restoreState()
                     if bgm=='frame':
                         fbg.pop()
@@ -283,31 +285,33 @@ class Frame:
         return r
 
 
-    def drawBoundary(self,canv):
+    @staticmethod
+    def _drawBoundary(canv,sb,x1,y1,width,height):
         "draw the frame boundary as a rectangle (primarily for debugging)."
         from reportlab.lib.colors import Color, toColor
-        sb = self.showBoundary
         ss = isinstance(sb,(str,tuple,list)) or isinstance(sb,Color)
         w = -1
+        da = None
         if ss:
-            c = toColor(sb,self)
-            ss = c is not self
+            c = toColor(sb,-1)
+            ss = c is not -1
         elif isinstance(sb,ShowBoundaryValue) and sb:
-            c = toColor(sb.color,self)
-            w = sb.width
-            ss = c is not self
+            c = toColor(sb.color,-1)
+            ss = c is not -1
+            if ss:
+                w = sb.width
+                da = sb.dashArray
         if ss:
             canv.saveState()
             canv.setStrokeColor(c)
-            if w>=0:
-                canv.setLineWidth(w)
-        canv.rect(
-                self._x1,
-                self._y1,
-                self._x2 - self._x1,
-                self._y2 - self._y1
-                )
+            if w>=0: canv.setLineWidth(w)
+            if da: canv.setDash(da)
+        canv.rect(x1,y1,width,height)
         if ss: canv.restoreState()
+
+    def drawBoundary(self,canv):
+        self._drawBoundary(canv,self.showBoundary, self._x1, self._y1,
+                                self._x2 - self._x1, self._y2 - self._y1)
 
     def addFromList(self, drawlist, canv):
         """Consumes objects from the front of the list until the

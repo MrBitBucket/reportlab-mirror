@@ -1425,6 +1425,23 @@ class Canvas(_PDFColorSetter):
             self._code.append('%s m %s l' % (fp_str(x1, y1), fp_str(x2, y2)))
         self._code.append('S')
 
+    def cross(self, x, y, size=5, gap=1, text=None, strokeColor=None, strokeWidth=None, fontSize=3):
+        size *= 0.5
+        gap *= 0.5
+        crosshairs = [(x,y-size,x,y-gap),(x,y+gap,x,y+size), (x-size,y,x-gap,y),(x+gap,y,x+size,y)]
+        self.saveState()
+        if strokeColor:
+            self.setStrokeColor(strokeColor)
+            if text:
+                self.setFillColor(strokeColor)
+        if strokeWidth:
+            self.setLineWidth(StrokeWidth)
+        self.lines(crosshairs)
+        if text:
+            if fontSize is not None: self.setFontSize(fontSize)
+            self.drawRightString(x-size, y, text)
+        self.restoreState()
+
     def grid(self, xlist, ylist):
         """Lays out a grid in current line style.  Supply list of
         x an y positions."""

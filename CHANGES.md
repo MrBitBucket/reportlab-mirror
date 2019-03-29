@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.17	29/03/2019
+--------------------------
+	* more FrameBG fixes; added canvas cross method, frame static drawBoundary
+
 RELEASE 3.5.16	27/03/2019
 --------------------------
 	* fix stroking for frame background in container

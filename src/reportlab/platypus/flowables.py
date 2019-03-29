@@ -930,12 +930,12 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
                 if not getattr(c,'_SPACETRANSFER',False):
                     h += max(s-pS,0)
             y -= h
-            fbg = getattr(frame,'_frameBGs',None)
             s = c.getSpaceAfter()
             if getattr(c,'_SPACETRANSFER',False):
                 s = pS
             pS = s
-            if fbg:
+            fbg = getattr(frame,'_frameBGs',None)
+            if fbg and fbg[-1].active:
                 bg = fbg[-1]
                 fbgl = bg.left
                 fbgr = bg.right
@@ -960,9 +960,11 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
                         ox,oy,ow,oh = map(float,inst[1:5])
                         inst[1:5] = [fp_str(ox,fby,ow,oh+oy-fby)]
                         canv._code[codePos] = ' '.join(inst)
+                        #print '%-14s: fbx=%s fby=%s fbw=%s fbh=%s fby1=%s codePos=%s %s' % ('container edit',ox,fby,ow,oh+oy-fby,fby+oh+oy-fby,codePos,id(bg))
                     else:
                         canv.saveState()
-                        canv.setFillColor(fbgc)
+                        if fbgc:
+                            canv.setFillColor(fbgc)
                         if sc:
                             canv.setStrokeColor(sc)
                             canv.setLineWidth(sw)
@@ -970,7 +972,9 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
                             bg.cid = id(canv)
                             bg.pn = pn
                             bg.codePos = len(canv._code)
-                        canv.rect(x0+scale*(fbgl-frame._leftPadding),fby,fbw,fbh,stroke=1 if sc else 0,fill=1)
+                        fbx = x0+scale*(fbgl-frame._leftPadding)
+                        canv.rect(fbx,fby,fbw,fbh,stroke=1 if sc else 0,fill=1 if fbgc else 0)
+                        #print '%-14s: fbx=%s fby=%s fbw=%s fbh=%s fby1=%s codePos=%s %s' % ('container',fbx,fby,fbw,fbh,fby+fbh,bg.codePos,id(bg))
                         canv.restoreState()
             c._frame = frame
             c.drawOn(canv,x,y,_sW=aW-w)
@@ -1239,6 +1243,11 @@ class _FindSplitterMixin:
         atTop = 1
         F = self._getContent(content)
         for i,f in enumerate(F):
+            if hasattr(f,'frameAction'):
+                from reportlab.platypus.doctemplate import Indenter
+                if isinstance(f,Indenter):
+                    availWidth -= f.left+f.right
+                continue
             w,h = f.wrapOn(canv,availWidth,0xfffffff)
             if w<=_FUZZ or h<=_FUZZ: continue
             W = max(W,w)
@@ -1403,11 +1412,70 @@ class ImageAndFlowables(_Container,_FindSplitterMixin,Flowable):
             aW, aH = self._wrapArgs
             _Container.drawOn(self, canv, x, y-self._aH,content=self._C1, aW=aW)
 
+class _AbsRect(NullDraw):
+    _ZEROSIZE=1
+    _SPACETRANSFER = True
+    def __init__(self,x,y,width,height,strokeWidth=0,strokeColor=None,fillColor=None,strokeDashArray=None):
+        self._x = x
+        self._y = y
+        self._width = width
+        self._height = height
+        self._strokeColor = strokeColor
+        self._fillColor = fillColor
+        self._strokeWidth = strokeWidth
+        self._strokeDashArray = strokeDashArray
+
+    def wrap(self, availWidth, availHeight):
+        return 0,0
+
+    def drawOn(self, canv, x, y, _sW=0):
+        if self._width>_FUZZ and self._height>_FUZZ:
+            st = self._strokeColor and self._strokeWidth is not None and self._strokeWidth>=0
+            if st or self._fillColor:
+                canv.saveState()
+                if st:
+                    canv.setStrokeColor(self._strokeColor)
+                    canv.setLineWidth(self._strokeWidth)
+                if self._fillColor:
+                    canv.setFillColor(self._fillColor)
+                canv.rect(self._x,self._y,self._width,self._height,stroke=1 if st else 0, fill=1 if self._fillColor else 0)
+                canv.restoreState()
+
+class _AbsLine(NullDraw):
+    _ZEROSIZE=1
+    _SPACETRANSFER = True
+    def __init__(self,x,y,x1,y1,strokeWidth=0,strokeColor=None,strokeDashArray=None):
+        self._x = x
+        self._y = y
+        self._x1 = x1
+        self._y1 = y1
+        self._strokeColor = strokeColor
+        self._strokeWidth = strokeWidth
+        self._strokeDashArray = strokeDashArray
+
+    def wrap(self, availWidth, availHeight):
+        return 0,0
+
+    def drawOn(self, canv, x, y, _sW=0):
+        if self._strokeColor and self._strokeWidth is not None and self._strokeWidth>=0:
+            canv.saveState()
+            canv.setStrokeColor(self._strokeColor)
+            canv.setLineWidth(self._strokeWidth)
+            canv.line(self._x,self._y,self._x1,self._y1)
+            canv.restoreState()
+
 class BalancedColumns(_FindSplitterMixin,NullDraw):
     '''combine a list of flowables and an Image'''
     def __init__(self, F, nCols=2, needed=72, spaceBefore=0, spaceAfter=0, showBoundary=None,
             leftPadding=None, innerPadding=None, rightPadding=None, topPadding=None, bottomPadding=None,
-            name='', endSlack=0.1):
+            name='', endSlack=0.1,
+            boxStrokeColor=None,
+            boxStrokeWidth=0,
+            boxFillColor=None,
+            boxMargin=None,
+            vLinesStrokeColor=None,
+            vLinesStrokeWidth=None,
+            ):
         self.name = name
         if nCols <2:
             raise ValueError('nCols should be at least 2 not %r in %s' % (nCols,self.identitity()))
@@ -1423,6 +1491,12 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
         self._needed = needed - _FUZZ
         self.showBoundary = showBoundary
         self.endSlack = endSlack    #what we might allow as a lastcolumn overrun
+        self._boxStrokeColor = boxStrokeColor
+        self._boxStrokeWidth = boxStrokeWidth
+        self._boxFillColor = boxFillColor
+        self._boxMargin = boxMargin
+        self._vLinesStrokeColor = vLinesStrokeColor
+        self._vLinesStrokeWidth = vLinesStrokeWidth
 
     def identity(self, maxLen=None):
         return "<%s nCols=%r at %s%s%s>" % (self.__class__.__name__, self._nCols, hex(id(self)), self._frameName(),
@@ -1438,19 +1512,21 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
     def _generated_content(self,aW,aH):
         G = []
         frame = self._frame
-        from reportlab.platypus.doctemplate import CurrentFrameFlowable,LayoutError, ActionFlowable
+        from reportlab.platypus.doctemplate import CurrentFrameFlowable,LayoutError, ActionFlowable, Indenter
         from reportlab.platypus.frames import Frame
         from reportlab.platypus.doctemplate import FrameBreak
         lpad = frame._leftPadding if self._leftPadding is None else self._leftPadding
         rpad = frame._rightPadding if self._rightPadding is None else self._rightPadding
         tpad = frame._topPadding if self._topPadding is None else self._topPadding
         bpad = frame._bottomPadding if self._bottomPadding is None else self._bottomPadding
+        leftExtraIndent = frame._leftExtraIndent
+        rightExtraIndent = frame._rightExtraIndent
         gap = max(lpad,rpad) if self._innerPadding is None else self._innerPadding
         hgap = gap*0.5
         canv = self.canv
         nCols = self._nCols
         cw = (aW - gap*(nCols-1))/float(nCols)
-        aH += frame._bottomPadding - bpad + frame._topPadding - tpad
+        aH -= tpad + bpad
         W,H0,_C0,C2 = self._findSplit(canv,cw,nCols*aH,paraFix=False)
         if not _C0:
             raise ValueError(
@@ -1545,10 +1621,16 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
         ftop = y1+bpad+tpad+aH
         fh = H1 + bpad + tpad
         y2 = ftop - fh
-        dx = fw / float(nCols)
+        dx = aW / float(nCols)
+        if leftExtraIndent or rightExtraIndent:
+            indenter0 = Indenter(-leftExtraIndent,-rightExtraIndent)
+            indenter1 = Indenter(leftExtraIndent,rightExtraIndent)
+        else:
+            indenter0 = indenter1 = None
 
         showBoundary=self.showBoundary if self.showBoundary is not None else frame.showBoundary
-        F = [Frame(x1+i*dx,y2,cw+(lpad+hgap if not i else rpad+hgap if i==nCols-1 else gap),fh,
+        obx = x1+leftExtraIndent+frame._leftPadding
+        F = [Frame(obx+i*dx,y2,dx,fh,
                 leftPadding=lpad if not i else hgap, bottomPadding=bpad,
                 rightPadding=rpad if i==nCols-1 else hgap, topPadding=tpad,
                 id=i,
@@ -1561,20 +1643,81 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
         T=self._doctemplateAttr('pageTemplate')
         if T is None:
             raise LayoutError('%s used in non-doctemplate environment' % self.identity())
+
+        BGs = getattr(frame,'_frameBGs',None)
+        bg = BGs[-1] if BGs else None
+        bg = bg if bg and bg.strokeColor and bg.strokeWidth>=0 else None
+        class BGAction(ActionFlowable):
+            def __init__(self,i=None):
+                Flowable.__init__(self)
+                self._i = i
+            def apply(self,doc):
+                if self._i is not None:
+                    BGs.append(bg.clone(fid=id(F[self._i])))
+                else:
+                    BGs.pop(-1)
+
         class Unwrapper(ActionFlowable):
             def __init__(self):
                 Flowable.__init__(self)
-            def apply(canv,doc,T=T,oldFrames=T.frames):
+            def apply(self,doc,T=T,oldFrames=T.frames):
                 T.frames=oldFrames
+
         T.frames=F
         G.append(CurrentFrameFlowable(F[0].id))
+        if indenter0: G.append(indenter0)
+        doBox = (self._boxStrokeColor and self._boxStrokeWidth and self._boxStrokeWidth>=0) or self._boxFillColor
+        doVLines = self._vLinesStrokeColor and self._vLinesStrokeWidth and self._vLinesStrokeWidth>=0
+        if doBox or doVLines:
+            obm = self._boxMargin
+            if not obm: obm = (0,0,0,0)
+            if len(obm)==1:
+                obmt = obml = obmr = obmb = obm[0]
+            elif len(obm)==2:
+                obmt = obmb = obm[0]
+                obml = obmr = obm[1]
+            elif len(obm)==3:
+                obmt = obm[0]
+                obml = obmr = obm[1]
+                obmb = obm[2]
+            elif len(obm)==4:
+                obmt = obm[0]
+                obmr = obm[1]
+                obmb = obm[2]
+                obml = obm[3]
+            else:
+                raise ValueError('Invalid value %s for boxMargin' % repr(obm))
+            obx1 = obx - obml
+            obx2 = F[-1]._x1+F[-1]._width + obmr
+            oby2 = y2-obmb
+            obh = fh+obmt+obmb
+            if doBox:
+                box = _AbsRect(obx1,oby2, obx2-obx1, obh,
+                        fillColor=self._boxFillColor,
+                        strokeColor=self._boxStrokeColor,
+                        strokeWidth=self._boxStrokeWidth,
+                        )
+            if doVLines:
+                oby1 = oby2+obh
+                vLines = []
+                for i in xrange(1,nCols):
+                    vlx = 0.5*(F[i]._x1 + F[i-1]._x1+F[i-1]._width)
+                    vLines.append(_AbsLine(vlx,oby2,vlx,oby1,strokeWidth=self._vLinesStrokeWidth,strokeColor=self._vLinesStrokeColor))
+        if doBox:
+            G.append(box)
+        if doVLines:
+            G.extend(vLines)
         for i in xrange(nCols):
+            if bg: G.append(BGAction(i))
             G.append(KeepInFrame(W1,H1,C[i],mode='shrink'))
+            if bg: G.append(BGAction())
             if i!=nCols-1:
                 G.append(FrameBreak)
             else:
                 G.append(Unwrapper())
                 G.append(CurrentFrameFlowable(frame.id))
+                G.append(Spacer(1e-5,1e-5))
+        if indenter1: G.append(indenter1)
         if C1:
             G.append(
                 BalancedColumns(C1, nCols=nCols,
@@ -1587,7 +1730,7 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
                     bottomPadding=self._bottomPadding,
                     )
                 )
-        return H1, G
+        return fh, G
 
     def wrap(self,aW,aH):
         #here's where we mess with everything
@@ -1617,6 +1760,12 @@ class AnchorFlowable(Spacer):
 
     def draw(self):
         self.canv.bookmarkHorizontal(self._name,0,0)
+
+class FrameBGAttrs(ABag):
+    def matches(self,f,c):
+        fid = id(f)
+        return ((isinstance(self.fid,list) and fid in self.fid or fid==self.fid)
+                    and id(c)==self.cid and self.pn==c.getPageNumber())
 
 class FrameBG(AnchorFlowable):
     """Start or stop coloring the frame background
@@ -1659,6 +1808,7 @@ class FrameBG(AnchorFlowable):
                                 cid = 0,
                                 pn = -1,
                                 codePos = None,
+                                active=True,
                                 ))
         elif frame._frameBGs:
             frame._frameBGs.pop()
