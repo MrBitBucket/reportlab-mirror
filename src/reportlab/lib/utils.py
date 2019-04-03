@@ -883,7 +883,7 @@ class ImageReader(object):
                     im = self._image
                     mode = self.mode = im.mode
                     if mode in ('LA','RGBA'):
-                        if getattr(Image,'.VERSION','').startswith('1.1.7'): im.load()
+                        if getattr(Image,'VERSION','').startswith('1.1.7'): im.load()
                         self._dataA = ImageReader(im.split()[3 if mode=='RGBA' else 1])
                         nm = mode[:-1]
                         im = im.convert(nm)
