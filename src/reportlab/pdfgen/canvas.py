@@ -1921,5 +1921,12 @@ class Canvas(_PDFColorSetter):
             self._doc._catalog.AcroForm = self.AcroForm = AcroForm(self)
             return self.AcroForm
 
+    @property
+    def drawBoundary(self):
+        if not hasattr(self,'_drawBoundary'):
+            from reportlab.platypus import Frame
+            self._drawBoundary = lambda sb,x,y,w,h: Frame._drawBoundary(self,sb,x,y,w,h)
+        return self._drawBoundary
+
 if __name__ == '__main__':
     print('For test scripts, look in tests')
