@@ -695,7 +695,8 @@ class Drawing(Group, Flowable):
         draw itself in a story.  It is specific to PDF and should not
         be used directly."""
         from reportlab.graphics import renderPDF
-        renderPDF.draw(self, self.canv, 0, 0, showBoundary=showBoundary)
+        renderPDF.draw(self, self.canv, 0, 0,
+                showBoundary=showBoundary if showBoundary is not _unset_ else getattr(self,'_showBoundary',_unset_))
 
     def wrap(self, availWidth, availHeight):
         width = self.width

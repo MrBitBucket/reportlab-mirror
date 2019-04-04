@@ -122,20 +122,7 @@ class Figure(Flowable):
             self.drawCaption()
 
     def drawBorder(self):
-        canv = self.canv
-        border = self.border
-        bc = getattr(border,'color',None)
-        bw = getattr(border,'width',None)
-        bd = getattr(border,'dashArray',None)
-        ss = bc or bw or bd
-        if ss:
-            canv.saveState()
-            if bc: canv.setStrokeColor(bc)
-            if bw: canv.setLineWidth(bw)
-            if bd: canv.setDash(bd)
-        canv.rect(0, 0, self.width, self.figureHeight,fill=0,stroke=1)
-        if ss:
-            canv.restoreState()
+        self.canv.drawBoundary(self.border,0,0,self.width, self.figureHeight)
 
     def _doBackground(self, color):
         self.canv.saveState()

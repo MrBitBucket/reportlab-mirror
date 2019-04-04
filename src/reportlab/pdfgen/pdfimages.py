@@ -186,7 +186,7 @@ class PDFImage:
             canvas._code.append(line)
         canvas._code.append('Q')
         if showBoundary:
-            canvas.rect(x,y,width,height,stroke=1,fill=0)
+            canvas.drawBoundary(showBoundary,x,y,width,height)
         return True
 
     def format(self, document):

@@ -195,7 +195,11 @@ class Renderer:
         drawing._parent = None
         try:
             #bounding box
-            if showBoundary: canvas.rect(x, y, drawing.width, drawing.height)
+            if showBoundary:
+                if hasattr(canvas,'drawBoundary'):
+                    canvas.drawBoundary(showBoundary,x,y,drawing.width,drawing.height)
+                else:
+                    canvas.rect(x, y, drawing.width, drawing.height)
             canvas.saveState()
             self.initState(x,y)  #this is the push()
             self.drawNode(drawing)
