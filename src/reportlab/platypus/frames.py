@@ -192,9 +192,9 @@ class Frame:
                     bg = fbg[-1]
                     fbgl = bg.left
                     fbgr = bg.right
-                    fbgc = bg.fillColor
                     bgm = bg.start
                     fbw = self._width-fbgl-fbgr
+                    fbx = self._x1+fbgl
                     if not bgm:
                         fbh = y + h + sa
                         fby = max(p,y-sa)
@@ -209,36 +209,8 @@ class Frame:
                             if bgm=='frame-permanent':
                                 fbg[-1].start = 'frame-permanent-1'
                         else:
-                            fbw = fbh = 0
-                    if abs(fbw)>_FUZZ and abs(fbh)>_FUZZ:
-                        sc = bg.strokeColor
-                        sw = bg.strokeWidth
-                        if sw is None or sw<0: sc = None
-                        edit = False
-                        if sc:
-                            pn = canv.getPageNumber()
-                            if bg.fid==id(self) and bg.cid==id(canv) and bg.pn==pn:
-                                edit = True
-                                codePos = bg.codePos
-                        fbx = self._x1+fbgl
-                        if edit:
-                            inst = canv._code[codePos].split()
-                            ox,oy,ow,oh = map(float,inst[1:5])
-                            inst[1:5] = [fp_str(ox,fby,ow,oh+oy-fby)]
-                            canv._code[codePos] = ' '.join(inst)
-                        else:
-                            canv.saveState()
-                            if fbgc:
-                                canv.setFillColor(fbgc)
-                            if sc:
-                                canv.setStrokeColor(sc)
-                                canv.setLineWidth(sw)
-                                bg.fid = id(self)
-                                bg.cid = id(canv)
-                                bg.pn = pn
-                                bg.codePos = len(canv._code)
-                            canv.rect(fbx,fby,fbw,fbh,stroke=1 if sc else 0,fill=1 if fbgc else 0)
-                            canv.restoreState()
+                            fby = fbw = fbh = 0
+                    bg.render(canv,self,fbx,fby,fbw,fbh)
                     if bgm=='frame':
                         fbg.pop()
 
@@ -309,8 +281,8 @@ class Frame:
         canv.rect(x1,y1,width,height)
         if ss: canv.restoreState()
 
-    def drawBoundary(self,canv):
-        self._drawBoundary(canv,self.showBoundary, self._x1, self._y1,
+    def drawBoundary(self,canv, __boundary__=None):
+        self._drawBoundary(canv,__boundary__ or self.showBoundary, self._x1, self._y1,
                                 self._x2 - self._x1, self._y2 - self._y1)
 
     def addFromList(self, drawlist, canv):

@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.18	03/04/2019
+--------------------------
+	* more FrameBG changes vs BalancedColumns
+	* fix bb issues #176/#177 reported by graingert & droidzone 
+
 RELEASE 3.5.17	29/03/2019
 --------------------------
 	* more FrameBG fixes; added canvas cross method, frame static drawBoundary
