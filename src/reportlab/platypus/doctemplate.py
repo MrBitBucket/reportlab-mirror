@@ -659,8 +659,9 @@ class BaseDocTemplate:
         '''What to do at the beginning of a frame'''
         f = self.frame
         if f._atTop:
-            if self.showBoundary or self.frame.showBoundary:
-                self.frame.drawBoundary(self.canv)
+            boundary = self.frame.showBoundary or self.showBoundary
+            if boundary:
+                self.frame.drawBoundary(self.canv,boundary)
         f._leftExtraIndent = self._leftExtraIndent
         f._rightExtraIndent = self._rightExtraIndent
         f._frameBGs = self._frameBGs
