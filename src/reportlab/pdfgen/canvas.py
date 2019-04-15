@@ -520,6 +520,10 @@ class Canvas(_PDFColorSetter):
            which is passing data into ReportLab, if you wish to name it."""
         self._doc.setCreator(creator)
 
+    def setProducer(self, producer):
+        """change the default producer value"""
+        self._doc.setProducer(producer)
+
     def setKeywords(self, keywords):
         """write a list of keywords into the PDF file which shows in document properties.
         Either submit a single string or a list/tuple"""

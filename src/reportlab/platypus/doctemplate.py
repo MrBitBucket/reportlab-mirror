@@ -468,6 +468,7 @@ class BaseDocTemplate:
                     'author':None,
                     'subject':None,
                     'creator':None,
+                    'producer':None,
                     'keywords':[],
                     'invariant':None,
                     'pageCompression':None,
@@ -971,6 +972,7 @@ class BaseDocTemplate:
         canv.setTitle(self.title)
         canv.setSubject(self.subject)
         canv.setCreator(self.creator)
+        canv.setProducer(self.producer)
         canv.setKeywords(self.keywords)
         if self.displayDocTitle is not None:
             canv.setViewerPreference('DisplayDocTitle',['false','true'][self.displayDocTitle])

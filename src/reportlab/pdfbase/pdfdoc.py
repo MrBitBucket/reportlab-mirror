@@ -354,12 +354,17 @@ class PDFDocument(PDFObject):
 
     def setCreator(self, creator):
         "embeds in PDF file"
-
-        #allow resetting to clear it
-        if creator is None:
+        if creator is None: #allow resetting to clear it
             self.info.creator = '(unspecified)'
         else:
             self.info.creator = creator
+
+    def setProducer(self, producer):
+        "embeds in PDF file"
+        if producer is None:
+            self.info.producer = _default_producer
+        else:
+            self.info.producer = producer
 
     def setKeywords(self, keywords):
         "embeds a string containing keywords in PDF file"
@@ -1519,11 +1524,12 @@ def count(tree, closedict=None):
         return sum(counts)  #used to be: return reduce(add, counts)
     return 1
 
+_default_producer = "ReportLab PDF Library - www.reportlab.com"
 class PDFInfo(PDFObject):
     """PDF documents can have basic information embedded, viewable from
     File | Document Info in Acrobat Reader.  If this is wrong, you get
     Postscript errors while printing, even though it does not print."""
-    producer = "ReportLab PDF Library - www.reportlab.com"
+    producer = _default_producer
     creator = "ReportLab PDF Library - www.reportlab.com"
     title = "untitled"
     author = "anonymous"
