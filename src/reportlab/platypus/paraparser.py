@@ -15,7 +15,7 @@ import unicodedata
 import reportlab.lib.sequencer
 
 from reportlab.lib.abag import ABag
-from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode, asBytes, uniChr, isStr
+from reportlab.lib.utils import ImageReader, isPy3, annotateException, encode_label, asUnicode, asBytes, uniChr, isStr, unicodeT
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
@@ -105,6 +105,9 @@ class _PCT(float):
 
     def __deepcopy__(self,mem):
         return self.__copy__()
+
+class _LinkValue(unicodeT):
+    pass
 
 def fontSizeNormalize(frag,attr,default):
     if not hasattr(frag,attr): return default
@@ -2666,7 +2669,7 @@ class ParaParser(HTMLParser):
         underline = A.pop('underline',self._defaultLinkUnderline)
         A['link'] = self._stack[-1].link + [(
                         self.nlinks,
-                        A.pop('link','').strip(),
+                        _LinkValue(A.pop('link','').strip()),
                         )]
         self.nlinks += 1
         self._push(tag,**A)
