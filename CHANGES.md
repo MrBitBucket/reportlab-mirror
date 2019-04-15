@@ -11,6 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.19	15/04/2019
+--------------------------
+	* fix bug with a tag href not having a scheme
+	* all0w LineChart/LinePlot area fills to differe from the stroke colour
+	* add canvas setProducer method
+
 RELEASE 3.5.18	03/04/2019
 --------------------------
 	* more FrameBG changes vs BalancedColumns
