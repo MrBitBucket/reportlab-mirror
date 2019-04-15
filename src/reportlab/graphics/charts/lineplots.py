@@ -26,6 +26,7 @@ class LinePlotProperties(PropHolder):
         strokeWidth = AttrMapValue(isNumber, desc='Width of a line.'),
         strokeColor = AttrMapValue(isColorOrNone, desc='Color of a line.'),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc='Dash array of a line.'),
+        fillColor = AttrMapValue(isColorOrNone, desc='Color of infill defaults to the strokeColor.'),
         symbol = AttrMapValue(None, desc='Widget placed at data points.',advancedUsage=1),
         shader = AttrMapValue(None, desc='Shader Class.',advancedUsage=1),
         filler = AttrMapValue(None, desc='Filler Class.',advancedUsage=1),
@@ -257,11 +258,11 @@ class LinePlot(AbstractLineChart):
 
         P = list(range(len(self._positions)))
         if self.reversePlotOrder: P.reverse()
-        inFill = getattr(self,'_inFill',None)
+        _inFill = getattr(self,'_inFill',None)
         lines = self.lines
         styleCount = len(lines)
-        if inFill or [rowNo for rowNo in P if getattr(lines[rowNo%styleCount],'inFill',False)]:
-            inFillY = getattr(inFill,'yValue',None)
+        if _inFill or [rowNo for rowNo in P if getattr(lines[rowNo%styleCount],'inFill',False)]:
+            inFillY = getattr(_inFill,'yValue',None)
             if inFillY is None:
                 inFillY = xA._y
             else:
@@ -275,7 +276,9 @@ class LinePlot(AbstractLineChart):
             row = self._positions[rowNo]
             styleRowNo = rowNo % styleCount
             rowStyle = lines[styleRowNo]
-            rowColor = getattr(rowStyle,'strokeColor',None)
+            strokeColor = getattr(rowStyle,'strokeColor',None)
+            fillColor = getattr(rowStyle, 'fillColor', strokeColor)
+            inFill = getattr(rowStyle,'inFill',_inFill)
             dash = getattr(rowStyle, 'strokeDashArray', None)
 
             if hasattr(rowStyle, 'strokeWidth'):
@@ -290,15 +293,15 @@ class LinePlot(AbstractLineChart):
                 points = []
                 for xy in row:
                     points += [xy[0], xy[1]]
-                if inFill or getattr(rowStyle,'inFill',False):
+                if inFill:
                     fpoints = [inFillX0,inFillY] + points + [inFillX1,inFillY]
                     filler = getattr(rowStyle, 'filler', None)
                     if filler:
-                        filler.fill(self,inFillG,rowNo,rowColor,fpoints)
+                        filler.fill(self,inFillG,rowNo,fillColor,fpoints)
                     else:
-                        inFillG.add(Polygon(fpoints,fillColor=rowColor,strokeColor=rowColor,strokeWidth=width or 0.1))
-                if inFill in (None,0,2):
-                    line = PolyLine(points,strokeColor=rowColor,strokeLineCap=0,strokeLineJoin=1)
+                        inFillG.add(Polygon(fpoints,fillColor=fillColor,strokeColor=strokeColor if strokeColor==fillColor else None,strokeWidth=width or 0.1))
+                if not inFill or inFill==2 or strokeColor!=fillColor:
+                    line = PolyLine(points,strokeColor=strokeColor,strokeLineCap=0,strokeLineJoin=1)
                     if width:
                         line.strokeWidth = width
                     if dash:
@@ -321,10 +324,10 @@ class LinePlot(AbstractLineChart):
                         juSymbol = uSymbol
                     if juSymbol is uSymbol:
                         symbol = uSymbol
-                        symColor = rowColor
+                        symColor = strokeColor
                     else:
                         symbol = juSymbol
-                        symColor = getattr(symbol,'fillColor',rowColor)
+                        symColor = getattr(symbol,'fillColor',strokeColor)
                     symbol = uSymbol2Symbol(symbol,xy[0],xy[1],symColor)
                     if symbol:
                         if bubblePlot:
@@ -335,7 +338,7 @@ class LinePlot(AbstractLineChart):
                 for j,xy in enumerate(row):
                     juSymbol = getattr(lines[styleRowNo,j],'symbol',None)
                     if not juSymbol: continue
-                    symColor = getattr(juSymbol,'fillColor',getattr(juSymbol,'strokeColor',rowColor))
+                    symColor = getattr(juSymbol,'fillColor',getattr(juSymbol,'strokeColor',strokeColor))
                     symbol = uSymbol2Symbol(juSymbol,xy[0],xy[1],symColor)
                     if symbol:
                         if bubblePlot:
@@ -348,7 +351,7 @@ class LinePlot(AbstractLineChart):
                 self.drawLabel(g, rowNo, colNo, x1, y1)
 
             shader = getattr(rowStyle, 'shader', None)
-            if shader: shader.shade(self,g,rowNo,rowColor,row)
+            if shader: shader.shade(self,g,rowNo,strokeColor,row)
 
         return g
 

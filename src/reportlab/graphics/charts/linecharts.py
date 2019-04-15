@@ -31,6 +31,7 @@ class LineChartProperties(PropHolder):
         name = AttrMapValue(isStringOrNone, desc='Name of the line.'),
         lineStyle = AttrMapValue(NoneOr(OneOf('line','joinedLine','bar')), desc="What kind of plot this line is",advancedUsage=1),
         barWidth = AttrMapValue(isNumberOrNone,desc="Percentage of available width to be used for a bar",advancedUsage=1),
+        inFill = AttrMapValue(isBoolean, desc='If true flood fill to x axis',advancedUsage=1),
         )
 
 class AbstractLineChart(PlotArea):
@@ -287,8 +288,10 @@ class HorizontalLineChart(LineChart):
         labelFmt = self.lineLabelFormat
         P = list(range(len(self._positions)))
         if self.reversePlotOrder: P.reverse()
-        inFill = self.inFill
-        if inFill:
+        lines = self.lines
+        styleCount = len(lines)
+        _inFill = self.inFill
+        if _inFill or [rowNo for rowNo in P if getattr(lines[rowNo%styleCount],'inFill',False)]:
             inFillY = self.categoryAxis._y
             inFillX0 = self.valueAxis._x
             inFillX1 = inFillX0 + self.categoryAxis._length
@@ -298,40 +301,44 @@ class HorizontalLineChart(LineChart):
         # Iterate over data rows.
         for rowNo in P:
             row = self._positions[rowNo]
-            styleCount = len(self.lines)
             styleIdx = rowNo % styleCount
-            rowStyle = self.lines[styleIdx]
-            rowColor = rowStyle.strokeColor
+            rowStyle = lines[styleIdx]
+            strokeColor = rowStyle.strokeColor
+            fillColor = getattr(rowStyle,'fillColor',strokeColor)
+            inFill = getattr(rowStyle,'inFill',_inFill)
             dash = getattr(rowStyle, 'strokeDashArray', None)
             lineStyle = getattr(rowStyle,'lineStyle',None)
 
             if hasattr(rowStyle, 'strokeWidth'):
                 strokeWidth = rowStyle.strokeWidth
-            elif hasattr(self.lines, 'strokeWidth'):
-                strokeWidth = self.lines.strokeWidth
+            elif hasattr(lines, 'strokeWidth'):
+                strokeWidth = lines.strokeWidth
             else:
                 strokeWidth = None
 
             # Iterate over data columns.
             if lineStyle=='bar':
                 barWidth = getattr(rowStyle,'barWidth',Percentage(50))
-                fillColor = getattr(rowStyle,'fillColor',rowColor)
                 if isinstance(barWidth,Percentage):
                     hbw = self._hngs*barWidth*0.01
                 else:
                     hbw = barWidth*0.5
                 for colNo in range(len(row)):
                     x,y = row[colNo]
-                    g.add(Rect(x-hbw,min(y,yzero),2*hbw,abs(y-yzero),strokeWidth=strokeWidth,strokeColor=rowColor,fillColor=fillColor))
+                    g.add(Rect(x-hbw,min(y,yzero),2*hbw,abs(y-yzero),strokeWidth=strokeWidth,strokeColor=strokeColor,fillColor=fillColor))
             elif self.joinedLines or lineStyle=='joinedLine':
                 points = []
                 for colNo in range(len(row)):
                     points += row[colNo]
                 if inFill:
-                    points = points + [inFillX1,inFillY,inFillX0,inFillY]
-                    inFillG.add(Polygon(points,fillColor=rowColor,strokeColor=rowColor,strokeWidth=0.1))
-                else:
-                    line = PolyLine(points,strokeColor=rowColor,strokeLineCap=0,strokeLineJoin=1)
+                    fpoints = [inFillX0,inFillY] + points + [inFillX1,inFillY]
+                    filler = getattr(rowStyle, 'filler', None)
+                    if filler:
+                        filler.fill(self,inFillG,rowNo,fillColor,fpoints)
+                    else:
+                        inFillG.add(Polygon(fpoints,fillColor=fillColor,strokeColor=strokeColor if strokeColor==fillColor else None,strokeWidth=strokeWidth or 0.1))
+                if not inFill or inFill==2 or strokeColor!=fillColor:
+                    line = PolyLine(points,strokeColor=strokeColor,strokeLineCap=0,strokeLineJoin=1)
                     if strokeWidth:
                         line.strokeWidth = strokeWidth
                     if dash:
@@ -340,8 +347,8 @@ class HorizontalLineChart(LineChart):
 
             if hasattr(rowStyle, 'symbol'):
                 uSymbol = rowStyle.symbol
-            elif hasattr(self.lines, 'symbol'):
-                uSymbol = self.lines.symbol
+            elif hasattr(lines, 'symbol'):
+                uSymbol = lines.symbol
             else:
                 uSymbol = None
 
