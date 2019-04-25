@@ -783,7 +783,8 @@ class cssParse:
         v = v.strip()
         try:
             c=eval(v[:])
-            if not isinstance(c,int): raise ValueError
+            if not isinstance(c,(int,float)): raise ValueError
+            if isinstance(c,float) and 0<=c<=1: c *= 255
             return int(min(255,max(0,c)))/255.
         except:
             raise ValueError('bad argument value %r in css color %r' % (v,self.s))
