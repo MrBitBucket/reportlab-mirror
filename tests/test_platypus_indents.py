@@ -3,6 +3,7 @@
 """Tests for context-dependent indentation
 """
 __version__='3.3.0'
+from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os, random
