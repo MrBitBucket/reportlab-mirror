@@ -1,7 +1,13 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
 #history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/platypus/paragraph.py
-__version__='3.3.0'
+__all__=(
+        'Paragraph',
+        'cleanBlockQuotedText',
+        'ParaLines',
+        'FragLine',
+        )
+__version__='3.5.20'
 __doc__='''The standard paragraph implementation'''
 from string import whitespace
 from operator import truth

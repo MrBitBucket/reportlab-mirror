@@ -1,7 +1,11 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
 #history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/platypus/xpreformatted.py
-__version__='3.3.0'
+__all__ = (
+            'XPreformatted',
+            'PythonPreformatted',
+            )
+__version__='3.5.20'
 __doc__='''A 'rich preformatted text' widget allowing internal markup'''
 from reportlab.lib import PyFontify
 from reportlab.platypus.paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, \

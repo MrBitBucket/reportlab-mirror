@@ -1,7 +1,13 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
 #history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/platypus/tables.py
-__version__='3.3.0'
+__all__= (
+        'Table',
+        'TableStyle',
+        'CellStyle',
+        'LongTable',
+        )
+__version__='3.5.20'
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in

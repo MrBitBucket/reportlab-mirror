@@ -1,8 +1,26 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
 #history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/platypus/doctemplate.py
-
-__version__='3.4.2'
+__all__ = (
+        'ActionFlowable',
+        'BaseDocTemplate',
+        'CurrentFrameFlowable',
+        'FrameActionFlowable',
+        'FrameBreak',
+        'Indenter',
+        'IndexingFlowable',
+        'LayoutError',
+        'LCActionFlowable',
+        'NextFrameFlowable',
+        'NextPageTemplate',
+        'NotAtTopPageBreak',
+        'NullActionFlowable',
+        'PageAccumulator',
+        'PageBegin',
+        'PageTemplate',
+        'SimpleDocTemplate',
+        )
+__version__='3.5.20'
 
 __doc__="""
 This module contains the core structure of platypus.
