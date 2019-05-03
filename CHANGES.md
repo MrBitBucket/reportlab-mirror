@@ -11,6 +11,17 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.21	 3/05/2019
+--------------------------
+	* fix bug in legends
+	* add extra table info in spanning error case
+
+RELEASE 3.5.20	25/04/2019
+--------------------------
+	* Preliminary MultiCol implementation
+	* fix missing xrange import
+	* allow rgb to have fractions of 1 in css colors
+
 RELEASE 3.5.19	15/04/2019
 --------------------------
 	* fix bug with a tag href not having a scheme

@@ -7,7 +7,7 @@ __all__= (
         'CellStyle',
         'LongTable',
         )
-__version__='3.5.20'
+__version__='3.5.21'
 
 __doc__="""
 Tables are created by passing the constructor a tuple of column widths, a tuple of row heights and the data in
@@ -1000,20 +1000,23 @@ class Table(Flowable):
             if value is None:
                 spanRects[coord] = None
             else:
-                col0, row0, col1, row1 = value
-                if row1>=rlim: continue
-                col,row = coord
-                if col1-col0>0:
-                    for _ in xrange(col0+1,col1+1):
-                        vBlocks.setdefault(colpositions[_],[]).append((rowpositions[row1+1],rowpositions[row0]))
-                if row1-row0>0:
-                    for _ in xrange(row0+1,row1+1):
-                        hBlocks.setdefault(rowpositions[_],[]).append((colpositions[col0],colpositions[col1+1]))
-                x = colpositions[col0]
-                y = rowpositions[row1+1]
-                width = colpositions[col1+1] - x
-                height = rowpositions[row0] - y
-                spanRects[coord] = (x, y, width, height)
+                try:
+                    col0, row0, col1, row1 = value
+                    if row1>=rlim: continue
+                    col,row = coord
+                    if col1-col0>0:
+                        for _ in xrange(col0+1,col1+1):
+                            vBlocks.setdefault(colpositions[_],[]).append((rowpositions[row1+1],rowpositions[row0]))
+                    if row1-row0>0:
+                        for _ in xrange(row0+1,row1+1):
+                            hBlocks.setdefault(rowpositions[_],[]).append((colpositions[col0],colpositions[col1+1]))
+                    x = colpositions[col0]
+                    y = rowpositions[row1+1]
+                    width = colpositions[col1+1] - x
+                    height = rowpositions[row0] - y
+                    spanRects[coord] = (x, y, width, height)
+                except:
+                    annotateException('\nspanning problem in %s' % (self.identity(),))
 
         for _ in hBlocks, vBlocks:
             for value in _.values():
