@@ -17,7 +17,7 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropH
 from reportlab.graphics.shapes import Drawing, Group, String, Rect, Line, STATE_DEFAULTS
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
-from reportlab.lib.utils import isSeq, find_locals
+from reportlab.lib.utils import isSeq, find_locals, isStr, asNative
 from reportlab.graphics.shapes import _baseGFontName
 from functools import reduce
 from reportlab import xrange
@@ -35,8 +35,8 @@ def _transMax(n,A):
     return X
 
 def _objStr(s):
-    if isinstance(s,str):
-        return s
+    if isStr(s):
+        return asNative(s)
     else:
         return str(s)
 
