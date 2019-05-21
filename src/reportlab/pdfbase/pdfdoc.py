@@ -1858,17 +1858,13 @@ class PDFDestinationFitR(PDFObject):
 
 class PDFResourceDictionary(PDFObject):
     """each element *could* be reset to a reference if desired"""
-    def __init__(self):
-        self.ColorSpace = {}
-        self.XObject = {}
-        self.ExtGState = {}
-        self.Font = {}
-        self.Pattern = {}
-        self.ProcSet = []
-        self.Properties = {}
-        self.Shading = {}
-        # ?by default define the basicprocs
+    def __init__(self,**kwds):
+        for _ in self.dict_attributes:
+            setattr(self,_,kwds.pop(_,{}))
+        # define the basicprocs
         self.basicProcs()
+        if 'ProcSet' in kwds:
+            self.ProcSet= kwds.pop('ProcSet')
     stdprocs = [PDFName(s) for s in "PDF Text ImageB ImageC ImageI".split()]
     dict_attributes = ("ColorSpace", "XObject", "ExtGState", "Font", "Pattern", "Properties", "Shading")
 
