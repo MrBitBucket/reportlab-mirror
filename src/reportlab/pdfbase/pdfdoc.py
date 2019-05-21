@@ -593,7 +593,7 @@ class PDFString(PDFObject):
         s = self.s
         enc = getattr(self,'enc','auto')
         if isBytes(s):
-            if enc is 'auto':
+            if enc == 'auto':
                 try:
                     if s.startswith(codecs.BOM_UTF16_BE):
                         u = s.decode('utf_16_be')
@@ -612,7 +612,7 @@ class PDFString(PDFObject):
                         stderr.write('Error in %s' % (repr(s),))
                         raise
         elif isUnicode(s):
-            if enc is 'auto':
+            if enc == 'auto':
                 if _checkPdfdoc(s):
                     s = s.encode('pdfdoc')
                 else:
