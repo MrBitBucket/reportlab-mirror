@@ -5,6 +5,7 @@
 * for details.
 * history http://www.reportlab.co.uk/cgi-bin/viewcvs.cgi/public/reportlab/trunk/reportlab/lib/_rl_accel.c
 */
+#define PY_SSIZE_T_CLEAN
 #include "Python.h"
 #if PY_MAJOR_VERSION >= 3
 #	define isPy3
@@ -29,7 +30,7 @@
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.74"
+#define VERSION "0.75"
 #define MODULE "_rl_accel"
 
 struct module_state	{
@@ -107,7 +108,8 @@ bad:
 PyObject *_a85_encode(PyObject *module, PyObject *args)
 {
 	unsigned char	*inData;
-	int				length, blocks, extra, i, k, lim;
+	Py_ssize_t		length, blocks, extra;
+	int				i, k, lim;
 	unsigned long	block, res;
 	char			*buf;
 	PyObject		*retVal=NULL, *inObj, *_o1=NULL;
@@ -136,7 +138,7 @@ PyObject *_a85_encode(PyObject *module, PyObject *args)
 	extra = length % 4;
 
 	buf = (char*)malloc((blocks+1)*5+3);
-	lim = 4*blocks;
+	lim = 4*(int)blocks;
 
 	for(k=i=0; i<lim; i += 4){
 		/*
@@ -230,7 +232,7 @@ PyObject *_a85_decode(PyObject *module, PyObject *args)
 		ERROR_EXIT();
 		}
 	inData = PyBytes_AsString(inObj);
-	length = PyBytes_GET_SIZE(inObj);
+	length = (unsigned int)PyBytes_GET_SIZE(inObj);
 	for(k=0,q=inData, p=q+length;q<p && (q=(unsigned char*)strchr((const char*)q,'z'));k++, q++);	/*count 'z'*/
 	length += k*4;
 	tmp = q = (unsigned char*)malloc(length+1);
@@ -245,7 +247,7 @@ PyObject *_a85_decode(PyObject *module, PyObject *args)
 			*q++ = k;
 		}
 	inData = tmp;
-	length = q - inData;
+	length = (unsigned int)(q - inData);
 	buf = inData+length-2;
 	if(buf[0]!='~' || buf[1]!='>'){
 		PyErr_SetString(PyExc_ValueError, "Invalid terminator for Ascii Base 85 Stream");
@@ -333,7 +335,7 @@ static	char *_fp_one(PyObject* module,PyObject *pD)
 		else l = 6;
 		sprintf(s,_fp_fmts[l], d);
 		if(l){
-			l = strlen(s)-1;
+			l = (int)strlen(s)-1;
 			while(l && s[l]=='0') l--;
 			if(s[l]=='.' || s[l]==',') s[l]=0;
 			else {
@@ -351,11 +353,10 @@ static	char *_fp_one(PyObject* module,PyObject *pD)
 
 PyObject *_fp_str(PyObject *module, PyObject *args)
 {
-	int				aL;
+	Py_ssize_t		i, aL;
 	PyObject		*retVal;
 	char			*pD;
 	char			*buf, *pB;
-	int				i;
 
 	if((aL=PySequence_Length(args))>=0){
 		if(aL==1){
@@ -402,7 +403,7 @@ PyObject *_fp_str(PyObject *module, PyObject *args)
 		}
 }
 
-static PyObject *_escapePDF(unsigned char* text, int textlen)
+static PyObject *_escapePDF(unsigned char* text, Py_ssize_t textlen)
 {
 	unsigned char*	out = PyMem_Malloc((textlen<<2)+1);
 	int				j=0, i=0;
@@ -435,7 +436,7 @@ static PyObject *_escapePDF(unsigned char* text, int textlen)
 static PyObject *escapePDF(PyObject *module, PyObject* args)
 {
 	unsigned char	*text;
-	int				textLen;
+	Py_ssize_t		textLen;
 
 	if (!PyArg_ParseTuple(args, "s#:escapePDF", &text, &textLen)) return NULL;
 	return _escapePDF(text,textLen);
@@ -480,7 +481,7 @@ L1:	return NULL;
 static PyObject *ttfonts_calcChecksum(PyObject *module, PyObject* args)
 {
 	unsigned char	*data;
-	int				dataLen;
+	Py_ssize_t		dataLen;
 	unsigned long	Sum = 0L;
 	unsigned char	*EndPtr;
 	unsigned long n;
@@ -555,7 +556,7 @@ static PyObject *_GetAttrString(PyObject *obj, char *name)
 /* Get a UTF8 encoded string buffer, the return value is the PyObject
    holding the memory for the buffer and should be decrefed to free
    memory */
-static PyObject *_GetStringBuf(PyObject *obj, char **buf)
+static PyObject *_GetStringBuf(PyObject *obj, const char **buf)
 {
 	PyObject *res;
 
@@ -563,7 +564,7 @@ static PyObject *_GetStringBuf(PyObject *obj, char **buf)
 #ifdef	isPy3
 		res = obj;
 		Py_INCREF(res);
-		*buf = PyUnicode_AsUTF8(res);
+		*buf = (const char *)PyUnicode_AsUTF8(res);
 #else
 		res = PyUnicode_AsUTF8String(obj);
 		if (!res) {
@@ -732,7 +733,8 @@ static PyObject *instanceStringWidthT1(PyObject *module, PyObject *args, PyObjec
 	unsigned char *b;
 	PyObject *encObj = NULL;
 	const char *encStr;
-	int n, m, i, j, s, _i1;
+	Py_ssize_t n, m;
+	int	i, j, s, _i1;
 	static char *argnames[]={"self","text","size","encoding",0};
 	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &self, &text, &size, &encoding)) return 0;
 	Py_INCREF(text);
@@ -831,7 +833,8 @@ static PyObject *instanceStringWidthTTF(PyObject *module, PyObject *args, PyObje
 	PyObject *self, *text, *size, *res,
 				*encoding = 0, *_o1=NULL, *_o2=NULL, *_o3=NULL;
 	Py_UNICODE *b;
-	int n, i;
+	Py_ssize_t n;
+	int	i;
 	double s, _d1, dw;
 	static char *argnames[]={"self","text","size","encoding",0};
 	if(!PyArg_ParseTupleAndKeywords(args, kwds, "OOO|O", argnames, &self, &text, &size, &_o1)) return 0;

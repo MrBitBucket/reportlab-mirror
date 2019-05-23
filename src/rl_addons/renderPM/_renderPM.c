@@ -1,3 +1,4 @@
+#define PY_SSIZE_T_CLEAN
 #include "Python.h"
 #if PY_MAJOR_VERSION >= 3
 #	define isPy3
@@ -20,7 +21,7 @@
 #endif
 
 
-#define VERSION "3.01"
+#define VERSION "3.02"
 #define MODULENAME "_renderPM"
 #ifdef isPy3
 #	define PyInt_FromLong	PyLong_FromLong
@@ -92,7 +93,8 @@ typedef	struct {
 static	PyObject* parse_utf8(PyObject* self, PyObject* args)
 {
 	char		*c, *msg;
-	int			n, i;
+	Py_ssize_t	n;
+	int			i;
 	unsigned	first, second, third;
 	PyObject	*r;
     if(!PyArg_ParseTuple(args, "t#:parse_utf8", &c, &n)) return NULL;
@@ -185,7 +187,7 @@ static py_FT_FontObject *_get_ft_face(char *fontName)
 	_data = PyObject_GetAttrString(face,"_ttf_data");
 	Py_DECREF(face);
 	if(!_data) goto RET;
-	error = FT_New_Memory_Face(ft_library, (unsigned char *)PyBytes_AsString(_data), PyBytes_GET_SIZE(_data), 0, &ft_face->face);
+	error = FT_New_Memory_Face(ft_library, (unsigned char *)PyBytes_AsString(_data), (FT_Long)PyBytes_GET_SIZE(_data), 0, &ft_face->face);
 	Py_DECREF(_data);
 	if(error){
 		PyErr_Format(PyExc_IOError, "FT_New_Memory_Face(%s) Failed!", fontName);
@@ -260,7 +262,7 @@ static pixBufT* pixBufAlloc(int w, int h, int nchan, gstateColorX bg)
 			p->width = w;
 			p->height = h;
 			p->nchan = nchan;
-			p->rowstride = stride;
+			p->rowstride = (int)stride;
 
 			/*set up the background*/
 			if(bg.stride==0){	/*simple color case*/
@@ -835,7 +837,8 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 	A2DMX	orig, trans = {1,0,0,1,0,0}, scaleMat = {1,0,0,1,0,0};
 	double	scaleFactor, x, y, w;
 	char*	text;
-	int		c, textlen, i;
+	int		c, i;
+	Py_ssize_t	textlen;
 	ArtBpath	*saved_path, *path;
 	void	*font = self->font;
 	PyObject	*textObj, *obj0;
@@ -1055,7 +1058,8 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 	char*	text;
 	PyObject *P, *p;
 	ArtBpath	*path, *pp;
-	int		textlen, i, c;
+	Py_ssize_t	textlen;
+	int		i, c;
 	void	*font = self->font;
 	PyObject	*textObj, *obj0;
 #ifdef	RENDERPM_FT
@@ -1140,7 +1144,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 				pp->y3 = pp->y3*s+y;
 				pp++;
 				}
-			p = _get_gstatePath(pp-path,path);
+			p = _get_gstatePath((int)(pp-path),path);
 #ifdef	RENDERPM_FT
 			if(!ft_font && path!=notdefPath)
 #endif
@@ -1326,7 +1330,8 @@ static	int _set_gstateDashArray(PyObject* value, gstateObject* self)
 		return 1;
 		}
 	else {
-		int	n_dash, i, r=0;
+		Py_ssize_t	n_dash;
+		int i, r=0;
 		PyObject	*v=NULL, *pDash=NULL;
 		double		offset, *dash=NULL;
 		if(!PySequence_Check(value) || PySequence_Length(value)!=2){
@@ -1349,7 +1354,7 @@ L1:			_safeDecr(&v);
 
 		/*everything checks out release current thing and set new one*/
 		_dashFree(self);
-		self->dash.n_dash = n_dash;
+		self->dash.n_dash = (int)n_dash;
 		self->dash.offset = offset;
 		self->dash.dash = dash;
 		r = 1;
@@ -1428,7 +1433,7 @@ static	int _set_gstateColorX(PyObject* value, gstateColorX* c)
 {
 	int	i;
 	if(PySequence_Check(value)){
-		size_t	len;
+		Py_ssize_t	len;
 		i = PyArg_Parse(value,"(iis#)",&c->width,&c->height,&c->buf,&len);
 		if(i){
 			/*we assume depth 3*/
@@ -1753,7 +1758,7 @@ static	char* my_pfb_reader(void *data, const char *filename, int *psize)
 		/*the file should have been read as binary*/
 		if(PyBytes_Check(result)){
 			char	*pystr = PyBytes_AS_STRING(result);
-			int		size = PyBytes_GET_SIZE(result);
+			int		size = (int)PyBytes_GET_SIZE(result);
 			*psize = size;
 			memcpy(pfb=gt1_alloc(size),pystr,size);
 			}
@@ -1821,7 +1826,7 @@ static	PyObject*	makeT1Font(PyObject* self, PyObject *args, PyObject *kw)
 			rfunc.data = reader;
 			rfunc.reader = my_pfb_reader;
 			}
-		if(!gt1_create_encoded_font(name,pfbPath,names,N,prfunc)){
+		if(!gt1_create_encoded_font(name,pfbPath,names,(int)N,prfunc)){
 			PyErr_SetString(PyExc_ValueError, "_renderPM.makeT1Font: can't make font");
 			ok = 0;
 			}
@@ -1958,7 +1963,7 @@ static int pict_putRow(BYTE_STREAM* fd, int row, int cols, pixel* rowpixels, cha
 		}
 	if (count > 0) *p++ = counttochar(count);
 
-	packcols = p - packed;		/* how many did we write? */
+	packcols = (int)(p - packed);		/* how many did we write? */
 	if (cols > 250){
 		pict_putShort(fd, packcols);
 		oc = packcols + 2;
@@ -1980,7 +1985,9 @@ static int pict_putRow(BYTE_STREAM* fd, int row, int cols, pixel* rowpixels, cha
 static PyObject* pil2pict(PyObject* self, PyObject* args)
 {
 	PyObject *result;
-	int		rows, cols, colors, i, row, oc, len, npixels, tc=-1;
+	Py_ssize_t	npixels, colors;
+	int		rows, cols, i, row, oc, tc=-1;
+	size_t	len;
 	char	*packed;
 	long	lpos;
 	pixel	*palette, *pixels;
@@ -2047,7 +2054,7 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 	pict_putLong(obs, 0L);	/* pmReserved */
 	pict_putLong(obs, 0L);	/* ctSeed */
 	pict_putShort(obs, 0);	/* ctFlags */
-	pict_putShort(obs, colors-1);	/* ctSize */
+	pict_putShort(obs, (int)(colors-1));	/* ctSize */
 
 	/*Write out the colormap*/
 	for (i = 0; i < colors; i++){
@@ -2072,7 +2079,7 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 	pict_putShort(obs, PICT_EndOfPicture);
 
 	len = obs->p-obs->buf;
-	lpos = (obs->p-obs->buf) - HEADER_SIZE;
+	lpos = (int)(obs->p-obs->buf) - HEADER_SIZE;
 	obs->p = obs->buf + HEADER_SIZE;
 	pict_putShort(obs, (short)(lpos & 0xffff));
 	result = PyBytes_FromStringAndSize((const char *)obs->buf,len);
