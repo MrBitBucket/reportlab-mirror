@@ -15,7 +15,7 @@ from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isNumberOrNone, isColor, isColorOrNone, isString,\
             isListOfStrings, SequenceOf, isBoolean, isNoneOrShape, isStringOrNone,\
             NoneOr, isListOfNumbersOrNone, EitherOr, OneOf, isInt
-from reportlab.lib.utils import flatten
+from reportlab.lib.utils import flatten, isStr
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.formatters import Formatter
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
@@ -492,7 +492,7 @@ class BarChart(PlotArea):
             labelText = None
         elif labelFmt == 'values':
             labelText = self.barLabelArray[rowNo][colNo]
-        elif type(labelFmt) is str:
+        elif isStr(labelFmt):
             labelText = labelFmt % self.data[rowNo][colNo]
         elif hasattr(labelFmt,'__call__'):
             labelText = labelFmt(self.data[rowNo][colNo])

@@ -165,16 +165,23 @@ canonical points of a box: sw, se, nw, ne, w, e, n, s or c (standing for
         story.append(PageBreak())
 
         # Round 1c
-        story.append(Paragraph('Helvetica 18pt, multi-line', h3))
+        try:
+            from reportlab.pdfbase.pdfmetrics import registerFont
+            from reportlab.pdfbase.ttfonts import TTFont
+            fontName = 'Vera'
+            registerFont(TTFont(fontName, "Vera.ttf"))
+        except:
+            fontName = 'Helvetica'
+        story.append(Paragraph('%s 18pt, multi-line' % fontName, h3))
         story.append(Spacer(0, 0.5*cm))
 
         w, h = drawWidth, drawHeight = 400, 100
         protoLabel = self._makeProtoLabel()
         protoLabel.setOrigin(drawWidth*0.5, drawHeight*0.5)
         protoLabel.textAnchor = 'start'
-        protoLabel.fontName = 'Helvetica'
+        protoLabel.fontName = fontName
         protoLabel.fontSize = 18
-        drawings = self._makeDrawings(protoLabel, text='Hello\nWorld!')
+        drawings = self._makeDrawings(protoLabel, text=u'Hello\nW\xf6rld!')
         for d in drawings:
             story.append(d)
             story.append(Spacer(0, 1*cm))

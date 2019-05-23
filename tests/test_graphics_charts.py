@@ -35,6 +35,17 @@ try:
 except ImportError:
     _renderPM = None
 
+def getFontName():
+    try:
+        from reportlab.pdfbase.pdfmetrics import registerFont
+        from reportlab.pdfbase.ttfonts import TTFont
+        fontName = 'Vera'
+        registerFont(TTFont(fontName, "Vera.ttf"))
+    except:
+        fontName = 'Helvetica'
+    return fontName
+fontName = getFontName()
+
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
 
@@ -81,8 +92,12 @@ def sample1bar(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     bc.categoryAxis.labels.dx = 8
     bc.categoryAxis.labels.dy = -2
     bc.categoryAxis.labels.angle = 30
+    bc.categoryAxis.labels.fontName = fontName
+    bc.barLabels.fontName = fontName
+    bc.barLabelFormat = u'\xc5%s'
 
-    catNames = 'Jan Feb Mar Apr May Jun Jul Aug'.split( ' ')
+    catNames = u'J\xe4n Feb M\xe4r \xc4pr M\xe4y J\xfcn J\xfcl \xc4\xfcg'.split( ' ')
+    bc.barLabelArray = catNames
     catNames = [n+'-99' for n in catNames]
     bc.categoryAxis.categoryNames = catNames
     drawing.add(bc)
@@ -157,13 +172,14 @@ def sample4pie():
     pc.x = 150
     pc.y = 50
     pc.data = [1, 50, 100, 100, 100, 100, 100, 100, 100, 50]
-    pc.labels = ['0','a','b','c','d','e','f','g','h','i']
+    pc.labels = u'0 \xe4 b c d e f g h i'.split()
     pc.slices.strokeWidth=0.5
     pc.slices[3].popout = 20
     pc.slices[3].strokeWidth = 2
     pc.slices[3].strokeDashArray = [2,2]
     pc.slices[3].labelRadius = 1.75
     pc.slices[3].fontColor = colors.red
+    pc.slices[1].fontName = fontName
     d.add(pc)
     legend = Legend()
     legend.x = width-5
@@ -199,6 +215,11 @@ def autoLegender(i,chart,styleObj,sym='symbol'):
         legend.swatchMarker.size = 10
     elif i=='swatch auto':
         legend.swatchMarker=Auto(chart=chart)
+    else:
+        cnp = legend.colorNamePairs
+        legend.fontName = fontName
+        legend.colorNamePairs = [(cnp[0][0],u'r\xf6t')] + cnp[1:]
+
     d = Drawing(width,height)
     d.background = Rect(0,0,width,height,strokeWidth=1,strokeColor=colors.red,fillColor=None)
     m = makeMarker('Cross')
@@ -264,7 +285,6 @@ bt = styleSheet['BodyText']
 h1 = styleSheet['Heading1']
 h2 = styleSheet['Heading2']
 h3 = styleSheet['Heading3']
-FINISHED = 0
 
 def run_samples(S,kind='axes'):
     outDir = outputfile('charts-out')
@@ -276,22 +296,19 @@ def run_samples(S,kind='axes'):
 class ChartTestCase(unittest.TestCase):
     "Test chart classes."
 
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         "Hook method for setting up the test fixture before exercising it."
+        cls.story = []
+        cls.story.append(Paragraph('Tests for chart classes', h1))
 
-        global STORY
-        self.story = STORY
-
-        if self.story == []:
-            self.story.append(Paragraph('Tests for chart classes', h1))
-
-    def tearDown(self):
+    @classmethod
+    def tearDownClass(cls):
         "Hook method for deconstructing the test fixture after testing it."
 
-        if FINISHED:
-            path=outputfile('test_graphics_charts.pdf')
-            doc = MyDocTemplate(path)
-            doc.build(self.story)
+        path=outputfile('test_graphics_charts.pdf')
+        doc = MyDocTemplate(path)
+        doc.build(cls.story)
 
     def test0(self):
         "Test bar charts."
@@ -487,10 +504,6 @@ class ChartTestCase(unittest.TestCase):
         for d in ('anticlockwise','clockwise'):
             for sa in (225, 180, 135, 90, 45, 0, -45, -90):
                 subtest(sa,d)
-
-        # This triggers the document build operation (hackish).
-        global FINISHED
-        FINISHED = 1
 
     def test801(self):
         '''test for bitbucket issue 105 reported by Johann Du Toit'''
