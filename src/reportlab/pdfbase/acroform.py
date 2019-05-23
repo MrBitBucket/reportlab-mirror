@@ -157,6 +157,7 @@ class AcroForm(PDFObject):
         self._radios = {}
         self._refMap = {}
         self._pdfdocenc = {}
+        self.sigFlags = None
 
     @property
     def canv(self):
@@ -172,6 +173,7 @@ class AcroForm(PDFObject):
         d = dict(
                 Fields = PDFArray([self.getRef(f) for f in self.fields]),
                 )
+        if self.sigFlags: d['SigFlags'] = self.sigFlags
         if self.fonts:
             FK = list(sorted(self.fonts.keys()))
             F = [self.fontRef(f) for f in FK]
