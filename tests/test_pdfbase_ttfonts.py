@@ -309,10 +309,9 @@ class TTFontTestCase(NearTestCase):
         font = TTFont("Vera", "Vera.ttf")
         text = b"".join(utf8(i) for i in range(511))
         allchars = b"".join(int2Byte(i) for i in range(256))
-        if rl_config.reserveTTFNotdef:
-            chunks = [(0, allchars), (1, allchars[1:32] + allchars[33:]), (2, b'\x01')]
-        else:
-            chunks = [(0, allchars), (1, allchars[:32] + allchars[33:])]
+        chunks = [(0, allchars[:0xa0]+b' '+allchars[0xa0:])] + [
+                (1, allchars[1:32] + allchars[33:]) if rl_config.reserveTTFNotdef else
+                (1, allchars[:32] + allchars[33:-1])]
         self.assertEqual(font.splitString(text, doc), chunks)
         # Do it twice
         self.assertEqual(font.splitString(text, doc), chunks)

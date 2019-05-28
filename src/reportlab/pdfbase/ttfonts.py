@@ -808,7 +808,7 @@ class TTFontFile(TTFontParser):
         # (needs data from hhea, maxp, and cmap tables)
         self.seek_table("hmtx")
         aw = None
-        self.charWidths = {}
+        self.charWidths = charWidths = {}
         self.hmetrics = []
         for glyph in xrange(numberOfHMetrics):
             # advance width and left side bearing.  lsb is actually signed
@@ -820,7 +820,7 @@ class TTFontFile(TTFontParser):
                 self.defaultWidth = aw
             if glyph in glyphToChar:
                 for char in glyphToChar[glyph]:
-                    self.charWidths[char] = aw
+                    charWidths[char] = aw
         for glyph in xrange(numberOfHMetrics, numGlyphs):
             # the rest of the table only lists advance left side bearings.
             # so we reuse aw set by the last iteration of the previous loop
@@ -828,7 +828,7 @@ class TTFontFile(TTFontParser):
             self.hmetrics.append((aw, lsb))
             if glyph in glyphToChar:
                 for char in glyphToChar[glyph]:
-                    self.charWidths[char] = aw
+                    charWidths[char] = aw
 
         # loca - Index to location
         self.seek_table('loca')
@@ -841,6 +841,12 @@ class TTFontFile(TTFontParser):
                 self.glyphPos.append(self.read_ulong())
         else:
             raise TTFError('Unknown location table format (%d)' % indexToLocFormat)
+        if 0x20 in charToGlyph:
+            charToGlyph[0xa0] = charToGlyph[0x20]
+            charWidths[0xa0] = charWidths[0x20]
+        elif 0xa0 in charToGlyph:
+            charToGlyph[0x20] = charToGlyph[0xa0]
+            charWidths[0x20] = charWidths[0xa0]
 
     # Subsetting
 
@@ -1111,6 +1117,7 @@ class TTFont:
             self.frozen = 0
             if getattr(getattr(ttf,'face',None),'_full_font',None):
                 C = set(self.charToGlyph.keys())
+                if 0xa0 in C: C.remove(0xa0)
                 for n in xrange(256):
                     if n in C:
                         A[n] = n
@@ -1187,6 +1194,7 @@ class TTFont:
         subsets = state.subsets
         reserveTTFNotdef = rl_config.reserveTTFNotdef
         for code in map(ord,text):
+            if code==0xa0: code = 32    #map nbsp into space
             if code in assignments:
                 n = assignments[code]
             else:

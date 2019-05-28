@@ -51,6 +51,7 @@ syntax: regexp
 ^src/reportlab/graphics/epsout
 ^src/reportlab/graphics/pdfout
 ^src/reportlab/graphics/out-svg
+^src/reportlab/pdfbase/_glyphlist.py
 ^tools/docco/.*\.pdf
 ^tests/test_.*\.pdf
 ^tests/test_.*\.svg
@@ -64,6 +65,7 @@ syntax: regexp
 ^tests/test_source_chars\.txt
 ^tests/barcode-out
 ^tests/render-out
+^tests/charts-out
 ^tests/charts-out
 ^tmp/
 ^patches/

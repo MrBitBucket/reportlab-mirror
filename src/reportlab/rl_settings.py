@@ -148,7 +148,7 @@ uriWasteReduce=0                                    #split URI if we would waste
                                                     #is attempted. suggested value = 0.3
 embeddedHyphenation=0                               #if true attempt hypenation of words with embedded hyphens
 hyphenationMinWordLength=5                          #minimum length of words that can be hyphenated
-reserveTTFNotdef=0                                  #if true force subset elemement 0 to be zero(.notdef)
+reserveTTFNotdef=0                                  #if true force subset element 0 to be zero(.notdef)
                                                     #helps to fix bug in edge
 
 # places to look for T1Font information
