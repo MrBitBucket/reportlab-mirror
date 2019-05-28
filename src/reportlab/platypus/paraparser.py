@@ -107,9 +107,6 @@ class _PCT(float):
     def __deepcopy__(self,mem):
         return self.__copy__()
 
-class _LinkValue(unicodeT):
-    pass
-
 def fontSizeNormalize(frag,attr,default):
     if not hasattr(frag,attr): return default
     v = _numpct(getattr(frag,attr),allowRelative=True)
@@ -2670,7 +2667,7 @@ class ParaParser(HTMLParser):
         underline = A.pop('underline',self._defaultLinkUnderline)
         A['link'] = self._stack[-1].link + [(
                         self.nlinks,
-                        _LinkValue(A.pop('link','').strip()),
+                        A.pop('link','').strip(),
                         )]
         self.nlinks += 1
         self._push(tag,**A)
