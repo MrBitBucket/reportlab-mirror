@@ -76,7 +76,7 @@ eg("""    def __init__(self,filename,
 
 disc("""The $filename$ argument controls the
 name of the final PDF file.  You
-may also pass in any open file object (such as $sys.stdout$, the python process standard output)
+may also pass in any open binary stream (such as $sys.stdout$, the python process standard output with a binary encoding)
 and the PDF document will be written to that.  Since PDF
 is a binary format, you should take care when writing other
 stuff before or after it; you can't deliver PDF documents
