@@ -11,6 +11,21 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.23	31/05/2019
+--------------------------
+	* fix issue #180 raised by Christoph Berg
+	* fix issue #181 raised by Daniel Terecuk
+	* brutalist fix for Marius Gedminas' issue #183
+	* add wordSpace keyword to Canvas draw methods
+	* fix for Marius Gedminas' issue #184
+
+RELEASE 3.5.22	23/05/2019
+--------------------------
+	* Allow kewords in PDFResourceDictionary
+	* pr #58 issue #174 contribution by Marius Gedminas
+	* Allow AcroForm to have SigFlags
+	* Bug Fixes and tests
+
 RELEASE 3.5.21	 3/05/2019
 --------------------------
 	* fix bug in legends
