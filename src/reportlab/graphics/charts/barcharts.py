@@ -231,8 +231,12 @@ class BarChart(PlotArea):
 
         # if zero is in chart, put the other axis there, otherwise use low
         crossesAt = vA.scale(0)
-        if crossesAt > org+length or crossesAt<org:
-            crossesAt = org
+        if not vA.forceZero:
+            eps = min(1,1.001*abs(length))
+            end = org+length
+            org, end = min(org,end)-eps, max(org,end)+eps
+            if crossesAt>eps or crossesAt<end:
+                crossesAt = org
         return crossesAt
 
     def _drawFinish(self):
