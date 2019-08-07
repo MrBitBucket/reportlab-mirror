@@ -229,7 +229,7 @@ class FontFinder:
         self.__dict__.update(finder2.__dict__)
 
     def search(self):
-        started = time.clock()
+        #started = time.time()
         if not self._dirs:
             raise ValueError("Font search path is empty!  Please specify search directories using addDirectory or addDirectories")
 
@@ -311,7 +311,7 @@ class FontFinder:
         if self.useCache:
             self.save(cfn)
 
-        finished = time.clock()
+        #finished = time.time()
 ##        print "found %d fonts; skipped %d; bad %d.  Took %0.2f seconds" % (
 ##            len(self._fonts), len(self._skippedFiles), len(self._badFiles),
 ##            finished - started

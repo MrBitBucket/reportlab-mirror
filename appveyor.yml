@@ -17,9 +17,6 @@ environment:
     - python: 27-x64
       ARCH: AMD64
 
-    - python: 34
-      ARCH: X86
-
     - python: 34-x64
       ARCH: AMD64
 

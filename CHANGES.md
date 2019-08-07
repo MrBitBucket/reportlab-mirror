@@ -13,6 +13,10 @@ mentioned. If we missed you, please let us know!
 
 	* fix Barchart axis crossing issue reported by Martin Jones (Zeidler)
 
+RELEASE 3.5.24	07/08/2019
+--------------------------
+	* prepare for python3.8, drop support for python3.4
+
 RELEASE 3.5.23	31/05/2019
 --------------------------
 	* fix issue #180 raised by Christoph Berg

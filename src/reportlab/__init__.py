@@ -1,14 +1,16 @@
 #Copyright ReportLab Europe Ltd. 2000-2018
 #see license.txt for license details
 __doc__="""The Reportlab PDF generation library."""
-Version = "3.5.23"
+Version = "3.5.24"
 __version__=Version
-__date__='20190531'
+__date__='20190807'
 
 import sys, os
 
-if sys.version_info[0:2]!=(2, 7) and sys.version_info<(3, 3):
-    raise ImportError("""reportlab requires Python 2.7+ or 3.3+; 3.0-3.2 are not supported.""")
+if sys.version_info[0:2]!=(2, 7) and sys.version_info<(3, 5):
+    raise ImportError("""reportlab requires Python 2.7+ or 3.5+; 3.0-3.4 are not supported.
+If you want to try with other python versions edit line 10 of reportlab/__init__
+to remove this error.""")
 
 #define these early in reportlab's life
 isPy3 = sys.version_info[0]==3

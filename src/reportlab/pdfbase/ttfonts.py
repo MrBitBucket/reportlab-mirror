@@ -831,6 +831,7 @@ class TTFontFile(TTFontParser):
                     charWidths[char] = aw
 
         # loca - Index to location
+        if 'loca' not in self.table: raise TTFError('missing location table')
         self.seek_table('loca')
         self.glyphPos = []
         if indexToLocFormat == 0:
