@@ -128,6 +128,25 @@ GF_OVERLAP_COMPOUND             = 1 << 10
 GF_SCALED_COMPONENT_OFFSET      = 1 << 11
 GF_UNSCALED_COMPONENT_OFFSET    = 1 << 12
 
+
+_cached_ttf_dirs={}
+def _ttf_dirs(*roots):
+    R = _cached_ttf_dirs.get(roots,None)
+    if R is None:
+        join = os.path.join
+        realpath = os.path.realpath
+        R = []
+        aR = R.append
+        for root in roots:
+            for r, d, f in os.walk(root,followlinks=True):
+                s = realpath(r)
+                if s not in R: aR(s)
+                for s in d:
+                    s = realpath(join(r,s))
+                    if s not in R: aR(s)
+        _cached_ttf_dirs[roots] = R
+    return R
+
 def TTFOpenFile(fn):
     '''Opens a TTF file possibly after searching TTFSearchPath
     returns (filename,file)
@@ -139,7 +158,7 @@ def TTFOpenFile(fn):
     except IOError:
         import os
         if not os.path.isabs(fn):
-            for D in rl_config.TTFSearchPath:
+            for D in _ttf_dirs(*rl_config.TTFSearchPath):
                 tfn = os.path.join(D,fn)
                 if rl_isfile(tfn):
                     f = open_for_read(tfn,'rb')
@@ -1284,3 +1303,11 @@ class TTFont:
             fontDict = doc.idToObject['BasicFonts'].dict
             fontDict[internalName] = pdfFont
         del self.state[doc]
+
+#preserve the initial values here
+def _reset():
+    _cached_ttf_dirs.clear()
+
+from reportlab.rl_config import register_reset
+register_reset(_reset)
+del register_reset
