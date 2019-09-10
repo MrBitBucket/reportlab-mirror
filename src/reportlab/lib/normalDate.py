@@ -206,13 +206,17 @@ class NormalDate:
         """return integer representing day of week, Mon=0, Tue=1, etc."""
         return dayOfWeek(*self.toTuple())
 
+    @property
+    def __day_of_week_name__(self):
+        return getattr(self,'_dayOfWeekName',_dayOfWeekName)
+
     def dayOfWeekAbbrev(self):
         """return day of week abbreviation for current date: Mon, Tue, etc."""
-        return _dayOfWeekName[self.dayOfWeek()][:3]
+        return self.__day_of_week_name__[self.dayOfWeek()][:3]
 
     def dayOfWeekName(self):
         """return day of week name for current date: Monday, Tuesday, etc."""
-        return _dayOfWeekName[self.dayOfWeek()]
+        return self.__day_of_week_name__[self.dayOfWeek()]
 
     def dayOfYear(self):
         """day of year"""
@@ -384,14 +388,18 @@ class NormalDate:
     def month(self):
         """returns month as integer 1-12"""
         return int(repr(self.normalDate)[-4:-2])
+    
+    @property
+    def __month_name__(self):
+        return getattr(self,'_monthName',_monthName)
 
     def monthAbbrev(self):
         """returns month as a 3-character abbreviation, i.e. Jan, Feb, etc."""
-        return _monthName[self.month() - 1][:3]
+        return self.__month_name__[self.month() - 1][:3]
 
     def monthName(self):
         """returns month name, i.e. January, February, etc."""
-        return _monthName[self.month() - 1]
+        return self.__month_name__[self.month() - 1]
 
     def normalize(self, scalar):
         """convert scalar to normalDate"""
