@@ -266,10 +266,10 @@ class Frame:
         da = None
         if ss:
             c = toColor(sb,-1)
-            ss = c is not -1
+            ss = c != -1
         elif isinstance(sb,ShowBoundaryValue) and sb:
             c = toColor(sb.color,-1)
-            ss = c is not -1
+            ss = c != -1
             if ss:
                 w = sb.width
                 da = sb.dashArray
