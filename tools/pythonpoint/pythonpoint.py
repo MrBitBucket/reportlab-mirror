@@ -602,8 +602,6 @@ class PPPara:
         pass
 
     def getFlowable(self):
-##        print 'rawText for para:'
-##        print repr(self.rawtext)
         p = Paragraph(
                     self.rawtext,
                     getStyles()[self.style],
