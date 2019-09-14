@@ -45,7 +45,7 @@ WWWWWWWWWWWW XXX YYYYYY ABBBBB BCCCCCCCCCCC.'''
         fonts = set()
         fonts.add('Helvetica')
         for fontName, fontPath in (('Vera','Vera.ttf'),
-                ('Times','/usr/share/fonts/TTF/times.ttf')):
+                ('TTFTimes','/usr/share/fonts/TTF/times.ttf')):
             try:
                 registerFont(TTFont(fontName, fontPath))
                 fonts.add(fontName)
@@ -58,14 +58,14 @@ WWWWWWWWWWWW XXX YYYYYY ABBBBB BCCCCCCCCCCC.'''
             styv = sty.clone('AV',fontName='Vera')
             y = do2(72,y-10,text,styv)
 
-        if 'Times' in fonts:
-            styv = sty.clone('AV',fontName='Times')
+        if 'TTFTimes' in fonts:
+            styv = sty.clone('AV',fontName='TTFTimes')
             y = do2(72,y-10,text,styv)
 
         text = u'|A B C D E F G H I J K L|'
         y -= 13.1
         offs = None
-        for fontName in 'Helvetica Vera Times'.split():
+        for fontName in 'Helvetica Vera TTFTimes'.split():
             if fontName not in fonts: continue
             for ws in 0, -1, 1:
                 for s in (u' ',u'\xa0'):
