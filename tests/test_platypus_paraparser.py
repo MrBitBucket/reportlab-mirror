@@ -39,32 +39,32 @@ class ParaParserTestCase(unittest.TestCase):
     def testBold(self):
         txt = "Hello <b>Bold</b> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals([x.text for x in fragList], ['Hello ','Bold',' World'])
-        self.assertEquals(fragList[1].fontName, 'Times-Bold')
+        self.assertEqual([x.text for x in fragList], ['Hello ','Bold',' World'])
+        self.assertEqual(fragList[1].fontName, 'Times-Bold')
 
     def testStrong(self):
         txt = "Hello <strong>Strong</strong> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals([x.text for x in fragList], ['Hello ','Strong',' World'])
-        self.assertEquals(fragList[1].fontName, 'Times-Bold')
+        self.assertEqual([x.text for x in fragList], ['Hello ','Strong',' World'])
+        self.assertEqual(fragList[1].fontName, 'Times-Bold')
 
     def testItalic(self):
         txt = "Hello <i>Italic</i> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals([x.text for x in fragList], ['Hello ','Italic',' World'])
-        self.assertEquals(fragList[1].fontName, 'Times-Italic')
+        self.assertEqual([x.text for x in fragList], ['Hello ','Italic',' World'])
+        self.assertEqual(fragList[1].fontName, 'Times-Italic')
 
     def testEm(self):
         txt = "Hello <em>Em</em> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals([x.text for x in fragList], ['Hello ','Em',' World'])
-        self.assertEquals(fragList[1].fontName, 'Times-Italic')
+        self.assertEqual([x.text for x in fragList], ['Hello ','Em',' World'])
+        self.assertEqual(fragList[1].fontName, 'Times-Italic')
 
     def testEntity(self):
         "Numeric entities should be unescaped by parser"
         txt = b"Hello &#169; copyright"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals([x.text for x in fragList], [u'Hello ', u'\xa9', u' copyright'])
+        self.assertEqual([x.text for x in fragList], [u'Hello ', u'\xa9', u' copyright'])
 
     def testEscaped(self):
         "Escaped high-bit stuff should go straight through"
@@ -83,14 +83,14 @@ class ParaParserTestCase(unittest.TestCase):
     def testBoldUnicode(self):
         txt = "Hello <b>Bold</b> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals([x.text for x in fragList], ['Hello ','Bold',' World'])
-        self.assertEquals(fragList[1].fontName, 'Times-Bold')
+        self.assertEqual([x.text for x in fragList], ['Hello ','Bold',' World'])
+        self.assertEqual(fragList[1].fontName, 'Times-Bold')
 
     def testEntityUnicode(self):
         "Numeric entities should be unescaped by parser"
         txt = "Hello &#169; copyright"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals([x.text for x in fragList], [u'Hello ', u'\xa9', u' copyright'])
+        self.assertEqual([x.text for x in fragList], [u'Hello ', u'\xa9', u' copyright'])
 
     def testEscapedUnicode(self):
         "Escaped high-bit stuff should go straight through"
@@ -101,8 +101,8 @@ class ParaParserTestCase(unittest.TestCase):
     def testBr(self):
         txt = "Hello <br/> World"
         fragList = ParaParser().parse(txt, self.style)[1]
-        self.assertEquals([x.text for x in fragList], ['Hello ','',' World'])
-        self.assertEquals(fragList[1].lineBreak, True)
+        self.assertEqual([x.text for x in fragList], ['Hello ','',' World'])
+        self.assertEqual(fragList[1].lineBreak, True)
 
 
     def testRejectsBadlyFormed(self):

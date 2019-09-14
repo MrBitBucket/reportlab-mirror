@@ -70,14 +70,14 @@ class TextEncodingTestCase(NearTestCase):
 
         # Courier are all 600 ems wide.  So if one 'measures as utf8' one will
         # get a wrong width as extra characters are seen
-        self.assertEquals(len(testCp1252),52)
+        self.assertEqual(len(testCp1252),52)
         self.assertNear(pdfmetrics.stringWidth(testCp1252, 'Courier', 10, 'cp1252'),312.0)
         # the test string has 5 more bytes and so "measures too long" if passed to
         # a single-byte font which treats it as a single-byte string.
-        self.assertEquals(len(testUTF8),57)
+        self.assertEqual(len(testUTF8),57)
         self.assertNear(pdfmetrics.stringWidth(testUTF8, 'Courier', 10),312.0)
 
-        self.assertEquals(len(testUni),52)
+        self.assertEqual(len(testUni),52)
         self.assertNear(pdfmetrics.stringWidth(testUni, 'Courier', 10),312.0)
 
 
@@ -163,9 +163,9 @@ class TextEncodingTestCase(NearTestCase):
         d4.drawOn(c, 100, 0)
 
         extracted = extractText(c.getCurrentPageContent())
-        self.assertEquals(extracted[0], expectedCp1252)
-        self.assertEquals(extracted[1], extracted[2])
-        #self.assertEquals(subsetToUnicode(self.vera, extracted[1]), testUni)
+        self.assertEqual(extracted[0], expectedCp1252)
+        self.assertEqual(extracted[1], extracted[2])
+        #self.assertEqual(subsetToUnicode(self.vera, extracted[1]), testUni)
         c.save()
 
 class FontEncodingTestCase(unittest.TestCase):

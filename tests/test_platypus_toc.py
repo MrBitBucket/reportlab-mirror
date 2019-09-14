@@ -220,7 +220,7 @@ class TocTestCase(unittest.TestCase):
         path = outputfile('test_platypus_toc_preload_1.pdf')
         doc = MyDocTemplate(path)
         passes = doc.multiBuild(story1)
-        self.assertEquals(passes, 3)
+        self.assertEqual(passes, 3)
 
         #try 2: now preload the TOC with the entries
 
@@ -239,7 +239,7 @@ class TocTestCase(unittest.TestCase):
         path = outputfile('test_platypus_toc_preload_2.pdf')
         doc = MyDocTemplate(path)
         passes = doc.multiBuild(story2)
-        self.assertEquals(passes, 2)
+        self.assertEqual(passes, 2)
 
 
 
@@ -277,7 +277,7 @@ class TocTestCase(unittest.TestCase):
         passes = doc.multiBuild(story3)
 
         # I can't get one pass yet'
-        #self.assertEquals(passes, 1)
+        #self.assertEqual(passes, 1)
         self.assertTrue(hasattr(doc,'seq'))
 
     def test2(self):
