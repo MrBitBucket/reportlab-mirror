@@ -11,12 +11,15 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-	* fix Barchart axis crossing issue reported by Martin Jones (Zeidler)
+	* micro changes to normalDate
+	* fix warnings about is not (detected in python 3.8b4)
+	* implement PR #59 bug fix contributed by Vytis Banaitis
 
 RELEASE 3.5.25	23/08/2019
 --------------------------
 	* add recursive ttf searching
 	* sync with rlextra
+	* fix Barchart axis crossing issue reported by Martin Jones (Zeidler)
 
 RELEASE 3.5.24	07/08/2019
 --------------------------

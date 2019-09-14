@@ -2146,7 +2146,7 @@ class PDFImageXObject(PDFObject):
         self._filters = 'FlateDecode', #'Fl'
         if IMG: self._checkTransparency(IMG[0])
         elif self.mask=='auto': self.mask = None
-        self.streamContent = ''.join(imagedata[3:-1])
+        self.streamContent = b''.join(imagedata[3:-1])
 
     def _checkTransparency(self,im):
         if self.mask=='auto':
