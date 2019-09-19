@@ -81,7 +81,10 @@ def parseAFMFile(afmFileName):
             # width
             l, r = widthChunk.split()
             assert l == 'WX', 'bad line in font file %s' % line
-            width = int(r)
+            try:
+                width = int(r)
+            except ValueError:
+                width = float(r)
 
             # name
             l, r = nameChunk.split()
