@@ -131,12 +131,14 @@ class PDFDocument(PDFObject):
                  invariant=rl_config.invariant,
                  filename=None,
                  pdfVersion=PDF_VERSION_DEFAULT,
+                 lang=None,
                  ):
         self._ID = None
         self.objectcounter = 0
         self.shadingCounter = 0
         self.inObject = None
         self.pageCounter = 1
+        self.lang = lang
 
         # allow None value to be passed in to mean 'give system defaults'
         if invariant is None:
@@ -163,6 +165,7 @@ class PDFDocument(PDFObject):
         cat = self.Catalog = self._catalog = PDFCatalog()
         pages = self.Pages = PDFPages()
         cat.Pages = pages
+        cat.lang = self.lang
         self.outline = self.Outlines = cat.Outlines = PDFOutlines0() if dummyoutline else PDFOutlines()
         self.info = PDFInfo()
         #self.Reference(self.Catalog)
