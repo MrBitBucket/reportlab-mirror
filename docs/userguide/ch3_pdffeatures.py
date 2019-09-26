@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/docs/userguide/ch3_pdffeatures.py
+#history https://hg.reportlab.com/hg-public/reportlab/log/tip/docs/userguide/ch3_pdffeatures.py
 from tools.docco.rl_doc_utils import *
 
 heading1("Exposing PDF Special Capabilities")

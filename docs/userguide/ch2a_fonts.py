@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/docs/userguide/ch2a_fonts.py
+#history https://hg.reportlab.com/hg-public/reportlab/log/tip/docs/userguide/ch2a_fonts.py
 from tools.docco.rl_doc_utils import *
 from reportlab.lib.codecharts import SingleByteEncodingChart
 from reportlab.platypus import Image

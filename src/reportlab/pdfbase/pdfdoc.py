@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/pdfbase/pdfdoc.py
+#history https://hg.reportlab.com/hg-public/reportlab/log/tip/src/reportlab/pdfbase/pdfdoc.py
 __version__='3.4.1'
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that

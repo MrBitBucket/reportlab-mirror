@@ -69,11 +69,19 @@ Main releases are also available from the Python Package Index:
 
     http://pypi.python.org/
 
-From March 2013, the code is being hosted in Mercurial on BitBucket.
+From March 2013, the code is being hosted in Mercurial at
+https://hg.reportlab.com/hg-public/.
 You can obtain the latest code from our Mercurial repository with::
 
-    hg clone https://bitbucket.org/rptlab/reportlab
+    hg clone https://hg.reportlab.com/hg-public/reportlab
 
+A mirror only repository is available for git users at
+
+	https://github.com/MrBitBucket/reportlab-mirror
+
+please do not use this for issue reporting etc; use the mail list at
+
+    https://pairlist2.pair.net/mailman/listinfo/reportlab-users
 
 Users of our commercial libraries, and/or anyone who registers on our site,
 can also access our commercial area which has exactly the same packages,
@@ -96,7 +104,7 @@ package.  If you aren't comfortable with the command line, we recommend pip-win:
 
 This will NOT install the tests, examples and documentation.  If you want
 to learn your way around the package or do development with it on Windows,
-we suggest you also obtain source from https://bitbucket.org/rptlab/reportlab
+we suggest you also obtain source from https://hg.reportlab.com.org/hg-public/reportlab
 and work with the examples/tests within that directory.
 
 2.4 Mac OS

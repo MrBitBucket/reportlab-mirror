@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/platypus/paraparser.py
+#history https://hg.reportlab.com/hg-public/reportlab/log/tip/src/reportlab/platypus/paraparser.py
 __all__ = ('ParaFrag', 'ParaParser')
 __version__='3.5.20'
 __doc__='''The parser used to process markup within paragraphs'''

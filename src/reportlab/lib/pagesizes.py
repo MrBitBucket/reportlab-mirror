@@ -1,7 +1,7 @@
 #!/bin/env python
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-#history https://bitbucket.org/rptlab/reportlab/history-node/tip/src/reportlab/lib/pagesizes.py
+#history https://hg.reportlab.com/hg-public/reportlab/log/tip/src/reportlab/lib/pagesizes.py
 
 """This module defines a few common page sizes in points (1/72 inch).
 To be expanded to include things like label sizes, envelope windows
