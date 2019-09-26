@@ -138,7 +138,6 @@ class PDFDocument(PDFObject):
         self.shadingCounter = 0
         self.inObject = None
         self.pageCounter = 1
-        self.lang = lang
 
         # allow None value to be passed in to mean 'give system defaults'
         if invariant is None:
@@ -165,7 +164,7 @@ class PDFDocument(PDFObject):
         cat = self.Catalog = self._catalog = PDFCatalog()
         pages = self.Pages = PDFPages()
         cat.Pages = pages
-        cat.lang = self.lang
+        cat.Lang = PDFString(lang if lang else rl_config.documentLang)
         self.outline = self.Outlines = cat.Outlines = PDFOutlines0() if dummyoutline else PDFOutlines()
         self.info = PDFInfo()
         #self.Reference(self.Catalog)

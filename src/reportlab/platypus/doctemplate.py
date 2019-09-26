@@ -981,6 +981,7 @@ class BaseDocTemplate:
                             artBox = self.artBox,
                             trimBox = self.trimBox,
                             bleedBox = self.bleedBox,
+                            lang = self.lang,
                             )
 
         getattr(canv,'setEncrypt',lambda x: None)(self.encrypt)
@@ -994,8 +995,6 @@ class BaseDocTemplate:
         canv.setKeywords(self.keywords)
         if self.displayDocTitle is not None:
             canv.setViewerPreference('DisplayDocTitle',['false','true'][self.displayDocTitle])
-        if self.lang:
-            canv.setCatalogEntry('Lang',self.lang)
 
         if self._onPage:
             canv.setPageCallBack(self._onPage)
