@@ -164,7 +164,9 @@ class PDFDocument(PDFObject):
         cat = self.Catalog = self._catalog = PDFCatalog()
         pages = self.Pages = PDFPages()
         cat.Pages = pages
-        cat.Lang = PDFString(lang if lang else rl_config.documentLang)
+        lang = lang if lang else rl_config.documentLang
+        if lang:
+            cat.Lang = PDFString(lang)
         self.outline = self.Outlines = cat.Outlines = PDFOutlines0() if dummyoutline else PDFOutlines()
         self.info = PDFInfo()
         #self.Reference(self.Catalog)
