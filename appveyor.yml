@@ -44,7 +44,7 @@ install:
   - cmd: echo "C:\Program Files\Microsoft SDKs\Windows\v7.1\Bin\SetEnv.cmd" /x64 > "C:\Program Files (x86)\Microsoft Visual Studio 10.0\VC\bin\amd64\vcvars64.bat"
   - cmd: c:\Python27-x64\python.exe -mvirtualenv myenv
   - cmd: myenv\scripts\pip.exe --version
-  - cmd: myenv\scripts\pip.exe install git+https://github.com/MrBitBucket/rl-ci-tools
+  - cmd: myenv\scripts\pip.exe install git+https://github.com/MrBitBucket/rl-ci-tools-mirror
   - cmd: mkdir winstuff
   - cmd: myenv\scripts\python.exe -mrl_ci_tools download-resources --dst=winstuff winstuff.zip
   - cmd: myenv\scripts\python.exe -c"import zipfile;zipfile.ZipFile('winstuff/winstuff.zip','r').extractall('winstuff')"
