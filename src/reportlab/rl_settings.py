@@ -63,7 +63,8 @@ hyphenationLang
 uriWasteReduce
 embeddedHyphenation
 hyphenationMinWordLength
-reserveTTFNotdef'''.split())
+reserveTTFNotdef
+documentLang'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -150,6 +151,7 @@ embeddedHyphenation=0                               #if true attempt hypenation 
 hyphenationMinWordLength=5                          #minimum length of words that can be hyphenated
 reserveTTFNotdef=0                                  #if true force subset element 0 to be zero(.notdef)
                                                     #helps to fix bug in edge
+documentLang=None                                   #pdf document catalog Lang value xx-xx not ee_xx
 
 # places to look for T1Font information
 T1SearchPath =  (

@@ -245,6 +245,7 @@ class Canvas(_PDFColorSetter):
                  artBox=None,
                  trimBox=None,
                  bleedBox=None,
+                 lang=None,
                  ):
         """Create a canvas of a given size. etc.
 
@@ -273,6 +274,7 @@ class Canvas(_PDFColorSetter):
         self._doc = pdfdoc.PDFDocument(compression=pageCompression,
                                        invariant=invariant, filename=filename,
                                        pdfVersion=pdfVersion or pdfdoc.PDF_VERSION_DEFAULT,
+                                       lang=lang
                                        )
 
         self._enforceColorSpace = _chooseEnforceColorSpace(enforceColorSpace)
