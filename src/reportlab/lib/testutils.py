@@ -45,13 +45,18 @@ def setOutDir(name):
     global _OUTDIR, RL_HOME, testsFolder
     if _OUTDIR: return _OUTDIR
     D = [d[9:] for d in sys.argv if d.startswith('--outdir=')]
+    if not D:
+        D = os.environ.get('RL_TEST_OUTDIR','')
+        if D: D=[D]
     if D:
         _OUTDIR = D[-1]
         try:
             os.makedirs(_OUTDIR)
         except:
             pass
-        for d in D: sys.argv.remove(d)
+        for d in D:
+            if d in sys.argv:
+                sys.argv.remove(d)
     else:
         assert name=='__main__',"setOutDir should only be called in the main script"
         scriptDir=os.path.dirname(sys.argv[0])

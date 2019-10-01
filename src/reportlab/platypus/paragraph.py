@@ -1704,7 +1704,11 @@ class Paragraph(Flowable):
         P1=self.__class__(None,style1,bulletText=self.bulletText,frags=func(blPara,0,s))
         #this is a major hack
         P1.blPara = ParaLines(kind=1,lines=blPara.lines[0:s],aH=availHeight,aW=availWidth)
-        P1._JustifyLast = 1
+        #do not justify text if linebreak was inserted after the text
+        #bug reported and fix contributed by Niharika Singh <nsingh@shoobx.com>
+        P1._JustifyLast = not (isinstance(blPara.lines[s-1],FragLine)
+                                and hasattr(blPara.lines[s-1], 'lineBreak')
+                                and blPara.lines[s-1].lineBreak)
         P1._splitpara = 1
         P1.height = height
         P1.width = availWidth

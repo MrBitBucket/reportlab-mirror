@@ -499,6 +499,49 @@ component delimits the traditional practice of grammarians.'''
         doc = MyDocTemplate(outputfile('test_platypus_imageandflowables_rtl.pdf'),showBoundary=1)
         doc.multiBuild(story)
 
+    def test_splitJustBug(self):
+        """test that justified paragraphs with </br>last line split properly
+        bug reported by Niharika Singh <nsingh@shoobx.com>
+        """
+        from reportlab.pdfgen.canvas import Canvas
+        measures = []
+        def _odW(canv,name,label):
+            measures.append((label,canv._curr_tx_info['cur_x']))
+        text = '''<para><onDraw name="_odW" label="start"/>First line<onDraw name="_odW" label="end"/><br/><onDraw name="_odW" label="start"/>Second line<onDraw name="_odW" label="end"/><br/><onDraw name="_odW" label="start"/>split here<onDraw name="_odW" label="end"/><br/><onDraw name="_odW" label="start"/>Third line should not be justified<onDraw name="_odW" label="end"/><br/></para>'''
+        normal = getSampleStyleSheet()['BodyText']
+        normal.fontName = "Helvetica"
+        normal.fontSize = 10
+        normal.leading = 12
+        normal.alignment = TA_JUSTIFY
+        canv = Canvas(outputfile('test_splitJustBug.pdf'))
+        canv._odW = _odW
+        W, H = canv._pagesize
+        aW = W-2*72
+        aH = H-2*72
+        x = 72
+        y = H-72
+        P = Paragraph(text,normal)
+        w,h = P.wrap(aW,aH)
+        P.drawOn(canv,x,y)
+        M0 = measures[:]
+        measures[:] = []
+        y -= h
+        aH -= h
+        P = Paragraph(text,normal)
+        w,h = P.wrap(W-2*72,H-2*72)
+        P1,P2 = P.split(aW,37)
+        w,h = P1.wrap(aW,37)
+        P1.drawOn(canv,x,y)
+        y -= h
+        aH -= h
+        w,h = P2.wrap(aW,aH)
+        P2.drawOn(canv,x,y)
+        y -= h
+        aH -= h
+        canv.save()
+        self.assertEqual(M0,measures,"difference detected in justified split Paragraph rendering")
+
+
 class TwoFrameDocTemplate(BaseDocTemplate):
     "Define a simple document with two frames per page."
     

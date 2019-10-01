@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.27	??/??/2019
+--------------------------
+	* fix to justified para splits contributed by Niharika Singh <nsingh@shoobx.com>
+
+
 RELEASE 3.5.26	17/09/2019
 --------------------------
 	* micro changes to normalDate
