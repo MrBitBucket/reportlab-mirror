@@ -1524,7 +1524,7 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
         hgap = gap*0.5
         canv = self.canv
         nCols = self._nCols
-        cw = (aW - gap*(nCols-1))/float(nCols)
+        cw = (aW - gap*(nCols-1) - lpad - rpad)/float(nCols)
         aH0 = aH
         aH -= tpad + bpad
         W,H0,_C0,C2 = self._findSplit(canv,cw,nCols*aH,paraFix=False)
