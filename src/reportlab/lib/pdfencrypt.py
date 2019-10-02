@@ -17,6 +17,22 @@ try:
 except ImportError:
     pyaes = None
 
+if isPy3:
+    def xorKey(num,key):
+        "xor's each byte of the key with the number, which is <256"
+        if num==0: return key
+        return bytes(num^k for k in key)
+    bytes3 = bytes
+else:
+    def xorKey(num,key):
+        "xor's each bytes of the key with the number, which is <256"
+        if num==0: return key
+        return ''.join(chr(num^ord(k)) for k in key)
+    def bytes3(x):
+        if isinstance(x,basestring):
+            return asBytes(x)
+        else:
+            return b''.join([chr(k) for k in x])
 
 #AR debug hooks - leaving in for now
 CLOBBERID = 0  # set a constant Doc ID to allow comparison with other software like iText
@@ -34,6 +50,18 @@ annotatable = 1<<5
 higherbits = 0
 for i in range(6,31):
     higherbits = higherbits | (1<<i)
+
+if rl_config.invariant:
+    _os_random_x=0
+    _os_random_b = b'\xbd\x8f\xdc\xabovp\xe8\x15\xec\\C\x9d\x92B~\xb8\xf4\xdeEg8\xb2f\x80Sj\'y\xcfG\xcaY\xb9\xdc-\xc4Q\x17\x88\xaf\xd1\xf7\x7f\xa1L>\x99\x89i\xf7\xc4\xb4\'\xe9k\xc9\xfa\xa6p\x80\xcd\xaa\xaf|\x97\xf7\xcc \xc1\xef\xc7\x97\xd2;\xaf\xe1\xfc\x16,\xd3\x0b\x19\xa1\x02\xe6\x01\xcb\x1c\xd8\xe6\\H}\r\xdc\x85\xe1\xbc\xc4\x02>|\xc5\x97\xb5T\xad\x0cT\x95\xb1\xdc!\xb6+E#\xa1\xa4O\xf3j\x98"\xc2\x1a\xcb\x8cHB\xd8B~\xa7\x7f7\xd2\xe8\x131.\xd7\xa9\x0b\r\xdd2\x0b}\xc0\xffm\x9e3\xe2/\xea\x84W\x82\xbd\xc8K\xc2;?\xbe#\x84`W\xf3\xe0\xec\x9e\x85\x9c\xcb\xc7\xc9#\x19\xff\xde\x17\xea\xb2\xd4\x0e\x9a\xbd\xbaz\xbd\x87O\xd4\xf4\xac\xb3(z\x92\xfc\xbc\x85i\x8d\x1f\xfb!\t|w,\x8bI\xc9_D`A\xbc}\x0e+r\x1b-%F(@\xc8\\cL\x172(\x9c\x95BM\xa1\x89UG\x9d\xfd\xed\xce\xd8\x1f\xb1'
+    def os_urandom(n):
+        global _os_random_x
+        b = [_os_random_b[(i+_os_random_x)%256] for i in range(n)]
+        b = bytes(b) if isPy3 else b''.join(b)
+        _os_random_x = (_os_random_x + n) % 256
+        return b
+else:
+    os_urandom = os.urandom
 
 # no encryption
 class StandardEncryption:
@@ -110,9 +138,9 @@ class StandardEncryption:
                 internalID = "xxxxxxxxxxxxxxxx"
 
         if DEBUG:
-            print('userPassword    = %s' % self.userPassword)
-            print('ownerPassword   = %s' % self.ownerPassword)
-            print('internalID      = %s' % internalID)
+            print('userPassword    = %r' % self.userPassword)
+            print('ownerPassword   = %r' % self.ownerPassword)
+            print('internalID      = %r' % internalID)
         self.P = int(self.permissionBits() - 2**31)
         if CLOBBERPERMISSIONS: self.P = -44 # AR hack
         if DEBUG:
@@ -123,13 +151,15 @@ class StandardEncryption:
             iv  = b'\x00' * 16
 
             # Random User salts
-            uvs = os.urandom(8)
-            uks = os.urandom(8)
+            uvs = os_urandom(8)
+            uks = os_urandom(8)
             
             # the main encryption key
-            self.key = asBytes(os.urandom(32))
+            self.key = asBytes(os_urandom(32))
             
             if DEBUG:
+                print("uvs      (hex)  = %s" % hexText(uvs))
+                print("uks      (hex)  = %s" % hexText(uks))
                 print("self.key (hex)  = %s" % hexText(self.key))
 
             # Calculate the sha-256 hash of the User password (U)
@@ -150,8 +180,8 @@ class StandardEncryption:
                 print("self.UE (hex)  = %s" % hexText(self.UE))
 
             # Random Owner salts
-            ovs = os.urandom(8)
-            oks = os.urandom(8)
+            ovs = os_urandom(8)
+            oks = os_urandom(8)
 
             # Calculate the hash of the Owner password (U)
             md = sha256(asBytes(self.ownerPassword[:127]) + ovs + self.U )
@@ -192,7 +222,7 @@ class StandardEncryption:
 
             # the permission array should be enrypted in the Perms field
             encrypter = pyaes.Encrypter(pyaes.AESModeOfOperationCBC(self.key, iv=iv))
-            self.Perms = encrypter.feed(bytes(permsarr))
+            self.Perms = encrypter.feed(bytes3(permsarr))
             self.Perms += encrypter.feed()
                         
             if DEBUG:
@@ -276,16 +306,6 @@ padding = """
 28 BF 4E 5E 4E 75 8A 41 64 00 4E 56 FF FA 01 08
 2E 2E 00 B6 D0 68 3E 80 2F 0C A9 FE 64 53 69 7A
 """
-if isPy3:
-    def xorKey(num,key):
-        "xor's each byte of the key with the number, which is <256"
-        if num==0: return key
-        return bytes(num^k for k in key)
-else:
-    def xorKey(num,key):
-        "xor's each bytes of the key with the number, which is <256"
-        if num==0: return key
-        return ''.join(chr(num^ord(k)) for k in key)
 
 def hexText(text):
     "a legitimate way to show strings in PDF"
@@ -433,7 +453,7 @@ def encodePDF(key, objectNumber, generationNumber, string, revision=None):
         encrypted = ArcIV(key).encode(string)
         #print 'encrypted=', hexText(encrypted)
     elif revision == 5:
-        iv = os.urandom(16)
+        iv = os_urandom(16)
         encrypter = pyaes.Encrypter(pyaes.AESModeOfOperationCBC(key, iv=iv))
        
         # pkcs7 style padding so that the size of the encrypted block is multiple of 16 
@@ -446,7 +466,7 @@ def encodePDF(key, objectNumber, generationNumber, string, revision=None):
         if isinstance(string, str):
             string = (string + padding).encode("utf-8")    
         else:
-            string += bytes(padding, "ascii")
+            string += asBytes(padding)
             
         encrypted = iv + encrypter.feed(string)
         encrypted += encrypter.feed()

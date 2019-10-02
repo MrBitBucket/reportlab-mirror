@@ -11,7 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-RELEASE 3.5.27	01/102019
+RELEASE 3.5.28	02/10/2019
+--------------------------
+	* improve support for AES encryption
+
+RELEASE 3.5.27	01/10/2019
 --------------------------
 	* fix to justified para splits contributed by Niharika Singh <nsingh@shoobx.com>
 	* fix BalanceColumn width calculation
