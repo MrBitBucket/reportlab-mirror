@@ -1,3 +1,7 @@
+branches:
+  only:
+    - master
+
 environment:
   global:
     TWINE_USERNAME: MrRLBitBucket
@@ -9,10 +13,6 @@ environment:
     FIRST: 27
     LAST: 37-x64
     RLCACHE: windows/reportlab
-
-  branches:
-    only:
-      - master
 
   matrix:
     - python: 27
