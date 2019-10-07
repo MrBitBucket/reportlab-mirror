@@ -10,6 +10,10 @@ environment:
     LAST: 37-x64
     RLCACHE: windows/reportlab
 
+  branches:
+    only:
+      - master
+
   matrix:
     - python: 27
       ARCH: X86
