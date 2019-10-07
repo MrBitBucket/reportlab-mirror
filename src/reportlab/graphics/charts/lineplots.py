@@ -10,7 +10,7 @@ import string, time
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
-from reportlab.lib.utils import flatten
+from reportlab.lib.utils import flatten, isStr
 from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine, Polygon, _SetKeyWordArgs
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.textlabels import Label
@@ -217,11 +217,11 @@ class LinePlot(AbstractLineChart):
                     raise ValueError('data row %r is paired with invalid data row %r' % (rowNo, other))
             line = [].append
             for colNo, datum in enumerate(row):
-                xv, yv = datum
+                xv = datum[0]
                 line(
                     (
-                    xscale(mktime(mkTimeTuple(xv))) if isinstance(xv,basestring) else xscale(xv),
-                    yscale(yv)
+                    xscale(mktime(mkTimeTuple(xv))) if isStr(xv) else xscale(xv),
+                    yscale(datum[1])
                     )
                     )
             P(line.__self__)
