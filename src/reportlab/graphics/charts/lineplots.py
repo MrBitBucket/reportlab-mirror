@@ -10,6 +10,7 @@ import string, time
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
+from reportlab.lib.utils import flatten
 from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine, Polygon, _SetKeyWordArgs
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.textlabels import Label
@@ -39,6 +40,11 @@ class InFillValue(int):
         self = int.__new__(cls,v)
         self.yValue = yValue
         return self
+
+class PairedData(list):
+    def __init__(self,v,other=0):
+        list.__init__(self,v)
+        self.other = other
 
 class Shader(_SetKeyWordArgs):
     _attrMap = AttrMap(BASE=PlotArea,
@@ -193,18 +199,39 @@ class LinePlot(AbstractLineChart):
         self._seriesCount = len(self.data)
         self._rowLength = max(list(map(len,self.data)))
 
-        self._positions = []
-        for rowNo in range(len(self.data)):
-            line = []
-            for colNo in range(len(self.data[rowNo])):
-                datum = self.data[rowNo][colNo] # x,y value
-                if isinstance(datum[0],str):
-                    x = self.xValueAxis.scale(mktime(mkTimeTuple(datum[0])))
+        pairs = set()
+        P = [].append
+        xscale = self.xValueAxis.scale
+        yscale = self.yValueAxis.scale
+        data = self.data
+        n = len(data)
+        for rowNo, row in enumerate(data):
+            if isinstance(row, PairedData):
+                other = row.other
+                if 0<=other<n:
+                    if other==rowNo:
+                        raise ValueError('data row %r may not be paired with itself' % rowNo)
+                    t = (rowNo,other)
+                    pairs.add((min(t),max(t)))
                 else:
-                    x = self.xValueAxis.scale(datum[0])
-                y = self.yValueAxis.scale(datum[1])
-                line.append((x, y))
-            self._positions.append(line)
+                    raise ValueError('data row %r is paired with invalid data row %r' % (rowNo, other))
+            line = [].append
+            for colNo, datum in enumerate(row):
+                xv, yv = datum
+                line(
+                    (
+                    xscale(mktime(mkTimeTuple(xv))) if isinstance(xv,basestring) else xscale(xv),
+                    yscale(yv)
+                    )
+                    )
+            P(line.__self__)
+        P = P.__self__
+
+        #if there are some paired lines we ensure only one is created
+        for rowNo, other in pairs:
+            P[rowNo] = PairedData(P[rowNo],other)
+        self._pairInFills = len(pairs)
+        self._positions = P
 
     def _innerDrawLabel(self, rowNo, colNo, x, y):
         "Draw a label for a given item in the list."
@@ -256,12 +283,14 @@ class LinePlot(AbstractLineChart):
 
         labelFmt = self.lineLabelFormat
 
-        P = list(range(len(self._positions)))
-        if self.reversePlotOrder: P.reverse()
+        P = self._positions
         _inFill = getattr(self,'_inFill',None)
         lines = self.lines
         styleCount = len(lines)
-        if _inFill or [rowNo for rowNo in P if getattr(lines[rowNo%styleCount],'inFill',False)]:
+        if (_inFill or self._pairInFills or
+                [rowNo for rowNo in range(len(P))
+                        if getattr(lines[rowNo%styleCount],'inFill',False)]
+                ):
             inFillY = getattr(_inFill,'yValue',None)
             if inFillY is None:
                 inFillY = xA._y
@@ -272,8 +301,7 @@ class LinePlot(AbstractLineChart):
             inFillG = getattr(self,'_inFillG',g)
         lG = getattr(self,'_lineG',g)
         # Iterate over data rows.
-        for rowNo in P:
-            row = self._positions[rowNo]
+        for rowNo, row in enumerate(reversed(P) if self.reversePlotOrder else P):
             styleRowNo = rowNo % styleCount
             rowStyle = lines[styleRowNo]
             strokeColor = getattr(rowStyle,'strokeColor',None)
@@ -290,12 +318,13 @@ class LinePlot(AbstractLineChart):
 
             # Iterate over data columns.
             if self.joinedLines:
-                points = []
-                for xy in row:
-                    points += [xy[0], xy[1]]
-                if inFill:
-                    fpoints = [inFillX0,inFillY] + points + [inFillX1,inFillY]
+                points = flatten(row)
+                if inFill or isinstance(row,PairedData):
                     filler = getattr(rowStyle, 'filler', None)
+                    if isinstance(row,PairedData):
+                        fpoints = points + flatten(reversed(P[row.other]))
+                    else:
+                        fpoints = [inFillX0,inFillY] + points + [inFillX1,inFillY]
                     if filler:
                         filler.fill(self,inFillG,rowNo,fillColor,fpoints)
                     else:
