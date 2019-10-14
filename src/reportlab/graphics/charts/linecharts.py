@@ -10,7 +10,8 @@ from reportlab.lib.validators import isNumber, isNumberOrNone, isColor, isColorO
                                     isListOfStringsOrNone, SequenceOf, isBoolean, NoneOr, \
                                     isListOfNumbersOrNone, isStringOrNone, OneOf, Percentage
 from reportlab.lib.attrmap import *
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
+from reportlab.lib.utils import flatten
+from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder, isWKlass
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing, Polygon, PolyLine
 from reportlab.graphics.widgets.signsandsymbols import NoEntry
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
@@ -18,6 +19,7 @@ from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol, makeMarker
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.charts.legends import _objStr
+from .utils import FillPairedData
 
 class LineChartProperties(PropHolder):
     _attrMap = AttrMap(
@@ -182,7 +184,6 @@ class HorizontalLineChart(LineChart):
         self.inFill = 0
         self.reversePlotOrder = 0
 
-
     def demo(self):
         """Shows basic use of a line chart."""
 
@@ -206,7 +207,6 @@ class HorizontalLineChart(LineChart):
 
         return drawing
 
-
     def calcPositions(self):
         """Works out where they go.
 
@@ -229,19 +229,38 @@ class HorizontalLineChart(LineChart):
         self._yzero = yzero = self.valueAxis.scale(0)
         self._hngs = hngs = 0.5 * self.groupSpacing * normFactor
 
-        self._positions = []
-        for rowNo in range(len(self.data)):
-            lineRow = []
-            for colNo in range(len(self.data[rowNo])):
-                datum = self.data[rowNo][colNo]
+        pairs = set()
+        P = [].append
+        cscale = self.categoryAxis.scale
+        vscale = self.valueAxis.scale
+        data = self.data
+        n = len(data)
+        for rowNo,row in enumerate(data):
+            if isinstance(row, FillPairedData):
+                other = row.other
+                if 0<=other<n:
+                    if other==rowNo:
+                        raise ValueError('data row %r may not be paired with itself' % rowNo)
+                    t = (rowNo,other)
+                    pairs.add((min(t),max(t)))
+                else:
+                    raise ValueError('data row %r is paired with invalid data row %r' % (rowNo, other))
+            line = [].append
+            for colNo,datum in enumerate(row):
                 if datum is not None:
-                    (groupX, groupWidth) = self.categoryAxis.scale(colNo)
+                    groupX, groupWidth = cscale(colNo)
                     x = groupX + hngs
                     y = yzero
-                    height = self.valueAxis.scale(datum) - y
-                    lineRow.append((x, y+height))
-            self._positions.append(lineRow)
+                    height = vscale(datum) - y
+                    line((x, y+height))
+            P(line.__self__)
+        P = P.__self__
 
+        #if there are some paired lines we ensure only one is created
+        for rowNo, other in pairs:
+            P[rowNo] = FillPairedData(P[rowNo],other)
+        self._pairInFills = len(pairs)
+        self._positions = P
 
     def _innerDrawLabel(self, rowNo, colNo, x, y):
         "Draw a label for a given item in the list."
@@ -286,12 +305,15 @@ class HorizontalLineChart(LineChart):
         g = Group()
 
         labelFmt = self.lineLabelFormat
-        P = list(range(len(self._positions)))
+        P = self._positions
         if self.reversePlotOrder: P.reverse()
         lines = self.lines
         styleCount = len(lines)
         _inFill = self.inFill
-        if _inFill or [rowNo for rowNo in P if getattr(lines[rowNo%styleCount],'inFill',False)]:
+        if (_inFill or self._pairInFills or
+                [rowNo for rowNo in range(len(P))
+                        if getattr(lines[rowNo%styleCount],'inFill',False)]
+                ):
             inFillY = self.categoryAxis._y
             inFillX0 = self.valueAxis._x
             inFillX1 = inFillX0 + self.categoryAxis._length
@@ -299,8 +321,7 @@ class HorizontalLineChart(LineChart):
         yzero = self._yzero
 
         # Iterate over data rows.
-        for rowNo in P:
-            row = self._positions[rowNo]
+        for rowNo, row in enumerate(reversed(P) if self.reversePlotOrder else P):
             styleIdx = rowNo % styleCount
             rowStyle = lines[styleIdx]
             strokeColor = rowStyle.strokeColor
@@ -327,12 +348,13 @@ class HorizontalLineChart(LineChart):
                     x,y = row[colNo]
                     g.add(Rect(x-hbw,min(y,yzero),2*hbw,abs(y-yzero),strokeWidth=strokeWidth,strokeColor=strokeColor,fillColor=fillColor))
             elif self.joinedLines or lineStyle=='joinedLine':
-                points = []
-                for colNo in range(len(row)):
-                    points += row[colNo]
-                if inFill:
-                    fpoints = [inFillX0,inFillY] + points + [inFillX1,inFillY]
+                points = flatten(row)
+                if inFill or isinstance(row,FillPairedData):
                     filler = getattr(rowStyle, 'filler', None)
+                    if isinstance(row,FillPairedData):
+                        fpoints = points + flatten(reversed(P[row.other]))
+                    else:
+                        fpoints = [inFillX0,inFillY] + points + [inFillX1,inFillY]
                     if filler:
                         filler.fill(self,inFillG,rowNo,fillColor,fpoints)
                     else:
@@ -353,9 +375,10 @@ class HorizontalLineChart(LineChart):
                 uSymbol = None
 
             if uSymbol:
-                for colNo in range(len(row)):
-                    x1, y1 = row[colNo]
-                    symbol = uSymbol2Symbol(uSymbol,x1,y1,rowStyle.strokeColor)
+                getSym = (lambda _i,_j: uSymbol.parent[_i,_j]) if isWKlass(uSymbol) else (lambda _i,_j: uSymbol)
+                for colNo,datum in enumerate(row):
+                    x1, y1 = datum
+                    symbol = uSymbol2Symbol(getSym(rowNo,colNo),x1,y1,rowStyle.strokeColor)
                     if symbol: g.add(symbol)
 
             # Draw item labels.
@@ -539,7 +562,6 @@ class HorizontalLineChart3D(HorizontalLineChart):
 class VerticalLineChart(LineChart):
     pass
 
-
 def sample1():
     drawing = Drawing(400, 200)
 
@@ -571,7 +593,6 @@ def sample1():
 
     return drawing
 
-
 class SampleHorizontalLineChart(HorizontalLineChart):
     "Sample class overwriting one method to draw additional horizontal lines."
 
@@ -599,7 +620,6 @@ class SampleHorizontalLineChart(HorizontalLineChart):
 
         return drawing
 
-
     def makeBackground(self):
         g = Group()
 
@@ -614,8 +634,6 @@ class SampleHorizontalLineChart(HorizontalLineChart):
                        strokeColor = self.strokeColor))
 
         return g
-
-
 
 def sample1a():
     drawing = Drawing(400, 200)
@@ -650,7 +668,6 @@ def sample1a():
 
     return drawing
 
-
 def sample2():
     drawing = Drawing(400, 200)
 
@@ -683,7 +700,6 @@ def sample2():
     drawing.add(lc)
 
     return drawing
-
 
 def sample3():
     drawing = Drawing(400, 200)
@@ -720,3 +736,32 @@ def sample3():
     drawing.add(lc)
 
     return drawing
+
+def sampleCandleStick():
+    from reportlab.graphics.widgetbase import CandleSticks
+    d = Drawing(400, 200)
+    chart = HorizontalLineChart()
+    d.add(chart)
+    chart.y = 20
+    boxMid = (100, 110, 120, 130)
+    hi = [m+10 for m in boxMid]
+    lo = [m-10 for m in boxMid]
+    boxHi = [m+6 for m in boxMid]
+    boxLo = [m-4 for m in boxMid]
+    boxFillColor = colors.pink
+    boxWidth = 20
+    crossWidth = 10
+    candleStrokeWidth = 0.5
+    candleStrokeColor = colors.black
+    chart.valueAxis.avoidBoundSpace = 5
+
+    chart.valueAxis.valueMin = min(min(boxMid),min(hi),min(lo),min(boxLo),min(boxHi))
+    chart.valueAxis.valueMax = max(max(boxMid),max(hi),max(lo),max(boxLo),max(boxHi))
+    lines = chart.lines
+    lines[0].strokeColor = None
+    I = range(len(boxMid))
+    chart.data = [boxMid]
+    d._candles = candles = CandleSticks(chart=chart, boxFillColor=boxFillColor, boxWidth=boxWidth, crossWidth=crossWidth, strokeWidth=candleStrokeWidth, strokeColor=candleStrokeColor)
+    for i in I: candles[0,i].setProperties(dict(position=i,boxMid=boxMid[i],crossLo=lo[i],crossHi=hi[i],boxLo=boxLo[i],boxHi=boxHi[i]))
+    for i in I: lines[i].symbol = candles[0,i]
+    return d

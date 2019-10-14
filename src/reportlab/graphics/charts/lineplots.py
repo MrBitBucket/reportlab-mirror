@@ -20,6 +20,7 @@ from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol, makeMar
 from reportlab.graphics.widgets.grids import Grid, DoubleGrid, ShadedRect, ShadedPolygon
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 from reportlab.graphics.charts.areas import PlotArea
+from .utils import FillPairedData
 
 # This might be moved again from here...
 class LinePlotProperties(PropHolder):
@@ -40,11 +41,6 @@ class InFillValue(int):
         self = int.__new__(cls,v)
         self.yValue = yValue
         return self
-
-class PairedData(list):
-    def __init__(self,v,other=0):
-        list.__init__(self,v)
-        self.other = other
 
 class Shader(_SetKeyWordArgs):
     _attrMap = AttrMap(BASE=PlotArea,
@@ -206,7 +202,7 @@ class LinePlot(AbstractLineChart):
         data = self.data
         n = len(data)
         for rowNo, row in enumerate(data):
-            if isinstance(row, PairedData):
+            if isinstance(row, FillPairedData):
                 other = row.other
                 if 0<=other<n:
                     if other==rowNo:
@@ -229,7 +225,7 @@ class LinePlot(AbstractLineChart):
 
         #if there are some paired lines we ensure only one is created
         for rowNo, other in pairs:
-            P[rowNo] = PairedData(P[rowNo],other)
+            P[rowNo] = FillPairedData(P[rowNo],other)
         self._pairInFills = len(pairs)
         self._positions = P
 
@@ -319,9 +315,9 @@ class LinePlot(AbstractLineChart):
             # Iterate over data columns.
             if self.joinedLines:
                 points = flatten(row)
-                if inFill or isinstance(row,PairedData):
+                if inFill or isinstance(row,FillPairedData):
                     filler = getattr(rowStyle, 'filler', None)
-                    if isinstance(row,PairedData):
+                    if isinstance(row,FillPairedData):
                         fpoints = points + flatten(reversed(P[row.other]))
                     else:
                         fpoints = [inFillX0,inFillY] + points + [inFillX1,inFillY]
@@ -375,8 +371,8 @@ class LinePlot(AbstractLineChart):
                         g.add(symbol)
 
             # Draw data labels.
-            for colNo in range(len(row)):
-                x1, y1 = row[colNo]
+            for colNo,datum in enumerate(row):
+                x1, y1 = datum
                 self.drawLabel(g, rowNo, colNo, x1, y1)
 
             shader = getattr(rowStyle, 'shader', None)
@@ -1203,3 +1199,13 @@ def sample2():
     drawing.add(lp)
 
     return drawing
+
+def sampleFillPairedData():
+    d = Drawing(400,200)
+    chart = SimpleTimeSeriesPlot()
+    d.add(chart)
+    chart.data = [FillPairedData(chart.data[0],1),chart.data[1]]
+    chart.lines[0].filler= Filler(fillColor=colors.toColor('#9f9f9f'),strokeWidth=0,strokeColor=None)
+    chart.lines[0].strokeColor = None
+    chart.lines[1].strokeColor = None
+    return d

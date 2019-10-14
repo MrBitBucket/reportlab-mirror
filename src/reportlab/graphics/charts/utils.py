@@ -388,3 +388,8 @@ class CustomDrawChanger:
         can restore them.
         '''
         raise RuntimeError('Abstract method _changer called')
+
+class FillPairedData(list):
+    def __init__(self,v,other=0):
+        list.__init__(self,v)
+        self.other = other

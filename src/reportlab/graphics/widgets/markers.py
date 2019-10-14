@@ -201,7 +201,7 @@ class Marker(Widget):
         return m
 
 def uSymbol2Symbol(uSymbol,x,y,color):
-    if isFunction(uSymbol):
+    if callable(uSymbol):
         symbol = uSymbol(x, y, 5, color)
     elif isClass(uSymbol) and issubclass(uSymbol,Widget):
         size = 10.

@@ -577,6 +577,14 @@ class CategoryAxis(_AxisG):
         if self.reverseDirection: idx = self._catCount-idx-1
         return idx
 
+    def scale(self, idx):
+        "Returns the position and width in drawing units"
+        return (self.loScale(idx), self._barWidth)
+
+    def midScale(self, idx):
+        "Returns the bar mid position in drawing units"
+        return self.loScale(idx) + 0.5*self._barWidth
+
 def _assertYAxis(axis):
     assert axis.isYAxis, "Cannot connect to other axes (%s), but Y- ones." % axis.__class__.__name__
 def _assertXAxis(axis):
@@ -723,9 +731,9 @@ class XCategoryAxis(_XTicks,CategoryAxis):
             elif jam in ('value', 'points'):
                 self.joinToAxis(ja, mode=jam, pos=self.joinAxisPos)
 
-    def scale(self, idx):
-        """returns the x position and width in drawing units of the slice"""
-        return (self._x + self.loPad + self._scale(idx)*self._barWidth, self._barWidth)
+    def loScale(self, idx):
+        """returns the x position in drawing units"""
+        return self._x + self.loPad + self._scale(idx)*self._barWidth
 
     def makeAxis(self):
         g = Group()
@@ -836,9 +844,9 @@ class YCategoryAxis(_YTicks,CategoryAxis):
             elif jam in ('value', 'points'):
                 self.joinToAxis(ja, mode=jam, pos=self.joinAxisPos)
 
-    def scale(self, idx):
-        "Returns the y position and width in drawing units of the slice."
-        return (self._y + self._scale(idx)*self._barWidth, self._barWidth)
+    def loScale(self, idx):
+        "Returns the y position in drawing units"
+        return self._y + self._scale(idx)*self._barWidth
 
     def makeAxis(self):
         g = Group()
@@ -1198,7 +1206,7 @@ class ValueAxis(_AxisG):
         abfiz = getattr(self,'abf_ignore_zero', False)
         if not isSeq(abfiz):
             abfiz = abfiz, abfiz
-        do_rr = rangeRound is not 'none' and do_rr
+        do_rr = rangeRound != 'none' and do_rr
         if do_rr:
             rrn = rangeRound in ['both','floor']
             rrx = rangeRound in ['both','ceiling']
