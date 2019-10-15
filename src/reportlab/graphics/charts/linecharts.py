@@ -11,7 +11,7 @@ from reportlab.lib.validators import isNumber, isNumberOrNone, isColor, isColorO
                                     isListOfNumbersOrNone, isStringOrNone, OneOf, Percentage
 from reportlab.lib.attrmap import *
 from reportlab.lib.utils import flatten
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder, isWKlass
+from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder, tpcGetItem
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing, Polygon, PolyLine
 from reportlab.graphics.widgets.signsandsymbols import NoEntry
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
@@ -375,10 +375,9 @@ class HorizontalLineChart(LineChart):
                 uSymbol = None
 
             if uSymbol:
-                getSym = (lambda _i,_j: uSymbol.parent[_i,_j]) if isWKlass(uSymbol) else (lambda _i,_j: uSymbol)
                 for colNo,datum in enumerate(row):
                     x1, y1 = datum
-                    symbol = uSymbol2Symbol(getSym(rowNo,colNo),x1,y1,rowStyle.strokeColor)
+                    symbol = uSymbol2Symbol(tpcGetItem(uSymbol,colNo),x1,y1,rowStyle.strokeColor)
                     if symbol: g.add(symbol)
 
             # Draw item labels.
@@ -761,7 +760,6 @@ def sampleCandleStick():
     lines[0].strokeColor = None
     I = range(len(boxMid))
     chart.data = [boxMid]
-    d._candles = candles = CandleSticks(chart=chart, boxFillColor=boxFillColor, boxWidth=boxWidth, crossWidth=crossWidth, strokeWidth=candleStrokeWidth, strokeColor=candleStrokeColor)
-    for i in I: candles[0,i].setProperties(dict(position=i,boxMid=boxMid[i],crossLo=lo[i],crossHi=hi[i],boxLo=boxLo[i],boxHi=boxHi[i]))
-    for i in I: lines[i].symbol = candles[0,i]
+    lines[0].symbol = candles = CandleSticks(chart=chart, boxFillColor=boxFillColor, boxWidth=boxWidth, crossWidth=crossWidth, strokeWidth=candleStrokeWidth, strokeColor=candleStrokeColor)
+    for i in I: candles[i].setProperties(dict(position=i,boxMid=boxMid[i],crossLo=lo[i],crossHi=hi[i],boxLo=boxLo[i],boxHi=boxHi[i]))
     return d

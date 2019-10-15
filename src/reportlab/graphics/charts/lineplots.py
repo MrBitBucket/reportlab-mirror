@@ -12,7 +12,7 @@ from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
 from reportlab.lib.utils import flatten, isStr
 from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine, Polygon, _SetKeyWordArgs
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
+from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder, tpcGetItem
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XValueAxis, YValueAxis, AdjYValueAxis, NormalDateXValueAxis
 from reportlab.graphics.charts.utils import *
@@ -353,7 +353,7 @@ class LinePlot(AbstractLineChart):
                     else:
                         symbol = juSymbol
                         symColor = getattr(symbol,'fillColor',strokeColor)
-                    symbol = uSymbol2Symbol(symbol,xy[0],xy[1],symColor)
+                    symbol = uSymbol2Symbol(tpcGetItem(symbol,j),xy[0],xy[1],symColor)
                     if symbol:
                         if bubblePlot:
                             symbol.size = bubbleR*(drow[j][2]/bubbleMax)**0.5

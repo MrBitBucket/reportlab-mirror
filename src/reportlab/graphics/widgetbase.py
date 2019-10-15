@@ -265,8 +265,8 @@ class TypedPropertyCollection(PropHolder):
         return key in self._children
 
     def __setitem__(self, key, value):
-        msg = "This collection can only hold objects of type %s" % self._value.__class__.__name__
-        assert isinstance(value, self._value.__class__), msg
+        assert isinstance(value, self._value.__class__), (
+            "This collection can only hold objects of type %s" % self._value.__class__.__name__)
 
     def __len__(self):
         return len(list(self._children.keys()))
@@ -289,14 +289,18 @@ class TypedPropertyCollection(PropHolder):
 
     def setVector(self,**kw):
         for name, value in kw.items():
-            for i in range(len(value)):
-                setattr(self[i],name,value[i])
+            for i, v in enumerate(value):
+                setattr(self[i],name,v)
 
     def __getattr__(self,name):
         return getattr(self._value,name)
 
     def __setattr__(self,name,value):
         return setattr(self._value,name,value)
+
+def tpcGetItem(obj,x):
+    '''return obj if it's not a TypedPropertyCollection else obj[x]'''
+    return obj[x] if isinstance(obj,TypedPropertyCollection) else obj
 
 def isWKlass(obj):
     if not hasattr(obj,'__propholder_parent__'): return

@@ -11,6 +11,14 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.30	15/10/2019
+--------------------------
+	* better support for candlestick charts using smartGetItem
+
+RELEASE 3.5.29	14/10/2019
+--------------------------
+	* Support for candlestick charts and infilled pair plots
+
 RELEASE 3.5.28	02/10/2019
 --------------------------
 	* improve support for AES encryption
