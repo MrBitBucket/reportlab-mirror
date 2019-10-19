@@ -2809,7 +2809,11 @@ class ParaParser(HTMLParser):
                 v = '\0'
         elif 'code' in attr:
             try:
-                v = int(eval(attr['code']))
+                v = attr['code'].lower()
+                if v.startswith('0x'):
+                    v = int(v,16)
+                else:
+                    v = int(v,0)    #treat as a python literal would be
                 v = chr(v) if isPy3 else unichr(v)
             except:
                 self._syntax_error('<unichar/> invalid code attribute %s' % ascii(attr['code']))

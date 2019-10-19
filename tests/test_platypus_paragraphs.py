@@ -7,6 +7,7 @@ from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, p
 setOutDir(__name__)
 import sys, os, unittest
 from operator import truth
+from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth, registerFont, registerFontFamily
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus.paraparser import ParaParser
@@ -108,7 +109,6 @@ class ParagraphCorners(unittest.TestCase):
 
     def test3(self):
         '''compare CJK splitting in some edge cases'''
-        from reportlab.pdfgen.canvas import Canvas
         from reportlab.platypus.paragraph import Paragraph
         from reportlab.lib.styles import ParagraphStyle
         from reportlab.pdfbase import pdfmetrics
@@ -503,7 +503,6 @@ component delimits the traditional practice of grammarians.'''
         """test that justified paragraphs with </br>last line split properly
         bug reported by Niharika Singh <nsingh@shoobx.com>
         """
-        from reportlab.pdfgen.canvas import Canvas
         measures = []
         def _odW(canv,name,label):
             measures.append((label,canv._curr_tx_info['cur_x']))
@@ -541,6 +540,12 @@ component delimits the traditional practice of grammarians.'''
         canv.save()
         self.assertEqual(M0,measures,"difference detected in justified split Paragraph rendering")
 
+    def test_unicharCodeSafety(self):
+        """test a bug reported by ravi prakash giri <raviprakashgiri@gmail.com>"""
+        normal = getSampleStyleSheet()['BodyText']
+        self.assertRaises(Exception,Paragraph,
+                """<unichar code="open('/tmp/test.txt','w').write('Hello from unichar')"/>""",
+                normal)
 
 class TwoFrameDocTemplate(BaseDocTemplate):
     "Define a simple document with two frames per page."
@@ -682,7 +687,6 @@ class FragmentTestCase(unittest.TestCase):
         bt.fontSize = 10
         bt.leading = 12
         bt.alignment = TA_JUSTIFY
-        from reportlab.pdfgen.canvas import Canvas
         canv = Canvas(outputfile('test_platypus_paragraphs_hyphenations.pdf'))
         x = 72
         y = canv._pagesize[1] - 72

@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.31	15/10/2019
+--------------------------
+	* paraparser fix contributed by ravi prakash giri <raviprakashgiri@gmail.com>
+
 RELEASE 3.5.30	15/10/2019
 --------------------------
 	* better support for candlestick charts using smartGetItem
