@@ -36,7 +36,7 @@ if __name__=='__main__':
             sys.path.insert(0,topDir)
             P.append(topDir)
     del topDir
-    from reportlab.lib.testutils import GlobDirectoryWalker, outputfile, printLocation
+    from reportlab.lib.testutils import GlobDirectoryWalker, RestrictedGlobDirectoryWalker, outputfile, printLocation
     pp = os.environ.get('PYTHONPATH','')
     if pp: P.append(pp)
     del pp
@@ -48,7 +48,7 @@ def makeSuite(folder, exclude=[],nonImportable=[],pattern='test_*.py'):
     allTests = unittest.TestSuite()
 
     if os.path.isdir(folder): sys.path.insert(0, folder)
-    for filename in GlobDirectoryWalker(folder, pattern):
+    for filename in RestrictedGlobDirectoryWalker(folder, pattern,['*/charts-out/*.py']):
         modname = os.path.splitext(os.path.basename(filename))[0]
         if modname not in exclude:
             try:

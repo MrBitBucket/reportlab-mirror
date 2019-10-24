@@ -154,7 +154,7 @@ class ExtConfigParser(ConfigParser):
         val = value.replace('\n', '')
 
         if self.pat.match(val):
-            return eval(val)
+            return eval(val,{})
         else:
             return value
 
@@ -216,22 +216,23 @@ class RestrictedGlobDirectoryWalker(GlobDirectoryWalker):
 
         if ignore == None:
             ignore = []
-        self.ignoredPatterns = []
-        if type(ignore) == type([]):
+        ip = [].append
+        if isinstance(ignore,(tuple,list)):
             for p in ignore:
-                self.ignoredPatterns.append(p)
-        elif type(ignore) == type(''):
-            self.ignoredPatterns.append(ignore)
-
+                ip(p)
+        elif isinstance(ignore,str):
+            ip(ignore)
+        self.ignorePatterns = ([_.replace('/',os.sep) for _ in ip.__self__] if os.sep != '/'
+                                else ip.__self__)
 
     def filterFiles(self, folder, files):
         "Filters all items from files matching patterns to ignore."
 
+        fnm = fnmatch.fnmatch
         indicesToDelete = []
-        for i in range(len(files)):
-            f = files[i]
-            for p in self.ignoredPatterns:
-                if fnmatch.fnmatch(f, p):
+        for i,f in enumerate(files):
+            for p in self.ignorePatterns:
+                if fnm(f, p) or fnm(os.path.join(folder,f),p):
                     indicesToDelete.append(i)
         indicesToDelete.reverse()
         for i in indicesToDelete:
@@ -333,11 +334,13 @@ class ScriptThatMakesFileTest(unittest.TestCase):
 
     def runTest(self):
         fmt = sys.platform=='win32' and '"%s" %s' or '%s %s'
-        p = os.popen(fmt % (sys.executable,self.scriptName),'r')
-        out = p.read()
+        import subprocess
+        out = subprocess.check_output((sys.executable,self.scriptName))
+        #p = os.popen(fmt % (sys.executable,self.scriptName),'r')
+        #out = p.read()
         if self.verbose:
             print(out)
-        status = p.close()
+        #status = p.close()
         assert os.path.isfile(self.outFileName), "File %s not created!" % self.outFileName
 
 def equalStrings(a,b,enc='utf8'):
