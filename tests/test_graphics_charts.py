@@ -286,12 +286,20 @@ h1 = styleSheet['Heading1']
 h2 = styleSheet['Heading2']
 h3 = styleSheet['Heading3']
 
-def run_samples(S,kind='axes'):
+def eps():
+    try:
+        from rlextra.graphics import renderPS_SEP
+    except ImportError:
+        return []
+    else:
+        return ['eps']
+
+def run_samples(L):
     outDir = outputfile('charts-out')
-    for f in S:
-        if f.startswith('sample'):
-            d = S[f]()
-            d.save(formats=['pdf', 'gif', 'svg'],outDir=outDir, fnRoot='test_graphics_charts_%s_%s' % (kind,f))
+    for k,f,kind in L:
+        d = f()
+        if not isinstance(d,Drawing): continue
+        d.save(formats=['pdf', 'gif', 'svg', 'ps', 'py']+eps(),outDir=outDir, fnRoot='test_graphics_charts_%s_%s' % (kind,k))
 
 class ChartTestCase(unittest.TestCase):
     "Test chart classes."
@@ -973,7 +981,18 @@ class ChartTestCase(unittest.TestCase):
 
             return drawing
 
-        run_samples(locals())
+        def extract_samples():
+            S = [].extend
+            for m in ('barcharts','doughnut','linecharts','lineplots','piecharts','spider'):
+                mod = {}
+                exec('from reportlab.graphics.charts import %s as mod' % m ,mod)
+                mod  = mod['mod']
+                L = [(k,getattr(mod,k)) for k in dir(mod) if k.lower().startswith('sample')]
+                S([(k,v,m) for k,v in L if callable(v)])
+            return S.__self__
+
+        run_samples([(k,v,'axes') for k,v in locals().items() if k.lower().startswith('sample')])
+        run_samples(extract_samples())
 
     def test_legends(self):
         from reportlab.graphics.charts.legends import Legend, LineLegend, LineSwatch
@@ -1085,7 +1104,7 @@ class ChartTestCase(unittest.TestCase):
             d.legend.swatchCallout = LSwatchCallout(sw_names,'Helvetica',12)
             return d
 
-        run_samples(locals(),'legends')
+        run_samples([(k,v,'legends') for k,v in locals().items() if k.lower().startswith('sample')])
 
 def makeSuite():
     return makeSuiteForClasses(ChartTestCase)

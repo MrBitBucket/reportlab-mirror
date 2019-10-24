@@ -10,6 +10,7 @@ vertical versions.
 """
 
 import copy, functools
+from ast import literal_eval
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isNumberOrNone, isColor, isColorOrNone, isString,\
@@ -200,8 +201,8 @@ class BarChart(PlotArea):
                 pdata = max((len(d) for d in D))*[0]
                 ndata = pdata[:]
                 for d in D:
-                    for i in xrange(len(d)):
-                        v = d[i] or 0
+                    for i,v in enumerate(d):
+                        v = v or 0
                         if v<=-1e-6:
                             ndata[i] += v
                         else:
@@ -281,7 +282,7 @@ class BarChart(PlotArea):
                 if k not in Z:
                     raise ValueError('Unknown zIndex variable %r in %r\nallowed variables are\n%s' % (k,Z,'\n'.join(['%s=%r'% (k,Z[k]) for k in sorted(Z.keys())])))
                 try:
-                    v = eval(v,{})  #only constants allowed
+                    v = literal_eval(v) #only constants allowed
                     assert isinstance(v,(float,int))
                 except:
                     raise ValueError('Bad zIndex value %r in clause %r of zIndex\nallowed variables are\n%s' % (v,z,zIndex,'\n'.join(['%s=%r'% (k,Z[k]) for k in sorted(Z.keys())])))
@@ -465,11 +466,10 @@ class BarChart(PlotArea):
             barRow.append(flipXY and (y,x,height,width) or (x,y,width,height))
 
         if style!='mixed':
-            for rowNo in xrange(seriesCount):   #iterate over the separate series
+            for rowNo, row in enumerate(data):  #iterate over the separate series
                 barRow = []
                 xVal = barsPerGroup - 1 - rowNo if reversePlotOrder else rowNo
                 xVal = offs + xVal*bGap
-                row = data[rowNo]
                 for colNo in xrange(rowLength): #iterate over categories
                     _addBar(colNo,colNo)
                 aBP(barRow)
@@ -610,7 +610,6 @@ class BarChart(PlotArea):
         g.add(r)
 
     def _makeBars(self,g,lg):
-        lenData = len(self.data)
         bars = self.bars
         br = getattr(self,'barRecord',None)
         BP = self._barPositions
@@ -620,11 +619,10 @@ class BarChart(PlotArea):
         catNNA = {}
         if catNAL:
             CBL = []
-            rowNoL = lenData - 1
+            rowNoL = len(self.data) - 1
             #find all the categories that have at least one value
             for rowNo, row in enumerate(BP):
-                for colNo in xrange(len(row)):
-                    x, y, width, height = row[colNo]
+                for colNo, (x, y, width, height) in enumerate(row):
                     if None not in (width,height):
                         catNNA[colNo] = 1
 
@@ -632,9 +630,8 @@ class BarChart(PlotArea):
             styleCount = len(bars)
             styleIdx = rowNo % styleCount
             rowStyle = bars[styleIdx]
-            for colNo in xrange(len(row)):
+            for colNo, (x,y,width,height) in enumerate(row):
                 style = (styleIdx,colNo) in bars and bars[(styleIdx,colNo)] or rowStyle
-                x, y, width, height = row[colNo]
                 if None in (width,height):
                     if not catNAL or colNo in catNNA:
                         self._addNABarLabel(lg,rowNo,colNo,x,y,width,height)
@@ -754,8 +751,8 @@ class BarChart(PlotArea):
             lo = self.x
             hi = lo + self.width
             end = self.y+self.height
-            for i in xrange(lenData):
-                for x, y, w, h in BP[i]:
+            for bp in BP:
+                for x, y, w, h in bp:
                     v = x+w
                     z = y+h
                     aC((min(y,z),max(y,z), min(x,v) - lo, hi - max(x,v)))
@@ -763,8 +760,8 @@ class BarChart(PlotArea):
             lo = self.y
             hi = lo + self.height
             end = self.x+self.width
-            for i in xrange(lenData):
-                for x, y, w, h in BP[i]:
+            for bp in BP:
+                for x, y, w, h in bp:
                     v = y+h
                     z = x+w
                     aC((min(x,z), max(x,z), min(y,v) - lo, hi - max(y,v)))
@@ -813,15 +810,12 @@ class BarChart(PlotArea):
         cA.configure(self._configureData)
         self.calcBarPositions()
 
-        lenData = len(self.data)
         bars = self.bars
         R = [].append
         BP = self._barPositions
-        for rowNo in xrange(lenData):
-            row = BP[rowNo]
+        for rowNo, row in enumerate(BP):
             C = [].append
-            for colNo in xrange(len(row)):
-                x, y, width, height = row[colNo]
+            for colNox, (y, width, height) in enumerate(row):
                 if None in (width,height):
                     na = self.naLabel
                     if na and na.text:

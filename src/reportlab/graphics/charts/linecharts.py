@@ -344,8 +344,7 @@ class HorizontalLineChart(LineChart):
                     hbw = self._hngs*barWidth*0.01
                 else:
                     hbw = barWidth*0.5
-                for colNo in range(len(row)):
-                    x,y = row[colNo]
+                for x, y in row:
                     g.add(Rect(x-hbw,min(y,yzero),2*hbw,abs(y-yzero),strokeWidth=strokeWidth,strokeColor=strokeColor,fillColor=fillColor))
             elif self.joinedLines or lineStyle=='joinedLine':
                 points = flatten(row)
@@ -375,15 +374,13 @@ class HorizontalLineChart(LineChart):
                 uSymbol = None
 
             if uSymbol:
-                for colNo,datum in enumerate(row):
-                    x1, y1 = datum
-                    symbol = uSymbol2Symbol(tpcGetItem(uSymbol,colNo),x1,y1,rowStyle.strokeColor)
+                for colNo,(x,y) in enumerate(row):
+                    symbol = uSymbol2Symbol(tpcGetItem(uSymbol,colNo),x,y,rowStyle.strokeColor)
                     if symbol: g.add(symbol)
 
             # Draw item labels.
-            for colNo in range(len(row)):
-                x1, y1 = row[colNo]
-                self.drawLabel(g, rowNo, colNo, x1, y1)
+            for colNo, (x, y) in enumerate(row):
+                self.drawLabel(g, rowNo, colNo, x, y)
 
         return g
 

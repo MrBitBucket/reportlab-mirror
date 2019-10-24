@@ -15,11 +15,11 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 def mkTimeTuple(timeString):
     "Convert a 'dd/mm/yyyy' formatted string to a tuple for use in the time module."
 
-    list = [0] * 9
+    L = [0] * 9
     dd, mm, yyyy = list(map(int, timeString.split('/')))
-    list[:3] = [yyyy, mm, dd]
+    L[:3] = [yyyy, mm, dd]
 
-    return tuple(list)
+    return tuple(L)
 
 def str2seconds(timeString):
     "Convert a number of seconds since the epoch into a date string."
