@@ -11,7 +11,8 @@ from reportlab import rl_config
 import unittest
 from reportlab.lib import colors
 from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetAttr, rl_isfile, \
-                                isCompactDistro, isPy3, isPyPy, TimeStamp, rl_get_module
+                                isCompactDistro, isPy3, isPyPy, TimeStamp, rl_get_module, \
+                                recursiveGetAttr, recursiveSetAttr, recursiveDelAttr
 
 def _rel_open_and_read(fn):
     from reportlab.lib.utils import open_and_read
@@ -207,8 +208,139 @@ class ImporterTestCase(unittest.TestCase):
         ff.search()
         ff.getFamilyNames()
 
+
+class RaccessTest:
+    l = [1, 2]
+    a = [0, [1, 2, [3,4]]]
+    b = {'x': {'y': 'y'}, 'z': [1, 2]}
+    z = 'z'
+
+class RaccessPerson:
+    settings = {
+        'autosave': True,
+        'style': {
+            'height': 30,
+            'width': 200
+        },
+        'themes': ['light', 'dark']
+    }
+    def __init__(self, name, age, friends):
+        self.name = name
+        self.age = age
+        self.friends = friends
+
+class RaccessTestCase(unittest.TestCase):
+    "Test recursive access functions"
+    def test1(self):
+        def innerTest(k,v):
+            obj = RaccessTest()
+            obj.t = obj
+            obj.a.append(obj)
+            obj.b['w'] = obj
+            self.assertEqual(recursiveGetAttr(obj,k),v,"error getattr(obj,%r)==%r" % (k,v))
+        for k,v in [
+            ('l', RaccessTest.l),
+            ('t.t.t.t.z', 'z'),
+            ('a[0]', 0),
+            ('a[1][0]', 1),
+            ('a[1][2]', [3,4]),
+            ('b["x"]', {'y': 'y'}),
+            ('b["x"]["y"]', 'y'),
+            ('b["z"]', [1,2]),
+            ('b["z"][1]', 2),
+            ('b["w"].z', 'z'),
+            ('b["w"].t.l', [1, 2]),
+            ('a[-1].z', 'z'),
+            ('l[-1]', 2),
+            ('a[2].t.a[-1].z', 'z'),
+            ('a[2].t.b["z"][0]', 1),
+            ('a[-1].t.z', 'z'),
+            ]:
+            innerTest(k,v)
+
+    def test_person_example(self):
+        bob = RaccessPerson(name="Bob", age=31, friends=[])
+        jill = RaccessPerson(name="Jill", age=29, friends=[bob])
+        jack = RaccessPerson(name="Jack", age=28, friends=[bob, jill])
+
+        # Nothing new
+        self.assertEqual(recursiveGetAttr(bob, 'age') ,31)
+
+        # Lists
+        self.assertEqual(recursiveGetAttr(jill, 'friends[0].name') ,'Bob')
+        self.assertEqual(recursiveGetAttr(jack, 'friends[-1].age') ,29)
+
+        # Dict lookups
+        self.assertEqual(recursiveGetAttr(jack, 'settings["style"]["width"]') ,200)
+
+        # Combination of lookups
+        self.assertEqual(recursiveGetAttr(jack, 'settings["themes"][-2]') ,'light')
+        self.assertEqual(recursiveGetAttr(jack, 'friends[-1].settings["themes"][1]') ,'dark')
+
+        # Setattr
+        recursiveSetAttr(bob, 'settings["style"]["width"]', 400)
+        self.assertEqual(recursiveGetAttr(bob, 'settings["style"]["width"]') ,400)
+
+        # Nested objects
+        recursiveSetAttr(bob, 'friends', [jack, jill])
+        self.assertEqual(recursiveGetAttr(jack, 'friends[0].friends[0]') ,jack)
+
+        recursiveSetAttr(jill, 'friends[0].age', 32)
+        self.assertEqual(bob.age ,32)
+
+        # Deletion
+        recursiveDelAttr(jill, 'friends[0]')
+        self.assertEqual(len(jill.friends) ,0)
+
+        recursiveDelAttr(jill, 'age')
+        assert not hasattr(jill, 'age')
+
+        recursiveDelAttr(bob, 'friends[0].age')
+        assert not hasattr(jack, 'age')
+
+        # Unsupported
+        with self.assertRaises(NotImplementedError) as e:
+            recursiveGetAttr(bob, 'friends[0+1]')
+
+        # Nice try, function calls are not allowed
+        with self.assertRaises(ValueError):
+            recursiveGetAttr(bob, 'friends.pop(0)')
+
+        # Must be an expression
+        with self.assertRaises(ValueError):
+            recursiveGetAttr(bob, 'friends = []')
+
+        # Must be an expression
+        with self.assertRaises(SyntaxError):
+            recursiveGetAttr(bob, 'friends..')
+
+        # Must be an expression
+        with self.assertRaises(KeyError):
+            recursiveGetAttr(bob, 'settings["DoesNotExist"]')
+
+        # Must be an expression
+        with self.assertRaises(IndexError):
+            recursiveGetAttr(bob, 'friends[100]')
+
+    def test_empty(self):
+        obj = RaccessTest()
+        with self.assertRaises(ValueError):
+           recursiveGetAttr(obj,"  ")
+
+        with self.assertRaises(ValueError):
+            recursiveGetAttr(obj,"")
+
+        with self.assertRaises(TypeError):
+            recursiveGetAttr(obj, 0)
+
+        with self.assertRaises(TypeError):
+            recursiveGetAttr(obj, None)
+
+        with self.assertRaises(TypeError):
+            recursiveGetAttr(obj, obj)
+
 def makeSuite():
-    return makeSuiteForClasses(ImporterTestCase)
+    return makeSuiteForClasses(ImporterTestCase,RaccessTestCase)
 
 if __name__ == "__main__": #noruntests
     unittest.TextTestRunner().run(makeSuite())

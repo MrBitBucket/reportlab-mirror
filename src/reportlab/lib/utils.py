@@ -4,7 +4,9 @@
 __version__='3.3.0'
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
-import os, sys, time, types, datetime
+import os, sys, time, types, datetime, ast
+from functools import reduce as functools_reduce
+literal_eval = ast.literal_eval
 from base64 import decodestring as base64_decodestring, encodestring as base64_encodestring
 from reportlab import isPy3
 from reportlab.lib.logger import warnOnce
@@ -240,7 +242,7 @@ else:
             del frame
         elif L is None:
             L = G
-        exec("""exec obj in G, L""")
+        exec(obj,G, L)
     rl_exec("""def rl_reraise(t, v, b=None):\n\traise t, v, b\n""")
 
     char2int = ord
@@ -490,22 +492,6 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     finally:
         sys.path = opath
 
-def recursiveGetAttr(obj, name):
-    "Can call down into e.g. object1.object2[4].attr"
-    return eval(name, obj.__dict__)
-
-def recursiveSetAttr(obj, name, value):
-    "Can call down into e.g. object1.object2[4].attr = value"
-    #get the thing above last.
-    tokens = name.split('.')
-    if len(tokens) == 1:
-        setattr(obj, name, value)
-    else:
-        most = '.'.join(tokens[:-1])
-        last = tokens[-1]
-        parent = recursiveGetAttr(obj, most)
-        setattr(parent, last, value)
-
 def import_zlib():
     try:
         import zlib
@@ -558,9 +544,9 @@ def getArgvDict(**kw):
             elif isinstance(v,int):
                 v = int(av)
             elif isinstance(v,list):
-                v = list(eval(av))
+                v = list(literal_eval(av),{})
             elif isinstance(v,tuple):
-                v = tuple(eval(av))
+                v = tuple(literal_eval(av),{})
             else:
                 raise TypeError("Can't convert string %r to %s" % (av,type(v)))
         return v
@@ -575,7 +561,7 @@ def getArgvDict(**kw):
         handled = 0
         ke = k+'='
         for a in A:
-            if a.find(ke)==0:
+            if a.startswith(ke):
                 av = a[len(ke):]
                 A.remove(a)
                 R[k] = handleValue(v,av,func)
@@ -1516,3 +1502,89 @@ class TimeStamp(object):
             a[2] = a[2].lstrip('0')
             a = ' '.join(a)
         return a
+
+def safer_globals(g=None):
+    if g is None:
+        g = sys._getframe(1).f_globals.copy()
+    for name in ('__annotations__', '__builtins__', '__doc__', '__loader__', '__name__', '__package__', '__spec__'):
+        if name in g:
+            del g[name]
+    return g
+
+###############################################################
+#the following code has been (thanks to MIT license)
+#freely adapted from https://github.com/frmdstryr/magicattr
+#the function names are changed to avoid clasing with the actual
+#magicattr names to prevent confusion should others be using that
+#as well as ReportLab
+from functools import reduce as functools_reduce
+
+#: Types of AST nodes that are used
+_raccess_ast_types = (ast.Name, ast.Attribute, ast.Subscript, ast.Call)
+
+def recursiveGetAttr(ob, a):
+    return functools_reduce(_raccess_getattr, _raccess_get_nodes(a), ob)
+
+def recursiveSetAttr(ob, a, val):
+    ob, attr_or_key, is_subscript = raccess_lookup(ob, a)
+    if is_subscript:
+        ob[attr_or_key] = val
+    else:
+        setattr(ob, attr_or_key, val)
+
+def recursiveDelAttr(ob, a):
+    ob, attr_or_key, is_subscript = raccess_lookup(ob, a)
+    if is_subscript:
+        del ob[attr_or_key]
+    else:
+        delattr(ob, attr_or_key)
+
+def raccess_lookup(ob, a):
+    N = tuple(_raccess_get_nodes(a))
+    if len(N) > 1:
+        ob = functools_reduce(_raccess_getattr, N[:-1], ob)
+        n = N[-1]
+    else:
+        n = N[0]
+    if isinstance(n, ast.Attribute):
+        return ob, n.attr, False
+    elif isinstance(n, ast.Subscript):
+        return ob, _raccess_getitem(n.slice.value), True
+    elif isinstance(n, ast.Name):
+        return ob, n.id, False
+    raise NotImplementedError("access by %s is not supported" % n)
+
+def _raccess_get_nodes(a):
+    if not isStr(a):
+        raise TypeError("Attribute name must be a string not %s" % repr(a))
+    if not isNative(a):
+        a = asNative(a)
+    N = ast.parse(a).body
+    if not N or not isinstance(N[0], ast.Expr):
+        raise ValueError("Invalid expression: %s"%a)
+    return reversed([n for n in ast.walk(N[0])
+                     if isinstance(n, _raccess_ast_types)])
+
+def _raccess_getitem(n):
+    # Handle indexes
+    if isinstance(n, ast.Num):
+        return n.n
+    # Handle string keys
+    elif isinstance(n, ast.Str):
+        return n.s
+    # Handle negative indexes
+    elif (isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.USub)
+          and isinstance(n.operand, ast.Num)):
+        return -n.operand.n
+    raise NotImplementedError("subscripting unsupported for node: %s" % n)
+
+def _raccess_getattr(ob, n):
+    if isinstance(n, ast.Attribute):
+        return getattr(ob, n.attr)
+    elif isinstance(n, ast.Subscript):
+        return ob[_raccess_getitem(n.slice.value)]
+    elif isinstance(n, ast.Name):
+        return getattr(ob, n.id)
+    elif isinstance(n, ast.Call):
+        raise ValueError("Function calls are not allowed.")
+    raise NotImplementedError("unsupported node: %s" % n)
