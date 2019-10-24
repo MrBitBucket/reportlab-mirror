@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2017
+#Copyright ReportLab Europe Ltd. 2000-2019
 #see license.txt for license details
 __version__='3.4.22'
 
@@ -58,14 +58,24 @@ of non-Python applications.
 Future plans might include using this to auto-register fonts; and making it
 update itself smartly on repeated instantiation.
 """
-import sys, time, os, tempfile
-from reportlab.lib.utils import pickle
+import sys, os, tempfile
+from reportlab.lib.utils import pickle, asNative as _asNative
 from xml.sax.saxutils import quoteattr
 from reportlab.lib.utils import asBytes
+try:
+    from time import process_time as clock
+except ImportError:
+    from time import clock
 try:
     from hashlib import md5
 except ImportError:
     from md5 import md5
+
+def asNative(s):
+    try:
+        return _asNative(s)
+    except:
+        return _asNative(s,enc='latin-1')
 
 EXTENSIONS = ['.ttf','.ttc','.otf','.pfb','.pfa']
 
@@ -115,7 +125,7 @@ class FontDescriptor:
 
 from reportlab.lib.utils import rl_isdir, rl_isfile, rl_listdir, rl_getmtime
 class FontFinder:
-    def __init__(self, dirs=[], useCache=True, validate=False, recur=False, fsEncoding=None):
+    def __init__(self, dirs=[], useCache=True, validate=False, recur=False, fsEncoding=None, verbose=0):
         self.useCache = useCache
         self.validate = validate
         if fsEncoding is None:
@@ -133,6 +143,7 @@ class FontFinder:
         self._fontsByName = {}
         self._fontsByFamily = {}
         self._fontsByFamilyBoldItalic = {}   #indexed by bold, italic
+        self.verbose = verbose
 
     def addDirectory(self, dirName, recur=None):
         #aesthetics - if there are 2 copies of a font, should the first or last
@@ -175,10 +186,10 @@ class FontFinder:
         lines.append('<?xml version="1.0" encoding="UTF-8" standalone="yes"?>')
         lines.append("<font_families>")
         for dirName in self._dirs:
-            lines.append("    <directory name=%s/>" % quoteattr(dirName))
+            lines.append("    <directory name=%s/>" % quoteattr(asNative(dirName)))
         for familyName in self.getFamilyNames():
             if familyName:  #skip null case
-                lines.append('    <family name=%s>' % quoteattr(familyName))
+                lines.append('    <family name=%s>' % quoteattr(asNative(familyName)))
                 for font in self.getFontsInFamily(familyName):
                     lines.append('        ' + font.getTag())
                 lines.append('    </family>')
@@ -229,7 +240,8 @@ class FontFinder:
         self.__dict__.update(finder2.__dict__)
 
     def search(self):
-        #started = time.time()
+        if self.verbose:
+            started = clock()
         if not self._dirs:
             raise ValueError("Font search path is empty!  Please specify search directories using addDirectory or addDirectories")
 
@@ -238,7 +250,8 @@ class FontFinder:
             if rl_isfile(cfn):
                 try:
                     self.load(cfn)
-                    #print "loaded cached file with %d fonts (%s)" % (len(self._fonts), cfn)
+                    if self.verbose>=3:
+                        print("loaded cached file with %d fonts (%s)" % (len(self._fonts), cfn))
                     return
                 except:
                     pass  #pickle load failed.  Ho hum, maybe it's an old pickle.  Better rebuild it.
@@ -311,16 +324,17 @@ class FontFinder:
         if self.useCache:
             self.save(cfn)
 
-        #finished = time.time()
-##        print "found %d fonts; skipped %d; bad %d.  Took %0.2f seconds" % (
-##            len(self._fonts), len(self._skippedFiles), len(self._badFiles),
-##            finished - started
-##            )
+        if self.verbose:
+            finished = clock()
+            print("found %d fonts; skipped %d; bad %d.  Took %0.2f seconds" % (
+                len(self._fonts), len(self._skippedFiles), len(self._badFiles),
+                finished - started
+                ))
 
 def test():
     #windows-centric test maybe
     from reportlab import rl_config
-    ff = FontFinder()
+    ff = FontFinder(verbose=rl_config.verbose)
     ff.useCache = True
     ff.validate = True
 
