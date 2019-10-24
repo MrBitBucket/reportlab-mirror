@@ -918,8 +918,9 @@ def test(outDir='epsout',shout=False):
 
         for funcname in dir(testshapes):
             if funcname[0:10] == 'getDrawing':
-                drawing = eval('testshapes.' + funcname + '()')  #execute it
-                docstring = eval('testshapes.' + funcname + '.__doc__')
+                func = getattr(testshapes,funcname)
+                drawing = func()
+                docstring = getattr(func,'__doc__','')
                 drawings.append((drawing, docstring))
 
         i = 0

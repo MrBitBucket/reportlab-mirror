@@ -349,8 +349,9 @@ def test(outDir='pdfout',shout=False):
     drawings = []
     for funcname in dir(testshapes):
         if funcname[0:10] == 'getDrawing':
-            drawing = eval('testshapes.' + funcname + '()')  #execute it
-            docstring = eval('testshapes.' + funcname + '.__doc__')
+            func = getattr(testshapes,funcname)
+            drawing = func()  #execute it
+            docstring = getattr(func,'__doc__','')
             drawings.append((drawing, docstring))
 
     #print in a loop, with their doc strings
@@ -380,32 +381,6 @@ def test(outDir='pdfout',shout=False):
     c.save()
     if shout or verbose>2:
         print('saved %s' % ascii(fn))
-
-##def testFlowable():
-##    """Makes a platypus document"""
-##    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-##    from reportlab.lib.styles import getSampleStyleSheet
-##    styles = getSampleStyleSheet()
-##    styNormal = styles['Normal']
-##
-##    doc = SimpleDocTemplate('test_flowable.pdf')
-##    story = []
-##    story.append(Paragraph("This sees is a drawing can work as a flowable", styNormal))
-##
-##    import testdrawings
-##    drawings = []
-##
-##    for funcname in dir(testdrawings):
-##        if funcname[0:10] == 'getDrawing':
-##            drawing = eval('testdrawings.' + funcname + '()')  #execute it
-##            docstring = eval('testdrawings.' + funcname + '.__doc__')
-##            story.append(Paragraph(docstring, styNormal))
-##            story.append(Spacer(18,18))
-##            story.append(drawing)
-##            story.append(Spacer(36,36))
-##
-##    doc.build(story)
-##    print 'saves test_flowable.pdf'
 
 if __name__=='__main__':
     test(shout=True)

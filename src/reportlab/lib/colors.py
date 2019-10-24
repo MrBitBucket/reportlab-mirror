@@ -42,8 +42,9 @@ ValueError: css color 'pcmyka(100,0,0,0)' has wrong number of components
 import math, re, functools
 from reportlab import isPy3, cmp
 from reportlab.lib.rl_accel import fp_str
-from reportlab.lib.utils import asNative, isStr
+from reportlab.lib.utils import asNative, isStr, safer_globals
 import collections
+from ast import literal_eval
 
 class Color:
     """This class is used to represent color.  Components red, green, blue
@@ -769,8 +770,7 @@ class cssParse:
     def pcVal(self,v):
         v = v.strip()
         try:
-            c=eval(v[:-1])
-            if not isinstance(c,(float,int)): raise ValueError
+            c=float(v[:-1])
             c=min(100,max(0,c))/100.
         except:
             raise ValueError('bad percentage argument value %r in css color %r' % (v,self.s))
@@ -782,9 +782,8 @@ class cssParse:
     def rgbVal(self,v):
         v = v.strip()
         try:
-            c=eval(v[:])
-            if not isinstance(c,(int,float)): raise ValueError
-            if isinstance(c,float) and 0<=c<=1: c *= 255
+            c=float(v)
+            if 0<c<=1: c *= 255
             return int(min(255,max(0,c)))/255.
         except:
             raise ValueError('bad argument value %r in css color %r' % (v,self.s))
@@ -792,16 +791,14 @@ class cssParse:
     def hueVal(self,v):
         v = v.strip()
         try:
-            c=eval(v[:])
-            if not isinstance(c,(int,float)): raise ValueError
+            c=float(v)
             return ((c%360+360)%360)/360.
         except:
             raise ValueError('bad hue argument value %r in css color %r' % (v,self.s))
 
     def alphaVal(self,v,c=1,n='alpha'):
         try:
-            a = eval(v.strip())
-            if not isinstance(a,(int,float)): raise ValueError
+            a = float(v)
             return min(c,max(0,a))
         except:
             raise ValueError('bad %s argument value %r in css color %r' % (n,v,self.s))
@@ -864,7 +861,7 @@ class toColor:
             s = arg.lower()
             if s in C: return C[s]
             try:
-                return toColor(eval(arg))
+                return toColor(eval(arg,safer_globals()))
             except:
                 pass
 

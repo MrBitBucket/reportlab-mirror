@@ -11,6 +11,13 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.32	24/10/2019
+--------------------------
+	* some chart efficiency changes
+	* use clock in fontFinder contributed by Matěj Cepl @ bitbucket
+	* improve recursive access and do some minor eval/exec fixes
+	* improve use of eval/exec
+
 RELEASE 3.5.31	15/10/2019
 --------------------------
 	* paraparser fix contributed by ravi prakash giri <raviprakashgiri@gmail.com>

@@ -4,7 +4,8 @@ __version__='3.3.0'
 
 """helpers for pdf encryption/decryption"""
 import sys, os, tempfile
-from reportlab.lib.utils import getBytesIO, md5, asBytes, int2Byte, char2int, rawUnicode, rawBytes, isPy3
+from binascii import hexlify, unhexlify
+from reportlab.lib.utils import getBytesIO, md5, asBytes, int2Byte, char2int, rawUnicode, rawBytes, isPy3, asNative
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfdoc import PDFObject
@@ -309,18 +310,12 @@ padding = """
 
 def hexText(text):
     "a legitimate way to show strings in PDF"
-    return '<' + ''.join('%02X' % ord(c) for c in rawUnicode(text)) + '>'
+    return '<%s>' % asNative(hexlify(rawBytes(text))).upper()
 
 def unHexText(hexText):
     equalityCheck(hexText[0], '<', 'bad hex text')
     equalityCheck(hexText[-1], '>', 'bad hex text')
-    hexText = hexText[1:-1]
-    out = b''
-    for i in range(int(len(hexText)/2.0)):
-        slice = hexText[i*2: i*2+2]
-        char = int2Byte(eval('0x'+slice))
-        out = out + char
-    return out
+    return unhexlify(hexText[1:-1])
 
 PadString = rawBytes(''.join(chr(int(c, 16)) for c in padding.strip().split()))
 
@@ -735,9 +730,9 @@ See PdfEncryptIntro.pdf for more information.
                 try:
                     if argv[pos+1] not in known_modes:
                         if thisarg[0] in binaryrequired:
-                            exec(thisarg[1] +' = int(argv[pos+1])')
+                            exec(thisarg[1] +' = int(argv[pos+1])',vars())
                         else:
-                            exec(thisarg[1] +' = argv[pos+1]')
+                            exec(thisarg[1] +' = argv[pos+1]',vars())
                         if verbose:
                             print("%s set to: '%s'." % (thisarg[3], argv[pos+1]))
                         argv.remove(argv[pos+1])

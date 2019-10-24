@@ -480,4 +480,4 @@ message2 = '\202\261\202\352\202\315\225\275\220\254\212p\203S\203V\203b\203N\20
 ##            out.append(word)
 ##        else:
 ##            out.append(word + ',')
-##    return eval(''.join(out))
+##    return eval(''.join(out),{})

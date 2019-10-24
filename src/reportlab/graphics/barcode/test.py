@@ -2,6 +2,7 @@
 
 import os, sys, time
 
+from reportlab import Version as __RL_Version__
 from reportlab.graphics.barcode.common import *
 from reportlab.graphics.barcode.code39 import *
 from reportlab.graphics.barcode.code93 import *
@@ -148,23 +149,14 @@ def fullTest(fileName="test_full.pdf"):
     styleH2 = styles['Heading2']
     story = []
 
-    story.append(Paragraph('ReportLab Barcode Test Suite - full output', styleH))
-    story.append(Paragraph('Generated on %s' % time.ctime(time.time()), styleN))
+    story.append(Paragraph('ReportLab %s Barcode Test Suite - full output' % __RL_Version__,styleH))
+    story.append(Paragraph('Generated at %s' % time.ctime(time.time()), styleN))
 
-    story.append(Paragraph('', styleN))
-    story.append(Paragraph('Repository information for this build:', styleN))
-    #see if we can figure out where it was built, if we're running in source
-    if os.path.split(os.getcwd())[-1] == 'barcode' and os.path.isdir('.svn'):
-        #runnning in a filesystem svn copy
-        infoLines = os.popen('svn info').read()
-        story.append(Preformatted(infoLines, styles["Code"]))
-        
     story.append(Paragraph('About this document', styleH2))
     story.append(Paragraph('History and Status', styleH2))
 
     story.append(Paragraph("""
-        This is the test suite and docoumentation for the ReportLab open source barcode API,
-        being re-released as part of the forthcoming ReportLab 2.0 release.
+        This is the test suite and docoumentation for the ReportLab open source barcode API.
         """, styleN))
 
     story.append(Paragraph("""

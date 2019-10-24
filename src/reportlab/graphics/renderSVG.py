@@ -355,7 +355,7 @@ class SVGCanvas:
             self.style['stroke-dasharray'] = ', '.join(map(str, ([array, phase])))
         elif isinstance(array,(tuple,list)) and len(array) > 0:
             assert phase >= 0, "phase is a length in user space"
-            self.style['stroke-dasharray'] = ', '.join(map(str, (array+[phase])))
+            self.style['stroke-dasharray'] = ', '.join(map(str, (list(array)+[phase])))
 
     def setStrokeColor(self, color):
         self._strokeColor = color
@@ -933,13 +933,11 @@ def test(outDir='out-svg'):
     drawings = []
 
     for funcname in dir(testshapes):
-        #if funcname[0:11] == 'getDrawing2':
-        #    print 'hacked to only show drawing 2'
         if funcname[0:10] == 'getDrawing':
-            drawing = eval('testshapes.' + funcname + '()')
-            docstring = eval('testshapes.' + funcname + '.__doc__')
+            func = getattr(testshapes,funcname)
+            drawing = func()
+            docstring = getattr(func,'__doc__','')
             drawings.append((drawing, docstring))
-
 
     i = 0
     for (d, docstring) in drawings:

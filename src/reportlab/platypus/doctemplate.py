@@ -1215,7 +1215,7 @@ class BaseDocTemplate:
         try:
             if lifetime not in self._allowedLifetimes:
                 raise ValueError('bad lifetime %r not in %r'%(lifetime,self._allowedLifetimes))
-            exec(stmt, {},NS)
+            exec(stmt, NS)
         except:
             for k in NS.keys():
                 if k not in K0:
