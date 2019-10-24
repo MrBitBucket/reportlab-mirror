@@ -35,7 +35,7 @@ class EncryptionAlgorithmTestCase(unittest.TestCase):
     def check0wnerHash40Bit(self):
         "owner key calculation"
         ownerHash = computeO('userpass','ownerpass', revision=2)
-        assert hexText(ownerHash) == '<F86213EB0CED81F097947F3B343E34CAC8CA92CE8F6FEE2556FA31EC1FE968AF>'
+        self.assertEqual(hexText(ownerHash),'<F86213EB0CED81F097947F3B343E34CAC8CA92CE8F6FEE2556FA31EC1FE968AF>')
         
     def checkEncryptionKey40Bit(self):
         userPass = 'userpass'
@@ -43,21 +43,21 @@ class EncryptionAlgorithmTestCase(unittest.TestCase):
         documentID = 'xxxxxxxxxxxxxxxx'        
         permissions = -4
         encKey = encryptionkey(userPass, ownerHash, permissions, documentID, revision=2)
-        assert hexText(encKey) == '<7EBBD07A88>'
+        self.assertEqual(hexText(encKey),'<7EBBD07A88>')
 
     def checkUserHash40Bit(self):
         encKey = unHexText('<7EBBD07A88>')
         userHash = computeU(encKey, revision=2, documentId='xxxxxxxxxxxxxxxx')
-        assert hexText(userHash) == '<AA154131D8FA105317F7104D2001A345D78A3DEEFA3D85D032FC9B4B35DA72A0>'
+        self.assertEqual(hexText(userHash),'<AA154131D8FA105317F7104D2001A345D78A3DEEFA3D85D032FC9B4B35DA72A0>')
 
     def checkEncryptString40Bit(self):
-        assert hexText(encodePDF(unHexText('<3DC3EBDA71>'), 9, 0, 'anonymous')) == '<57AC33DDEB5775982A>'
+        self.assertEqual(hexText(encodePDF(unHexText('<3DC3EBDA71>'), 9, 0, 'anonymous')), '<57AC33DDEB5775982A>')
 
         
     def check0wnerHash128Bit(self):
         "owner key calculation"
         ownerHash = computeO('userpass','ownerpass', revision=3)
-        assert hexText(ownerHash) == '<68E5704AC779A5F0CD89704406587A52F25BF61CADC56A0F8DB6C4DB0052534D>'
+        self.assertEqual(hexText(ownerHash), '<68E5704AC779A5F0CD89704406587A52F25BF61CADC56A0F8DB6C4DB0052534D>')
         
     def checkEncryptionKey128Bit(self):
         userPass = 'userpass'
@@ -65,19 +65,19 @@ class EncryptionAlgorithmTestCase(unittest.TestCase):
         documentID = 'xxxxxxxxxxxxxxxx'        
         permissions = -4
         encKey = encryptionkey(userPass, ownerHash, permissions, documentID, revision=3)
-        assert hexText(encKey) == '<13DDE7585D9BE366C976DDD56AF541D1>'
+        self.assertEqual(hexText(encKey), '<13DDE7585D9BE366C976DDD56AF541D1>')
         
     def checkUserHash128Bit(self):
         encKey = unHexText('<13DDE7585D9BE366C976DDD56AF541D1>')
         userHash = computeU(encKey, revision=3, documentId='xxxxxxxxxxxxxxxx')
-        assert hexText(userHash) == '<A9AE45CDE827FE0B7D6536267948836A00000000000000000000000000000000>'
+        self.assertEqual(hexText(userHash), '<A9AE45CDE827FE0B7D6536267948836A00000000000000000000000000000000>')
 
     def checkEncryptString128Bit(self):
-        assert hexText(encodePDF(unHexText('<3C0C5EBE0122D8EB2BDDF8A09FA8E29E>'),
+        self.assertEqual(hexText(encodePDF(unHexText('<3C0C5EBE0122D8EB2BDDF8A09FA8E29E>'),
                                  9,
                                  0,
                                  'anonymous')
-                       ) == '<27FB3E943FCF61878B>'
+                       ),'<27FB3E943FCF61878B>')
 
 class EyeballTestCase(unittest.TestCase):
     "This makes a gaxillion self-explanatory files"
