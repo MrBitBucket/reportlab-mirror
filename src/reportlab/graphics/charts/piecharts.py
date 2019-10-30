@@ -1171,10 +1171,14 @@ class Pie3d(Pie):
 
     def __init__(self):
         Pie.__init__(self)
+        self.slices = TypedPropertyCollection(Wedge3dProperties)
+        self.slices[0].fillColor = colors.darkcyan
+        self.slices[1].fillColor = colors.blueviolet
+        self.slices[2].fillColor = colors.blue
+        self.slices[3].fillColor = colors.cyan
         self.slices[4].fillColor = colors.azure
         self.slices[5].fillColor = colors.crimson
         self.slices[6].fillColor = colors.darkviolet
-        self.slices = TypedPropertyCollection(Wedge3dProperties)
         self.xradius = self.yradius = None
         self.width = 300
         self.height = 200
@@ -1311,7 +1315,7 @@ class Pie3d(Pie):
 
         S.sort(key=_keyS3D)
         if checkLabelOverlap and L:
-            fixLabelOverlaps(L,sideLabels)
+            fixLabelOverlaps(L,self.sideLabels)
         for x in ([s[1] for s in S]+T+L):
             g.add(x)
         return g
