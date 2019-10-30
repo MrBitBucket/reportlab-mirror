@@ -519,9 +519,13 @@ class CandleStickProperties(PropHolder):
         crossHi = AttrMapValue(isNumberOrNone,desc="cross line high value",advancedUsage=1),
         boxWidth = AttrMapValue(isNumberOrNone,desc="width of the box part",advancedUsage=1),
         boxFillColor = AttrMapValue(isColorOrNone, desc='fill color of box'),
+        boxStrokeColor = AttrMapValue(NotSetOr(isColorOrNone), desc='stroke color of box'),
+        boxStrokeDashArray = AttrMapValue(NotSetOr(isListOfNumbersOrNone), desc='Dash array of the box.'),
+        boxStrokeWidth = AttrMapValue(NotSetOr(isNumber), desc='Width of the box lines.'),
         boxLo = AttrMapValue(isNumberOrNone,desc="low value of the box",advancedUsage=1),
         boxMid = AttrMapValue(isNumberOrNone,desc="middle box line value",advancedUsage=1),
         boxHi = AttrMapValue(isNumberOrNone,desc="high value of the box",advancedUsage=1),
+        boxSides = AttrMapValue(isBoolean,desc="whether to show box sides",advancedUsage=1),
         position = AttrMapValue(isNumberOrNone,desc="position of the candle",advancedUsage=1),
         chart = AttrMapValue(None,desc="our chart",advancedUsage=1),
         candleKind = AttrMapValue(OneOf('vertical','horizontal'),desc="candle direction",advancedUsage=1),
@@ -537,9 +541,13 @@ class CandleStickProperties(PropHolder):
         self.crossHi = kwds.pop('crossHi',None)
         self.boxWidth = kwds.pop('boxWidth',None)
         self.boxFillColor = kwds.pop('boxFillColor',None)
+        self.boxStrokeColor =kwds.pop('boxStrokeColor',NotSetOr._not_set) 
+        self.boxStrokeWidth =kwds.pop('boxStrokeWidth',NotSetOr._not_set) 
+        self.boxStrokeDashArray =kwds.pop('boxStrokeDashArray',NotSetOr._not_set) 
         self.boxLo = kwds.pop('boxLo',None)
         self.boxMid = kwds.pop('boxMid',None)
         self.boxHi = kwds.pop('boxHi',None)
+        self.boxSides = kwds.pop('boxSides',True)
         self.position = kwds.pop('position',None)
         self.candleKind = kwds.pop('candleKind','vertical')
         self.axes = kwds.pop('axes',['categoryAxis','valueAxis'])
@@ -566,6 +574,9 @@ class CandleStickProperties(PropHolder):
         crossHi = yScale(self.crossHi)
         boxWidth = self.boxWidth
         boxFillColor = self.boxFillColor
+        boxStrokeColor = NotSetOr.conditionalValue(self.boxStrokeColor,strokeColor)
+        boxStrokeWidth = NotSetOr.conditionalValue(self.boxStrokeWidth,strokeWidth)
+        boxStrokeDashArray = NotSetOr.conditionalValue(self.boxStrokeDashArray,strokeDashArray)
         boxLo = yScale(self.boxLo)
         boxMid = yScale(self.boxMid)
         boxHi = yScale(self.boxHi)
@@ -601,7 +612,10 @@ class CandleStickProperties(PropHolder):
             w = boxWidth
             if candleKind!='vertical':
                 x, y, w, h = y, x, h, w
-            G(shapes.Rect(x,y,w,h,strokeColor=strokeColor,strokeWidth=strokeWidth,strokeDashArray=strokeDashArray,fillColor=boxFillColor))
+            G(shapes.Rect(x,y,w,h,strokeColor=boxStrokeColor if self.boxSides else None,strokeWidth=boxStrokeWidth,strokeDashArray=boxStrokeDashArray,fillColor=boxFillColor))
+            if not self.boxSides:
+                aLine(position-0.5*boxWidth,boxHi,position+0.5*boxWidth,boxHi)
+                aLine(position-0.5*boxWidth,boxLo,position+0.5*boxWidth,boxLo)
 
             if boxMid is not None:
                 aLine(position-0.5*boxWidth,boxMid,position+0.5*boxWidth,boxMid)

@@ -1,7 +1,7 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
 #history https://hg.reportlab.com/hg-public/reportlab/log/tip/src/reportlab/lib/validators.py
-__version__='3.3.0'
+__version__='3.5.33'
 __doc__="""Standard verifying functions used by attrmap."""
 
 import sys, codecs
@@ -252,6 +252,20 @@ class NoneOr(Validator):
         if x is None: return True
         return self._elemTest(x)
 
+class NotSetOr(NoneOr):
+    _not_set = object()
+    def test(self, x):
+        if x is NotSetOr._not_set: return True
+        return self._elemTest(x)
+
+    @staticmethod
+    def conditionalValue(v,a):
+        return a if v is NotSetOr._not_set else v
+
+class _isNotSet(Validator):
+    def test(self,x):
+        return x is NotSetOr._not_set
+
 class Auto(Validator):
     def __init__(self,**kw):
         self.__dict__.update(kw)
@@ -350,3 +364,4 @@ isStringOrCallable=EitherOr((isString,isCallable),'isStringOrCallable')
 isStringOrCallableOrNone=NoneOr(isStringOrCallable,'isStringOrCallableNone')
 isStringOrNone=NoneOr(isString,'isStringOrNone')
 isNormalDate=_isNormalDate()
+isNotSet=_isNotSet()
