@@ -14,7 +14,7 @@ mentioned. If we missed you, please let us know!
 RELEASE 3.5.33	30/10/2019
 --------------------------
 	* fix bug in Pie3d reported by Eldon Ziegler <eldonz@atlanticdb.com>
-	* fix bufg in background splitting in repeatRows cases reported by David VanEe <david.vanee@convergent.ca>
+	* fix bug in background splitting in repeatRows cases reported by David VanEe <david.vanee@convergent.ca>
 	* small improvements to CandleSticks
 	* created NotSet validator (use in  CandleStickProperties)
 	* update .travis.yml and .appeyor.yml hopefully to create 3.8 wheels
