@@ -15,6 +15,7 @@ env:
   - CITOOLS_USER=rl-wheelbuilder
   - RLCACHE=manylinux/reportlab
   - secure: ZrIej0neeQWKd7svbNEdaKyAxWvGCjpEI2QhjEZ8+6T2Ggp0N1nHSw8768OxAGZhVDwi0kkMTj+i2Fqb5i/p60tveFn3rYk8KG27KjZo/eErAP8T46tTTZBGCXN4m9h62IyhwQQSqGdUGXbEELmCqWTANYNyorCA+fSXwJYa74ly7BRlUke6eg3XAllw83lECDBqSehafJb5QwNYJHYo63Ak8f0T3a/m4eGzQtGTK2WluZ9/0QiO4iutNGztYbHjtgJFoUBzUPtkW4z1x9RJtEAIms9U8c6vB3efU15mrXlt8yH2ANtybbn0bLidT6rem+lqB8LvLh9Hc5cRAtRmeLYjVQRAbXxKg+ZCaf9R1XNn6O6C49YPIf2Z76ZW6LkqCyEwNPCYj0BDa8tbg9zGLO8P7Qxf+x8uVqpSo9nmvgfLWRQ0Vb3tKTnic3CC+p3bGaFocousmMilpr891w01wsdT9utjvF8U5JCK9Valo6FPhUum66rWVyzqBWP3kKPWa4OirRaJpdptm02ZcbQl4ZOIGlqt+GqN28CZO5xaUL4h9plM57h7bOydKVK4eP0j+ICdPWkQh1+cfEVZLZJMYBsMwXyKAPtruLi1HM2X/yPsvLjLZR9BA9d9bvJ2v9zJe9v5aOwOLfJXgdDlXfXtkzLa0dCDaseG3U7+Tm8oElg=
+  # travis encrypt -r MrBitBucket/reportlab-mirror CITOOLS_PASSWORD="**********************" --add with extra bash quoting
 language: python
 # Default Python version is usually 3.5
 python: 3.5
@@ -25,86 +26,90 @@ services: docker
 notifications:
   email:
     recipients:
-      - bitbucket@reportlab.com
-      - live_errors@reportlab.com
+    - bitbucket@reportlab.com
+    - live_errors@reportlab.com
     on_success: always
     on_failure: always
-
 matrix:
   exclude:
-      # Exclude the default Python 3.5 build
-      - python: 3.5
+  # Exclude the default Python 3.5 build
+  - python: 3.5
   include:
-    - os: linux
-      env:
-        - UNICODE_WIDTH=16
-        - MB_PYTHON_VERSION=2.7
-    - os: linux
-      env:
-        - UNICODE_WIDTH=16
-        - MB_PYTHON_VERSION=2.7
-        - PLAT=i686
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=2.7
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=2.7
-        - PLAT=i686
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=3.5
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=3.5
-        - PLAT=i686
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=3.6
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=3.6
-        - PLAT=i686
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=3.7
-    - os: linux
-      env:
-        - MB_PYTHON_VERSION=3.7
-        - PLAT=i686
-    - os: osx
-      language: generic
-      env:
-        - MB_PYTHON_VERSION=2.7
-    - os: osx
-      language: generic
-      env:
-        - MB_PYTHON_VERSION=3.5
-    - os: osx
-      language: generic
-      env:
-        - MB_PYTHON_VERSION=3.6
-    - os: osx
-      language: generic
-      env:
-        - MB_PYTHON_VERSION=3.7
-
+  - os: linux
+    env:
+    - UNICODE_WIDTH=16
+    - MB_PYTHON_VERSION=2.7
+  - os: linux
+    env:
+    - UNICODE_WIDTH=16
+    - MB_PYTHON_VERSION=2.7
+    - PLAT=i686
+  - os: linux
+    env:
+    - MB_PYTHON_VERSION=2.7
+  - os: linux
+    env:
+    - MB_PYTHON_VERSION=2.7
+    - PLAT=i686
+  - os: linux
+    env:
+    - MB_PYTHON_VERSION=3.5
+  - os: linux
+    env:
+    - MB_PYTHON_VERSION=3.5
+    - PLAT=i686
+  - os: linux
+    env:
+    - MB_PYTHON_VERSION=3.6
+  - os: linux
+    env:
+    - MB_PYTHON_VERSION=3.6
+    - PLAT=i686
+  - os: linux
+    env:
+    - MB_PYTHON_VERSION=3.7
+  - os: linux
+    env:
+    - MB_PYTHON_VERSION=3.7
+    - PLAT=i686
+  - os: osx
+    language: generic
+    env:
+    - MB_PYTHON_VERSION=2.7
+  - os: osx
+    language: generic
+    env:
+    - MB_PYTHON_VERSION=3.5
+  - os: osx
+    language: generic
+    env:
+    - MB_PYTHON_VERSION=3.6
+  - os: osx
+    language: generic
+    env:
+    - MB_PYTHON_VERSION=3.7
+  - os: linux
+    env:
+    - MB_PYTHON_VERSION=3.8
+  - os: osx
+    language: generic
+    env:
+    - MB_PYTHON_VERSION=3.8
+    - MB_PYTHON_OSX_VER=10.9
 before_install:
-    - git clone https://github.com/matthew-brett/multibuild $MULTIBUILD_DIR
-    - git clone https://github.com/MrBitBucket/reportlab-mirror $REPO_DIR
-    - source $MULTIBUILD_DIR/common_utils.sh
-    - source $MULTIBUILD_DIR/travis_steps.sh
-    - before_install
-
+- git clone https://github.com/matthew-brett/multibuild $MULTIBUILD_DIR
+- cd $MULTIBUILD_DIR
+- git checkout 44910268b56c0a1cffa2025c69844cf253fabaf0
+- cd ..
+- git clone https://github.com/MrBitBucket/reportlab-mirror $REPO_DIR
+- source $MULTIBUILD_DIR/common_utils.sh
+- source $MULTIBUILD_DIR/travis_steps.sh
+- before_install
 install:
-    # Maybe get and clean and patch source
-    - clean_code $REPO_DIR $BUILD_COMMIT
-    - build_wheel $REPO_DIR $PLAT
-
+- clean_code $REPO_DIR $BUILD_COMMIT
+- build_wheel $REPO_DIR $PLAT
 script:
-    - install_run $PLAT
-
+- install_run $PLAT
 after_success:
-    # Upload wheels to reportlab's pypi
-    - pip install https://hg.reportlab.com/hg-public/rl-ci-tools/archive/tip.tar.gz -U
-    - python -mrl_ci_tools upload-caches --subdir="$RLCACHE" --verbosity=1 ${TRAVIS_BUILD_DIR}/wheelhouse/*
+- pip install https://hg.reportlab.com/hg-public/rl-ci-tools/archive/tip.tar.gz -U
+- python -mrl_ci_tools upload-caches --subdir="$RLCACHE" --verbosity=1 ${TRAVIS_BUILD_DIR}/wheelhouse/*
