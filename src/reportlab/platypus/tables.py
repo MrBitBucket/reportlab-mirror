@@ -288,7 +288,7 @@ class Table(Flowable):
         self._spanCmds = []
         self._nosplitCmds = []
         self._srflcmds = []
-        # NB repeatRows can be a list or tuple eg (1,) reapesat only the second row of a table
+        # NB repeatRows can be a list or tuple eg (1,) repeats only the second row of a table
         # or an integer eg 2 to repeat both rows 0 & 1
         self.repeatRows = repeatRows
         self.repeatCols = repeatCols
@@ -339,8 +339,6 @@ class Table(Flowable):
         for row in data:
             outRow = [normCell(cell) for cell in row]
             outData.append(outRow)
-        from pprint import pprint as pp
-        #pp(outData)
         return outData
 
     def identity(self, maxLen=30):
@@ -1229,7 +1227,9 @@ class Table(Flowable):
             if er>=n: er = n-1
             self._addCommand((c[0],)+((sc, sr), (ec, er))+tuple(c[3:]))
 
-    def _cr_1_1(self,n,repeatRows, cmds,_srflMode=False):
+    def _cr_1_1(self, n, nRows, repeatRows, cmds, _srflMode=False):
+        nrr = len(repeatRows)
+        rrS = set(repeatRows)
         for c in cmds:
             (sc,sr), (ec,er) = c[1:3]
             if sr in ('splitfirst','splitlast'):
@@ -1237,22 +1237,27 @@ class Table(Flowable):
                 self._addCommand(c)
                 if sr=='splitlast': continue
                 sr = er = n
-            if sr>=0 and sr>=repeatRows and sr<n and er>=0 and er<n: continue
-            if sr>=repeatRows and sr<n: sr=repeatRows
-            elif sr>=repeatRows and sr>=n: sr=sr+repeatRows-n
-            if er>=repeatRows and er<n: er=repeatRows
-            elif er>=repeatRows and er>=n: er=er+repeatRows-n
+            if sr<0: sr += nRows
+            if er<0: er += nRows
+            cS = set(xrange(sr,er+1)) & rrS
+            if cS:
+                #it's a repeat row
+                cS = list(cS)
+                self._addCommand((c[0],)+((sc, repeatRows.index(min(cS))), (ec, repeatRows.index(max(cS))))+tuple(c[3:]))
+            if er<n: continue
+            sr = max(sr-n,0)+nrr
+            er = max(er-n,0)+nrr
             self._addCommand((c[0],)+((sc, sr), (ec, er))+tuple(c[3:]))
         sr = self._rowSplitRange
         if sr:
             sr, er = sr
-            if sr>=0 and sr>=repeatRows and sr<n and er>=0 and er<n:
+            if sr<0: sr += nRows
+            if er<0: er += nRows
+            if er<n:
                 self._rowSplitRange = None
             else:
-                if sr>=repeatRows and sr<n: sr=repeatRows
-                elif sr>=repeatRows and sr>=n: sr=sr+repeatRows-n
-                if er>=repeatRows and er<n: er=repeatRows
-                elif er>=repeatRows and er>=n: er=er+repeatRows-n
+                sr = max(sr-n,0)+nrr
+                er = max(er-n,0)+nrr
                 self._rowSplitRange = sr,er
 
     def _cr_1_0(self,n,cmds,_srflMode=False):
@@ -1367,29 +1372,28 @@ class Table(Flowable):
         if repeatRows:
             if isinstance(repeatRows,int):
                 iRows = data[:repeatRows]
-                nRepeatRows = repeatRows
                 iRowH = splitH[:repeatRows]
                 iCS = self._cellStyles[:repeatRows]
+                repeatRows = list(xrange(repeatRows))
             else:
                 #we have a list of repeated rows eg (1,3)
                 repeatRows = list(sorted(repeatRows))
                 iRows = [data[i] for i in repeatRows]
-                nRepeatRows = len(repeatRows)
                 iRowH = [splitH[i] for i in repeatRows]
                 iCS = [self._cellStyles[i] for i in repeatRows]
             R1 = self.__class__(iRows+data[n:],colWidths=self._colWidths,
                     rowHeights=iRowH+splitH[n:],
-                    repeatRows=nRepeatRows, repeatCols=repeatCols,
+                    repeatRows=len(repeatRows), repeatCols=repeatCols,
                     splitByRow=splitByRow, normalizedData=1,
                     cellStyles=iCS+self._cellStyles[n:],
                     ident=ident,
                     spaceAfter=getattr(self,'spaceAfter',None),
                     longTableOptimize=lto,
                     )
-            R1._cr_1_1(n,nRepeatRows,A)
-            R1._cr_1_1(n,nRepeatRows,self._bkgrndcmds,_srflMode=True)
-            R1._cr_1_1(n,nRepeatRows,self._spanCmds)
-            R1._cr_1_1(n,nRepeatRows,self._nosplitCmds)
+            R1._cr_1_1(n,nrows,repeatRows,A) #linecommands
+            R1._cr_1_1(n,nrows,repeatRows,self._bkgrndcmds,_srflMode=True)
+            R1._cr_1_1(n,nrows,repeatRows,self._spanCmds)
+            R1._cr_1_1(n,nrows,repeatRows,self._nosplitCmds)
         else:
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
             R1 = self.__class__(data[n:], colWidths=self._colWidths, rowHeights=self._argH[n:],

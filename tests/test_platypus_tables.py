@@ -183,10 +183,11 @@ def old_tables_test():
         ('Hats\nLarge', 893, 912, '1,212', 643, 789, 159, 888, '1,298', 832, 453, '1,344','2,843')
         )
     lst = []
-    lst.append(Paragraph("Tables", styleSheet['Heading1']))
-    lst.append(Paragraph(__doc__, styleSheet['BodyText']))
-    lst.append(Paragraph("The Tables (shown in different styles below) were created using the following code:", styleSheet['BodyText']))
-    lst.append(Preformatted("""
+    lst_add = lst.append
+    lst_add(Paragraph("Tables", styleSheet['Heading1']))
+    lst_add(Paragraph(__doc__, styleSheet['BodyText']))
+    lst_add(Paragraph("The Tables (shown in different styles below) were created using the following code:", styleSheet['BodyText']))
+    lst_add(Preformatted("""
     colwidths = (50, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32, 32)
     rowheights = (24, 16, 16, 16, 16)
     data = (
@@ -200,66 +201,66 @@ def old_tables_test():
         )
     t = Table(data, colwidths, rowheights)
     """, styleSheet['Code'], dedent=4))
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
     You can then give the Table a TableStyle object to control its format. The first TableStyle used was
     created as follows:
     """, styleSheet['BodyText']))
-    lst.append(Preformatted("""
+    lst_add(Preformatted("""
 GRID_STYLE = TableStyle(
     [('GRID', (0,0), (-1,-1), 0.25, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
     TableStyles are created by passing in a list of commands. There are two types of commands - line commands
     and cell formatting commands. In all cases, the first three elements of a command are the command name,
     the starting cell and the ending cell.
     """, styleSheet['BodyText']))
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
     Line commands always follow this with the weight and color of the desired lines. Colors can be names,
     or they can be specified as a (R,G,B) tuple, where R, G and B are floats and (0,0,0) is black. The line
     command names are: GRID, BOX, OUTLINE, INNERGRID, LINEBELOW, LINEABOVE, LINEBEFORE
     and LINEAFTER. BOX and OUTLINE are equivalent, and GRID is the equivalent of applying both BOX and
     INNERGRID.
     """, styleSheet['BodyText']))
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
     Cell formatting commands are:
     """, styleSheet['BodyText']))
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
     FONT - takes fontname, fontsize and (optional) leading.
     """, styleSheet['Definition']))
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
     TEXTCOLOR - takes a color name or (R,G,B) tuple.
     """, styleSheet['Definition']))
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
     ALIGNMENT (or ALIGN) - takes one of LEFT, RIGHT, CENTRE (or CENTER) or DECIMAL.
     """, styleSheet['Definition']))
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
     LEFTPADDING - defaults to 6.
     """, styleSheet['Definition']))
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
     RIGHTPADDING - defaults to 6.
     """, styleSheet['Definition']))
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
     BOTTOMPADDING - defaults to 3.
     """, styleSheet['Definition']))
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
     A tablestyle is applied to a table by calling Table.setStyle(tablestyle).
     """, styleSheet['BodyText']))
     t = Table(data, colwidths, rowheights)
     t.setStyle(GRID_STYLE)
-    lst.append(PageBreak())
-    lst.append(Paragraph("This is GRID_STYLE\n", styleSheet['BodyText']))
-    lst.append(t)
+    lst_add(PageBreak())
+    lst_add(Paragraph("This is GRID_STYLE\n", styleSheet['BodyText']))
+    lst_add(t)
 
     t = Table(data, colwidths, rowheights)
     t.setStyle(BOX_STYLE)
-    lst.append(Paragraph("This is BOX_STYLE\n", styleSheet['BodyText']))
-    lst.append(t)
-    lst.append(Paragraph("""
+    lst_add(Paragraph("This is BOX_STYLE\n", styleSheet['BodyText']))
+    lst_add(t)
+    lst_add(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
-    lst.append(Preformatted("""
+    lst_add(Preformatted("""
 BOX_STYLE = TableStyle(
     [('BOX', (0,0), (-1,-1), 0.50, colors.black),
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
@@ -268,16 +269,16 @@ BOX_STYLE = TableStyle(
 
     t = Table(data, colwidths, rowheights)
     t.setStyle(LABELED_GRID_STYLE)
-    lst.append(Paragraph("This is LABELED_GRID_STYLE\n", styleSheet['BodyText']))
-    lst.append(t)
+    lst_add(Paragraph("This is LABELED_GRID_STYLE\n", styleSheet['BodyText']))
+    lst_add(t)
     t = Table(data2, colwidths, rowheights2)
     t.setStyle(LABELED_GRID_STYLE)
-    lst.append(Paragraph("This is LABELED_GRID_STYLE ILLUSTRATES EXPLICIT LINE SPLITTING WITH NEWLINE (different heights and data)\n", styleSheet['BodyText']))
-    lst.append(t)
-    lst.append(Paragraph("""
+    lst_add(Paragraph("This is LABELED_GRID_STYLE ILLUSTRATES EXPLICIT LINE SPLITTING WITH NEWLINE (different heights and data)\n", styleSheet['BodyText']))
+    lst_add(t)
+    lst_add(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
-    lst.append(Preformatted("""
+    lst_add(Preformatted("""
 LABELED_GRID_STYLE = TableStyle(
     [('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
      ('BOX', (0,0), (-1,-1), 2, colors.black),
@@ -286,16 +287,16 @@ LABELED_GRID_STYLE = TableStyle(
      ('ALIGN', (1,1), (-1,-1), 'RIGHT')]
     )
     """, styleSheet['Code']))
-    lst.append(PageBreak())
+    lst_add(PageBreak())
 
     t = Table(data, colwidths, rowheights)
     t.setStyle(COLORED_GRID_STYLE)
-    lst.append(Paragraph("This is COLORED_GRID_STYLE\n", styleSheet['BodyText']))
-    lst.append(t)
-    lst.append(Paragraph("""
+    lst_add(Paragraph("This is COLORED_GRID_STYLE\n", styleSheet['BodyText']))
+    lst_add(t)
+    lst_add(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
-    lst.append(Preformatted("""
+    lst_add(Preformatted("""
 COLORED_GRID_STYLE = TableStyle(
     [('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
      ('BOX', (0,0), (-1,-1), 2, colors.red),
@@ -307,12 +308,12 @@ COLORED_GRID_STYLE = TableStyle(
 
     t = Table(data, colwidths, rowheights)
     t.setStyle(LIST_STYLE)
-    lst.append(Paragraph("This is LIST_STYLE\n", styleSheet['BodyText']))
-    lst.append(t)
-    lst.append(Paragraph("""
+    lst_add(Paragraph("This is LIST_STYLE\n", styleSheet['BodyText']))
+    lst_add(t)
+    lst_add(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
-    lst.append(Preformatted("""
+    lst_add(Preformatted("""
 LIST_STYLE = TableStyle(
     [('LINEABOVE', (0,0), (-1,0), 2, colors.green),
      ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
@@ -332,12 +333,12 @@ LIST_STYLE = TableStyle(
      ('BACKGROUND', (0,0), (-1,0), colors.Color(0,0.7,0.7))]
     )
     t.setStyle(ts)
-    lst.append(Paragraph("This is a custom style\n", styleSheet['BodyText']))
-    lst.append(t)
-    lst.append(Paragraph("""
+    lst_add(Paragraph("This is a custom style\n", styleSheet['BodyText']))
+    lst_add(t)
+    lst_add(Paragraph("""
     It was created as follows:
     """, styleSheet['BodyText']))
-    lst.append(Preformatted("""
+    lst_add(Preformatted("""
    ts = TableStyle(
     [('LINEABOVE', (0,0), (-1,0), 2, colors.green),
      ('LINEABOVE', (0,1), (-1,-1), 0.25, colors.black),
@@ -360,14 +361,14 @@ LIST_STYLE = TableStyle(
     c[8] = None
     t = Table(data, c, [None]+list(rowheights[1:]))
     t.setStyle(LIST_STYLE)
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
         This is a LIST_STYLE table with the first rowheight set to None ie automatic.
         The top row cells are split at a newline '\\n' character. The first and August
         column widths were also set to None.
     """, styleSheet['BodyText']))
-    lst.append(t)
+    lst_add(t)
 
-    lst.append(Paragraph("""
+    lst_add(Paragraph("""
         This demonstrates a number of features useful in financial statements. The first is decimal alignment;
         with ALIGN=DECIMAL the numbers align on the points; and the points are aligned based on
         the RIGHTPADDING, which is usually 3 points so you should set it higher.  The second is multiple lines;
@@ -411,9 +412,9 @@ LIST_STYLE = TableStyle(
         )
 
     t.setStyle(ts)
-    lst.append(t)
-    lst.append(Spacer(36,36))
-    lst.append(Paragraph("""
+    lst_add(t)
+    lst_add(Spacer(36,36))
+    lst_add(Paragraph("""
         The red numbers should be aligned LEFT &amp; BOTTOM, the blue RIGHT &amp; TOP
         and the green CENTER &amp; MIDDLE.
     """, styleSheet['BodyText']))
@@ -435,7 +436,7 @@ LIST_STYLE = TableStyle(
                 ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
                 ('BOX', (0,0), (-1,-1), 0.25, colors.black),
                 ])
-    lst.append(t)
+    lst_add(t)
     data = [('alignment', 'align\012alignment'),
             ('bulletColor', 'bulletcolor\012bcolor'),
             ('bulletFontName', 'bfont\012bulletfontname'),
@@ -456,7 +457,7 @@ LIST_STYLE = TableStyle(
             ('INNERGRID', (0,0), (-1,-1), 0.25, colors.black),
             ('BOX', (0,0), (-1,-1), 0.25, colors.black),
             ])
-    lst.append(t)
+    lst_add(t)
     t = Table([ ('Attribute', 'Synonyms'),
                 ('alignment', 'align, alignment'),
                 ('bulletColor', 'bulletcolor, bcolor'),
@@ -487,17 +488,17 @@ LIST_STYLE = TableStyle(
                 ('FONT', (0, 0), (-1, 0), 'Times-Bold', 12),
                 ('ALIGN', (1, 1), (1, -1), 'CENTER'),
                 ])
-    lst.append(t)
-    lst.append(Table(XY,
+    lst_add(t)
+    lst_add(Table(XY,
             style=[ ('FONT',(0,0),(-1,-1),'Times-Roman', 5,6),
                     ('GRID', (0,0), (-1,-1), 0.25, colors.blue),]))
-    lst.append(Table(XY,
+    lst_add(Table(XY,
             style=[ ('FONT',(0,0),(-1,-1),'Times-Roman', 10,12),
                     ('GRID', (0,0), (-1,-1), 0.25, colors.black),]))
-    lst.append(Table(XY,
+    lst_add(Table(XY,
             style=[ ('FONT',(0,0),(-1,-1),'Times-Roman', 20,24),
                     ('GRID', (0,0), (-1,-1), 0.25, colors.red),]))
-    lst.append(PageBreak())
+    lst_add(PageBreak())
     data=  [['00', '01', '02', '03', '04'],
             ['10', '11', '12', '13', '14'],
             ['20', '21', '22', '23', '24'],
@@ -514,26 +515,26 @@ LIST_STYLE = TableStyle(
                     ('BACKGROUND', (2, 2), (2, 3), colors.orange),
                     ('TEXTCOLOR',(0,-1),(-2,-1),colors.green),
                     ])
-    lst.append(Paragraph("Illustrating splits: nosplit", styleSheet['BodyText']))
-    lst.append(t)
-    lst.append(Spacer(0,6))
-    lst.append(Paragraph("Illustrating splits: split(4in,30)", styleSheet['BodyText']))
+    lst_add(Paragraph("Illustrating splits: nosplit", styleSheet['BodyText']))
+    lst_add(t)
+    lst_add(Spacer(0,6))
+    lst_add(Paragraph("Illustrating splits: split(4in,30)", styleSheet['BodyText']))
     for s in t.split(4*inch,30):
-        lst.append(s)
-        lst.append(Spacer(0,6))
-    lst.append(Spacer(0,6))
-    lst.append(Paragraph("Illustrating splits: split(4in,36)", styleSheet['BodyText']))
+        lst_add(s)
+        lst_add(Spacer(0,6))
+    lst_add(Spacer(0,6))
+    lst_add(Paragraph("Illustrating splits: split(4in,36)", styleSheet['BodyText']))
     for s in t.split(4*inch,36):
-        lst.append(s)
-        lst.append(Spacer(0,6))
-    lst.append(Paragraph("Illustrating splits: split(4in,56)", styleSheet['BodyText']))
-    lst.append(Spacer(0,6))
+        lst_add(s)
+        lst_add(Spacer(0,6))
+    lst_add(Paragraph("Illustrating splits: split(4in,56)", styleSheet['BodyText']))
+    lst_add(Spacer(0,6))
     for s in t.split(4*inch,56):
-        lst.append(s)
-        lst.append(Spacer(0,6))
+        lst_add(s)
+        lst_add(Spacer(0,6))
 
-    lst.append(Paragraph("Illustrating splits: repeated split(4in,30)", styleSheet['BodyText']))
-    lst.append(Spacer(0,6))
+    lst_add(Paragraph("Illustrating splits: repeated split(4in,30)", styleSheet['BodyText']))
+    lst_add(Spacer(0,6))
     S = t.split(4*inch,30)
     s = S.pop(-1)
     S.extend(s.split(4*inch,30))
@@ -541,10 +542,10 @@ LIST_STYLE = TableStyle(
     S.extend(s.split(4*inch,30))
 
     for s in S:
-        lst.append(s)
-        lst.append(Spacer(0,6))
+        lst_add(s)
+        lst_add(Spacer(0,6))
 
-    lst.append(PageBreak())
+    lst_add(PageBreak())
     data=  [['00', '01', '02', '03', '04'],
             ['', '11', '12', '13', '14'],
             ['20', '21', '22', '23', '24'],
@@ -562,23 +563,23 @@ LIST_STYLE = TableStyle(
                     ('SPAN',(2,2),(2,3)),
                     ]
     t=Table(data,style=sty)
-    lst.append(Paragraph("Illustrating splits with spans: nosplit", styleSheet['BodyText']))
-    lst.append(t)
-    lst.append(Spacer(0,6))
-    lst.append(Paragraph("Illustrating splits with spans: split(4in,30)", styleSheet['BodyText']))
+    lst_add(Paragraph("Illustrating splits with spans: nosplit", styleSheet['BodyText']))
+    lst_add(t)
+    lst_add(Spacer(0,6))
+    lst_add(Paragraph("Illustrating splits with spans: split(4in,30)", styleSheet['BodyText']))
     for s in t.split(4*inch,30):
-        lst.append(s)
-        lst.append(Spacer(0,6))
-    lst.append(Spacer(0,6))
-    lst.append(Paragraph("Illustrating splits with spans: split(4in,36)", styleSheet['BodyText']))
+        lst_add(s)
+        lst_add(Spacer(0,6))
+    lst_add(Spacer(0,6))
+    lst_add(Paragraph("Illustrating splits with spans: split(4in,36)", styleSheet['BodyText']))
     for s in t.split(4*inch,36):
-        lst.append(s)
-        lst.append(Spacer(0,6))
-    lst.append(Paragraph("Illustrating splits with spans: split(4in,56)", styleSheet['BodyText']))
-    lst.append(Spacer(0,6))
+        lst_add(s)
+        lst_add(Spacer(0,6))
+    lst_add(Paragraph("Illustrating splits with spans: split(4in,56)", styleSheet['BodyText']))
+    lst_add(Spacer(0,6))
     for s in t.split(4*inch,56):
-        lst.append(s)
-        lst.append(Spacer(0,6))
+        lst_add(s)
+        lst_add(Spacer(0,6))
 
     data=  [['00', '01', '02', '03', '04'],
             ['', '11', '12', '13', ''],
@@ -603,26 +604,26 @@ LIST_STYLE = TableStyle(
         ]
 
     t=Table(data,style=sty,repeatRows=2)
-    lst.append(Paragraph("Illustrating splits with spans and repeatRows: nosplit", styleSheet['BodyText']))
-    lst.append(t)
-    lst.append(Spacer(0,6))
+    lst_add(Paragraph("Illustrating splits with spans and repeatRows: nosplit", styleSheet['BodyText']))
+    lst_add(t)
+    lst_add(Spacer(0,6))
     if  1:
-        lst.append(Paragraph("Illustrating splits with spans and repeatRows: split(4in,30)", styleSheet['BodyText']))
+        lst_add(Paragraph("Illustrating splits with spans and repeatRows: split(4in,30)", styleSheet['BodyText']))
         for s in t.split(4*inch,30):
-            lst.append(s)
-            lst.append(Spacer(0,6))
-        lst.append(Spacer(0,6))
-        lst.append(Paragraph("Illustrating splits with spans and repeatRows: split(4in,36)", styleSheet['BodyText']))
+            lst_add(s)
+            lst_add(Spacer(0,6))
+        lst_add(Spacer(0,6))
+        lst_add(Paragraph("Illustrating splits with spans and repeatRows: split(4in,36)", styleSheet['BodyText']))
         for s in t.split(4*inch,36):
-            lst.append(s)
-            lst.append(Spacer(0,6))
-    lst.append(Paragraph("Illustrating splits with spans and repeatRows: split(4in,56)", styleSheet['BodyText']))
-    lst.append(Spacer(0,6))
+            lst_add(s)
+            lst_add(Spacer(0,6))
+    lst_add(Paragraph("Illustrating splits with spans and repeatRows: split(4in,56)", styleSheet['BodyText']))
+    lst_add(Spacer(0,6))
     for s in t.split(4*inch,56):
-        lst.append(s)
-        lst.append(Spacer(0,6))
+        lst_add(s)
+        lst_add(Spacer(0,6))
 
-    lst.append(PageBreak())
+    lst_add(PageBreak())
     from reportlab.lib.testutils import testsFolder
     I = Image(os.path.join(os.path.dirname(testsFolder),'tools','pythonpoint','demos','leftlogo.gif'))
     I.drawHeight = 1.25*inch*I.drawHeight / I.drawWidth
@@ -657,10 +658,10 @@ LIST_STYLE = TableStyle(
                     ])
 
     t._argW[3]=1.5*inch
-    lst.append(t)
+    lst_add(t)
 
     # now for an attempt at column spanning.
-    lst.append(PageBreak())
+    lst_add(PageBreak())
     data=  [['A', 'BBBBB', 'C', 'D', 'E'],
             ['00', '01', '02', '03', '04'],
             ['10', '11', '12', '13', '14'],
@@ -691,58 +692,58 @@ LIST_STYLE = TableStyle(
             ('LINEBELOW', (0,'splitlast'), (-1,'splitlast'), 1, colors.grey,'butt'),
            ]
     t=Table(data,style=sty, colWidths = [20] * 5, rowHeights = [20]*5)
-    lst.append(t)
-    lst.append(Spacer(18,18))
+    lst_add(t)
+    lst_add(Spacer(18,18))
 
     t=Table(data,style=sty, colWidths = [20] * 5, rowHeights = [20]*5)
     for s in t.split(4*inch,72):
-        lst.append(s)
-        lst.append(Spacer(0,6))
+        lst_add(s)
+        lst_add(Spacer(0,6))
 
     # now for an attempt at percentage widths
-    lst.append(Spacer(18,18))
-    lst.append(Paragraph("This table has colWidths=5*['14%']!", styleSheet['BodyText']))
+    lst_add(Spacer(18,18))
+    lst_add(Paragraph("This table has colWidths=5*['14%']!", styleSheet['BodyText']))
     t=Table(data,style=sty, colWidths = ['14%'] * 5, rowHeights = [20]*5)
-    lst.append(t)
+    lst_add(t)
 
-    lst.append(Spacer(18,18))
-    lst.append(Paragraph("This table has colWidths=['14%','10%','19%','22%','*']!", styleSheet['BodyText']))
+    lst_add(Spacer(18,18))
+    lst_add(Paragraph("This table has colWidths=['14%','10%','19%','22%','*']!", styleSheet['BodyText']))
     t=Table(data,style=sty, colWidths = ['14%','10%','19%','22%','*'], rowHeights = [20]*5)
-    lst.append(t)
+    lst_add(t)
 
     # Mike's test example
-    lst.append(Spacer(18,18))
-    lst.append(Paragraph('Mike\'s Spanning Example', styleSheet['Heading1']))
+    lst_add(Spacer(18,18))
+    lst_add(Paragraph('Mike\'s Spanning Example', styleSheet['Heading1']))
     data=  [[Paragraph('World Domination: The First Five Years', styleSheet['BodyText']), ''],
             [Paragraph('World <font color="green">Domination</font>: The First Five Years', styleSheet['BodyText']),''],
             [Paragraph('World Domination: The First Five Years', styleSheet['BodyText']), ''],
             ]
     t=Table(data, style=[('SPAN',(0,0),(1,0)),('SPAN',(0,1),(1,1)),('SPAN',(0,2),(1,2)),], colWidths = [3*cm,8*cm], rowHeights = [None]*3)
-    lst.append(t)
+    lst_add(t)
 
-    lst.append(Spacer(18,18))
-    lst.append(Paragraph('Mike\'s Non-spanning Example', styleSheet['Heading1']))
+    lst_add(Spacer(18,18))
+    lst_add(Paragraph('Mike\'s Non-spanning Example', styleSheet['Heading1']))
     data=  [[Paragraph('World Domination: The First Five Years', styleSheet['BodyText'])],
             [Paragraph('World <font color="magenta">Domination</font>: The First Five Years', styleSheet['BodyText'])],
             [Paragraph('World Domination: The First Five Years', styleSheet['BodyText'])],
             ]
     t=Table(data, style=[], colWidths = [11*cm], rowHeights = [None]*3)
-    lst.append(t)
+    lst_add(t)
 
-    lst.append(Spacer(18,18))
-    lst.append(Paragraph('xpre example', styleSheet['Heading1']))
+    lst_add(Spacer(18,18))
+    lst_add(Paragraph('xpre example', styleSheet['Heading1']))
     data=  [    [
                 XPreformatted('Account Details', styleSheet['Heading3']),
                 '', XPreformatted('Client Details', styleSheet['Heading3']),
                 ],  #end of row 0
             ]
     t=Table(data, style=[], colWidths = [80,230.0,80], rowHeights = [None]*1)
-    lst.append(t)
+    lst_add(t)
 
-    lst.append(PageBreak())
+    lst_add(PageBreak())
 
-    lst.append(Paragraph('Trying colour cycling in background', styleSheet['Heading1']))
-    lst.append(Paragraph("This should alternate pale blue and uncolored by row", styleSheet['BodyText']))
+    lst_add(Paragraph('Trying colour cycling in background', styleSheet['Heading1']))
+    lst_add(Paragraph("This should alternate pale blue and uncolored by row", styleSheet['BodyText']))
     data=  [['001', '01', '02', '03', '04', '05'],
             ['002', '01', '02', '03', '04', '05'],
             ['003', '01', '02', '03', '04', '05'],
@@ -759,30 +760,18 @@ LIST_STYLE = TableStyle(
                     ('GRID',(0,0),(-1,-1),0.5,colors.grey),
                     ('ROWBACKGROUNDS', (0, 0), (-1, -1), (0xD0D0FF, None)),
                     ])
-    lst.append(t)
-    lst.append(Spacer(0,6))
-    lst.append(Paragraph("And this should pale blue, pale pink and None by column", styleSheet['BodyText']))
-    data=  [['001', '01', '02', '03', '04', '05'],
-            ['002', '01', '02', '03', '04', '05'],
-            ['003', '01', '02', '03', '04', '05'],
-            ['004', '01', '02', '03', '04', '05'],
-            ['005', '01', '02', '03', '04', '05'],
-            ['006', '01', '02', '03', '04', '05'],
-            ['007', '01', '02', '03', '04', '05'],
-            ['008', '01', '02', '03', '04', '05'],
-            ['009', '01', '02', '03', '04', '05'],
-            ['010', '01', '02', '03', '04', '05'],
-
-            ]
+    lst_add(t)
+    lst_add(Spacer(0,6))
+    lst_add(Paragraph("And this should pale blue, pale pink and None by column", styleSheet['BodyText']))
     t=Table(data,style=[
                     ('GRID',(0,0),(-1,-1),0.5,colors.grey),
                     ('COLBACKGROUNDS', (0, 0), (-1, -1), (0xD0D0FF, 0xFFD0D0, None)),
                     ])
-    lst.append(t)
+    lst_add(t)
 
-    lst.append(PageBreak())
-    lst.append(Paragraph("This spanning example illustrates automatic removal of grids and lines in spanned cells!", styleSheet['BodyText']))
-    lst.append(Spacer(0,6))
+    lst_add(PageBreak())
+    lst_add(Paragraph("This spanning example illustrates automatic removal of grids and lines in spanned cells!", styleSheet['BodyText']))
+    lst_add(Spacer(0,6))
     data=  [['Top\nLeft', '', '02', '03', '04', '05', '06', '07'],
             ['', '', '12', 'Span (3,1) (6,2)', '','','','17'],
             ['20', '21', '22', '', '','','','27'],
@@ -805,21 +794,21 @@ LIST_STYLE = TableStyle(
             ('LINEABOVE', (0,2),(-1,2), 1, colors.black, 0, None, None, 2, 2),
             ('LINEBEFORE', (3,0),(3,-1), 1, colors.black, 0, None, None, 2, 2),
             ])
-    lst.append(t)
+    lst_add(t)
 
-    lst.append(PageBreak())
+    lst_add(PageBreak())
 
-    lst.append(Paragraph("und jetzt noch eine Tabelle mit 5000 Zeilen:", styleSheet['BodyText']))
+    lst_add(Paragraph("und jetzt noch eine Tabelle mit 5000 Zeilen:", styleSheet['BodyText']))
     sty = [ ('GRID',(0,0),(-1,-1),1,colors.green),
             ('BOX',(0,0),(-1,-1),2,colors.red),
            ]
     data = [[str(i), Paragraph("xx "* (i%10), styleSheet["BodyText"]), Paragraph("blah "*(i%40), styleSheet["BodyText"])] for i in range(500)]
     t=LongTable(data, style=sty, colWidths = [50,100,200])
-    lst.append(t)
+    lst_add(t)
 
     #Yuan Hong's bug tester
-    lst.append(PageBreak())
-    lst.append(Paragraph('Yian Hong\'s Bug Case (should not blow up)', styleSheet['Heading2']))
+    lst_add(PageBreak())
+    lst_add(Paragraph('Yian Hong\'s Bug Case (should not blow up)', styleSheet['Heading2']))
     data = ([['Col1', 'Col2', 'Col3', 'Col4', 'Col5']]+
                 [['01', Paragraph('This is cell one that contains a paragraph.', styleSheet['Normal']), '02', '03', '04']
                     for i in range(50)])
@@ -831,8 +820,8 @@ LIST_STYLE = TableStyle(
         ('SPAN', (0,50), (-2,50)),
         ]))
 
-    lst.append(t)
-    lst.append(PageBreak())
+    lst_add(t)
+    lst_add(PageBreak())
 
     #Volker Haas' example extended
     #the optimal row heights are the solution of an LP similar to
@@ -871,23 +860,23 @@ LIST_STYLE = TableStyle(
                     ('SPAN',(5,0),(5,2)),
                 ])
     p_style= ParagraphStyle('Normal')
-    lst.append(makeTable(
+    lst_add(makeTable(
             Paragraph('This is a string',p_style),
             Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs', p_style)
             ))
 
-    lst.append(Spacer(10,10))
-    lst.append(makeTable(
+    lst_add(Spacer(10,10))
+    lst_add(makeTable(
             XPreformatted('This is a string',p_style),
             Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs', p_style)
             ))
-    lst.append(Spacer(10,10))
-    lst.append(makeTable(
+    lst_add(Spacer(10,10))
+    lst_add(makeTable(
             'This is a string',
             '22\nblub\nasfd\nafd\nasdfs',
             ))
-    lst.append(Spacer(10,10))
-    lst.append(makeTable(
+    lst_add(Spacer(10,10))
+    lst_add(makeTable(
             'This is a string',
             Paragraph('22<br/>blub<br/>asfd<br/>afd<br/>asdfs', p_style)
             ))
@@ -971,6 +960,71 @@ class TablesTestCase(unittest.TestCase):
         t = Table(data, colWidths=None, rowHeights=None, style=style, repeatRows=1)
         doc = SimpleDocTemplate(outputfile('test_platypus_tables_issue74.pdf'), showBoundary=0, pagesize=landscape(A4))
         doc.build([t])
+
+    def test3(self):
+        '''bug reported by David VanEe <david.vanee@convergent.ca>'''
+        story = []
+        story_add = story.append
+        ts_tables = [
+                 ('BACKGROUND',(0,0),(-1,0),colors.pink),
+                 ('BACKGROUND',(0,1),(-1,1),colors.lightblue),
+                 ('BACKGROUND',(0,3),(-1,3),colors.grey),
+                 ('TEXTCOLOR',(0,0),(-1,0),colors.green),
+                 ('TEXTCOLOR',(0,1),(-1,1),colors.red),
+                 ('LINEABOVE', (0,0), (-1,0), 1, colors.purple),
+                 ('LINEBELOW', (0,0), (-1,0), 2, colors.purple),
+                 ('LINEABOVE', (0,1), (-1,1), 1, colors.orange),
+                 ('LINEBELOW', (0,1), (-1,1), 2, colors.orange),
+                 ('FONT', (2,2), (5,8), 'Times-Bold'),
+                 ]
+        data = [
+            ['001', '01', '02', '03', '04', '05'],
+            ['002', '01', '02', '03', '04', '05'],
+            ['003', '01', '02', '03', '04', '05'],
+            ['004', '01', '02', '03', '04', '05'],
+            ['005', '01', '02', '03', '04', '05'],
+            ['006', '01', '02', '03', '04', '05'],
+            ['007', '01', '02', '03', '04', '05'],
+            ['008', '01', '02', '03', '04', '05'],
+            ['009', '01', '02', '03', '04', '05'],
+            ['010', '01', '02', '03', '04', '05'],
+            ['011', '01', '02', '03', '04', '05'],
+            ['012', '01', '02', '03', '04', '05'],
+            ]
+        from reportlab.platypus import Paragraph, Table, SimpleDocTemplate, PageBreak
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        styleSheet = getSampleStyleSheet()
+        bodyText = styleSheet['BodyText']
+
+        story_add(Paragraph('The whole table',bodyText))
+        t = Table(data, style=ts_tables, repeatRows=(1,3))
+        story_add(t)
+        t = Table(data, style=ts_tables, repeatRows=(1,3))
+        T = t.split(4*72,90)
+        story_add(Paragraph('The split table part 0',bodyText))
+        story_add(T[0])
+        story_add(Paragraph('The split table part 1',bodyText))
+        story_add(T[1])
+        self.assertIn(('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),T[1]._bkgrndcmds)
+        self.assertIn(('BACKGROUND', (0, 1), (-1, 1), colors.grey),T[1]._bkgrndcmds)
+        self.assertEqual(len(T[1]._bkgrndcmds),2)
+
+        # do the same again with repeatRows=1
+        story_add(PageBreak())
+        story_add(Paragraph('The whole table repeatRows=1',bodyText))
+        t = Table(data, style=ts_tables, repeatRows=1)
+        story_add(t)
+        t = Table(data, style=ts_tables, repeatRows=1)
+        T = t.split(4*72,60)
+        story_add(Paragraph('The split table (repeatRows=1) part 0',bodyText))
+        story_add(T[0])
+        story_add(Paragraph('The split table (repeatRows=1) part 1',bodyText))
+        story_add(T[1])
+        self.assertIn(('BACKGROUND', (0, 0), (-1, 0), colors.pink),  T[1]._bkgrndcmds)
+        self.assertIn(('BACKGROUND', (0, 1), (-1, 1), colors.grey), T[1]._bkgrndcmds)
+        self.assertEqual(len(T[1]._bkgrndcmds),2)
+        doc = SimpleDocTemplate(outputfile('test_platypus_tables_repeatrows_bgsplit.pdf'), showBoundary=0)
+        doc.build(story)
 
 def makeSuite():
     return makeSuiteForClasses(TablesTestCase)
