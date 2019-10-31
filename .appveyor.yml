@@ -110,7 +110,7 @@ test_script:
   #- c:\projects\myenv\scripts\python.exe -mrl_ci_tools info --recur c:\projects\testenv\Lib\site-packages\reportlab\fonts
   - set OLDCD=%CD%
   - cd tests
-  - ..\testenv\Scripts\python.exe .\runAll.py
+  - c:\projects\testenv\Scripts\python.exe .\runAll.py
   - cd %OLDCD%
   - echo "=============================== Python%PYVER% TEST END"
 
