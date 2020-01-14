@@ -30,7 +30,7 @@ from reportlab.lib.colors import red, gray, lightgrey
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
 from reportlab.lib.styles import _baseFontName
-from reportlab.lib.utils import strTypes, safer_globals
+from reportlab.lib.utils import strTypes, rl_safe_exec
 from reportlab.lib.abag import ABag
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -755,7 +755,7 @@ class Macro(Flowable):
     def wrap(self, availWidth, availHeight):
         return (0,0)
     def draw(self):
-        exec(self.command, safer_globals(), {'canvas':self.canv})
+        rl_safe_exec(self.command, g=None, l={'canvas':self.canv})
 
 def _nullCallable(*args,**kwds):
     pass

@@ -154,7 +154,7 @@ class ExtConfigParser(ConfigParser):
         val = value.replace('\n', '')
 
         if self.pat.match(val):
-            return eval(val,{})
+            return eval(val,{__builtins__:None})
         else:
             return value
 

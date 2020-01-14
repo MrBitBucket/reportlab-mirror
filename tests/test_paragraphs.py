@@ -5,7 +5,7 @@ __version__='3.3.0'
 from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import unittest
+import unittest, os
 from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter, XPreformatted, PageBreak, Spacer
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
@@ -17,6 +17,7 @@ from reportlab.rl_config import defaultPageSize, rtlSupport
 from reportlab.pdfbase import ttfonts
 from reportlab.pdfbase import pdfmetrics
 from reportlab.lib.fonts import addMapping, tt2ps
+from reportlab.pdfgen.canvas import Canvas
 
 (PAGE_WIDTH, PAGE_HEIGHT) = defaultPageSize
 
@@ -258,6 +259,18 @@ class ParagraphTestCase(unittest.TestCase):
                                      showBoundary=1)
         template.build(story,
             onFirstPage=myFirstPage, onLaterPages=myLaterPages)
+
+    def testMalColor(self):
+        '''attempt to test may inputs via span etc etc'''
+        styNormal = ParagraphStyle('normal')
+        ofn = outputfile('dumbo.txt')
+        canv = Canvas(outputfile('testMalColor.pdf'))
+        self.assertRaises(ValueError,Paragraph, '''<span color="toColor(open(%s,'w').write('dumber and dumber'))">AAA</span>''' % ofn, styNormal)
+        self.assertFalse(os.path.isfile(ofn),"toColor managed to create a file %s :("% repr(ofn))
+        self.assertRaises(ValueError,Paragraph,
+            '''<span color="(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]): fc('function')(fc('code')(0,0,0,0,'KABOOM',(), (),(),'','',0,''),{})())()">AAA</span>''',styNormal)
+        #w, h = p.wrap(5*72,7*72)
+        #p.drawOn(canv,36,6.5*72)
     
     if rtlSupport:
         def testBidi(self):
@@ -440,7 +453,7 @@ class ParagraphTestCase(unittest.TestCase):
             styBI = ParagraphStyle('BI',fontName=fontNameBI)
             self.assertRaises(ValueError,Paragraph,'aaaa <b><i>bibibi</b></i> ccccc',stySTD)
             self.assertRaises(ValueError,Paragraph,'AAAA <b><i>BIBIBI</b></i> CCCCC',styBI)
-
+    
 def makeSuite():
     return makeSuiteForClasses(ParagraphTestCase)
 

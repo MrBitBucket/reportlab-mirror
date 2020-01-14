@@ -42,7 +42,7 @@ ValueError: css color 'pcmyka(100,0,0,0)' has wrong number of components
 import math, re, functools
 from reportlab import isPy3, cmp
 from reportlab.lib.rl_accel import fp_str
-from reportlab.lib.utils import asNative, isStr, safer_globals
+from reportlab.lib.utils import asNative, isStr, rl_safe_eval
 import collections
 from ast import literal_eval
 
@@ -836,6 +836,7 @@ class cssParse:
 cssParse=cssParse()
 
 class toColor:
+    _G = {} #globals we like (eventually)
 
     def __init__(self):
         self.extraColorsNS = {} #used for overriding/adding to existing color names
@@ -860,8 +861,18 @@ class toColor:
             C = getAllNamedColors()
             s = arg.lower()
             if s in C: return C[s]
+            G = C.copy()
+            G.update(self.extraColorsNS)
+            if not self._G:
+                C = globals()
+                self._G = {s:C[s] for s in '''Blacker CMYKColor CMYKColorSep Color ColorType HexColor PCMYKColor PCMYKColorSep Whiter
+                    _chooseEnforceColorSpace _enforceCMYK _enforceError _enforceRGB _enforceSEP _enforceSEP_BLACK
+                    _enforceSEP_CMYK _namedColors _re_css asNative cmyk2rgb cmykDistance color2bw colorDistance
+                    cssParse describe fade fp_str getAllNamedColors hsl2rgb hue2rgb isStr linearlyInterpolatedColor
+                    literal_eval obj_R_G_B opaqueColor rgb2cmyk setColors toColor toColorOrNone'''.split()}
+            G.update(self._G)
             try:
-                return toColor(eval(arg,safer_globals()))
+                return toColor(rl_safe_eval(arg,g=G,l={}))
             except:
                 pass
 

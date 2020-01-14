@@ -33,6 +33,13 @@ def framePage(canvas, title):
 class ColorTestCase(unittest.TestCase):
     ""
 
+    def ctAssertRaisesRegex(self,ex,regex,func,*args,**kwds):
+        try:
+            a = self.assertRaisesRegex
+        except AttributeError:
+            a = self.assertRaisesRegexp
+        return a(ex,regex,func,*args,**kwds)
+
     def test0(self):
         "Test color2bw function on all named colors."
 
@@ -63,6 +70,15 @@ class ColorTestCase(unittest.TestCase):
         for thing in allRed:
             assert colors.toColor(thing) == colors.red,"colors.toColor(%s)-->%s != colors.red(%s)" % (ascii(thing),ascii(colors.toColor(thing)),colors.red)
 
+    def test2a(self):
+        '''attempt to test toColor against simple attacks'''
+        ofn = outputfile('dumbo.txt')
+        self.assertRaises(ValueError,colors.toColor,"open(%s,'w').write('dumber and dumber')" % repr(ofn))
+        self.assertFalse(os.path.isfile(ofn),"toColor managed to create a file %s :("% repr(ofn))
+        self.assertRaises(ValueError,colors.toColor,"red.__class__.__bases__[0].__subclasses__()")
+        self.assertRaises(ValueError,colors.toColor,
+            '''(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]): fc("function")(fc("code")(0,0,0,0,"KABOOM",(), (),(),"","",0,""),{})())()''')
+        self.assertEqual(colors.Blacker(colors.red,0.5),colors.toColor("Blacker(red,0.5)"))
 
     def test3(self):
         "Test roundtrip RGB to CMYK conversion."
@@ -159,19 +175,19 @@ class ColorTestCase(unittest.TestCase):
         self.assertEqual(HexColor(b'0xffffff'),Color(1,1,1,1))
         self.assertEqual(HexColor(b'0xFFFFFF'),Color(1,1,1,1))
         self.assertEqual(HexColor(b'16777215'),Color(1,1,1,1))
-        self.assertRaisesRegexp(ValueError,r"invalid literal for int\(\) with base 10:.*ffffff",HexColor,b'ffffff')
+        self.ctAssertRaisesRegex(ValueError,r"invalid literal for int\(\) with base 10:.*ffffff",HexColor,b'ffffff')
         self.assertEqual(HexColor(b'#FFFFFF', htmlOnly=True),Color(1,1,1,1))
-        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,b'0xffffff',htmlOnly=True)
-        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,b'16777215',htmlOnly=True)
+        self.ctAssertRaisesRegex(ValueError,"not a hex string",HexColor,b'0xffffff',htmlOnly=True)
+        self.ctAssertRaisesRegex(ValueError,"not a hex string",HexColor,b'16777215',htmlOnly=True)
         self.assertEqual(HexColor(u'#ffffff'),Color(1,1,1,1))
         self.assertEqual(HexColor(u'#FFFFFF'),Color(1,1,1,1))
         self.assertEqual(HexColor(u'0xffffff'),Color(1,1,1,1))
         self.assertEqual(HexColor(u'0xFFFFFF'),Color(1,1,1,1))
         self.assertEqual(HexColor(u'16777215'),Color(1,1,1,1))
-        self.assertRaisesRegexp(ValueError,r"invalid literal for int\(\) with base 10:.*ffffff",HexColor,u'ffffff')
+        self.ctAssertRaisesRegex(ValueError,r"invalid literal for int\(\) with base 10:.*ffffff",HexColor,u'ffffff')
         self.assertEqual(HexColor(u'#FFFFFF', htmlOnly=True),Color(1,1,1,1))
-        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,u'0xffffff',htmlOnly=True)
-        self.assertRaisesRegexp(ValueError,"not a hex string",HexColor,u'16777215',htmlOnly=True)
+        self.ctAssertRaisesRegex(ValueError,"not a hex string",HexColor,u'0xffffff',htmlOnly=True)
+        self.ctAssertRaisesRegex(ValueError,"not a hex string",HexColor,u'16777215',htmlOnly=True)
 
 def makeSuite():
     return makeSuiteForClasses(ColorTestCase)

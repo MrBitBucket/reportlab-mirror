@@ -1,7 +1,7 @@
-#Copyright ReportLab Europe Ltd. 2000-2017
+#Copyright ReportLab Europe Ltd. 2000-2019
 #see license.txt for license details
 # $URI:$
-__version__='3.3.0'
+__version__='3.5.34'
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
 import os, sys, time, types, datetime, ast
@@ -11,6 +11,7 @@ from base64 import decodestring as base64_decodestring, encodestring as base64_e
 from reportlab import isPy3
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
+from . rl_safe_eval import rl_safe_exec, rl_safe_eval, safer_globals
 
 try:
     import cPickle as pickle
@@ -234,6 +235,7 @@ else:
         return s.encode('latin1') if isinstance(s,unicode) else s
 
     def rl_exec(obj, G=None, L=None):
+        '''this is unsafe'''
         if G is None:
             frame = sys._getframe(1)
             G = frame.f_globals
@@ -1502,14 +1504,6 @@ class TimeStamp(object):
             a[2] = a[2].lstrip('0')
             a = ' '.join(a)
         return a
-
-def safer_globals(g=None):
-    if g is None:
-        g = sys._getframe(1).f_globals.copy()
-    for name in ('__annotations__', '__builtins__', '__doc__', '__loader__', '__name__', '__package__', '__spec__'):
-        if name in g:
-            del g[name]
-    return g
 
 ###############################################################
 #the following code has been (thanks to MIT license)
