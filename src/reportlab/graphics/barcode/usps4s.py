@@ -1,11 +1,19 @@
 #copyright ReportLab Inc. 2000-2016
 #see license.txt for license details
+from __future__ import print_function
 __version__='3.3.0'
 __all__ = ('USPS_4State',)
 
 from reportlab.lib.colors import black
 from reportlab.graphics.barcode.common import Barcode
 from reportlab.lib.utils import asNative
+
+def nhex(i):
+    'normalized hex'
+    r = hex(i)
+    r = r[:2]+r[2:].lower()
+    if r.endswith('l'): r = r[:-1]
+    return r
 
 class USPS_4State(Barcode):
     ''' USPS 4-State OneView (TM) barcode. All info from USPS-B-3200A
@@ -83,14 +91,14 @@ class USPS_4State(Barcode):
 
     def binary(self):
         '''convert the 4 state string values to binary
-        >>> print hex(USPS_4State('01234567094987654321','').binary)
-        0x1122103B5C2004B1L
-        >>> print hex(USPS_4State('01234567094987654321','01234').binary)
-        0xD138A87BAB5CF3804B1L
-        >>> print hex(USPS_4State('01234567094987654321','012345678').binary)
-        0x202BDC097711204D21804B1L
-        >>> print hex(USPS_4State('01234567094987654321','01234567891').binary)
-        0x16907B2A24ABC16A2E5C004B1L
+        >>> print(nhex(USPS_4State('01234567094987654321','').binary))
+        0x1122103b5c2004b1
+        >>> print(nhex(USPS_4State('01234567094987654321','01234').binary))
+        0xd138a87bab5cf3804b1
+        >>> print(nhex(USPS_4State('01234567094987654321','012345678').binary))
+        0x202bdc097711204d21804b1
+        >>> print(nhex(USPS_4State('01234567094987654321','01234567891').binary))
+        0x16907b2a24abc16a2e5c004b1
         '''
         value = self._bvalue
         if not value:
@@ -138,7 +146,7 @@ class USPS_4State(Barcode):
 
     def codewords(self):
         '''convert binary value into codewords
-        >>> print USPS_4State('01234567094987654321','01234567891').codewords)
+        >>> print(USPS_4State('01234567094987654321','01234567891').codewords)
         (673, 787, 607, 1022, 861, 19, 816, 1294, 35, 602)
         '''
         if not self._codewords:
@@ -173,7 +181,7 @@ class USPS_4State(Barcode):
 
     def characters(self):
         ''' convert own codewords to characters
-        >>> print ' '.join(hex(c)[2:] for c in USPS_4State('01234567094987654321','01234567891').characters)
+        >>> print(' '.join(hex(c)[2:] for c in USPS_4State('01234567094987654321','01234567891').characters))
         dcb 85c 8e4 b06 6dd 1740 17c6 1200 123f 1b2b
         '''
         if not self._characters:
@@ -198,7 +206,7 @@ class USPS_4State(Barcode):
 
     def barcodes(self):
         '''Get 4 state bar codes for current routing and tracking
-        >>> print USPS_4State('01234567094987654321','01234567891').barcodes
+        >>> print(USPS_4State('01234567094987654321','01234567891').barcodes)
         AADTFFDFTDADTAADAATFDTDDAAADDTDTTDAFADADDDTFFFDDTTTADFAAADFTDAADA
         '''
         if not self._barcodes:
@@ -312,14 +320,17 @@ class USPS_4State(Barcode):
 
 def _crc11(value):
     '''
-    >>> print ' '.join(hex(_crc11(USPS_4State('01234567094987654321',x).binary)) for x in ('','01234','012345678','01234567891'))
+    >>> usps = [USPS_4State('01234567094987654321',x).binary for x in ('','01234','012345678','01234567891')]
+    >>> print(' '.join(nhex(x) for x in usps))
+    0x1122103b5c2004b1 0xd138a87bab5cf3804b1 0x202bdc097711204d21804b1 0x16907b2a24abc16a2e5c004b1
+    >>> print(' '.join(nhex(_crc11(x)) for x in usps))
     0x51 0x65 0x606 0x751
     '''
-    bytes = hex(int(value))[2:-1]
-    bytes = '0'*(26-len(bytes))+bytes
+    hexbytes = nhex(int(value))[2:]
+    hexbytes = '0'*(26-len(hexbytes))+hexbytes
     gp = 0x0F35
     fcs = 0x07FF
-    data = int(bytes[:2],16)<<5
+    data = int(hexbytes[:2],16)<<5
     for b in range(2,8):
         if (fcs ^ data)&0x400:
             fcs = (fcs<<1)^gp
@@ -329,7 +340,7 @@ def _crc11(value):
         data <<= 1
 
     for x in range(2,2*13,2):
-        data = int(bytes[x:x+2],16)<<3
+        data = int(hexbytes[x:x+2],16)<<3
         for b in range(8):
             if (fcs ^ data)&0x400:
                 fcs = (fcs<<1)^gp
@@ -341,7 +352,7 @@ def _crc11(value):
 
 def _ru13(i):
     '''reverse unsigned 13 bit number
-    >>> print _ru13(7936), _ru13(31), _ru13(47), _ru13(7808)
+    >>> print(_ru13(7936), _ru13(31), _ru13(47), _ru13(7808))
     31 7936 7808 47
     '''
     r = 0
@@ -354,7 +365,7 @@ def _ru13(i):
 def _initNof13Table(N,lenT):
     '''create and return table of 13 bit values with N bits on
     >>> T = _initNof13Table(5,1287)
-    >>> print ' '.join('T[%d]=%d' % (i, T[i]) for i in (0,1,2,3,4,1271,1272,1284,1285,1286))
+    >>> print(' '.join('T[%d]=%d' % (i, T[i]) for i in (0,1,2,3,4,1271,1272,1284,1285,1286)))
     T[0]=31 T[1]=7936 T[2]=47 T[3]=7808 T[4]=55 T[1271]=6275 T[1272]=6211 T[1284]=856 T[1285]=744 T[1286]=496
     '''
     T = lenT*[None]
