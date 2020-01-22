@@ -283,6 +283,12 @@ class isInstanceOf(Validator):
     def test(self,x):
         return isinstance(x,self._klass)
 
+class isSubclassOf(Validator):
+    def __init__(self,klass=None):
+        self._klass = klass
+    def test(self,x):
+        return issubclass(x,self._klass)
+
 class matchesPattern(Validator):
     """Matches value, or its string representation, against regex"""
     def __init__(self, pattern):
