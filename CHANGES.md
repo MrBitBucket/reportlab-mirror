@@ -11,6 +11,13 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.35	22/01/2020
+--------------------------
+	* test fixes
+	* Label enhancement
+	* added isSubclassOf validator
+	* added CrossHair widget
+
 RELEASE 3.5.34	14/01/2020
 --------------------------
 	* attempted restriction of the reportlab.lib.color.toColor function
