@@ -144,7 +144,7 @@ class ParagraphSplitTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
 
     def test0(self):
-        "This makes one long multi-page paragraph."
+        "ParagraphSplitTestCase.test0"
 
         # Build story.
         story = []
@@ -176,7 +176,7 @@ it's actually easy to do using platypus.
         doc.multiBuild(story)
 
     def test1(self):
-        "This makes one long multi-page paragraph."
+        "ParagraphSplitTestCase.test1"
 
         # Build story.
         story = []
@@ -304,7 +304,7 @@ component delimits the traditional practice of grammarians.'''
 
     @unittest.skipUnless(rtlSupport,'s')
     def test1_RTL(self):
-        "This makes one long multi-page paragraph."
+        "ParagraphSplitTestCase.test_RTL"
         from reportlab.platypus.flowables import ImageAndFlowables, Image
         from reportlab.lib.testutils import testsFolder
         from test_paragraphs import getAFont

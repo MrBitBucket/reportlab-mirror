@@ -61,7 +61,7 @@ subject to the levels of acceptability from fairly high (e.g. (99a)) to
 virtual gibberish (e.g. (98d)).
 '''
 def _test0(self):
-    "This makes one long multi-page paragraph."
+    "This makes one long multi-page paragraph in test_platypus_breaking."
 
     def RT(k,theme='PYTHON',sentences=1,cache={}):
         if k not in cache:

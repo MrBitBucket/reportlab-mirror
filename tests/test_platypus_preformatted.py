@@ -60,7 +60,7 @@ class WrappingTestCase(unittest.TestCase):
     "Test wrapping of long urls"
 
     def test0(self):
-        "This makes one long multi-page paragraph."
+        "WrappingTestCase.test0"
 
         # Build story.
         story = []

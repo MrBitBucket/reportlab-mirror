@@ -86,7 +86,7 @@ class MyDocTemplate(BaseDocTemplate):
 class LeftRightTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
     def testIt(self):
-        "This makes one long multi-page paragraph."
+        "LeftRightTestCase.testit"
 
         # Build story.
         story = []

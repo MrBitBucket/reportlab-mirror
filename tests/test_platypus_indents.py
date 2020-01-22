@@ -64,7 +64,7 @@ class IndentTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
 
     def test0(self):
-        "This makes one long multi-page paragraph."
+        "IndentTestCase test0"
 
         # Build story.
         story = []
