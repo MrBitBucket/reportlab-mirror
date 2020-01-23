@@ -103,7 +103,7 @@ matrix:
 before_install:
 - git clone https://github.com/matthew-brett/multibuild $MULTIBUILD_DIR
 - cd $MULTIBUILD_DIR
-- git checkout 44910268b56c0a1cffa2025c69844cf253fabaf0
+- git checkout 0c4a9920fa4635419fcea61f10d6dc0cd50e3639
 - cd ..
 - git clone https://github.com/MrBitBucket/reportlab-mirror $REPO_DIR
 - source $MULTIBUILD_DIR/common_utils.sh
