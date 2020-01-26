@@ -43,7 +43,6 @@ import math, re, functools
 from reportlab import isPy3, cmp
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.utils import asNative, isStr, rl_safe_eval
-import collections
 from ast import literal_eval
 
 class Color:
@@ -1025,7 +1024,7 @@ def _enforceRGB(c):
     return tc
 
 def _chooseEnforceColorSpace(enforceColorSpace):
-    if enforceColorSpace is not None and not isinstance(enforceColorSpace, collections.Callable):
+    if enforceColorSpace is not None and not callable(enforceColorSpace):
         if isinstance(enforceColorSpace,str): enforceColorSpace=enforceColorSpace.upper()
         if enforceColorSpace=='CMYK':
             enforceColorSpace = _enforceCMYK

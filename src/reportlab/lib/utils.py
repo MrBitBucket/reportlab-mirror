@@ -7,7 +7,10 @@ __doc__='''Gazillions of miscellaneous internal utility functions'''
 import os, sys, time, types, datetime, ast
 from functools import reduce as functools_reduce
 literal_eval = ast.literal_eval
-from base64 import decodestring as base64_decodestring, encodestring as base64_encodestring
+try:
+    from base64 import decodebytes as base64_decodebytes, encodebytes as base64_encodebytes
+except ImportError:
+    from base64 import decodestring as base64_decodebytes, encodestring as base64_encodebytes
 from reportlab import isPy3
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
@@ -124,10 +127,10 @@ if isPy3:
             return str(x).encode(enc)
 
     def encode_label(args):
-        return base64_encodestring(pickle.dumps(args)).strip().decode('latin1')
+        return base64_encodebytes(pickle.dumps(args)).strip().decode('latin1')
 
     def decode_label(label):
-        return pickle.loads(base64_decodestring(label.encode('latin1')))
+        return pickle.loads(base64_decodebytes(label.encode('latin1')))
 
     def rawUnicode(s):
         '''converts first 256 unicodes 1-1'''
@@ -221,10 +224,10 @@ else:
     from string import letters as ascii_letters, uppercase as ascii_uppercase, lowercase as ascii_lowercase
 
     def encode_label(args):
-        return base64_encodestring(pickle.dumps(args)).strip()
+        return base64_encodebytes(pickle.dumps(args)).strip()
 
     def decode_label(label):
-        return pickle.loads(base64_decodestring(label))
+        return pickle.loads(base64_decodebytes(label))
 
     def rawUnicode(s):
         '''converts first 256 unicodes 1-1'''

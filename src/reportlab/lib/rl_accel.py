@@ -23,6 +23,7 @@ del reportlab
 for fn in __all__:
     D={}
     try:
+        if fn=='unicode2T1': raise ImportError
         exec('from reportlab.lib._rl_accel import %s as f' % fn,D)
         _c_funcs[fn] = D['f']
         if testing: _py_funcs[fn] = None

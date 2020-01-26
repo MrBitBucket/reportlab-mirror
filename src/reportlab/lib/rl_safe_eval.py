@@ -4,7 +4,6 @@
 #https://github.com/danthedeckie/simpleeval
 #hopefully we are standing on giants' shoulders
 import sys, os, ast, re, weakref, time, copy, math
-from collections import Mapping as collectionsMapping
 from reportlab import isPy3
 isPy2 = not isPy3
 eval_debug = int(os.environ.get('EVAL_DEBUG','0'))
@@ -981,7 +980,7 @@ class __RL_SAFE_ENV__(object):
 
 		class __rl_dict__(dict):
 			def __new__(cls, *args,**kwds):
-				if len(args)==1 and not isinstance(args[0],collectionsMapping):
+				if len(args)==1 and not isinstance(args[0],dict):
 					try:
 						it = self.__real_iter__(args[0])
 					except TypeError:

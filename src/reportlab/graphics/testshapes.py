@@ -19,7 +19,7 @@ import os, sys, base64
 
 from reportlab.lib import colors
 from reportlab.lib.units import cm
-from reportlab.lib.utils import asNative
+from reportlab.lib.utils import asNative, base64_decodebytes
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus import Flowable
@@ -456,7 +456,7 @@ def smallArrow():
     '''create a small PIL image'''
     from reportlab.graphics.renderPM import _getImage
     from reportlab.lib.utils import getBytesIO
-    b = base64.decodestring(b'''R0lGODdhCgAHAIMAAP/////29v/d3f+ysv9/f/9VVf9MTP8iIv8ICP8AAAAAAAAAAAAAAAAAAAAA
+    b = base64_decodebytes(b'''R0lGODdhCgAHAIMAAP/////29v/d3f+ysv9/f/9VVf9MTP8iIv8ICP8AAAAAAAAAAAAAAAAAAAAA
 AAAAACwAAAAACgAHAAAIMwABCBxIsKABAQASFli4MAECAgEAJJhIceKBAQkyasx4YECBjx8TICAQ
 AIDJkwYEAFgZEAA7''')
     return _getImage().open(getBytesIO(b))

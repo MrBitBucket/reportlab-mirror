@@ -91,7 +91,8 @@ def main(pattern='test_*.py'):
     cleanup(outputfile(''))
     NI = []
     cleanOnly = '--clean' in sys.argv
-    verbosity = 2 if '--verbose' in sys.argv else 0
+    verbosity = [_ for _ in sys.argv if _.startswith('--verbosity=')]
+    verbosity = int(verbosity[-1][12:]) if verbosity else 1
     if not cleanOnly:
         testSuite = makeSuite(folder,nonImportable=NI,pattern=pattern+(not haveSRC and 'c' or ''))
         result = unittest.TextTestRunner(verbosity=verbosity).run(testSuite)
