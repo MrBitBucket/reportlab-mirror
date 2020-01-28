@@ -637,10 +637,27 @@ class Drawing(Group, Flowable):
     This has no properties except a height, width and list
     of contents."""
 
-    _saveModes=(
-            'pdf','ps','eps','gif','png','jpg','jpeg','pct',
-            'pict','tiff','tif','py','bmp','svg','tiffp','tiffl','tiff1',
-            )
+    _saveModes = {
+            'bmp',
+            'eps',
+            'gif',
+            'jpeg',
+            'jpg',
+            'pct',
+            'pdf',
+            'pict',
+            'png',
+            'ps',
+            'py',
+            'svg',
+            'tif',
+            'tiff',
+            'tiff1',
+            'tiffl',
+            'tiffp',
+            }
+
+    _bmModes = _saveModes - {'eps','pdf','ps','py','svg'}
 
     _xtraAttrMap = AttrMap(
         width = AttrMapValue(isNumber,desc="Drawing width in points."),
@@ -779,7 +796,7 @@ class Drawing(Group, Flowable):
                 macfs.FSSpec(filename).SetCreatorType("CARO", "PDF ")
                 macostools.touched(filename)
 
-        for bmFmt in ('gif','png','tif','jpg','tiff','pct','pict', 'bmp','tiffp','tiffl','tiff1'):
+        for bmFmt in self._bmModes:
             if bmFmt in plotMode:
                 from reportlab.graphics import renderPM
                 filename = '%s.%s' % (fnroot,bmFmt)
@@ -843,13 +860,13 @@ class Drawing(Group, Flowable):
 
     def asString(self, format, verbose=None, preview=0, **kw):
         """Converts to an 8 bit string in given format."""
-        assert format in ('pdf','ps','eps','gif','png','jpg','jpeg','bmp','ppm','tiff','tif','py','pict','pct','tiffp','tiffl','tiff1'), 'Unknown file format "%s"' % format
+        assert format in self._saveModes, 'Unknown file format "%s"' % format
         from reportlab import rl_config
         #verbose = verbose is not None and (verbose,) or (getattr(self,'verbose',verbose),)[0]
         if format == 'pdf':
             from reportlab.graphics import renderPDF
             return renderPDF.drawToString(self)
-        elif format in ('gif','png','tif','tiff','jpg','pct','pict','bmp','ppm','tiffp','tiffl','tiff1'):
+        elif format in self._bmModes:
             from reportlab.graphics import renderPM
             return renderPM.drawToString(self, fmt=format,showBoundary=getattr(self,'showBorder',
                             rl_config.showBoundary),**_extraKW(self,'_renderPM_',**kw))
@@ -867,6 +884,9 @@ class Drawing(Group, Flowable):
             return renderPS.drawToString(self, showBoundary=getattr(self,'showBorder',rl_config.showBoundary))
         elif format == 'py':
             return self._renderPy()
+        elif format == 'svg':
+            from reportlab.graphics import renderSVG
+            renderSVG.drawToString(self,showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderSVG_',**kw))
 
     def resized(self,kind='fit',lpad=0,rpad=0,bpad=0,tpad=0):
         '''return a base class drawing which ensures all the contents fits'''
