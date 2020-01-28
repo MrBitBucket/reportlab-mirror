@@ -675,8 +675,7 @@ class Drawing(Group, Flowable):
 
     _attrMap = AttrMap(BASE=Group,
             formats = AttrMapValue(SequenceOf(
-                OneOf('pdf','gif','png','tif','jpg','tiff','pct','pict',
-                        'bmp','tiffp','tiffl','tiff1','eps','svg','ps','py'),
+                OneOf(*_saveModes),
                 lo=1,emptyOK=0), desc='One or more plot modes'),
             )
     _attrMap.update(_xtraAttrMap)
@@ -886,7 +885,7 @@ class Drawing(Group, Flowable):
             return self._renderPy()
         elif format == 'svg':
             from reportlab.graphics import renderSVG
-            renderSVG.drawToString(self,showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderSVG_',**kw))
+            return renderSVG.drawToString(self,showBoundary=getattr(self,'showBorder',rl_config.showBoundary),**_extraKW(self,'_renderSVG_',**kw))
 
     def resized(self,kind='fit',lpad=0,rpad=0,bpad=0,tpad=0):
         '''return a base class drawing which ensures all the contents fits'''
