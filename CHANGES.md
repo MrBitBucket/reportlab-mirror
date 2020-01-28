@@ -11,6 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.36	28/01/2020
+--------------------------
+	* update travis version of multibuild contrib by Matthew Brett
+	* fixes to cope with python 3.9
+	* imrove Drawing formats handling and ensure asString can do svg
+
 RELEASE 3.5.35	22/01/2020
 --------------------------
 	* test fixes

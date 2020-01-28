@@ -18,7 +18,7 @@ a registry of Font, TypeFace and Encoding objects.  Ideally these
 would be pre-loaded, but due to a nasty circularity problem we
 trap attempts to access them and do it on first access.
 """
-import string, os, sys
+import string, os, sys, encodings
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines, findInPaths, isSeq, isStr, isUnicode, isPy3
@@ -556,7 +556,7 @@ class EmbeddedType1Face(TypeFace):
                     if u is not None:
                         rex[code] = u
                         ex[u] = code
-            encName = 'rl-dynamic-%s-encoding' % self.name.lower()
+            encName = encodings.normalize_encoding('rl-dynamic-%s-encoding' % self.name)
             rl_codecs.RL_Codecs.add_dynamic_codec(encName,ex,rex)
             self.requiredEncoding = encName
             enc = Encoding(encName, names)
