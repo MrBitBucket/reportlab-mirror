@@ -20,7 +20,8 @@ from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
                                     isBoolean, isListOfColors,\
                                     isNoneOrListOfNoneOrStrings,\
                                     isNoneOrListOfNoneOrNumbers,\
-                                    isNumberOrNone
+                                    isNumberOrNone, isListOfNoneOrNumber,\
+                                    isListOfListOfNoneOrNumber, EitherOr
 from reportlab.lib.attrmap import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, Ellipse, \
@@ -30,6 +31,7 @@ from reportlab.graphics.charts.piecharts import AbstractPieChart, WedgePropertie
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgets.markers import Marker
 from functools import reduce
+from reportlab import xrange
 
 class SectorProperties(WedgeProperties):
     """This holds descriptive information about the sectors in a doughnut chart.
@@ -48,7 +50,7 @@ class Doughnut(AbstractPieChart):
         y = AttrMapValue(isNumber, desc='Y position of the chart within its container.'),
         width = AttrMapValue(isNumber, desc='width of doughnut bounding box. Need not be same as width.'),
         height = AttrMapValue(isNumber, desc='height of doughnut bounding box.  Need not be same as height.'),
-        data = AttrMapValue(None, desc='list of numbers defining sector sizes; need not sum to 1'),
+        data = AttrMapValue(EitherOr((isListOfNoneOrNumber,isListOfListOfNoneOrNumber)), desc='list of numbers defining sector sizes; need not sum to 1'),
         labels = AttrMapValue(isListOfStringsOrNone, desc="optional list of labels to use for each data point"),
         startAngle = AttrMapValue(isNumber, desc="angle of first slice; like the compass, 0 is due North"),
         direction = AttrMapValue(OneOf('clockwise', 'anticlockwise'), desc="'clockwise' or 'anticlockwise'"),
@@ -120,17 +122,19 @@ class Doughnut(AbstractPieChart):
 
     def makeSectors(self):
         # normalize slice data
-        if isinstance(self.data,(list,tuple)) and isinstance(self.data[0],(list,tuple)):
+        data = self.data
+        multi = isListOfListOfNoneOrNumber(data)
+        if multi:
             #it's a nested list, more than one sequence
             normData = []
             n = []
-            for l in self.data:
+            for l in data:
                 t = self.normalizeData(l)
                 normData.append(t)
                 n.append(len(t))
             self._seriesCount = max(n)
         else:
-            normData = self.normalizeData(self.data)
+            normData = self.normalizeData(data)
             n = len(normData)
             self._seriesCount = n
         
@@ -139,18 +143,18 @@ class Doughnut(AbstractPieChart):
         L = []
         L_add = L.append
         
-        if self.labels is None:
+        labels = self.labels
+        if labels is None:
             labels = []
-            if not isinstance(n,(list,tuple)):
+            if not multi:
                 labels = [''] * n
             else:
                 for m in n:
                     labels = list(labels) + [''] * m
         else:
-            labels = self.labels
             #there's no point in raising errors for less than enough labels if
             #we silently create all for the extreme case of no labels.
-            if not isinstance(n,(list,tuple)):
+            if not multi:
                 i = n-len(labels)
                 if i>0:
                     labels = list(labels) + [''] * i
@@ -161,6 +165,7 @@ class Doughnut(AbstractPieChart):
                 i = tlab-len(labels)
                 if i>0:
                     labels = list(labels) + [''] * i
+        self.labels = labels
 
         xradius = self.width/2.0
         yradius = self.height/2.0
@@ -177,9 +182,10 @@ class Doughnut(AbstractPieChart):
         startAngle = self.startAngle #% 360
         styleCount = len(self.slices)
         irf = self.innerRadiusFraction
-        if isinstance(self.data[0],(list,tuple)):
+
+        if multi:
             #multi-series doughnut
-            ndata = len(self.data)
+            ndata = len(data)
             if irf is None:
                 yir = (yradius/2.5)/ndata
                 xir = (xradius/2.5)/ndata
@@ -191,7 +197,8 @@ class Doughnut(AbstractPieChart):
             for sn,series in enumerate(normData):
                 for i,angle in enumerate(series):
                     endAngle = (startAngle + (angle * whichWay)) #% 360
-                    if abs(startAngle-endAngle)<1e-5:
+                    aa = abs(startAngle-endAngle)
+                    if aa<1e-5:
                         startAngle = endAngle
                         continue
                     if startAngle < endAngle:
@@ -204,7 +211,7 @@ class Doughnut(AbstractPieChart):
 
                     #if we didn't use %stylecount here we'd end up with the later sectors
                     #all having the default style
-                    sectorStyle = self.slices[i%styleCount]
+                    sectorStyle = self.slices[sn,i%styleCount]
 
                     # is it a popout?
                     cx, cy = centerx, centery
@@ -220,7 +227,7 @@ class Doughnut(AbstractPieChart):
                     yr = yr1 + ydr
                     xr1 = xir+sn*xdr
                     xr = xr1 + xdr
-                    if isinstance(n,(list,tuple)):
+                    if len(series) > 1:
                         theSector = Wedge(cx, cy, xr, a1, a2, yradius=yr, radius1=xr1, yradius1=yr1)
                     else:
                         theSector = Wedge(cx, cy, xr, a1, a2, yradius=yr, radius1=xr1, yradius1=yr1, annular=True)
@@ -229,6 +236,35 @@ class Doughnut(AbstractPieChart):
                     theSector.strokeColor = sectorStyle.strokeColor
                     theSector.strokeWidth = sectorStyle.strokeWidth
                     theSector.strokeDashArray = sectorStyle.strokeDashArray
+
+                    shader = sectorStyle.shadingKind
+                    if shader:
+                        nshades = aa / float(sectorStyle.shadingAngle)
+                        if nshades > 1:
+                            shader = colors.Whiter if shader=='lighten' else colors.Blacker
+                            nshades = 1+int(nshades)
+                            shadingAmount = 1-sectorStyle.shadingAmount
+                            if sectorStyle.shadingDirection=='normal':
+                                dsh = (1-shadingAmount)/float(nshades-1)
+                                shf1 = shadingAmount
+                            else:
+                                dsh = (shadingAmount-1)/float(nshades-1)
+                                shf1 = 1
+                            shda = (a2-a1)/float(nshades)
+                            shsc = sectorStyle.fillColor
+                            theSector.fillColor = None
+                            for ish in xrange(nshades):
+                                sha1 = a1 + ish*shda
+                                sha2 = a1 + (ish+1)*shda
+                                shc = shader(shsc,shf1 + dsh*ish)
+                                if len(series)>1:
+                                    shSector = Wedge(cx, cy, xr, sha1, sha2, yradius=yr, radius1=xr1, yradius1=yr1)
+                                else:
+                                    shSector = Wedge(cx, cy, xr, sha1, sha2, yradius=yr, radius1=xr1, yradius1=yr1, annular=True)
+                                shSector.fillColor = shc
+                                shSector.strokeColor = None
+                                shSector.strokeWidth = 0
+                                g.add(shSector)
 
                     g.add(theSector)
 
@@ -260,7 +296,8 @@ class Doughnut(AbstractPieChart):
                 xir = xradius*irf
             for i,angle in enumerate(normData):
                 endAngle = (startAngle + (angle * whichWay)) #% 360
-                if abs(startAngle-endAngle)<1e-5:
+                aa = abs(startAngle-endAngle)
+                if aa<1e-5:
                     startAngle = endAngle
                     continue
                 if startAngle < endAngle:
@@ -294,6 +331,35 @@ class Doughnut(AbstractPieChart):
                 theSector.strokeColor = sectorStyle.strokeColor
                 theSector.strokeWidth = sectorStyle.strokeWidth
                 theSector.strokeDashArray = sectorStyle.strokeDashArray
+
+                shader = sectorStyle.shadingKind
+                if shader:
+                    nshades = aa / float(sectorStyle.shadingAngle)
+                    if nshades > 1:
+                        shader = colors.Whiter if shader=='lighten' else colors.Blacker
+                        nshades = 1+int(nshades)
+                        shadingAmount = 1-sectorStyle.shadingAmount
+                        if sectorStyle.shadingDirection=='normal':
+                            dsh = (1-shadingAmount)/float(nshades-1)
+                            shf1 = shadingAmount
+                        else:
+                            dsh = (shadingAmount-1)/float(nshades-1)
+                            shf1 = 1
+                        shda = (a2-a1)/float(nshades)
+                        shsc = sectorStyle.fillColor
+                        theSector.fillColor = None
+                        for ish in xrange(nshades):
+                            sha1 = a1 + ish*shda
+                            sha2 = a1 + (ish+1)*shda
+                            shc = shader(shsc,shf1 + dsh*ish)
+                            if n > 1:
+                                shSector = Wedge(cx, cy, xradius, sha1, sha2, yradius=yradius, radius1=xir, yradius1=yir)
+                            elif n==1:
+                                shSector = Wedge(cx, cy, xradius, sha1, sha2, yradius=yradius, radius1=xir, yradius1=yir, annular=True)
+                            shSector.fillColor = shc
+                            shSector.strokeColor = None
+                            shSector.strokeWidth = 0
+                            g.add(shSector)
 
                 g.add(theSector)
 

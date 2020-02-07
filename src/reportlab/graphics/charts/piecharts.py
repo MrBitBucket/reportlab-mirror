@@ -105,6 +105,10 @@ class WedgeProperties(PropHolder):
         label_pointer_piePad = AttrMapValue(isNumber,desc='pad between pointer label and pie'),
         swatchMarker = AttrMapValue(NoneOr(isSymbol), desc="None or makeMarker('Diamond') ...",advancedUsage=1),
         visible = AttrMapValue(isBoolean,'Set to false to skip displaying'),
+        shadingAmount = AttrMapValue(isNumberOrNone,desc='amount by which to shade fillColor'),
+        shadingAngle = AttrMapValue(isNumber,desc='shading changes at multiple of this angle (in degrees)'),
+        shadingDirection = AttrMapValue(OneOf('normal','anti'),desc="Whether shading is at start or end of wedge/sector"),
+        shadingKind = AttrMapValue(OneOf(None,'lighten','darken'),desc="use colors.Whiter or Blacker"),
         )
 
     def __init__(self):
@@ -139,6 +143,10 @@ class WedgeProperties(PropHolder):
         self.label_pointer_edgePad = 2
         self.label_pointer_piePad = 3
         self.visible = 1
+        self.shadingKind = None
+        self.shadingAmount = 0.5
+        self.shadingAngle = 2.0137
+        self.shadingDirection = 'normal'    #or 'anti'
 
 def _addWedgeLabel(self,text,angle,labelX,labelY,wedgeStyle,labelClass=WedgeLabel):
     # now draw a label
@@ -764,6 +772,7 @@ class Pie(AbstractPieChart):
 
         innerRadiusFraction = self.innerRadiusFraction
 
+
         for i,(a1,a2) in angles:
             if a2 is None: continue
             #if we didn't use %stylecount here we'd end up with the later wedges
@@ -802,8 +811,37 @@ class Pie(AbstractPieChart):
             theWedge.strokeLineJoin = wedgeStyle.strokeLineJoin
             theWedge.strokeLineCap = wedgeStyle.strokeLineCap
             theWedge.strokeMiterLimit = wedgeStyle.strokeMiterLimit
-            theWedge.strokeWidth = wedgeStyle.strokeWidth
             theWedge.strokeDashArray = wedgeStyle.strokeDashArray
+
+            shader = wedgeStyle.shadingKind
+            if shader:
+                nshades = aa / float(wedgeStyle.shadingAngle)
+                if nshades > 1:
+                    shader = colors.Whiter if shader=='lighten' else colors.Blacker
+                    nshades = 1+int(nshades)
+                    shadingAmount = 1-wedgeStyle.shadingAmount
+                    if wedgeStyle.shadingDirection=='normal':
+                        dsh = (1-shadingAmount)/float(nshades-1)
+                        shf1 = shadingAmount
+                    else:
+                        dsh = (shadingAmount-1)/float(nshades-1)
+                        shf1 = 1
+                    shda = (a2-a1)/float(nshades)
+                    shsc = wedgeStyle.fillColor
+                    theWedge.fillColor = None
+                    for ish in xrange(nshades):
+                        sha1 = a1 + ish*shda
+                        sha2 = a1 + (ish+1)*shda
+                        shc = shader(shsc,shf1 + dsh*ish)
+                        if innerRadiusFraction:
+                            shWedge = Wedge(cx, cy, xradius, sha1, sha2, yradius=yradius,
+                                    radius1=xradius*innerRadiusFraction,yradius1=yradius*innerRadiusFraction)
+                        else:
+                            shWedge = Wedge(cx, cy, xradius, sha1, sha2, yradius=yradius)
+                        shWedge.fillColor = shc
+                        shWedge.strokeColor = None
+                        shWedge.strokeWidth = 0
+                        g_add(shWedge)
 
             g_add(theWedge)
             if wr:
