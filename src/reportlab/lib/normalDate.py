@@ -23,7 +23,7 @@ _dayOfWeekName = _dayOfWeekName.split()
 _monthName = '''January February March April May June
                 July August September October November December'''
 _monthNameLower = _monthName.lower().split()
-_monthNameLower = _monthName.split()
+_monthName = _monthName.split()
 
 from reportlab import cmp
 import re, time, datetime
