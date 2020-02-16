@@ -5,6 +5,7 @@ env:
   global:
   - REPO_DIR=reportlab
   - MULTIBUILD_DIR=multibuild
+  - MB_ML_VER=2010
   - CONFIG_PATH=.travis-config.sh
   - BUILD_COMMIT=master
   - PLAT=x86_64

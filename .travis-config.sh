@@ -37,3 +37,15 @@ function run_tests {
 	python runAll.py
 	)
 	}
+
+if [ -n "$IS_OSX" ]; then
+	function repair_wheelhouse {
+		local wheelhouse=$1
+		install_delocate
+		if [ -x $(dirname $PYTHON_EXE)/delocate-wheel ]; then
+			$(dirname $PYTHON_EXE)/delocate-wheel $wheelhouse/*.whl # copies library dependencies into wheel
+		else
+			/Library/Frameworks/Python.framework/Versions/2.7/bin/delocate-wheel $wheelhouse/*.whl # copies library dependencies into wheel
+		fi
+	}
+fi
