@@ -1731,12 +1731,20 @@ class Canvas(_PDFColorSetter):
 
     def setDash(self, array=[], phase=0):
         """Two notations.  pass two numbers, or an array and phase"""
+        reason = ''
         if isinstance(array,(int,float)):
-            self._code.append('[%s %s] 0 d' % (array, phase))
-        elif isSeq(array):
-            assert phase >= 0, "phase is a length in user space"
-            textarray = ' '.join([str(s) for s in array])
-            self._code.append('[%s] %s d' % (textarray, phase))
+            array = (array, phase)
+            phase = 0
+        elif not isSeq(array):
+            reason = 'array should be a sequence of numbers or a number'
+        bad = [_ for _ in array if not isinstance(_,(int,float)) or _ < 0]
+        if bad or not isinstance(phase,(int,float)) or phase<0:
+            reason = 'array & phase should be non-negative numbers'
+        elif array and sum(array)<=0:
+            reason = 'dash cycle should be larger than zero'
+        if reason:
+            raise ValueError('setDash: array=%r phase=%r\n%s' % (array, phase, reason))
+        self._code.append('[%s] %s d' % (fp_str(array), phase))
 
     # path stuff - the separate path object builds it
 
