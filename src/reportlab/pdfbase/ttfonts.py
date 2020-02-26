@@ -52,7 +52,7 @@ Canvas and TextObject have special support for dynamic fonts.
 """
 
 from struct import pack, unpack, error as structError
-from reportlab.lib.utils import getBytesIO, isPy3, bytestr, isUnicode, char2int
+from reportlab.lib.utils import getBytesIO, isPy3, bytestr, isUnicode, char2int, bytesT, isStr, isBytes
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config, xrange, ascii
 from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF
@@ -62,7 +62,6 @@ import os, time
 class TTFError(pdfdoc.PDFError):
     "TrueType font exception"
     pass
-
 
 if isPy3:
     def SUBSETN(n,table=bytes.maketrans(b'0123456789',b'ABCDEFGIJK')):
@@ -178,9 +177,6 @@ class TTFontParser:
         """
         self.validate = validate
         self.readFile(file)
-        self._filename = getattr(file,'name','')
-        if self._filename.startswith('<'):
-            self._filename = ''
         isCollection = self.readHeader()
         if isCollection:
             self.readTTCHeader()
@@ -247,17 +243,18 @@ class TTFontParser:
             raise TTFError('%s file "%s": postscript outlines are not supported'%(self.fileKind,self.filename))
 
         if version not in self.ttfVersions:
-            raise TTFError('Not a TrueType font: version=0x%8.8X' % version)
+            raise TTFError('Not a recognized TrueType font: version=0x%8.8X' % version)
         return version==self.ttfVersions[-1]
 
     def readFile(self,f):
-        if hasattr(f,'read'):
-            self.filename = getattr(f,'name','(ttf)')   #good idea Marius
-            self._ttf_data = f.read()
-        else:
-            self.filename, f = TTFOpenFile(f)
-            self._ttf_data = f.read()
-            f.close()
+        if not hasattr(self,'_ttf_data'):
+            if hasattr(f,'read'):
+                self.filename = getattr(f,'name','(ttf)')   #good idea Marius
+                self._ttf_data = f.read()
+            else:
+                self.filename, f = TTFOpenFile(f)
+                self._ttf_data = f.read()
+                f.close()
         self._pos = 0
 
     def checksumTables(self):
@@ -416,6 +413,17 @@ class TTFontMaker:
 #this is used in the cmap encoding fmt==2 case
 CMapFmt2SubHeader = namedtuple('CMapFmt2SubHeader', 'firstCode entryCount idDelta idRangeOffset')
 
+class TTFNameBytes(bytesT):
+    '''class used to return named strings'''
+    def __new__(cls,b,enc='utf8'):
+        try:
+            ustr = b.decode(enc)
+        except:
+            ustr = b.decode('latin1')
+        self = bytesT.__new__(cls,ustr.encode('utf8'))
+        self.ustr = ustr
+        return self
+    
 class TTFontFile(TTFontParser):
     "TTF file parser and generator"
     _agfnc = 0
@@ -428,8 +436,26 @@ class TTFontFile(TTFontParser):
         values, skips checksum validation.  This can save time, especially if
         the font is large.  See TTFontFile.extractInfo for more information.
         """
-        TTFontParser.__init__(self, file, validate=validate,subfontIndex=subfontIndex)
-        self.extractInfo(charInfo)
+        if isStr(subfontIndex): #bytes or unicode
+            sfi = 0
+            __dict__ = self.__dict__.copy()
+            while True:
+                TTFontParser.__init__(self, file, validate=validate,subfontIndex=sfi)
+                numSubfonts = self.numSubfonts = self.read_ulong()
+                self.extractInfo(charInfo)
+                if (isBytes(subfontIndex) and subfontIndex==self.name
+                    or subfontIndex==self.name.ustr): #we found it
+                    return
+                if not sfi:
+                    __dict__.update(dict(_ttf_data=self._ttf_data, filename=self.filename))
+                sfi += 1
+                if sfi>=numSubfonts:
+                    raise ValueError('cannot find %r subfont %r' % (self.filename, subfontIndex))
+                self.__dict__.clear()
+                self.__dict__.update(__dict__)
+        else:
+            TTFontParser.__init__(self, file, validate=validate,subfontIndex=subfontIndex)
+            self.extractInfo(charInfo)
 
     def extractInfo(self, charInfo=1):
         """
@@ -484,21 +510,14 @@ class TTFontFile(TTFontParser):
                     self.seek(string_data_offset + offset)
                     if length % 2 != 0:
                         raise TTFError("PostScript name is UTF-16BE string of odd length")
-                    length /= 2
-                    N = []
-                    A = N.append
-                    while length > 0:
-                        char = self.read_ushort()
-                        A(bytes([char]) if isPy3 else chr(char))
-                        length -= 1
-                    N = b''.join(N)
+                    N = TTFNameBytes(self.get_chunk(string_data_offset + offset, length),'utf_16_be')
                 finally:
                     self._pos = opos
             elif platformId == 1 and encodingId == 0 and languageId == 0: # Macintosh, Roman, English, PS Name
                 # According to OpenType spec, if PS name exists, it must exist
                 # both in MS Unicode and Macintosh Roman formats.  Apparently,
                 # you can find live TTF fonts which only have Macintosh format.
-                N = self.get_chunk(string_data_offset + offset, length)
+                N = TTFNameBytes(self.get_chunk(string_data_offset + offset, length),'mac_roman')
             if N and names[nameId]==None:
                 names[nameId] = N
                 nameCount -= 1
@@ -516,7 +535,7 @@ class TTFontFile(TTFontParser):
         # Don't just assume, check for None since some shoddy fonts cause crashes here...
         if not psName:
             if rl_config.autoGenerateTTFMissingTTFName:
-                fn = self._filename
+                fn = self.filename
                 if fn:
                     bfn = os.path.splitext(os.path.basename(fn))[0]
                 if not fn:
@@ -534,7 +553,7 @@ class TTFontFile(TTFontParser):
             else:
                 raise TTFError("Could not find PostScript font name")
 
-        psName = psName.replace(b" ", b"-")  #Dinu Gherman's fix for font names with spaces
+        psName = psName.__class__(psName.replace(b" ", b"-"))  #Dinu Gherman's fix for font names with spaces
 
         for c in psName:
             if char2int(c)>126 or c in b' [](){}<>/%':
