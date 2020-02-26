@@ -1508,80 +1508,33 @@ class TimeStamp(object):
             a = ' '.join(a)
         return a
 
-###############################################################
-#the following code has been (thanks to MIT license)
-#freely adapted from https://github.com/frmdstryr/magicattr
-#the function names are changed to avoid clasing with the actual
-#magicattr names to prevent confusion should others be using that
-#as well as ReportLab
-from functools import reduce as functools_reduce
+def recursiveGetAttr(obj, name, g=None):
+    "Can call down into e.g. object1.object2[4].attr"
+    if not isStr(name): raise TypeError('invalid reursive acess using %r' % name)
+    name = asNative(name)
+    name = name.strip()
+    if not name: raise ValueError('empty recursive access')
+    dot = '.' if name and name[0] not in '[.(' else ''
+    return rl_safe_eval('obj%s%s'%(dot,name), g={}, l=dict(obj=obj))
 
-#: Types of AST nodes that are used
-_raccess_ast_types = (ast.Name, ast.Attribute, ast.Subscript, ast.Call)
-
-def recursiveGetAttr(ob, a):
-    return functools_reduce(_raccess_getattr, _raccess_get_nodes(a), ob)
-
-def recursiveSetAttr(ob, a, val):
-    ob, attr_or_key, is_subscript = raccess_lookup(ob, a)
-    if is_subscript:
-        ob[attr_or_key] = val
+def recursiveSetAttr(obj, name, value):
+    "Can call down into e.g. object1.object2[4].attr = value"
+    #get the thing above last.
+    tokens = name.split('.')
+    if len(tokens) == 1:
+        setattr(obj, name, value)
     else:
-        setattr(ob, attr_or_key, val)
+        most = '.'.join(tokens[:-1])
+        last = tokens[-1]
+        parent = recursiveGetAttr(obj, most)
+        setattr(parent, last, value)
 
-def recursiveDelAttr(ob, a):
-    ob, attr_or_key, is_subscript = raccess_lookup(ob, a)
-    if is_subscript:
-        del ob[attr_or_key]
+def recursiveDelAttr(obj, name):
+    tokens = name.split('.')
+    if len(tokens) == 1:
+        delattr(obj, name)
     else:
-        delattr(ob, attr_or_key)
-
-def raccess_lookup(ob, a):
-    N = tuple(_raccess_get_nodes(a))
-    if len(N) > 1:
-        ob = functools_reduce(_raccess_getattr, N[:-1], ob)
-        n = N[-1]
-    else:
-        n = N[0]
-    if isinstance(n, ast.Attribute):
-        return ob, n.attr, False
-    elif isinstance(n, ast.Subscript):
-        return ob, _raccess_getitem(n.slice.value), True
-    elif isinstance(n, ast.Name):
-        return ob, n.id, False
-    raise NotImplementedError("access by %s is not supported" % n)
-
-def _raccess_get_nodes(a):
-    if not isStr(a):
-        raise TypeError("Attribute name must be a string not %s" % repr(a))
-    if not isNative(a):
-        a = asNative(a)
-    N = ast.parse(a).body
-    if not N or not isinstance(N[0], ast.Expr):
-        raise ValueError("Invalid expression: %s"%a)
-    return reversed([n for n in ast.walk(N[0])
-                     if isinstance(n, _raccess_ast_types)])
-
-def _raccess_getitem(n):
-    # Handle indexes
-    if isinstance(n, ast.Num):
-        return n.n
-    # Handle string keys
-    elif isinstance(n, ast.Str):
-        return n.s
-    # Handle negative indexes
-    elif (isinstance(n, ast.UnaryOp) and isinstance(n.op, ast.USub)
-          and isinstance(n.operand, ast.Num)):
-        return -n.operand.n
-    raise NotImplementedError("subscripting unsupported for node: %s" % n)
-
-def _raccess_getattr(ob, n):
-    if isinstance(n, ast.Attribute):
-        return getattr(ob, n.attr)
-    elif isinstance(n, ast.Subscript):
-        return ob[_raccess_getitem(n.slice.value)]
-    elif isinstance(n, ast.Name):
-        return getattr(ob, n.id)
-    elif isinstance(n, ast.Call):
-        raise ValueError("Function calls are not allowed.")
-    raise NotImplementedError("unsupported node: %s" % n)
+        most = '.'.join(tokens[:-1])
+        last = tokens[-1]
+        parent = recursiveGetAttr(obj, most)
+        delattr(parent, last)

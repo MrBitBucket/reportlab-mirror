@@ -11,6 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.39	26/02/2020
+--------------------------
+	* allow selection of ttf subfonts by PS name
+	* revert to old style recursiveGetAttr
+	* raise error for problematic Canvas.setDash reported by Mike Carter from sitemorse
+
 RELEASE 3.5.38	14/02/2020
 --------------------------
 	* bug fix for normalDate monthnames; bump travis; version-->3.5.38
