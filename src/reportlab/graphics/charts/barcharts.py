@@ -815,7 +815,7 @@ class BarChart(PlotArea):
         BP = self._barPositions
         for rowNo, row in enumerate(BP):
             C = [].append
-            for colNox, (y, width, height) in enumerate(row):
+            for colNo, (x, y, width, height) in enumerate(row):
                 if None in (width,height):
                     na = self.naLabel
                     if na and na.text:
@@ -2357,3 +2357,4 @@ class SampleH5c4(Drawing):
         bc.categoryAxis.categoryNames = ['Ying', 'Yang']
 
         self.add(bc,name='HBC')
+        bc._computeSimpleBarLabelPositions()
