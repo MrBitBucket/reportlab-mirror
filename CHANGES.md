@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.41	 4/03/2020
+--------------------------
+	* fix python3 bug in DDIndenter.__getattr__
+
 RELEASE 3.5.40	28/02/2020
 --------------------------
 	* fix broken (by robin) simple bar lables found by Djan

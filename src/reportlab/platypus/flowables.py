@@ -2033,7 +2033,7 @@ class DDIndenter(Flowable):
                 return self.__dict__[a]
             except KeyError:
                 if a not in ('spaceBefore','spaceAfter'):
-                    raise
+                    raise AttributeError('%r has no attribute %s' % (self,a))
         return getattr(self._flowable,a)
 
     def __setattr__(self,a,v):
