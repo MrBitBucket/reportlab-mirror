@@ -1396,7 +1396,7 @@ class Table(Flowable):
             R1._cr_1_1(n,nrows,repeatRows,self._nosplitCmds)
         else:
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
-            R1 = self.__class__(data[n:], colWidths=self._colWidths, rowHeights=self._argH[n:],
+            R1 = self.__class__(data[n:], colWidths=self._colWidths, rowHeights=splitH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
                     splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[n:],
                     ident=ident,
