@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.42	 17/03/2020
+--------------------------
+	* fix bug in tables.py reported by Kamil Niski https://bitbucket.org/rptlab/reportlab/issues/182 & Adam Kalinsky
+
 RELEASE 3.5.41	 4/03/2020
 --------------------------
 	* fix python3 bug in DDIndenter.__getattr__
