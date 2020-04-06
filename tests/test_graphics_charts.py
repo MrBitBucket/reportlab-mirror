@@ -981,6 +981,11 @@ class ChartTestCase(unittest.TestCase):
 
             return drawing
 
+        def sample_hatching():
+            d = Drawing(width=110,height=110)
+            d.add(Hatching(spacings=(5,5),angles=(45,-45),xyLists=[5,5, 5,100, 99,105, 105,5],strokeWidth=1,strokeColor=colors.toColor('red'), strokeDashArray=None))
+            return d
+
         def extract_samples():
             S = [].extend
             for m in ('barcharts','doughnut','linecharts','lineplots','piecharts','spider'):

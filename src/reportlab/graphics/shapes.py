@@ -6,7 +6,7 @@ __version__='3.3.0'
 __doc__='''Core of the graphics library - defines Drawing and Shapes'''
 
 import os, sys
-from math import pi, cos, sin, tan, sqrt
+from math import pi, cos, sin, tan, sqrt, radians, floor
 from pprint import pprint
 
 from reportlab.platypus import Flowable
@@ -1110,7 +1110,6 @@ EmptyClipPath=Path()    #special path
 def getArcPoints(centerx, centery, radius, startangledegrees, endangledegrees, yradius=None, degreedelta=None, reverse=None):
     if yradius is None: yradius = radius
     points = []
-    from math import sin, cos, pi
     degreestoradians = pi/180.0
     startangle = startangledegrees*degreestoradians
     endangle = endangledegrees*degreestoradians
@@ -1317,7 +1316,6 @@ class Wedge(SolidShape):
         yradius, radius1, yradius1 = self._xtraRadii()
         startangledegrees = self.startangledegrees
         endangledegrees = self.endangledegrees
-        from math import sin, cos, pi
         degreestoradians = pi/180.0
         startangle = startangledegrees*degreestoradians
         endangle = endangledegrees*degreestoradians
@@ -1428,6 +1426,94 @@ class PolyLine(LineShape):
 
     def getBounds(self):
         return getPointsBounds(self.points)
+
+class Hatching(Path):
+    '''define a hatching of a set of polygons defined by lists of the form [x0,y0,x1,y1,....,xn,yn]'''
+
+    _attrMap = AttrMap(BASE=Path,
+        xyLists = AttrMapValue(EitherOr((isListOfNumbers,SequenceOf(isListOfNumbers,lo=1)),"xy list(s)"),desc="list(s) of numbers in the form x1, y1, x2, y2 ... xn, yn"),
+        angles = AttrMapValue(EitherOr((isNumber,isListOfNumbers,"angle(s)")),desc="the angle or list of angles at which hatching lines should be drawn"),
+        spacings = AttrMapValue(EitherOr((isNumber,isListOfNumbers,"spacings(s)")),desc="orthogonal distance(s) between hatching lines"),
+        )
+
+    def __init__(self, spacings=2, angles=45, xyLists=[], **kwds):
+        Path.__init__(self, **kwds)
+        if isListOfNumbers(xyLists):
+            xyLists  = (xyLists,)
+        if isNumber(angles):
+            angles = (angles,)  #turn into a sequence
+        if isNumber(spacings):
+            spacings = (spacings,)  #turn into a sequence
+        i = len(angles)-len(spacings)
+        if i>0:
+            spacings = list(spacings)+i*[spacings[-1]]
+
+        self.xyLists = xyLists
+        self.angles = angles
+        self.spacings = spacings
+
+        moveTo = self.moveTo
+        lineTo = self.lineTo
+
+        for i, theta in enumerate(angles):
+            spacing = spacings[i]
+            theta = radians(theta)
+            cosTheta = cos(theta)
+            sinTheta = sin(theta)
+
+            spanMin = 0x7fffffff
+            spanMax = -spanMin
+
+            #   Loop to determine the span over which diagonal lines must be drawn.
+            for P in xyLists:
+                for j in range(0,len(P),2):
+                    #   rotated point, since the stripes may be at an angle.
+                    y = P[j+1]*cosTheta-P[j]*sinTheta
+                    spanMin = min(y,spanMin)
+                    spanMax = max(y,spanMax)
+
+            #   Turn the span into a discrete step range.
+            spanStart = int(floor(spanMin/spacing)) - 1
+            spanEnd  = int(floor(spanMax/spacing)) + 1
+
+            #   Loop to create all stripes.
+            for step in range(spanStart,spanEnd):
+                nodeX = []
+                stripeY = spacing*step
+
+                #   Loop to build a node list for one row of stripes.
+                for P in xyLists:
+                    k = len(P)-2    #start by comparing with the last point
+                    for j in range(0,len(P),2):
+                        a = P[k]
+                        b = P[k+1]
+                        a1 = a*cosTheta + b*sinTheta
+                        b1 = b*cosTheta - a*sinTheta
+                        x = P[j]
+                        y = P[j+1]
+
+                        x1 = x*cosTheta+y*sinTheta
+                        y1 = y*cosTheta-x*sinTheta
+
+                        #   Find the node, if any.
+                        if (b1<stripeY and y1>=stripeY) or y1<stripeY and b1>=stripeY:
+                            nodeX.append(a1+(x1-a1)*(stripeY-b1)/(y1-b1))
+
+                        k = j
+
+                nodeX.sort()
+
+                #   Loop to draw one row of line segments.
+                for j in range(0,len(nodeX),2):
+                    #   Rotate the points back to their original coordinate system.
+                    a = nodeX[j]*cosTheta - stripeY*sinTheta
+                    b = stripeY*cosTheta+nodeX[j]*sinTheta
+                    x = nodeX[j+1]*cosTheta - stripeY*sinTheta
+                    y = stripeY*cosTheta + nodeX[j+1]*sinTheta
+
+                    #Draw a single stripe segment.
+                    moveTo(a,b)
+                    lineTo(x,y)
 
 def numericXShift(tA,text,w,fontName,fontSize,encoding=None,pivotCharacter=decimalSymbol):
     dp = getattr(tA,'_dp',pivotCharacter)
