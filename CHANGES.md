@@ -11,6 +11,13 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.43	 03/06/2020
+--------------------------
+	* small change to improve strokeDashArray handling to allow [phase, [values]] and allow stroke-dashoffset
+	* Hatching class which inherits from shapes.Path
+	* add support for soft hyphens u'\xad'
+	* apply a pr from KENLYST @ bitbucket (gfe.py)
+
 RELEASE 3.5.42	 17/03/2020
 --------------------------
 	* fix bug in tables.py reported by Kamil Niski https://bitbucket.org/rptlab/reportlab/issues/182 & Adam Kalinsky

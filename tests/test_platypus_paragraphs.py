@@ -139,6 +139,59 @@ class ParagraphCorners(unittest.TestCase):
         assert canv._code[ix:]==['q', '1 0 0 1 72 697.8898 cm', 'q', '0 0 0 rg', 'BT 1 0 0 1 0 57 Tm /F2 15 Tf 18 TL (ABCD) Tj T* (EFGH) Tj T* (IJKL]) Tj T* (N) Tj T* ET', 'Q', 'Q', 'q', '1 0 0 1 72 615.8898 cm', 'q', 'BT 1 0 0 1 0 57 Tm 18 TL /F2 15 Tf 0 0 0 rg (AB) Tj 1 0 0 rg (C) Tj 0 0 0 rg (D) Tj T* (EFGH) Tj T* (IJKL]) Tj T* (N) Tj T* ET', 'Q', 'Q', 'q', '1 0 0 1 72 353.8898 cm', 'q', '0 0 0 rg', 'BT 1 0 0 1 0 237 Tm /F2 15 Tf 18 TL (A) Tj T* (B) Tj T* (C) Tj T* (D) Tj T* (E) Tj T* (F) Tj T* (G) Tj T* (H) Tj T* (I) Tj T* (J) Tj T* (K) Tj T* (L) Tj T* (]) Tj T* (N) Tj T* ET', 'Q', 'Q', 'q', '1 0 0 1 72 91.88976 cm', 'q', 'BT 1 0 0 1 0 237 Tm 18 TL /F2 15 Tf 0 0 0 rg (A) Tj T* (B) Tj T* 1 0 0 rg (C) Tj T* 0 0 0 rg (D) Tj T* (E) Tj T* (F) Tj T* (G) Tj T* (H) Tj T* (I) Tj T* (J) Tj T* (K) Tj T* (L) Tj T* (]) Tj T* (N) Tj T* ET', 'Q', 'Q']
         canv.showPage()
         canv.save()
+
+    def test4(self):
+        from reportlab.platypus.paragraph import _SHYIndexedStr, stringWidth, _SHYWord, ABag, _shyUnsplit
+        fontName = 'Helvetica'
+        fontSize = 10
+        f = ABag(fontName=fontName,fontSize=fontSize)
+        sW = lambda _: stringWidth(_,fontName,fontSize)
+        text = u'Super\xadcali\xadfragi\xadlistic\xadexpi\xadali\xaddocious'
+        u = _SHYIndexedStr(text)
+        self.assertEqual(u,u'Supercalifragilisticexpialidocious','_SHYIndexStr not as expected')
+        self.assertEqual(u._shyIndices,[5, 9, 14, 20, 24, 27], '_SHYIndexStr._shyIndices are wrong')
+        shyW = _SHYWord([sW(u),(f,u)])
+        hsw = shyW.shyphenate(shyW[0],50)
+        self.assertTrue(hsw,'shyphenate failed')
+        self.assertTrue(
+                hsw[0][0] == 45.01
+                and hsw[0][1][0].__dict__== ABag(fontName='Helvetica', fontSize=10).__dict__
+                and hsw[0][1][1]==u'Supercali-'
+                and hsw[0][1][1]._shyIndices==[5,9], 'left part of shyphenate split failed')
+        self.assertTrue(
+                hsw[1][0] == 101.69000000000001
+                and hsw[1][1][0].__dict__== ABag(fontName='Helvetica', fontSize=10).__dict__
+                and hsw[1][1][1]==u'fragilisticexpialidocious'
+                and hsw[1][1][1]._shyIndices== [5, 11, 15, 18], 'right part of shyphenate split failed')
+        uj = _shyUnsplit(hsw[0][1][1],hsw[1][1][1])
+        self.assertTrue(
+                uj == u
+                and uj._shyIndices==u._shyIndices, '_shyUnsplit failed')
+
+    def test5(self):
+        '''some soft hyphenation'''
+        from reportlab.pdfgen import canvas
+        from reportlab.platypus import Frame, ShowBoundaryValue, Paragraph
+        from reportlab.lib.styles import ParagraphStyle
+
+        pagesize = (80+20, 400)
+        c = canvas.Canvas(  outputfile('test_platypus_soft_hyphenation.pdf'), pagesize=pagesize)
+        f = Frame(10, 0, 68, 400,
+                showBoundary=ShowBoundaryValue(dashArray=(1,1)),
+                leftPadding=0,
+                rightPadding=0,
+                topPadding=0,
+                bottomPadding=0,
+                )
+        style = ParagraphStyle(
+            'normal', fontName='Helvetica', fontSize=12,
+            embeddedHyphenation=1, splitLongWords=0, hyphenationLang='en-GB')
+        text = 'Super\xc2\xadcali\xc2\xadfragi\xc2\xadlistic\xc2\xadexpi\xc2\xadali\xc2\xaddocious'
+        f.addFromList([Paragraph(text, style)], c)
+        text = u'<span color="red">Super</span><span color="pink">&#173;cali&#173;</span>fragi&#173;listic&#173;expi&#173;ali&#173;docious'
+        f.addFromList([Paragraph(text, style)], c)
+        c.showPage()
+        c.save() 
         
 class ParagraphSplitTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
@@ -249,6 +302,7 @@ providing the ultimate in ease of installation.</font>''',
                     imageSide='left',
                     )
                 )
+        story.append(Paragraph('Width 240 single frag',h3))
         story.append(ImageAndFlowables(
                         Image(gif,width=240,height=120),
                         Paragraph('''The concept of an integrated one box solution for advanced voice and
@@ -299,6 +353,56 @@ component delimits the traditional practice of grammarians.'''
         story.append(PageBreak())
         story.append(heading)
         story.append(ImageAndFlowables(Image(gif,width=66,height=81),[Paragraph(text,bt)],imageSide='left',imageRightPadding=10))
+
+        story.append(NextPageTemplate('special'))
+        story.append(PageBreak())
+        story.append(Paragraph('Width 240, multi-frag free hyphenation',h3))
+        story.append(ImageAndFlowables(
+                        Image(gif,width=240,height=120),
+                        Paragraph('''The concept of an <span color="red">integ</span><span color="green">rated</span> one box solution for advanced voice and
+data applications began with the introduction of the IMACS. The
+IMACS 200 carries on that tradition with an integrated solution
+<span color="pink">optimized</span> for smaller port size applications that the IMACS could not
+<span color="lightgreen">eco</span><span color="blue">nomically</span> address. An array of the most popular interfaces and
+features from the IMACS has been bundled into a small 2U chassis
+providing the ultimate in ease of installation.''',
+                        style=st,
+                        ),
+                    imageSide='left',
+                    )
+                )
+        story.append(PageBreak())
+        story.append(Paragraph('Width 240, multi-frag soft hyphenation',h3))
+        story.append(ImageAndFlowables(
+                        Image(gif,width=240,height=120),
+                        Paragraph(u'''The concept of an <span color="red">integ</span><span color="green">\xadrated</span> one box solution for advanced voice and
+data applica\xadtions began with the in\xadtroduction of the IMACS. The
+IMACS 200 carries on that tradition with an integrated solution
+<span color="pink">op\xadtimized</span> for smaller port size applications that the IMACS could not
+<span color="lightgreen">eco</span><span color="blue">\xadnomically</span> address. An array of the most popular interfaces and
+fea\xadtures from the IMACS has been bundled into a small 2U chassis
+providing the ultimate in ease of installation.''',
+                        style=st,
+                        ),
+                    imageSide='left',
+                    )
+                )
+        story.append(PageBreak())
+        story.append(Paragraph('Width 240, single-frag soft hyphenation',h3))
+        story.append(ImageAndFlowables(
+                        Image(gif,width=240,height=120),
+                        Paragraph(u'''The concept of an integ\xadrated one box solution for advanced voice and
+data applica\xadtions began with the in\xadtroduction of the IMACS. The
+IMACS 200 carries on that tradition with an integrated solution
+op\xadtimized for smaller port size applications that the IMACS could not
+eco\xadnomically address. An array of the most popular interfaces and
+fea\xadtures from the IMACS has been bundled into a small 2U chassis
+providing the ultimate in ease of installation.''',
+                        style=st,
+                        ),
+                    imageSide='left',
+                    )
+                )
         doc = MyDocTemplate(outputfile('test_platypus_imageandflowables.pdf'),showBoundary=1)
         doc.multiBuild(story)
 
@@ -621,8 +725,8 @@ class FragmentTestCase(unittest.TestCase):
 
     def test2(self):
         '''test _splitWord'''
-        self.assertEqual(_splitWord(u'd\'op\u00e9ration',30,[30],0,'Helvetica',12),[u"d'op\xe9", u'ratio', u'n'])
-        self.assertEqual(_splitWord(b'd\'op\xc3\xa9ration',30,[30],0,'Helvetica',12),[u"d'op\xe9", u'ratio', u'n'])
+        self.assertEqual(_splitWord(u'd\'op\u00e9ration',30,[30],0,'Helvetica',12),[u'', u"d'op\xe9", u'ratio', u'n'])
+        self.assertEqual(_splitWord(b'd\'op\xc3\xa9ration',30,[30],0,'Helvetica',12),[u'', u"d'op\xe9", u'ratio', u'n'])
 
     def test3(self):
         '''test _fragWordSplitRep'''
@@ -783,6 +887,105 @@ class FragmentTestCase(unittest.TestCase):
                     )
             w,h = p.wrap(aW,0x7fffffff)
             self.assertEqual(h,ex,'Russion hyphenation test failed for ex=%(ex)s template=%(template)r hymwl=%(hymwl)r h=%(h)s\ntext=%(t)r' % locals())
+
+    @unittest.skipUnless(pyphen,'s')
+    def test8(self):
+        """display splitting of hyphenated words"""
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib.styles import ParagraphStyle
+        from reportlab.lib.utils import isBytes
+        import hashlib
+        from reportlab.pdfgen.canvas import Canvas
+        from reportlab.platypus.paragraph import Paragraph
+        pW, pH = A4
+        canv = Canvas(outputfile('test_platypus_paragraphs_hysplit.pdf'),pagesize=(pW,pH))
+        text = u'Supercalifragilisticexpialidocious'
+        mtext = u'<span color="red">Super</span>califragilisticexpialidocious'
+        mtext1 = u'Supercalifragilisticexpiali<span color="green">docious</span>'
+        stext = u'Super\xadcali\xadfragi\xadlistic\xadexpi\xadali\xaddocious'
+        mstext = u'<span color="red">Super\xad</span>cali\xadfragi\xadlistic\xadexpi\xadali\xaddocious'
+        mstext1 = u'Super\xadcali\xadfragi\xadlistic\xadexpi\xadali\xad<span color="green">docious</span>'
+        text =   u'Supercalifragilisticexpialidocious'
+        mtext2 = 'converted to a <b>Python</b> <font name=Courier><nobr>string</nobr></font>.'
+        mtext3 = 'This one uses fonts with size "14pt" and also uses the em and strong tags: Here comes <font face="Helvetica" size="14pt">Helvetica 14</font> with <Strong>strong</Strong> <em>emphasis</em>.'
+        textF = 'Figure [seq template="%(Chapter)s-%(FigureNo+)s"/] - Multi-level templates'
+        mtextF = 'Figure &lt;seq template="%(Chapter)s-%(FigureNo+)s"/&gt; - Multi-level templates'
+        sty0=ParagraphStyle(
+                            name="base",
+                            fontName="Helvetica",
+                            leading=12,
+                            leftIndent=0,
+                            firstLineIndent=0,
+                            spaceBefore = 9.5,
+                            fontSize=10,
+                            )
+        sty1=ParagraphStyle(
+                            name="base",
+                            fontName="Times-Roman",
+                            leading=12,
+                            leftIndent=0,
+                            firstLineIndent=0,
+                            spaceBefore = 9.5,
+                            fontSize=10,
+                            )
+        styN =  ParagraphStyle('normal')
+        styF=ParagraphStyle(
+                            name = 'styF',
+                            fontName='Courier',
+                            fontSize=8,
+                            leading=9.6)
+        def box(x, y, aW, h):
+            canv.saveState()
+            canv.setDash(1,1)
+            canv.setLineWidth(0.1)
+            canv.rect(x,y,aW,h)
+            canv.restoreState()
+
+        def doPara(P,x,y,aW, wc=1):
+            for _ in range(wc):
+                w,h = P.wrap(aW,900)
+            #print('w=%s h=%s' % (w,h))
+            y -= h
+            box(x, y, aW, h)
+            P.drawOn(canv, x, y)
+            return y
+
+        def doTest(msg, t,x,y,aW, st=None, split=True, wc=1):
+            if not st: st = sty0
+            canv.drawString(x+aW+5,y-12,msg) 
+            P = Paragraph(t,st)
+            y = doPara(P, x, y, aW, wc=wc) - 5
+            if split:
+                P = Paragraph(t,st)
+                S = P.split(aW, st.leading*2+0.1)
+                y = doPara(S[0], x, y, aW) - 5
+                y = doPara(S[1], x, y, aW) - 5
+            return y
+
+        aW = 55
+        x = 72
+        y = pH - 72
+
+        cp0 = len(canv._code)
+        y = doTest('Single Frag Free Hyphenation', text, x, y, aW) - 5
+        y = doTest('Single Frag Soft Hyphenation', stext, x, y, aW) - 5
+        y = doTest('Multi Frag Free Hyphenation', mtext, x, y, aW) - 5
+        y = doTest('Multi Frag Free Hyphenation 1', mtext1, x, y, aW) - 5
+        y = doTest('Multi Frag Free Hyphenation 2', mtext2, x, y, 77, st=sty1, split=False, wc=2) - 5
+        y = doTest('Multi Frag Free Hyphenation 3', mtext3, x, y, 439.27559055118115, st=styN, split=False, wc=1) - 5
+        y = doTest('Multi Frag Soft Hyphenation', mstext, x, y, aW) - 5
+        y = doTest('Multi Frag Soft Hyphenation 1', mstext1, x, y, aW) - 5
+        y = doTest('Single Frag Free F', textF, x, y, 158.13921259842525, st=styF, split=False, wc=3) - 5
+        y = doTest('Multi Frag Free F', mtextF, x, y, 158.13921259842525, st=styF, split=False, wc=3) - 5
+        c = '\n'.join(canv._code[cp0:])
+        if not isBytes(c):
+            c = c.encode('utf8')
+        h = hashlib.md5(c).hexdigest()
+        canv.showPage()
+        canv.save()
+        #xh = '32e0e490cc4a53c31bb19f1cc52debdd'
+        xh = 'eee06395aa68a727d58e688006c85d79'
+        self.assertEqual(xh, h, 'test8 code is no longer correct %s != expected %s' % (h,xh))
 
 class ULTestCase(unittest.TestCase):
     "Test underlining and overstriking of paragraphs."
