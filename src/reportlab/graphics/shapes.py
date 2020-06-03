@@ -928,6 +928,11 @@ class _DrawingEditorMixin:
         else:
             raise ValueError("Can't add, need name")
 
+class isStrokeDashArray(Validator):
+    def test(self,x):
+        return isListOfNumbersOrNone.test(x) or (isinstance(x,(list,tuple)) and isNumber(x[0]) and isListOfNumbers(x[1]))
+isStrokeDashArray = isStrokeDashArray()
+
 class LineShape(Shape):
     # base for types of lines
 
@@ -937,7 +942,7 @@ class LineShape(Shape):
         strokeLineCap = AttrMapValue(OneOf(0,1,2),desc="Line cap 0=butt, 1=round & 2=square"),
         strokeLineJoin = AttrMapValue(OneOf(0,1,2),desc="Line join 0=miter, 1=round & 2=bevel"),
         strokeMiterLimit = AttrMapValue(isNumber,desc="miter limit control miter line joins"),
-        strokeDashArray = AttrMapValue(isListOfNumbersOrNone,desc="a sequence of numbers represents on and off, e.g. (2,1)"),
+        strokeDashArray = AttrMapValue(isStrokeDashArray,desc="[numbers] or [phase,[numbers]]"),
         strokeOpacity = AttrMapValue(isOpacity,desc="The level of transparency of the line, any real number betwen 0 and 1"),
         strokeOverprint = AttrMapValue(isBoolean,desc='Turn on stroke overprinting'),
         overprintMask = AttrMapValue(isBoolean,desc='overprinting for ordinary CMYK',advancedUsage=1),

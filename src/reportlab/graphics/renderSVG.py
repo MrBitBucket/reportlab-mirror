@@ -29,8 +29,8 @@ sin = math.sin
 cos = math.cos
 pi = math.pi
 
-AREA_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity fill fill-opacity stroke-dasharray id'.split()
-LINE_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity stroke-dasharray id'.split()
+AREA_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity fill fill-opacity stroke-dasharray stroke-dashoffset id'.split()
+LINE_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity stroke-dasharray stroke-dashoffset id'.split()
 TEXT_STYLES = 'font-family font-weight font-style font-variant font-size id'.split()
 
 ### top-level user function ###
@@ -355,7 +355,9 @@ class SVGCanvas:
             self.style['stroke-dasharray'] = ', '.join(map(str, ([array, phase])))
         elif isinstance(array,(tuple,list)) and len(array) > 0:
             assert phase >= 0, "phase is a length in user space"
-            self.style['stroke-dasharray'] = ', '.join(map(str, (list(array)+[phase])))
+            self.style['stroke-dasharray'] = ', '.join(map(str, array))
+            if phase>0:
+                self.style['stroke-dashoffset'] = str(phase)
 
     def setStrokeColor(self, color):
         self._strokeColor = color
