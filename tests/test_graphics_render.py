@@ -11,7 +11,7 @@ try:
     from reportlab.graphics import _renderPM
 except:
     _renderPM = None
-from reportlab.graphics.shapes import _DrawingEditorMixin, Drawing, Group, Rect, Path, String, Polygon
+from reportlab.graphics.shapes import _DrawingEditorMixin, Drawing, Group, Rect, Path, String, Polygon, Hatching, Line
 from reportlab.lib.colors import Color, CMYKColor, PCMYKColor, toColor
 
 class FillModeDrawing(_DrawingEditorMixin,Drawing):
@@ -109,6 +109,15 @@ class AutoCloseDrawing(_DrawingEditorMixin,Drawing):
         v1.transform = (1,0,0,-1,0,100)
         v1.add(Path(points=[10,10,10,90,20,90,20,10,30,10,30,90,40,90,40,10,50,10,50,90,60,90,60,10,70,10,70,90,80,90,80,10],operators=[0,1,1,1,3,0,1,1,1,0,1,1,1,3,0,1,1,1],isClipPath=0,autoclose=autoclose,fillMode=1,strokeDashArray=None,strokeWidth=2,strokeMiterLimit=0,strokeOpacity=None,strokeLineJoin=0,fillOpacity=1,strokeColor=Color(1,0,0,1),strokeLineCap=0,fillColor=Color(0,0,1,1)))
 
+class HatchDrawing(_DrawingEditorMixin,Drawing):
+    def __init__(self,width=400,height=200,*args,**kw):
+        Drawing.__init__(self,width,height,*args,**kw)
+        #for x1,y1, x2,y2 in diagonalLines(45, 5, [Polygon([5,5,  5,100, 99,105, 105,5])]): self._add(self,Line(x1,y1,x2,y2,strokeWidth=1,strokeColor=toColor('black')),name=None,validate=None,desc=None)
+        self._add(self,Hatching(spacing=(30,30,30),angles=(45,0,-45),xyLists=[5,5,  5,100, 99,105, 105,5],strokeWidth=0.1,strokeColor=toColor('red'), strokeDashArray=None),name='hatching',validate=None,desc=None)
+        self.width        = 110
+        self.height       = 110
+        self._add(self,Line(0,105,110,105,strokeWidth=0.5,strokeColor=toColor('blue')),name=None,validate=None,desc=None)
+
 class RenderTestCase(unittest.TestCase):
     "Test renderPS classes."
 
@@ -144,6 +153,7 @@ class RenderTestCase(unittest.TestCase):
         _410Drawing().save(formats=formats,outDir=self.outDir,fnRoot='410')
         for ac in (None,'pdf','svg'):
             AutoCloseDrawing(autoclose=ac).save(formats=formats,outDir=self.outDir,fnRoot='autoclose-'+(ac or 'none'))
+        HatchDrawing().save(formats=formats,outDir=self.outDir,fnRoot='hatch')
 
     @unittest.skipIf(not _renderPM,'no _renderPM')
     def testSVGLibIssues(self):
