@@ -8,6 +8,7 @@ from reportlab import isPy3
 isPy2 = not isPy3
 eval_debug = int(os.environ.get('EVAL_DEBUG','0'))
 strTypes = basestring if isPy2 else (bytes,str)
+isPy39 = sys.version_info[:2]>=(3,9)
 
 haveNameConstant = hasattr(ast,'NameConstant')
 haveMatMult = haveMultiStarred = hasattr(ast,'MatMult')
@@ -322,6 +323,9 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 			for item in slice_.dims:
 				dims.elts.append(self.transform_slice(item))
 			return dims
+
+		elif isPy39:
+			return slice_
 
 		else:  # pragma: no cover
 			# Index, Slice and ExtSlice are only defined Slice types.
@@ -933,7 +937,7 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 	visit_Param = visit_children
 
 def astFormat(node):
-	return ast.dump(copy.deepcopy(node),annotate_fields=True, include_attributes=True)
+	return ast.dump(copy.deepcopy(node),annotate_fields=True, include_attributes=True,indent=4)
 
 class __rl_SafeIter__(object):
 	def __init__(self, it, owner):

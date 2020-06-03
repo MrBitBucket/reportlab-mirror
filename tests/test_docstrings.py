@@ -96,9 +96,14 @@ def getObjects(objects,lookup,mName,modBn,tobj):
             continue
         typ = obj2typ(obj)
         if typ in ('function','method'):
-            if not isPyPy and os.path.splitext(obj.__code__.co_filename)[0]==modBn:
-                lookup[obj] = 1
-                objects.setdefault(typ if typ=='function' and ttyp=='module' else 'method',[]).append((mName,obj))
+            try:
+                cond = not isPyPy and os.path.splitext(obj.__code__.co_filename)[0]==modBn
+            except:
+                pass
+            else:
+                if cond:
+                    lookup[obj] = 1
+                    objects.setdefault(typ if typ=='function' and ttyp=='module' else 'method',[]).append((mName,obj))
         elif typ=='class':
             if obj.__module__==mName:
                 lookup[obj] = 1
