@@ -192,6 +192,31 @@ class ParagraphCorners(unittest.TestCase):
         f.addFromList([Paragraph(text, style)], c)
         c.showPage()
         c.save() 
+
+    def test_lele_img(self):
+        from reportlab.pdfgen.canvas import Canvas
+        from reportlab.platypus import Paragraph
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.rl_config import defaultPageSize
+        from reportlab.lib.units import cm
+        from reportlab.lib.testutils import testsFolder
+
+        styles = getSampleStyleSheet()
+        c = Canvas(outputfile('test_lele_img.pdf'), pagesize=defaultPageSize)
+        s = styles["Normal"]
+        t = '<img src="%s/pythonpowered.gif" valign="middle"/>' % testsFolder
+        p = Paragraph(t, s)
+        owh = p.wrap(cm,cm)
+        cx0 = len(c._code)
+        p.drawOn(c, cm, 2*cm)
+        xcode = ['q', '1 0 0 1 28.34646 56.69291 cm', 'q', 'q', '110 0 0 44 0 -16 cm', '/FormXob.00cb676cb2b2da8ec875fe2c13cf2496 Do', 'Q', 'BT 1 0 0 1 0 2 Tm 12 TL 110 0 Td /F1 10 Tf 12 TL  T* -110 0 Td ET', 'Q', 'Q']
+        xwh = (28.346456692913385, 12)
+        ocode = c._code[cx0:]
+        c.showPage()
+        c.save()
+        self.assertEqual((owh,ocode),(xwh,xcode),
+                "\n(owh,ocode)=%r\nfor test_lele_img.pdf doesn't match expected\n(xwh,xcode)=%r" %(
+                    (xwh,xcode),(owh,ocode)))
         
 class ParagraphSplitTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."

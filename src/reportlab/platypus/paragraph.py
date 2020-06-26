@@ -150,7 +150,7 @@ def _leftDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,offset)
     if not simple:
         nSpaces = len(words)+_nbspCount(text)-1
-        simple = not nSpaces
+        simple = nSpaces<=0
     if simple:
         tx._textOut(text,1)
     else:
@@ -165,7 +165,7 @@ def _centerDrawParaLine( tx, offset, extraspace, words, last=0):
     text = ' '.join(words)
     if not simple:
         nSpaces = len(words)+_nbspCount(text)-1
-        simple = not nSpaces
+        simple = nSpaces<=0
     if simple:
         m = offset + 0.5 * extraspace
         setXPos(tx,m)
@@ -184,7 +184,7 @@ def _rightDrawParaLine( tx, offset, extraspace, words, last=0):
     text = ' '.join(words)
     if not simple:
         nSpaces = len(words)+_nbspCount(text)-1
-        simple = not nSpaces
+        simple = nSpaces<=0
     if simple:
         m = offset + extraspace
         setXPos(tx,m)
@@ -204,7 +204,7 @@ def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
     simple = last or (-1e-8<extraspace<=1e-8) or getattr(tx,'preformatted',False)
     if not simple:
         nSpaces = len(words)+_nbspCount(text)-1
-        simple = not nSpaces
+        simple = nSpaces<=0
     if simple:
         #last one or no extra space so left align
         tx._textOut(text,1)
@@ -441,7 +441,7 @@ def _leftDrawParaLineX( tx, offset, line, last=0):
     simple = extraSpace>-1e-8 or getattr(line,'preformatted',False)
     if not simple:
         nSpaces = line.wordCount+sum([_nbspCount(w.text) for w in line.words if not hasattr(w,'cbDefn')])-1
-        simple = not nSpaces
+        simple = nSpaces<=0
     if simple:
         _putFragLine(offset, tx, line, last, 'left')
     else:
@@ -457,7 +457,7 @@ def _centerDrawParaLineX( tx, offset, line, last=0):
         simple = extraSpace>-1e-8 or getattr(line,'preformatted',False)
         if not simple:
             nSpaces = line.wordCount+sum([_nbspCount(w.text) for w in line.words if not hasattr(w,'cbDefn')])-1
-            simple = not nSpaces
+            simple = nSpaces<=0
         if simple:
             m = offset+0.5*line.extraSpace
             setXPos(tx,m)
@@ -476,7 +476,7 @@ def _rightDrawParaLineX( tx, offset, line, last=0):
     simple = extraSpace>-1e-8 or getattr(line,'preformatted',False)
     if not simple:
         nSpaces = line.wordCount+sum([_nbspCount(w.text) for w in line.words if not hasattr(w,'cbDefn')])-1
-        simple = not nSpaces
+        simple = nSpaces<=0
     if simple:
         m = offset+line.extraSpace
         setXPos(tx,m)
@@ -494,7 +494,7 @@ def _justifyDrawParaLineX( tx, offset, line, last=0):
     simple = last or abs(extraSpace)<=1e-8 or line.lineBreak
     if not simple:
         nSpaces = line.wordCount+sum([_nbspCount(w.text) for w in line.words if not hasattr(w,'cbDefn')])-1
-        simple = not nSpaces
+        simple = nSpaces<=0
     if not simple:
         tx.setWordSpace(extraSpace / float(nSpaces))
         _putFragLine(offset, tx, line, last, 'justify')
@@ -843,7 +843,7 @@ def _getFragWords(frags,maxWidth=None):
 def _fragWordIter(w):
     for f, s in w[1:]:
         if hasattr(f,'cbDefn'):
-            yield f, getattr(f,'width',0), s
+            yield f, getattr(f.cbDefn,'width',0), s
         elif s:
             if isBytes(s):
                 s = s.decode('utf8')    #only encoding allowed
@@ -2158,7 +2158,7 @@ class Paragraph(Flowable):
                 #test to see if this frag is a line break. If it is we will only act on it
                 #if the current width is non-negative or the previous thing was a deliberate lineBreak
                 lineBreak = f._fkind==_FK_BREAK
-                if not lineBreak and newWidth>(maxWidth+spaceShrink) and not isinstance(w,_SplitFragH):
+                if not lineBreak and newWidth>(maxWidth+spaceShrink) and not isinstance(w,_SplitFragH) and not hasattr(f,'cbDefn'):
                     if isinstance(w,_SHYWord):
                         hsw = w.shyphenate(newWidth, maxWidth+spaceShrink)
                         if hsw:
