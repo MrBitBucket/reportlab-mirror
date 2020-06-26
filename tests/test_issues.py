@@ -45,7 +45,8 @@ WWWWWWWWWWWW XXX YYYYYY ABBBBB BCCCCCCCCCCC.'''
         fonts = set()
         fonts.add('Helvetica')
         for fontName, fontPath in (('Vera','Vera.ttf'),
-                ('TTFTimes','/usr/share/fonts/TTF/times.ttf')):
+                ('TTFTimes','times.ttf'),
+                ('TTFTimes','Times.TTF')):
             try:
                 registerFont(TTFont(fontName, fontPath))
                 fonts.add(fontName)
