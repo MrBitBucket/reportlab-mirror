@@ -149,7 +149,8 @@ class QrCodeWidget(Widget):
                 if isDark:
                     x = (c + border) * boxsize
                     y = (r + border + 1) * boxsize
-                    s = SRect(offsetX + x, offsetY + height - y, count * boxsize, boxsize)
+                    s = SRect(offsetX + x, offsetY + height - y, count * boxsize, boxsize,
+                            fillColor=color)
                     g.add(s)
                 c += count
 
