@@ -11,8 +11,13 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.44	 26/06/2020
+---------------------------
+	* ensure qr bar colour is passed (contrib by Lele Gaifax)
+	* fix img layout bug (reported by Lele Gaifax) 
+
 RELEASE 3.5.43	 03/06/2020
---------------------------
+---------------------------
 	* small change to improve strokeDashArray handling to allow [phase, [values]] and allow stroke-dashoffset
 	* Hatching class which inherits from shapes.Path
 	* add support for soft hyphens u'\xad'
