@@ -271,6 +271,15 @@ class ParagraphTestCase(unittest.TestCase):
             '''<span color="(lambda fc=(lambda n: [c for c in ().__class__.__bases__[0].__subclasses__() if c.__name__ == n][0]): fc('function')(fc('code')(0,0,0,0,'KABOOM',(), (),(),'','',0,''),{})())()">AAA</span>''',styNormal)
         #w, h = p.wrap(5*72,7*72)
         #p.drawOn(canv,36,6.5*72)
+
+    def testSomeParaAttrs(self):
+        self.assertTrue(Paragraph('<para texttransform="">aaaaa</para>'))
+        self.assertTrue(Paragraph('<para texttransform="uppercase">aaaaa</para>'))
+        self.assertTrue(Paragraph('<para texttransform="lowercase">AAAAA</para>'))
+        self.assertTrue(Paragraph('<para texttransform="capitalize">aaaaa</para>'))
+        self.assertRaises(ValueError,Paragraph,'<para texttransform="upper">aaaaa</para>')
+        self.assertRaises(ValueError,Paragraph,'<para texttransform="lower">AAAAA</para>')
+        self.assertRaises(ValueError,Paragraph,'<para texttransform="capitalise">aaaaa</para>')
     
     if rtlSupport:
         def testBidi(self):

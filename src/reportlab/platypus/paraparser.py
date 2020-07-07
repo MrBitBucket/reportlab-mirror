@@ -205,7 +205,7 @@ def _textTransformConv(s):
     s = s.lower().strip()
     if not s: return None
     if s not in ('uppercase','lowercase','capitalize','none'):
-        raise ValueError('cannot convert wordWrap=%r' % s)
+        raise ValueError('cannot convert textTransform=%r' % s)
     return s
 
 _paraAttrMap = {'font': ('fontName', None),

@@ -19,6 +19,7 @@ from reportlab.lib.colors import Color
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.geomutils import normalizeTRBL
 from reportlab.lib.textsplit import wordSplit, ALL_CANNOT_START
+from reportlab.lib.styles import ParagraphStyle
 from copy import deepcopy
 from reportlab.lib.abag import ABag
 from reportlab.rl_config import platypus_link_underline, decimalSymbol, _FUZZ,\
@@ -1759,7 +1760,9 @@ class Paragraph(Flowable):
 
         It will also be able to handle any MathML specified Greek characters.
     """
-    def __init__(self, text, style, bulletText = None, frags=None, caseSensitive=1, encoding='utf8'):
+    def __init__(self, text, style=None, bulletText = None, frags=None, caseSensitive=1, encoding='utf8'):
+        if style is None:
+            style = ParagraphStyle(name='paragraphImplicitDefaultStyle')
         self.caseSensitive = caseSensitive
         self.encoding = encoding
         self._setup(text, style, bulletText or getattr(style,'bulletText',None), frags, cleanBlockQuotedText)
