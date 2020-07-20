@@ -230,15 +230,9 @@ class BarChart(PlotArea):
         self._getConfigureData()
         vA.configure(self._configureData)
 
-        # if zero is in chart, put the other axis there, otherwise use low
+        # if zero is in chart, put the other axis there, otherwise use org
         crossesAt = vA.scale(0)
-        if not vA.forceZero:
-            eps = min(1,1.001*abs(length))
-            end = org+length
-            org, end = min(org,end)-eps, max(org,end)+eps
-            if crossesAt>eps or crossesAt<end:
-                crossesAt = org
-        return crossesAt
+        return crossesAt if vA.forceZero or (crossesAt>=org and crossesAt<=org+length) else org
 
     def _drawFinish(self):
         '''finalize the drawing of a barchart'''

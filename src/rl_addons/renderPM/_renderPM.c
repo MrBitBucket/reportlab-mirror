@@ -21,7 +21,7 @@
 #endif
 
 
-#define VERSION "3.02"
+#define VERSION "3.03"
 #define MODULENAME "_renderPM"
 #ifdef isPy3
 #	define PyInt_FromLong	PyLong_FromLong
@@ -72,6 +72,7 @@ _FT_DOC
 #	define PyObject_DEL(op) PyMem_DEL((op))
 #endif
 
+#define VECSP 0.25
 
 typedef struct {
   int format;
@@ -616,7 +617,7 @@ static	PyObject* gstate_clipPathSet(gstateObject* self, PyObject* args)
 	if(!PyArg_ParseTuple(args,"|i:clipPathSet",&fillMode)) return NULL;
 	gstate_pathEnd(self);
 	dump_path(self);
-	vpath = art_bez_path_to_vec(self->path, 0.25);
+	vpath = art_bez_path_to_vec(self->path, VECSP);
 	dump_vpath("after -->vec",vpath);
 	trVpath = art_vpath_affine_transform (vpath, self->ctm);
 	_vpath_area(trVpath);
@@ -639,7 +640,7 @@ static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse, int fi
 		double		a;
 		if(endIt) gstate_pathEnd(self);
 		dump_path(self);
-		vpath = art_bez_path_to_vec(self->path, 0.25);
+		vpath = art_bez_path_to_vec(self->path, VECSP);
 		if(0 && vpReverse) _vpath_reverse(vpath);
 		trVpath =  art_vpath_affine_transform(vpath, self->ctm);
 		a = _vpath_area(trVpath);
@@ -708,7 +709,7 @@ static PyObject* gstate_pathStroke(gstateObject* self, PyObject* args)
 	if(self->strokeColor.valid && self->strokeWidth>0){
 		gstate_pathEnd(self);
 		dump_path(self);
-		vpath = art_bez_path_to_vec(self->path, 0.25);
+		vpath = art_bez_path_to_vec(self->path, VECSP);
 
 		if(self->dash.dash){
 			ArtVpath*	tvpath=vpath;
@@ -1024,7 +1025,7 @@ static PyObject* _get_gstateVPath(gstateObject *self)
 	int			i;
 
 	gstate_pathEnd(self);
-	v = vpath = art_bez_path_to_vec(self->path, 0.25);
+	v = vpath = art_bez_path_to_vec(self->path, VECSP);
 	while(v->code!=ART_END) v++;
 	P = PyTuple_New(v-vpath);
 	i = 0;
