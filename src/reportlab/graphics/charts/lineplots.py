@@ -207,8 +207,7 @@ class LinePlot(AbstractLineChart):
                 if 0<=other<n:
                     if other==rowNo:
                         raise ValueError('data row %r may not be paired with itself' % rowNo)
-                    t = (rowNo,other)
-                    pairs.add((min(t),max(t)))
+                    pairs.add((rowNo,other))
                 else:
                     raise ValueError('data row %r is paired with invalid data row %r' % (rowNo, other))
             line = [].append
@@ -297,7 +296,10 @@ class LinePlot(AbstractLineChart):
             inFillG = getattr(self,'_inFillG',g)
         lG = getattr(self,'_lineG',g)
         # Iterate over data rows.
-        for rowNo, row in enumerate(reversed(P) if self.reversePlotOrder else P):
+        R = range(len(P))
+        if self.reversePlotOrder: R = reversed(R)
+        for rowNo in R:
+            row = P[rowNo]
             styleRowNo = rowNo % styleCount
             rowStyle = lines[styleRowNo]
             strokeColor = getattr(rowStyle,'strokeColor',None)

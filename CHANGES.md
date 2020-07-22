@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.46	 22/07/2020
+---------------------------
+	* fix style-data mismatch in LinePlot found by Anshika Sahay
+
 RELEASE 3.5.45	 10/07/2020
 ---------------------------
 	* fix some documentation bugs reported by Lele Gaifax
