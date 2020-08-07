@@ -1035,6 +1035,14 @@ class Table(Flowable):
             if not hasattr(self,a) and hasattr(tblstyle,a):
                 setattr(self,a,getattr(tblstyle,a))
 
+    def normCellRange(self, sc, ec, sr, er):
+        '''ensure cell range ends are with the table bounds'''
+        if sc < 0: sc = sc + self._ncols
+        if ec < 0: ec = ec + self._ncols
+        if sr < 0: sr = sr + self._nrows
+        if er < 0: er = er + self._nrows
+        return max(0,sc), min(self._ncols-1,ec), max(0,sr), min(self._nrows-1,er)
+
     def _addCommand(self,cmd):
         if cmd[0] in ('BACKGROUND','ROWBACKGROUNDS','COLBACKGROUNDS'):
             self._bkgrndcmds.append(cmd)
@@ -1088,12 +1096,10 @@ class Table(Flowable):
             if sr in ('splitfirst','splitlast'):
                 self._srflcmds.append(cmd)
             else:
-                if sc < 0: sc = sc + self._ncols
-                if ec < 0: ec = ec + self._ncols
-                if sr < 0: sr = sr + self._nrows
-                if er < 0: er = er + self._nrows
+                sc, ec, sr, er = self.normCellRange(sc,ec,sr,er)
+                ec += 1
                 for i in xrange(sr, er+1):
-                    for j in xrange(sc, ec+1):
+                    for j in xrange(sc, ec):
                         _setCellStyle(self._cellStyles, i, j, op, values)
 
     def _drawLines(self):
@@ -1101,10 +1107,6 @@ class Table(Flowable):
         self.canv.saveState()
         for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
             if isinstance(sr,strTypes) and sr.startswith('split'): continue
-            if sc < 0: sc = sc + self._ncols
-            if ec < 0: ec = ec + self._ncols
-            if sr < 0: sr = sr + self._nrows
-            if er < 0: er = er + self._nrows
             if cap!=None and ccap!=cap:
                 self.canv.setLineCap(cap)
                 ccap = cap
@@ -1118,6 +1120,7 @@ class Table(Flowable):
             if join is not None and cjoin!=join:
                 self.canv.setLineJoin(join)
                 cjoin = join
+            sc, ec, sr, er = self.normCellRange(sc,ec,sr,er)
             getattr(self,_LineOpMap.get(op, '_drawUnknown' ))( (sc, sr), (ec, er), weight, color, count, space)
         self.canv.restoreState()
         self._curcolor = None
