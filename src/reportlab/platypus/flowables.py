@@ -1614,6 +1614,9 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
             assert not C2, "unexpected non-empty C2"
         W1, H1, C, C1 = splitFunc(H, endSlack)
         _fres.clear()
+        if C[0]==[] and C[1]==[] and C1:
+            #no split situation
+            C, C1 = [C1,C[1]], C[0]
 
         x1 = frame._x1
         y1 = frame._y1
@@ -1648,7 +1651,8 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
         xbg = bg = BGs[-1] if BGs else None
 
         class TAction(ActionFlowable):
-            def __init__(self,bgs=[],F=[],f=None):
+            '''a special Action flowable that sets stuff on the doc template T'''
+            def __init__(self, bgs=[],F=[],f=None):
                 Flowable.__init__(self)
                 self.bgs = bgs
                 self.F = F
@@ -1714,9 +1718,11 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
         if doVLines: G.extend(vLines)
         sa = self.getSpaceAfter()
         for i in xrange(nCols):
-            Ci = KeepInFrame(W1,H1,C[i],mode='shrink')
-            sa = max(sa,Ci.getSpaceAfter())
-            G.append(Ci)
+            Ci = C[i]
+            if Ci:
+                Ci = KeepInFrame(W1,H1,Ci,mode='shrink')
+                sa = max(sa,Ci.getSpaceAfter())
+                G.append(Ci)
             if i!=nCols-1:
                 G.append(FrameBreak)
         G.append(TAction(BGs,oldFrames,frame))

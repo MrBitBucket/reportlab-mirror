@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.48	 18/08/2020
+---------------------------
+	* bug fix for balanced column special case unsplittable half column
+
 RELEASE 3.5.47	  7/08/2020
 ---------------------------
 	* try to limit table style cell ranges
