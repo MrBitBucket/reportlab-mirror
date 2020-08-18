@@ -1217,9 +1217,9 @@ class BaseDocTemplate:
                 raise ValueError('bad lifetime %r not in %r'%(lifetime,self._allowedLifetimes))
             exec(stmt, NS)
         except:
-            for k in NS.keys():
-                if k not in K0:
-                    del NS[k]
+            K1 = [k for k in NS if k not in K0] #the added keys we need to delete
+            for k in K1:
+                del NS[k]
             annotateException('\ndocExec %s lifetime=%r failed!\n' % (stmt,lifetime))
         self._addVars([k for k in NS.keys() if k not in K0],lifetime)
 
