@@ -742,6 +742,7 @@ class ViewerPreferencesPDFDictionary(CheckedPDFDictionary):
                 PrintArea=checkPDFNames(*'MediaBox CropBox BleedBox TrimBox ArtBox'.split()),
                 PrintClip=checkPDFNames(*'MediaBox CropBox BleedBox TrimBox ArtBox'.split()),
                 PrintScaling=checkPDFNames(*'None AppDefault'.split()),
+                Duplex=checkPDFNames(*'Simplex DuplexFlipShortEdge DuplexFlipLongEdge'.split()),
                 )
 
 # stream filters are objects to support round trip and
@@ -968,7 +969,7 @@ class PDFCrossReferenceTable(PDFObject):
             fs = format(s, document)
             L.append(fs)
         return pdfdocEnc(b''.join(L))
-
+		
 class PDFTrailer(PDFObject):
     def __init__(self, startxref, Size=None, Prev=None, Root=None, Info=None, ID=None, Encrypt=None):
         self.startxref = startxref
