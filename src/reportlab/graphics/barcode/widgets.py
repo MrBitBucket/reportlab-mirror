@@ -61,8 +61,8 @@ class _BarcodeWidget(PlotArea):
     _BCC = None
     def __init__(self,_value='',**kw):
         PlotArea.__init__(self)
-        del self.__dict__['width']
-        del self.__dict__['height']
+        if 'width' in self.__dict__: del self.__dict__['width']
+        if 'height' in self.__dict__: del self.__dict__['height']
         self.x = self.y = 0
         kw.setdefault('value',_value)
         self._BCC.__init__(self,**kw)
@@ -94,7 +94,8 @@ def _BCW(doc,codeName,attrMap,mod,value,**kwds):
     code = 'from %s import %s' % (mod,codeName)
     rl_exec(code,ns)
     ns['_BarcodeWidget'] = _BarcodeWidget
-    code = '''class %(name)s(_BarcodeWidget,%(codeName)s):
+    ns['doc'] = ("\n\t'''%s'''" % doc) if doc else ''
+    code = '''class %(name)s(_BarcodeWidget,%(codeName)s):%(doc)s
 \t_BCC = %(codeName)s
 \tcodeName = %(codeName)r
 \tdef __init__(self,**kw):%(_pre_init)s
@@ -102,7 +103,6 @@ def _BCW(doc,codeName,attrMap,mod,value,**kwds):
     rl_exec(code,ns)
     Klass = ns[name]
     if attrMap: Klass._attrMap = attrMap
-    if doc: Klass.__doc__ = doc
     for k, v in kwds.items():
         setattr(Klass,k,v)
     return Klass
@@ -304,6 +304,9 @@ BarcodeUSPS_4State=_BCW('',
                             tracking = AttrMapValue(isString, desc='tracking data'),
                             routing = AttrMapValue(isString, desc='routing data'),
                             humanReadable = AttrMapValue(isBoolean, desc='if human readable'),
+                            barWidth = AttrMapValue(isNumber, desc='barWidth'),
+                            barHeight = AttrMapValue(isNumber, desc='barHeight'),
+                            pitch = AttrMapValue(isNumber, desc='pitch'),
                             ),
                         'reportlab.graphics.barcode.usps4s',
                         '01234567094987654321',

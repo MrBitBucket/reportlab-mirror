@@ -22,28 +22,56 @@ class USPS_4State(Barcode):
     _heightSize = 1
     _fontSize = 11
     _humanReadable = 0
-    tops = dict(
-        F = (0.067,0.115),
-        T = (0.021,0.040),
-        A = (0.067,0.115),
-        D = (0.021,0.040),
-        )
-    bottoms = dict(
-        F = (-0.067,-0.115),
-        D = (-0.067,-0.115), 
-        T = (-0.021,-0.040),
-        A = (-0.021,-0.040),
-        )
-    dimensions = dict(
-        width = (0.015, 0.025),
-        pitch = (0.0416,0.050),
-        hcz = (0.125,0.125),
-        vcz = (0.040,0.040),
-        )
+    if True:
+        tops = dict(
+            F = (0.0625,0.0825),
+            T = (0.0195,0.0285),
+            A = (0.0625,0.0825),
+            D = (0.0195,0.0285),
+            )
+        bottoms = dict(
+            F = (-0.0625,-0.0825),
+            T = (-0.0195,-0.0285),
+            D = (-0.0625,-0.0825),
+            A = (-0.0195,-0.0285),
+            )
+        dimensions = dict(
+            width = (0.015, 0.025),
+            pitch = (0.0416, 0.050),
+            hcz = (0.125,0.125),
+            vcz = (0.028,0.028),
+            )
+    else:
+        tops = dict(
+            F = (0.067,0.115),
+            T = (0.021,0.040),
+            A = (0.067,0.115),
+            D = (0.021,0.040),
+            )
+        bottoms = dict(
+            F = (-0.067,-0.115),
+            D = (-0.067,-0.115), 
+            T = (-0.021,-0.040),
+            A = (-0.021,-0.040),
+            )
+        dimensions = dict(
+            width = (0.015, 0.025),
+            pitch = (0.0416,0.050),
+            hcz = (0.125,0.125),
+            vcz = (0.040,0.040),
+            )
 
     def __init__(self,value='01234567094987654321',routing='',**kwd):
         self._init()
         value = str(value) if isinstance(value,int) else asNative(value)
+        if not routing:
+            #legal values for combined tracking + routing
+            if len(value) in (20,25,29,31):
+                value, routing = value[:20], value[20:]
+            else:
+                raise ValueError('value+routing length must be 20, 25, 29 or 31 digits not %d' % len(value))
+        elif len(routing) not in (5,9,11):
+            raise ValueError('routing length must be 5, 9 or 11 digits not %d' % len(routing))
         self._tracking = value
         self._routing = routing
         self._setKeywords(**kwd)
@@ -71,7 +99,7 @@ class USPS_4State(Barcode):
 
     def widthSize(self,value):
         self._sized = None
-        self._widthSize = value
+        self._widthSize = min(max(0,value),1)
     widthSize = property(lambda self: self._widthSize,widthSize)
 
     def heightSize(self,value):
@@ -241,9 +269,42 @@ class USPS_4State(Barcode):
     _bits2bars = 'T','D','A','F'
     horizontalClearZone = property(lambda self: self.scale('hcz',self.dimensions,self.widthScale))
     verticalClearZone = property(lambda self: self.scale('vcz',self.dimensions,self.heightScale))
-    pitch = property(lambda self: self.scale('pitch',self.dimensions,self.widthScale))
-    barWidth = property(lambda self: self.scale('width',self.dimensions,self.widthScale))
-    barHeight = property(lambda self: self.scale('F',self.tops,self.heightScale) - self.scale('F',self.bottoms,self.heightScale))
+
+    @property
+    def barWidth(self):
+        if '_barWidth' in self.__dict__:
+            return self.__dict__['_barWidth']
+        return self.scale('width',self.dimensions,self.widthScale)
+
+    @barWidth.setter
+    def barWidth(self,value):
+        n, x = self.dimensions['width']
+        self.__dict__['_barWidth'] = 72*min(max(value/72.0,n),x)
+
+    @property
+    def pitch(self):
+        if '_pitch' in self.__dict__:
+            return self.__dict__['_pitch']
+        return self.scale('pitch',self.dimensions,self.widthScale)
+
+    @pitch.setter
+    def pitch(self,value):
+        n, x = self.dimensions['pitch']
+        self.__dict__['_pitch'] = 72*min(max(value/72.0,n),x)
+
+    @property
+    def barHeight(self):
+        if '_barHeight' in self.__dict__:
+            return self.__dict__['_barHeight']
+        return self.scale('F',self.tops,self.heightScale) - self.scale('F',self.bottoms,self.heightScale)
+
+    @barHeight.setter
+    def barHeight(self,value):
+        n = self.tops['F'][0] - self.bottoms['F'][0]
+        x = self.tops['F'][1] - self.bottoms['F'][1]
+        value = self.__dict__['_barHeight'] = 72*min(max(value/72.0,n),x)
+        self.heightSize = (value - n)/(x-n)
+
     widthScale = property(lambda self: min(1,max(0,self.widthSize)))
     heightScale = property(lambda self: min(1,max(0,self.heightSize)))
 

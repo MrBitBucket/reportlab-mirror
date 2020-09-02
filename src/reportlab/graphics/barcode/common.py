@@ -35,7 +35,7 @@ from reportlab.lib.units import inch
 from reportlab.lib.utils import ascii_uppercase, ascii_lowercase
 from string import digits as string_digits
 
-class Barcode(Flowable):
+class Barcode(Flowable,object):
     """Abstract Base for barcodes. Includes implementations of
     some methods suitable for the more primitive barcode types"""
 

@@ -30,7 +30,7 @@ class Rect(SolidShape):
 '''
 from reportlab.lib.validators import isAnything, DerivedValue
 from reportlab.lib.utils import isSeq
-from reportlab import rl_config, ascii
+from reportlab import rl_config, ascii, isPy3
 
 class CallableValue:
     '''a class to allow callable initial values'''
@@ -113,7 +113,14 @@ def validateSetattr(obj,name,value):
                         raise AttributeError("Illegal assignment of '%s' to '%s' in class %s" % (value, name, obj.__class__.__name__))
                 except KeyError:
                     raise AttributeError("Illegal attribute '%s' in class %s" % (name, obj.__class__.__name__))
-    obj.__dict__[name] = value
+    prop = getattr(obj.__class__,name,None)
+    if isinstance(prop,property):
+        try:
+            prop.__set__(obj,value)
+        except AttributeError:
+            pass
+    else:
+        obj.__dict__[name] = value
 
 def _privateAttrMap(obj,ret=0):
     '''clone obj._attrMap if required'''
