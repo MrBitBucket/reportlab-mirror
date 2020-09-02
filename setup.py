@@ -497,7 +497,7 @@ def main():
                     if m:
                         D[m.group(1).lower()] = m.group(2)
                         if len(D)==3: break
-                return (sys.platform == 'win32' and '\\"%s\\"' or '"%s"') % '.'.join(map(lambda k,D=D: D.get(k,'?'),K))
+                return '.'.join(map(lambda k,D=D: D.get(k,'?'),K))
             LIBART_VERSION = libart_version()
             infoline('will use package libart %s' % LIBART_VERSION.replace('"',''))
 

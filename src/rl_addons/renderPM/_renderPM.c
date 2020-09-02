@@ -43,9 +43,10 @@ PyObject *RLPy_FindMethod(PyMethodDef *ml, PyObject *self, const char* name){
 #		define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
 #	endif
 #endif
-
+#define __STR(x) #x
+#define STRINGIFY(x) __STR(x)
 #ifndef LIBART_VERSION
-#	define LIBART_VERSION "?.?.?"
+#	define LIBART_VERSION ?.?.?
 #endif
 #ifdef	RENDERPM_FT
 #	define _FT_DOC "    ft_get_face(fontName) --> ft_face instance\n"
@@ -2147,7 +2148,7 @@ void init_renderPM(void)
 	if(!obj)goto err;
 	PyModule_AddObject(m, "_version", obj);
 
-	obj = PyUnicode_FromString(LIBART_VERSION);
+	obj = PyUnicode_FromString(STRINGIFY(LIBART_VERSION));
 	if(!obj)goto err;
 	PyModule_AddObject(m, "_libart_version", obj);
 
