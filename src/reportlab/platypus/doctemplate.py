@@ -506,6 +506,19 @@ class BaseDocTemplate:
                     'trimBox': None,
                     'bleedBox': None,
                     'keepTogetherClass': KeepTogether,
+                    'hideToolbar': None,
+                    'hideMenubar': None,
+                    'hideWindowUI': None,
+                    'fitWindow': None,
+                    'centerWindow': None,
+                    'nonFullScreenPageMode': None,
+                    'direction': None,
+                    'viewArea': None,
+                    'viewClip': None,
+                    'printArea': None,
+                    'printClip': None,
+                    'printScaling': None,
+                    'duplex': None,
                     }
     _invalidInitArgs = ()
     _firstPageTemplateIndex = 0
@@ -993,8 +1006,15 @@ class BaseDocTemplate:
         canv.setCreator(self.creator)
         canv.setProducer(self.producer)
         canv.setKeywords(self.keywords)
-        if self.displayDocTitle is not None:
-            canv.setViewerPreference('DisplayDocTitle',['false','true'][self.displayDocTitle])
+        from reportlab.pdfbase.pdfdoc import (
+                ViewerPreferencesPDFDictionary as VPD, checkPDFBoolean as cPDFB,
+                )
+        for k,vf in VPD.validate.items():
+            v = getattr(self,k[0].lower()+k[1:],None)
+            if v is not None:
+                if vf is cPDFB:
+                    v = ['false','true'][v] #convert to pdf form of boolean
+                canv.setViewerPreference(k,v)
 
         if self._onPage:
             canv.setPageCallBack(self._onPage)

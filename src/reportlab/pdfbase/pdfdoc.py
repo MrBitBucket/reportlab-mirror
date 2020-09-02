@@ -969,7 +969,7 @@ class PDFCrossReferenceTable(PDFObject):
             fs = format(s, document)
             L.append(fs)
         return pdfdocEnc(b''.join(L))
-		
+
 class PDFTrailer(PDFObject):
     def __init__(self, startxref, Size=None, Prev=None, Root=None, Info=None, ID=None, Encrypt=None):
         self.startxref = startxref

@@ -161,7 +161,10 @@ I hope we don't, but you never do Know.</a></font>""",bt)
         return story
 
     for sfx,klass in (('',KeepTogether),('_ktsat',KeepTogetherSplitAtTop)):
-        doc = MyDocTemplate(outputfile('test_platypus_breaking%s.pdf'%sfx),keepTogetherClass=klass)
+        doc = MyDocTemplate(outputfile('test_platypus_breaking%s.pdf'%sfx),keepTogetherClass=klass,
+                displayDocTitle=(sfx==''),
+                duplex='Simplex',
+                )
         doc.multiBuild(makeStory())
 
 class BreakingTestCase(unittest.TestCase):

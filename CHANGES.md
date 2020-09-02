@@ -11,6 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.49	 02/09/2020
+---------------------------
+	* ViewerPreferencesPDFDictionary add /Duplex as possibility
+	* Doctemplate add support for all ViewerPreferencesPDFDictionary keys
+	* fix bugs in USPS_4State; Barcode inherits from Flowable and object.
+
 RELEASE 3.5.48	 18/08/2020
 ---------------------------
 	* bug fix for balanced column special case unsplittable half column
