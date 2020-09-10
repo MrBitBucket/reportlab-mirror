@@ -141,6 +141,7 @@ class   ExtGState:
                 OP=False,
                 op=False,
                 OPM=0,
+                BM='/Normal',
                 )
 
     def __init__(self):
@@ -588,6 +589,9 @@ class Canvas(_PDFColorSetter):
             if bleedW:
                 bw -= bleedW
             return bw
+        
+    def setBlendMode(self, v):
+        self._extgstate.set(self,'BM',v)
 
     def showPage(self):
         """Close the current page and possibly start on a new page."""
