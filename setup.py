@@ -16,6 +16,7 @@ def specialOption(n):
 # if used on command line the config values are not used
 dlt1 = not specialOption('--no-download-t1-files')
 usla = specialOption('--use-system-libart')
+mdbg = specialOption('--memory-debug')
 
 try:
     import configparser
@@ -147,6 +148,8 @@ if dlt1:
 if not usla:
     #not set on command line so try for config value
     usla = config('OPTIONS','use-system-libart','0').lower() in ('1','true','yes')
+if not mdbg:
+    mdbg = config('OPTIONS','memory-debug','0').lower() in ('1','true','yes')
 
 #this code from /FBot's PIL setup.py
 def aDir(P, d, x=None):
@@ -386,6 +389,8 @@ def main():
             debug_link_args=['/DEBUG']
             if debug>1:
                 debug_macros.extend([('RL_DEBUG',debug), ('ROBIN_DEBUG',None)])
+    if mdbg:
+        debug_macros.extend([('MEMORY_DEBUG',None)])
 
     SPECIAL_PACKAGE_DATA = {}
     RL_ACCEL = _find_rl_ccode('rl_accel','_rl_accel.c')
