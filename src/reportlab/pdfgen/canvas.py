@@ -141,7 +141,29 @@ class   ExtGState:
                 OP=False,
                 op=False,
                 OPM=0,
+                BM='Normal',
                 )
+    allowed = dict(
+                BM = {
+                    'Normal', 'Multiply', 'Screen', 'Overlay',
+                    'Darken', 'Lighten', 'ColorDodge', 'ColorBurn',
+                    'HardLight', 'SoftLight', 'Difference', 'Exclusion',
+                    'Hue', 'Saturation', 'Color', 'Luminosity',
+                    },
+                )
+    pdfNameValues = {'BM'}
+
+    @staticmethod
+    def _boolTransform(v):
+        return str(v).lower()
+
+    @staticmethod
+    def _identityTransform(v):
+        return v
+
+    @staticmethod
+    def _pdfNameTransform(v):
+        return '/'+v
 
     def __init__(self):
         self._d = {}
@@ -149,12 +171,19 @@ class   ExtGState:
 
     def set(self,canv,a,v):
         d = self.defaults[a]
-        isbool = isinstance(d,bool)
-        if isbool: v=bool(v)
+        if isinstance(d,bool):
+            v=bool(v)
+            vTransform = self._boolTransform
+        elif a in self.pdfNameValues:
+            if v not in self.allowed[a]:
+                raise ValueError('ExtGstate[%r] = %r not in allowed values %r' % (
+                    a,v,self.allowed[a]))
+            vTransform = self._pdfNameTransform
+        else:
+            vTransform = self._identityTransform
         if v!=self._d.get(a,d) or (a=='op' and self.getValue('OP')!=d):
             self._d[a] = v
-            if isbool: v=str(v).lower()
-            t = a,v
+            t = a,vTransform(v)
             if t in self._c:
                 name = self._c[t]
             else:
@@ -579,6 +608,9 @@ class Canvas(_PDFColorSetter):
 
     def _setOverprintMask(self,v):
         self._extgstate.set(self,'OPM',v and 1 or 0)
+
+    def setBlendMode(self, v):
+        self._extgstate.set(self,'BM',v)
 
     def _getCmShift(self):
         cM = self._cropMarks
