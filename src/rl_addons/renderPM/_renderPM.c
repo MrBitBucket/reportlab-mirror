@@ -21,7 +21,7 @@
 #endif
 
 
-#define VERSION "3.03"
+#define VERSION "3.04"
 #define MODULENAME "_renderPM"
 #ifdef isPy3
 #	define PyInt_FromLong	PyLong_FromLong
@@ -49,24 +49,32 @@ PyObject *RLPy_FindMethod(PyMethodDef *ml, PyObject *self, const char* name){
 #	define LIBART_VERSION ?.?.?
 #endif
 #ifdef	RENDERPM_FT
-#	define _FT_DOC "    ft_get_face(fontName) --> ft_face instance\n"
+#	define _FT_DOC "    _renderPM.ft_get_face(fontName) --> ft_face instance\n"
 #else
 #	define _FT_DOC ""
+#endif
+#ifdef MEMORY_DEBUG
+#	define _MDBG_DOC "    _renderPM.mtrace(int) start or stop the malloc tracing\n"
+#else
+#	define _MDBG_DOC ""
 #endif
 PyDoc_STRVAR(__DOC__,
 "Helper extension module for renderPM.\n\
 \n\
 Interface summary:\n\
 \n\
-	import _renderPM\n\
-	gstate(width,height[,depth=3,bg=0xffffff]) #create an initialised graphics state\n\
-	makeT1Font(fontName,pfbPath,names[,reader])	#make a T1 font\n\
-	delCache() #delete all T1 font info\n\
-	pil2pict(cols,rows,datastr,palette) return PICT version of im as bytes\n"
+    from reportlan.graphics import _renderPM\n\
+    _renderPM.gstate(width,height[,depth=3,bg=0xffffff]) create an \n\
+        initialised graphics state\n\
+    _renderPM.makeT1Font(fontName,pfbPath,names[,reader]) make a T1 font\n\
+    _renderPM.delCache() delete all T1 font info\n\
+    _renderPM.pil2pict(cols,rows,datastr,palette) return PICT version of\n\
+        im as bytes\n"
 _FT_DOC
+_MDBG_DOC
 "\n\
-	_libart_version	# base library version string\n\
-	_version		# module version string\n\
+    _renderPM._libart_version base library version string\n\
+    _renderPM._version module version string ie " VERSION "\n\
 ");
 
 #if PY_VERSION_HEX < 0x01060000
@@ -648,8 +656,8 @@ static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse, int fi
 		if(fabs(a)>1e-7){
 			/*fill only larger things*/
 			tmp_vpath =  art_vpath_perturb(trVpath);
-			trVpath =  art_vpath_perturb(tmp_vpath);
-			art_free(tmp_vpath);
+			art_free(trVpath);	/*free the original*/
+			trVpath =  tmp_vpath;
 			svp = art_svp_from_vpath(trVpath);
 			dump_svp("fill svp from vpath",svp);
 			if(fillMode==0){
@@ -1850,6 +1858,22 @@ static PyObject* delCache(PyObject* self, PyObject* args)
 	Py_INCREF(Py_None);
 	return Py_None;
 }
+#ifdef MEMORY_DEBUG
+#include <mcheck.h>
+static PyObject* _py_mtrace(PyObject* self, PyObject* args)
+{
+	int startStop;
+	if(!PyArg_ParseTuple(args,"i:mtrace",&startStop)) return NULL;
+	if (startStop) {
+		mtrace();
+		}
+	else {
+		muntrace();
+		}
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+#endif
 
 #define HEADER_SIZE		512
 
@@ -2091,7 +2115,7 @@ static PyObject* pil2pict(PyObject* self, PyObject* args)
 
 
 static struct PyMethodDef _methods[] = {
-	{"gstate", (PyCFunction)gstate, METH_VARARGS|METH_KEYWORDS, "gstate(width,height[,depth=3][,bg=0xffffff]) create an initialised graphics state"},
+	{"gstate", (PyCFunction)gstate, METH_VARARGS|METH_KEYWORDS, "gstate(width,height[,depth=3][,bg=0xffffff]) create an\n        initialised graphics state"},
 	{"makeT1Font", (PyCFunction)makeT1Font, METH_VARARGS|METH_KEYWORDS, "makeT1Font(fontName,pfbPath,names)"},
 	{"delCache", (PyCFunction)delCache, METH_VARARGS, "delCache()"},
 	{"pil2pict", (PyCFunction)pil2pict, METH_VARARGS, "pil2pict(cols,rows,datastr,palette) return PICT version of im as bytes"},
@@ -2099,6 +2123,9 @@ static struct PyMethodDef _methods[] = {
     {"ft_get_face", (PyCFunction)ft_get_face, METH_VARARGS|METH_KEYWORDS,"ft_get_face(fontName) --> ft_face instance"},
 	{"parse_utf8", (PyCFunction)parse_utf8, METH_VARARGS, "parse_utf8(utf8_string) return UCS list"},
 #endif /*ifdef	RENDERPM_FT*/
+#ifdef MEMORY_DEBUG
+    {"mtrace", (PyCFunction)_py_mtrace, METH_VARARGS|METH_KEYWORDS,"mtrace(startStop) start or stop malloc tracing"},
+#endif /*MEMORY_DEBUG*/
 	{NULL,	NULL}			/*sentinel*/
 	};
 
