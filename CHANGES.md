@@ -11,10 +11,14 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.51	 24/09/2020
+---------------------------
+	* fix malloc(0) issue in \_rl_accel.c \_fp_str thanks to Hans-Peter Jansen <hpj@urpla.net> @ openSUSE
+
 RELEASE 3.5.50	 18/09/2020
 ---------------------------
 	* Add BM ExtGState option (suggestion by tjj021 @ github
-	* Fix memory leak in _renderPM.c
+	* Fix memory leak in \_renderPM.c
 
 RELEASE 3.5.49	 02/09/2020
 ---------------------------

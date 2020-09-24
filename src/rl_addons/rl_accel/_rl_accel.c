@@ -368,7 +368,7 @@ PyObject *_fp_str(PyObject *module, PyObject *args)
 			else PyErr_Clear();
 			Py_DECREF(retVal);
 			}
-		buf=malloc(31*aL);
+		buf = malloc(31*aL+1); /*add the 1 in case aL is 0 thanks to Hans-Peter Jansen <hpj@urpla.net>*/
 		pB = buf;
 		for(i=0;i<aL;i++){
 			retVal = PySequence_GetItem(args,i);
