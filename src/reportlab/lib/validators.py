@@ -336,6 +336,7 @@ class NumericAlign(str):
         self._dpLen = dpLen
         return self
 
+
 isAuto = Auto()
 isBoolean = _isBoolean()
 isString = _isString()

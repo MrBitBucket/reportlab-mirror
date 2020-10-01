@@ -10,6 +10,7 @@ from reportlab.graphics.barcode.code128 import *
 from reportlab.graphics.barcode.usps import *
 from reportlab.graphics.barcode.usps4s import USPS_4State
 from reportlab.graphics.barcode.qr import QrCodeWidget
+from reportlab.graphics.barcode.dmtx import DataMatrixWidget, pylibdmtx
 
 
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle, Preformatted, PageBreak
@@ -114,6 +115,11 @@ def run():
     storyAdd(Paragraph('QR', styleN))
     storyAdd(createBarcodeDrawing('QR', value='01234567094987654321',x=30,y=50))
 
+    def addCross(d,x,y,w=5,h=5, strokeColor='black', strokeWidth=0.5):
+        w *= 0.5
+        h *= 0.5
+        d.add(Line(x-w,y,x+w,y,strokeWidth=0.5,strokeColor=colors.blue))
+        d.add(Line(x, y-h, x, y+h,strokeWidth=0.5,strokeColor=colors.blue))
     storyAdd(Paragraph('QR in drawing at (0,0)', styleN))
     d = Drawing(100,100)
     d.add(Rect(0,0,100,100,strokeWidth=1,strokeColor=colors.red,fillColor=None))
@@ -123,8 +129,7 @@ def run():
     storyAdd(Paragraph('QR in drawing at (10,10)', styleN))
     d = Drawing(100,100)
     d.add(Rect(0,0,100,100,strokeWidth=1,strokeColor=colors.red,fillColor=None))
-    d.add(Line(7.5,10,12.5,10,strokeWidth=0.5,strokeColor=colors.blue))
-    d.add(Line(10,7.5, 10, 12.5,strokeWidth=0.5,strokeColor=colors.blue))
+    addCross(d,10,10)
     d.add(QrCodeWidget(value='01234567094987654321',x=10,y=10))
     storyAdd(d)
 
@@ -133,6 +138,28 @@ def run():
 
     storyAdd(Paragraph('Label Size', styleN))
     storyAdd(XBox((1.75)*inch, .5 * inch, '1/2x1-3/4"'))
+
+    if pylibdmtx:
+        storyAdd(PageBreak())
+        storyAdd(Paragraph('DataMatrix in drawing at (10,10)', styleN))
+        d = Drawing(100,100)
+        d.add(Rect(0,0,100,100,strokeWidth=1,strokeColor=colors.red,fillColor=None))
+        addCross(d,10,10)
+        d.add(DataMatrixWidget(value='1234567890',x=10,y=10))
+        storyAdd(d)
+        storyAdd(Paragraph('DataMatrix in drawing at (10,10)', styleN))
+        d = Drawing(100,100)
+        d.add(Rect(0,0,100,100,strokeWidth=1,strokeColor=colors.red,fillColor=None))
+        addCross(d,10,10)
+        d.add(DataMatrixWidget(value='1234567890',x=10,y=10,color='black',bgColor='lime'))
+        storyAdd(d)
+
+        storyAdd(Paragraph('DataMatrix in drawing at (90,90) anchor=ne', styleN))
+        d = Drawing(100,100)
+        d.add(Rect(0,0,100,100,strokeWidth=1,strokeColor=colors.red,fillColor=None))
+        addCross(d,90,90)
+        d.add(DataMatrixWidget(value='1234567890',x=90,y=90,color='darkblue',bgColor='yellow', anchor='ne'))
+        storyAdd(d)
     
 
     SimpleDocTemplate('out.pdf').build(story)

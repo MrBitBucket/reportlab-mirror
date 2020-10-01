@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.52	 01/10/2020
+---------------------------
+	* add support for DataMatrix barcode
+
 RELEASE 3.5.51	 24/09/2020
 ---------------------------
 	* fix malloc(0) issue in \_rl_accel.c \_fp_str thanks to Hans-Peter Jansen <hpj@urpla.net> @ openSUSE

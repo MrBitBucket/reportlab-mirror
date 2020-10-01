@@ -177,6 +177,12 @@ class Barcode(Flowable,object):
         getattr(canv,func)(x,y,text)
         canv.restoreState()
 
+    def _checkVal(self, name, v, allowed):
+        if v not in allowed:
+            raise ValueError('%s attribute %s is invalid %r\nnot in allowed %r' % (
+                self.__class__.__name__, name, v, allowed))
+        return v
+
 class MultiWidthBarcode(Barcode):
     """Base for variable-bar-width codes like Code93 and Code128"""
 
