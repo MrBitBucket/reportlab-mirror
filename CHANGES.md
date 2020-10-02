@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.53	 02/10/2020
+---------------------------
+	* Fix bug that allowed type 0 postscript commands to persist
+
 RELEASE 3.5.52	 01/10/2020
 ---------------------------
 	* add support for DataMatrix barcode

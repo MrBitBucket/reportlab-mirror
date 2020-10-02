@@ -1022,6 +1022,7 @@ class Canvas(_PDFColorSetter):
         else:
             self._code = []    # ready for more...
             self._psCommandsAfterPage = []
+            self._psCommandsBeforePage = []
             self._currentPageHasImages = 1 # for safety...
             self._formsinuse = []
             self._annotationrefs = []
