@@ -1,5 +1,6 @@
 __all__=('AcroForm',)
-from reportlab.pdfbase.pdfdoc import PDFObject, PDFArray, PDFDictionary, PDFString, pdfdocEnc, PDFName, PDFStream, PDFStreamFilterZCompress, escapePDF
+from reportlab.pdfbase.pdfdoc import (PDFObject, PDFArray, PDFDictionary, PDFString, pdfdocEnc,
+                                    PDFName, PDFStream, PDFStreamFilterZCompress, escapePDF)
 from reportlab.pdfgen.canvas  import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.colors import Color, CMYKColor, Whiter, Blacker, opaqueColor
@@ -158,6 +159,7 @@ class AcroForm(PDFObject):
         self._refMap = {}
         self._pdfdocenc = {}
         self.sigFlags = None
+        self.extras = {}
 
     @property
     def canv(self):
@@ -179,6 +181,7 @@ class AcroForm(PDFObject):
             F = [self.fontRef(f) for f in FK]
             d['DA'] = PDFString('/%s 0 Tf 0 g' % FK[0])
             d['DR'] = PDFFromString('<< /Encoding\n<<\n/RLAFencoding\n%s\n>>\n%s\n>>' % (self.encRefStr,'\n'.join(F)))
+        d.update(self.extras)
         r = PDFDictionary(d).format(doc)
         return r
 
