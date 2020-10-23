@@ -21,6 +21,7 @@ from reportlab.graphics.barcode.dmtx import DataMatrixWidget, pylibdmtx
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle, Preformatted, PageBreak
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
+from reportlab.lib.utils import TimeStamp
 
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.lib.styles import getSampleStyleSheet
@@ -181,7 +182,7 @@ def fullTest(fileName):
     story = []
 
     story.append(Paragraph('ReportLab %s Barcode Test Suite - full output' % __RL_Version__,styleH))
-    story.append(Paragraph('Generated at %s' % time.ctime(time.time()), styleN))
+    story.append(Paragraph('Generated at %s' % TimeStamp().asctime, styleN))
 
     story.append(Paragraph('About this document', styleH2))
     story.append(Paragraph('History and Status', styleH2))
