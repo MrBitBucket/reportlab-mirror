@@ -11,6 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.54	 23/10/2020
+---------------------------
+	* Allow extra fields in AcroForm suggested by Chris Else ubuntu247 at gmail.com
+	* Allow DocTemplate.\_firstPageTemplateIndex to be a list of PageTemplate ids
+	* improve PageBreak repr
+
 RELEASE 3.5.53	 02/10/2020
 ---------------------------
 	* Fix bug that allowed type 0 postscript commands to persist

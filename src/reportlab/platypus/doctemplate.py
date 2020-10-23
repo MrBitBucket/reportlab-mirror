@@ -600,7 +600,11 @@ class BaseDocTemplate:
     def handle_documentBegin(self):
         '''implement actions at beginning of document'''
         self._hanging = [PageBegin]
-        self.pageTemplate = self.pageTemplates[self._firstPageTemplateIndex]
+        if isinstance(self._firstPageTemplateIndex,list):
+            self.handle_nextPageTemplate(self._firstPageTemplateIndex)
+            self._setPageTemplate()
+        else:
+            self.pageTemplate = self.pageTemplates[self._firstPageTemplateIndex]
         self.page = 0
         self.beforeDocument()
 
