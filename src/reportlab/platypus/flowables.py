@@ -570,6 +570,9 @@ class PageBreak(UseUpSpace):
     def __init__(self,nextTemplate=None):
         self.nextTemplate = nextTemplate
 
+    def __repr__(self):
+        return "%s(%s)" % (self.__class__.__name__,repr(self.nextTemplate) if self.nextTemplate else '')
+
 class SlowPageBreak(PageBreak):
     pass
 
