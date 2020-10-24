@@ -306,7 +306,7 @@ class PMCanvas:
 
     def toPIL(self):
         im = _getImage().new('RGB', size=(self._gs.width, self._gs.height))
-        getattr(im,'frombytes',getattr(im,'fromstring'))(self._gs.pixBuf)
+        (getattr(im,'frombytes',None) or getattr(im,'fromstring'))(self._gs.pixBuf)
         return im
 
     def saveToFile(self,fn,fmt=None):
