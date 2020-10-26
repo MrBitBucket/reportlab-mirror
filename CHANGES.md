@@ -16,6 +16,7 @@ RELEASE 3.5.54	 23/10/2020
 	* Allow extra fields in AcroForm suggested by Chris Else ubuntu247 at gmail.com
 	* Allow DocTemplate.\_firstPageTemplateIndex to be a list of PageTemplate ids
 	* improve PageBreak repr
+	* minor changes to travis & appveyor scripts; drop forml support for python 3.5
 
 RELEASE 3.5.53	 02/10/2020
 ---------------------------

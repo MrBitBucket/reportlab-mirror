@@ -13,27 +13,21 @@ environment:
     CITOOLS_USER: rl-wheelbuilder
     CITOOLS_PASSWORD:
       secure: xbq9uLuFeus1N1x8xSF9f5kAYXY4lkvU4UveYwgcMkM=
-    FIRST: 27
-    LAST: 38-x64
+    FIRST: 39
+    LAST: 27-x64
     RLCACHE: windows/reportlab
 
   matrix:
-    - PYVER: 27
+    - PYVER: 39
       ARCH: X86
 
-    - PYVER: 27-x64
+    - PYVER: 39-x64
       ARCH: AMD64
 
-    - PYVER: 35
+    - PYVER: 38
       ARCH: X86
 
-    - PYVER: 35-x64
-      ARCH: AMD64
-
-    - PYVER: 36
-      ARCH: X86
-
-    - PYVER: 36-x64
+    - PYVER: 38-x64
       ARCH: AMD64
 
     - PYVER: 37
@@ -42,10 +36,16 @@ environment:
     - PYVER: 37-x64
       ARCH: AMD64
 
-    - PYVER: 38
+    - PYVER: 36
       ARCH: X86
 
-    - PYVER: 38-x64
+    - PYVER: 36-x64
+      ARCH: AMD64
+
+    - PYVER: 27
+      ARCH: X86
+
+    - PYVER: 27-x64
       ARCH: AMD64
 
 matrix:

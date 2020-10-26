@@ -7,10 +7,11 @@ __date__='20201023'
 
 import sys, os
 
-if sys.version_info[0:2]!=(2, 7) and sys.version_info<(3, 5):
-    raise ImportError("""reportlab requires Python 2.7+ or 3.5+; 3.0-3.4 are not supported.
+__min_python_version__ = (3,6)
+if sys.version_info[0:2]!=(2, 7) and sys.version_info< __min_python_version__:
+    raise ImportError("""reportlab requires Python 2.7+ or %s.%s+; other versions are unsupported.
 If you want to try with other python versions edit line 10 of reportlab/__init__
-to remove this error.""")
+to remove this error.""" % (__min_python_version__))
 
 #define these early in reportlab's life
 isPy3 = sys.version_info[0]==3

@@ -49,13 +49,6 @@ jobs:
     - PLAT=i686
   - os: linux
     env:
-    - MB_PYTHON_VERSION=3.5
-  - os: linux
-    env:
-    - MB_PYTHON_VERSION=3.5
-    - PLAT=i686
-  - os: linux
-    env:
     - MB_PYTHON_VERSION=3.6
   - os: linux
     env:
@@ -74,15 +67,18 @@ jobs:
   - os: linux
     env:
     - MB_PYTHON_VERSION=3.8
+    - PLAT=i686
+  - os: linux
+    env:
+    - MB_PYTHON_VERSION=3.9
+  - os: linux
+    env:
+    - MB_PYTHON_VERSION=3.9
     - PLAT=i686
   - os: osx
     language: generic
     env:
     - MB_PYTHON_VERSION=2.7
-  - os: osx
-    language: generic
-    env:
-    - MB_PYTHON_VERSION=3.5
   - os: osx
     language: generic
     env:
@@ -96,10 +92,15 @@ jobs:
     env:
     - MB_PYTHON_VERSION=3.8
     - MB_PYTHON_OSX_VER=10.9
+  - os: osx
+    language: generic
+    env:
+    - MB_PYTHON_VERSION=3.9
+    - MB_PYTHON_OSX_VER=10.9
 before_install:
 - git clone https://github.com/matthew-brett/multibuild $MULTIBUILD_DIR
 - cd $MULTIBUILD_DIR
-- git checkout b943f33a92772fd52c2fa38c03d08aac974c53bd
+- git checkout ec386efaa9e6840b552d845dfc4d597f6b97a2b7
 - cd ..
 - git clone https://github.com/MrBitBucket/reportlab-mirror $REPO_DIR
 - source $MULTIBUILD_DIR/common_utils.sh

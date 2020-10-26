@@ -260,11 +260,11 @@ for and Bitstream Inc. for the Vera fonts.""")
 heading2("Installation and Setup")
 
 disc("""To avoid duplication, the installation instructions are kept in the README file
-in our distribution, which can be viewed online at ^http://bitbucket.org/rptlab/reportlab/^""")
+in our distribution, which can be viewed online at ^https://hg.reportlab.com/hg-public/reportlab/^""")
 
-disc("""This release (3.0) of ReportLab requires Python versions 2.7, 3.3 or higher.  
-	If you need to use Python 2.5 or 2.6, please use the latest ReportLab 2.x package.
-""")
+disc("""This release (%s) of ReportLab requires Python versions 2.7, %s.%s+ or higher.  
+	If you need to use Python 2.5 or 2.6, please use the latest ReportLab 2.7 package.
+""" % ((reportlab.Version,)+reportlab.__min_python_version__))
 
 
 
@@ -302,7 +302,7 @@ From there you can also browse through the group's archives
 and contributions.  The mailing list is
 the place to report bugs and get support. """)
 
-disc("""The code now lives on BitBucket ($http://bitbucket.org/rptlab/reportlab/$)
+disc("""The code now lives on our website ($http://hg.reportlab.com/hg-public/reportlab/$)
 in a Mercurial repository, along with an issue tracker and wiki.  Everyone should
 feel free to contribute, but if you are working actively on some improvements
 or want to draw attention to an issue, please use the mailing list to let us know.""")
