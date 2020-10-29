@@ -972,6 +972,7 @@ class FragmentTestCase(unittest.TestCase):
                             firstLineIndent=0,
                             spaceBefore = 9.5,
                             fontSize=10,
+                            hyphenationLang="en_GB",
                             )
         sty1=ParagraphStyle(
                             name="base",
@@ -981,13 +982,16 @@ class FragmentTestCase(unittest.TestCase):
                             firstLineIndent=0,
                             spaceBefore = 9.5,
                             fontSize=10,
+                            hyphenationLang="en_GB",
                             )
-        styN =  ParagraphStyle('normal')
+        styN =  ParagraphStyle('normal', hyphenationLang="en_GB")
         styF=ParagraphStyle(
                             name = 'styF',
                             fontName='Courier',
                             fontSize=8,
-                            leading=9.6)
+                            leading=9.6,
+                            hyphenationLang="en_GB",
+                            )
         def box(x, y, aW, h):
             canv.saveState()
             canv.setDash(1,1)
