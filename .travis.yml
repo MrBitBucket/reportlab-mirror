@@ -11,7 +11,7 @@ env:
   - PLAT=x86_64
   - UNICODE_WIDTH=32
   - BUILD_DEPENDS=""
-  - TEST_DEPENDS="pillow"
+  - TEST_DEPENDS="pillow pyphen"
   - TWINE_USERNAME=MrRLBitBucket
   - CITOOLS_USER=rl-wheelbuilder
   - RLCACHE=manylinux/reportlab

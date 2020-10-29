@@ -71,3 +71,4 @@ syntax: regexp
 ^patches/
 ^src/reportlab/pdfbase/_glyphlist.py
 ^src/rl_addons/renderPM/libart_lgpl/art_config.h
+^demos/.*\.pdf$

@@ -107,7 +107,7 @@ class SafeEvalTestSequenceMeta(type):
             tfmt = 'test_ExpectedTo%s_%%02d' % kind.capitalize()
             for i, expr in enumerate(_data):
                 if expr is None:
-                    test = genTest('skip','')
+                    continue #test = genTest('skip','')
                 else:
                     expr, kwds = expr if isinstance(expr,tuple) else (expr,{})
                     test = genTest(kind, expr,**kwds)

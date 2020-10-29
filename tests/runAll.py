@@ -11,6 +11,7 @@ import os, glob, sys, traceback, unittest
 #directory and run this directly
 if __name__=='__main__':
     P=[]
+    os.environ['RL_trustedHosts'] = '*.reportlab.com'
     try:
         from reportlab.lib.testutils import setOutDir
     except ImportError:

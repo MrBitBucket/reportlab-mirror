@@ -104,7 +104,7 @@ test_script:
   - c:\Python37-x64\python.exe -mvirtualenv -p C:\Python%PYVER%\python.exe c:\projects\testenv
   - c:\projects\testenv\scripts\python.exe -mpip install -U pip setuptools wheel
   - c:\projects\testenv\scripts\pip.exe --version
-  - c:\projects\testenv\scripts\pip.exe install pillow
+  - c:\projects\testenv\scripts\pip.exe install pillow pyphen
   - c:\projects\testenv\scripts\pip.exe install --cache-dir=dist --find-links file:dist --pre reportlab
   #- c:\projects\myenv\scripts\python.exe -mrl_ci_tools info --recur c:\projects\testenv\Lib\site-packages
   #- c:\projects\myenv\scripts\python.exe -mrl_ci_tools info --recur c:\projects\testenv\Lib\site-packages\reportlab\fonts
