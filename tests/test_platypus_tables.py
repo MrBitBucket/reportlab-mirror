@@ -961,6 +961,20 @@ class TablesTestCase(unittest.TestCase):
         doc = SimpleDocTemplate(outputfile('test_platypus_tables_issue74.pdf'), showBoundary=0, pagesize=landscape(A4))
         doc.build([t])
 
+    data34 = [
+            ['001', '01', '02', '03', '04', '05'],
+            ['002', '01', '02', '03', '04', '05'],
+            ['003', '01', '02', '03', '04', '05'],
+            ['004', '01', '02', '03', '04', '05'],
+            ['005', '01', '02', '03', '04', '05'],
+            ['006', '01', '02', '03', '04', '05'],
+            ['007', '01', '02', '03', '04', '05'],
+            ['008', '01', '02', '03', '04', '05'],
+            ['009', '01', '02', '03', '04', '05'],
+            ['010', '01', '02', '03', '04', '05'],
+            ['011', '01', '02', '03', '04', '05'],
+            ['012', '01', '02', '03', '04', '05'],
+            ]
     def test3(self):
         '''bug reported by David VanEe <david.vanee@convergent.ca>'''
         story = []
@@ -977,20 +991,7 @@ class TablesTestCase(unittest.TestCase):
                  ('LINEBELOW', (0,1), (-1,1), 2, colors.orange),
                  ('FONT', (2,2), (5,8), 'Times-Bold'),
                  ]
-        data = [
-            ['001', '01', '02', '03', '04', '05'],
-            ['002', '01', '02', '03', '04', '05'],
-            ['003', '01', '02', '03', '04', '05'],
-            ['004', '01', '02', '03', '04', '05'],
-            ['005', '01', '02', '03', '04', '05'],
-            ['006', '01', '02', '03', '04', '05'],
-            ['007', '01', '02', '03', '04', '05'],
-            ['008', '01', '02', '03', '04', '05'],
-            ['009', '01', '02', '03', '04', '05'],
-            ['010', '01', '02', '03', '04', '05'],
-            ['011', '01', '02', '03', '04', '05'],
-            ['012', '01', '02', '03', '04', '05'],
-            ]
+        data = self.data34
         from reportlab.platypus import Paragraph, Table, SimpleDocTemplate, PageBreak
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
         styleSheet = getSampleStyleSheet()
@@ -1024,6 +1025,45 @@ class TablesTestCase(unittest.TestCase):
         self.assertIn(('BACKGROUND', (0, 1), (-1, 1), colors.grey), T[1]._bkgrndcmds)
         self.assertEqual(len(T[1]._bkgrndcmds),2)
         doc = SimpleDocTemplate(outputfile('test_platypus_tables_repeatrows_bgsplit.pdf'), showBoundary=0)
+        doc.build(story)
+
+    def test4(self):
+        '''test splitting row colour cycles'''
+        story = []
+        story_add = story.append
+        ts_tables = [
+                 ('BACKGROUND',(0,0),(-1,0),colors.pink),
+                 ('BACKGROUND',(0,1),(-1,1),colors.lightblue),
+                 ('ROWBACKGROUNDS',(0,2),(-1,-1),(colors.lightgrey,None)),
+                 ('TEXTCOLOR',(0,0),(-1,0),colors.green),
+                 ('TEXTCOLOR',(0,1),(-1,1),colors.red),
+                 ('LINEABOVE', (0,0), (-1,0), 1, colors.purple),
+                 ('LINEBELOW', (0,0), (-1,0), 2, colors.purple),
+                 ('LINEABOVE', (0,1), (-1,1), 1, colors.orange),
+                 ('LINEBELOW', (0,1), (-1,1), 2, colors.orange),
+                 ('FONT', (2,2), (5,8), 'Times-Bold'),
+                 ]
+        data = self.data34
+        from reportlab.platypus import Paragraph, Table, SimpleDocTemplate, PageBreak
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        styleSheet = getSampleStyleSheet()
+        bodyText = styleSheet['BodyText']
+
+        story_add(Paragraph('The whole table',bodyText))
+        t = Table(data, style=ts_tables, repeatRows=2)
+        story_add(t)
+        t = Table(data, style=ts_tables, repeatRows=2)
+        T = t.split(4*72,90)
+        story_add(Paragraph('The split table part 0',bodyText))
+        story_add(T[0])
+        story_add(Paragraph('The split table part 1',bodyText))
+        story_add(T[1])
+        self.assertIn(('BACKGROUND', (0, 0), (-1, 0), colors.pink),T[1]._bkgrndcmds)
+        self.assertIn(('BACKGROUND', (0, 1), (-1, 1), colors.lightblue),T[1]._bkgrndcmds)
+        self.assertIn(('ROWBACKGROUNDS', (0, 2), (-1, 8), (colors.lightgrey,None)),T[1]._bkgrndcmds)
+        self.assertEqual(len(T[1]._bkgrndcmds),3)
+        doc = SimpleDocTemplate(outputfile('test_platypus_tables_repeatrows_bgsplit_1.pdf'), showBoundary=0)
+        self.assertEqual(len(T[1]._bkgrndcmds),3)
         doc.build(story)
 
 def makeSuite():
