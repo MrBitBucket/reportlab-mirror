@@ -71,7 +71,7 @@ Morten Welinder <terra@diku.dk> September 1999.
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#if !defined(_WIN32) && !defined(macintosh)
+#if !defined(_WIN32) && !defined(macintosh) && !defined(__APPLE__)
 #	include <sys/file.h>
 #endif
 #include <math.h>

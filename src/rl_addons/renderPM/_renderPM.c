@@ -15,7 +15,7 @@
 #define FILL_EVEN_ODD 0
 #define FILL_NON_ZERO 1
 
-#if defined(macintosh)
+#if defined(macintosh) || defined(__APPLE__)
 #	include <extras.h>
 #	define strdup _strdup
 #endif

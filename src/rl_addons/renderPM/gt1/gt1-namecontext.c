@@ -3,7 +3,7 @@
 #include "gt1-misc.h"
 
 #include "gt1-namecontext.h"
-#if defined(_WIN32) || defined(macintosh)
+#if defined(_WIN32) || defined(macintosh) || defined(__APPLE__)
 #	include <string.h>
 #endif
 

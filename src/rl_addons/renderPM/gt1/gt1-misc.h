@@ -4,7 +4,7 @@
 #define __GT1_MISC_H__
 
 #include <stdlib.h> /* for malloc, etc. */
-#if defined(macintosh) || defined (__linux__) || defined(__FreeBSD_kernel__) || (__GNU__)
+#if defined(macintosh) || defined(__APPLE__) || defined (__linux__) || defined(__FreeBSD_kernel__) || (__GNU__)
 #	include <string.h> /* for memcpy() */
 #endif
 

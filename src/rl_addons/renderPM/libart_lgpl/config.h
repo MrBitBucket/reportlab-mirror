@@ -3,7 +3,7 @@
 
 /* Define if your processor stores words with the most significant
    byte first (like Motorola and SPARC, unlike Intel and VAX).  */
-#ifdef macintosh
+#if defined(macintosh) || defined(__APPLE__)
 #	define WORDS_BIGENDIAN
 #else
 /* #undef WORDS_BIGENDIAN */
