@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <math.h>
 
-#if defined(macintosh) || defined(__APPLE__)
+#if defined(macintosh)
 #	include <extras.h>
 #	define strdup _strdup
 #endif
