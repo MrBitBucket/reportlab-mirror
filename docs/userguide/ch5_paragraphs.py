@@ -346,7 +346,9 @@ This &lt;img/&gt; <img src="../images/testimg.gif" width="10"/> has width <b>10<
 </para>""","Inline images")
 disc("""The $src$ attribute can refer to a remote location eg $src="https://www.reportlab.com/images/logo.gif"$. By default we set $rl_config.trustedShemes$ to $['https','http', 'file', 'data', 'ftp']$ and
 $rl_config.trustedHosts=None$ the latter meaning no-restriction. You can modify these variables using one of the override files eg $reportlab_settings.py$ or $~/.reportlab_settings$. Or as comma seprated strings in the 
-environment variables $RL_trustedSchemes$ &amp; $RL_trustedHosts$. Note that the $trustedHosts$ values may contain <b>glob</b> wild cars so <i>*.reportlab.com</i> will match the obvious domains.""")
+environment variables $RL_trustedSchemes$ &amp; $RL_trustedHosts$. Note that the $trustedHosts$ values may contain <b>glob</b> wild cars so <i>*.reportlab.com</i> will match the obvious domains.
+<br/><span color="red"><b>*NB*</b></span> use of <i>trustedHosts</i> and or <i>trustedSchemes</i> may not control behaviour &amp; actions when $URI$ patterns
+are detected by the viewer application.""")
 
 heading3("The $&lt;u&gt;$ &amp; $&lt;strike&gt;$ tags")
 disc("""These tags can be used to carry out explicit underlineing or strikethroughs. These tags have

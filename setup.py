@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-__version__='3.5.48'
+__version__='3.5.56'
 import os, sys, glob, shutil, re
 def specialOption(n):
     v = False
@@ -631,10 +631,10 @@ def main():
                 'Programming Language :: Python :: 2',
                 'Programming Language :: Python :: 2.7',
                 'Programming Language :: Python :: 3',
-                'Programming Language :: Python :: 3.5',
                 'Programming Language :: Python :: 3.6',
                 'Programming Language :: Python :: 3.7',
                 'Programming Language :: Python :: 3.8',
+                'Programming Language :: Python :: 3.9',
                 ],
             
             #this probably only works for setuptools, but distutils seems to ignore it

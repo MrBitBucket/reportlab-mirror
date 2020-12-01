@@ -11,6 +11,16 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+RELEASE 3.5.56	 01/12/2020
+---------------------------
+	* micro changes for Big Sur in C extensions
+	* allow Drawing.outDir to be a callable for more control in save method
+
+RELEASE 3.5.55	 29/10/2020
+---------------------------
+	* add trustedHosts and trustedSchemes for url management
+	* drop 3.5 support
+
 RELEASE 3.5.54	 23/10/2020
 ---------------------------
 	* Allow extra fields in AcroForm suggested by Chris Else ubuntu247 at gmail.com

@@ -767,6 +767,10 @@ class Drawing(Group, Flowable):
                     #check a substring
                     if str(err).find('not all arguments converted') < 0: raise
 
+        if outDir is None:
+            outDir = getattr(self,'outDir',None)
+        if hasattr(outDir,'__call__'):
+            outDir = outDir(self)
         if os.path.isabs(fnRoot):
             outDir, fnRoot = os.path.split(fnRoot)
         else:
