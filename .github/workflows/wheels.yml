@@ -1,6 +1,9 @@
 name: Wheels
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
 
 env:
   GIT_REPO: "MrBitBucket/reportlab-mirror"
