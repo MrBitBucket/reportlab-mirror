@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.5.56	 10/12/2020
+---------------------------
+	* added .github action wheel.yml
+	* micro change to userguide doc
+
 RELEASE 3.5.56	 01/12/2020
 ---------------------------
 	* micro changes for Big Sur in C extensions
