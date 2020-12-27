@@ -81,8 +81,15 @@ class RlAccelTestCase(unittest.TestCase):
 
     def testEscapePDF(self):
         for func, kind in getFuncs('escapePDF'):
-            assert func('(test)')=='\\(test\\)',"%s escapePDF('(test)')=='\\\\(test\\\\)' fails with value %s!" % (
-                    kind,ascii(func('(test)')))
+            for s, sx in (
+                    ('(test)', r'\(test\)'),
+                    (r'\(test)', r'\\\(test\)'),
+                    (b'\223\214\213\236',r'\223\214\213\236'),
+                    (u'\223\214\213\236',r'\223\214\213\236'),
+                    ):
+                r = func(s)
+                assert r==sx,"%s escapePDF('%s')=='%s' fails with value '%s'!" % (
+                    kind,s,sx,r)
 
     def testCalcChecksum(self):
         for func, kind in getFuncs('calcChecksum'):

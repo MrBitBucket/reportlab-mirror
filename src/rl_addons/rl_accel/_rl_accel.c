@@ -30,7 +30,7 @@
 #ifndef min
 #	define min(a,b) ((a)<(b)?(a):(b))
 #endif
-#define VERSION "0.75"
+#define VERSION "0.80"
 #define MODULE "_rl_accel"
 
 struct module_state	{
@@ -435,11 +435,37 @@ static PyObject *_escapePDF(unsigned char* text, Py_ssize_t textlen)
 
 static PyObject *escapePDF(PyObject *module, PyObject* args)
 {
-	unsigned char	*text;
-	Py_ssize_t		textLen;
+	unsigned char	*inData;
+	Py_ssize_t		length;
+	PyObject		*retVal=NULL, *inObj, *_o1=NULL;
 
-	if (!PyArg_ParseTuple(args, "s#:escapePDF", &text, &textLen)) return NULL;
-	return _escapePDF(text,textLen);
+	if (!PyArg_ParseTuple(args, "O:escapePDF", &inObj)) return NULL;
+	if(PyUnicode_Check(inObj)){
+		_o1 = PyUnicode_AsLatin1String(inObj);
+		if(!_o1){
+			PyErr_SetString(PyExc_ValueError,"argument not decodable as latin1");
+			ERROR_EXIT();
+			}
+		inData = PyBytes_AsString(_o1);
+		inObj = _o1;
+		if(!inData){
+			PyErr_SetString(PyExc_ValueError,"argument not converted to internal char string");
+			ERROR_EXIT();
+			}
+		}
+	else if(!PyBytes_Check(inObj)){
+		PyErr_SetString(PyExc_ValueError,"argument should be " BYTESNAME " or latin1 decodable " STRNAME);
+		ERROR_EXIT();
+		}
+	inData = PyBytes_AsString(inObj);
+	length = PyBytes_GET_SIZE(inObj);
+	retVal = _escapePDF(inData,length);
+L_exit:
+	Py_XDECREF(_o1);
+	return retVal;
+L_ERR:
+	ADD_TB(module,"excapePDF");
+	goto L_exit;
 }
 
 static PyObject *sameFrag(PyObject *module, PyObject* args)
@@ -1240,7 +1266,7 @@ static PyTypeObject BoxList_type = {
 PyDoc_STRVAR(__DOC__,
 "_rl_accel contains various accelerated utilities\n\
 \n\
-\tescapePDF makes a string safe for PDF\n\
+\tescapePDF makes a unicode or latin1 bytes safe for PDF\n\
 \n\
 \tasciiBase85Encode does what is says\n\
 \tasciiBase85Decode does what is says\n\
