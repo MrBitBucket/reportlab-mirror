@@ -5,7 +5,8 @@
 __version__='3.3.0'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import sys, os, time
+import sys, os, time, random
+from reportlab.rl_config import invariant as rl_invariant
 from operator import truth
 import unittest
 from reportlab.lib import colors
@@ -69,6 +70,7 @@ class MyDocTemplate(BaseDocTemplate):
 def _test0(self):
     "This makes one long multi-page paragraph."
     from reportlab.platypus.flowables import DocAssign, DocExec, DocPara, DocIf, DocWhile
+    if rl_invariant: random.seed(1629812163)
 
     # Build story.
     story = []

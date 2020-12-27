@@ -15,7 +15,7 @@ from reportlab.platypus.flowables import Flowable, DocAssert
 from reportlab.lib.colors import Color
 from reportlab.lib.units import cm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
-from reportlab.lib.utils import _className, asBytes, asUnicode
+from reportlab.lib.utils import _className, asBytes, asUnicode, asNative
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame, ShowBoundaryValue
@@ -186,12 +186,73 @@ class ParagraphCorners(unittest.TestCase):
         style = ParagraphStyle(
             'normal', fontName='Helvetica', fontSize=12,
             embeddedHyphenation=1, splitLongWords=0, hyphenationLang='en-GB')
-        text = 'Super\xc2\xadcali\xc2\xadfragi\xc2\xadlistic\xc2\xadexpi\xc2\xadali\xc2\xaddocious'
+        shy = asNative(u'\xad')
+        text = shy.join(('Super','cali','fragi','listic','expi','ali','docious'))
         f.addFromList([Paragraph(text, style)], c)
         text = u'<span color="red">Super</span><span color="pink">&#173;cali&#173;</span>fragi&#173;listic&#173;expi&#173;ali&#173;docious'
         f.addFromList([Paragraph(text, style)], c)
         c.showPage()
         c.save() 
+
+    def test_platypus_paragraphs_embedded2(self):
+        from hashlib import md5 as hashlib_md5
+
+        fontName = 'Helvetica'
+        fontSize = 10
+
+        texts = [asUnicode(text) for text
+                in  [
+                    b'UU\xc2\xadDIS\xc2\xadTU\xc2\xadSA\xc2\xadLA JA TAI\xc2\xadMIK\xc2\xadKO',
+                    b'NUO\xc2\xadRI KAS\xc2\xadVA\xc2\xadTUS\xc2\xadMET\xc2\xadSIK\xc2\xadK\xc3\x96',
+                    b'VART\xc2\xadTU\xc2\xadNUT KAS\xc2\xadVA\xc2\xadTUS\xc2\xadMET\xc2\xadSIK\xc2\xadK\xc3\x96',
+                    b'UU\xc2\xadDIS\xc2\xadTUS-KYP\xc2\xadS\xc3\x84 MET\xc2\xadSIK\xc2\xadK\xc3\x96',
+                    b'SIE\xc2\xadMEN- JA SUO-JUS\xc2\xadPUU-MET\xc2\xadSIK\xc2\xadK\xc3\x96',
+                    b'E\xc2\xadRI-I\xc2\xadK\xc3\x84\xc2\xadIS-RA\xc2\xadKEN\xc2\xadTEI\xc2\xadNEN MET\xc2\xadSIK\xc2\xadK\xc3\x96',
+                    ]
+                ]
+        maxWidth = stringWidth('VARTTUNUT KAS', fontName, fontSize)+0.5
+        span = lambda _t, _c: "<span color='%s'>%s</span>" % (_c, _t)
+
+        pagesize = (20+maxWidth, 800)
+        c = Canvas(outputfile('test_platypus_paragraphs_embedded2.pdf'), pagesize=pagesize)
+
+        expected = [
+                (163, b'\x7f\xd7_^\x07\x9c!u\x02\xb4\x13z\xb5y6C'),
+                (163, b'\xab\x82\xbf\xb3\xfc\xb5\xaau\x15\xb1<\x8eX\xbe35'),
+                (163, b'LL\xb1\xfd.\x8a\x8bk\xde\xcdK\x16P\xebWh'),
+                (163, b'\xa9fj\xdd\xb9\x11N\xcf\xbb\x12\xfb\xd9\xa5\xf0v<'),
+                (163, b'\x18r\x98\x17\xd8&\x8c\x01{\xf3|r\xca\xccQy'),
+                (163, b'\xb7\xf2\x0f/d\xe9<\xd1B?\xe5\x8c\xcbO\x06?'),
+                ]
+        observed = []
+        for eh in 0, 1, 2:
+            for slw in 0, 1:
+                f = Frame(10, 10, maxWidth, 780,
+                        showBoundary=ShowBoundaryValue(dashArray=(1,1)),
+                        leftPadding=0,
+                        rightPadding=0,
+                        topPadding=0,
+                        bottomPadding=0,
+                        )
+                style = ParagraphStyle(
+                    'normal', fontName=fontName, fontSize=fontSize,
+                    embeddedHyphenation=eh, splitLongWords=slw,
+                    hyphenationLang=None)
+                f.addFromList([Paragraph('slw=%d eh=%d' % (slw,eh), style)], c)
+                for text in texts:
+                    f.addFromList([Paragraph(text, style)], c)
+                    mfText = text.split(u'\xad')
+                    mfText[0] = span(mfText[0],'red')
+                    if len(mfText)>1:
+                        mfText[1] = span(mfText[1],'pink')
+                        if len(mfText)>2:
+                            mfText[-1] = span(mfText[-1],'blue')
+                    mfText = u'&#173;'.join(mfText)
+                    f.addFromList([Paragraph(mfText, style)], c)
+                observed.append((len(c._code), hashlib_md5(b"".join((asBytes(b,"latin1") for b in c._code))).digest()))
+                c.showPage()
+        c.save() 
+        self.assertEqual(observed, expected)
 
     def test_lele_img(self):
         from reportlab.pdfgen.canvas import Canvas
@@ -621,9 +682,9 @@ providing the ultimate in ease of installation.''',
         \xd7\x93\xd7\xa8\xd7\x9b\xd7\x94 \xd7\xa9\xd7\x99\xd7\xaa\xd7\x95\xd7\xa4\xd7\x99\xd7\xaa
         \xd7\x90\xd7\xaa\xd7\x94 \xd7\x93\xd7\xaa.'''
         gif = os.path.join(testsFolder,'pythonpowered.gif')
-        heading = Paragraph('\xd7\x96\xd7\x95\xd7\x94\xd7\x99 \xd7\x9b\xd7\x95\xd7\xaa\xd7\xa8\xd7\xaa',h3)
+        heading = Paragraph(b'\xd7\x96\xd7\x95\xd7\x94\xd7\x99 \xd7\x9b\xd7\x95\xd7\xaa\xd7\xa8\xd7\xaa',h3)
         story.append(ImageAndFlowables(Image(gif),[heading,Paragraph(text,bt)]))
-        heading = Paragraph('\xd7\x96\xd7\x95\xd7\x94\xd7\x99 \xd7\x9b\xd7\x95\xd7\xaa\xd7\xa8\xd7\xaa',h3)
+        heading = Paragraph(b'\xd7\x96\xd7\x95\xd7\x94\xd7\x99 \xd7\x9b\xd7\x95\xd7\xaa\xd7\xa8\xd7\xaa',h3)
         story.append(ImageAndFlowables(Image(gif),[heading,Paragraph(text1,bt)]))
         doc = MyDocTemplate(outputfile('test_platypus_imageandflowables_rtl.pdf'),showBoundary=1)
         doc.multiBuild(story)
@@ -1311,7 +1372,7 @@ def tentities(title, b, fn):
     bt = getSampleStyleSheet()['BodyText']
     bt.fontName = 'DejaVuSans'
     doc = SimpleDocTemplate(fn)
-    story = [Paragraph('<b>%s</b>' % title,bt)]
+    story = [Paragraph('<b>%s</b>' % asNative(title),bt)]
     story.extend([Paragraph(bu('&amp;%s; = <span color="red">&%s;</span>' % (k,k)), bt) for k, v in alphaSortedItems(greeks)])
     doc.build(story)
 

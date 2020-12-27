@@ -6,7 +6,8 @@ __version__='3.3.0'
 from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import sys, os
+import sys, os, random
+from reportlab.rl_config import invariant as rl_invariant
 from os.path import join, basename, splitext
 from math import sqrt
 import unittest
@@ -83,6 +84,7 @@ class IndexTestCase(unittest.TestCase):
         Index terms are grouped by their first 2, and first 3 characters.
         The page numbers should be clickable and link to the indexed word.
         '''
+        if rl_invariant: random.seed(1753799561)
         # Build story.
         
         for headers in False, True:

@@ -23,6 +23,9 @@ class SourceTester(SecureTestCase):
 
         self.output = open(outputfile(os.path.splitext(os.path.basename(fn))[0]+'.txt'),'w')
 
+    def tearDown(self):
+        self.output.close()
+
     def checkFileForTabs(self, filename):
         txt = open_and_read(filename, 'r')
         chunks = txt.split('\t')

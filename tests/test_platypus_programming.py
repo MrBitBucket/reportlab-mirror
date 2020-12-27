@@ -7,8 +7,7 @@ __doc__="""Tests low level programming of doc templates
 """
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import sys
-import unittest
+import sys, unittest
 class PlatypusProgrammingTestCase(unittest.TestCase):
     "test platypus programming"
 
@@ -60,6 +59,9 @@ class PlatypusProgrammingTestCase(unittest.TestCase):
         from reportlab.platypus import Paragraph
         from reportlab.lib import colors
         from reportlab.lib.randomtext import randomText, PYTHON
+        import random
+        from reportlab.rl_config import invariant as rl_invariant
+        if rl_invariant: random.seed(2103696747)
 
         # Build story.
         story = []

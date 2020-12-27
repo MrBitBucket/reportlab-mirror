@@ -5,7 +5,8 @@
 __version__='3.3.0'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import sys, os, time
+import sys, os, time, random
+from reportlab.rl_config import invariant as rl_invariant
 from operator import truth
 import unittest
 from reportlab.platypus.flowables import Flowable
@@ -88,6 +89,7 @@ class LeftRightTestCase(unittest.TestCase):
     def testIt(self):
         "LeftRightTestCase.testit"
 
+        if rl_invariant: random.seed(464568862)
         # Build story.
         story = []
 

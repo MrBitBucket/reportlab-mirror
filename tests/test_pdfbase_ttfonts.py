@@ -47,7 +47,7 @@ def show_all_glyphs(fn,fontName='Vera'):
     font = _fonts[fontName]
     doc = c._doc
     kfunc = font.face.charToGlyph.keys if isPy3 else font.face.charToGlyph.iterkeys
-    for s in kfunc():
+    for s in sorted(list(kfunc())):
         if s<0x10000:
             font.splitString(uniChr(s),doc)
     state = font.state[doc]
@@ -55,7 +55,7 @@ def show_all_glyphs(fn,fontName='Vera'):
     #print('len(assignments)=%d'%  len(state.assignments))
     nzero = 0
     ifunc = state.assignments.items if isPy3 else state.assignments.iteritems
-    for code, n in ifunc():
+    for code, n in sorted(list(ifunc())):
         if code==0: nzero += 1
         cn[n] = uniChr(code)
     if nzero>1: print('%s there were %d zero codes' % (fontName,nzero))

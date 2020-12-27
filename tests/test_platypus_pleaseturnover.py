@@ -5,8 +5,7 @@
 __version__='3.3.0'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import sys
-import unittest
+import sys, unittest
 from reportlab.platypus.flowables import Flowable, PTOContainer, KeepInFrame
 from reportlab.platypus import FrameBG
 from reportlab.lib.units import cm
@@ -16,7 +15,6 @@ from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.tables import Table
 from reportlab.platypus.frames import Frame
-from reportlab.lib.randomtext import randomText
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, FrameBreak
 
 def myMainPageFrame(canvas, doc):

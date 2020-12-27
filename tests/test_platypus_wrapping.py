@@ -5,7 +5,7 @@
 __version__='3.3.0'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import sys, os, random
+import sys, os
 from operator import truth
 import unittest
 from reportlab.pdfbase.pdfmetrics import stringWidth

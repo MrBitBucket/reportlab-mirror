@@ -13,6 +13,7 @@ import sys, os
 from os.path import join, basename, splitext
 from math import sqrt
 import random
+from reportlab.rl_config import invariant as rl_invariant
 import unittest
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
@@ -133,7 +134,7 @@ class TocTestCase(unittest.TestCase):
             3. Only entries of every second level has links
             ...
         """
-
+        if rl_invariant: random.seed(2077179149)
         maxLevels = 12
 
         # Create styles to be used for document headers
@@ -181,7 +182,7 @@ class TocTestCase(unittest.TestCase):
         with the right headings to make it go faster.  We used
         a simple 100-chapter document with one level.
         """
-
+        if rl_invariant: random.seed(1216902530)
         chapters = 30   #goes over one page
         
         headerStyle = makeHeaderStyle(0)
@@ -281,6 +282,7 @@ class TocTestCase(unittest.TestCase):
         self.assertTrue(hasattr(doc,'seq'))
 
     def test2(self):
+        if rl_invariant: random.seed(530125105)
         chapters = 20   #so we know we use only one page
         from reportlab.lib.colors import pink
 

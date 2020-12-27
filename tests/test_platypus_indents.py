@@ -7,6 +7,7 @@ from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os, random
+from reportlab.rl_config import invariant as rl_invariant
 from operator import truth
 import unittest
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -65,6 +66,7 @@ class IndentTestCase(unittest.TestCase):
 
     def test0(self):
         "IndentTestCase test0"
+        if rl_invariant: random.seed(1479316371)
 
         # Build story.
         story = []

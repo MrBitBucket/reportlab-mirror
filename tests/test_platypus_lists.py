@@ -3,7 +3,8 @@ from xml.sax.saxutils import escape as xmlEscape
 from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import os,unittest
+import os,unittest, random
+from reportlab.rl_config import invariant as rl_invariant
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle, ListFlowable, ListItem, \
         Paragraph, PageBreak, DDIndenter, MultiCol
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
@@ -60,6 +61,7 @@ class ListsTestCase(unittest.TestCase):
     "Make documents with tables"
 
     def test1(self):
+        if rl_invariant: random.seed(888147853)
         styleSheet = getSampleStyleSheet()
         doc = SimpleDocTemplate(outputfile('test_platypus_lists1.pdf'),showBoundary=True)
         story=[]
