@@ -5,13 +5,14 @@ __version__='3.3.0'
 from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import unittest, os
+import unittest, os, random
 from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter, XPreformatted, PageBreak, Spacer
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.abag import ABag
 from reportlab.lib.colors import red, black, navy, white, green
 from reportlab.lib.randomtext import randomText
+from reportlab.rl_config import invariant as rl_invariant
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.rl_config import defaultPageSize, rtlSupport
 from reportlab.pdfbase import ttfonts
@@ -83,7 +84,7 @@ class ParagraphTestCase(unittest.TestCase):
             2. ...
             3. ...
         """
-
+        if rl_invariant: random.seed(1854640162)
         story = []
         SA = story.append
 

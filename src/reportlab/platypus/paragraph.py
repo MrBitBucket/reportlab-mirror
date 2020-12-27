@@ -2014,6 +2014,7 @@ class Paragraph(Flowable):
             hyphenator = None
         uriWasteReduce = style.uriWasteReduce
         embeddedHyphenation = style.embeddedHyphenation
+        hyphenation2 = embeddedHyphenation>1
         spaceShrinkage = style.spaceShrinkage
         splitLongWords = style.splitLongWords
         attemptHyphenation = hyphenator or uriWasteReduce or embeddedHyphenation
@@ -2078,6 +2079,17 @@ class Paragraph(Flowable):
                             self._hyphenations += 1
                             forcedSplit = 1
                             continue
+                        elif hyphenation2 and len(cLine):
+                            hsw = word.__shysplit__(
+                                fontName, fontSize,
+                                0 + hyw - 1e-8,
+                                maxWidth,
+                                encoding = self.encoding,
+                                )
+                            if hsw:
+                                words[0:0] = [word]
+                                forcedSplit = 1
+                                word = None
                     elif attemptHyphenation:
                         hyOk = not getattr(f,'nobr',False)
                         hsw = _hyphenateWord(hyphenator if hyOk else None,
@@ -2089,7 +2101,16 @@ class Paragraph(Flowable):
                             self._hyphenations += 1
                             forcedSplit = 1
                             continue
-                    if splitLongWords and not isinstance(word,_SplitWord):
+                        elif hyphenation2 and len(cLine):
+                            hsw = _hyphenateWord(hyphenator if hyOk else None,
+                                fontName, fontSize, word, wordWidth, wordWidth, maxWidth,
+                                    uriWasteReduce if hyOk else False,
+                                    embeddedHyphenation and hyOk, hymwl)
+                            if hsw:
+                                words[0:0] = [word]
+                                forcedSplit = 1
+                                word = None
+                    if splitLongWords and not (isinstance(word,_SplitWord) or forcedSplit):
                         nmw = min(lineno,maxlineno)
                         if wordWidth>max(maxWidths[nmw:nmw+1]):
                             #a long word
@@ -2099,7 +2120,7 @@ class Paragraph(Flowable):
                             continue
                 if newWidth <= (maxWidth+spaceShrink) or not len(cLine) or forcedSplit:
                     # fit one more on this line
-                    cLine.append(word)
+                    if word: cLine.append(word)
                     if forcedSplit:
                         forcedSplit = 0
                         if newWidth > self._width_max: self._width_max = newWidth
@@ -2170,6 +2191,13 @@ class Paragraph(Flowable):
                             FW.pop(-1)  #remove this as we are doing this one again
                             self._hyphenations += 1
                             continue
+                        elif hyphenation2 and len(FW)>1:    #only if we are not the first word on the line
+                            hsw = w.shyphenate(wordWidth, maxWidth)
+                            if hsw:
+                                _words[0:0] = [_InjectedFrag([0,(f.clone(_fkind=_FK_BREAK,text=''),'')]),w]
+                                FW.pop(-1)  #remove this as we are doing this one again
+                                continue
+                        #else: try to split an overlong word
                     elif attemptHyphenation:
                         hyOk = not getattr(f,'nobr',False)
                         hsw = _hyphenateFragWord(hyphenator if hyOk else None,
@@ -2182,6 +2210,16 @@ class Paragraph(Flowable):
                             FW.pop(-1)  #remove this as we are doing this one again
                             self._hyphenations += 1
                             continue
+                        elif hyphenation2 and len(FW)>1:
+                            hsw = _hyphenateFragWord(hyphenator if hyOk else None,
+                                        w,wordWidth,maxWidth,
+                                        uriWasteReduce if hyOk else False,
+                                        embeddedHyphenation and hyOk, hymwl)
+                            if hsw:
+                                _words[0:0] = [_InjectedFrag([0,(f.clone(_fkind=_FK_BREAK,text=''),'')]),w]
+                                FW.pop(-1)  #remove this as we are doing this one again
+                                continue
+                        #else: try to split an overlong word
                     if splitLongWords and not isinstance(w,_SplitFrag):
                         nmw = min(lineno,maxlineno)
                         if wordWidth>max(maxWidths[nmw:nmw+1]):
