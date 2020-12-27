@@ -507,9 +507,15 @@ class Table(Flowable):
                 if ew is None: return None
                 w = max(w,ew)
             return w
-        elif isinstance(v,Flowable) and v._fixedWidth:
-            if hasattr(v, 'width') and isinstance(v.width,(int,float)): return v.width
-            if hasattr(v, 'drawWidth') and isinstance(v.drawWidth,(int,float)): return v.drawWidth
+        elif isinstance(v,Flowable):
+            if v._fixedWidth:
+                if hasattr(v, 'width') and isinstance(v.width,(int,float)): return v.width
+                if hasattr(v, 'drawWidth') and isinstance(v.drawWidth,(int,float)): return v.drawWidth
+            if hasattr(v,'__styledWrap__'): #very experimental
+                try:
+                    return getattr(v,'__styledWrap__')(s)[0]
+                except:
+                    pass
         # Even if something is fixedWidth, the attribute to check is not
         # necessarily consistent (cf. Image.drawWidth).  Therefore, we'll
         # be extra-careful and fall through to this code if necessary.
@@ -715,7 +721,7 @@ class Table(Flowable):
         and assign some best-guess values."""
 
         W = list(self._argW) # _calc_pc(self._argW,availWidth)
-        verbose = 0
+        #verbose = 1
         totalDefined = 0.0
         percentDefined = 0
         percentTotal = 0
@@ -733,8 +739,7 @@ class Table(Flowable):
             else:
                 assert isinstance(w,(int,float))
                 totalDefined = totalDefined + w
-        if verbose: print('prelim width calculation.  %d columns, %d undefined width, %0.2f units remain' % (
-            self._ncols, numberUndefined, availWidth - totalDefined))
+        #if verbose: print('prelim width calculation.  %d columns, %d undefined width, %0.2f units remain' % (self._ncols, numberUndefined, availWidth - totalDefined))
 
         #check columnwise in each None column to see if they are sizable.
         given = []
@@ -753,6 +758,7 @@ class Table(Flowable):
                     style = self._cellStyles[rowNo][colNo]
                     new = elementWidth(value,style) or 0
                     new += style.leftPadding+style.rightPadding
+                    #if verbose: print('[%d,%d] new=%r-->%r' % (rowNo,colNo,new - style.leftPadding+style.rightPadding, new))
                     final = max(final, new)
                     siz = siz and self._canGetWidth(value) # irrelevant now?
                 if siz:
@@ -765,21 +771,22 @@ class Table(Flowable):
                 given.append(colNo)
         if len(given) == self._ncols:
             return
-        if verbose: print('predefined width:   ',given)
-        if verbose: print('uncomputable width: ',unsizeable)
-        if verbose: print('computable width:   ',sizeable)
+        #if verbose: print('predefined width:   ',given)
+        #if verbose: print('uncomputable width: ',unsizeable)
+        #if verbose: print('computable width:   ',sizeable)
+        #if verbose: print('minimums=%r' % (list(sorted(list(minimums.items()))),))
 
         # how much width is left:
         remaining = availWidth - (totalMinimum + totalDefined)
         if remaining > 0:
             # we have some room left; fill it.
-            definedPercentage = (totalDefined/availWidth)*100
+            definedPercentage = (totalDefined/float(availWidth))*100
             percentTotal += definedPercentage
             if numberUndefined and percentTotal < 100:
                 undefined = numberGreedyUndefined or numberUndefined
-                defaultWeight = (100-percentTotal)/undefined
+                defaultWeight = (100-percentTotal)/float(undefined)
                 percentTotal = 100
-                defaultDesired = (defaultWeight/percentTotal)*availWidth
+                defaultDesired = (defaultWeight/float(percentTotal))*availWidth
             else:
                 defaultWeight = defaultDesired = 1
             # we now calculate how wide each column wanted to be, and then
@@ -826,7 +833,7 @@ class Table(Flowable):
                 # column is (104/264), which, multiplied  by the desired
                 # width of 264, is 104: the amount assigned to the remaining
                 # column.
-                proportion = effectiveRemaining/totalDesired
+                proportion = effectiveRemaining/float(totalDesired)
                 # we sort the desired widths by difference between desired and
                 # and minimum values, a value called "disappointment" in the
                 # code.  This means that the columns with a bigger
@@ -841,7 +848,7 @@ class Table(Flowable):
                         totalDesired -= desired
                         effectiveRemaining -= minimum
                         if totalDesired:
-                            proportion = effectiveRemaining/totalDesired
+                            proportion = effectiveRemaining/float(totalDesired)
                     else:
                         finalSet.append((minimum, desired, colNo))
                 for minimum, desired, colNo in finalSet:
@@ -851,7 +858,7 @@ class Table(Flowable):
         else:
             for colNo, minimum in minimums.items():
                 W[colNo] = minimum
-        if verbose: print('new widths are:', W)
+        #if verbose: print('new widths are:', W)
         self._argW = self._colWidths = W
         return W
 
