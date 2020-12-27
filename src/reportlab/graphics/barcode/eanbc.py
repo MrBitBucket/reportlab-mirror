@@ -461,7 +461,7 @@ class Ean5BarcodeWidget(Ean13BarcodeWidget):
             if s[0] in '3456':
                 price = '$'
             elif s[0] in '01':
-                price = '\xc2\xa3'
+                price = asNative(b'\xc2\xa3')
 
             if price is None:
                 return
