@@ -16,7 +16,7 @@ from reportlab.graphics.shapes import _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, define
 from reportlab.graphics.widgetbase import Widget, PropHolder
 from reportlab.graphics.shapes import _baseGFontName, DirectDraw
 from reportlab.platypus import XPreformatted, Paragraph, Flowable
-from reportlab.lib.styles import ParagraphStyle
+from reportlab.lib.styles import ParagraphStyle, PropertySet
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER
 _ta2al = dict(start=TA_LEFT,end=TA_RIGHT,middle=TA_CENTER)
 
@@ -153,6 +153,7 @@ class Label(Widget):
         customDrawChanger = AttrMapValue(isNoneOrCallable,desc="An instance of CustomDrawChanger to modify the behavior at draw time", _advancedUsage=1),
         ddf = AttrMapValue(NoneOr(isSubclassOf(DirectDraw),'NoneOrDirectDraw'),desc="A DirectDrawFlowable instance", _advancedUsage=1),
         ddfKlass = AttrMapValue(NoneOr(isSubclassOf(Flowable),'NoneOrDirectDraw'),desc="A DirectDrawFlowable instance", _advancedUsage=1),
+        ddfStyle = AttrMapValue(NoneOr(isSubclassOf(PropertySet)),desc="A style for a ddfKlass or None", _advancedUsage=1),
         )
 
     def __init__(self,**kw):
@@ -187,6 +188,7 @@ class Label(Widget):
                 useAscentDescent = False,
                 ddf = DirectDrawFlowable,
                 ddfKlass = None,
+                ddfStyle = None,
                 )
 
     def setText(self, text):
@@ -288,12 +290,14 @@ class Label(Widget):
         else:
             if self.ddf is None:
                 raise RuntimeError('DirectDrawFlowable class is not available you need the rlextra package as well as reportlab')
-            sty = self._style = ParagraphStyle('xlabel-generated',
+            sty = dict(
+                    name='xlabel-generated',
                     fontName=self.fontName,
                     fontSize=self.fontSize,
                     fillColor=self.fillColor,
                     strokeColor=self.strokeColor,
                     )
+            sty = self._style =  (ddfStyle.clone if self.ddfStyle else ParagraphStyle)(**sty)
             self._getBaseLineRatio()
             if self.useAscentDescent:
                 sty.autoLeading = True
