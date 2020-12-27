@@ -23,7 +23,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pdfgeom, pathobject
 from reportlab.pdfgen.textobject import PDFTextObject, _PDFColorSetter
 from reportlab.lib.colors import black, _chooseEnforceColorSpace, Color, CMYKColor, toColor
-from reportlab.lib.utils import import_zlib, ImageReader, isSeq, isStr, isUnicode, _digester
+from reportlab.lib.utils import import_zlib, ImageReader, isSeq, isStr, isUnicode, _digester, asUnicode
 from reportlab.lib.rl_accel import fp_str, escapePDF
 from reportlab.lib.boxstuff import aspectRatioFix
 
@@ -1595,8 +1595,7 @@ class Canvas(_PDFColorSetter):
 
     def drawString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None):
         """Draws a string in the current text styles."""
-        if sys.version_info[0] == 3 and not isinstance(text, str):
-            text = text.decode('utf-8')
+        text = asUnicode(text)
         #we could inline this for speed if needed
         t = self.beginText(x, y, direction=direction)
         if mode is not None: t.setTextRenderMode(mode)

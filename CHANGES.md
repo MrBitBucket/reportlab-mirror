@@ -11,6 +11,15 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.5.57	 27/12/2020
+---------------------------
+	* added ddfStyle to Label
+	* allowed for embedded(and ordinary)Hyphenation to pre-empt splitting when embeddedHyphenation>=2
+	* fix extension escapePDF so it can handle unicode
+	* fix poundsign in Ean5BarcodeWidget
+	* Table can use __styledWrap__ for sizing
+	* test fixes so 3.9 and 2.7 produce same pdf
+
 CHANGES  3.5.56	 10/12/2020
 ---------------------------
 	* added .github action wheel.yml
