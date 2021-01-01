@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.5.58	 01/01/2021
+---------------------------
+	* Allow variant corners in Canvas.roundRect
+	* Allow tables to have rounded corners
+
 CHANGES  3.5.57	 27/12/2020
 ---------------------------
 	* added ddfStyle to Label

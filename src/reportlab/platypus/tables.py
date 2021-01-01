@@ -28,11 +28,13 @@ from reportlab import rl_config, xrange, ascii
 from reportlab.lib.styles import PropertySet, ParagraphStyle, _baseFontName
 from reportlab.lib import colors
 from reportlab.lib.utils import annotateException, IdentStr, flatten, isStr, asNative, strTypes
+from reportlab.lib.validators import isListOfNumbersOrNone
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.abag import ABag as CellFrame
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.doctemplate import Indenter, NullActionFlowable
 from reportlab.platypus.flowables import LIIndenter
+from collections import namedtuple
 
 LINECAPS={None: None, 'butt':0,'round':1,'projecting':2,'squared':2}
 LINEJOINS={None: None, 'miter':0, 'mitre':0, 'round':1,'bevel':2}
@@ -138,6 +140,41 @@ def _calc_pc(V,avail):
             R[j] = v
     return R
 
+def _calcBezierPoints(P, kind):
+    '''calculate all or half of a bezier curve
+    kind==0 all, 1=first half else second half''' 
+    if kind==0:
+        return P
+    else:
+        Q0 = (0.5*(P[0][0]+P[1][0]),0.5*(P[0][1]+P[1][1]))
+        Q1 = (0.5*(P[1][0]+P[2][0]),0.5*(P[1][1]+P[2][1]))
+        Q2 = (0.5*(P[2][0]+P[3][0]),0.5*(P[2][1]+P[3][1]))
+        R0 = (0.5*(Q0[0]+Q1[0]),0.5*(Q0[1]+Q1[1]))
+        R1 = (0.5*(Q1[0]+Q2[0]),0.5*(Q1[1]+Q2[1]))
+        S0 = (0.5*(R0[0]+R1[0]),0.5*(R0[1]+R1[1]))
+        return [P[0],Q0,R0,S0] if kind==1 else [S0,R1,Q2,P[3]]
+
+def _quadrantDef(xpos, ypos, corner, r, kind=0, direction='left-right', m=0.4472):
+    t = m*r
+    if xpos=='right' and ypos=='bottom': #bottom right
+        xhi,ylo = corner
+        P = [(xhi - r, ylo),(xhi-t, ylo), (xhi, ylo + t), (xhi, ylo + r)]
+    elif xpos=='right' and ypos=='top': #top right
+        xhi,yhi = corner
+        P = [(xhi, yhi - r),(xhi, yhi - t), (xhi - t, yhi), (xhi - r, yhi)]
+    elif xpos=='left' and ypos=='top': #top left
+        xlo,yhi = corner
+        P = [(xlo + r, yhi),(xlo + t, yhi), (xlo, yhi - t), (xlo, yhi - r)]
+    elif xpos=='left' and ypos=='bottom': #bottom left
+        xlo,ylo = corner
+        P = [(xlo, ylo + r),(xlo, ylo + t), (xlo + t, ylo), (xlo + r, ylo)]
+    else:
+        raise ValueError('Unknown quadrant position %s' % repr((xpos,ypos)))
+    if direction=='left-right' and P[0][0]>P[-1][0] or direction=='bottom-top' and P[0][1]>P[-1][1]:
+        P.reverse()
+    P = _calcBezierPoints(P, kind)
+    return P
+
 def _hLine(canvLine, scp, ecp, y, hBlocks, FUZZ=rl_config._FUZZ):
     '''
     Draw horizontal lines; do not draw through regions specified in hBlocks
@@ -208,11 +245,17 @@ def spanFixDim(V0,V,spanCons,lim=None,FUZZ=rl_config._FUZZ):
 class _ExpandedCellTuple(tuple):
     pass
 
+
+RoundingRectDef = namedtuple('RoundingRectDefs','x0 y0 w h x1 y1 ar SL')
+RoundingRectLine = namedtuple('RoundingRectLine','xs ys xe ye weight color cap dash join')
+
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None,
                 hAlign=None,vAlign=None, normalizedData=0, cellStyles=None, rowSplitRange=None,
-                spaceBefore=None,spaceAfter=None, longTableOptimize=None, minRowHeights=None):
+                spaceBefore=None,spaceAfter=None, longTableOptimize=None, minRowHeights=None,
+                cornerRadii=None, #or [topLeft, topRight, bottomLeft bottomRight]
+                ):
         self.ident = ident
         self.hAlign = hAlign or 'CENTER'
         self.vAlign = vAlign or 'MIDDLE'
@@ -294,6 +337,9 @@ class Table(Flowable):
         self.repeatCols = repeatCols
         self.splitByRow = splitByRow
 
+        if cornerRadii is not None:
+            self._setCornerRadii(cornerRadii)
+
         if style:
             self.setStyle(style)
 
@@ -310,6 +356,7 @@ class Table(Flowable):
             elif lmrh<nrows:
                 minRowHeights = minRowHeights+(nrows-lmrh)*minRowHeights.__class__((0,))
         self._minRowHeights = minRowHeights
+
 
     def __repr__(self):
         "incomplete, but better than nothing"
@@ -1098,6 +1145,9 @@ class Table(Flowable):
             assert len(cmd) == 10
 
             self._linecmds.append(tuple(cmd))
+        elif cmd[0]=="ROUNDEDCORNERS":
+            if not hasattr(self,"_cornerRadii"):
+                self._setCornerRadii(cmd[1])
         else:
             (op, (sc, sr), (ec, er)), values = cmd[:3] , cmd[3:]
             if sr in ('splitfirst','splitlast'):
@@ -1111,25 +1161,48 @@ class Table(Flowable):
 
     def _drawLines(self):
         ccap, cdash, cjoin = None, None, None
-        self.canv.saveState()
-        for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
-            if isinstance(sr,strTypes) and sr.startswith('split'): continue
-            if cap!=None and ccap!=cap:
-                self.canv.setLineCap(cap)
-                ccap = cap
-            if dash is None or dash == []:
-                if cdash is not None:
-                    self.canv.setDash()
-                    cdash = None
-            elif dash != cdash:
-                self.canv.setDash(dash)
-                cdash = dash
-            if join is not None and cjoin!=join:
-                self.canv.setLineJoin(join)
-                cjoin = join
-            sc, ec, sr, er = self.normCellRange(sc,ec,sr,er)
-            getattr(self,_LineOpMap.get(op, '_drawUnknown' ))( (sc, sr), (ec, er), weight, color, count, space)
-        self.canv.restoreState()
+        canv = self.canv
+        canv.saveState()
+
+        rrd = self._roundingRectDef
+        if rrd: #we are collection some lines
+            SL = rrd.SL
+            SL[:] = []  #empty saved lines list
+            ocanvline = canv.line
+            aSL = SL.append
+            def rcCanvLine(xs, ys, xe, ye):
+                if  (
+                    (xs==xe and (xs>=rrd.x1 or xs<=rrd.x0)) #vertical line that needs to be saved
+                    or
+                    (ys==ye and (ys>=rrd.y1 or ys<=rrd.y0)) #horizontal line that needs to be saved
+                    ):
+                    aSL(RoundingRectLine(xs,ys,xe,ye,weight,color,cap,dash,join))
+                else:
+                    ocanvline(xs,ys,xe,ye)
+            canv.line = rcCanvLine
+
+        try:
+            for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
+                if isinstance(sr,strTypes) and sr.startswith('split'): continue
+                if cap!=None and ccap!=cap:
+                    canv.setLineCap(cap)
+                    ccap = cap
+                if dash is None or dash == []:
+                    if cdash is not None:
+                        canv.setDash()
+                        cdash = None
+                elif dash != cdash:
+                    canv.setDash(dash)
+                    cdash = dash
+                if join is not None and cjoin!=join:
+                    canv.setLineJoin(join)
+                    cjoin = join
+                sc, ec, sr, er = self.normCellRange(sc,ec,sr,er)
+                getattr(self,_LineOpMap.get(op, '_drawUnknown' ))( (sc, sr), (ec, er), weight, color, count, space)
+        finally:
+            if rrd: 
+                canv.line = ocanvline
+        canv.restoreState()
         self._curcolor = None
 
     def _drawUnknown(self,  start, end, weight, color, count, space):
@@ -1313,12 +1386,14 @@ class Table(Flowable):
             splitH = self._rowHeights
         else:
             splitH = self._argH
+        cornerRadii = getattr(self,'_cornerRadii',None)
         R0 = self.__class__( data[:n], colWidths=self._colWidths, rowHeights=splitH[:n],
                 repeatRows=repeatRows, repeatCols=repeatCols,
                 splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[:n],
                 ident=ident,
                 spaceBefore=getattr(self,'spaceBefore',None),
-                longTableOptimize=lto)
+                longTableOptimize=lto,
+                cornerRadii=cornerRadii[:2] if cornerRadii else None)
 
         nrows = self._nrows
         ncols = self._ncols
@@ -1399,6 +1474,7 @@ class Table(Flowable):
                     ident=ident,
                     spaceAfter=getattr(self,'spaceAfter',None),
                     longTableOptimize=lto,
+                    cornerRadii = cornerRadii,
                     )
             R1._cr_1_1(n,nrows,repeatRows,A) #linecommands
             R1._cr_1_1(n,nrows,repeatRows,self._bkgrndcmds,_srflMode=True)
@@ -1412,6 +1488,7 @@ class Table(Flowable):
                     ident=ident,
                     spaceAfter=getattr(self,'spaceAfter',None),
                     longTableOptimize=lto,
+                    cornerRadii = ([0,0] + cornerRadii[2:]) if cornerRadii else None,
                     )
             R1._cr_1_0(n,A)
             R1._cr_1_0(n,self._bkgrndcmds,_srflMode=True)
@@ -1470,7 +1547,117 @@ class Table(Flowable):
         else:
             raise NotImplementedError
 
+    def _makeRoundedCornersClip(self, FUZZ=rl_config._FUZZ):
+        self._roundingRectDef = None
+        cornerRadii = getattr(self,'_cornerRadii',None)
+        if not cornerRadii or max(cornerRadii)<=FUZZ: return
+        nrows = self._nrows
+        ncols = self._ncols
+        ar = [min(self._rowHeights[i],self._colWidths[j],cornerRadii[k]) for 
+                k,(i,j) in enumerate((
+                    (0,0),
+                    (0,ncols-1),
+                    (nrows-1,0),
+                    (nrows-1, ncols-1),
+                    ))]
+        rp = self._rowpositions
+        cp = self._colpositions
+
+        x0 = cp[0]
+        y0 = rp[nrows]
+        x1 = cp[ncols]
+        y1 = rp[0]
+        w = x1 - x0
+        h = y1 - y0
+        self._roundingRectDef = RoundingRectDef(x0, y0, w, h, x1, y1, ar, [])
+        P = self.canv.beginPath()
+        P.roundRect(x0, y0, w, h, ar)
+        c = self.canv
+        c.addLiteral('%begin table rect clip')
+        c.clipPath(P,stroke=0)
+        c.addLiteral('%end table rect clip')
+
+    def _restoreRoundingObscuredLines(self):
+        x0, y0, w, h, x1, y1, ar, SL = self._roundingRectDef
+        if not SL: return
+        canv = self.canv
+        canv.saveState()
+        ccap, cdash, cjoin = None, None, None
+        line = canv.line
+        cornerRadii = self._cornerRadii
+        for (xs,ys,xe,ye,weight,color,cap,dash,join) in SL:
+            if cap!=None and ccap!=cap:
+                canv.setLineCap(cap)
+                ccap = cap
+            if dash is None or dash == []:
+                if cdash is not None:
+                    canv.setDash()
+                    cdash = None
+            elif dash != cdash:
+                canv.setDash(dash)
+                cdash = dash
+            if join is not None and cjoin!=join:
+                canv.setLineJoin(join)
+                cjoin = join
+            self._prepLine(weight, color)
+            if ys==ye:
+                #horizontal line
+                if ys>y1 or ys<y0:
+                    line(xs,ys,xe,ye)   #simple line that's outside the clip
+                    continue
+                #which corners are involved
+                if ys==y0:
+                    ypos = 'bottom'
+                    r0 = ar[2]
+                    r1 = ar[3]
+                else: #ys==y1
+                    ypos = 'top'
+                    r0 = ar[0]
+                    r1 = ar[1]
+                if xs>=x0+r0 and xe<=x1-r1:
+                    line(xs,ys,xe,ye)   #simple line with no rounding
+                    continue
+                #we have some rounding so we must use a path
+                c0 = _quadrantDef('left',ypos,(xs,ys), r0, kind=2, direction='left-right') if xs<x0+r0 else None
+                c1 = _quadrantDef('right',ypos,(xe,ye), r1, kind=1, direction='left-right') if xe>x1-r1 else None
+            else:
+                #vertical line
+                if xs>x1 or xs<x0:
+                    line(xs,ys,xe,ye)   #simple line that's outside the clip
+                    continue
+                #which corners are involved
+                if xs==x0:
+                    xpos = 'left'
+                    r0 = ar[2]
+                    r1 = ar[0]
+                else: #xs==x1
+                    xpos = 'right'
+                    r0 = ar[3]
+                    r1 = ar[1]
+                if ys>=y0+r0 and ye<=y1-r1:
+                    line(xs,ys,xe,ye)   #simple line with no rounding
+                    continue
+                #we have some rounding so we must use a path
+                c0 = _quadrantDef(xpos,'bottom',(xs,ys), r0, kind=2, direction='bottom-top') if ys<y0+r0 else None
+                c1 = _quadrantDef(xpos,'top',(xe,ye), r1, kind=1, direction='bottom-top') if ye>y1-r1 else None
+            P = canv.beginPath()
+            if c0:
+                P.moveTo(*c0[0])
+                P.curveTo(c0[1][0],c0[1][1],c0[2][0],c0[2][1], c0[3][0],c0[3][1])
+            else:
+                P.moveTo(xs,ys)
+            if not c1:
+                P.lineTo(xe,ye)
+            else:
+                P.lineTo(*c1[0])
+                P.curveTo(c1[1][0],c1[1][1],c1[2][0],c1[2][1], c1[3][0],c1[3][1])
+            canv.drawPath(P, stroke=1, fill=0)
+        canv.restoreState()
+
     def draw(self):
+        c = self.canv
+        c.saveState()
+        self._makeRoundedCornersClip()
         self._curweight = self._curcolor = self._curcellstyle = None
         self._drawBkgrnd()
         if not self._spanCmds:
@@ -1490,6 +1677,9 @@ class Table(Flowable):
                         cellstyle = self._cellStyles[rowNo][colNo]
                         self._drawCell(cellval, cellstyle, (x, y), (width, height))
         self._drawLines()
+        c.restoreState()
+        if self._roundingRectDef:
+            self._restoreRoundingObscuredLines()
 
     def _drawBkgrnd(self):
         nrows = self._nrows
@@ -1655,6 +1845,12 @@ class Table(Flowable):
         if cellstyle.destination:
             #external hyperlink
             self.canv.linkRect("", cellstyle.destination, Rect=(colpos, rowpos, colpos + colwidth, rowpos + rowheight), relative=1)
+
+    def _setCornerRadii(self, cornerRadii):
+        if isListOfNumbersOrNone(cornerRadii):
+            self._cornerRadii = None if not cornerRadii else list(cornerRadii) + (max(4-len(cornerRadii),0)*[0])
+        else:
+            raise ValueError('cornerRadii should be None or a list/tuple of numeric radii')
 
 _LineOpMap = {  'GRID':'_drawGrid',
                 'BOX':'_drawBox',

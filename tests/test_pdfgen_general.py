@@ -463,6 +463,12 @@ cost to performance.""")
     t.textLine('canvas.rect(x, y, width, height) - x,y is lower left')
 
     c.roundRect(inch,6.25*inch,2*inch,0.6*inch,0.1*inch)
+    c.saveState()
+    c.setStrokeColor(red)
+    c.roundRect(inch*1.1,6.35*inch,1.8*inch,0.4*inch,[0.1*inch,0,0.09*inch,0])
+    c.setStrokeColor(green)
+    c.roundRect(inch*1.15,6.40*inch,1.7*inch,0.3*inch,[0,0.1*inch,0,0.09*inch])
+    c.restoreState()
     t.setTextOrigin(4*inch, 6.55*inch)
     t.textLine('canvas.roundRect(x,y,width,height,radius)')
 
