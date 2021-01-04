@@ -57,7 +57,7 @@ heading2('$Table$ User Methods')
 disc("""These are the main methods which are of interest to the client programmer.""")
 
 heading4("""$Table(data, colWidths=None, rowHeights=None, style=None, splitByRow=1,
-repeatRows=0, repeatCols=0, rowSplitRange=None, spaceBefore=None, spaceAfter=None)$""")
+repeatRows=0, repeatCols=0, rowSplitRange=None, spaceBefore=None, spaceAfter=None, cornerRadii=None)$""")
 
 disc("""The $data$ argument is a sequence of sequences of cell values each of which
 should be convertible to a string value using the $str$ function or should be a Flowable instance (such as a $Paragraph$) or a list (or tuple) of such instances.
@@ -91,8 +91,11 @@ disc("""The $repeatRows$ argument specifies the number or a tuple of leading row
 that should be repeated when the $Table$ is asked to split itself. If it is a tuple it should specify which of the leading rows should be repeated; this allows
 for cases where the first appearance of the table hsa more leading rows than later split parts.
 The $repeatCols$ argument is currently ignored as a $Table$ cannot be split by column.""")
-disc("""The $spaceBefore$ &amp; $spaceAfter$ arguments may be used to put extra space before or after the table when renedered in a $platypus$ story.""")
 disc("""The $rowSplitRange$ argument may be used to control the splitting of the table to a subset of its rows; that can be to prevent splitting too close to the beginning or end of the table.""")
+disc("""The $spaceBefore$ &amp; $spaceAfter$ arguments may be used to put extra space before or after the table when renedered in a $platypus$ story.""")
+disc("""The $style$ argument can be an initial style for the table.""")
+disc("""The $cornerRadii$ argument can be a list of the top left, top right, bottom left and bottom right radii.
+A positive non-zero radius indicates that the corner should be rounded. This argument will override any $ROUNDEDCORNERS$ command in the argument $style$ list (ie it has pririty).""")
 heading4('$Table.setStyle(tblStyle)$')
 disc("""
 This method applies a particular instance of class $TableStyle$ (discussed below)
@@ -339,6 +342,17 @@ eg("""
 NOSPLIT, (sc,sr), (ec,er)
 """)
 disc("""demands that the cells in columns $sc$ - $ec$ and rows $sr$ - $er$ may not be split.""")
+
+eg("")
+eg("")
+disc("""To control $Table$ corner rounding the $ROUNDEDCORNERS$ command may be used
+The style specification
+""")
+eg("""
+ROUNDEDCORNERS, [tl, tr, bl, br]
+""")
+disc("""specifies the radii of the top left, top right, bottom left and bottom right. A value of $0$ indicates a square corner. replace the whole array by $None$ to turn off all rounding.
+<br/>Borders at a rounded corner are curved by an octant.""")
 
 heading3("""Special $TableStyle$ Indeces""")
 disc("""In any style command the first row index may be set to one of the special strings

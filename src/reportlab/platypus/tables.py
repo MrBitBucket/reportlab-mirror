@@ -27,7 +27,7 @@ from reportlab.platypus.flowables import Flowable, Preformatted
 from reportlab import rl_config, xrange, ascii
 from reportlab.lib.styles import PropertySet, ParagraphStyle, _baseFontName
 from reportlab.lib import colors
-from reportlab.lib.utils import annotateException, IdentStr, flatten, isStr, asNative, strTypes
+from reportlab.lib.utils import annotateException, IdentStr, flatten, isStr, asNative, strTypes, __UNSET__
 from reportlab.lib.validators import isListOfNumbersOrNone
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.abag import ABag as CellFrame
@@ -254,7 +254,7 @@ class Table(Flowable):
                 repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None,
                 hAlign=None,vAlign=None, normalizedData=0, cellStyles=None, rowSplitRange=None,
                 spaceBefore=None,spaceAfter=None, longTableOptimize=None, minRowHeights=None,
-                cornerRadii=None, #or [topLeft, topRight, bottomLeft bottomRight]
+                cornerRadii=__UNSET__, #or [topLeft, topRight, bottomLeft bottomRight]
                 ):
         self.ident = ident
         self.hAlign = hAlign or 'CENTER'
@@ -337,11 +337,11 @@ class Table(Flowable):
         self.repeatCols = repeatCols
         self.splitByRow = splitByRow
 
-        if cornerRadii is not None:
-            self._setCornerRadii(cornerRadii)
-
         if style:
             self.setStyle(style)
+
+        if cornerRadii is not __UNSET__:    #instance argument overrides
+            self._setCornerRadii(cornerRadii)
 
         self._rowSplitRange = rowSplitRange
         if spaceBefore is not None:
@@ -1146,8 +1146,7 @@ class Table(Flowable):
 
             self._linecmds.append(tuple(cmd))
         elif cmd[0]=="ROUNDEDCORNERS":
-            if not hasattr(self,"_cornerRadii"):
-                self._setCornerRadii(cmd[1])
+            self._setCornerRadii(cmd[1])
         else:
             (op, (sc, sr), (ec, er)), values = cmd[:3] , cmd[3:]
             if sr in ('splitfirst','splitlast'):
@@ -1582,7 +1581,7 @@ class Table(Flowable):
         if not SL: return
         canv = self.canv
         canv.saveState()
-        ccap, cdash, cjoin = None, None, None
+        ccap = cdash = cjoin = self._curweight = self._curcolor = None
         line = canv.line
         cornerRadii = self._cornerRadii
         for (xs,ys,xe,ye,weight,color,cap,dash,join) in SL:

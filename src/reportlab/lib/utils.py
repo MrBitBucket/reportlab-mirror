@@ -16,6 +16,16 @@ from reportlab.lib.logger import warnOnce
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
 from . rl_safe_eval import rl_safe_exec, rl_safe_eval, safer_globals
 
+class __UNSET__(object):
+    @staticmethod
+    def __bool__():
+        return False
+    @staticmethod
+    def __str__():
+        return '__UNSET__'
+    __repr__ = __str__
+__UNSET__ = __UNSET__()
+
 try:
     import cPickle as pickle
 except ImportError:
