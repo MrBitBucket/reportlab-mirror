@@ -88,12 +88,13 @@ class SubColProperty(PropHolder):
         align = AttrMapValue(OneOf('left','right','center','centre','numeric'),desc='alignment in subCol'),
         fontName = AttrMapValue(isString, desc="Font name of the strings"),
         fontSize = AttrMapValue(isNumber, desc="Font size of the strings"),
-        leading = AttrMapValue(isNumber, desc="leading for the strings"),
+        leading = AttrMapValue(isNumberOrNone, desc="leading for the strings"),
         fillColor = AttrMapValue(isColorOrNone, desc="fontColor"),
         underlines = AttrMapValue(EitherOr((NoneOr(isInstanceOf(Line)),SequenceOf(isInstanceOf(Line),emptyOK=0,lo=0,hi=0x7fffffff))), desc="underline definitions"),
         overlines = AttrMapValue(EitherOr((NoneOr(isInstanceOf(Line)),SequenceOf(isInstanceOf(Line),emptyOK=0,lo=0,hi=0x7fffffff))), desc="overline definitions"),
         dx = AttrMapValue(isNumber, desc="x offset from default position"),
         dy = AttrMapValue(isNumber, desc="y offset from default position"),
+        vAlign = AttrMapValue(OneOf('top','bottom','middle'),desc='vertical alignment in the row'),
         )
 
 class LegendCallout:
@@ -148,6 +149,7 @@ class Legend(Widget):
         colorNamePairs = AttrMapValue(None, desc="List of color/name tuples (color can also be widget)"),
         fontName = AttrMapValue(isString, desc="Font name of the strings"),
         fontSize = AttrMapValue(isNumber, desc="Font size of the strings"),
+        leading = AttrMapValue(isNumberOrNone, desc="text leading"),
         fillColor = AttrMapValue(isColorOrNone, desc="swatches filling color"),
         strokeColor = AttrMapValue(isColorOrNone, desc="Border color of the swatches"),
         strokeWidth = AttrMapValue(isNumber, desc="Width of the border color of the swatches"),
@@ -205,6 +207,7 @@ class Legend(Widget):
         # Font name and size of the labels.
         self.fontName = STATE_DEFAULTS['fontName']
         self.fontSize = STATE_DEFAULTS['fontSize']
+        self.leading = None #will be used as 1.2*fontSize
         self.fillColor = STATE_DEFAULTS['fillColor']
         self.strokeColor = STATE_DEFAULTS['strokeColor']
         self.strokeWidth = STATE_DEFAULTS['strokeWidth']
@@ -227,6 +230,8 @@ class Legend(Widget):
         sc.dx = sc.dy = sc.minWidth = 0
         sc.align = 'right'
         sc[0].align = 'left' 
+        sc.vAlign = 'top'   #that's current
+        sc.leading = None
 
     def _getChartStyleName(self,chart):
         for a in 'lines', 'bars', 'slices', 'strands':
@@ -265,7 +270,8 @@ class Legend(Widget):
         yGap = self.yGap
         thisy = upperlefty = self.y - dy
         fontSize = self.fontSize
-        ascent=getFont(self.fontName).face.ascent/1000.
+        fontName = self.fontName
+        ascent=getFont(fontName).face.ascent/1000.
         if ascent==0: ascent=0.718 # default (from helvetica)
         ascent *= fontSize
         leading = fontSize*1.2
@@ -284,7 +290,7 @@ class Legend(Widget):
             if count==lim:
                 count = 0
                 thisy = upperlefty
-                columnCount = columnCount + 1
+                columnCount += 1
             else:
                 thisy = newy
                 count = count+1
@@ -405,6 +411,7 @@ class Legend(Widget):
                 raise ValueError("bad alignment")
             if not isSeq(name):
                 T = [T]
+            lineCount = _getLineCount(name)
             yd = y
             for k,lines in enumerate(T):
                 y = y0
@@ -418,13 +425,21 @@ class Legend(Widget):
                 fN = getattr(sc,'fontName',fontName)
                 fS = getattr(sc,'fontSize',fontSize)
                 fC = getattr(sc,'fillColor',fillColor)
-                fL = getattr(sc,'leading',1.2*fontSize)
+                fL = sc.leading or 1.2*fontSize
                 if fN==fontName:
                     fA = (ascent*fS)/fontSize
                 else:
                     fA = getFont(fontName).face.ascent/1000.
                     if fA==0: fA=0.718
                     fA *= fS
+
+                vA = sc.vAlign
+                if vA=='top':
+                    vAdy = 0
+                else:
+                    vAdy = -fL * (lineCount - len(lines))
+                    if vA=='middle': vAdy *= 0.5
+
                 if anchor=='left':
                     anchor = 'start'
                     xoffs = x1
@@ -437,7 +452,7 @@ class Legend(Widget):
                     anchor = 'middle'
                     xoffs = 0.5*(x1+x2)
                 for t in lines:
-                    aS(String(xoffs+scdx,y+scdy,t,fontName=fN,fontSize=fS,fillColor=fC, textAnchor = anchor))
+                    aS(String(xoffs+scdx,y+scdy+vAdy,t,fontName=fN,fontSize=fS,fillColor=fC, textAnchor = anchor))
                     y -= fL
                 yd = min(yd,y)
                 y += fL
