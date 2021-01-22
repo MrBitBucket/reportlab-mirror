@@ -1054,7 +1054,7 @@ class Path(SolidShape):
         fillMode = AttrMapValue(OneOf(FILL_EVEN_ODD,FILL_NON_ZERO)),
         )
 
-    def __init__(self, points=None, operators=None, isClipPath=0, autoclose=None, fillMode=None, **kw):
+    def __init__(self, points=None, operators=None, isClipPath=0, autoclose=None, fillMode=FILL_EVEN_ODD, **kw):
         SolidShape.__init__(self, kw)
         if points is None:
             points = []
@@ -1065,6 +1065,7 @@ class Path(SolidShape):
         self.operators = operators
         self.isClipPath = isClipPath
         self.autoclose=autoclose
+        self.fillMode = fillMode
 
     def copy(self):
         new = self.__class__(self.points[:], self.operators[:])
@@ -1358,7 +1359,7 @@ class Wedge(SolidShape):
                 a(centerx+radius1*c)
                 a(centery+yradius1*s)
         if self.annular:
-            P = Path(fillMode=getattr(self,'fillMode',None))
+            P = Path(fillMode=getattr(self,'fillMode', FILL_EVEN_ODD))
             P.moveTo(points[0],points[1])
             for x in xrange(2,2*n,2):
                 P.lineTo(points[x],points[x+1])
@@ -1546,6 +1547,7 @@ class String(Shape):
         fillColor = AttrMapValue(isColorOrNone,desc="color of the font"),
         textAnchor = AttrMapValue(OneOf('start','middle','end','numeric'),desc="treat (x,y) as one of the options below."),
         encoding = AttrMapValue(isString),
+        textRenderMode = AttrMapValue(OneOf(0,1,2,3,4,5,6,7),desc="Control whether text is filled/stroked etc etc"),
         )
     encoding = 'utf8'
 

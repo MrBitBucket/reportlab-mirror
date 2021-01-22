@@ -11,6 +11,17 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.5.60	 22/01/2021
+---------------------------
+	* Allow legend column control of vertical alignment
+	* Allow renderTextMode attribute in reportlab.graphics.shapes.String
+	* Allow renderTextMode drawString handling in renderPDF/PM/PS/SVG
+	* Some fixes to fillMode handling
+
+CHANGES  3.5.59	 04/01/2021
+---------------------------
+	* Minor changes to table rounded corners; some documentation updates
+
 CHANGES  3.5.58	 01/01/2021
 ---------------------------
 	* Allow variant corners in Canvas.roundRect

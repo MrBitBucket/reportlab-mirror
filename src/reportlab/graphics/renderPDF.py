@@ -155,7 +155,11 @@ class _PDFRenderer(Renderer):
                             )
 
     def drawString(self, stringObj):
-        if self._fill:
+        textRenderMode = getattr(stringObj,'textRenderMode',0)
+        needFill = textRenderMode in (0,2,4,6) 
+        needStroke = textRenderMode in (1,2,5,6) 
+
+        if (self._fill and needFill) or (self._stroke and needStroke):
             S = self._tracker.getState()
             text_anchor, x, y, text, enc = S['textAnchor'], stringObj.x,stringObj.y,stringObj.text, stringObj.encoding
             if not text_anchor in ['start','inherited']:
@@ -169,9 +173,7 @@ class _PDFRenderer(Renderer):
                     x -= numericXShift(text_anchor,text,textLen,font,font_size,enc)
                 else:
                     raise ValueError('bad value for textAnchor '+str(text_anchor))
-            t = self._canvas.beginText(x,y)
-            t.textLine(text)
-            self._canvas.drawText(t)
+            self._canvas.drawString(x, y, text, mode=textRenderMode or None)
 
     def drawPath(self, path):
         from reportlab.graphics.shapes import _renderPath

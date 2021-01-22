@@ -29,9 +29,11 @@ sin = math.sin
 cos = math.cos
 pi = math.pi
 
-AREA_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity fill fill-opacity stroke-dasharray stroke-dashoffset id'.split()
+AREA_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity fill fill-opacity stroke-dasharray stroke-dashoffset fill-rule id'.split()
 LINE_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity stroke-dasharray stroke-dashoffset id'.split()
 TEXT_STYLES = 'font-family font-weight font-style font-variant font-size id'.split()
+EXTRA_STROKE_STYLES = 'stroke-width stroke-linecap stroke stroke-opacity stroke-dasharray stroke-dashoffset'.split()
+EXTRA_FILL_STYLES = 'fill fill-opacity'.split()
 
 ### top-level user function ###
 def drawToString(d, showBoundary=rl_config.showBoundary,**kwds):
@@ -142,6 +144,9 @@ _fillRuleMap = {
         'evenodd': 'evenodd',
         }
 
+def py_fp_str(*args):
+    return ' '.join((('%f' % a).rstrip('0').rstrip('.') for a in args))
+
 ### classes ###
 class SVGCanvas:
     def __init__(self, size=(300,300), encoding='utf-8', verbose=0, bom=False, **kwds):
@@ -173,7 +178,7 @@ class SVGCanvas:
         if kwds.pop('use_fp_str',False):
             self.fp_str = fp_str
         else:
-            self.fp_str = lambda *args: (' '.join(len(args)*['%f'])) % args
+            self.fp_str = py_fp_str
         self.cfp_str = lambda *args: self.fp_str(*args).replace(' ',',')
 
         implementation = getDOMImplementation('minidom')
@@ -325,7 +330,7 @@ class SVGCanvas:
     def _fillAndStroke(self, code, clip=0, link_info=None,styles=AREA_STYLES,fillMode=None):
         xtra = {}
         if fillMode:
-            xtra['fill-rule'] = _fillRuleName(fillMode)
+            xtra['fill-rule'] = _fillRuleMap[fillMode]
         path = transformNode(self.doc, "path",
             d=self.path, style=self._formatStyle(styles),
             )
@@ -454,16 +459,38 @@ class SVGCanvas:
 
         self.currGroup.appendChild(rect)
 
-    def drawString(self, s, x, y, angle=0, link_info=None,**_svgAttrs):
+    def drawString(self, s, x, y, angle=0, link_info=None, text_anchor='left', textRenderMode=0, **_svgAttrs):
+        if textRenderMode==3: return    #invisible
         s = asNative(s)
         if self.verbose: print("+++ SVGCanvas.drawString")
+        needFill = textRenderMode==0 or textRenderMode==2 or textRenderMode==4 or textRenderMode==6
+        needStroke = textRenderMode==1 or textRenderMode==2 or textRenderMode==5 or textRenderMode==6
 
-        if self._fillColor != None:
+        if (self._fillColor!=None and needFill) or (self._strokeColor!=None and needStroke):
+            if not text_anchor in ['start', 'inherited', 'left']:
+                textLen = stringWidth(s,self._font,self._fontSize)
+                if text_anchor=='end':
+                    x -= textLen
+                elif text_anchor=='middle':
+                    x -= textLen/2.
+                elif text_anchor=='numeric':
+                    x -= numericXShift(text_anchor,s,textLen,self._font,self._fontSize)
+                else:
+                    raise ValueError('bad value for text_anchor ' + str(text_anchor))
             s = self._escape(s)
             st = self._formatStyle(TEXT_STYLES)
             if angle != 0:
                st = st + " rotate(%s);" % self.fp_str(angle, x, y)
-            st = st + " fill: %s;" % self.style['fill']
+            if needFill:
+                st += self._formatStyle(EXTRA_FILL_STYLES)
+            else:
+                st += " fill:none;"
+            if needStroke:
+                st += self._formatStyle(EXTRA_STROKE_STYLES)
+            else:
+                st += " stroke:none;"
+            #if textRenderMode>=4:
+            #   _gstate_clipPathSetOrAddself, -1, 1, 0  /*we are adding*/
             text = transformNode(self.doc, "text",
                 x=x, y=y, style=st,
                 transform="translate(0,%d) scale(1,-1)" % (2*y),
@@ -477,24 +504,17 @@ class SVGCanvas:
     
             self.currGroup.appendChild(text)
 
-    def drawCentredString(self, s, x, y, angle=0, text_anchor='middle', link_info=None):
+    def drawCentredString(self, s, x, y, angle=0, text_anchor='middle',
+            link_info=None, textRenderMode=0, **_svgAttrs):
         if self.verbose: print("+++ SVGCanvas.drawCentredString")
+        self.drawString(s,x,y,angle=angle, link_info=link_info, text_anchor=text_anchor,
+                textRenderMode=textRenderMode, **_svgAttrs)
 
-        if self._fillColor != None:
-            if not text_anchor in ['start', 'inherited']:
-                textLen = stringWidth(s,self._font,self._fontSize)
-                if text_anchor=='end':
-                    x -= textLen
-                elif text_anchor=='middle':
-                    x -= textLen/2.
-                elif text_anchor=='numeric':
-                    x -= numericXShift(text_anchor,s,textLen,self._font,self._fontSize)
-                else:
-                    raise ValueError('bad value for text_anchor ' + str(text_anchor))
-        self.drawString(s,x,y,angle=angle, link_info=link_info)
-
-    def drawRightString(self, text, x, y, angle=0, link_info=None):
-        self.drawCentredString(text,x,y,angle=angle,text_anchor='end', link_info=link_info)
+    def drawRightString(self, text, x, y, angle=0,text_anchor='end',
+            link_info=None, textRenderMode=0, **_svgAttrs):
+        if self.verbose: print("+++ SVGCanvas.drawRightString")
+        self.drawString(text,x,y,angle=angle, link_info=link_info, text_anchor=text_anchor,
+                textRenderMode=textRenderMode, **_svgAttrs)
 
     def comment(self, data):
         "Add a comment."
@@ -790,21 +810,11 @@ class _SVGRenderer(Renderer):
                     link_info=link_info, **svgAttrs)
 
     def drawString(self, stringObj):
-        if self._canvas._fillColor:
-            S = self._tracker.getState()
-            text_anchor, x, y, text = S['textAnchor'], stringObj.x, stringObj.y, stringObj.text
-            if not text_anchor in ('start', 'inherited'):
-                font, fontSize = S['fontName'], S['fontSize']
-                textLen = stringWidth(text, font,fontSize)
-                if text_anchor=='end':
-                    x -= textLen
-                elif text_anchor=='middle':
-                    x -= textLen/2
-                elif text_anchor=='numeric':
-                    x -= numericXShift(text_anchor,text,textLen,font,fontSize)
-                else:
-                    raise ValueError('bad value for text_anchor ' + str(text_anchor))
-            self._canvas.drawString(text,x,y,link_info=self._get_link_info_dict(stringObj),**getattr(stringObj,'_svgAttrs',{}))
+        S = self._tracker.getState()
+        text_anchor, x, y, text = S['textAnchor'], stringObj.x, stringObj.y, stringObj.text
+        self._canvas.drawString(text,x,y,link_info=self._get_link_info_dict(stringObj),
+                text_anchor=text_anchor, textRenderMode=getattr(stringObj,'textRenderMode',0),
+                    **getattr(stringObj,'_svgAttrs',{}))
 
     def drawLine(self, line):
         if self._canvas._strokeColor:
@@ -845,13 +855,13 @@ class _SVGRenderer(Renderer):
     def drawPolygon(self, p):
         self._canvas.polygon(_pointsFromList(p.points), closed=1, link_info=self._get_link_info_dict(p))
 
-    def drawPath(self, path, fillMode=None):
+    def drawPath(self, path, fillMode=FILL_EVEN_ODD):
         # print "### drawPath", path.points
         from reportlab.graphics.shapes import _renderPath
         c = self._canvas
         drawFuncs = (c.moveTo, c.lineTo, c.curveTo, c.closePath)
         if fillMode is None:
-            fillMode = getattr(path,'fillMode',None)
+            fillMode = getattr(path,'fillMode',FILL_EVEN_ODD)
         link_info = self._get_link_info_dict(path)
         autoclose = getattr(path,'autoclose','')
         def rP(**kwds):

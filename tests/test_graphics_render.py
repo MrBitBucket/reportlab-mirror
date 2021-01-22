@@ -11,7 +11,7 @@ try:
     from reportlab.graphics import _renderPM
 except:
     _renderPM = None
-from reportlab.graphics.shapes import _DrawingEditorMixin, Drawing, Group, Rect, Path, String, Polygon, Hatching, Line
+from reportlab.graphics.shapes import _DrawingEditorMixin, Drawing, Group, Rect, Path, String, Polygon, Hatching, Line, definePath
 from reportlab.lib.colors import Color, CMYKColor, PCMYKColor, toColor
 
 class FillModeDrawing(_DrawingEditorMixin,Drawing):
@@ -118,6 +118,19 @@ class HatchDrawing(_DrawingEditorMixin,Drawing):
         self.height       = 110
         self._add(self,Line(0,105,110,105,strokeWidth=0.5,strokeColor=toColor('blue')),name=None,validate=None,desc=None)
 
+class TextRenderModeDrawing(_DrawingEditorMixin,Drawing):
+    def __init__(self,width=400,height=200,*args,**kw):
+        Drawing.__init__(self,width,height,*args,**kw)
+        smallFontSize = float(os.environ.get('smallFontSize','40'))
+        self._add(self,String(65,10,'text0',fontSize=80,fontName='Helvetica',fillColor=toColor('blue'),strokeColor=toColor('red'),strokeWidth=1.5,textRenderMode=0),name='S0',validate=None,desc=None)
+        self._add(self,String(405,20,'text1',fontSize=80,fontName='Helvetica',fillColor=toColor('blue'),strokeColor=toColor('red'),strokeWidth=1.5,textRenderMode=1, textAnchor='end'),name='S1',validate=None,desc=None)
+        self._add(self,String(190,90,'text2',fontSize=80,fontName='Helvetica',fillColor=toColor('blue'),strokeColor=toColor('red'),strokeWidth=1.5,textRenderMode=2),name='S2',validate=None,desc=None)
+        self._add(self,String(240,150,'text3',fontSize=smallFontSize,fontName='Helvetica',fillColor=toColor('green'),strokeColor=toColor('magenta'),strokeWidth=0.5,textRenderMode=2),name='S3',validate=None,desc=None)
+        self._add(self,String(140,150,'text4',fontSize=smallFontSize,fontName='Helvetica',fillColor=toColor('green'),strokeColor=toColor('magenta'),strokeWidth=0.5,textRenderMode=1),name='S4',validate=None,desc=None)
+        self._add(self,String(70,120,'text5',fontSize=smallFontSize,fontName='Helvetica',fillColor=toColor('green'),strokeColor=toColor('magenta'),strokeWidth=0.5,textRenderMode=0),name='S5',validate=None,desc=None)
+        self._add(self,Line(40,40,70,70,strokeWidth=0.5,strokeColor=toColor('green')),name='L0',validate=None,desc=None)
+        self._add(self,definePath([('moveTo',80,80),('lineTo',110,110),('lineTo',80,110),'closePath'],fillColor=None,strokeWidth=2,strokeColor=toColor('yellow')),name='P0',validate=None,desc=None)
+
 class RenderTestCase(unittest.TestCase):
     "Test renderPS classes."
 
@@ -154,6 +167,7 @@ class RenderTestCase(unittest.TestCase):
         for ac in (None,'pdf','svg'):
             AutoCloseDrawing(autoclose=ac).save(formats=formats,outDir=self.outDir,fnRoot='autoclose-'+(ac or 'none'))
         HatchDrawing().save(formats=formats,outDir=self.outDir,fnRoot='hatch')
+        TextRenderModeDrawing().save(formats=formats,outDir=self.outDir,fnRoot='textmode')
 
     @unittest.skipIf(not _renderPM,'no _renderPM')
     def testSVGLibIssues(self):

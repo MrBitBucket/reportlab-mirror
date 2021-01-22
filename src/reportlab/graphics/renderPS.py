@@ -242,7 +242,35 @@ class PSCanvas:
         except:
             raise ValueError("cannot escape %s" % ascii(s))
 
-    def _issueT1String(self,fontObj,x,y,s):
+    def _textOut(self, x, y, s, textRenderMode=0):
+        if textRenderMode==3: return
+        xy = fp_str(x,y)
+        s = self._escape(s)
+
+        if textRenderMode==0: #the standard case
+            self.setColor(self._fillColor)
+            self.code_append('%s m (%s) show ' % (xy,s))
+            return
+
+        fill = textRenderMode==0 or textRenderMode==2 or textRenderMode==4 or textRenderMode==6
+        stroke = textRenderMode==1 or textRenderMode==2 or textRenderMode==5 or textRenderMode==6
+        addToClip = textRenderMode>=4
+        if fill and stroke:
+            if self._fillColor is None:
+                op = ''
+            else:
+                op = 'fill '
+                self.setColor(self._fillColor)
+            self.code_append('%s m (%s) true charpath gsave %s' % (xy,s,op))
+            self.code_append('grestore ')
+            if self._strokeColor is not None:
+                self.setColor(self._strokeColor)
+                self.code_append('stroke ')
+        else: #can only be stroke alone
+            self.setColor(self._strokeColor)
+            self.code_append('%s m (%s) true charpath stroke ' % (xy,s))
+
+    def _issueT1String(self,fontObj,x,y,s, textRenderMode=0):
         fc = fontObj
         code_append = self.code_append
         fontSize = self._fontSize
@@ -262,45 +290,47 @@ class PSCanvas:
                 if psName not in fontsUsed:
                     fontsUsed.append(psName)
                 fc = f
-            code_append('%s m (%s) show ' % (fp_str(x,y),escape(t)))
+            self._textOut(x,y,t,textRenderMode)
             x += f.stringWidth(t.decode(f.encName),fontSize)
         if fontObj!=fc:
             self._font = None
             self.setFont(fontObj.face.name,fontSize)
 
-    def drawString(self, x, y, s, angle=0):
-        if self._fillColor != None:
+    def drawString(self, x, y, s, angle=0, text_anchor='left', textRenderMode=0):
+        needFill = textRenderMode in (0,2,4,6) 
+        needStroke = textRenderMode in (1,2,5,6) 
+        if needFill or needStroke:
+            if text_anchor!='left':
+                textLen = stringWidth(s, self._font,self._fontSize)
+                if text_anchor=='end':
+                    x -= textLen
+                elif text_anchor=='middle':
+                    x -= textLen/2.
+                elif text_anchor=='numeric':
+                    x -= numericXShift(text_anchor,s,textLen,self._font,self._fontSize)
             fontObj = getFont(self._font)
             if not self.code[self._fontCodeLoc]:
                 psName = asNative(fontObj.face.name)
                 self.code[self._fontCodeLoc]='(%s) findfont %s scalefont setfont' % (psName,fp_str(self._fontSize))
                 if psName not in self._fontsUsed:
                     self._fontsUsed.append(psName)
-            self.setColor(self._fillColor)
             if angle!=0:
                 self.code_append('gsave %s translate %s rotate' % (fp_str(x,y),fp_str(angle)))
                 x = y = 0
+            oldColor = self._color
             if fontObj._dynamicFont:
-                s = self._escape(s)
-                self.code_append('%s m (%s) show ' % (fp_str(x,y),s))
+                self._textOut(self, x, y, s, textRenderMode=textRenderMode)
             else:
-                self._issueT1String(fontObj,x,y,s)
+                self._issueT1String(fontObj,x,y,s, textRenderMode=textRenderMode)
+            self.setColor(oldColor)
             if angle!=0:
                 self.code_append('grestore')
 
-    def drawCentredString(self, x, y, text, text_anchor='middle'):
-        if self._fillColor is not None:
-            textLen = stringWidth(text, self._font,self._fontSize)
-            if text_anchor=='end':
-                x -= textLen
-            elif text_anchor=='middle':
-                x -= textLen/2.
-            elif text_anchor=='numeric':
-                x -= numericXShift(text_anchor,text,textLen,self._font,self._fontSize)
-            self.drawString(x,y,text)
+    def drawCentredString(self, x, y, text, text_anchor='middle', textRenderMode=0):
+            self.drawString(x,y,text, text_anchor=text_anchor, textRenderMode=textRenderMode)
 
-    def drawRightString(self, text, x, y):
-        self.drawCentredString(text,x,y,text_anchor='end')
+    def drawRightString(self, text, x, y, text_anchor='end', textRenderMode=0):
+        self.drawString(text,x,y,text_anchor=text_anchor, textRenderMode=textRenderMode)
 
     def drawCurve(self, x1, y1, x2, y2, x3, y3, x4, y4, closed=0):
         codeline = '%s m %s curveto'
@@ -786,7 +816,8 @@ class _PSRenderer(Renderer):
         self._canvas.polygon(_pointsFromList(p.points), closed=1)
 
     def drawString(self, stringObj):
-        if self._canvas._fillColor:
+        textRenderMode = getattr(stringObj,'textRenderMode',0)
+        if self._canvas._fillColor or textRenderMode:
             S = self._tracker.getState()
             text_anchor, x, y, text = S['textAnchor'], stringObj.x,stringObj.y,stringObj.text
             if not text_anchor in ['start','inherited']:
@@ -800,7 +831,7 @@ class _PSRenderer(Renderer):
                     x -= numericXShift(text_anchor,text,textLen,font,fontSize,encoding='winansi')
                 else:
                     raise ValueError('bad value for text_anchor '+str(text_anchor))
-            self._canvas.drawString(x,y,text)
+            self._canvas.drawString(x,y,text, textRenderMode=textRenderMode)
 
     def drawPath(self, path, fillMode=None):
         from reportlab.graphics.shapes import _renderPath
@@ -831,6 +862,7 @@ class _PSRenderer(Renderer):
             if fill and rP(countOnly=True):
                 rP()
             elif stroke or clip:
+                rP()
                 fas(stroke=stroke,fill=0,clip=clip)
 
     def applyStateChanges(self, delta, newState):

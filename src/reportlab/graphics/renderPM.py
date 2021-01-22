@@ -168,7 +168,8 @@ class _PMRenderer(Renderer):
     def drawString(self, stringObj):
         canv = self._canvas
         fill = canv.fillColor
-        if fill is not None:
+        textRenderMode = getattr(stringObj,'textRenderMode',0)
+        if fill is not None or textRenderMode:
             S = self._tracker.getState()
             text_anchor = S['textAnchor']
             fontName = S['fontName']
@@ -186,7 +187,12 @@ class _PMRenderer(Renderer):
                     x -= numericXShift(text_anchor,text,textLen,fontName,fontSize,stringObj.encoding)
                 else:
                     raise ValueError('bad value for textAnchor '+str(text_anchor))
-            canv.drawString(x,y,text,_fontInfo=(fontName,fontSize))
+            oldTextRenderMode = canv.textRenderMode
+            canv.textRenderMode = textRenderMode
+            try:
+                canv.drawString(x,y,text,_fontInfo=(fontName,fontSize))
+            finally:
+                canv.textRenderMode = oldTextRenderMode
 
     def drawPath(self, path):
         c = self._canvas
@@ -485,20 +491,12 @@ class PMCanvas:
             self.curveTo(x1,y1,x2,y2,x3,y3)
 
     def drawCentredString(self, x, y, text, text_anchor='middle'):
-        if self.fillColor is not None:
-            textLen = stringWidth(text, self.fontName,self.fontSize)
-            if text_anchor=='end':
-                x -= textLen
-            elif text_anchor=='middle':
-                x -= textLen/2.
-            elif text_anchor=='numeric':
-                x -= numericXShift(text_anchor,text,textLen,self.fontName,self.fontSize)
-            self.drawString(x,y,text)
+        self.drawString(x,y,text, text_anchor=text_anchor)
 
     def drawRightString(self, text, x, y):
-        self.drawCentredString(text,x,y,text_anchor='end')
+        self.drawString(text,x,y,text_anchor='end')
 
-    def drawString(self, x, y, text, _fontInfo=None):
+    def drawString(self, x, y, text, _fontInfo=None, text_anchor='left'):
         gs = self._gs
         if _fontInfo:
             fontName, fontSize = _fontInfo
@@ -509,6 +507,16 @@ class PMCanvas:
             gfont=getFont(gs.fontName)
         except:
             gfont = None
+
+        if text_anchor in ('end','middle', 'end'):
+            textLen = stringWidth(text, fontName,fontSize)
+            if text_anchor=='end':
+                x -= textLen
+            elif text_anchor=='middle':
+                x -= textLen/2.
+            elif text_anchor=='numeric':
+                x -= numericXShift(text_anchor,text,textLen,fontName,self.fontSize)
+
         font = getFont(fontName)
         if font._dynamicFont:
             gs.drawString(x,y,text)

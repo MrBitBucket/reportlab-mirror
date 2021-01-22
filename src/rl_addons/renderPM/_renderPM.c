@@ -21,7 +21,7 @@
 #endif
 
 
-#define VERSION "3.04"
+#define VERSION "4.00"
 #define MODULENAME "_renderPM"
 #ifdef isPy3
 #	define PyInt_FromLong	PyLong_FromLong
@@ -337,6 +337,7 @@ typedef struct {
 	double		strokeOpacity;
 	gstateColor	fillColor;			/*fill color*/
 	int			fillMode;
+	int			textRenderMode;
 	double		fillOpacity;
 	double		fontSize;
 	double		fontEMSize;			/*for scaling to points*/
@@ -617,23 +618,49 @@ static double _vpath_area(ArtVpath *p)
 	return a;
 }
 
-static	PyObject* gstate_clipPathSet(gstateObject* self, PyObject* args)
-{
+static	void _gstate_clipPathSetOrAdd(gstateObject* self, int fillMode, int add, int endIt){
 	ArtVpath	*vpath;
 	ArtVpath	*trVpath;
-	int			fillMode = self->fillMode;
-
-	if(!PyArg_ParseTuple(args,"|i:clipPathSet",&fillMode)) return NULL;
-	gstate_pathEnd(self);
+	if (fillMode==-1) fillMode = self->fillMode;
+	if(endIt) gstate_pathEnd(self);
 	dump_path(self);
 	vpath = art_bez_path_to_vec(self->path, VECSP);
 	dump_vpath("after -->vec",vpath);
 	trVpath = art_vpath_affine_transform (vpath, self->ctm);
 	_vpath_area(trVpath);
-	if(self->clipSVP) art_svp_free(self->clipSVP);
-	self->clipSVP = art_svp_from_vpath(trVpath);
+	if (add) {
+		ArtSVP		*newSVP = art_svp_from_vpath(trVpath);
+		if(self->clipSVP) {
+			ArtSVP *oldSVP = self->clipSVP;
+			self->clipSVP = art_svp_union(oldSVP,newSVP);
+			art_svp_free(oldSVP);
+			art_svp_free(newSVP);
+			}
+		else{
+			self->clipSVP = newSVP;
+			}
+		}
+	else{
+		if(self->clipSVP) art_svp_free(self->clipSVP);
+		self->clipSVP = art_svp_from_vpath(trVpath);
+		}
 	art_free(trVpath);
 	art_free(vpath);
+}
+
+static	PyObject* gstate_clipPathSet(gstateObject* self, PyObject* args)
+{
+	int			fillMode = -1;
+	if(!PyArg_ParseTuple(args,"|i:clipPathSet",&fillMode)) return NULL;
+	_gstate_clipPathSetOrAdd(self, fillMode, 0, 1);
+	Py_INCREF(Py_None);
+	return Py_None;
+}
+static	PyObject* gstate_clipPathAdd(gstateObject* self, PyObject* args)
+{
+	int			fillMode = -1;
+	if(!PyArg_ParseTuple(args,"|i:clipPathAdd",&fillMode)) return NULL;
+	_gstate_clipPathSetOrAdd(self, fillMode, 1, 1);
 	Py_INCREF(Py_None);
 	return Py_None;
 }
@@ -707,16 +734,15 @@ static PyObject* gstate_pathFill(gstateObject* self, PyObject* args)
 	return Py_None;
 }
 
-static PyObject* gstate_pathStroke(gstateObject* self, PyObject* args)
+static void _gstate_pathStroke(gstateObject* self, int endIt)
 {
 	ArtVpath	*vpath=NULL, *trVpath;
 	ArtSVP*		svp=NULL;
 	ArtSVP*		tmp_svp=NULL;
 	pixBufT*	p;
 
-	if(!PyArg_ParseTuple(args,":pathStroke")) return NULL;
 	if(self->strokeColor.valid && self->strokeWidth>0){
-		gstate_pathEnd(self);
+		if(endIt) gstate_pathEnd(self);
 		dump_path(self);
 		vpath = art_bez_path_to_vec(self->path, VECSP);
 
@@ -750,6 +776,12 @@ static PyObject* gstate_pathStroke(gstateObject* self, PyObject* args)
 		art_svp_free(svp);
 		art_free(vpath);
 		}
+}
+
+static PyObject* gstate_pathStroke(gstateObject* self, PyObject* args)
+{
+	if(!PyArg_ParseTuple(args,":pathStroke")) return NULL;
+	_gstate_pathStroke(self, 1);
 	Py_INCREF(Py_None);
 	return Py_None;
 }
@@ -847,7 +879,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 	A2DMX	orig, trans = {1,0,0,1,0,0}, scaleMat = {1,0,0,1,0,0};
 	double	scaleFactor, x, y, w;
 	char*	text;
-	int		c, i;
+	int		c, i, textRenderMode=self->textRenderMode;
 	Py_ssize_t	textlen;
 	ArtBpath	*saved_path, *path;
 	void	*font = self->font;
@@ -941,7 +973,13 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 
 		if(path){
 			self->path = path;
-			_gstate_pathFill(self,0,1,1);
+			if (textRenderMode==0 || textRenderMode==2 || textRenderMode==4 || textRenderMode==6)
+				_gstate_pathFill(self,0,1,1);
+			if (textRenderMode==1 || textRenderMode==2 || textRenderMode==5 || textRenderMode==6)
+				_gstate_pathStroke(self,0);
+			if (textRenderMode>=4)
+				_gstate_clipPathSetOrAdd(self, -1, 1, 0);	/*we are adding*/
+
 #ifdef	RENDERPM_FT
 			if(!ft_font && path!=notdefPath)
 #endif
@@ -1511,6 +1549,7 @@ static PyObject* _get_gstateFontName(gstateObject *self)
 static struct PyMethodDef gstate_methods[] = {
 	{"clipPathClear", (PyCFunction)gstate_clipPathClear, METH_VARARGS, "clipPathClear()"},
 	{"clipPathSet", (PyCFunction)gstate_clipPathSet, METH_VARARGS, "clipPathSet([fillMode])"},
+	{"clipPathAdd", (PyCFunction)gstate_clipPathAdd, METH_VARARGS, "clipPathAdd([fillMode])"},
 	{"curveTo", (PyCFunction)gstate_curveTo, METH_VARARGS, "curveTo(x1,y1,x2,y2,x3,y3)"},
 	{"drawString", (PyCFunction)gstate_drawString, METH_VARARGS, "drawString(x,y,text)"},
 	{"lineTo", (PyCFunction)gstate_lineTo, METH_VARARGS, "lineTo(x,y)"},
@@ -1551,6 +1590,7 @@ static PyObject* gstate_getattr(gstateObject *self, char *name)
 	else if(!strcmp(name,"fontName")) return _get_gstateFontName(self);
 	else if(!strcmp(name,"fontNameI")) return _get_gstateFontNameI(self);
 	else if(!strcmp(name,"dashArray")) return _get_gstateDashArray(self);
+	else if(!strcmp(name,"textRenderMode")) return PyInt_FromLong(self->textRenderMode);
 	else if(!strcmp(name,"pixBuf")){
 		pixBufT* p = self->pixBuf;
 		int	nw = p->rowstride;
@@ -1589,6 +1629,7 @@ static int gstate_setattr(gstateObject *self, char *name, PyObject* value)
 	else if(!strcmp(name,"strokeOpacity")) i = PyArg_Parse(value,"d",&self->strokeOpacity);
 	else if(!strcmp(name,"fillOpacity")) i = PyArg_Parse(value,"d",&self->fillOpacity);
 	else if(!strcmp(name,"dashArray")) i = _set_gstateDashArray(value,self);
+	else if(!strcmp(name,"textRenderMode")) i = PyArg_Parse(value,"i",&self->textRenderMode);
 	else {
 		PyErr_SetString(PyExc_AttributeError, name);
 		i = 0;
@@ -1621,6 +1662,7 @@ static	void gstateFree(gstateObject* self)
 gstates have the following methods\n\
  clipPathClear() clear clipPath\n\
  clipPathSet([fillMode]) move current path into clipPath\n\
+ clipPathAdd([fillMode]) add current path into clipPath\n\
  curveTo(x1,y1,x2,y2,x3,y3)  #add a curveTo type segment\n\
  drawString(x,y,text)\n\
  moveTo(x,y) start a segment\n\
@@ -1641,6 +1683,7 @@ ctm			6vec float transformation matrix\n\
 strokeColor 32bit stroke colour\n\
 fillColor	32bit fill colour\n\
 fillMode	int fill rule\n\
+textRenderMode	int controls filling and stroking (follows pdf values)\n\
 lineCap		int\n\
 lineJoin	int\n\
 hasClipPath readonly int\n\
@@ -1740,6 +1783,7 @@ static	gstateObject* gstate(PyObject* module, PyObject* args, PyObject* keywds)
 			self->strokeColor.valid = self->fillColor.valid = 0;
 			self->lineCap = self->lineJoin = 0;
 			self->fillMode = FILL_NON_ZERO;	/*our default for renderPM differed from PDF/PS*/
+			self->textRenderMode = 0;
 			self->strokeOpacity = self->strokeWidth = self->fillOpacity = 1.0;
 			self->pathLen = 0;
 			self->pathMax = m;
