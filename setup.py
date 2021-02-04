@@ -387,8 +387,8 @@ def main():
         if sys.platform == 'win32':
             debug_compile_args=['/Zi']
             debug_link_args=['/DEBUG']
-            if debug>1:
-                debug_macros.extend([('RL_DEBUG',debug), ('ROBIN_DEBUG',None)])
+        if debug>1:
+            debug_macros.extend([('RL_DEBUG',debug), ('ROBIN_DEBUG',None)])
     if mdbg:
         debug_macros.extend([('MEMORY_DEBUG',None)])
 
@@ -639,6 +639,7 @@ def main():
             
             #this probably only works for setuptools, but distutils seems to ignore it
             install_requires=['pillow>=4.0.0'],
+            python_requires='>=2.6, >=3.6, <4',
             )
         print()
         print('########## SUMMARY INFO #########')

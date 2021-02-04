@@ -49,7 +49,7 @@ RELEASE 3.5.56	 01/12/2020
 RELEASE 3.5.55	 29/10/2020
 ---------------------------
 	* add trustedHosts and trustedSchemes for url management
-	* drop 3.5 support
+	* deifinitely drop 3.5 support (Jon Ribbens points out it may have happened in 3.5.54).
 
 RELEASE 3.5.54	 23/10/2020
 ---------------------------

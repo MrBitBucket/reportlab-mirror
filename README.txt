@@ -54,7 +54,7 @@ do the job.  Full details follow below for each platform.
 
 2.1 General prerequisites
 --------------------------
-You need to have installed Python (versions 2.7 or >=3.5),
+You need to have installed Python (versions 2.7 or >=3.6),
 and ideally PIL or Pillow with Freetype support; more notes on prerequisites
 follow below.
 
@@ -149,7 +149,7 @@ Take care not to confuse it with any releases you download.
 
 3. Prerequisites / Dependencies
 ===============================
-This works with Python versions 2.7 or >=3.3. Older versions are available
+This works with Python versions 2.7 or >=3.5. Older versions are available
 going back to Python 1.5 or thereabouts.
 
 There are no absolute prerequisites beyond the Python
