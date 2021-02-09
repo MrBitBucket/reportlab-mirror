@@ -29,6 +29,7 @@ from reportlab.graphics.charts.piecharts import Pie
 from reportlab.graphics.charts.legends import Legend
 from reportlab.graphics.charts.spider import SpiderChart
 from reportlab.graphics.widgets.markers import makeMarker
+from reportlab.graphics.widgets.adjustableArrow import AdjustableArrowDrawing
 
 try:
     from reportlab.graphics import _renderPM
@@ -454,6 +455,22 @@ class ChartTestCase(unittest.TestCase):
         story.append(Spacer(0,0.5*cm))
         drawing8 = sample8()
         story.append(drawing8)
+        story.append(Spacer(0,1*cm))
+        story.append(Paragraph('The drawing is set as zero size, but the widget can still draw where you want it.', bt))
+        def makeArrow(scale=0.2,boxAnchor='c',**kwds):
+            A = AdjustableArrowDrawing()
+            A.width = A.height = 0
+            A._ZEROSIZE = True
+            A.adjustableArrow.scale = scale
+            A.adjustableArrow.boxAnchor = boxAnchor
+            for k,v in kwds.items():
+                setattr(A.adjustableArrow,k,v)
+            return A
+        A = makeArrow()
+        bb = A.getBounds()
+        deltax = 2 + max(bb[2]-bb[0],bb[3]-bb[1])
+        for i,angle in enumerate((0, 10, 20, 60, 90, 120, 180, 270, 315)):
+            story.append(makeArrow(y=-10,x=deltax*i,angle=angle,strokeColor=colors.black,strokeWidth=0.5,headSweep=-i*0.6))
         story.append(Spacer(0,1*cm))
 
     @unittest.skipIf(not _renderPM,'no _renderPM')
