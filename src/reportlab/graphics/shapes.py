@@ -2,7 +2,7 @@
 #see license.txt for license details
 #history https://hg.reportlab.com/hg-public/reportlab/log/tip/src/reportlab/graphics/shapes.py
 
-__version__='3.3.0'
+__version__='3.5.60'
 __doc__='''Core of the graphics library - defines Drawing and Shapes'''
 
 import os, sys
@@ -1173,6 +1173,34 @@ def definePath(pathSegs=[],isClipPath=0, dx=0, dy=0, **kw):
     for d,o in (dx,0), (dy,1):
         for i in range(o,len(P),2):
             P[i] = P[i]+d
+
+    #if there's a bounding box given we constrain so our points lie in it
+    #partial bbox is allowed and does something sensible
+    bbox = kw.pop('bbox',None)
+    if bbox:
+        for j in 0,1:
+            d = bbox[j],bbox[j+2]
+            if d[0] is None and d[1] is None: continue
+            a = P[j::2]
+            a, b = min(a), max(a)
+            if d[0] is not None and d[1] is not None:
+                c, d = min(d), max(d)
+                fac = (b-a)
+                if abs(fac)>=1e-6:
+                    fac = (d-c)/fac
+                    for i in range(j,len(P),2):
+                        P[i] = c + fac*(P[i]-a)
+                else:
+                    #there's no range in the bbox so fixed as average
+                    for i in range(j,len(P),2):
+                        P[i] = (c + d)*0.5
+            else:
+                #if   there's a  lower bound shift so min is lower bound
+                #else there's an upper bound shift so max is upper bound
+                c = d[0] - a if d[0] is not None else d[1] - b
+                for i in range(i,len(P),2):
+                    P[i] += c
+
     return Path(P,O,isClipPath,**kw)
 
 class Rect(SolidShape):
