@@ -20,7 +20,6 @@ from reportlab.lib.styles import ParagraphStyle, PropertySet
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER
 _ta2al = dict(start=TA_LEFT,end=TA_RIGHT,middle=TA_CENTER)
 
-_gs = None
 _A2BA=  {
         'x': {0:'n', 45:'ne', 90:'e', 135:'se', 180:'s', 225:'sw', 270:'w', 315: 'nw', -45: 'nw'},
         'y': {0:'e', 45:'se', 90:'s', 135:'sw', 180:'w', 225:'nw', 270:'n', 315: 'ne', -45: 'ne'},
@@ -33,17 +32,16 @@ def _pathNumTrunc(n):
 def _processGlyph(G, truncate=1, pathReverse=0):
     O = []
     P = []
-    R = []
+    R_append = [].append
     if G and len(G)==1 and G[0][0]=='lineTo':
         G = (('moveToClosed',)+G[0][1:],)+G #hack fix for some errors
     for g in G+(('end',),):
         op = g[0]
         if O and op in ['moveTo', 'moveToClosed','end']:
             if O[0]=='moveToClosed':
-                O = O[1:]
+                del O[0]
                 if pathReverse:
-                    for i in range(0,len(P),2):
-                        P[i+1], P[i] = P[i:i+2]
+                    P[1::2],P[0::2] = P[0::2],P[1::2]   #exchange x and y
                     P.reverse()
                     O.reverse()
                 O.insert(0,'moveTo')
@@ -53,15 +51,15 @@ def _processGlyph(G, truncate=1, pathReverse=0):
             for o in O:
                 j = i + _PATH_OP_ARG_COUNT[_PATH_OP_NAMES.index(o)]
                 if o=='closePath':
-                    R.append(o)
+                    R_append(o)
                 else:
-                    R.append((o,)+ tuple(P[i:j]))
+                    R_append((o,)+ tuple(P[i:j]))
                 i = j
             O = []
             P = []
         O.append(op)
         P.extend(g[1:])
-    return R
+    return R_append.__self__
 
 def _text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
                             anchor='start', truncate=1, pathReverse=0):
@@ -69,7 +67,7 @@ def _text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000
     font = getFont(fontName)
     if font._multiByte and not font._dynamicFont:
         raise ValueError("_text2PathDescription doesn't support multi byte fonts like %r" % fontName)
-    P = []
+    P_extend = [].extend
     if not anchor=='start':
         textLen = stringWidth(text, fontName, fontSize)
         if anchor=='end':
@@ -77,10 +75,11 @@ def _text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000
         elif anchor=='middle':
             x = x - textLen/2.
     _gs = _renderPM.gstate(1,1)
-    renderPM._setFont(_gs,fontName,fontSize)
+    _setFont = renderPM._setFont
+    _setFont(_gs,fontName,fontSize)
     if font._dynamicFont:
         for g in _gs._stringPath(text,x,y):
-            P.extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
+            P_extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
     else:
         if isBytes(text):
             try:
@@ -93,13 +92,13 @@ def _text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000
         nm1 = len(FT)-1
         for i, (f, t) in enumerate(FT):
             if f!=fc:
-                renderPM._setFont(_gs,f.fontName,fontSize)
+                _setFont(_gs,f.fontName,fontSize)
                 fc = f
             for g in _gs._stringPath(t,x,y):
-                P.extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
+                P_extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
             if i!=nm1:
                 x += f.stringWidth(t.decode(f.encName), fontSize)
-    return P
+    return P_extend.__self__
 
 def _text2Path(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
                 anchor='start', truncate=1, pathReverse=0,**kwds):
