@@ -12,6 +12,7 @@
 #include "libart_lgpl/libart.h"
 #include "gt1/gt1-parset1.h"
 #include "gt1/gt1-misc.h"
+#define FILL_UNSET -1
 #define FILL_EVEN_ODD 0
 #define FILL_NON_ZERO 1
 
@@ -21,7 +22,7 @@
 #endif
 
 
-#define VERSION "4.00"
+#define VERSION "4.01"
 #define MODULENAME "_renderPM"
 #ifdef isPy3
 #	define PyInt_FromLong	PyLong_FromLong
@@ -621,7 +622,7 @@ static double _vpath_area(ArtVpath *p)
 static	void _gstate_clipPathSetOrAdd(gstateObject* self, int fillMode, int add, int endIt){
 	ArtVpath	*vpath;
 	ArtVpath	*trVpath;
-	if (fillMode==-1) fillMode = self->fillMode;
+	if (fillMode==FILL_UNSET) fillMode = self->fillMode;
 	if(endIt) gstate_pathEnd(self);
 	dump_path(self);
 	vpath = art_bez_path_to_vec(self->path, VECSP);
@@ -650,17 +651,17 @@ static	void _gstate_clipPathSetOrAdd(gstateObject* self, int fillMode, int add, 
 
 static	PyObject* gstate_clipPathSet(gstateObject* self, PyObject* args)
 {
-	int			fillMode = -1;
+	int			fillMode = FILL_UNSET;
 	if(!PyArg_ParseTuple(args,"|i:clipPathSet",&fillMode)) return NULL;
-	_gstate_clipPathSetOrAdd(self, fillMode, 0, 1);
+	_gstate_clipPathSetOrAdd(self, fillMode, 0, 1); /*fill add endIt*/
 	Py_INCREF(Py_None);
 	return Py_None;
 }
 static	PyObject* gstate_clipPathAdd(gstateObject* self, PyObject* args)
 {
-	int			fillMode = -1;
+	int			fillMode = FILL_UNSET;
 	if(!PyArg_ParseTuple(args,"|i:clipPathAdd",&fillMode)) return NULL;
-	_gstate_clipPathSetOrAdd(self, fillMode, 1, 1);
+	_gstate_clipPathSetOrAdd(self, fillMode, 1, 1) /*fill add endIt*/;
 	Py_INCREF(Py_None);
 	return Py_None;
 }
@@ -671,7 +672,6 @@ static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse, int fi
 	if(self->fillColor.valid){
 		ArtVpath	*vpath, *trVpath, *tmp_vpath;
 		ArtSVP		*svp, *tmp_svp;
-		ArtWindRule	wrule;
 		pixBufT*	p;
 		double		a;
 		if(endIt) gstate_pathEnd(self);
@@ -687,14 +687,13 @@ static void _gstate_pathFill(gstateObject* self,int endIt, int vpReverse, int fi
 			trVpath =  tmp_vpath;
 			svp = art_svp_from_vpath(trVpath);
 			dump_svp("fill svp from vpath",svp);
-			if(fillMode==0){
+			if(fillMode==FILL_EVEN_ODD){
 				tmp_svp = art_svp_uncross(svp);
 				dump_svp("fill svp uncrossed",tmp_svp);
-				wrule = fillMode==FILL_EVEN_ODD ? ART_WIND_RULE_ODDEVEN : ART_WIND_RULE_NONZERO;
 				art_svp_free(svp);
-				svp = art_svp_rewind_uncrossed(tmp_svp,wrule);
+				svp = art_svp_rewind_uncrossed(tmp_svp,fillMode==FILL_EVEN_ODD ? ART_WIND_RULE_ODDEVEN : ART_WIND_RULE_NONZERO);
 				art_svp_free(tmp_svp);
-				}
+			}
 			if(self->clipSVP) {
 				tmp_svp = svp;
 				dump_svp("fill clip svp path",self->clipSVP);
@@ -729,7 +728,7 @@ static PyObject* gstate_pathFill(gstateObject* self, PyObject* args)
 {
 	int			fillMode = self->fillMode;
 	if(!PyArg_ParseTuple(args,"|i:pathFill",&fillMode)) return NULL;
-	_gstate_pathFill(self,1,0,fillMode);
+	_gstate_pathFill(self,1,0,fillMode); /*endIt vpReverse(ignored) fillMode*/
 	Py_INCREF(Py_None);
 	return Py_None;
 }
@@ -781,7 +780,7 @@ static void _gstate_pathStroke(gstateObject* self, int endIt)
 static PyObject* gstate_pathStroke(gstateObject* self, PyObject* args)
 {
 	if(!PyArg_ParseTuple(args,":pathStroke")) return NULL;
-	_gstate_pathStroke(self, 1);
+	_gstate_pathStroke(self, 1);	/*endIt*/
 	Py_INCREF(Py_None);
 	return Py_None;
 }
@@ -974,11 +973,11 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 		if(path){
 			self->path = path;
 			if (textRenderMode==0 || textRenderMode==2 || textRenderMode==4 || textRenderMode==6)
-				_gstate_pathFill(self,0,1,1);
+				_gstate_pathFill(self,0,1,FILL_NON_ZERO) /*endit vpReverse(ignored) fillMode*/;
 			if (textRenderMode==1 || textRenderMode==2 || textRenderMode==5 || textRenderMode==6)
-				_gstate_pathStroke(self,0);
+				_gstate_pathStroke(self,0);	/*endIt*/
 			if (textRenderMode>=4)
-				_gstate_clipPathSetOrAdd(self, -1, 1, 0);	/*we are adding*/
+				_gstate_clipPathSetOrAdd(self, -1, 1, 0);	/*fill add endIt*/
 
 #ifdef	RENDERPM_FT
 			if(!ft_font && path!=notdefPath)
@@ -1228,7 +1227,10 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 	if(!PyArg_ParseTuple(args,"Od:setFont", &fontNameObj, &fontSize)) return NULL;
 	if(PyUnicode_Check(fontNameObj)){
 		b=PyUnicode_AsUTF8String(fontNameObj);
-		if(!b) goto err;
+		if(!b){
+			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_setFont: bytes conversion of fontName failed");
+			goto err;
+			}
 		fontName = PyBytes_AsString(b);
 		}
 	else{
@@ -1247,7 +1249,7 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 		fontEMSize = 1000.;
 		ft_font = 0;
 		}
-#ifdef	RENDERPM_FT
+#ifdef RENDERPM_FT
 	else{
 		f = (Gt1EncodedFont*)_ft_get_face(fontName);
 		fontEMSize = f ? ((FT_Face)f)->units_per_EM : 0;
@@ -1262,7 +1264,7 @@ static PyObject* gstate_setFont(gstateObject* self, PyObject* args)
 		self->fontNameObj = fontNameObj;
 		Py_INCREF(fontNameObj);
 		self->fontEMSize = fontEMSize;
-#ifdef	RENDERPM_FT
+#ifdef RENDERPM_FT
 		self->ft_font = ft_font;
 #endif
 		Py_INCREF(Py_None);
@@ -1615,7 +1617,7 @@ static PyObject* gstate_getattr(gstateObject *self, char *name)
 
 static int gstate_setattr(gstateObject *self, char *name, PyObject* value)
 {
-	int	i;
+	int	i, tmp;
 #ifdef	ROBIN_DEBUG
 	printf("setattr(%s)\n", name);
 #endif
@@ -1630,6 +1632,15 @@ static int gstate_setattr(gstateObject *self, char *name, PyObject* value)
 	else if(!strcmp(name,"fillOpacity")) i = PyArg_Parse(value,"d",&self->fillOpacity);
 	else if(!strcmp(name,"dashArray")) i = _set_gstateDashArray(value,self);
 	else if(!strcmp(name,"textRenderMode")) i = PyArg_Parse(value,"i",&self->textRenderMode);
+	else if(!strcmp(name,"fontSize")) {
+		i = PyArg_Parse(value,"i",&tmp);
+		if(!i) {
+			if(tmp<0) {
+				i = -1;
+				PyErr_SetString(PyExc_ValueError, name);
+				}
+			}
+		}
 	else {
 		PyErr_SetString(PyExc_AttributeError, name);
 		i = 0;
