@@ -5,105 +5,28 @@ __version__='3.3.0'
 import string
 
 from reportlab.lib import colors
-from reportlab.lib.utils import simpleSplit, _simpleSplit, isBytes
+from reportlab.lib.utils import simpleSplit, _simpleSplit
 from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, \
         isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf, isNoneOrString, isNoneOrCallable, \
         isSubclassOf
 from reportlab.lib.attrmap import *
-from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent, getFont, unicode2T1
+from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent, getFont
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
-from reportlab.graphics.shapes import _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, definePath
 from reportlab.graphics.widgetbase import Widget, PropHolder
 from reportlab.graphics.shapes import _baseGFontName, DirectDraw
 from reportlab.platypus import XPreformatted, Paragraph, Flowable
 from reportlab.lib.styles import ParagraphStyle, PropertySet
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER
 _ta2al = dict(start=TA_LEFT,end=TA_RIGHT,middle=TA_CENTER)
+from ..utils import (text2Path as _text2Path,   #here for continuity
+                    pathNumTrunc as _pathNumTrunc,
+                    processGlyph as _processGlyph,
+                    text2PathDescription as _text2PathDescription)
 
 _A2BA=  {
         'x': {0:'n', 45:'ne', 90:'e', 135:'se', 180:'s', 225:'sw', 270:'w', 315: 'nw', -45: 'nw'},
         'y': {0:'e', 45:'se', 90:'s', 135:'sw', 180:'w', 225:'nw', 270:'n', 315: 'ne', -45: 'ne'},
         }
-
-def _pathNumTrunc(n):
-    if int(n)==n: return int(n)
-    return round(n,5)
-
-def _processGlyph(G, truncate=1, pathReverse=0):
-    O = []
-    P = []
-    R_append = [].append
-    if G and len(G)==1 and G[0][0]=='lineTo':
-        G = (('moveToClosed',)+G[0][1:],)+G #hack fix for some errors
-    for g in G+(('end',),):
-        op = g[0]
-        if O and op in ['moveTo', 'moveToClosed','end']:
-            if O[0]=='moveToClosed':
-                del O[0]
-                if pathReverse:
-                    P[1::2],P[0::2] = P[0::2],P[1::2]   #exchange x and y
-                    P.reverse()
-                    O.reverse()
-                O.insert(0,'moveTo')
-                O.append('closePath')
-            i = 0
-            if truncate: P = list(map(_pathNumTrunc,P))
-            for o in O:
-                j = i + _PATH_OP_ARG_COUNT[_PATH_OP_NAMES.index(o)]
-                if o=='closePath':
-                    R_append(o)
-                else:
-                    R_append((o,)+ tuple(P[i:j]))
-                i = j
-            O = []
-            P = []
-        O.append(op)
-        P.extend(g[1:])
-    return R_append.__self__
-
-def _text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
-                            anchor='start', truncate=1, pathReverse=0):
-    from reportlab.graphics import renderPM, _renderPM
-    font = getFont(fontName)
-    if font._multiByte and not font._dynamicFont:
-        raise ValueError("_text2PathDescription doesn't support multi byte fonts like %r" % fontName)
-    P_extend = [].extend
-    if not anchor=='start':
-        textLen = stringWidth(text, fontName, fontSize)
-        if anchor=='end':
-            x = x-textLen
-        elif anchor=='middle':
-            x = x - textLen/2.
-    _gs = _renderPM.gstate(1,1)
-    _setFont = renderPM._setFont
-    _setFont(_gs,fontName,fontSize)
-    if font._dynamicFont:
-        for g in _gs._stringPath(text,x,y):
-            P_extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
-    else:
-        if isBytes(text):
-            try:
-                text = text.decode('utf8')
-            except UnicodeDecodeError as e:
-                i,j = e.args[2:4]
-                raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[max(i-10,0):i],text[i:j],text[j:j+10]),)))
-        fc = font
-        FT = unicode2T1(text,[font]+font.substitutionFonts)
-        nm1 = len(FT)-1
-        for i, (f, t) in enumerate(FT):
-            if f!=fc:
-                _setFont(_gs,f.fontName,fontSize)
-                fc = f
-            for g in _gs._stringPath(t,x,y):
-                P_extend(_processGlyph(g,truncate=truncate,pathReverse=pathReverse))
-            if i!=nm1:
-                x += f.stringWidth(t.decode(f.encName), fontSize)
-    return P_extend.__self__
-
-def _text2Path(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
-                anchor='start', truncate=1, pathReverse=0,**kwds):
-    return definePath(_text2PathDescription(text,x=x,y=y,fontName=fontName,
-                    fontSize=fontSize,anchor=anchor,truncate=truncate,pathReverse=pathReverse),**kwds)
 
 try:
     from rlextra.graphics.canvasadapter import DirectDrawFlowable

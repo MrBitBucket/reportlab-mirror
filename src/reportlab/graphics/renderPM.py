@@ -18,9 +18,7 @@ from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1
 from math import sin, cos, pi, ceil
 from reportlab.lib.utils import getStringIO, getBytesIO, open_and_read, isUnicode
 from reportlab import rl_config, ascii
-
-class RenderPMError(Exception):
-    pass
+from .utils import setFont as _setFont, RenderPMError
 
 import os, sys
 
@@ -242,20 +240,6 @@ class _PMRenderer(Renderer):
             if rP():
                 c.pathFill(fillMode)
             c.pathStroke()
-
-def _setFont(gs,fontName,fontSize):
-    try:
-        gs.setFont(fontName,fontSize)
-    except ValueError as e:
-        if not e.args[0].endswith("Can't find font!"): raise
-        #here's where we try to add a font to the canvas
-        try:
-            f = getFont(fontName)
-            _renderPM.makeT1Font(fontName,f.face.findT1File(),f.encoding.vector,open_and_read)
-        except:
-            s1, s2 = list(map(str,sys.exc_info()[:2]))
-            raise RenderPMError("Can't setFont(%s) missing the T1 files?\nOriginally %s: %s" % (fontName,s1,s2))
-        gs.setFont(fontName,fontSize)
 
 def _convert2pilp(im):
     Image = _getImage()

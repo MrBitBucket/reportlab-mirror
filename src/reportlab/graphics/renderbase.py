@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2017
+#Copyright ReportLab Europe Ltd. 2000-2021
 #see license.txt for license details
 #history https://hg.reportlab.com/hg-public/reportlab/log/tip/src/reportlab/graphics/renderbase.py
 
@@ -9,26 +9,7 @@ from reportlab.graphics.shapes import *
 from reportlab.lib.validators import DerivedValue
 from reportlab import rl_config
 
-def inverse(A):
-    "For A affine 2D represented as 6vec return 6vec version of A**(-1)"
-    # I checked this RGB
-    det = float(A[0]*A[3] - A[2]*A[1])
-    R = [A[3]/det, -A[1]/det, -A[2]/det, A[0]/det]
-    return tuple(R+[-R[0]*A[4]-R[2]*A[5],-R[1]*A[4]-R[3]*A[5]])
-
-def mmult(A, B):
-    "A postmultiplied by B"
-    # I checked this RGB
-    # [a0 a2 a4]    [b0 b2 b4]
-    # [a1 a3 a5] *  [b1 b3 b5]
-    # [      1 ]    [      1 ]
-    #
-    return (A[0]*B[0] + A[2]*B[1],
-            A[1]*B[0] + A[3]*B[1],
-            A[0]*B[2] + A[2]*B[3],
-            A[1]*B[2] + A[3]*B[3],
-            A[0]*B[4] + A[2]*B[5] + A[4],
-            A[1]*B[4] + A[3]*B[5] + A[5])
+from . transform import mmult, inverse
 
 def getStateDelta(shape):
     """Used to compute when we need to change the graphics state.
