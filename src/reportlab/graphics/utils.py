@@ -54,10 +54,7 @@ def processGlyph(G, truncate=1, pathReverse=0):
             if truncate: P = list(map(pathNumTrunc,P))
             for o in O:
                 j = i + _PATH_OP_ARG_COUNT[_PATH_OP_NAMES.index(o)]
-                if o=='closePath':
-                    R_append(o)
-                else:
-                    R_append((o,)+ tuple(P[i:j]))
+                R_append((o,)+ tuple(P[i:j]))
                 i = j
             O = []
             P = []
