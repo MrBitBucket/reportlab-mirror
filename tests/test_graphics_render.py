@@ -160,7 +160,7 @@ class RenderTestCase(unittest.TestCase):
         assert test(self.outDir) is None
 
     def test4(self):
-        formats = ('pdf svg ps' + (' png' if _renderPM else '')).split()
+        formats = ('pdf svg ps py' + (' png' if _renderPM else '')).split()
         for fm in (0,1):
             FillModeDrawing(fillMode=fm).save(formats=formats,outDir=self.outDir,fnRoot='fillmode-'+('non-zero' if fm else 'even-odd'))
         _410Drawing().save(formats=formats,outDir=self.outDir,fnRoot='410')
