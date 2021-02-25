@@ -42,7 +42,7 @@ jobs:
       fail-fast: true
       matrix:
         os: ["ubuntu-16.04","macos-latest"]
-        python: ["2.7", "3.6", "3.7", "3.8", "3.9" ]
+        python: ["3.6", "3.7", "3.8", "3.9" ]
         platform: ["x86_64", "i686"]
         unicode-width: [32]
         mb-ml-ver: ["1", "2010"]
@@ -56,30 +56,6 @@ jobs:
             os-name: "osx"
           - os: "ubuntu-16.04"
             os-name: "xenial"
-          - os: "ubuntu-16.04"
-            os-name: "xenial"
-            python: "2.7"
-            unicode-width: 16
-            platform: "i686"
-            mb-ml-ver: "1"
-          - os: "ubuntu-16.04"
-            os-name: "xenial"
-            python: "2.7"
-            unicode-width: 16
-            platform: "i686"
-            mb-ml-ver: "2010"
-          - os: "ubuntu-16.04"
-            os-name: "xenial"
-            python: "2.7"
-            unicode-width: 16
-            platform: "x86_64"
-            mb-ml-ver: "1"
-          - os: "ubuntu-16.04"
-            os-name: "xenial"
-            python: "2.7"
-            unicode-width: 16
-            platform: "x86_64"
-            mb-ml-ver: "2010"
     env:
       BUILD_COMMIT: HEAD
       PLAT: ${{ matrix.platform }}

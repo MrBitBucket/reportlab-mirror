@@ -14,7 +14,7 @@ environment:
     CITOOLS_PASSWORD:
       secure: xbq9uLuFeus1N1x8xSF9f5kAYXY4lkvU4UveYwgcMkM=
     FIRST: 39
-    LAST: 27-x64
+    LAST: 36-x64
     RLCACHE: windows/reportlab
 
   matrix:
@@ -40,12 +40,6 @@ environment:
       ARCH: X86
 
     - PYVER: 36-x64
-      ARCH: AMD64
-
-    - PYVER: 27
-      ARCH: X86
-
-    - PYVER: 27-x64
       ARCH: AMD64
 
 matrix:
