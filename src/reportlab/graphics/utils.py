@@ -39,7 +39,7 @@ def processGlyph(G, truncate=1, pathReverse=0):
     R_append = [].append
     if G and len(G)==1 and G[0][0]=='lineTo':
         G = (('moveToClosed',)+G[0][1:],)+G #hack fix for some errors
-    for g in G+(('end',),):
+    for g in (G or ())+(('end',),):
         op = g[0]
         if O and op in ['moveTo', 'moveToClosed','end']:
             if O[0]=='moveToClosed':

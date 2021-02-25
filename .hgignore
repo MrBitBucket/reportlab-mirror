@@ -63,6 +63,7 @@ syntax: regexp
 ^tests/test_pdfgen_pycanvas_out\.txt
 ^tests/test_render(SVG|PS)_output\.html
 ^tests/test_source_chars\.txt
+^tests/test_graphics_images(|-cairo)\.(png|gif)
 ^tests/barcode-out
 ^tests/render-out
 ^tests/charts-out
@@ -72,3 +73,4 @@ syntax: regexp
 ^src/reportlab/pdfbase/_glyphlist.py
 ^src/rl_addons/renderPM/libart_lgpl/art_config.h
 ^demos/.*\.pdf$
+^src/reportlab.egg-info/

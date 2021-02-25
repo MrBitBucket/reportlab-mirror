@@ -11,6 +11,16 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.5.61	 dd/02/2021
+---------------------------
+	* add adjustableArrow widget
+	* allow para tag borderPadding attribute
+	* minor cosmetics in renderPM C extension and add fontSize setattr 
+	* allow a bounding box constraint in definePath
+	* efficiency savings in text2Path
+	* refactor transformation math and text2Path functionality	
+	* allow a renderPM plugin cairo backend package rlPyCairo
+
 CHANGES  3.5.60	 22/01/2021
 ---------------------------
 	* Allow legend column control of vertical alignment

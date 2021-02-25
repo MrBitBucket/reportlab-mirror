@@ -20,6 +20,7 @@ from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config, ascii
 from reportlab.lib.utils import getStringIO, RLString, isPy3, isUnicode, isBytes
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
+from .renderPM import _getImage
 
 from xml.dom import getDOMImplementation
 
@@ -530,6 +531,7 @@ class SVGCanvas:
                 transformNode(self.doc,'image',
                     x=x,y=y,width=width,height=height,
                     href="data:image/png;base64,"+buf,
+                    transform="matrix(%s)" % self.cfp_str(1,0,0,-1,0,height+2*y),
                     )
                 )
 

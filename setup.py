@@ -639,7 +639,10 @@ def main():
             
             #this probably only works for setuptools, but distutils seems to ignore it
             install_requires=['pillow>=4.0.0'],
-            python_requires='>=2.6, >=3.6, <4',
+            python_requires='>=2.7, >=3.6, <4',
+            extras_require={
+                'RLPYCAIRO': ['rlPyCairo>=0.0.5'],
+                },
             )
         print()
         print('########## SUMMARY INFO #########')
