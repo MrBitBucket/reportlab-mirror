@@ -12,7 +12,8 @@ import unittest
 from reportlab.lib import colors
 from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetAttr, rl_isfile, \
                                 isCompactDistro, isPy3, isPyPy, TimeStamp, rl_get_module, \
-                                recursiveGetAttr, recursiveSetAttr, recursiveDelAttr
+                                recursiveGetAttr, recursiveSetAttr, recursiveDelAttr, \
+                                asUnicode, asUnicodeEx, asBytes
 
 def _rel_open_and_read(fn):
     from reportlab.lib.utils import open_and_read
@@ -46,6 +47,9 @@ class ImporterTestCase(unittest.TestCase):
     def tearDownClass(cls):
         from shutil import rmtree
         rmtree(cls._tempdir,1)
+
+    def myAssertRaisesRegex(self,*args,**kwds):
+        return getattr(self,'assertRaisesRegex' if isPy3 else 'assertRaisesRegexp')(*args,**kwds)
 
     def test1(self):
         "try stuff known to be in the path"
@@ -208,6 +212,18 @@ class ImporterTestCase(unittest.TestCase):
         ff.search()
         ff.getFamilyNames()
 
+    def test17(self):
+        self.assertEqual(asUnicode(u'abc'),u'abc')
+        self.assertEqual(asUnicode(b'abc'),u'abc')
+        self.assertRaises(AttributeError,asUnicode,['abc'])
+        self.myAssertRaisesRegex(AttributeError,r"asUnicode\(.*'list' object has no attribute 'decode'", asUnicode,['abc'])
+        self.assertEqual(asUnicodeEx(u'abc'),u'abc')
+        self.assertEqual(asUnicodeEx(b'abc'),u'abc')
+        self.assertEqual(asUnicodeEx(123),u'123')
+        self.assertEqual(asBytes(u'abc'),b'abc')
+        self.assertEqual(asBytes(b'abc'),b'abc')
+        self.assertRaises(AttributeError,asBytes,['abc'])
+        self.myAssertRaisesRegex(AttributeError,"asBytes\(.*'list' object has no attribute 'encode'", asBytes,['abc'])
 
 class RaccessTest:
     l = [1, 2]

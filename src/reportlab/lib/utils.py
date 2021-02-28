@@ -73,14 +73,26 @@ if isPy3:
         return md5(s if isBytes(s) else s.encode('utf8')).hexdigest()
 
     def asBytes(v,enc='utf8'):
-        return v if isinstance(v,bytes) else v.encode(enc)
+        if isinstance(v,bytes): return v
+        try:
+            return v.encode(enc)
+        except:
+            annotateException('asBytes(%s,enc=%s) error: ' % (ascii(v),ascii(enc)))
 
     def asUnicode(v,enc='utf8'):
-        return v if isinstance(v,str) else v.decode(enc)
+        if isinstance(v,str): return v
+        try:
+            return v.decode(enc)
+        except:
+            annotateException('asUnicode(%s,enc=%s) error: ' % (ascii(v),ascii(enc)))
 
     def asUnicodeEx(v,enc='utf8'):
-        return v if isinstance(v,str) else v.decode(enc) if isinstance(v,bytes) else str(v)
-
+        if isinstance(v,str): return v
+        try:
+            return v.decode(enc) if isinstance(v,bytes) else str(v)
+        except:
+            annotateException('asUnicodeEx(%s,enc=%s) error: ' % (ascii(v),ascii(enc)))
+        
     def asNative(v,enc='utf8'):
         return asUnicode(v,enc=enc)
 
@@ -175,7 +187,11 @@ else:
             return join(["%02x" % ord(x) for x in md5(s).digest()], '')
 
     def asBytes(v,enc='utf8'):
-        return v if isinstance(v,str) else v.encode(enc)
+        if isinstance(v,str): return v
+        try:
+            return v.encode(enc)
+        except:
+            annotateException('asBytes(%s,enc=%s) error: ' % (repr(v),repr(enc)))
 
     def asNative(v,enc='utf8'):
         return asBytes(v,enc=enc)
@@ -193,10 +209,18 @@ else:
         return isinstance(v, unicode)
 
     def asUnicode(v,enc='utf8'):
-        return v if isinstance(v,unicode) else v.decode(enc)
+        if isinstance(v,unicode): return v
+        try:
+            return v.decode(enc)
+        except:
+            annotateException('asUnicode(%s,enc=%s) error: ' % (repr(v),repr(enc)))
 
     def asUnicodeEx(v,enc='utf8'):
-        return v if isinstance(v,unicode) else v.decode(enc) if isinstance(v,str) else  unicode(v)
+        if isinstance(v,unicode): return v
+        try:
+            return v.decode(enc) if isinstance(v,str) else str(v)
+        except:
+            annotateException('asUnicodeEx(%s,enc=%s) error: ' % (repr(v),repr(enc)))
 
     def isClass(v):
         return isinstance(v,(types.ClassType,type))
@@ -1390,35 +1414,10 @@ def findInPaths(fn,paths,isfile=True,fail=False):
     if fail: raise ValueError('cannot locate %r with paths=%r' % (fn,paths))
     return fn
 
-def annotateException(msg,enc='utf8'):
+def annotateException(msg,enc='utf8',postMsg='',sep=' '):
     '''add msg to the args of an existing exception'''
-    if not msg: raise
     t,v,b=sys.exc_info()
-    if not hasattr(v,'args'): raise
-    e = -1
-    A = list(v.args)
-    for i,a in enumerate(A):
-        if isinstance(a,str):
-            e = i
-            break
-    if e>=0:
-        if not isPy3:
-            if isUnicode(a):
-                if not isUnicode(msg):
-                    msg=msg.decode(enc)
-            else:
-                if isUnicode(msg):
-                    msg=msg.encode(enc)
-                else:
-                    msg = str(msg)
-        if isinstance(v,IOError) and getattr(v,'strerror',None):
-            v.strerror = msg+'\n'+str(v.strerror)
-        else:
-            A[e] += msg
-    else:
-        A.append(msg)
-    v.args = tuple(A)
-    rl_reraise(t,v,b)
+    rl_reraise(t,t(sep.join((_ for _ in (msg,str(v),postMsg) if _))),b)
 
 def escapeOnce(data):
     """Ensure XML output is escaped just once, irrespective of input
