@@ -575,10 +575,12 @@ class _SHYWord(list):
     '''a fragword containing soft hyphens some of its strings are _SHYIndexedStr'''
     def shyphenate(self, newWidth, maxWidth):
         ww = self[0]
+        self._fsww = 0x7fffffff
         if ww==0: return []
         possible = None
         exceeded = False
         baseWidth = baseWidth0 = newWidth - ww
+        fsww = None
         for i,(f,t) in enumerate(self[1:]):
             sW = lambda s: stringWidth(s, f.fontName, f.fontSize)
             if isinstance(t,_SHYIndexedStr):
@@ -588,6 +590,7 @@ class _SHYWord(list):
                 for j, x in enumerate(t._shyIndices):
                     left, right = t[:x], t[x:]
                     leftw = bw+sW(left)
+                    if fsww is None: fsww = leftw
                     exceeded = leftw > maxWidth
                     if exceeded: break
                     possible = i, j, x, leftw, left, right, shyLen
@@ -595,7 +598,8 @@ class _SHYWord(list):
             else:
                 baseWidth += sW(t)
                 exceeded = baseWidth > maxWidth
-            if exceeded: break
+            if exceeded and fsww is not None: break
+        self._fsww = fsww-baseWidth0 if fsww is not None else 0x7fffffff
         if not possible: return []
         i, j, x, leftw, left, right, shyLen = possible
         i1 = i+1
@@ -1182,9 +1186,14 @@ class _SHYStr(unicodeT):
             baseWidth = currentWidth + spaceWidth + hyphenWidth
             limWidth = maxWidth + spaceShrink
             '''
+            self._fsww = 0x7fffffff
             for i, sp in reversed(list(enumerate(self.__sp__))):
+                #we iterate backwards so that we return the longest that fits
+                #else we will end up with the shortest value in self._fsww
                 sw = self[:sp]
-                swnw = baseWidth + stringWidth(sw, fontName, fontSize, encoding)
+                sww = stringWidth(sw, fontName, fontSize, encoding)
+                if not i: self._fsww = sww
+                swnw = baseWidth + sww
                 if swnw <= limWidth:
                     #we found a suitable split in a soft-hyphenated word
                     T = self.__sp__[i:] + [len(self)]
@@ -2079,17 +2088,20 @@ class Paragraph(Flowable):
                             self._hyphenations += 1
                             forcedSplit = 1
                             continue
-                        elif hyphenation2 and len(cLine):
-                            hsw = word.__shysplit__(
-                                fontName, fontSize,
-                                0 + hyw - 1e-8,
-                                maxWidth,
-                                encoding = self.encoding,
-                                )
-                            if hsw:
-                                words[0:0] = [word]
-                                forcedSplit = 1
-                                word = None
+                        elif len(cLine):
+                            nMW = maxWidths[min(maxlineno,lineno)]
+                            if hyphenation2 or (word._fsww+hyw+1e-8)<=nMW:
+                                hsw = word.__shysplit__(
+                                    fontName, fontSize,
+                                    0 + hyw - 1e-8,
+                                    nMW,
+                                    encoding = self.encoding,
+                                    )
+                                if hsw:
+                                    words[0:0] = [word]
+                                    forcedSplit = 1
+                                    word = None
+                                    newWidth = currentWidth
                     elif attemptHyphenation:
                         hyOk = not getattr(f,'nobr',False)
                         hsw = _hyphenateWord(hyphenator if hyOk else None,
@@ -2109,6 +2121,7 @@ class Paragraph(Flowable):
                             if hsw:
                                 words[0:0] = [word]
                                 forcedSplit = 1
+                                newWidth = currentWidth
                                 word = None
                     if splitLongWords and not (isinstance(word,_SplitWord) or forcedSplit):
                         nmw = min(lineno,maxlineno)
@@ -2191,12 +2204,14 @@ class Paragraph(Flowable):
                             FW.pop(-1)  #remove this as we are doing this one again
                             self._hyphenations += 1
                             continue
-                        elif hyphenation2 and len(FW)>1:    #only if we are not the first word on the line
-                            hsw = w.shyphenate(wordWidth, maxWidth)
-                            if hsw:
-                                _words[0:0] = [_InjectedFrag([0,(f.clone(_fkind=_FK_BREAK,text=''),'')]),w]
-                                FW.pop(-1)  #remove this as we are doing this one again
-                                continue
+                        elif len(FW)>1: #only if we are not the first word on the line
+                            nMW = maxWidths[min(maxlineno,lineno)]  #next maxWidth or current one
+                            if hyphenation2 or w._fsww+1e-8<=nMW:
+                                hsw = w.shyphenate(wordWidth, nMW)
+                                if hsw:
+                                    _words[0:0] = [_InjectedFrag([0,(f.clone(_fkind=_FK_BREAK,text=''),'')]),w]
+                                    FW.pop(-1)  #remove this as we are doing this one again
+                                    continue
                         #else: try to split an overlong word
                     elif attemptHyphenation:
                         hyOk = not getattr(f,'nobr',False)

@@ -217,12 +217,12 @@ class ParagraphCorners(unittest.TestCase):
         c = Canvas(outputfile('test_platypus_paragraphs_embedded2.pdf'), pagesize=pagesize)
 
         expected = [
-                (163, b'\x7f\xd7_^\x07\x9c!u\x02\xb4\x13z\xb5y6C'),
-                (163, b'\xab\x82\xbf\xb3\xfc\xb5\xaau\x15\xb1<\x8eX\xbe35'),
-                (163, b'LL\xb1\xfd.\x8a\x8bk\xde\xcdK\x16P\xebWh'),
-                (163, b'\xa9fj\xdd\xb9\x11N\xcf\xbb\x12\xfb\xd9\xa5\xf0v<'),
-                (163, b'\x18r\x98\x17\xd8&\x8c\x01{\xf3|r\xca\xccQy'),
-                (163, b'\xb7\xf2\x0f/d\xe9<\xd1B?\xe5\x8c\xcbO\x06?'),
+                (163, b':\n\x16\x8c\xa9\x87\xf4C\xe0\xe6\xfd/\x07\xe7\xde8'),
+                (163, b'4\x98_\t\xd0\xde\x9a:8\xa7E\xfc\x13\xad\xfbk'),
+                (163, b'9m\xec\xdfX\xe4\x85\xe9tL,\xe5ob\x13w'),
+                (163, b"\xf39*6\x85\xd2\xf9`:<\xe8'\xa9\x8a\xec["),
+                (163, b'\x85\x07\x83\xee\x8d\x11Bp\xd0p\xaa\xcbp\x98\xf4\xb7'),
+                (163, b'\xf0"wp\x91vN\xc8<\xef\xe7\xc8s\xae\xf8\x10'),
                 ]
         observed = []
         for eh in 0, 1, 2:

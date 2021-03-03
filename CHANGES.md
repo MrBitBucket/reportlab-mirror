@@ -11,7 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  3.5.61	 dd/02/2021
+CHANGES  3.5.62	 03/03/2021
+---------------------------
+	* simplify annotateException and add better error messages for asUnicode/Bytes etc
+	* improve embeddedHyphenation in paragraph.py
+
+CHANGES  3.5.61	 25/02/2021
 ---------------------------
 	* add adjustableArrow widget
 	* allow para tag borderPadding attribute
