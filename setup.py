@@ -406,8 +406,6 @@ def main():
         infoline( 'Attempting build of _rl_accel & pyHnj')
         infoline( 'extensions from %r'%RL_ACCEL)
         infoline( '================================================')
-        fn = pjoin(RL_ACCEL,'hyphen.mashed')
-        SPECIAL_PACKAGE_DATA[fn] = pjoin('lib','hyphen.mashed')
         EXT_MODULES += [
                     Extension( 'reportlab.lib._rl_accel',
                                 [pjoin(RL_ACCEL,'_rl_accel.c')],
@@ -420,6 +418,8 @@ def main():
                             ),
                         ]
         if not isPy3:
+            fn = pjoin(RL_ACCEL,'hyphen.mashed')
+            SPECIAL_PACKAGE_DATA[fn] = pjoin('lib','hyphen.mashed')
             EXT_MODULES += [
                     Extension( 'reportlab.lib.pyHnj',
                             [pjoin(RL_ACCEL,'pyHnjmodule.c'),
