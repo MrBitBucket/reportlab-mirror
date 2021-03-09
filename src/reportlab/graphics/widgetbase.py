@@ -232,10 +232,7 @@ class TypedPropertyCollection(PropHolder):
         return WKlass
 
     def __getitem__(self, x):
-        if isinstance(x,(tuple,list)):
-            x = tuple(x)
-        else:
-            x = (x,)
+        x = tuple(x) if isinstance(x,(tuple,list)) else (x,)
         try:
             return self._children[x]
         except KeyError:
@@ -258,11 +255,7 @@ class TypedPropertyCollection(PropHolder):
             return child
 
     def __contains__(self,key):
-        if isinstance(key,(tuple,list)):
-            key = tuple(key)
-        else:
-            key = key,
-        return key in self._children
+        return (tuple(key) if isinstance(key,(tuple,list)) else (key,)) in self._children
 
     def __setitem__(self, key, value):
         assert isinstance(value, self._value.__class__), (
@@ -297,6 +290,9 @@ class TypedPropertyCollection(PropHolder):
 
     def __setattr__(self,name,value):
         return setattr(self._value,name,value)
+
+    def checkAttr(self, key, a, default=None):
+        return getattr(self[key], a, default) if key in self else default
 
 def tpcGetItem(obj,x):
     '''return obj if it's not a TypedPropertyCollection else obj[x]'''
