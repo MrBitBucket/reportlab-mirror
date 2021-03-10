@@ -1561,3 +1561,17 @@ def recursiveDelAttr(obj, name):
         last = tokens[-1]
         parent = recursiveGetAttr(obj, most)
         delattr(parent, last)
+
+def yieldNoneSplits(L):
+    '''yield sublists of L separated by None; the Nones disappear'''
+    i = 0
+    n = len(L)
+    while i<n:
+        try:
+            j = L.index(None,i)
+            yield L[i:j]
+            i = j+1
+            if not L: break
+        except ValueError:
+            yield L[i:]
+            break

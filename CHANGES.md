@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.5.65	 10/03/2021
+---------------------------
+	* add yieldNoneSplits utility function
+	* fix BarChart so it lines can have markers and Nones in their data
+
 CHANGES  3.5.64	 09/03/2021
 ---------------------------
 	* add ability to have lineplots in barcharts; no support yet for line markers

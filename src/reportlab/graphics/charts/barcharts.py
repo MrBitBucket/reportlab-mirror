@@ -16,12 +16,12 @@ from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isNumberOrNone, isColor, isColorOrNone, isString,\
             isListOfStrings, SequenceOf, isBoolean, isNoneOrShape, isStringOrNone,\
             NoneOr, isListOfNumbersOrNone, EitherOr, OneOf, isInt
-from reportlab.lib.utils import flatten, isStr
+from reportlab.lib.utils import flatten, isStr, yieldNoneSplits
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.formatters import Formatter
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
+from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder, tpcGetItem
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing, NotImplementedError, PolyLine
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis, YCategoryAxis, XValueAxis
 from reportlab.graphics.charts.textlabels import BarChartLabel, NA_Label, NoneOrInstanceOfNA_Label
@@ -96,15 +96,29 @@ class BarChart(PlotArea):
         swatchMarker = getattr(style, 'swatchMarker', getattr(baseStyle, 'swatchMarker',None))
         if swatchMarker:
             return uSymbol2Symbol(swatchMarker,x+width/2.,y+height/2.,fillColor)
-        return (
-                Line(x,y+height/2.0, x+width, y+height/2.0,
+        elif getattr(style,'isLine',False):
+            yh2 = y+height/2.
+            if hasattr(style, 'symbol'):
+                S = style.symbol
+            elif hasattr(baseStyle, 'symbol'):
+                S = baseStyle.symbol
+            else:
+                S = None
+            L = Line(x,yh2, x+width, yh2,
                     strokeColor=style.strokeColor or style.fillColor,
                     strokeWidth=style.strokeWidth,
                     strokeDashArray = style.strokeDashArray)
-                        if getattr(style,'isLine',False)
-                else
-                    Rect(x,y,width,height,strokeWidth=strokeWidth,strokeColor=strokeColor,
-                        strokeDashArray=strokeDashArray,fillColor=fillColor))
+
+            if S: S = uSymbol2Symbol(S,x+width/2.,yh2,style.strokeColor or style.fillColor)
+            if S and L:
+                g = Group()
+                g.add(L)
+                g.add(S)
+                return g
+            return S or L
+        else:
+            return Rect(x,y,width,height,strokeWidth=strokeWidth,strokeColor=strokeColor,
+                        strokeDashArray=strokeDashArray,fillColor=fillColor)
 
     def getSeriesName(self,i,default=None):
         '''return series name i or default'''
@@ -186,15 +200,24 @@ class BarChart(PlotArea):
         if not bs: 
             R = [(ss,) for ss in xrange(n)]
         else:
+            bars = self.bars
             unseen = set(range(n))
+            lines = set()
             R = []
             for s in bs:
-                g = [ss for ss in s if 0<=ss<=n]
+                g = {ss for ss in s if 0<=ss<=n}
+                gl = {ss for ss in g if bars.checkAttr(ss,'isLine',False)}
+                if gl:
+                    g -= gl
+                    lines |= gl
+                    unseen -= gl
                 if g:
                     R.append(tuple(g))
-                    unseen -= set(g)
+                    unseen -= g
             if unseen:
                 R.extend((ss,) for ss in sorted(unseen))
+            if lines:
+                R.extend((ss,) for ss in sorted(lines))
         self._seriesOrder = R
 
     def _getConfigureData(self):
@@ -346,7 +369,7 @@ class BarChart(PlotArea):
         seriesMLineCount = seriesCount - lineCount
         if style=='mixed':
             ss = self._seriesOrder
-            barsPerGroup = len(ss)
+            barsPerGroup = len(ss) - lineCount
             wB = barsPerGroup*barWidth
             wS = (barsPerGroup-1)*barSpacing
             if barsPerGroup>1:
@@ -486,13 +509,20 @@ class BarChart(PlotArea):
                     _addBar(colNo,colNo)
                 aBP(barRow)
         else:
+            lineSeen = 0
             for sb,sg in enumerate(self._seriesOrder):  #the sub bar nos and series groups
                 style = 'parallel' if len(sg)<=1 else 'stacked'
-                xVal = barsPerGroup - 1 - sb if reversePlotOrder else sb
-                xVal = offs + xVal*bGap
                 for rowNo in sg:    #the individual series
+                    xVal = barsPerGroup - 1 - sb if reversePlotOrder else sb
+                    xVal = offs + xVal*bGap
                     barRow = []
                     row = data[rowNo]
+                    isLine = bars.checkAttr(rowNo, 'isLine', False)
+                    if isLine:
+                        lineSeen += 1
+                        xVal = offs+(barsPerGroup-1)*bGap*0.5
+                    else:
+                        xVal -= lineSeen*bGap
                     for colNo in xrange(rowLength): #iterate over categories
                         _addBar(colNo,colNo*barsPerGroup + sb)
                     aBP(barRow)
@@ -639,11 +669,13 @@ class BarChart(PlotArea):
                         catNNA[colNo] = 1
 
         lines = [].append
+        lineSyms = [].append
         for rowNo, row in enumerate(BP):
             styleCount = len(bars)
             styleIdx = rowNo % styleCount
             rowStyle = bars[styleIdx]
             isLine = bars.checkAttr(rowNo, 'isLine', False)
+            linePts = [].append
             for colNo, (x,y,width,height) in enumerate(row):
                 style = (styleIdx,colNo) in bars and bars[(styleIdx,colNo)] or rowStyle
                 if None in (width,height):
@@ -658,6 +690,7 @@ class BarChart(PlotArea):
                             y = (r0[1]+r1[1])/2.0
                             self._addNABarLabel(lg,rowNoL,colNo,x,y,0.0001,0.0001,na=catNAL)
                         CBL.append(colNo)
+                    if isLine: linePts(None)
                     continue
 
                 # Draw a rectangular symbol for each data item,
@@ -688,15 +721,11 @@ class BarChart(PlotArea):
                     else:
                         xL = x + width
                         yL = y + height*0.5
-                    if colNo==0:
-                        linePts = [].append
                     linePts(xL)
                     linePts(yL)
-                    if colNo==len(row)-1:
-                        lines(PolyLine(linePts.__self__,
-                            strokeColor=rowStyle.strokeColor or rowStyle.fillColor,
-                            strokeWidth=rowStyle.strokeWidth,
-                            strokeDashArray = rowStyle.strokeDashArray))
+                    if symbol:
+                        sym = uSymbol2Symbol(tpcGetItem(symbol,colNo),xL,yL,style.strokeColor or style.fillColor)
+                        if sym: lineSyms(sym)
 
                 elif symbol:
                     symbol.x = x
@@ -711,8 +740,17 @@ class BarChart(PlotArea):
 
                 self._addBarLabel(lg,rowNo,colNo,x,y,width,height)
 
+            for linePts in yieldNoneSplits(linePts.__self__):
+                if linePts:
+                    lines(PolyLine(linePts,
+                            strokeColor=rowStyle.strokeColor or rowStyle.fillColor,
+                            strokeWidth=rowStyle.strokeWidth,
+                            strokeDashArray = rowStyle.strokeDashArray))
+
         for pl in lines.__self__:
             g.add(pl)
+        for sym in lineSyms.__self__:
+            g.add(sym)
 
     def _computeLabelPosition(self, text, label, rowNo, colNo, x, y, width, height):
         if label.visible:
