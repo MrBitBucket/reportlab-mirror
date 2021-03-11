@@ -110,6 +110,40 @@ def sample2bar(data=[(13, 5, 20, 22, 37, 45, 19, 4),
                   (14, 6, 21, 23, 38, 46, 20, 5)]):
     return sample1bar(data)
 
+def sample1barline(
+        data=[(100,110,120,130),(70,25,85,30),(63,75,51,92),(51,21,66,71),(10,11,90,30)],
+        seriesOrder=[[0,3,1],[4],[2]],
+        lines=[3,4],
+        cAStyle = 'mixed',
+        ):
+        d = Drawing(400,250)
+        chart = VerticalBarChart()
+        d.add(chart,name='chart')
+        leg = Legend()
+        d.add(leg, name='leg')
+        chart.bars.strokeColor = None
+        chart.bars[2].fillColor   = colors.blue
+        chart.bars[3].fillColor   = colors.orange
+        chart.bars[4].fillColor   = colors.black#yellow
+        chart.bars[4].strokeWidth     = 3
+        chart.bars[4].symbol = makeMarker('FilledDiamond',size=10,fillColor=colors.red)
+        chart.barSpacing = 1
+        chart.categoryAxis.style=cAStyle
+        chart.data = data
+        chart.x = 20
+        chart.y = 70
+        chart.height = d.height - chart.y -10
+        chart.valueAxis.forceZero = True
+        chart.width = d.width-chart.x - 10
+        for i in lines: chart.bars[i].isLine=1
+        for i in lines: chart.bars[i].strokeWidth = 2
+        leg.colorNamePairs = Auto(chart=chart)
+        leg.x = d.width / 2
+        leg.y = 5
+        leg.boxAnchor = 's'
+        leg.columnMaximum = 1
+        leg.alignment='right'
+        return d
 
 def sample1line(data=[(13, 5, 20, 22, 37, 45, 19, 4)]):
     drawing = Drawing(400, 200)
@@ -319,6 +353,12 @@ class ChartTestCase(unittest.TestCase):
         doc = MyDocTemplate(path)
         doc.build(cls.story)
 
+        global fontName
+        fontName = 'Helvetica'
+        run_samples([(k,v,'special') for k,v in globals().items() if k.lower().startswith('sample')
+                            or k in ('lpleg', 'hlcleg', 'bcleg', 'pcleg', 'scleg', 'plpleg')
+                            ])
+
     def test0(self):
         "Test bar charts."
 
@@ -327,6 +367,12 @@ class ChartTestCase(unittest.TestCase):
 
         story.append(Spacer(0, 0.5*cm))
         drawing = sample1bar()
+        story.append(drawing)
+        story.append(Spacer(0, 1*cm))
+        story.append(Paragraph('Multiple series mixed bar style with lines', h2))
+
+        story.append(Spacer(0, 0.5*cm))
+        drawing = sample1barline()
         story.append(drawing)
         story.append(Spacer(0, 1*cm))
 
