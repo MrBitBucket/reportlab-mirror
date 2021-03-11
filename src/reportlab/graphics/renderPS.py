@@ -319,7 +319,7 @@ class PSCanvas:
                 x = y = 0
             oldColor = self._color
             if fontObj._dynamicFont:
-                self._textOut(self, x, y, s, textRenderMode=textRenderMode)
+                self._textOut(x, y, s, textRenderMode=textRenderMode)
             else:
                 self._issueT1String(fontObj,x,y,s, textRenderMode=textRenderMode)
             self.setColor(oldColor)
