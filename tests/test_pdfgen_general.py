@@ -1247,6 +1247,30 @@ class PdfgenTestCase(unittest.TestCase):
         c.showPage()
         c.save()
 
+    def testSpooledTemporarySaves(self):
+        return
+        from tempfile import SpooledTemporaryFile
+        with SpooledTemporaryFile() as f:
+            c = canvas.Canvas(f)
+            c.drawString(100, 700, 'Hello World I write to %s' % repr(f))
+            c.showPage()
+            c.save()
+
+    def testBytesIOSaves(self):
+        from io import BytesIO
+        with BytesIO() as f:
+            c = canvas.Canvas(f)
+            c.drawString(100, 700, 'Hello World I write to %s' % repr(f))
+            c.showPage()
+            c.save()
+
+    def testBadFileName(self):
+        f = ['filename']
+        c = canvas.Canvas(f)
+        c.drawString(100, 700, 'Hello World I write to %s' % repr(f))
+        c.showPage()
+        self.assertRaises(TypeError,c.save)
+
 def trySomeColors(C,enforceColorSpace=None):
     from reportlab.lib.utils import getBytesIO
     out=getBytesIO()

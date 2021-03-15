@@ -209,13 +209,19 @@ class PDFDocument(PDFObject):
         if hasattr(getattr(filename, "write",None),'__call__'):
             myfile = 0
             f = filename
-            filename = getattr(f,'name','')
-            if isinstance(filename,int): filename = '<os fd:%d>'% filename
+            filename = getattr(f,'name',None)
+            if isinstance(filename,int):
+                filename = '<os fd:%d>'% filename
+            elif not isStr(filename): #try to fix bug reported by Robert Schroll <rschroll at gmail.com> 
+                filename = '<%s@0X%8.8X>' % (f.__class__.__name__,id(f))
             filename = makeFileName(filename)
-        else :
+        elif isStr(filename):
             myfile = 1
             filename = makeFileName(filename)
             f = open(filename, "wb")
+        else:
+            raise TypeError('Cannot use %s as a filename or file' % repr(filename)) 
+
         data = self.GetPDFData(canvas)
         if isUnicode(data):
             data = data.encode('latin1')

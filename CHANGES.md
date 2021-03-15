@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.5.66	 11/03/2021
+---------------------------
+	* fix obvious bug in renderPS.py cut'n'paste bah :(
+	* fix bug saving to SpooledtemporaryFile's reported by Robert Schroll <rschroll at gmail.com>
+
 CHANGES  3.5.65	 10/03/2021
 ---------------------------
 	* add yieldNoneSplits utility function
