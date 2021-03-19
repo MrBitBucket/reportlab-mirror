@@ -2634,7 +2634,7 @@ class ParaParser(HTMLParser):
         frag.us_lines = frag.us_lines + [(
                     self.nlines,
                     k,
-                    getattr(frag,k+'Color',None),
+                    getattr(frag,k+'Color',self._defaultLineColors[k]),
                     getattr(frag,k+'Width',self._defaultLineWidths[k]),
                     getattr(frag,k+'Offset',self._defaultLineOffsets[k]),
                     frag.rise,
@@ -2894,6 +2894,10 @@ class ParaParser(HTMLParser):
         self._defaultLineWidths = dict(
                                     underline = getattr(style,'underlineWidth',''),
                                     strike = getattr(style,'strikeWidth',''),
+                                    )
+        self._defaultLineColors = dict(
+                                    underline = getattr(style,'underlineColor',''),
+                                    strike = getattr(style,'strikeColor',''),
                                     )
         self._defaultLineOffsets = dict(
                                     underline = getattr(style,'underlineOffset',''),

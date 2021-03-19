@@ -140,19 +140,19 @@ class ParagraphStyle(PropertySet):
                                 #string or object with text and optional fontName, fontSize, textColor & backColor
                                 #dy
         'splitLongWords':1,     #make best efforts to split long words
-        'underlineWidth': _baseUnderlineWidth,  #underline width
+        'underlineWidth': _baseUnderlineWidth,  #underline width default
         'bulletAnchor': 'start',    #where the bullet is anchored ie start, middle, end or numeric
         'justifyLastLine': 0,   #n allow justification on the last line for more than n words 0 means don't bother
         'justifyBreaks': 0,     #justify lines broken with <br/>
         'spaceShrinkage': _spaceShrinkage,  #allow shrinkage of percentage of space to fit on line
-        'strikeWidth': _baseStrikeWidth,    #stroke width
+        'strikeWidth': _baseStrikeWidth,    #stroke width default
         'underlineOffset': _baseUnderlineOffset,    #fraction of fontsize to offset underlines
         'underlineGap': _baseUnderlineGap,      #gap for double/triple underline
         'strikeOffset': _baseStrikeOffset,  #fraction of fontsize to offset strikethrough
         'strikeGap': _baseStrikeGap,        #gap for double/triple strike
         'linkUnderline': _platypus_link_underline,
-        #'underlineColor':  None,
-        #'strikeColor': None,
+        'underlineColor':   None,
+        'strikeColor': None,
         'hyphenationLang': _hyphenationLang,
         #'hyphenationMinWordLength': _hyphenationMinWordLength,
         'embeddedHyphenation': _embeddedHyphenation,
