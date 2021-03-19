@@ -279,6 +279,16 @@ class ParagraphCorners(unittest.TestCase):
                 "\n(owh,ocode)=%r\nfor test_lele_img.pdf doesn't match expected\n(xwh,xcode)=%r" %(
                     (xwh,xcode),(owh,ocode)))
         
+DEJAVUSANS = ('DejaVuSans','DejaVuSans-Bold','DejaVuSans-Oblique','DejaVuSans-BoldOblique')
+def haveDejaVu():
+    from reportlab.pdfbase.ttfonts import TTFont
+    for x in DEJAVUSANS:
+        try:
+            TTFont(x,x+'.ttf')
+        except:
+            return False
+    return True
+
 class ParagraphSplitTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
 
@@ -688,6 +698,114 @@ providing the ultimate in ease of installation.''',
         story.append(ImageAndFlowables(Image(gif),[heading,Paragraph(text1,bt)]))
         doc = MyDocTemplate(outputfile('test_platypus_imageandflowables_rtl.pdf'),showBoundary=1)
         doc.multiBuild(story)
+
+    @unittest.skipUnless(rtlSupport and haveDejaVu(),'s')
+    def test2_RTL(self):
+        '''example & bugfix contributed by Moshe Uminer < mosheduminer at gmail.com >'''
+        from reportlab.platypus import Paragraph, PageBreak
+        from reportlab.lib.enums import TA_JUSTIFY, TA_RIGHT, TA_CENTER, TA_LEFT
+        from reportlab.pdfbase import pdfmetrics
+        from reportlab.pdfbase.ttfonts import TTFont
+        from reportlab.lib.pagesizes import LETTER
+        from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+        from reportlab.platypus.doctemplate import SimpleDocTemplate
+        from reportlab.lib.colors import toColor
+        pdfmetrics.registerFont(TTFont("DejaVuSans", "DejaVuSans.ttf"))
+
+        text = u'\u05e9\u05dc\u05d5\u05dd! \u05d6\u05d5 \u05ea\u05d4\u05d9\u05d4 \u05e4\u05e1\u05e7\u05d4 \u05e9\u05d4\u05e9\u05d5\u05e8\u05d4 \u05d4\u05d0\u05d7\u05e8\u05d5\u05e0\u05d4 \u05e9\u05dc\u05d4 \u05dc\u05d0 \u05ea\u05d5\u05e6\u05d3\u05e7 \u05db\u05d4\u05dc\u05db\u05d4.'
+        text = u' '.join((text,text))
+
+        doc = SimpleDocTemplate(
+            outputfile("test_platypus_paragraphs_rtl_2.pdf"),
+            pagesize=LETTER,
+            rightMargin=72,
+            leftMargin=72,
+            topMargin=72,
+            bottomMargin=72,
+            )
+        styles = getSampleStyleSheet()
+        hebrew_j = ParagraphStyle(
+            parent=styles["Normal"],
+            name="NormalHebrew",
+            wordWrap="RTL",
+            alignment=TA_JUSTIFY,
+            fontName="DejaVuSans",
+            fontSize=14,
+            underlineWidth=0.5,
+            underlineColor=toColor('red'),
+            strikeWidth=0.4,
+            strikeColor=toColor('orange'),
+            )
+        latin = hebrew_j.clone('latin',alignment=TA_LEFT,wordWrap='LTR')
+        hebrew_r = hebrew_j.clone('nhr', alignment=TA_RIGHT)
+        hebrew_rd = hebrew_r.clone('nhrd', endDots='.')
+        hebrew_jd = hebrew_j.clone('nhjd', endDots='.')
+        hebrew_c = hebrew_j.clone('nhc', alignment=TA_CENTER)
+        hebrew_cd = hebrew_c.clone('nhc', endDots='.')
+
+        rtext = text.replace(u'\u05db\u05d4\u05dc\u05db\u05d4',u'<span color=red>\u05db\u05d4\u05dc\u05db\u05d4</span>')
+        _utext = u''.join((u'<u>',text,u'</u>'))
+        utext = u''.join(('<u color=green>',text,'</u>'))
+        stext = u''.join(('<strike>',text,'</strike>'))
+        urtext = u''.join(('<u color=blue>',rtext,'</u>'))
+        srtext = u''.join(('<strike color=magenta>',rtext,'</strike>'))
+        flowables = [
+                Paragraph('justified',latin),
+                Paragraph(text, hebrew_j),
+                Paragraph(_utext, hebrew_j), #single frag takes defaults
+                Paragraph(stext, hebrew_j), #single frag takes defaults
+                Paragraph(utext, hebrew_j),
+                Paragraph(rtext, hebrew_j),
+                Paragraph(urtext, hebrew_j),
+                Paragraph(srtext, hebrew_j),
+        
+                Paragraph('right',latin),
+                Paragraph(text, hebrew_r),
+                Paragraph(_utext, hebrew_r), #single frag takes defaults
+                Paragraph(stext, hebrew_r), #single frag takes defaults
+                Paragraph(utext, hebrew_r),
+                Paragraph(rtext, hebrew_r),
+                Paragraph(urtext, hebrew_r),
+                Paragraph(srtext, hebrew_r),
+
+                Paragraph('center',latin),
+                Paragraph(text, hebrew_c),
+                Paragraph(_utext, hebrew_c), #single frag takes defaults
+                Paragraph(stext, hebrew_c), #single frag takes defaults
+                Paragraph(utext, hebrew_c),
+                Paragraph(rtext, hebrew_c),
+                Paragraph(urtext, hebrew_c),
+                Paragraph(srtext, hebrew_c),
+
+                PageBreak(),
+                Paragraph('justified dots',latin),
+                Paragraph(text, hebrew_jd),
+                Paragraph(_utext, hebrew_jd), #single frag takes defaults
+                Paragraph(stext, hebrew_jd), #single frag takes defaults
+                Paragraph(utext, hebrew_jd),
+                Paragraph(rtext, hebrew_jd),
+                Paragraph(urtext, hebrew_jd),
+                Paragraph(srtext, hebrew_jd),
+        
+                Paragraph('right dots',latin),
+                Paragraph(text, hebrew_rd),
+                Paragraph(_utext, hebrew_rd), #single frag takes defaults
+                Paragraph(stext, hebrew_rd), #single frag takes defaults
+                Paragraph(utext, hebrew_rd),
+                Paragraph(rtext, hebrew_rd),
+                Paragraph(urtext, hebrew_rd),
+                Paragraph(srtext, hebrew_rd),
+
+                Paragraph('center dots',latin),
+                Paragraph(text, hebrew_cd),
+                Paragraph(_utext, hebrew_cd), #single frag takes defaults
+                Paragraph(stext, hebrew_cd), #single frag takes defaults
+                Paragraph(utext, hebrew_cd),
+                Paragraph(rtext, hebrew_cd),
+                Paragraph(urtext, hebrew_cd),
+                Paragraph(srtext, hebrew_cd),
+                ]
+        doc.build(flowables)
 
     def test_splitJustBug(self):
         """test that justified paragraphs with </br>last line split properly
@@ -1338,17 +1456,6 @@ phonemic and <u>morphological</u> <strike>analysis</strike>.'''
         doc = MyDocTemplate(outputfile('test_platypus_paragraphs_autoleading.pdf'))
         doc.build(story)
 
-DEJAVUSANS = ('DejaVuSans','DejaVuSans-Bold','DejaVuSans-Oblique','DejaVuSans-BoldOblique')
-def haveDejaVu():
-    from reportlab.pdfbase.ttfonts import TTFont
-    for x in DEJAVUSANS:
-        try:
-            TTFont(x,x+'.ttf')
-        except:
-            return False
-    return True
-
-DEJAVUSANS = ('DejaVuSans','DejaVuSans-Bold','DejaVuSans-Oblique','DejaVuSans-BoldOblique')
 def alphaSortedItems(d):
     return (i[1] for i in sorted((j[0].lower(),j) for j in d.items()))
 

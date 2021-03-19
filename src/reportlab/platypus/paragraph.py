@@ -216,6 +216,9 @@ def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,-offset)
     return offset
 
+def _justifyDrawParaLineRTL( tx, offset, extraspace, words, last=0):
+    return (_rightDrawParaLine if last else _justifyDrawParaLine)(tx, offset, extraspace, words, last)
+
 def imgVRange(h,va,fontSize):
     '''return bottom,top offsets relative to baseline(0)'''
     if va=='baseline':
@@ -403,8 +406,13 @@ def _putFragLine(cur_x, tx, line, last, pKind):
             nSpaces += text.count(' ')+_nbspCount(text)
 
     cur_x_s = cur_x+(nSpaces-1)*ws
-    if last and pKind!='right' and xs.style.endDots:
-        _do_dots_frag(cur_x,cur_x_s,line.maxWidth,xs,tx)
+    if last and xs.style.endDots:
+        if xs.style.wordWrap!='RTL':    #assume dots left --> right
+            if pKind!='right':
+                _do_dots_frag(cur_x,cur_x_s,line.maxWidth,xs,tx)
+        elif pKind!='left':
+            start = tx._x_offset
+            _do_dots_frag(start, start, x0 - start, xs, tx, left=False)
 
     if LL:
         for l in LL:
@@ -419,13 +427,13 @@ def _putFragLine(cur_x, tx, line, last, pKind):
     if tx._x0!=x0:
         setXPos(tx,x0-tx._x0)
 
-def _do_dots_frag(cur_x, cur_x_s, maxWidth, xs, tx):
+def _do_dots_frag(cur_x, cur_x_s, maxWidth, xs, tx, left=True):
     text,fontName,fontSize,textColor,backColor,dy = _getDotsInfo(xs.style)
     txtlen = tx._canvas.stringWidth(text, fontName, fontSize)
     if cur_x_s+txtlen<=maxWidth:
         if tx._fontname!=fontName or tx._fontsize!=fontSize:
             tx.setFont(fontName,fontSize)
-        maxWidth += getattr(tx,'_dotsOffsetX',tx._x0)
+        if left: maxWidth += getattr(tx,'_dotsOffsetX',tx._x0)
         tx.setTextOrigin(0,xs.cur_y+dy)
         setXPos(tx,cur_x_s-cur_x)
         n = int((maxWidth-cur_x_s)/txtlen)
@@ -437,6 +445,7 @@ def _do_dots_frag(cur_x, cur_x_s, maxWidth, xs, tx):
         if dy: tx.setTextOrigin(tx._x0,xs.cur_y-dy)
 
 def _leftDrawParaLineX( tx, offset, line, last=0):
+    tx._x_offset = offset
     setXPos(tx,offset)
     extraSpace = line.extraSpace
     simple = extraSpace>-1e-8 or getattr(line,'preformatted',False)
@@ -452,6 +461,7 @@ def _leftDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,-offset)
 
 def _centerDrawParaLineX( tx, offset, line, last=0):
+    tx._x_offset = offset
     tx._dotsOffsetX = offset + tx._x0
     try:
         extraSpace = line.extraSpace
@@ -473,6 +483,7 @@ def _centerDrawParaLineX( tx, offset, line, last=0):
         del tx._dotsOffsetX
 
 def _rightDrawParaLineX( tx, offset, line, last=0):
+    tx._x_offset = offset
     extraSpace = line.extraSpace
     simple = extraSpace>-1e-8 or getattr(line,'preformatted',False)
     if not simple:
@@ -490,6 +501,7 @@ def _rightDrawParaLineX( tx, offset, line, last=0):
     setXPos(tx,-m)
 
 def _justifyDrawParaLineX( tx, offset, line, last=0):
+    tx._x_offset = offset
     setXPos(tx,offset)
     extraSpace = line.extraSpace
     simple = last or abs(extraSpace)<=1e-8 or line.lineBreak
@@ -503,6 +515,9 @@ def _justifyDrawParaLineX( tx, offset, line, last=0):
     else:
         _putFragLine(offset, tx, line, last, 'justify') #no space modification
     setXPos(tx,-offset)
+
+def _justifyDrawParaLineXRTL( tx, offset, line, last=0):
+    return (_rightDrawParaLineX if last else _justifyDrawParaLineX)( tx, offset, line, last)
 
 def _trailingSpaceLength(text, tx):
     ws = _wsc_end_search(text)
@@ -1453,7 +1468,7 @@ def _do_under_line(i, x1, ws, tx, us_lines):
     tc = f.textColor
     values = dict(L=fs,F=fs,f=fs)
     dw = tx._defaultLineWidth
-    x2 = x1 + tx._canvas.stringWidth(' '.join(tx.XtraState.lines[i][1]), tx._fontname, fs)
+    x2 = x1 + tx._canvas.stringWidth(' '.join(tx.XtraState.lines[i][1]), tx._fontname, fs) + ws
     for n,k,c,w,o,r,m,g in us_lines:
         underline = k=='underline'
         lw = _usConv(w,values,default=tx._defaultLineWidth)
@@ -1705,6 +1720,15 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
         lines.append(makeCJKParaLine(U[lineStartPos:],maxWidth,widthUsed,maxWidth-widthUsed,False,calcBounds))
 
     return ParaLines(kind=1,lines=lines)
+
+def _setTXLineProps(tx, canvas, style):
+    tx._defaultLineWidth = canvas._lineWidth
+    tx._underlineColor = getattr(style,'underlineColor','')
+    tx._underlineWidth = getattr(style,'underlineWidth','')
+    tx._underlineOffset = getattr(style,'underlineOffset','') or '-0.125f'
+    tx._strikeColor = getattr(style,'strikeColor','')
+    tx._strikeWidth = getattr(style,'strikeWidth','')
+    tx._strikeOffset = getattr(style,'strikeOffset','') or '0.25f'
 
 class Paragraph(Flowable):
     """ Paragraph(text, style, bulletText=None, caseSensitive=1)
@@ -2484,23 +2508,25 @@ class Paragraph(Flowable):
             lim = nLines-1
             noJustifyLast = not getattr(self,'_JustifyLast',False)
             jllwc = style.justifyLastLine
+            isRTL = style.wordWrap=='RTL'
+            bRTL = isRTL and self._wrapWidths or False
 
             if blPara.kind==0:
                 if alignment == TA_LEFT:
                     dpl = _leftDrawParaLine
                 elif alignment == TA_CENTER:
                     dpl = _centerDrawParaLine
-                elif self.style.alignment == TA_RIGHT:
+                elif alignment == TA_RIGHT:
                     dpl = _rightDrawParaLine
-                elif self.style.alignment == TA_JUSTIFY:
-                    dpl = _justifyDrawParaLine
+                elif alignment == TA_JUSTIFY:
+                    dpl = _justifyDrawParaLineRTL if isRTL else _justifyDrawParaLine
                 f = blPara
                 if paraFontSizeHeightOffset:
                     cur_y = self.height - f.fontSize
                 else:
                     cur_y = self.height - getattr(f,'ascent',f.fontSize)
                 if bulletText:
-                    offset = _drawBullet(canvas,offset,cur_y,bulletText,style,rtl=style.wordWrap=='RTL' and self._wrapWidths or False)
+                    offset = _drawBullet(canvas,offset,cur_y,bulletText,style,rtl=bRTL)
 
                 #set up the font etc.
                 canvas.setFillColor(f.textColor)
@@ -2523,10 +2549,10 @@ class Paragraph(Flowable):
                 if lastLine and jllwc and len(words)>jllwc:
                     lastLine=False
                 t_off = dpl( tx, offset, ws, words, lastLine)
-                if f.us_lines or f.link or style.endDots:
+                if f.us_lines or f.link:# or style.endDots:
                     tx._do_line = MethodType(_do_line,tx)
                     tx.xs = xs = tx.XtraState = ABag()
-                    tx._defaultLineWidth = canvas._lineWidth
+                    _setTXLineProps(tx, canvas, style)
                     xs.cur_y = cur_y
                     xs.f = f
                     xs.style = style
@@ -2535,11 +2561,11 @@ class Paragraph(Flowable):
                     xs.textColor = f.textColor
                     xs.backColors = []
                     dx = t_off+leftIndent
-                    if dpl!=_justifyDrawParaLine: ws = 0
+                    if alignment!=TA_JUSTIFY or lastLine: ws = 0
                     if f.us_lines:
                         _do_under_line(0, dx, ws, tx, f.us_lines)
                     if f.link: _do_link_line(0, dx, ws, tx)
-                    if lastLine and style.endDots and dpl!=_rightDrawParaLine: _do_dots(0, dx, ws, xs, tx, dpl)
+                    #if lastLine and style.endDots and dpl!=_rightDrawParaLine: _do_dots(0, dx, ws, xs, tx, dpl)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
                     for i in xrange(1, nLines):
@@ -2550,11 +2576,11 @@ class Paragraph(Flowable):
                             lastLine=False
                         t_off = dpl( tx, _offsets[i], ws, words, lastLine)
                         dx = t_off+leftIndent
-                        if dpl!=_justifyDrawParaLine: ws = 0
+                        if alignment!=TA_JUSTIFY or lastLine: ws = 0
                         if f.us_lines:
                             _do_under_line(i, t_off, ws, tx, f.us_lines)
                         if f.link: _do_link_line(i, dx, ws, tx)
-                        if lastLine and style.endDots and dpl!=_rightDrawParaLine: _do_dots(i, dx, ws, xs, tx, dpl)
+                        #if lastLine and style.endDots and dpl!=_rightDrawParaLine: _do_dots(i, dx, ws, xs, tx, dpl)
                 else:
                     for i in xrange(1, nLines):
                         words = lines[i][1]
@@ -2563,7 +2589,7 @@ class Paragraph(Flowable):
                             lastLine=False
                         dpl( tx, _offsets[i], lines[i][0], words, lastLine)
             else:
-                if self.style.wordWrap == 'RTL':
+                if isRTL:
                     for line in lines:
                         line.words = line.words[::-1]
                 f = lines[0]
@@ -2575,26 +2601,22 @@ class Paragraph(Flowable):
                 dpl = _leftDrawParaLineX
                 if bulletText:
                     oo = offset
-                    offset = _drawBullet(canvas,offset,cur_y,bulletText,style, rtl=style.wordWrap=='RTL' and self._wrapWidths or False)
+                    offset = _drawBullet(canvas,offset,cur_y,bulletText,style, rtl=bRTL)
                 if alignment == TA_LEFT:
                     dpl = _leftDrawParaLineX
                 elif alignment == TA_CENTER:
                     dpl = _centerDrawParaLineX
-                elif self.style.alignment == TA_RIGHT:
+                elif alignment == TA_RIGHT:
                     dpl = _rightDrawParaLineX
-                elif self.style.alignment == TA_JUSTIFY:
-                    dpl = _justifyDrawParaLineX
+                elif alignment == TA_JUSTIFY:
+                    dpl = _justifyDrawParaLineXRTL if isRTL else _justifyDrawParaLineX
                 else:
                     raise ValueError("bad align %s" % repr(alignment))
 
                 #set up the font etc.
                 tx = self.beginText(cur_x, cur_y)
                 tx.preformatted = 'preformatted' in self.__class__.__name__.lower()
-                tx._defaultLineWidth = canvas._lineWidth
-                tx._underlineWidth = getattr(style,'underlineWidth','')
-                tx._underlineOffset = getattr(style,'underlineOffset','') or '-0.125f'
-                tx._strikeWidth = getattr(style,'strikeWidth','')
-                tx._strikeOffset = getattr(style,'strikeOffset','') or '0.25f'
+                _setTXLineProps(tx, canvas, style)
                 tx._do_line = MethodType(_do_line,tx)
                 # set the paragraph direction
                 tx.direction = self.style.wordWrap
