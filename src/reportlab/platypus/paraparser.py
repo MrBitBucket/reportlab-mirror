@@ -51,7 +51,7 @@ def _convnum(s, unit=1, allowRelative=True):
 
 def _num(s, unit=1, allowRelative=True,
         _unit_map = {'i':inch,'in':inch,'pt':1,'cm':cm,'mm':mm,'pica':pica },
-        _re_unit = re.compile('^\s*(.*)(i|in|cm|mm|pt|pica)\s*$'),
+        _re_unit = re.compile(r'^\s*(.*)(i|in|cm|mm|pt|pica)\s*$'),
         ):
     """Convert a string like '10cm' to an int or float (in points).
        The default unit is point, but optionally you can use other

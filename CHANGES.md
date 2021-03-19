@@ -16,6 +16,7 @@ CHANGES  3.5.66	 19/03/2021
 	* fix obvious bug in renderPS.py cut'n'paste bah :(
 	* fix bug saving to SpooledtemporaryFile's reported by Robert Schroll <rschroll at gmail.com>
 	* fix bug in justified RTL paragraphs example & bugfix contributed by Moshe Uminer <mosheduminer at gmail.com>
+	* fix regex deprecation reported by Jürgen Gmach <juergen.gmach at apis.de>
 
 CHANGES  3.5.65	 10/03/2021
 ---------------------------
