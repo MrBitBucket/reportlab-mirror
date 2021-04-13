@@ -3,13 +3,18 @@ CHANGES
 
 This is a summary of changes made to the reportlab source code for each release.
 Please refer to subversion backlogs (using the release dates) for more details
-or for releases which we have not provide a higher level changes list for.
+or for releases which we have not provide a hig`her level changes list for.
 E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 
   $ hg log -r 54ce2469ba5c
 
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
+
+CHANGES  3.5.67	 12/04/2021
+---------------------------
+	* Allow unicode PDFString to use encoding directly; fixes bug where colorspace indexes are broken
+	* Ensure PIL images can be size checked
 
 CHANGES  3.5.66	 19/03/2021
 ---------------------------

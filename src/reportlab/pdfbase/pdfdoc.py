@@ -584,12 +584,14 @@ def _checkPdfdoc(utext):
         return 0
 
 class PDFString(PDFObject):
+    unicodeEncValid = False
     def __init__(self, s, escape=1, enc='auto'):
         '''s can be unicode/utf8 or a PDFString
         if escape is true then the output will be passed through escape
-        if enc is raw then the string will be left alone
+        if enc is raw then bytes will be left alone
         if enc is auto we'll try and automatically adapt to utf_16_be/utf_16_le if the
         effective string is not entirely in pdfdoc
+        if self.unicodeEncValid unicode will use the specifed encoding
         '''
         if isinstance(s,PDFString):
             self.s = s.s
@@ -627,6 +629,8 @@ class PDFString(PDFObject):
                     s = s.encode('pdfdoc')
                 else:
                     s = codecs.BOM_UTF16_BE+s.encode('utf_16_be')
+            elif self.unicodeEncValid:
+                s = s.encode(self.enc)
             else:
                 s = codecs.BOM_UTF16_BE+s.encode('utf_16_be')
         else:
