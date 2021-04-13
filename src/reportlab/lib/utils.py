@@ -802,6 +802,7 @@ def _isPILImage(im):
 class ImageReader(object):
     "Wraps up either PIL or Java to get data from bitmaps"
     _cache={}
+    _max_image_size = None
     def __init__(self, fileName,ident=None):
         if isinstance(fileName,ImageReader):
             self.__dict__ = fileName.__dict__   #borgize
@@ -849,6 +850,7 @@ class ImageReader(object):
                     #detect which library we are using and open the image
                     if not self._image:
                         self._image = self._read_image(self.fp)
+                        self.check_pil_image_size(self._image)
                     if getattr(self._image,'format',None)=='JPEG': self.jpeg_fh = self._jpeg_fh
                 else:
                     from reportlab.pdfbase.pdfutils import readJPEGInfo
@@ -856,6 +858,10 @@ class ImageReader(object):
                         self._width,self._height,c=readJPEGInfo(self.fp)
                     except:
                         annotateException('\nImaging Library not available, unable to import bitmaps only jpegs\nfileName=%r identity=%s'%(fileName,self.identity()))
+                    size = self._width*self._height*c
+                    if self._max_image_size is not None and size>self._max+image_size:
+                        raise MemoryError('JPEG %s color %s x %s image would use %s > %s bytes'
+                                            %(c,self._width,self._height,size,self._max_image_size))
                     self.jpeg_fh = self._jpeg_fh
                     self._data = self.fp.read()
                     self._dataA=None
@@ -877,6 +883,23 @@ class ImageReader(object):
             return ImageIO.read(fp)
         else:
             return Image.open(fp)
+
+    @classmethod
+    def check_pil_image_size(cls, im):
+        max_image_size = cls._max_image_size
+        if max_image_size is None: return
+        w, h = im.size
+        m = im.mode
+        size = max(1,((1 if m=='1' else 8*len(m))*w*h)>>3)
+        if size>max_image_size:
+            raise MemoryError('PIL %s %s x %s image would use %s > %s bytes'
+                                            %(m,w,h,size,max_image_size))
+    @classmethod
+    def set_max_image_size(cls,max_image_size=None):
+        cls._max_image_size = max_image_size
+        if max_image_size is not None:
+            from reportlab.rl_config import register_reset
+            register_reset(cls.set_max_image_size)
 
     def _jpeg_fh(self):
         fp = self.fp
