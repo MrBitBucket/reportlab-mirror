@@ -1248,7 +1248,6 @@ class PdfgenTestCase(unittest.TestCase):
         c.save()
 
     def testSpooledTemporarySaves(self):
-        return
         from tempfile import SpooledTemporaryFile
         with SpooledTemporaryFile() as f:
             c = canvas.Canvas(f)
