@@ -8,25 +8,38 @@ __all__ = (
         )
 from . _renderPM import makeT1Font
 from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1
-from reportlab.lib.utils import open_and_read, isBytes
+from reportlab.lib.utils import open_and_read, isBytes, isPy3, rl_exec
 from .shapes import _baseGFontName, _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, definePath
 from sys import exc_info
 
 class RenderPMError(Exception):
     pass
 
+def _errorDump(fontName, fontSize):
+    s1, s2 = list(map(str,exc_info()[:2]))
+    from reportlab import rl_config
+    if rl_config.verbose>=2:
+        import os
+        _ = os.path.join(os.path.dirname(rl_config.__file__),'fonts')
+        print('!!!!! %s: %s' % (_,os.listdir(_)))
+        for _ in ('T1SearchPath','TTFSearchPath'):
+            print('!!!!! rl_config.%s = %s' % (_,repr(getattr(rl_config,_))))
+    code = 'raise RenderPMError("Error in setFont(%s,%s) missing the T1 files?\\nOriginally %s: %s")' % (repr(fontName),repr(fontSize),s1,s2)
+    if isPy3: code += ' from None'
+    rl_exec(code,dict(RenderPMError=RenderPMError))
+
 def setFont(gs,fontName,fontSize):
     try:
         gs.setFont(fontName,fontSize)
     except ValueError as e:
-        if not e.args[0].endswith("Can't find font!"): raise
+        if not e.args[0].endswith("Can't find font!"):
+            _errorDump(fontName,fontSize)
         #here's where we try to add a font to the canvas
         try:
             f = getFont(fontName)
             makeT1Font(fontName,f.face.findT1File(),f.encoding.vector,open_and_read)
         except:
-            s1, s2 = list(map(str,exc_info()[:2]))
-            raise RenderPMError("Can't setFont(%s) missing the T1 files?\nOriginally %s: %s" % (fontName,s1,s2))
+            _errorDump(fontName,fontSize)
         gs.setFont(fontName,fontSize)
 
 def pathNumTrunc(n):
