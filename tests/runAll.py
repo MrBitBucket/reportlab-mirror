@@ -10,6 +10,17 @@ import os, glob, sys, traceback, unittest
 #run 'setup.py tests', but won't be if you CD into the tests
 #directory and run this directly
 if __name__=='__main__':
+    if '--post-install' in sys.argv:
+        while '--post-install' in sys.argv: sys.argv.remove('--post-install')
+        import reportlab
+        from reportlab import rl_config
+        d = os.path.join(os.path.dirname(reportlab.__file__),'fonts')
+        for x in ('T1SearchPath','TTFSearchPath','CMapSearchPath'):
+            P = getattr(rl_config,x)
+            if d not in P:
+                P.insert(0,d)
+                print('+++++ inserted %r into rl_config.%s' % (d,x))
+        del reportlab, rl_config, d, x, P
     P=[]
     os.environ['RL_trustedHosts'] = '*.reportlab.com'
     try:

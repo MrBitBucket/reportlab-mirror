@@ -11,6 +11,14 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.5.68	 25/06/2021
+---------------------------
+	* graphics improve some error messages for renderPM
+	* changed lib.urilt.recursiveImport after errors in python3.10, reflect changes in readJPEGInfo
+	* pdfutils readJPEGInfo extracts dpi if present defaults to (72, 72)
+	* Image flowable allows a useDPI argument
+	* paraparser annotate some errors
+
 CHANGES  3.5.67	 12/04/2021
 ---------------------------
 	* Allow unicode PDFString to use encoding directly; fixes bug where colorspace indexes are broken

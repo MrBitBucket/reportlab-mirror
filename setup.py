@@ -30,6 +30,7 @@ path = os.path.abspath
 isfile = os.path.isfile
 isdir = os.path.isdir
 dirname = os.path.dirname
+basename = os.path.basename
 if __name__=='__main__':
     pkgDir=dirname(sys.argv[0])
 else:
@@ -44,21 +45,21 @@ except:
     print('!!!!! warning could not change directory to %r' % pkgDir)
 daily=int(os.environ.get('RL_EXE_DAILY','0'))
 
-import distutils
 try:
     from setuptools import setup, Extension
 except ImportError:
     from distutils.core import setup, Extension
-from distutils import sysconfig
+try:
+    import sysconfig
+except ImportError:
+    from distutils import sysconfig
 
-# from Zope - App.Common.package_home
-def package_home(globals_dict):
-    __name__=globals_dict['__name__']
-    m=sys.modules[__name__]
-    r=os.path.split(m.__path__[0])[0]
-    return r
+def _packages_path(d):
+    P = [_ for _ in sys.path if basename(_)==d]
+    if P: return P[0]
 
-package_path = pjoin(package_home(distutils.__dict__), 'site-packages', 'reportlab')
+package_path = _packages_path('dist-packages') or _packages_path('site-packages')
+package_path = pjoin(package_path, 'reportlab')
 
 def die(msg):
     raise ValueError(msg)
@@ -368,7 +369,10 @@ def get_glyphlist_module(PACKAGE_DIR):
 
 def main():
     #test to see if we've a special command
-    if 'test' in sys.argv or 'tests' in sys.argv or 'tests-preinstall' in sys.argv:
+    if 'test' in sys.argv \
+        or 'tests' in sys.argv \
+        or 'tests-postinstall' in sys.argv \
+        or 'tests-preinstall' in sys.argv:
         if len(sys.argv)!=2:
             raise ValueError('tests commands may only be used alone')
         cmd = sys.argv[-1]
@@ -377,7 +381,10 @@ def main():
             PYTHONPATH.insert(0,pjoin(pkgDir,'src'))
         if PYTHONPATH: os.environ['PYTHONPATH']=os.pathsep.join(PYTHONPATH)
         os.chdir(pjoin(pkgDir,'tests'))
-        sys.exit(os.system("%s runAll.py" % sys.executable))
+        cli = [sys.executable, 'runAll.py']
+        if cmd=='tests-postinstall':
+            cli.append('--post-install')
+        sys.exit(os.system(' '.join(cli)))
 
     debug_compile_args = []
     debug_link_args = []
@@ -528,7 +535,7 @@ def main():
                 FT_LIB_DIR = [dirname(FT_LIB)]
                 FT_INC_DIR = [FT_INC_DIR or pjoin(dirname(FT_LIB_DIR[0]),'include')]
                 FT_LIB_PATH = FT_LIB
-                FT_LIB = [os.path.splitext(os.path.basename(FT_LIB))[0]]
+                FT_LIB = [os.path.splitext(basename(FT_LIB))[0]]
                 if isdir(FT_INC_DIR[0]):
                     infoline('# installing with freetype %r' % FT_LIB_PATH)
                 else:
