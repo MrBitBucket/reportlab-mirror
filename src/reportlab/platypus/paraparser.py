@@ -2881,14 +2881,17 @@ class ParaParser(HTMLParser):
         frag.rise = 0
         frag.greek = 0
         frag.link = []
-        if bullet:
-            frag.fontName, frag.bold, frag.italic = ps2tt(style.bulletFontName)
-            frag.fontSize = style.bulletFontSize
-            frag.textColor = hasattr(style,'bulletColor') and style.bulletColor or style.textColor
-        else:
-            frag.fontName, frag.bold, frag.italic = ps2tt(style.fontName)
-            frag.fontSize = style.fontSize
-            frag.textColor = style.textColor
+        try:
+            if bullet:
+                frag.fontName, frag.bold, frag.italic = ps2tt(style.bulletFontName)
+                frag.fontSize = style.bulletFontSize
+                frag.textColor = hasattr(style,'bulletColor') and style.bulletColor or style.textColor
+            else:
+                frag.fontName, frag.bold, frag.italic = ps2tt(style.fontName)
+                frag.fontSize = style.fontSize
+                frag.textColor = style.textColor
+        except:
+            annotateException('error with style name=%s'%style.name)
         frag.us_lines = []
         self.nlinks = self.nlines = 0
         self._defaultLineWidths = dict(
