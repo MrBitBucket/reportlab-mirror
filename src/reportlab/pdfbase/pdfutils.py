@@ -238,13 +238,13 @@ def readJPEGInfo(image):
         [ 0xC3, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCD, 0xCE, 0xCF ]
 
     #read JPEG marker segments until we find SOFn marker or EOF
+    dpi = (72,72)
     done = 0
     while not done:
         x = struct.unpack('B', image.read(1))
         if x[0] == 0xFF:                    #found marker
             x = struct.unpack('B', image.read(1))
-            #print "Marker: ", '%0.2x' % x[0]
-            #check marker type is acceptable and process it
+            #print('marker=%2x' % x[0])
             if x[0] in validMarkers:
                 image.seek(2, 1)            #skip segment length
                 x = struct.unpack('B', image.read(1)) #data precision
@@ -256,7 +256,14 @@ def readJPEGInfo(image):
                 width =  (y[0] << 8) + y[1]
                 y = struct.unpack('B', image.read(1))
                 color =  y[0]
-                return width, height, color
+                return width, height, color, dpi
+            elif x[0]==0xE0:
+                x = struct.unpack('BB', image.read(2))
+                n = (x[0] << 8) + x[1] - 2
+                x = image.read(n)
+                y = struct.unpack('BB', x[10:12])
+                x = struct.unpack('BB', x[8:10])
+                dpi = ((x[0]<<8) + x[1],(y[0]<<8)+y[1])
             elif x[0] in unsupportedMarkers:
                 raise PDFError('JPEG Unsupported JPEG marker: %0.2x' % x[0])
             elif x[0] not in noParamMarkers:

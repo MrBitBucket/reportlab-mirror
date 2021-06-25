@@ -4,7 +4,7 @@
 __version__='3.5.34'
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
-import os, sys, time, types, datetime, ast
+import os, sys, time, types, datetime, ast, importlib
 from functools import reduce as functools_reduce
 literal_eval = ast.literal_eval
 try:
@@ -483,53 +483,56 @@ def isSourceDistro():
     '''return truth if a source file system distribution'''
     return _isFSSD
 
+def normalize_path(p):
+    return os.path.normcase(os.path.abspath(os.path.normpath(p)))
+
+_importlib_invalidate_caches = getattr(importlib,'invalidate_caches',lambda :None) 
+
 def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
     """Dynamically imports possible packagized module, or raises ImportError"""
-    normalize = lambda x: os.path.normcase(os.path.abspath(os.path.normpath(x)))
-    path = [normalize(p) for p in sys.path]
+    path = [normalize_path(p) for p in sys.path]
     if baseDir:
-        if not isSeq(baseDir):
-            tp = [baseDir]
-        else:
-            tp = filter(None,list(baseDir))
-        for p in tp:
-            p = normalize(p)
-            if p not in path: path.insert(0,p)
-
+        for p in baseDir if isinstance(baseDir,(list,tuple)) else (baseDir,):
+            if p:
+                p = normalize_path(p)
+                if p not in path: path.insert(0,p)
     if noCWD:
-        for p in ('','.',normalize('.')):
+        for p in ('','.',normalize_path('.')):
             while p in path:
                 if debug: print('removed "%s" from path' % p)
                 path.remove(p)
-    elif '.' not in path:
-            path.insert(0,'.')
-
-    if debug:
-        import pprint
-        pp = pprint.pprint
-        print('path=')
-        pp(path)
+    else:
+        p = os.getcwd()
+        if p not in path:
+            path.insert(0,p)
 
     #make import errors a bit more informative
     opath = sys.path
     try:
-        try:
-            sys.path = path
-            NS = {}
-            rl_exec('import %s as m' % modulename,NS)
-            return NS['m']
-        except ImportError:
-            sys.path = opath
-            msg = "Could not import '%s'" % modulename
-            if baseDir:
-                msg = msg + " under %s" % baseDir
-            annotateException(msg)
-        except:
-            e = sys.exc_info()
-            msg = "Exception raised while importing '%s': %s" % (modulename, e[1])
-            annotateException(msg)
+        sys.path = path
+        _importlib_invalidate_caches()
+        if debug:
+            print()
+            print(20*'+')
+            print('+++++ modulename=%s' % ascii(modulename))
+            print('+++++ cwd=%s' % ascii(os.getcwd()))
+            print('+++++ sys.path=%s' % ascii(sys.path))
+            print('+++++ os.paths.isfile(%s)=%s' % (ascii('./%s.py'%modulename), ascii(os.path.isfile('./%s.py'%modulename))))
+            print('+++++ opath=%s' % ascii(opath))
+            print(20*'-')
+        return importlib.import_module(modulename)
+    except ImportError:
+        annotateException("Could not import %r\nusing sys.path %r in cwd=%r" % (
+                modulename,sys.path,os.getcwd())
+                )
+    except:
+        annotateException("Exception %s while importing %r\nusing sys.path %r in cwd=%r" % (
+                str(sys.exc_info()[1]), modulename,sys.path,os.getcwd()))
     finally:
         sys.path = opath
+        _importlib_invalidate_caches()
+        if debug:
+            print('===== restore sys.path=%s' % repr(opath))
 
 def import_zlib():
     try:
@@ -855,7 +858,7 @@ class ImageReader(object):
                 else:
                     from reportlab.pdfbase.pdfutils import readJPEGInfo
                     try:
-                        self._width,self._height,c=readJPEGInfo(self.fp)
+                        self._width,self._height, c, dpi = readJPEGInfo(self.fp)
                     except:
                         annotateException('\nImaging Library not available, unable to import bitmaps only jpegs\nfileName=%r identity=%s'%(fileName,self.identity()))
                     size = self._width*self._height*c

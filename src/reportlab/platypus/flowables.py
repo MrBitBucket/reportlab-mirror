@@ -401,7 +401,7 @@ class Image(Flowable):
     _fixedWidth = 1
     _fixedHeight = 1
     def __init__(self, filename, width=None, height=None, kind='direct',
-                 mask="auto", lazy=1, hAlign='CENTER'):
+                 mask="auto", lazy=1, hAlign='CENTER', useDPI=False):
         """If size to draw at not specified, get it from the image."""
         self.hAlign = hAlign
         self._mask = mask
@@ -418,6 +418,7 @@ class Image(Flowable):
             fp = True
         else:
             self._file = self.filename = filename
+        self._dpi = useDPI
         if not fp and os.path.splitext(filename)[1] in ['.jpg', '.JPG', '.jpeg', '.JPEG']:
             # if it is a JPEG, will be inlined within the file -
             # but we still need to know its size now
@@ -434,12 +435,20 @@ class Image(Flowable):
                 f.close()
             self.imageWidth = info[0]
             self.imageHeight = info[1]
+            if useDPI:
+                self._dpi = info[3]
             self._img = None
             self._setup(width,height,kind,0)
         elif fp:
             self._setup(width,height,kind,0)
         else:
             self._setup(width,height,kind,lazy)
+
+    def _dpiAdjust(self):
+        dpi = self._dpi
+        if dpi:
+            if dpi[0]!=72: self.imageWidth *= 72.0 / dpi[0]
+            if dpi[1]!=72: self.imageHeight *= 72.0 / dpi[1]
 
     def _setup(self,width,height,kind,lazy):
         self._lazy = lazy
@@ -455,8 +464,12 @@ class Image(Flowable):
         img = self._img
         if img:
             self.imageWidth, self.imageHeight = img.getSize()
+            if self._dpi and hasattr(img,'_image'):
+                self._dpi = img._image.info.get('dpi',(72,72))
         elif self._drawing:
             self.imageWidth, self.imageHeight = self._drawing.width,self._drawing.height
+            self._dpi = False
+        self._dpiAdjust()
         if self._lazy>=2: del self._img
         if kind in ['direct','absolute']:
             self.drawWidth = width or self.imageWidth
@@ -1946,7 +1959,7 @@ def _bulletFormat(value,type='1',format=None):
     if format:
         if isinstance(format,strTypes):
             s = format % s
-        elif isinstance(format, collections.Callable):
+        elif callable(format):
             s = format(s)
         else:
             raise ValueError('unexpected BulletDrawer format %r' % format)
