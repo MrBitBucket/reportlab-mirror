@@ -21,7 +21,6 @@ from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.fonts import tt2ps
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
-from reportlab import xrange
 _baseGFontNameB = tt2ps(_baseGFontName,1,0)
 _baseGFontNameI = tt2ps(_baseGFontName,0,1)
 _baseGFontNameBI = tt2ps(_baseGFontName,1,1)
@@ -1314,7 +1313,7 @@ class Wedge(SolidShape):
         CA = []
         CAA = CA.append
         a = points.append
-        for angle in xrange(n):
+        for angle in range(n):
             angle = startangle+angle*radiansdelta
             CAA((cos(angle),sin(angle)))
         for c,s in CA:
@@ -1330,11 +1329,11 @@ class Wedge(SolidShape):
         if self.annular:
             P = Path(fillMode=getattr(self,'fillMode', FILL_EVEN_ODD))
             P.moveTo(points[0],points[1])
-            for x in xrange(2,2*n,2):
+            for x in range(2,2*n,2):
                 P.lineTo(points[x],points[x+1])
             P.closePath()
             P.moveTo(points[2*n],points[2*n+1])
-            for x in xrange(2*n+2,4*n,2):
+            for x in range(2*n+2,4*n,2):
                 P.lineTo(points[x],points[x+1])
             P.closePath()
             return P

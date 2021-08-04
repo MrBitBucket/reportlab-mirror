@@ -8,7 +8,7 @@ pythonpoint.py.
 """
 
 import string, imp, sys, os, copy
-from reportlab.lib.utils import isSeq, uniChr, isPy3
+from reportlab.lib.utils import isSeq, uniChr
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import recursiveImport
@@ -214,11 +214,6 @@ class PPMLParser(HTMLParser):
         self._curSubject = None
         self.fx = 1
         HTMLParser.__init__(self)
-        if not isPy3:
-            try:
-                self.parser.returnUnicode = False
-            except:
-                pass
 
     def _arg(self,tag,args,name):
         "What's this for???"

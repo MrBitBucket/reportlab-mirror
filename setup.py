@@ -1,7 +1,48 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-__version__='3.5.62'
-import os, sys, glob, shutil, re
+__version__='3.6.0'
+import os, sys, glob, shutil, re, sysconfig, traceback, io, subprocess
+platform = sys.platform
+pjoin = os.path.join
+abspath = os.path.abspath
+isfile = os.path.isfile
+isdir = os.path.isdir
+dirname = os.path.dirname
+basename = os.path.basename
+splitext = os.path.splitext
+archName = 'amd64' if sys.maxsize > 2**32 else 'x86'
+
+try:
+    from urllib.parse import quote as urlquote
+except ImportError:
+    from urllib import quote as urlquote
+
+INFOLINES=[]
+def infoline(t,
+        pfx='#####',
+        add=True,
+        ):
+    bn = splitext(basename(sys.argv[0]))[0]
+    ver = '.'.join(map(str,sys.version_info[:3]))
+    platform = sysconfig.get_platform()
+    s = '%s %s-python-%s-%s: %s' % (pfx, bn, ver, platform, t)
+    print(s)
+    if add: INFOLINES.append(s)
+
+def showTraceback(s):
+    buf = io.StringIO()
+    print(s,file=buf)
+    if verbose:
+        traceback.print_exc(file=buf)
+    for l in buf.getvalue().split('\n'):
+        infoline(l,pfx='!!!!!',add=False)
+
+def os_system(cmd,*args,**kwds):
+    r = os.system(cmd,*args,**kwds)
+    if verbose:
+        infoline('%r --> %s' % (cmd,r), pfx='!!!!!' if r else '#####', add=False)
+    return r
+
 def specialOption(n):
     v = False
     while n in sys.argv:
@@ -17,20 +58,13 @@ def specialOption(n):
 dlt1 = not specialOption('--no-download-t1-files')
 usla = specialOption('--use-system-libart')
 mdbg = specialOption('--memory-debug')
+verbose = specialOption('--verbose')
+nulldivert = '' if verbose else (" >%s 2>&1" % ('NUL' if sys.platform=='win32' else '/dev/null'))
 
 try:
     import configparser
 except ImportError:
     import ConfigParser as configparser
-isPy3 = sys.version_info[0]==3
-platform = sys.platform
-pjoin = os.path.join
-abspath = os.path.abspath
-path = os.path.abspath
-isfile = os.path.isfile
-isdir = os.path.isdir
-dirname = os.path.dirname
-basename = os.path.basename
 if __name__=='__main__':
     pkgDir=dirname(sys.argv[0])
 else:
@@ -38,11 +72,11 @@ else:
 if not pkgDir:
     pkgDir=os.getcwd()
 elif not os.path.isabs(pkgDir):
-    pkgDir=os.path.abspath(pkgDir)
+    pkgDir=abspath(pkgDir)
 try:
     os.chdir(pkgDir)
 except:
-    print('!!!!! warning could not change directory to %r' % pkgDir)
+    showTraceback('warning could not change directory to %r' % pkgDir)
 daily=int(os.environ.get('RL_EXE_DAILY','0'))
 
 try:
@@ -154,7 +188,7 @@ if not mdbg:
 
 #this code from /FBot's PIL setup.py
 def aDir(P, d, x=None):
-    if d and os.path.isdir(d) and d not in P:
+    if d and isdir(d) and d not in P:
         if x is None:
             P.append(d)
         else:
@@ -184,6 +218,11 @@ class inc_lib_dirs:
             aDir(I, "/usr/include")
             aDir(L, "/usr/lib")
             aDir(I, "/usr/include/freetype2")
+            if archName=='amd64':
+                aDir(L, "/usr/lib/lib64")
+                aDir(L, "/usr/lib/x86_64-linux-gnu")
+            else:
+                aDir(L, "/usr/lib/lib32")
             prefix = sysconfig.get_config_var("prefix")
             if prefix:
                 aDir(L, pjoin(prefix, "lib"))
@@ -248,11 +287,6 @@ def pfxJoin(pfx,*N):
         R.append(os.path.join(pfx,n))
     return R
 
-INFOLINES=[]
-def infoline(t):
-    print(t)
-    INFOLINES.append(t)
-
 reportlab_files= [
         'fonts/00readme.txt',
         'fonts/bitstream-vera-license.txt',
@@ -292,16 +326,27 @@ reportlab_files= [
 
 def url2data(url,returnRaw=False):
     import io
-    if isPy3:
-        import urllib.request as ureq
-    else:
-        import urllib2 as ureq
+    import urllib.request as ureq
     remotehandle = ureq.urlopen(url)
     try:
         raw = remotehandle.read()
         return raw if returnRaw else io.BytesIO(raw)
     finally:
         remotehandle.close()
+
+def ensureWinStuff(
+                    url='https://www.reportlab.com/ftp/winstuff.zip',
+                    target=pjoin(pkgDir,'build','winstuff'),
+                ):
+    done = pjoin(target,'.done')
+    if not isfile(done):
+        if not isdir(target):
+            os.makedirs(target)
+            import zipfile, time
+            zipfile.ZipFile(url2data(url), 'r').extractall(path=target)
+            with open(done,'w') as _:
+                _.write(time.strftime('%Y%m%dU%H%M%S\n',time.gmtime()))
+    return target
 
 def get_fonts(PACKAGE_DIR, reportlab_files):
     import zipfile
@@ -337,7 +382,7 @@ def get_glyphlist_module(PACKAGE_DIR):
             comments = ['#see https://github.com/adobe-type-tools/agl-aglfn\n'].append
             G2U = [].append
             G2Us = [].append
-            if isPy3 and not isinstance(text,str):
+            if not isinstance(text,str):
                 text = text.decode('latin1')
             for line in text.split('\n'):
                 line = line.strip()
@@ -353,7 +398,7 @@ def get_glyphlist_module(PACKAGE_DIR):
                         else:
                             G2Us('\t%r: (%s),\n' % (gu[0],','.join('0x%s'%u for u in v)))
                     else:
-                        infoline('!!!!! bad glyphlist line %r' % line)
+                        infoline('bad glyphlist line %r' % line, '!!!!!')
             with open(fn,'w') as f:
                 f.write(''.join(comments.__self__))
                 f.write('_glyphname2unicode = {\n')
@@ -367,14 +412,94 @@ def get_glyphlist_module(PACKAGE_DIR):
         xitmsg = "Failed to download glyphlist.txt"
     infoline(xitmsg)
 
+def canImport(pkg):
+    ns = [pkg.find(_) for _ in '<>=' if _ in pkg]
+    if ns: pkg =pkg[:min(ns)]
+    ns = {}
+    try:
+        exec('import %s as M' % pkg,{},ns)
+    except:
+        showTraceback("can't import %s" % pkg)
+    return 'M' in ns
+
+def pipInstall(pkg, ixu=None):
+    if canImport(pkg): return True
+    i = ['-i%s' % ixu] if ixu else []
+    try:
+        p = subprocess.Popen(
+                [sys.executable, '-mpip', 'install']+i+[pkg],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                )
+        out = p.communicate(timeout=30)[0]
+        if ixu and not nulldivert:
+            for t in out.decode('utf8').replace('\r\n','\n').replace(ixu.u,'***').split('\n'):
+                if t.strip():
+                    infoline(t)
+    except:
+        showTraceback("pipInstall %s failed" % pkg)
+    return canImport(pkg)
+
+def pipUninstall(pkg):
+    os_system('%s -mpip -q uninstall -y %s%s' % (sys.executable, pkg, nulldivert))
+
+def pipInstallGroups(pkgs, ixu=None):
+    '''install groups of packages; if any of a group fail we backout the group'''
+    for g in pkgs:
+        I = []  #thse are the installed in this group
+        for pkg in g.split():
+            if pipInstall(pkg,ixu):
+                I.append(pkg)
+            else:
+                for pkg in I:
+                    pipUninstall(pkg)
+                break
+
+def vopt(opt):
+    opt = '--%s=' % opt
+    v = [_ for _ in sys.argv if _.startswith(opt)]
+    for _ in v: sys.argv.remove(_)
+    n = len(opt)
+    return list(filter(None,[_[n:] for _ in v]))
+
+class QUPStr(str):
+    def __new__(cls,s,u,p):
+        self = str.__new__(cls,s)
+        self.u = u
+        self.p = p
+        return self
+
+def qup(url, pat=re.compile(r'(?P<scheme>https?://)(?P<up>[^@]*)(?P<rest>@.*)$')):
+    '''urlquote the user name and password'''
+    m = pat.match(url)
+    if m:
+        u, p = m.group('up').split(':',1)
+        url = "%s%s:%s%s" % (m.group('scheme'),urlquote(u),urlquote(p),m.group('rest'))
+    else:
+        u = p = ''
+    return QUPStr(url,u,p)
+
+def performPipInstalls():
+    pip_installs = vopt('pip-install')
+    pipInstallGroups(pip_installs)
+    rl_pip_installs = vopt('rl-pip-install')
+    if rl_pip_installs:
+        rl_ixu = vopt('rl-index-url')
+        if len(rl_ixu)==1:
+            pipInstallGroups(rl_pip_installs,qup(rl_ixu[0]))
+        else:
+            raise ValueError('rl-pip-install requires exactly 1 --rl-index-url not %d' % len(rl_ixu))
+
 def main():
+    performPipInstalls()
     #test to see if we've a special command
     if 'test' in sys.argv \
         or 'tests' in sys.argv \
         or 'tests-postinstall' in sys.argv \
         or 'tests-preinstall' in sys.argv:
+        verboseTests = specialOption('--verbose-tests')
         if len(sys.argv)!=2:
-            raise ValueError('tests commands may only be used alone')
+            raise ValueError('tests commands may only be used alone sys.argv[1:]=%s' % repr(sys.argv[1:]))
         cmd = sys.argv[-1]
         PYTHONPATH = [pkgDir] if cmd!='test' else []
         if cmd=='tests-preinstall':
@@ -384,7 +509,13 @@ def main():
         cli = [sys.executable, 'runAll.py']
         if cmd=='tests-postinstall':
             cli.append('--post-install')
-        sys.exit(os.system(' '.join(cli)))
+        if verboseTests:
+            cli.append('--verbosity=2')
+        cli = ' '.join(cli)
+        r = os_system(cli)
+        sys.exit(('!!!!! runAll.py --> %s should exit with error !!!!!' % r) if r else r)
+    elif 'null-cmd' in sys.argv or 'null-command' in sys.argv:
+        sys.exit(0)
 
     debug_compile_args = []
     debug_link_args = []
@@ -405,12 +536,12 @@ def main():
     EXT_MODULES = []
 
     if not RL_ACCEL:
-        infoline( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        infoline( '===================================================')
         infoline( 'not attempting build of the _rl_accel extension')
-        infoline( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        infoline( '===================================================')
     else:
         infoline( '================================================')
-        infoline( 'Attempting build of _rl_accel & pyHnj')
+        infoline( 'Attempting build of _rl_accel')
         infoline( 'extensions from %r'%RL_ACCEL)
         infoline( '================================================')
         EXT_MODULES += [
@@ -424,32 +555,16 @@ def main():
                             extra_link_args=debug_link_args,
                             ),
                         ]
-        if not isPy3:
-            fn = pjoin(RL_ACCEL,'hyphen.mashed')
-            SPECIAL_PACKAGE_DATA[fn] = pjoin('lib','hyphen.mashed')
-            EXT_MODULES += [
-                    Extension( 'reportlab.lib.pyHnj',
-                            [pjoin(RL_ACCEL,'pyHnjmodule.c'),
-                            pjoin(RL_ACCEL,'hyphen.c'),
-                            pjoin(RL_ACCEL,'hnjalloc.c')],
-                            include_dirs=[],
-                            define_macros=[]+debug_macros,
-                            library_dirs=[],
-                            libraries=[], # libraries to link against
-                            extra_compile_args=debug_compile_args,
-                            extra_link_args=debug_link_args,
-                            ),
-                        ]
     RENDERPM = _find_rl_ccode('renderPM','_renderPM.c')
     if not RENDERPM:
-        infoline( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        infoline( '===================================================')
         infoline( 'not attempting build of _renderPM')
-        infoline( '!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        infoline( '===================================================')
     else:
-        infoline( '================================================')
+        infoline( '===================================================')
         infoline( 'Attempting build of _renderPM')
         infoline( 'extensions from %r'%RENDERPM)
-        infoline( '================================================')
+        infoline( '===================================================')
         GT1_DIR=pjoin(RENDERPM,'gt1')
 
         if not usla:
@@ -521,26 +636,25 @@ def main():
                     ]+LIBART_SOURCES
 
         if platform=='win32':
-            from distutils.util import get_platform
-            secname = 'FREETYPE_PATHS_%s' % get_platform().split('-')[-1].upper()
-            FT_LIB=os.environ.get('FT_LIB','')
-            if not FT_LIB: FT_LIB=config(secname,'lib','')
-            if FT_LIB and not os.path.isfile(FT_LIB):
-                infoline('# freetype lib %r not found' % FT_LIB)
+            target = ensureWinStuff()
+            FT_LIB = pjoin(target,'libs',archName,'freetype.lib')
+            if not isfile(FT_LIB):
+                infoline('freetype lib %r not found' % FT_LIB, pfx='!!!!')
                 FT_LIB=[]
             if FT_LIB:
-                FT_INC_DIR=os.environ.get('FT_INC','')
-                if not FT_INC_DIR: FT_INC_DIR=config(secname,'inc')
+                FT_INC_DIR = pjoin(target,'include')
+                if not isfile(pjoin(FT_INC_DIR,'ft2build.h')):
+                    FT_INC_DIR = pjoin(FT_INC_DIR,'freetype2')
+                    if not isfile(pjoin(FT_INC_DIR,'ft2build.h')):
+                        infoline('freetype2 include folder %r not found' % FT_INC_DIR, pfx='!!!!!')
+                        FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
                 FT_MACROS = [('RENDERPM_FT',None)]
                 FT_LIB_DIR = [dirname(FT_LIB)]
-                FT_INC_DIR = [FT_INC_DIR or pjoin(dirname(FT_LIB_DIR[0]),'include')]
+                FT_INC_DIR = [FT_INC_DIR]
                 FT_LIB_PATH = FT_LIB
-                FT_LIB = [os.path.splitext(basename(FT_LIB))[0]]
+                FT_LIB = [splitext(basename(FT_LIB))[0]]
                 if isdir(FT_INC_DIR[0]):
-                    infoline('# installing with freetype %r' % FT_LIB_PATH)
-                else:
-                    infoline('# freetype2 include folder %r not found' % FT_INC_DIR[0])
-                    FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
+                    infoline('installing with freetype %r' % FT_LIB_PATH)
             else:
                 FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
         else:

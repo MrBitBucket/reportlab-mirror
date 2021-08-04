@@ -11,7 +11,6 @@ try:
     from base64 import decodebytes as base64_decodebytes, encodebytes as base64_encodebytes
 except ImportError:
     from base64 import decodestring as base64_decodebytes, encodestring as base64_encodebytes
-from reportlab import isPy3
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
 from . rl_safe_eval import rl_safe_exec, rl_safe_eval, safer_globals
@@ -64,231 +63,115 @@ def isNative(v):
 #isStr is supposed to be for arbitrary stringType
 #isBytes for bytes strings only
 #isUnicode for proper unicode
-if isPy3:
-    _rl_NoneType=type(None)
-    bytesT = bytes
-    unicodeT = str
-    strTypes = (str,bytes)
-    def _digester(s):
-        return md5(s if isBytes(s) else s.encode('utf8')).hexdigest()
+_rl_NoneType=type(None)
+bytesT = bytes
+unicodeT = str
+strTypes = (str,bytes)
+def _digester(s):
+    return md5(s if isBytes(s) else s.encode('utf8')).hexdigest()
 
-    def asBytes(v,enc='utf8'):
-        if isinstance(v,bytes): return v
-        try:
-            return v.encode(enc)
-        except:
-            annotateException('asBytes(%s,enc=%s) error: ' % (ascii(v),ascii(enc)))
+def asBytes(v,enc='utf8'):
+    if isinstance(v,bytes): return v
+    try:
+        return v.encode(enc)
+    except:
+        annotateException('asBytes(%s,enc=%s) error: ' % (ascii(v),ascii(enc)))
 
-    def asUnicode(v,enc='utf8'):
-        if isinstance(v,str): return v
-        try:
-            return v.decode(enc)
-        except:
-            annotateException('asUnicode(%s,enc=%s) error: ' % (ascii(v),ascii(enc)))
+def asUnicode(v,enc='utf8'):
+    if isinstance(v,str): return v
+    try:
+        return v.decode(enc)
+    except:
+        annotateException('asUnicode(%s,enc=%s) error: ' % (ascii(v),ascii(enc)))
 
-    def asUnicodeEx(v,enc='utf8'):
-        if isinstance(v,str): return v
-        try:
-            return v.decode(enc) if isinstance(v,bytes) else str(v)
-        except:
-            annotateException('asUnicodeEx(%s,enc=%s) error: ' % (ascii(v),ascii(enc)))
-        
-    def asNative(v,enc='utf8'):
-        return asUnicode(v,enc=enc)
+def asUnicodeEx(v,enc='utf8'):
+    if isinstance(v,str): return v
+    try:
+        return v.decode(enc) if isinstance(v,bytes) else str(v)
+    except:
+        annotateException('asUnicodeEx(%s,enc=%s) error: ' % (ascii(v),ascii(enc)))
+    
+def asNative(v,enc='utf8'):
+    return asUnicode(v,enc=enc)
 
-    uniChr = chr
+uniChr = chr
 
-    def int2Byte(i):
-        return bytes([i])
+def int2Byte(i):
+    return bytes([i])
 
-    def isStr(v):
-        return isinstance(v, (str,bytes))
+def isStr(v):
+    return isinstance(v, (str,bytes))
 
-    def isBytes(v):
-        return isinstance(v, bytes)
+def isBytes(v):
+    return isinstance(v, bytes)
 
-    def isUnicode(v):
-        return isinstance(v, str)
+def isUnicode(v):
+    return isinstance(v, str)
 
-    def isClass(v):
-        return isinstance(v, type)
+def isClass(v):
+    return isinstance(v, type)
 
-    def isNonPrimitiveInstance(x):
-        return not isinstance(x,(float,int,type,tuple,list,dict,str,bytes,complex,bool,slice,_rl_NoneType,
-            types.FunctionType,types.LambdaType,types.CodeType,
-            types.MappingProxyType,types.SimpleNamespace,
-            types.GeneratorType,types.MethodType,types.BuiltinFunctionType,
-            types.BuiltinMethodType,types.ModuleType,types.TracebackType,
-            types.FrameType,types.GetSetDescriptorType,types.MemberDescriptorType))
+def isNonPrimitiveInstance(x):
+    return not isinstance(x,(float,int,type,tuple,list,dict,str,bytes,complex,bool,slice,_rl_NoneType,
+        types.FunctionType,types.LambdaType,types.CodeType,
+        types.MappingProxyType,types.SimpleNamespace,
+        types.GeneratorType,types.MethodType,types.BuiltinFunctionType,
+        types.BuiltinMethodType,types.ModuleType,types.TracebackType,
+        types.FrameType,types.GetSetDescriptorType,types.MemberDescriptorType))
 
-    def instantiated(v):
-        return not isinstance(v,type)
+def instantiated(v):
+    return not isinstance(v,type)
 
-    from string import ascii_letters, ascii_uppercase, ascii_lowercase
+from string import ascii_letters, ascii_uppercase, ascii_lowercase
 
-    from io import BytesIO, StringIO
-    def getBytesIO(buf=None):
-        '''unified StringIO instance interface'''
-        if buf:
-            return BytesIO(buf)
-        return BytesIO()
-    _bytesIOType = BytesIO 
+from io import BytesIO, StringIO
+def getBytesIO(buf=None):
+    '''unified StringIO instance interface'''
+    if buf:
+        return BytesIO(buf)
+    return BytesIO()
+_bytesIOType = BytesIO 
 
-    def getStringIO(buf=None):
-        '''unified StringIO instance interface'''
-        if buf:
-            return StringIO(buf)
-        return StringIO()
+def getStringIO(buf=None):
+    '''unified StringIO instance interface'''
+    if buf:
+        return StringIO(buf)
+    return StringIO()
 
-    def bytestr(x,enc='utf8'):
-        if isinstance(x,str):
-            return x.encode(enc)
-        elif isinstance(x,bytes):
-            return x
-        else:
-            return str(x).encode(enc)
-
-    def encode_label(args):
-        return base64_encodebytes(pickle.dumps(args)).strip().decode('latin1')
-
-    def decode_label(label):
-        return pickle.loads(base64_decodebytes(label.encode('latin1')))
-
-    def rawUnicode(s):
-        '''converts first 256 unicodes 1-1'''
-        return s.decode('latin1') if not isinstance(s,str) else s
-
-    def rawBytes(s):
-        '''converts first 256 unicodes 1-1'''
-        return s.encode('latin1') if isinstance(s,str) else s
-    import builtins
-    rl_exec = getattr(builtins,'exec')
-    del builtins
-    def char2int(s):
-        return  s if isinstance(s,int) else ord(s if isinstance(s,str) else s.decode('latin1'))
-    def rl_reraise(t, v, b=None):
-        if v.__traceback__ is not b:
-            raise v.with_traceback(b)
-        raise v
-    def rl_add_builtins(**kwd):
-        import builtins
-        for k,v in kwd.items():
-            setattr(builtins,k,v)
-else:
-    bytesT = str
-    unicodeT = unicode
-    strTypes = basestring
-    if sys.hexversion >= 0x02000000:
-        def _digester(s):
-            return md5(s).hexdigest()
+def bytestr(x,enc='utf8'):
+    if isinstance(x,str):
+        return x.encode(enc)
+    elif isinstance(x,bytes):
+        return x
     else:
-        # hexdigest not available in 1.5
-        def _digester(s):
-            return join(["%02x" % ord(x) for x in md5(s).digest()], '')
+        return str(x).encode(enc)
 
-    def asBytes(v,enc='utf8'):
-        if isinstance(v,str): return v
-        try:
-            return v.encode(enc)
-        except:
-            annotateException('asBytes(%s,enc=%s) error: ' % (repr(v),repr(enc)))
+def encode_label(args):
+    return base64_encodebytes(pickle.dumps(args)).strip().decode('latin1')
 
-    def asNative(v,enc='utf8'):
-        return asBytes(v,enc=enc)
+def decode_label(label):
+    return pickle.loads(base64_decodebytes(label.encode('latin1')))
 
-    def uniChr(v):
-        return unichr(v)
+def rawUnicode(s):
+    '''converts first 256 unicodes 1-1'''
+    return s.decode('latin1') if not isinstance(s,str) else s
 
-    def isStr(v):
-        return isinstance(v, basestring)
-
-    def isBytes(v):
-        return isinstance(v, str)
-
-    def isUnicode(v):
-        return isinstance(v, unicode)
-
-    def asUnicode(v,enc='utf8'):
-        if isinstance(v,unicode): return v
-        try:
-            return v.decode(enc)
-        except:
-            annotateException('asUnicode(%s,enc=%s) error: ' % (repr(v),repr(enc)))
-
-    def asUnicodeEx(v,enc='utf8'):
-        if isinstance(v,unicode): return v
-        try:
-            return v.decode(enc) if isinstance(v,str) else str(v)
-        except:
-            annotateException('asUnicodeEx(%s,enc=%s) error: ' % (repr(v),repr(enc)))
-
-    def isClass(v):
-        return isinstance(v,(types.ClassType,type))
-
-    def isNonPrimitiveInstance(x):
-        return isinstance(x,types.InstanceType) or not isinstance(x,(float,int,long,type,tuple,list,dict,bool,unicode,str,buffer,complex,slice,types.NoneType,
-                    types.FunctionType,types.LambdaType,types.CodeType,types.GeneratorType,
-                    types.ClassType,types.UnboundMethodType,types.MethodType,types.BuiltinFunctionType,
-                    types.BuiltinMethodType,types.ModuleType,types.FileType,types.XRangeType,
-                    types.TracebackType,types.FrameType,types.EllipsisType,types.DictProxyType,
-                    types.NotImplementedType,types.GetSetDescriptorType,types.MemberDescriptorType
-                    ))
-
-    def instantiated(v):
-        return not isinstance(v,type) and hasattr(v,'__class__')
-
-    int2Byte = chr
-
-    from StringIO import StringIO
-    def getBytesIO(buf=None):
-        '''unified StringIO instance interface'''
-        if buf:
-            return StringIO(buf)
-        return StringIO()
-    getStringIO = getBytesIO
-    _bytesIOType = StringIO 
-
-    def bytestr(x,enc='utf8'):
-        if isinstance(x,unicode):
-            return x.encode(enc)
-        elif isinstance(x,str):
-            return x
-        else:
-            return str(x).encode(enc)
-    from string import letters as ascii_letters, uppercase as ascii_uppercase, lowercase as ascii_lowercase
-
-    def encode_label(args):
-        return base64_encodebytes(pickle.dumps(args)).strip()
-
-    def decode_label(label):
-        return pickle.loads(base64_decodebytes(label))
-
-    def rawUnicode(s):
-        '''converts first 256 unicodes 1-1'''
-        return s.decode('latin1') if not isinstance(s,unicode) else s
-
-    def rawBytes(s):
-        '''converts first 256 unicodes 1-1'''
-        return s.encode('latin1') if isinstance(s,unicode) else s
-
-    def rl_exec(obj, G=None, L=None):
-        '''this is unsafe'''
-        if G is None:
-            frame = sys._getframe(1)
-            G = frame.f_globals
-            if L is None:
-                L = frame.f_locals
-            del frame
-        elif L is None:
-            L = G
-        exec(obj,G, L)
-    rl_exec("""def rl_reraise(t, v, b=None):\n\traise t, v, b\n""")
-
-    char2int = ord
-    def rl_add_builtins(**kwd):
-        import __builtin__
-        for k,v in kwd.items():
-            setattr(__builtin__,k,v)
+def rawBytes(s):
+    '''converts first 256 unicodes 1-1'''
+    return s.encode('latin1') if isinstance(s,str) else s
+import builtins
+rl_exec = getattr(builtins,'exec')
+del builtins
+def char2int(s):
+    return  s if isinstance(s,int) else ord(s if isinstance(s,str) else s.decode('latin1'))
+def rl_reraise(t, v, b=None):
+    if v.__traceback__ is not b:
+        raise v.with_traceback(b)
+    raise v
+def rl_add_builtins(**kwd):
+    import builtins
+    for k,v in kwd.items():
+        setattr(builtins,k,v)
 
 def zipImported(ldr=None):
     try:
@@ -648,46 +531,38 @@ def open_for_read_by_name(name,mode='b'):
 
 def open_for_read(name,mode='b'):
     #auto initialized function`
-    if not isPy3:
-        import urllib2, urllib
-        from urlparse import urlparse
-        urlopen=urllib2.urlopen
-        def datareader(url,opener=urllib.URLopener().open):
-            return opener(url).read()
-        del urllib, urllib2
-    else:
-        from urllib.request import urlopen
-        from urllib.parse import unquote, urlparse
-        #copied here from urllib.URLopener.open_data because
-        # 1) they want to remove it
-        # 2) the existing one is borken
-        def datareader(url, unquote=unquote):
-            """Use "data" URL."""
-            # ignore POSTed data
-            #
-            # syntax of data URLs:
-            # dataurl   := "data:" [ mediatype ] [ ";base64" ] "," data
-            # mediatype := [ type "/" subtype ] *( ";" parameter )
-            # data      := *urlchar
-            # parameter := attribute "=" value
-            try:
-                typ, data = url.split(',', 1)
-            except ValueError:
-                raise IOError('data error', 'bad data URL')
-            if not typ:
-                typ = 'text/plain;charset=US-ASCII'
-            semi = typ.rfind(';')
-            if semi >= 0 and '=' not in typ[semi:]:
-                encoding = typ[semi+1:]
-                typ = typ[:semi]
-            else:
-                encoding = ''
-            if encoding == 'base64':
-                # XXX is this encoding/decoding ok?
-                data = base64_decodebytes(data.encode('ascii'))
-            else:
-                data = unquote(data).encode('latin-1')
-            return data
+    from urllib.request import urlopen
+    from urllib.parse import unquote, urlparse
+    #copied here from urllib.URLopener.open_data because
+    # 1) they want to remove it
+    # 2) the existing one is borken
+    def datareader(url, unquote=unquote):
+        """Use "data" URL."""
+        # ignore POSTed data
+        #
+        # syntax of data URLs:
+        # dataurl   := "data:" [ mediatype ] [ ";base64" ] "," data
+        # mediatype := [ type "/" subtype ] *( ";" parameter )
+        # data      := *urlchar
+        # parameter := attribute "=" value
+        try:
+            typ, data = url.split(',', 1)
+        except ValueError:
+            raise IOError('data error', 'bad data URL')
+        if not typ:
+            typ = 'text/plain;charset=US-ASCII'
+        semi = typ.rfind(';')
+        if semi >= 0 and '=' not in typ[semi:]:
+            encoding = typ[semi+1:]
+            typ = typ[:semi]
+        else:
+            encoding = ''
+        if encoding == 'base64':
+            # XXX is this encoding/decoding ok?
+            data = base64_decodebytes(data.encode('ascii'))
+        else:
+            data = unquote(data).encode('latin-1')
+        return data
     from reportlab.rl_config import trustedHosts, trustedSchemes
     if trustedHosts:
         import re, fnmatch
@@ -756,24 +631,14 @@ def rl_getmtime(pn,os_path_isfile=os.path.isfile,os_path_normpath=os.path.normpa
     d = e[6]
     return time_mktime((((d>>9)&0x7f)+1980,(d>>5)&0xf,d&0x1f,(s>>11)&0x1f,(s>>5)&0x3f,(s&0x1f)<<1,0,0,0))
 
-if isPy3 and sys.version_info[:2]>=(3,4):
-    from importlib import util as importlib_util
-    def __rl_get_module__(name,dir):
-        for ext in ('.py','.pyw','.pyo','.pyc','.pyd'):
-            path = os.path.join(dir,name+ext)
-            if os.path.isfile(path):
-                spec = importlib_util.spec_from_file_location(name,path)
-                return spec.loader.load_module()
-        raise ImportError('no suitable file found')
-else:
-    import imp
-    def __rl_get_module__(name,dir):
-        f, p, desc= imp.find_module(name,[dir])
-        try:
-            return imp.load_module(name,f,p,desc)
-        finally:
-            if f:
-                f.close()
+from importlib import util as importlib_util
+def __rl_get_module__(name,dir):
+    for ext in ('.py','.pyw','.pyo','.pyc','.pyd'):
+        path = os.path.join(dir,name+ext)
+        if os.path.isfile(path):
+            spec = importlib_util.spec_from_file_location(name,path)
+            return spec.loader.load_module()
+    raise ImportError('no suitable file found')
 
 def rl_get_module(name,dir):
     if name in sys.modules:
@@ -984,10 +849,7 @@ class ImageReader(object):
                         palette = palette.data
                     except:
                         return None
-                if isPy3:
-                    return palette[transparency:transparency+3]
-                else:
-                    return [ord(c) for c in palette[transparency:transparency+3]]
+                return palette[transparency:transparency+3]
             else:
                 return None
 
@@ -1330,30 +1192,16 @@ def escapeTextOnce(text):
     text = text.replace(u'&amp;lt;', u'&lt;')
     return text
 
-if isPy3:
-    def fileName2FSEnc(fn):
-        if isUnicode(fn):
-            return  fn
-        else:
-            for enc in fsEncodings:
-                try:
-                    return fn.decode(enc)
-                except:
-                    pass
-        raise ValueError('cannot convert %r to filesystem encoding' % fn)
-else:
-    def fileName2FSEnc(fn):
-        '''attempt to convert a filename to utf8'''
-        from reportlab.rl_config import fsEncodings
-        if isUnicode(fn):
-            return asBytes(fn)
-        else:
-            for enc in fsEncodings:
-                try:
-                    return fn.decode(enc).encode('utf8')
-                except:
-                    pass
-        raise ValueError('cannot convert %r to utf8 for file path name' % fn)
+def fileName2FSEnc(fn):
+    if isUnicode(fn):
+        return  fn
+    else:
+        for enc in fsEncodings:
+            try:
+                return fn.decode(enc)
+            except:
+                pass
+    raise ValueError('cannot convert %r to filesystem encoding' % fn)
 
 import itertools
 def prev_this_next(items):
@@ -1550,12 +1398,7 @@ class TimeStamp(object):
 
     @property
     def asctime(self):
-        a = time.asctime(self.lt)
-        if not isPy3:
-            a = a.split()
-            a[2] = a[2].lstrip('0')
-            a = ' '.join(a)
-        return a
+        return time.asctime(self.lt)
 
 def recursiveGetAttr(obj, name, g=None):
     "Can call down into e.g. object1.object2[4].attr"

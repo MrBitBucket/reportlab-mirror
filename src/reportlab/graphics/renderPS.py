@@ -12,10 +12,10 @@ from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta,
 from reportlab.graphics.shapes import STATE_DEFAULTS
 import math
 from operator import getitem
-from reportlab import rl_config, xrange, ascii
+from reportlab import rl_config
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
 _ESCAPEDICT={}
-for c in xrange(256):
+for c in range(256):
     if c<32 or c>=127:
         _ESCAPEDICT[c]= '\\%03o' % c
     elif c in (ord('\\'),ord('('),ord(')')):

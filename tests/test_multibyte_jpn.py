@@ -6,7 +6,6 @@
 The code in this module will disappear any day now and be replaced
 by classes in reportlab.pdfbase.cidfonts
 """
-from reportlab import ascii
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import string, os

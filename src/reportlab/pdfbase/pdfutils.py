@@ -10,7 +10,7 @@ import sys
 import os
 import binascii
 from reportlab import rl_config
-from reportlab.lib.utils import getBytesIO, ImageReader, isUnicode, isPy3
+from reportlab.lib.utils import getBytesIO, ImageReader, isUnicode
 from reportlab.lib.rl_accel import asciiBase85Encode, asciiBase85Decode
 
 def _chunker(src,dst=[],chunkSize=60):

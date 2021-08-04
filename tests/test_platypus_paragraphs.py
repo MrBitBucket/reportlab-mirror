@@ -1467,7 +1467,6 @@ def tentities(title, b, fn):
     from reportlab.platypus.tables import TableStyle, Table
     from reportlab.platypus.paragraph import Paragraph
     from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab import ascii
 
     for v in DEJAVUSANS:
         registerFont(TTFont(v,v+'.ttf'))

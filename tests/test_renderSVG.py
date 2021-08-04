@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-from reportlab import ascii
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys

@@ -31,7 +31,6 @@ from reportlab.graphics.charts.piecharts import AbstractPieChart, WedgePropertie
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgets.markers import Marker
 from functools import reduce
-from reportlab import xrange
 
 class SectorProperties(WedgeProperties):
     """This holds descriptive information about the sectors in a doughnut chart.
@@ -253,7 +252,7 @@ class Doughnut(AbstractPieChart):
                             shda = (a2-a1)/float(nshades)
                             shsc = sectorStyle.fillColor
                             theSector.fillColor = None
-                            for ish in xrange(nshades):
+                            for ish in range(nshades):
                                 sha1 = a1 + ish*shda
                                 sha2 = a1 + (ish+1)*shda
                                 shc = shader(shsc,shf1 + dsh*ish)
@@ -348,7 +347,7 @@ class Doughnut(AbstractPieChart):
                         shda = (a2-a1)/float(nshades)
                         shsc = sectorStyle.fillColor
                         theSector.fillColor = None
-                        for ish in xrange(nshades):
+                        for ish in range(nshades):
                             sha1 = a1 + ish*shda
                             sha2 = a1 + (ish+1)*shda
                             shc = shader(shsc,shf1 + dsh*ish)

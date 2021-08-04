@@ -5,12 +5,12 @@ __version__='3.3.0'
 """helpers for pdf encryption/decryption"""
 import sys, os, tempfile
 from binascii import hexlify, unhexlify
-from reportlab.lib.utils import getBytesIO, md5, asBytes, int2Byte, char2int, rawUnicode, rawBytes, isPy3, asNative
+from reportlab.lib.utils import getBytesIO, md5, asBytes, int2Byte, char2int, rawUnicode, rawBytes, asNative
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfdoc import PDFObject
 from reportlab.platypus.flowables import Flowable
-from reportlab import rl_config, ascii
+from reportlab import rl_config
 
 try:
     import pyaes
@@ -18,22 +18,11 @@ try:
 except ImportError:
     pyaes = None
 
-if isPy3:
-    def xorKey(num,key):
-        "xor's each byte of the key with the number, which is <256"
-        if num==0: return key
-        return bytes(num^k for k in key)
-    bytes3 = bytes
-else:
-    def xorKey(num,key):
-        "xor's each bytes of the key with the number, which is <256"
-        if num==0: return key
-        return ''.join(chr(num^ord(k)) for k in key)
-    def bytes3(x):
-        if isinstance(x,basestring):
-            return asBytes(x)
-        else:
-            return b''.join([chr(k) for k in x])
+def xorKey(num,key):
+    "xor's each byte of the key with the number, which is <256"
+    if num==0: return key
+    return bytes(num^k for k in key)
+bytes3 = bytes
 
 #AR debug hooks - leaving in for now
 CLOBBERID = 0  # set a constant Doc ID to allow comparison with other software like iText
@@ -58,7 +47,7 @@ if rl_config.invariant:
     def os_urandom(n):
         global _os_random_x
         b = [_os_random_b[(i+_os_random_x)%256] for i in range(n)]
-        b = bytes(b) if isPy3 else b''.join(b)
+        b = bytes(b)
         _os_random_x = (_os_random_x + n) % 256
         return b
 else:

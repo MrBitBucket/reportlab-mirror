@@ -32,7 +32,6 @@ the former axes in its own coordinate system.
 """
 
 from math import log10 as math_log10
-from reportlab import xrange
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
                                         isString, EitherOr, Validator, NoneOr, isInstanceOf, \
@@ -46,7 +45,6 @@ from reportlab.graphics.charts.utils import nextRoundNumber
 from reportlab.graphics.widgets.grids import ShadedRect
 from reportlab.lib.colors import Color
 from reportlab.lib.utils import isSeq
-from reportlab import xrange
 import copy
 try:
     reduce  # Python 2.x
@@ -222,7 +220,7 @@ class AxisBackgroundAnnotation:
         G = Group()
         ncolors = len(colors)
         v0 = axis._get_line_pos(tv[0])
-        for i in xrange(1,len(tv)):
+        for i in range(1,len(tv)):
             v1 = axis._get_line_pos(tv[i])
             c = colors[(i-1)%ncolors]
             if c:
@@ -561,17 +559,17 @@ class CategoryAxis(_AxisG):
         self._barWidth = barWidth or ((self._length-self.loPad-self.hiPad)/float(self._catCount or 1))
         self._calcTickmarkPositions()
         if self.labelAxisMode == 'axispmv':
-            self._pmv = [sum([series[i] for series in multiSeries]) for i in xrange(self._catCount)]
+            self._pmv = [sum([series[i] for series in multiSeries]) for i in range(self._catCount)]
 
     def _calcTickmarkPositions(self):
         n = self._catCount
         if self.tickShift:
-            self._tickValues = [t+0.5 for t in xrange(n)]
+            self._tickValues = [t+0.5 for t in range(n)]
         else:
             if self.reverseDirection:
-                self._tickValues = list(xrange(-1,n))
+                self._tickValues = list(range(-1,n))
             else:
-                self._tickValues = list(xrange(n+1))
+                self._tickValues = list(range(n+1))
 
     def _scale(self,idx):
         if self.reverseDirection: idx = self._catCount-idx-1
@@ -763,7 +761,7 @@ class XCategoryAxis(_XTicks,CategoryAxis):
             _x = self._x
             pmv = self._pmv if self.labelAxisMode=='axispmv' else None
 
-            for i in xrange(catCount):
+            for i in range(catCount):
                 if reverseDirection: ic = catCount-i-1
                 else: ic = i
                 if ic>=n: continue
@@ -877,7 +875,7 @@ class YCategoryAxis(_YTicks,CategoryAxis):
             _y = self._y
             pmv = self._pmv if self.labelAxisMode=='axispmv' else None
 
-            for i in xrange(catCount):
+            for i in range(catCount):
                 if reverseDirection: ic = catCount-i-1
                 else: ic = i
                 if ic>=n: continue
@@ -1341,7 +1339,7 @@ class ValueAxis(_AxisG):
         if rangeRound in ('both','ceiling'):
             if v<valueMax-fuzz: i1 += 1
         elif v>valueMax+fuzz: i1 -= 1
-        return valueStep,[i*valueStep for i in xrange(i0,i1+1)]
+        return valueStep,[i*valueStep for i in range(i0,i1+1)]
 
     def _calcTickPositions(self):
         return self._calcStepAndTickPositions()[1]
@@ -1380,7 +1378,7 @@ class ValueAxis(_AxisG):
                 if OTV[-1]<vx: OTV.append(OTV[-1]+dst)
                 dst /= float(nst+1)
                 for i,x in enumerate(OTV[:-1]):
-                    for j in xrange(nst):
+                    for j in range(nst):
                         t = x+dCnv((j+1)*dst)
                         if t<=vn or t>=vx: continue
                         T(t)
@@ -1842,7 +1840,7 @@ class NormalDateXValueAxis(XValueAxis):
 
         VC = self._valueClass
         for D in data:
-            for i in xrange(len(D)):
+            for i in range(len(D)):
                 x, y = D[i]
                 if not isinstance(x,VC):
                     D[i] = (VC(x),y)
@@ -2200,7 +2198,7 @@ class LogValueAxis(ValueAxis):
                 start = 1
                 if self.subTickNum == 10: start = 2
                 while tv < valueMax:
-                    for j in xrange(start,self.subTickNum):
+                    for j in range(start,self.subTickNum):
                         v = fac*j*(10**tv)
                         if v > self._valueMin and v < self._valueMax:
                             T(v)

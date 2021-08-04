@@ -3,7 +3,6 @@
 """Tests for utility functions in reportlab.pdfbase.pdfutils.
 """
 __version__='3.3.0'
-from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 setOutDir(__name__)
 import os
@@ -33,7 +32,7 @@ class PdfEncodingTestCase(unittest.TestCase):
         plain = 'What is the average velocity of a sparrow?'
 
         #the remainder block can be absent or from 1 to 4 bytes
-        for i in xrange(256):
+        for i in range(256):
             encoded = asciiBase85Encode(plain)
             decoded = asciiBase85Decode(encoded)
             assert decoded == asBytes(plain,'latin1'), msg

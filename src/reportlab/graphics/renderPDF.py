@@ -19,7 +19,7 @@ from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.utils import getBytesIO
-from reportlab import ascii, rl_config
+from reportlab import rl_config
 from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing, STATE_DEFAULTS
 
 # the main entry point for users...

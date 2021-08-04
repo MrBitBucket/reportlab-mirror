@@ -11,7 +11,7 @@ from reportlab import rl_config
 import unittest
 from reportlab.lib import colors
 from reportlab.lib.utils import recursiveImport, recursiveGetAttr, recursiveSetAttr, rl_isfile, \
-                                isCompactDistro, isPy3, isPyPy, TimeStamp, rl_get_module, \
+                                isCompactDistro, isPyPy, TimeStamp, rl_get_module, \
                                 recursiveGetAttr, recursiveSetAttr, recursiveDelAttr, \
                                 asUnicode, asUnicodeEx, asBytes
 
@@ -39,7 +39,7 @@ class ImporterTestCase(unittest.TestCase):
         _testmodulename = os.path.join(cls._tempdir,'test_module_%s.py' % s)
         with open(_testmodulename,'w') as f:
             f.write('__all__=[]\nvalue=%s\n' % repr(cls._value))
-        if sys.platform=='darwin' and isPy3:
+        if sys.platform=='darwin':
             time.sleep(0.3)
         cls._testmodulename = os.path.splitext(os.path.basename(_testmodulename))[0]
 
@@ -49,7 +49,7 @@ class ImporterTestCase(unittest.TestCase):
         rmtree(cls._tempdir,1)
 
     def myAssertRaisesRegex(self,*args,**kwds):
-        return getattr(self,'assertRaisesRegex' if isPy3 else 'assertRaisesRegexp')(*args,**kwds)
+        return self.assertRaisesRegex(*args,**kwds)
 
     def test1(self):
         "try stuff known to be in the path"
@@ -158,9 +158,7 @@ class ImporterTestCase(unittest.TestCase):
             self.fail("Imported a buggy module")
         except Exception as e:
             self.assertIn(("integer division by zeroException raised while importing 'unimportable': integer division by zero"
-                            if isPyPy
-                            else ('division by zero' if isPy3
-                                 else 'integer division or modulo by zero'))
+                            if isPyPy else 'division by zero')
                         ,str(e))
     def test14(self):
         "test the TimeStamp behaviour"

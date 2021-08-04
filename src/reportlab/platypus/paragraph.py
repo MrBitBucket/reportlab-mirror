@@ -26,7 +26,6 @@ from reportlab.rl_config import platypus_link_underline, decimalSymbol, _FUZZ,\
         paraFontSizeHeightOffset, hyphenationMinWordLength
 from reportlab.lib.utils import _className, isBytes, unicodeT, bytesT, isStr
 from reportlab.lib.rl_accel import sameFrag
-from reportlab import xrange
 import re
 from types import MethodType
 try:
@@ -1018,7 +1017,7 @@ def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize, uriWas
     #so this may succeed where the above does not
     n = len(H)
     if n>=3 and embeddedHyphenation and u'' not in H and _hy_shy_letters_pat.match(s):
-        for i in reversed(xrange(2,n,2)):
+        for i in reversed(range(2,n,2)):
             h = pfx + ''.join(H[:i])
             t = ''.join(H[i:]) + sfx
             hw = stringWidth(h,fontName,fontSize)
@@ -1037,7 +1036,7 @@ def _fragWordSplitRep(FW):
     eX = X.extend
     U = []
     aU = U.append
-    for i in xrange(1,len(FW)):
+    for i in range(1,len(FW)):
         f, t = FW[i]
         if f.rise!=0: return None
         if hasattr(f,'cbDefn') and getattr(f.cbDefn,'width',0): return
@@ -1128,7 +1127,7 @@ def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth, uriWasteReduce, embedded
     #so this may succeed where the above does not
     n = len(H)
     if n>=3 and embeddedHyphenation and u'' not in H and _hy_shy_letters_pat.match(s):
-        for i in reversed(xrange(2,n,2)):
+        for i in reversed(range(2,n,2)):
             pos = len(pfx + u''.join(H[:i]))
             fx, cc = X[pos]
             #FW[fx] is split
@@ -1682,13 +1681,13 @@ def cjkFragSplit(frags, maxWidths, calcBounds, encoding='utf8'):
                     #  - reversion to Kanji (which would be a good split point)
                     #  - in the worst case, roughly half way back along the line
                     limitCheck = (lineStartPos+i)>>1        #(arbitrary taste issue)
-                    for j in xrange(i-1,limitCheck,-1):
+                    for j in range(i-1,limitCheck,-1):
                         uj = U[j]
                         if uj and category(uj)=='Zs' or ord(uj)>=0x3000:
                             k = j+1
                             if k<i:
                                 j = k+1
-                                extraSpace += sum(U[ii].width for ii in xrange(j,i))
+                                extraSpace += sum(U[ii].width for ii in range(j,i))
                                 w = U[k].width
                                 u = U[k]
                                 i = j
@@ -2568,7 +2567,7 @@ class Paragraph(Flowable):
                     #if lastLine and style.endDots and dpl!=_rightDrawParaLine: _do_dots(0, dx, ws, xs, tx, dpl)
 
                     #now the middle of the paragraph, aligned with the left margin which is our origin.
-                    for i in xrange(1, nLines):
+                    for i in range(1, nLines):
                         ws = lines[i][0]
                         words = lines[i][1]
                         lastLine = noJustifyLast and i==lim
@@ -2582,7 +2581,7 @@ class Paragraph(Flowable):
                         if f.link: _do_link_line(i, dx, ws, tx)
                         #if lastLine and style.endDots and dpl!=_rightDrawParaLine: _do_dots(i, dx, ws, xs, tx, dpl)
                 else:
-                    for i in xrange(1, nLines):
+                    for i in range(1, nLines):
                         words = lines[i][1]
                         lastLine = noJustifyLast and i==lim
                         if lastLine and jllwc and len(words)>jllwc:
@@ -2648,7 +2647,7 @@ class Paragraph(Flowable):
                 _do_post_text(tx)
 
                 #now the middle of the paragraph, aligned with the left margin which is our origin.
-                for i in xrange(1, nLines):
+                for i in range(1, nLines):
                     line = lines[i]
                     lastLine = noJustifyLast and i==lim
                     if lastLine and jllwc and line.wordCount>jllwc:
@@ -2726,7 +2725,7 @@ if __name__=='__main__':    #NORUNTESTS
                 words = line[1]
             nwords = len(words)
             outw('line%d: %d(%s)\n  ' % (l,nwords,str(getattr(line,'wordCount','Unknown'))))
-            for w in xrange(nwords):
+            for w in range(nwords):
                 outw(" %d:'%s'"%(w,getattr(words[w],'text',words[w])))
             print()
 
@@ -2741,7 +2740,7 @@ if __name__=='__main__':    #NORUNTESTS
         print('dumpParagraphFrags(<Paragraph @ %d>) minWidth() = %.2f' % (id(P), P.minWidth()))
         frags = P.frags
         n =len(frags)
-        for l in xrange(n):
+        for l in range(n):
             print("frag%d: '%s' %s" % (l, frags[l].text,' '.join(['%s=%s' % (k,getattr(frags[l],k)) for k in frags[l].__dict__ if k!=text])))
 
         outw = sys.stdout.write
@@ -2836,7 +2835,7 @@ umfassend zu sein."""
         dumpParagraphLines(P)
 
     if flagged(4):
-        text='''Die eingebaute Funktion <font name=Courier>range(i, j [, stride])</font><onDraw name=myIndex label="eingebaute Funktionen::range()"><onDraw name=myIndex label="range() (Funktion)"><onDraw name=myIndex label="Funktionen::range()"> erzeugt eine Liste von Ganzzahlen und f&#xfc;llt sie mit Werten <font name=Courier>k</font>, f&#xfc;r die gilt: <font name=Courier>i &lt;= k &lt; j</font>. Man kann auch eine optionale Schrittweite angeben. Die eingebaute Funktion <font name=Courier>xrange()</font><onDraw name=myIndex label="eingebaute Funktionen::xrange()"><onDraw name=myIndex label="xrange() (Funktion)"><onDraw name=myIndex label="Funktionen::xrange()"> erf&#xfc;llt einen &#xe4;hnlichen Zweck, gibt aber eine unver&#xe4;nderliche Sequenz vom Typ <font name=Courier>XRangeType</font><onDraw name=myIndex label="XRangeType"> zur&#xfc;ck. Anstatt alle Werte in der Liste abzuspeichern, berechnet diese Liste ihre Werte, wann immer sie angefordert werden. Das ist sehr viel speicherschonender, wenn mit sehr langen Listen von Ganzzahlen gearbeitet wird. <font name=Courier>XRangeType</font> kennt eine einzige Methode, <font name=Courier>s.tolist()</font><onDraw name=myIndex label="XRangeType::tolist() (Methode)"><onDraw name=myIndex label="s.tolist() (Methode)"><onDraw name=myIndex label="Methoden::s.tolist()">, die seine Werte in eine Liste umwandelt.'''
+        text='''Die eingebaute Funktion <font name=Courier>range(i, j [, stride])</font><onDraw name=myIndex label="eingebaute Funktionen::range()"><onDraw name=myIndex label="range() (Funktion)"><onDraw name=myIndex label="Funktionen::range()"> erzeugt eine Liste von Ganzzahlen und f&#xfc;llt sie mit Werten <font name=Courier>k</font>, f&#xfc;r die gilt: <font name=Courier>i &lt;= k &lt; j</font>. Man kann auch eine optionale Schrittweite angeben. Die eingebaute Funktion <font name=Courier>range()</font><onDraw name=myIndex label="eingebaute Funktionen::range()"><onDraw name=myIndex label="range() (Funktion)"><onDraw name=myIndex label="Funktionen::range()"> erf&#xfc;llt einen &#xe4;hnlichen Zweck, gibt aber eine unver&#xe4;nderliche Sequenz vom Typ <font name=Courier>RangeType</font><onDraw name=myIndex label="RangeType"> zur&#xfc;ck. Anstatt alle Werte in der Liste abzuspeichern, berechnet diese Liste ihre Werte, wann immer sie angefordert werden. Das ist sehr viel speicherschonender, wenn mit sehr langen Listen von Ganzzahlen gearbeitet wird. <font name=Courier>RangeType</font> kennt eine einzige Methode, <font name=Courier>s.tolist()</font><onDraw name=myIndex label="RangeType::tolist() (Methode)"><onDraw name=myIndex label="s.tolist() (Methode)"><onDraw name=myIndex label="Methoden::s.tolist()">, die seine Werte in eine Liste umwandelt.'''
         aW = 420
         aH = 64.4
         P=Paragraph(text, B)

@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.6.0	 23/07/2021
+---------------------------
+	* create py-2-3 branch
+	* Cease support for Python-2.7
+
 CHANGES  3.5.68	 25/06/2021
 ---------------------------
 	* graphics improve some error messages for renderPM

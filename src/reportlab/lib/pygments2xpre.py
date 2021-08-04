@@ -9,7 +9,7 @@ For a list of available lexers see http://pygments.org/docs/
 
 """
 __all__ = ('pygments2xpre',)
-from reportlab.lib.utils import isPy3, asBytes, getBytesIO, getStringIO, asUnicode, isUnicode
+from reportlab.lib.utils import asBytes, getBytesIO, getStringIO, asUnicode, isUnicode
 import re
 
 def _2xpre(s,styles):
@@ -34,13 +34,7 @@ def pygments2xpre(s, language="python"):
 
     from pygments.lexers import get_lexer_by_name
     rconv = lambda x: x
-    if isPy3:
-        out = getStringIO()
-    else:
-        if isUnicode(s):
-            s = asBytes(s)
-            rconv = asUnicode
-        out = getBytesIO()
+    out = getStringIO()
 
     l = get_lexer_by_name(language)
     

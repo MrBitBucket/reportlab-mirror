@@ -77,7 +77,7 @@ from reportlab import rl_config
 from reportlab.lib import styles
 from reportlab.lib import colors
 from reportlab.lib.units import cm
-from reportlab.lib.utils import getBytesIO, isStr, isPy3, isBytes, isUnicode
+from reportlab.lib.utils import getBytesIO, isStr, isBytes, isUnicode
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
@@ -971,8 +971,8 @@ def validate(rawdata):
 
 
 def _re_match(pat,text,flags=re.M|re.I):
-    if isPy3 and isBytes(text):
-            pat = pat.encode('latin1')
+    if isBytes(text):
+        pat = pat.encode('latin1')
     return re.match(pat,text,flags)
 
 def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=None, datafilename=None, fx=1):
@@ -1004,10 +1004,7 @@ def process(datafile, notes=0, handout=0, printout=0, cols=0, verbose=0, outDir=
             raise ValueError('cannot decode input data')
     else:
         udata = rawdata
-    if isPy3:
-        rawdata = udata
-    else:
-        rawdata = udata.encode('utf8')
+    rawdata = udata
 
     #if pyRXP present, use it to check and get line numbers for errors...
     validate(rawdata)

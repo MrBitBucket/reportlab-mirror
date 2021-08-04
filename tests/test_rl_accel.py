@@ -1,6 +1,5 @@
 __version__='3.3.0'
 __doc__='''basic tests.'''
-from reportlab import xrange, ascii
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 from reportlab.lib.utils import asBytes, isPyPy
 setOutDir(__name__)
@@ -62,7 +61,7 @@ class RlAccelTestCase(unittest.TestCase):
     def testAsciiBase85RoundTrip(self):
         plain = 'What is the average velocity of a sparrow?'
         eFuncs = getFuncs('asciiBase85Encode')
-        for i in xrange(256):
+        for i in range(256):
             for j,(dfunc, kind) in enumerate(getFuncs('asciiBase85Decode')):
                 efunc = eFuncs[j][0]
                 encoded = efunc(plain)

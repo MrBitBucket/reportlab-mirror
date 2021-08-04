@@ -262,8 +262,8 @@ heading2("Installation and Setup")
 disc("""To avoid duplication, the installation instructions are kept in the README file
 in our distribution, which can be viewed online at ^https://hg.reportlab.com/hg-public/reportlab/^""")
 
-disc("""This release (%s) of ReportLab requires Python versions 2.7, %s.%s+ or higher.  
-	If you need to use Python 2.5 or 2.6, please use the latest ReportLab 2.7 package.
+disc("""This release (%s) of ReportLab requires Python versions %s.%s+ or higher.  
+	If you need to use Python 2, please use the latest ReportLab 2.7 package that is suitable for you.
 """ % ((reportlab.Version,)+reportlab.__min_python_version__))
 
 
@@ -390,14 +390,14 @@ styles = getStyleSheet()
 indent0_style = styles['Indent0']
 indent1_style = styles['Indent1']
 
-heading2("Goals for the 3.x release series")
+heading2("Goals of the 3.x release series")
 disc("""ReportLab 3.0 has been produced to help in the migration to Python 3.x.  Python 3.x will
 be standard in future Ubuntu releases and is gaining popularity, and a good proportion
 of major Python packages now run on Python 3.  """)
 
 
-bullet("""Python 3.x compatibility.  A single line of code should run on 2.7 and 3.6""")
-bullet(""" __init__.py restricts to 2.7 or >=3.6""")
+bullet("""Python 3.x compatibility.  A single line of code should run on 3.6 and higher""")
+bullet(""" __init__.py restricts to >=3.6""")
 bullet("""__init__.py allow the import of on optional reportlab.local_rl_mods to allow monkey patching etc.""")
 bullet("""rl_config now imports rl_settings, optionally local_rl_settings, reportlab_settings.py & finally ~/.reportlab_settings""")
 bullet("""ReportLab C extensions now live inside reportlab; _rl_accel is no longer required. All _rl_accel imports now pass through reportlab.lib.rl_accel""")

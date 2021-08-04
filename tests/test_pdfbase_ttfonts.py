@@ -17,7 +17,7 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, add32
 from reportlab import rl_config
-from reportlab.lib.utils import getBytesIO, isPy3, uniChr, int2Byte
+from reportlab.lib.utils import getBytesIO, uniChr, int2Byte
 
 def utf8(code):
     "Convert a given UCS character index into UTF-8"
@@ -46,7 +46,7 @@ def show_all_glyphs(fn,fontName='Vera'):
     from reportlab.lib.utils import uniChr
     font = _fonts[fontName]
     doc = c._doc
-    kfunc = font.face.charToGlyph.keys if isPy3 else font.face.charToGlyph.iterkeys
+    kfunc = font.face.charToGlyph.keys
     for s in sorted(list(kfunc())):
         if s<0x10000:
             font.splitString(uniChr(s),doc)
@@ -54,7 +54,7 @@ def show_all_glyphs(fn,fontName='Vera'):
     cn = {}
     #print('len(assignments)=%d'%  len(state.assignments))
     nzero = 0
-    ifunc = state.assignments.items if isPy3 else state.assignments.iteritems
+    ifunc = state.assignments.items
     for code, n in sorted(list(ifunc())):
         if code==0: nzero += 1
         cn[n] = uniChr(code)
@@ -294,7 +294,7 @@ class TTFontTestCase(NearTestCase):
         w3R/aE28KsfY2J+RPNp+j+KaOoCey4h+Dd48b9O5G0v2K7j0AM6s+5WQ/E0wVoK+pA6/3bup7bJf
         CMGjwvxTsr74/f/F95m3TH9x8o0/TU//N+7/D/ScVcA=
         """.encode('latin1')
-        uncompressed = zlib.decompress(getattr(base64,'decodebytes' if isPy3 else 'decodestring')(font))
+        uncompressed = zlib.decompress(base64.decodebytes(font))
         ttf = io.BytesIO(uncompressed)
         setattr(ttf ,"name", "(invisible.ttf)")
         font = TTFont('invisible', ttf)
@@ -317,7 +317,7 @@ class TTFontTestCase(NearTestCase):
         self.assertEqual(font.splitString(text, doc), chunks)
 
         text = b"".join(utf8(i) for i in range(510, -1, -1))
-        revver = (lambda b: map(int2Byte,reversed(b))) if isPy3 else (lambda b: reversed(list(b)))
+        revver = lambda b: map(int2Byte,reversed(b))
         chunks = [(i[0],b"".join(revver(i[1]))) for i in reversed(chunks)]
         self.assertEqual(font.splitString(text, doc), chunks)
 

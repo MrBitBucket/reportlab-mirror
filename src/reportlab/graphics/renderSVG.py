@@ -17,8 +17,8 @@ from reportlab.lib.utils import asNative, getBytesIO
 from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
-from reportlab import rl_config, ascii
-from reportlab.lib.utils import getStringIO, RLString, isPy3, isUnicode, isBytes
+from reportlab import rl_config
+from reportlab.lib.utils import getStringIO, RLString, isUnicode, isBytes
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
 from .renderPM import _getImage
 
@@ -265,16 +265,13 @@ class SVGCanvas:
         if hasattr(fn,'write'):
             f = fn
         else:
-            if isPy3:
-                f = open(fn, 'w',encoding=self.encoding)
-            else:
-                f = open(fn, 'w')
+            f = open(fn, 'w',encoding=self.encoding)
 
         svg = writer.getvalue()
         exd = self.extraXmlDecl
         if exd:
             svg = svg.replace('?>','?>'+exd)
-        f.write(svg if isPy3 else svg.encode(self.encoding))
+        f.write(svg)
         if f is not fn:
             f.close()
 

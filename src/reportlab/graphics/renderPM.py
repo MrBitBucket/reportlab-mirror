@@ -17,7 +17,7 @@ from reportlab.graphics.renderbase import StateTracker, getStateDelta, renderSca
 from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1
 from math import sin, cos, pi, ceil
 from reportlab.lib.utils import getStringIO, getBytesIO, open_and_read, isUnicode
-from reportlab import rl_config, ascii
+from reportlab import rl_config
 from .utils import setFont as _setFont, RenderPMError
 
 import os, sys

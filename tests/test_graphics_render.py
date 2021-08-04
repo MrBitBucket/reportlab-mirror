@@ -6,7 +6,6 @@ Tests for renderers
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import unittest, os, sys, glob
-from reportlab.lib.utils import isPy3
 try:
     from reportlab.graphics import _renderPM
 except:

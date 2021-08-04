@@ -16,7 +16,7 @@ import hashlib
 from string import digits
 import tempfile
 from math import sin, cos, tan, pi, ceil
-from reportlab import rl_config, ascii, xrange
+from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
@@ -111,7 +111,7 @@ def _buildColorFunction(colors, positions):
     # equally distribute if positions not specified
     if positions is None:
         nc = len(colors)
-        positions = [float(x)/(nc-1) for x in xrange(nc)]
+        positions = [float(x)/(nc-1) for x in range(nc)]
     else:
         # sort positions and colors in increasing order
         poscolors = list(zip(positions, colors))
@@ -422,7 +422,7 @@ class Canvas(_PDFColorSetter):
      _charSpace _wordSpace _horizScale _textRenderMode _rise _textLineMatrix
      _textMatrix _lineCap _lineJoin _lineDash _lineWidth _mitreLimit _fillColorObj
      _strokeColorObj _extgstate""".split()
-    STATE_RANGE = list(xrange(len(STATE_ATTRIBUTES)))
+    STATE_RANGE = list(range(len(STATE_ATTRIBUTES)))
 
         #self._addStandardFonts()
 

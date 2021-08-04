@@ -33,7 +33,7 @@ from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropH
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.charts.legends import _objStr
 from reportlab.graphics.charts.textlabels import Label
-from reportlab import xrange, ascii, cmp
+from reportlab import cmp
 
 _ANGLE2BOXANCHOR={0:'w', 45:'sw', 90:'s', 135:'se', 180:'e', 225:'ne', 270:'n', 315: 'nw', -45: 'nw'}
 _ANGLE2RBOXANCHOR={0:'e', 45:'ne', 90:'n', 135:'nw', 180:'w', 225:'sw', 270:'s', 315: 'se', -45: 'se'}
@@ -266,7 +266,7 @@ def findOverlapRun(B,wrap=1):
     '''determine a set of overlaps in bounding boxes B or return None'''
     n = len(B)
     if n>1:
-        for i in xrange(n-1):
+        for i in range(n-1):
             R = _findOverlapRun(B,i,wrap)
             if len(R)>1: return R
     return None
@@ -829,7 +829,7 @@ class Pie(AbstractPieChart):
                     shda = (a2-a1)/float(nshades)
                     shsc = wedgeStyle.fillColor
                     theWedge.fillColor = None
-                    for ish in xrange(nshades):
+                    for ish in range(nshades):
                         sha1 = a1 + ish*shda
                         sha2 = a1 + (ish+1)*shda
                         shc = shader(shsc,shf1 + dsh*ish)

@@ -11,7 +11,6 @@ __version__ = '0.8'
 import sys
 sys.path.insert(0, '.')
 import os, re, types, getopt, pickle, copy, time, pprint, traceback
-from reportlab import isPy3
 from reportlab import rl_config
 
 from docpy import PackageSkeleton0, ModuleSkeleton0
@@ -887,11 +886,8 @@ def documentPackage0(pathOrName, builder, opts={}):
     cwd = os.getcwd()
     os.chdir(path)
     builder.beginPackage(name)
-    if isPy3:
-        for dirpath, dirnames, filenames in os.walk(path):
-            _packageWalkCallback((builder, opts), dirpath, dirnames + filenames)
-    else:
-        os.path.walk(path, _packageWalkCallback, (builder, opts))
+    for dirpath, dirnames, filenames in os.walk(path):
+        _packageWalkCallback((builder, opts), dirpath, dirnames + filenames)
     builder.endPackage(name)
     os.chdir(cwd)
 

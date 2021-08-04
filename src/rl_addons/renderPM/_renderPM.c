@@ -1,8 +1,5 @@
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
-#if PY_MAJOR_VERSION >= 3
-#	define isPy3
-#endif
 
 #ifndef PyMem_New
 	/*Niki Spahiev <niki@vintech.bg> suggests this is required for 1.5.2*/
@@ -24,26 +21,15 @@
 
 #define VERSION "4.01"
 #define MODULENAME "_renderPM"
-#ifdef isPy3
-#	define PyInt_FromLong	PyLong_FromLong
-#	define staticforward static
-#	define statichere static
+#define PyInt_FromLong	PyLong_FromLong
+#define staticforward static
+#define statichere static
 PyObject *RLPy_FindMethod(PyMethodDef *ml, PyObject *self, const char* name){
 	for(;ml->ml_name!=NULL;ml++)
 		if(name[0]==ml->ml_name[0] && strcmp(name+1,ml->ml_name+1)==0) return PyCFunction_New(ml, self);
 	return NULL;
 	}
 #define Py_FindMethod RLPy_FindMethod
-#else
-#   include "bytesobject.h"
-#	ifndef PyVarObject_HEAD_INIT
-#		define PyVarObject_HEAD_INIT(type, size) \
-        	PyObject_HEAD_INIT(type) size,
-#	endif
-#	ifndef Py_TYPE
-#		define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
-#	endif
-#endif
 #define __STR(x) #x
 #define STRINGIFY(x) __STR(x)
 #ifndef LIBART_VERSION
@@ -1338,11 +1324,7 @@ static PyObject* gstate__aapixbuf(gstateObject* self, PyObject* args)
 	ArtPixBuf	src;
 
 	src.n_channels = 3;
-#ifdef isPy3
-	#define AAPIXBUFFMT "ddddy#ii|i:_aapixbuf"
-#else
-	#define AAPIXBUFFMT "ddddt#ii|i:_aapixbuf"
-#endif
+#define AAPIXBUFFMT "ddddy#ii|i:_aapixbuf"
 
 	/*(dstX,dstY,dstW,dstH,src,srcW,srcH[,srcD[,aff]])*/
 	if(!PyArg_ParseTuple(args,AAPIXBUFFMT,
@@ -2189,7 +2171,6 @@ extern void (*libart_set_DYNAMIC_BIGENDIAN(void));
 #endif
 
 /*Initialization function for the module*/
-#ifdef isPy3
 static struct PyModuleDef moduleDef = {
 	PyModuleDef_HEAD_INIT,
 	MODULENAME,
@@ -2203,15 +2184,6 @@ static struct PyModuleDef moduleDef = {
 	};
 
 PyMODINIT_FUNC PyInit__renderPM(void)
-#define OK_RET m
-#define ERR_RET NULL
-#define CREATE_MODULE() PyModule_Create(&moduleDef)
-#else
-void init_renderPM(void)
-#define OK_RET
-#define ERR_RET
-#define CREATE_MODULE() Py_InitModule(MODULENAME, _methods)
-#endif
 {
 	PyObject *m=NULL, *obj=NULL;
 
@@ -2222,7 +2194,7 @@ void init_renderPM(void)
 #endif
 
 	/* Create the module and add the functions */
-	m = CREATE_MODULE();
+	m = PyModule_Create(&moduleDef);
     if(!m)goto err;
 
 	/* Add some symbolic constants to the module */
@@ -2238,17 +2210,12 @@ void init_renderPM(void)
 	obj = PyUnicode_FromString(__FILE__);
 	if(!obj)goto err;
 	PyModule_AddObject(m, "__file__", obj);
-#ifndef isPy3
-	obj = PyUnicode_FromString(__DOC__);
-	if(!obj)goto err;
-	PyModule_AddObject(m, "__doc__", obj);/*add in the docstring*/
-#endif
 #ifdef DYNAMIC_ENDIANNESS
 	libart_set_DYNAMIC_BIGENDIAN();
 #endif
-	return OK_RET;
+	return m;
 err:
 	Py_XDECREF(obj);
 	Py_XDECREF(m);
-	return ERR_RET;
+	return NULL;
 }

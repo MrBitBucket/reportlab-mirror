@@ -8,7 +8,7 @@ __all__ = (
         )
 from . _renderPM import makeT1Font
 from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1
-from reportlab.lib.utils import open_and_read, isBytes, isPy3, rl_exec
+from reportlab.lib.utils import open_and_read, isBytes, rl_exec
 from .shapes import _baseGFontName, _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, definePath
 from sys import exc_info
 
@@ -25,7 +25,7 @@ def _errorDump(fontName, fontSize):
         for _ in ('T1SearchPath','TTFSearchPath'):
             print('!!!!! rl_config.%s = %s' % (_,repr(getattr(rl_config,_))))
     code = 'raise RenderPMError("Error in setFont(%s,%s) missing the T1 files?\\nOriginally %s: %s")' % (repr(fontName),repr(fontSize),s1,s2)
-    if isPy3: code += ' from None'
+    code += ' from None'
     rl_exec(code,dict(RenderPMError=RenderPMError))
 
 def setFont(gs,fontName,fontSize):

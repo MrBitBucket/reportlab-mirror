@@ -2,7 +2,6 @@
 #see license.txt for license details
 # tests some paragraph styles
 __version__='3.3.0'
-from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import unittest, os, random
@@ -354,12 +353,12 @@ class ParagraphTestCase(unittest.TestCase):
             
             story.append(Paragraph("<b><i>Following pairs of left justified texts have style.wordWrap=None &amp; 'LTR'.</i></b><br/>",stySTD))
             # write every LTR string and its corresponding RTL string to be matched.
-            for i in xrange(n):
+            for i in range(n):
                 story.append(Paragraph(ltrStrings[i], stySTD))
                 story.append(Paragraph(ltrStrings[i], styLTR))
 
             story.append(Paragraph("<br/><b><i>Following pairs of right justfied texts have style.wordWrap=None &amp; 'RTL'.</i></b><br/>",stySTD))
-            for i in xrange(n):
+            for i in range(n):
                 story.append(Paragraph(rtlStrings[i], styRJ))
                 story.append(Paragraph(rtlStrings[i], styRTL))
 

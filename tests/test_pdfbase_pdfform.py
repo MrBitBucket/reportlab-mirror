@@ -1,4 +1,3 @@
-from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, NearTestCase
 setOutDir(__name__)
 import unittest
@@ -130,7 +129,7 @@ class PdfFormTestCase(NearTestCase):
         BS = ['solid','bevelled','inset','dashed','underlined']
         V = ['Av','B','Cv','D','Dv','E','F','G','Gv']
         ff = ['','edit']
-        for i in xrange(500):
+        for i in range(500):
             x = 72+(i%3)*180
             y = 800 - int(i/3)*36
             if y<100: break
@@ -145,7 +144,7 @@ class PdfFormTestCase(NearTestCase):
         BS = ['solid','bevelled','inset','dashed','underlined']
         V = ['Av','B','Cv','D','Dv','E','F','G','Gv','H']
         ff = ['','multiSelect']
-        for i in xrange(500):
+        for i in range(500):
             x = 72+(i%3)*180
             y = 800 - int(i/3)*108 - 52
             if y<100: break

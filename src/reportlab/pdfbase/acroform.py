@@ -6,7 +6,6 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.colors import Color, CMYKColor, Whiter, Blacker, opaqueColor
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.utils import isStr, asNative
-from reportlab import xrange
 import weakref
 
 visibilities = dict(
@@ -1107,7 +1106,7 @@ class CBMark:
         points = self.points
         for op in self.ops:
             c = opCount[op]
-            for _ in xrange(c):
+            for _ in range(c):
                 C(xsc(points[i]))
                 C(ysc(points[i+1]))
                 i += 2

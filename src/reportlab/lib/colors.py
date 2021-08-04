@@ -40,7 +40,7 @@ Traceback (most recent call last):
 ValueError: css color 'pcmyka(100,0,0,0)' has wrong number of components
 '''
 import math, re, functools
-from reportlab import isPy3, cmp
+from reportlab import cmp
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.utils import asNative, isStr, rl_safe_eval
 from ast import literal_eval
@@ -146,7 +146,7 @@ class Color:
     @property
     def normalizedAlpha(self):
         return self.alpha
-if isPy3: Color = functools.total_ordering(Color)
+Color = functools.total_ordering(Color)
 
 def opaqueColor(c):
     '''utility to check we have a color that's not fully transparent'''

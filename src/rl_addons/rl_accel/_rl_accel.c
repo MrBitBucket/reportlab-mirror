@@ -7,9 +7,6 @@
 */
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
-#if PY_MAJOR_VERSION >= 3
-#	define isPy3
-#endif
 #include <stdlib.h>
 #include <math.h>
 #define DEFERRED_ADDRESS(A) 0
@@ -35,31 +32,10 @@
 
 struct module_state	{
 	int moduleLineno;
-#ifndef isPy3
-	PyObject *module;
-#endif
 	};
-#ifdef isPy3
-#	define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
-#	define STRNAME "str"
-#	define BYTESNAME "bytes"
-#else
-	static struct module_state _state;
-#	include "bytesobject.h"
-#	ifndef PyVarObject_HEAD_INIT
-#		define PyVarObject_HEAD_INIT(type, size) \
-        	PyObject_HEAD_INIT(type) size,
-#	endif
-#	ifndef Py_TYPE
-#		define Py_TYPE(ob) (((PyObject*)(ob))->ob_type)
-#	endif
-#	define PyBytes_AS_STRING	PyString_AS_STRING
-#	define PyBytes_AsString		PyString_AsString
-#	define PyBytes_GET_SIZE 	PyString_GET_SIZE
-#	define GETSTATE(m) (&_state)
-#	define STRNAME "unicode"
-#	define BYTESNAME "str"
-#endif
+#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
+#define STRNAME "str"
+#define BYTESNAME "bytes"
 
 #define ERROR_EXIT() {GETSTATE(module)->moduleLineno=__LINE__;goto L_ERR;}
 #define ADD_TB(module,name) _add_TB(module,name)
@@ -73,11 +49,7 @@ static void _add_TB(PyObject *module,char *funcname)
 	PyCodeObject *py_code = NULL;
 	PyFrameObject *py_frame = NULL;
 
-#ifdef isPy3
 	py_globals = PyModule_GetDict(module);
-#else
-	py_globals = PyModule_GetDict(GETSTATE(module)->module);
-#endif
 	if(!py_globals) goto bad;
 	py_code = PyCode_NewEmpty(
 						__FILE__,		/*PyObject *filename,*/
@@ -388,11 +360,7 @@ PyObject *_fp_str(PyObject *module, PyObject *args)
 			pB = pB + strlen(pB);
 			}
 		*pB = 0;
-#ifdef isPy3
 		retVal = PyUnicode_FromString(buf);
-#else
-		retVal = PyBytes_FromString(buf);
-#endif
 		free(buf);
 		return retVal;
 		}
@@ -424,11 +392,7 @@ static PyObject *_escapePDF(unsigned char* text, Py_ssize_t textlen)
 			out[j++] = c;
 			}
 		}
-#ifdef isPy3
 	ret = PyUnicode_FromStringAndSize((const char *)out,j);
-#else
-	ret = PyBytes_FromStringAndSize((const char *)out,j);
-#endif
 	PyMem_Free(out);
 	return ret;
 }
@@ -482,11 +446,7 @@ static PyObject *sameFrag(PyObject *module, PyObject* args)
 		fa = PyObject_GetAttrString(f,*p);
 		ga = PyObject_GetAttrString(g,*p);
 		if(fa && ga){
-#ifdef	isPy3
 			t = PyObject_RichCompareBool(fa,ga,Py_NE);
-#else
-			t = PyObject_Compare(fa,ga);
-#endif
 			Py_DECREF(fa);
 			Py_DECREF(ga);
 			if(PyErr_Occurred()) goto L1;
@@ -587,19 +547,9 @@ static PyObject *_GetStringBuf(PyObject *obj, const char **buf)
 	PyObject *res;
 
 	if(PyUnicode_Check(obj)){
-#ifdef	isPy3
 		res = obj;
 		Py_INCREF(res);
 		*buf = (const char *)PyUnicode_AsUTF8(res);
-#else
-		res = PyUnicode_AsUTF8String(obj);
-		if (!res) {
-			PyErr_SetString(PyExc_ValueError,
-					"encode to UTF8 bytes failed");
-			return NULL;
-		}
-		*buf = PyBytes_AsString(res);
-#endif
 		}
 	else if(PyBytes_Check(obj)){
 		res = obj;
@@ -1302,7 +1252,6 @@ static struct PyMethodDef _methods[] = {
 	};
 
 /*Initialization function for the module*/
-#ifdef isPy3
 static struct PyModuleDef moduledef = {
 	PyModuleDef_HEAD_INIT,
 	"_rl_accel",
@@ -1316,30 +1265,17 @@ static struct PyModuleDef moduledef = {
 	};
 
 PyMODINIT_FUNC PyInit__rl_accel(void)
-#else
-void init_rl_accel(void)
-#endif
 {
 	PyObject			*module=NULL, *moduleVersion=NULL;
 	/*Create the module and add the functions and module doc string*/
-#ifdef isPy3
 	module = PyModule_Create(&moduledef);
-#else
-	module = Py_InitModule3("_rl_accel", _methods,__DOC__);
-#endif
 	if(!module) goto err;
 	/*Add some symbolic constants to the module */
 	moduleVersion = PyBytes_FromString(VERSION);
 	if(!moduleVersion)goto err;
-#ifndef isPy3
-	GETSTATE(module)->module = module;
-#endif
 	PyModule_AddObject(module, "version", moduleVersion);
 
 #ifdef	HAVE_BOX
-#ifndef isPy3
-	BoxType.ob_type = &PyType_Type;
-#endif
 	if(PyType_Ready(&BoxType)<0) goto err;
 	BoxList_type.tp_base = &PyList_Type;
 	if(PyType_Ready(&BoxList_type)<0) goto err;
@@ -1347,18 +1283,10 @@ void init_rl_accel(void)
 	if(PyModule_AddObject(module, "BoxList", (PyObject *)&BoxList_type)<0)goto err;
 #endif
 
-#ifdef isPy3
 	return module;
-#else
-	return;
-#endif
 
 err:/*Check for errors*/
-#ifdef isPy3
 	Py_XDECREF(moduleVersion);
 	Py_XDECREF(module);
 	return NULL;
-#else
-	if (PyErr_Occurred()) Py_FatalError("can't initialize module _rl_accel");
-#endif
 }

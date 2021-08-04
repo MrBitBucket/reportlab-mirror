@@ -17,8 +17,8 @@ classes are made available elsewhere for users to manipulate.
 import types, binascii, codecs, time
 from collections import OrderedDict
 from reportlab.pdfbase import pdfutils
-from reportlab import rl_config, ascii
-from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester, isStr, bytestr, isPy3, annotateException, TimeStamp
+from reportlab import rl_config
+from reportlab.lib.utils import import_zlib, open_for_read, makeFileName, isSeq, isBytes, isUnicode, _digester, isStr, bytestr, annotateException, TimeStamp
 from reportlab.lib.rl_accel import escapePDF, fp_str, asciiBase85Encode, asciiBase85Decode
 from reportlab.pdfbase import pdfmetrics
 from hashlib import md5
@@ -59,12 +59,8 @@ PDF_SUPPORT_VERSION = dict(     #map keyword to min version that supports it
     transparency = (1, 4),
     )
 
-if isPy3:
-    def pdfdocEnc(x):
-        return x.encode('extpdfdoc') if isinstance(x,str) else x
-else:
-    def pdfdocEnc(x):
-        return x.encode('extpdfdoc') if isinstance(x,unicode) else x
+def pdfdocEnc(x):
+    return x.encode('extpdfdoc') if isinstance(x,str) else x
 
 def format(element, document, toplevel=0):
     """Indirection step for formatting.

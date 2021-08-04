@@ -10,7 +10,7 @@ import reportlab
 from reportlab import rl_config
 import unittest
 from reportlab.lib import colors
-from reportlab.lib.utils import rl_safe_eval, rl_safe_exec, isPy3, annotateException
+from reportlab.lib.utils import rl_safe_eval, rl_safe_exec, annotateException
 from reportlab.lib.rl_safe_eval import BadCode
 
 testObj = [1,('a','b',2),{'A':1,'B':2.0},"32"]
@@ -61,24 +61,20 @@ class SafeEvalTestSequenceMeta(type):
                 'list(enumerate((1,2,3)))',
                 'list(zip((1,2,3),("a","b","c")))',
                 '(hasattr(testInst,"b"),hasattr(testInst,"a"))',
-                (None if isPy3 else '(reduce(lambda x, y: x+y, [1, 2, 3, 4, 5]),reduce(lambda x, y: x+y, [[1], [2]],[0]))'),
                 'list(map(lambda x: (x+13,chr(x)),(1,2,3,4)))',
                 '(any([1]),any([]),all([]),all([1,None]),all([1,2]))',
                 '(getattr(testInst,"a"),getattr(testInst,"a",12),getattr(testInst,"xxx",13))',
                 'list(sorted([3,4,1,2,0],reverse=True))',
                 'list(reversed([3,4,1,2,0]))',
                 'list(range(1,10,3))',
-                None if isPy3 else 'list(xrange(1,10,3))',
                 '({1,2,3},set([4,5,6]),frozenset([7,8,9]),{i for i in range(1,10,3)})',
                 '"%s%s" % (1,2)',
-                None if isPy3 else 'apply(lambda x,y,a="a",b="b": (x,y,a,b), (1,2),dict(a="x",b="y"))',
                 )
                 ),
                 (
                 'fail',
                 (
                 'open("/tmp/myfile")',
-                None if isPy3 else 'file("/tmp/myfile")',
                 'SafeEvalTestCase.__module__',
                 ("testInst.__class__.__bases__[0].__subclasses__()",dict(g=dict(testInst=testInst))),
                 "10**200**200",

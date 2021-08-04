@@ -13,7 +13,7 @@ from reportlab.lib.testutils import setOutDir,SecureTestCase, GlobDirectoryWalke
 setOutDir(__name__)
 import os, sys, glob, re, unittest, inspect
 import reportlab
-from reportlab.lib.utils import rl_exec, isPy3, isPyPy
+from reportlab.lib.utils import rl_exec, isPyPy
 
 def typ2is(typ):
     return getattr(inspect,'is'+typ)

@@ -34,7 +34,6 @@ __version__ = '0.8'
 
 
 import sys, os, re, types, getopt, copy, time
-from reportlab import isPy3
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from reportlab.lib.units import inch, cm
@@ -1185,11 +1184,8 @@ def documentPackage0(pathOrName, builder, opts={}):
 
     cwd = os.getcwd()
     builder.beginPackage(name)
-    if isPy3:
-        for dirpath, dirnames, filenames in os.walk(path):
-            _packageWalkCallback((builder, opts), dirpath, dirnames + filenames)
-    else:
-        os.path.walk(path, _packageWalkCallback, (builder, opts))
+    for dirpath, dirnames, filenames in os.walk(path):
+        _packageWalkCallback((builder, opts), dirpath, dirnames + filenames)
     builder.endPackage(name)
     os.chdir(cwd)
 

@@ -1,6 +1,5 @@
 from random import randint
 from xml.sax.saxutils import escape as xmlEscape
-from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import os,unittest, random
@@ -71,8 +70,8 @@ class ListsTestCase(unittest.TestCase):
         normal = styleSheet['BodyText']
         bold = normal.clone('bold',fontName='Helvetica-Bold')
         lpSty = normal.clone('lpSty',spaceAfter=18)
-        data = [[str(i+1), Paragraph("xx "* (i%10), styleSheet["BodyText"]), Paragraph(("blah "*(i%40)), normal)] for i in xrange(5)]
-        data1 = [[str(i+1), Paragraph(["zz ","yy "][i]*(i+3), styleSheet["BodyText"]), Paragraph(("duh  "*(i+3)), normal)] for i in xrange(2)]
+        data = [[str(i+1), Paragraph("xx "* (i%10), styleSheet["BodyText"]), Paragraph(("blah "*(i%40)), normal)] for i in range(5)]
+        data1 = [[str(i+1), Paragraph(["zz ","yy "][i]*(i+3), styleSheet["BodyText"]), Paragraph(("duh  "*(i+3)), normal)] for i in range(2)]
         OL = ListFlowable(
             [
             Paragraph("A table with 5 rows", lpSty),
@@ -175,14 +174,14 @@ http://www.biometricassociates.com/downloads/user-guides/make-the-url-even-longe
         story.append(PageBreak())
         story.append(Paragraph("MultiCol", style=normal))
         RT = 'STARTUP COMPUTERS BLAH BUZZWORD STARTREK PRINTING PYTHON CHOMSKY CHOMSKY'.split()
-        for i in xrange(5):
+        for i in range(5):
             topic = RT[randint(0,len(RT)-1)]
             np = randint(2,6)
             story.append(
                     MultiCol([
                         [Paragraph('Column %d' % (i+1,),style=bold)],
                         [],
-                        [Paragraph(xmlEscape(randomtext.randomText(topic,randint(1,7))),style=normal) for j in xrange(np)]
+                        [Paragraph(xmlEscape(randomtext.randomText(topic,randint(1,7))),style=normal) for j in range(np)]
                         ],
                         widths=['20%',3,'80%'],
                         )
@@ -190,15 +189,15 @@ http://www.biometricassociates.com/downloads/user-guides/make-the-url-even-longe
 
         story.append(PageBreak())
         story.append(Paragraph("MultiCol 2", style=normal))
-        for i in xrange(5):
+        for i in range(5):
             topic = RT[randint(0,len(RT)-1)]
             np = randint(2,6)
             story.append(
                     MultiCol([
                         ([Paragraph('Column %d' % (i+1,),style=bold)]+
-                        [Paragraph(xmlEscape(randomtext.randomText(topic,randint(1,7))),style=normal) for j in xrange(np)]),
+                        [Paragraph(xmlEscape(randomtext.randomText(topic,randint(1,7))),style=normal) for j in range(np)]),
                         [],
-                        [Paragraph(xmlEscape(randomtext.randomText(topic,randint(1,7))),style=normal) for j in xrange(np)]
+                        [Paragraph(xmlEscape(randomtext.randomText(topic,randint(1,7))),style=normal) for j in range(np)]
                         ],
                         widths=['50%',5,'50%'],
                         )

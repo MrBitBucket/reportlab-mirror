@@ -3,7 +3,6 @@
 """Tests for the Platypus SimpleIndex and AlphabeticIndex classes.
 """
 __version__='3.3.0'
-from reportlab import xrange
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
 import sys, os, random
@@ -104,7 +103,7 @@ class IndexTestCase(unittest.TestCase):
                 para = Paragraph(txt, makeBodyStyle())
                 story.append(para)
     
-            for i in xrange(20):
+            for i in range(20):
                 addParas(randomtext.randomText(randomtext.PYTHON, 5).split(' '))
             addParas([u+w for u in u'E\xc8\xc9\xca\xcb' for w in (u'erily',u'asily')])
             addParas([u+w for u in u'A\xc0\xc4\xc1\xc3\xc2' for w in (u'dvance',u'ttend')])

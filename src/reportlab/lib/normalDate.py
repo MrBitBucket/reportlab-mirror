@@ -27,7 +27,7 @@ _monthName = _monthName.split()
 
 from reportlab import cmp
 import re, time, datetime
-from .utils import isPy3, isStr
+from .utils import isStr
 
 if hasattr(time,'struct_time'):
     _DateSeqTypes = (list,tuple,time.struct_time)
@@ -159,44 +159,35 @@ class NormalDate:
         """return a cloned instance of this normalDate"""
         return self.__class__(self.normalDate)
 
-    if not isPy3:
-        def __cmp__(self, target):
-            if target is None:
-                return 1
-            elif not hasattr(target, 'normalDate'):
-                return 1
-            else:
-                return cmp(self.normalDate, target.normalDate)
-    else:
-        def __lt__(self,other):
-            if not hasattr(other,'normalDate'):
-                return False
-            return self.normalDate < other.normalDate
+    def __lt__(self,other):
+        if not hasattr(other,'normalDate'):
+            return False
+        return self.normalDate < other.normalDate
 
-        def __le__(self,other):
-            if not hasattr(other,'normalDate'):
-                return False
-            return self.normalDate <= other.normalDate
+    def __le__(self,other):
+        if not hasattr(other,'normalDate'):
+            return False
+        return self.normalDate <= other.normalDate
 
-        def __eq__(self,other):
-            if not hasattr(other,'normalDate'):
-                return False
-            return self.normalDate == other.normalDate
+    def __eq__(self,other):
+        if not hasattr(other,'normalDate'):
+            return False
+        return self.normalDate == other.normalDate
 
-        def __ne__(self,other):
-            if not hasattr(other,'normalDate'):
-                return True
-            return self.normalDate != other.normalDate
+    def __ne__(self,other):
+        if not hasattr(other,'normalDate'):
+            return True
+        return self.normalDate != other.normalDate
 
-        def __ge__(self,other):
-            if not hasattr(other,'normalDate'):
-                return True
-            return self.normalDate >= other.normalDate
+    def __ge__(self,other):
+        if not hasattr(other,'normalDate'):
+            return True
+        return self.normalDate >= other.normalDate
 
-        def __gt__(self,other):
-            if not hasattr(other,'normalDate'):
-                return True
-            return self.normalDate > other.normalDate
+    def __gt__(self,other):
+        if not hasattr(other,'normalDate'):
+            return True
+        return self.normalDate > other.normalDate
 
     def day(self):
         """return the day as integer 1-31"""

@@ -35,7 +35,6 @@ from reportlab.lib.abag import ABag
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions, listWrapOnFakeWidth
-from reportlab import xrange
 import collections
 
 __all__ = '''AnchorFlowable BalancedColumns BulletDrawer CallerMacro CondPageBreak DDIndenter DocAssert
@@ -1011,7 +1010,7 @@ class PTOContainer(_Container,Flowable):
         n = len(C)
         I2W = {}
         dLeft = dRight = 0
-        for x in xrange(n):
+        for x in range(n):
             c = C[x]
             I = c._ptoinfo
             if I not in I2W.keys():
@@ -1558,7 +1557,7 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
                 h = 0
                 cn = None
                 icheck = nCols-2 if endSlack else -1
-                for i in xrange(nCols):
+                for i in range(nCols):
                     wi, hi, c0, c1 = self._findSplit(canv,cw,ah,content=cn,paraFix=False)
                     w = max(w,wi)
                     h = max(h,hi)
@@ -1655,7 +1654,7 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
                 id='%s-%d' %(self.name,i),
                 showBoundary=showBoundary,
                 overlapAttachedSpace=frame._oASpace,
-                _debug=frame._debug) for i in xrange(nCols)]
+                _debug=frame._debug) for i in range(nCols)]
 
 
         #we are going to modify the current template
@@ -1723,7 +1722,7 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
                         )
             if doVLines:
                 vLines = []
-                for i in xrange(1,nCols):
+                for i in range(1,nCols):
                     vlx = 0.5*(F[i]._x1 + F[i-1]._x1+F[i-1]._width)
                     vLines.append(_AbsLine(vlx,oby2,vlx,oby1,strokeWidth=self._vLinesStrokeWidth,strokeColor=self._vLinesStrokeColor))
         else:
@@ -1733,7 +1732,7 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
         if doBox: G.append(box)
         if doVLines: G.extend(vLines)
         sa = self.getSpaceAfter()
-        for i in xrange(nCols):
+        for i in range(nCols):
             Ci = C[i]
             if Ci:
                 Ci = KeepInFrame(W1,H1,Ci,mode='shrink')

@@ -27,7 +27,7 @@ from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis, YCategoryA
 from reportlab.graphics.charts.textlabels import BarChartLabel, NA_Label, NoneOrInstanceOfNA_Label
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.charts.legends import _objStr
-from reportlab import xrange, cmp
+from reportlab import cmp
 
 class BarChartProperties(PropHolder):
     _attrMap = AttrMap(
@@ -198,7 +198,7 @@ class BarChart(PlotArea):
         bs = getattr(self,'seriesOrder',None)
         n = len(self.data)
         if not bs: 
-            R = [(ss,) for ss in xrange(n)]
+            R = [(ss,) for ss in range(n)]
         else:
             bars = self.bars
             unseen = set(range(n))
@@ -505,7 +505,7 @@ class BarChart(PlotArea):
                     xVal = offs+(seriesMLineCount-1)*bGap*0.5
                 else:
                     xVal -= lineSeen*bGap
-                for colNo in xrange(rowLength): #iterate over categories
+                for colNo in range(rowLength): #iterate over categories
                     _addBar(colNo,colNo)
                 aBP(barRow)
         else:
@@ -523,7 +523,7 @@ class BarChart(PlotArea):
                         xVal = offs+(barsPerGroup-1)*bGap*0.5
                     else:
                         xVal -= lineSeen*bGap
-                    for colNo in xrange(rowLength): #iterate over categories
+                    for colNo in range(rowLength): #iterate over categories
                         _addBar(colNo,colNo*barsPerGroup + sb)
                     aBP(barRow)
 

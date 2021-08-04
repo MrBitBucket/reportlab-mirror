@@ -31,7 +31,7 @@ for fn in __all__:
     del D
 
 if _py_funcs:
-    from reportlab.lib.utils import isBytes, isUnicode, isSeq, isPy3, rawBytes, asNative, asUnicode, asBytes
+    from reportlab.lib.utils import isBytes, isUnicode, isSeq, rawBytes, asNative, asUnicode, asBytes
     from math import log
     from struct import unpack
 
@@ -96,16 +96,10 @@ if 'unicode2T1' in _py_funcs:
     _py_funcs['unicode2T1'] = unicode2T1
 
 if 'instanceStringWidthT1' in _py_funcs:
-    if isPy3:
-        def instanceStringWidthT1(self, text, size, encoding='utf8'):
-            """This is the "purist" approach to width"""
-            if not isUnicode(text): text = text.decode(encoding)
-            return sum([sum(map(f.widths.__getitem__,t)) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
-    else:
-        def instanceStringWidthT1(self, text, size, encoding='utf8'):
-            """This is the "purist" approach to width"""
-            if not isUnicode(text): text = text.decode(encoding)
-            return sum([sum(map(f.widths.__getitem__,list(map(ord,t)))) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
+    def instanceStringWidthT1(self, text, size, encoding='utf8'):
+        """This is the "purist" approach to width"""
+        if not isUnicode(text): text = text.decode(encoding)
+        return sum([sum(map(f.widths.__getitem__,t)) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
     _py_funcs['instanceStringWidthT1'] = instanceStringWidthT1
 
 if 'instanceStringWidthTTF' in _py_funcs:
@@ -164,7 +158,7 @@ if 'asciiBase85Encode' in _py_funcs:
         This is a compact encoding used for binary data within
         a PDF file.  Four bytes of binary data become five bytes of
         ASCII.  This is the default method used for encoding images."""
-        doOrd =  not isPy3 or isUnicode(input)
+        doOrd =  isUnicode(input)
         # special rules apply if not a multiple of four bytes.
         whole_word_count, remainder_size = divmod(len(input), 4)
         cut = 4 * whole_word_count

@@ -20,7 +20,6 @@ from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.utils import isSeq, find_locals, isStr, asNative
 from reportlab.graphics.shapes import _baseGFontName
 from functools import reduce
-from reportlab import xrange
 
 def _transMax(n,A):
     X = n*[0]
@@ -379,7 +378,7 @@ class Legend(Widget):
             dividerOffsX = self.dividerOffsX
             dividerOffsY = self.dividerOffsY
 
-        for i in xrange(n):
+        for i in range(n):
             if autoCP:
                 col = autoCP
                 col.index = i
