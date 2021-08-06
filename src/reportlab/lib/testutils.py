@@ -83,6 +83,18 @@ def setOutDir(name):
         sys.path.insert(0,os.path.dirname(testsFolder))
     return _OUTDIR
 
+_mockumap = (
+        None if os.environ.get('OFFLINE_MOCK','1')!='1' 
+            else'http://www.reportlab.com/rsrc/encryption.gif',
+        )
+def mockUrlRead(name):
+    if name in _mockumap:
+        with open(os.path.join(testsFolder,os.path.basename(name)),'rb') as f:
+            return f.read()
+    else:
+        from urllib.request import urlopen
+        return urlopen(name).read()
+
 def outputfile(fn):
     """This works out where to write test output.  If running
     code in a locked down file system, this will be a

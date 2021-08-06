@@ -11,7 +11,8 @@ return the 'story' for each.  The run() function gets the stories, then
 builds a special "document model" in which the frames are added to each page
 and drawn into.
 """
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, mockUrlRead
+from unittest.mock import patch
 setOutDir(__name__)
 import copy, sys, os
 from reportlab.pdfgen import canvas
@@ -517,12 +518,9 @@ def getExamples():
         story.append(Paragraph("Here is an Image flowable obtained from an open file.",styleSheet['Italic']))
         story.append(platypus.Image(open_for_read(_GIF,'b')))
         story.append(FrameBreak())
-        try:
-            img = platypus.Image('http://www.reportlab.com/rsrc/encryption.gif')
-            story.append(Paragraph("Here is an Image flowable obtained from a string http url.",styleSheet['Italic']))
-            story.append(img)
-        except:
-            story.append(Paragraph("The image could not be obtained from a string http url.",styleSheet['Italic']))
+        img = platypus.Image('http://www.reportlab.com/rsrc/encryption.gif')
+        story.append(Paragraph("Here is an Image flowable obtained from a string http url.",styleSheet['Italic']))
+        story.append(img)
         story.append(FrameBreak())
 
     if _GAPNG:
@@ -587,6 +585,7 @@ def run():
 
 class PlatypusTestCase(unittest.TestCase):
 
+    @patch('reportlab.lib.utils.rlUrlRead',mockUrlRead)
     def test0(self):
         "Make a platypus document"
         run()

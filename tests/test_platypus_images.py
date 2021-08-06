@@ -1,4 +1,5 @@
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, mockUrlRead
+from unittest.mock import patch
 setOutDir(__name__)
 import unittest, sys, os
 from reportlab.lib.testutils import testsFolder
@@ -44,12 +45,9 @@ def run():
         story.append(Paragraph("Here is an Image flowable obtained from an open GIF file.",styleSheet['Italic']))
         story.append(Image(open_for_read(_GIF,'b')))
         story.append(FrameBreak())
-        try:
-            img = Image('http://www.reportlab.com/rsrc/encryption.gif')
-            story.append(Paragraph("Here is an Image flowable obtained from a string GIF http url.",styleSheet['Italic']))
-            story.append(img)
-        except:
-            story.append(Paragraph("The image could not be obtained from a string http GIF url.",styleSheet['Italic']))
+        img = Image('http://www.reportlab.com/rsrc/encryption.gif')
+        story.append(Paragraph("Here is an Image flowable obtained from a string GIF http url.",styleSheet['Italic']))
+        story.append(img)
         story.append(FrameBreak())
 
     if _GAPNG:
@@ -76,6 +74,7 @@ def run():
     doc.build(story)
 
 class PlatypusImagesTestCase(unittest.TestCase):
+    @patch('reportlab.lib.utils.rlUrlRead', mockUrlRead)
     def test0(self):
         "Make a platypus document"
         run()

@@ -3,7 +3,8 @@
 """Tests for reportlab.lib.utils
 """
 __version__='3.3.0'
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation, mockUrlRead
+from unittest.mock import patch
 setOutDir(__name__)
 import os, time, sys
 import reportlab
@@ -117,6 +118,7 @@ class ImporterTestCase(unittest.TestCase):
         "test open and read of a relative file: URL"
         b = _rel_open_and_read('file:../docs/images/Edit_Prefs.gif')
 
+    @patch('reportlab.lib.utils.rlUrlRead',mockUrlRead)
     def test9(self):
         "test open and read of an http: URL"
         from reportlab.lib.utils import open_and_read

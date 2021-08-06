@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.6.1	 6/08/2021
+---------------------------
+	* add mock for urlopen calls so tests can run off line. Contribution by Antonio Trande sagitter at fedoraproject dot org
+
 CHANGES  3.6.0	 23/07/2021
 ---------------------------
 	* create py-2-3 branch

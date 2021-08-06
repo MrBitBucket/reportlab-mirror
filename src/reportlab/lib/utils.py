@@ -529,10 +529,13 @@ def open_for_read_by_name(name,mode='b'):
         if 'b' not in mode and os.linesep!='\n': s = s.replace(os.linesep,'\n')
         return getBytesIO(s)
 
+from urllib.parse import unquote, urlparse
+from urllib.request import urlopen
+def rlUrlRead(name):
+    return urlopen(name).read()
+
 def open_for_read(name,mode='b'):
     #auto initialized function`
-    from urllib.request import urlopen
-    from urllib.parse import unquote, urlparse
     #copied here from urllib.URLopener.open_data because
     # 1) they want to remove it
     # 2) the existing one is borken
@@ -583,7 +586,7 @@ def open_for_read(name,mode='b'):
                     purl = urlparse(name)
                     if purl[0] and not ((purl[0] in ('data','file') or trustedHosts.match(purl[1])) and (purl[0] in trustedSchemes)):
                         raise ValueError('Attempted untrusted host access')
-                return getBytesIO(datareader(name) if name[:5].lower()=='data:' else urlopen(name).read())
+                return getBytesIO(datareader(name) if name[:5].lower()=='data:' else rlUrlRead(name))
             except:
                 raise IOError('Cannot open resource "%s"' % name)
     globals()['open_for_read'] = open_for_read
