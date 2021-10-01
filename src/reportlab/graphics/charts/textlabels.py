@@ -74,7 +74,7 @@ class Label(Widget):
         useAscentDescent = AttrMapValue(isBoolean,desc="If True then the font's Ascent & Descent will be used to compute default heights and baseline."),
         customDrawChanger = AttrMapValue(isNoneOrCallable,desc="An instance of CustomDrawChanger to modify the behavior at draw time", _advancedUsage=1),
         ddf = AttrMapValue(NoneOr(isSubclassOf(DirectDraw),'NoneOrDirectDraw'),desc="A DirectDrawFlowable instance", _advancedUsage=1),
-        ddfKlass = AttrMapValue(NoneOr(isSubclassOf(Flowable),'NoneOrDirectDraw'),desc="A DirectDrawFlowable instance", _advancedUsage=1),
+        ddfKlass = AttrMapValue(NoneOr(isSubclassOf(Flowable),'NoneOrDirectDraw'),desc="A Flowable class for direct drawing (default is XPreformatted", _advancedUsage=1),
         ddfStyle = AttrMapValue(NoneOr(isSubclassOf(PropertySet)),desc="A style for a ddfKlass or None", _advancedUsage=1),
         )
 
@@ -480,7 +480,7 @@ class XLabel(Label):
             )
     def __init__(self,*args,**kwds):
         Label.__init__(self,*args,**kwds)
-        self.ddfKlass = kwds.pop('flowableClass',XPreformatted)
+        self.ddfKlass = kwds.pop('ddfKlass',XPreformatted)
         self.ddf = kwds.pop('directDrawClass',self.ddf)
 
     if False:
