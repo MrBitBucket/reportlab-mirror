@@ -586,7 +586,7 @@ def open_for_read(name,mode='b'):
                     purl = urlparse(name)
                     if purl[0] and not ((purl[0] in ('data','file') or trustedHosts.match(purl[1])) and (purl[0] in trustedSchemes)):
                         raise ValueError('Attempted untrusted host access')
-                return getBytesIO(datareader(name) if name[:5].lower()=='data:' else rlUrlRead(name))
+                return getBytesIO((datareader if name[:5].lower()=='data:' else rlUrlRead)(name))
             except:
                 raise IOError('Cannot open resource "%s"' % name)
     globals()['open_for_read'] = open_for_read
