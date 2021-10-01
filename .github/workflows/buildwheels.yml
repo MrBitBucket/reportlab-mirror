@@ -29,7 +29,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       #CIBW_SKIP: pp* cp37-macosx-arm64 cp37-macosx-universal2 cp36-macosx-arm64 cp36-macosx-universal2
-      CIBW_SKIP: pp* cp37-macosx-arm64 *-macosx-universal2 cp36-macosx-arm64 cp36-macosx-universal2
+      CIBW_SKIP: pp* cp37-macosx_arm64 *-macosx_universal2 cp36-macosx_arm64 cp36-macosx_universal2
       CIBW_BEFORE_BUILD_LINUX: yum install cairo-devel -y
       #CIBW_BEFORE_TEST: pip install --no-cache-dir pyphen
       #CIBW_TEST_REQUIRES: "${{ matrix.os != 'macos-latest' && 'pyphen pycairo rlPyCairo' || 'pyphen' }}"
