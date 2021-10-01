@@ -34,7 +34,7 @@ jobs:
       #CIBW_TEST_REQUIRES: "${{ matrix.os != 'macos-latest' && 'pyphen pycairo rlPyCairo' || 'pyphen' }}"
       # Will avoid testing on emulated architectures
       # Skip trying to test arm64 builds on Intel Macs
-      CIBW_TEST_SKIP: "*-manylinux_{aarch64,ppc64le,s390x} *-macosx_arm64 *-macosx_universal2:arm64"
+      CIBW_TEST_SKIP: "*-manylinux_{aarch64,ppc64le,s390x} cp310-* *-macosx_arm64 *-macosx_universal2:arm64"
       CIBW_TEST_COMMAND: python -c "import sys,os;r=os.system(' '.join((sys.executable,os.path.join(r'{project}','setup.py'),'tests-postinstall','--verbose','--pip-install=pyphen','--pip-install=rlPyCairo','--rl-index-url=https://${{secrets.CITOOLS_USER}}:${{secrets.CITOOLS_PASSWORD}}@www.reportlab.com/pypi','--rl-pip-install=pyfribidi')));sys.exit(('!!!!! test command --> %s !!!!!'%r) if r else r)"
       CIBW_BUILD_VERBOSITY: 3
     strategy:
