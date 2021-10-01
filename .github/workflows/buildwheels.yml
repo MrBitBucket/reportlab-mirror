@@ -28,10 +28,13 @@ jobs:
     name: Build wheels on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     env:
-      CIBW_SKIP: pp*
+      CIBW_SKIP: pp* cp37-macosx-arm64 cp37-macosx-universal2 cp36-macosx-arm64 cp36-macosx-universal2
       CIBW_BEFORE_BUILD_LINUX: yum install cairo-devel -y
       #CIBW_BEFORE_TEST: pip install --no-cache-dir pyphen
       #CIBW_TEST_REQUIRES: "${{ matrix.os != 'macos-latest' && 'pyphen pycairo rlPyCairo' || 'pyphen' }}"
+      # Will avoid testing on emulated architectures
+      # Skip trying to test arm64 builds on Intel Macs
+      CIBW_TEST_SKIP: "*-manylinux_{aarch64,ppc64le,s390x} *-macosx_arm64 *-macosx_universal2:arm64"
       CIBW_TEST_COMMAND: python -c "import sys,os;r=os.system(' '.join((sys.executable,os.path.join(r'{project}','setup.py'),'tests-postinstall','--verbose','--pip-install=pyphen','--pip-install=rlPyCairo','--rl-index-url=https://${{secrets.CITOOLS_USER}}:${{secrets.CITOOLS_PASSWORD}}@www.reportlab.com/pypi','--rl-pip-install=pyfribidi')));sys.exit(('!!!!! test command --> %s !!!!!'%r) if r else r)"
       CIBW_BUILD_VERBOSITY: 3
     strategy:
@@ -45,15 +48,22 @@ jobs:
       # Used to host cibuildwheel
       - uses: actions/setup-python@v2
 
+      - name: Set up QEMU
+        if: runner.os == 'Linux'
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: all
+
       - name: Install cibuildwheel
         run: |
-          python -m pip install cibuildwheel==2.0.0a2
+          python -m pip install 'cibuildwheel==2.2.0a1'
           python -c "import os;print('+++++ cwd=%r;dir=%r' % (os.getcwd(),os.listdir('.')))"
 
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
-          CIBW_ARCHS_MACOS: x86_64 arm64
+          CIBW_ARCHS_LINUX: auto aarch64 #needs quemu setup
+          CIBW_ARCHS_MACOS: x86_64 arm64 universal2
 
       - name: upload wheels
         env:
@@ -66,7 +76,7 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          name: lin-win-mac
+          name: reportlab-lin-win-mac
           path: ./wheelhouse/*.whl
   email:
     name: email

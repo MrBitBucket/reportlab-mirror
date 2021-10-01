@@ -749,18 +749,17 @@ def main():
                 'License :: OSI Approved :: BSD License',
                 'Topic :: Printing',
                 'Topic :: Text Processing :: Markup',
-                'Programming Language :: Python :: 2',
-                'Programming Language :: Python :: 2.7',
                 'Programming Language :: Python :: 3',
                 'Programming Language :: Python :: 3.6',
                 'Programming Language :: Python :: 3.7',
                 'Programming Language :: Python :: 3.8',
                 'Programming Language :: Python :: 3.9',
+                'Programming Language :: Python :: 3.10',
                 ],
             
             #this probably only works for setuptools, but distutils seems to ignore it
             install_requires=['pillow>=4.0.0'],
-            python_requires='>=2.7, >=3.6, <4',
+            python_requires='>=3.6, <4',
             extras_require={
                 'RLPYCAIRO': ['rlPyCairo>=0.0.5'],
                 },
