@@ -456,7 +456,7 @@ def pipInstallGroups(pkgs, ixu=None):
                 I = []
                 break
         if I:
-            print'===== pip installed %s' % repr(I)) 
+            print('===== pip installed %s' % repr(I)) 
 
 def vopt(opt):
     opt = '--%s=' % opt
