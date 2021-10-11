@@ -490,7 +490,30 @@ def performPipInstalls():
         else:
             raise ValueError('rl-pip-install requires exactly 1 --rl-index-url not %d' % len(rl_ixu))
 
+def showEnv():
+    print('+++++ setup.py environment')
+    print('+++++ sys.version = %s' % sys.version.replace('\n',''))
+    import platform
+    for k in sorted((_ for _ in dir(platform) if not _.startswith('_'))):
+        try:
+            v = getattr(platform,k)
+            if isinstance(v,(str,list,tuple,bool)):
+                v = repr(v)
+            if callable(v) and v.__module__=='platform':
+                v = repr(v())
+            else:
+                continue
+        except:
+            v = '?????'
+        print('+++++ platform.%s = %s' % (k,v))
+    print('--------------------------')
+    for k, v in sorted(os.environ.items()):
+        print('+++++ environ[%s] = %r' % (k,v))
+    print('--------------------------')
+
 def main():
+    if specialOption('--show-env'):
+        showEnv()
     performPipInstalls()
     #test to see if we've a special command
     if 'test' in sys.argv \
