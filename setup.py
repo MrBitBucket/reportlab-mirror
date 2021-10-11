@@ -453,7 +453,10 @@ def pipInstallGroups(pkgs, ixu=None):
             else:
                 for pkg in I:
                     pipUninstall(pkg)
+                I = []
                 break
+        if I:
+            print'===== pip installed %s' % repr(I)) 
 
 def vopt(opt):
     opt = '--%s=' % opt

@@ -38,7 +38,7 @@ jobs:
       # Will avoid testing on emulated architectures
       # Skip trying to test arm64 builds on Intel Macs
       CIBW_TEST_SKIP: "*-manylinux_{aarch64,ppc64le,s390x} *-macosx_arm64 *-macosx_universal2:arm64"
-      CIBW_TEST_COMMAND: python -u -c "import sys,os;r=os.system(' '.join((sys.executable,os.path.join(r'{project}','setup.py'),'tests-postinstall','--show-env','--verbose','--pip-install=pyphen','--pip-install=rlPyCairo','--rl-index-url=https://${{secrets.CITOOLS_USER}}:${{secrets.CITOOLS_PASSWORD}}@www.reportlab.com/pypi','--rl-pip-install=pyfribidi')));marker=20*('!' if r else '=');print('$s test command --> %s %s'%(marker,r,marker));sys.exit(r)" 2>&1
+      CIBW_TEST_COMMAND: python -u -c "import sys,os;r=os.system(' '.join((sys.executable,os.path.join(r'{project}','setup.py'),'tests-postinstall','--show-env','--verbose','--pip-install=pyphen','--pip-install=rlPyCairo','--rl-index-url=https://${{secrets.CITOOLS_USER}}:${{secrets.CITOOLS_PASSWORD}}@www.reportlab.com/pypi','--rl-pip-install=pyfribidi', '2>&1')));marker=20*('!' if r else '=');print('%s test command --> %s %s'%(marker,r,marker));sys.exit(r)" 2>&1
       CIBW_BUILD_VERBOSITY: 3
     strategy:
       fail-fast: true
