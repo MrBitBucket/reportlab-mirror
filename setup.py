@@ -42,7 +42,7 @@ def spCall(cmd,*args,**kwds):
             cmd,
             stderr =subprocess.STDOUT,
             stdout = subprocess.DEVNULL if kwds.pop('dropOutput',False) else None,
-            timeout = kwds.pop('timeout',60),
+            timeout = kwds.pop('timeout',3600),
             )
     if verbose>=3:
         infoline('%r --> %s' % (' '.join(cmd),r), pfx='!!!!!' if r else '#####', add=False)
