@@ -32,22 +32,34 @@ def infoline(t,
 def showTraceback(s):
     buf = io.StringIO()
     print(s,file=buf)
-    if verbose:
+    if verbose>2:
         traceback.print_exc(file=buf)
     for l in buf.getvalue().split('\n'):
         infoline(l,pfx='!!!!!',add=False)
 
-def os_system(cmd,*args,**kwds):
-    r = os.system(cmd,*args,**kwds)
-    if verbose:
-        infoline('%r --> %s' % (cmd,r), pfx='!!!!!' if r else '#####', add=False)
+def spCall(cmd,*args,**kwds):
+    r = subprocess.call(
+            cmd,
+            stderr =subprocess.STDOUT,
+            stdout = subprocess.DEVNULL if kwds.pop('dropOutput',False) else None,
+            timeout = kwds.pop('timeout',60),
+            )
+    if verbose>=3:
+        infoline('%r --> %s' % (' '.join(cmd),r), pfx='!!!!!' if r else '#####', add=False)
     return r
 
-def specialOption(n):
-    v = False
+def specialOption(n,ceq=False):
+    v = 0
     while n in sys.argv:
-        v = True
+        v += 1
         sys.argv.remove(n)
+    if ceq:
+        n += '='
+        V = [_ for _ in sys.argv if _.startswith(n)]
+        for _ in V: sys.argv.remove(_)
+        if V:
+            n = len(n)
+            v = V[-1][n:]
     return v
 
 #defaults for these options may be configured in local-setup.cfg
@@ -58,8 +70,8 @@ def specialOption(n):
 dlt1 = not specialOption('--no-download-t1-files')
 usla = specialOption('--use-system-libart')
 mdbg = specialOption('--memory-debug')
-verbose = specialOption('--verbose')
-nulldivert = '' if verbose else (" >%s 2>&1" % ('NUL' if sys.platform=='win32' else '/dev/null'))
+verbose = specialOption('--verbose',ceq=True)
+nullDivert = not verbose
 
 try:
     import configparser
@@ -419,29 +431,18 @@ def canImport(pkg):
     try:
         exec('import %s as M' % pkg,{},ns)
     except:
-        showTraceback("can't import %s" % pkg)
+        if verbose>=2:
+            showTraceback("can't import %s" % pkg)
     return 'M' in ns
 
 def pipInstall(pkg, ixu=None):
     if canImport(pkg): return True
     i = ['-i%s' % ixu] if ixu else []
-    try:
-        p = subprocess.Popen(
-                [sys.executable, '-mpip', 'install']+i+[pkg],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                )
-        out = p.communicate(timeout=30)[0]
-        if ixu and not nulldivert:
-            for t in out.decode('utf8').replace('\r\n','\n').replace(ixu.u,'***').split('\n'):
-                if t.strip():
-                    infoline(t)
-    except:
-        showTraceback("pipInstall %s failed" % pkg)
+    r = spCall([sys.executable, '-mpip', 'install']+i+[pkg],dropOutput=verbose<3)
     return canImport(pkg)
 
 def pipUninstall(pkg):
-    os_system('%s -mpip -q uninstall -y %s%s' % (sys.executable, pkg, nulldivert))
+    spCall((sys.executable,'-mpip','-q','uninstall','-y', pkg), dropOutput=verbose<3)
 
 def pipInstallGroups(pkgs, ixu=None):
     '''install groups of packages; if any of a group fail we backout the group'''
@@ -451,6 +452,7 @@ def pipInstallGroups(pkgs, ixu=None):
             if pipInstall(pkg,ixu):
                 I.append(pkg)
             else:
+                print('!!!!! pip uninstalled %s' % repr(I)) 
                 for pkg in I:
                     pipUninstall(pkg)
                 I = []
@@ -537,8 +539,7 @@ def main():
             cli.append('--post-install')
         if verboseTests:
             cli.append('--verbosity=2')
-        cli = ' '.join(cli)
-        r = os_system(cli)
+        r = spCall(cli)
         sys.exit(('!!!!! runAll.py --> %s should exit with error !!!!!' % r) if r else r)
     elif 'null-cmd' in sys.argv or 'null-command' in sys.argv:
         sys.exit(0)

@@ -3,7 +3,7 @@
 __doc__="""The Reportlab PDF generation library."""
 Version = "3.6.2"
 __version__=Version
-__date__='20211001'
+__date__='20211013'
 
 import sys, os
 
