@@ -11,7 +11,20 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  3.6.1	 6/08/2021
+CHANGES  3.6.3	  4/11/2021
+---------------------------
+	* modernisation of para.py contribution from <Andrews Searle at BMC dot com>
+	* many changes to .github workflows
+	* changes to setup.py to support cibuildwheel
+	* _FindSplitterMixin protect against deepcopy failure
+	* allow textAnnotation to have QuadPoints keyword
+
+CHANGES  3.6.2	  1/10/2021
+---------------------------
+	* minor changes to datareader
+	* fix XLabel argument usage
+
+CHANGES  3.6.1	  6/08/2021
 ---------------------------
 	* add mock for urlopen calls so tests can run off line. Contribution by Antonio Trande sagitter at fedoraproject dot org
 

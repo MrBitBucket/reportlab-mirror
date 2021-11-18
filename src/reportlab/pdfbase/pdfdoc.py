@@ -1608,7 +1608,7 @@ class Annotation(PDFObject):
         permitted = self.permitted
         for name in d.keys():
             if name not in permitted:
-                raise ValueError("bad annotation dictionary name %s" % name)
+                raise ValueError("%s bad annotation dictionary name %s" % (self.__class__.__name__,name))
         return PDFDictionary(d)
     def Dict(self):
         raise ValueError("DictString undefined for virtual superclass Annotation, must overload")
@@ -1617,21 +1617,6 @@ class Annotation(PDFObject):
     def format(self, document):
         D = self.Dict()
         return D.format(document)
-
-class TextAnnotation(Annotation):
-    permitted = Annotation.permitted + (
-        "Open", "Name")
-    def __init__(self, Rect, Contents, **kw):
-        self.Rect = Rect
-        self.Contents = Contents
-        self.otherkw = kw
-    def Dict(self):
-        d = {}
-        d.update(self.otherkw)
-        d["Rect"] = self.Rect
-        d["Contents"] = self.Contents
-        d["Subtype"] = "/Text"
-        return self.AnnotationDict(**d)
 
 class FreeTextAnnotation(Annotation):
     permitted = Annotation.permitted + ("DA",)
@@ -1718,6 +1703,20 @@ class HighlightAnnotation(Annotation):
         d["C"] = self.Color
         return self.AnnotationDict(**d)
 
+class TextAnnotation(HighlightAnnotation):
+    permitted = HighlightAnnotation.permitted + (
+        "Open", "Name")
+    def __init__(self, Rect, Contents, **kw):
+        HighlightAnnotation.__init__(self,
+                Rect,
+                Contents,
+                QuadPoints=kw.pop("QuadPoints",None) or rect_to_quad(Rect),
+                Color=kw.pop("Color",(0,0,0)), 
+                **kw)
+    def Dict(self):
+        d = HighlightAnnotation.Dict(self)
+        d["Subtype"] = "/Text"
+        return d
 
 def rect_to_quad(Rect):
     """

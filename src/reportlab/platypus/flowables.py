@@ -1263,7 +1263,10 @@ class _FindSplitterMixin:
                         if nH<aH: nH += leading
                         availHeight += nH-aH
                         aH = nH
-                S = cdeepcopy(f).splitOn(canv,availWidth,aH)
+                try:
+                    S = cdeepcopy(f).splitOn(canv,availWidth,aH)
+                except:
+                    S  = None   #sometimes the deepcopy cannot be done
                 if not S:
                     return W, availHeight, F[:i],F[i:]
                 else:
