@@ -1,6 +1,6 @@
-#Copyright ReportLab Europe Ltd. 2000-2017
+#Copyright ReportLab Europe Ltd. 2000-2021
 #see license.txt for license details
-__version__='3.6.0'
+__version__='3.6.3'
 import os, sys, glob, shutil, re, sysconfig, traceback, io, subprocess
 platform = sys.platform
 pjoin = os.path.join
@@ -10,7 +10,7 @@ isdir = os.path.isdir
 dirname = os.path.dirname
 basename = os.path.basename
 splitext = os.path.splitext
-archName = 'amd64' if sys.maxsize > 2**32 else 'x86'
+archName = 'amd64' if sys.maxsize > 2**32 else 'x86'    #correct for windows builds
 
 try:
     from urllib.parse import quote as urlquote
@@ -142,17 +142,11 @@ def make_libart_config(src):
         f.write('\n'.join(L))
 
 def get_version():
-    if daily: return 'daily'
     #determine Version
-    HERE = pkgDir
-    if os.getcwd()!=HERE:
-        if __name__=='__main__':
-            HERE=os.path.dirname(sys.argv[0])
-        else:
-            HERE=os.path.dirname(__file__)
+    if daily: return 'daily'
 
     #first try source
-    FN = pjoin(HERE,'src','reportlab','__init__')
+    FN = pjoin(pkgDir,'src','reportlab','__init__')
     try:
         for l in open(pjoin(FN+'.py'),'r').readlines():
             if l.startswith('Version'):
