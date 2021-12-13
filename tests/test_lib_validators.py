@@ -124,6 +124,25 @@ class ValidatorTestCase(unittest.TestCase):
         except ValueError:
             pass
 
+        import re
+        V = [
+            validators.OneOf('scalar','vector','matrix'),
+            validators.OneOf('scalar',re.compile(r'^vector(?:|\W.*)$'),'matrix'),
+            ]
+        for t,x in (
+                ('scalar',(True,True)),
+                ('vector',(True,True)),
+                ('vector[0]',(False,True)),
+                ('vector1',(False,False)),
+                ('matrix',(True,True)),
+                ('matrix1',(False,False)),
+                ('matrix[0]',(False,False)),
+                ):
+            r = (V[0].test(t),V[1].test(t))
+            self.assertEqual(x,r,
+                "\n!!!!! regex OneOf validation failed for %r\n%sexpected=%r != result=%r"
+                    % (t,6*' ',x,r))
+
 
     def test7(self):
         "Test isInt validator"

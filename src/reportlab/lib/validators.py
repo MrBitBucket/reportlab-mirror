@@ -4,7 +4,7 @@
 __version__='3.5.33'
 __doc__="""Standard verifying functions used by attrmap."""
 
-import sys, codecs
+import sys, codecs, re
 from reportlab.lib.utils import isSeq, isBytes, isStr
 from reportlab.lib import colors
 
@@ -204,9 +204,22 @@ class OneOf(Validator):
             self._enum = tuple(enum)+args
         else:
             self._enum = (enum,)+args
+        self._patterns = tuple((_ for _ in self._enum if isinstance(_,re.Pattern)))
+        if self._patterns:
+            self._enum =  tuple((_ for _ in self._enum if not isinstance(_,re.Pattern)))
+            self.test = self._test_patterns
 
     def test(self, x):
         return x in self._enum
+
+    def _test_patterns(self, x):
+        v = x in self._enum
+        #print(f'{x=} {self._enum=!r} {self._patterns=!r} {v=}')
+        if v: return True
+        for p in self._patterns:
+            v = p.match(x)
+            if v: return True
+        return False
 
 class SequenceOf(Validator):
     def __init__(self,elemTest,name=None,emptyOK=1, NoneOK=0, lo=0,hi=0x7fffffff):
