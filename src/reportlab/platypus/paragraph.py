@@ -201,7 +201,7 @@ def _rightDrawParaLine( tx, offset, extraspace, words, last=0):
 def _justifyDrawParaLine( tx, offset, extraspace, words, last=0):
     setXPos(tx,offset)
     text  = ' '.join(words)
-    simple = last or (-1e-8<extraspace<=1e-8) or getattr(tx,'preformatted',False)
+    simple =  getattr(tx,'preformatted',False) or (-1e-8<extraspace<=1e-8) or (last and extraspace>-1e-8)
     if not simple:
         nSpaces = len(words)+_nbspCount(text)-1
         simple = nSpaces<=0
@@ -503,7 +503,7 @@ def _justifyDrawParaLineX( tx, offset, line, last=0):
     tx._x_offset = offset
     setXPos(tx,offset)
     extraSpace = line.extraSpace
-    simple = last or abs(extraSpace)<=1e-8 or line.lineBreak
+    simple = line.lineBreak or (-1e-8<extraSpace<=1e-8) or (last and extraSpace>-1e-8)
     if not simple:
         nSpaces = line.wordCount+sum([_nbspCount(w.text) for w in line.words if not hasattr(w,'cbDefn')])-1
         simple = nSpaces<=0
@@ -2084,7 +2084,6 @@ class Paragraph(Flowable):
                     return f.clone(kind=0, lines=[],ascent=ascent,descent=descent,fontSize=fontSize)
             spaceWidth = stringWidth(' ', fontName, fontSize, self.encoding)
             dSpaceShrink = spaceShrinkage*spaceWidth
-            spaceShrink = 0
             cLine = []
             currentWidth = -spaceWidth   # hack to get around extra space for word 1
             hyw = stringWidth('-', fontName, fontSize, self.encoding)
@@ -2098,12 +2097,14 @@ class Paragraph(Flowable):
                 #this underscores my feeling that Unicode throughout would be easier!
                 wordWidth = stringWidth(word, fontName, fontSize, self.encoding)
                 newWidth = currentWidth + spaceWidth + wordWidth
-                if newWidth>maxWidth+spaceShrink and not (isinstance(word,_SplitWordH) or forcedSplit):
+                limWidth = maxWidth + dSpaceShrink*len(cLine)
+                #print(f's: {currentWidth=} spaceShrink={limWidth-maxWidth} {newWidth=} {limWidth=} {newWidth>limWidth} cond={newWidth>limWidth and not (isinstance(word,_SplitWordH) or forcedSplit)} {word=}')
+                if newWidth>limWidth and not (isinstance(word,_SplitWordH) or forcedSplit):
                     if isinstance(word,_SHYStr):
                         hsw = word.__shysplit__(
                                 fontName, fontSize,
                                 currentWidth + spaceWidth + hyw - 1e-8,
-                                maxWidth+spaceShrink,
+                                limWidth,
                                 encoding = self.encoding,
                                 )
                         if hsw:
@@ -2128,7 +2129,7 @@ class Paragraph(Flowable):
                     elif attemptHyphenation:
                         hyOk = not getattr(f,'nobr',False)
                         hsw = _hyphenateWord(hyphenator if hyOk else None,
-                                fontName, fontSize, word, wordWidth, newWidth, maxWidth+spaceShrink,
+                                fontName, fontSize, word, wordWidth, newWidth, limWidth,
                                     uriWasteReduce if hyOk else False,
                                     embeddedHyphenation and hyOk, hymwl)
                         if hsw:
@@ -2154,27 +2155,25 @@ class Paragraph(Flowable):
                             self._splitLongWordCount += 1
                             forcedSplit = 1
                             continue
-                if newWidth <= (maxWidth+spaceShrink) or not len(cLine) or forcedSplit:
+                if newWidth<=limWidth or not len(cLine) or forcedSplit:
                     # fit one more on this line
                     if word: cLine.append(word)
+                    #print(f's: |line|={len(cLine)} {newWidth=} spaceShrink={limWidth-maxWidth}')
                     if forcedSplit:
                         forcedSplit = 0
                         if newWidth > self._width_max: self._width_max = newWidth
                         lines.append((maxWidth - newWidth, cLine))
                         cLine = []
                         currentWidth = -spaceWidth
-                        spaceShrink = 0
                         lineno += 1
                         maxWidth = maxWidths[min(maxlineno,lineno)]
                     else:
                         currentWidth = newWidth
-                        spaceShrink += dSpaceShrink
                 else:
                     if currentWidth > self._width_max: self._width_max = currentWidth
                     #end of line
                     lines.append((maxWidth - currentWidth, cLine))
                     cLine = [word]
-                    spaceShrink = 0
                     currentWidth = wordWidth
                     lineno += 1
                     maxWidth = maxWidths[min(maxlineno,lineno)]
@@ -2204,7 +2203,7 @@ class Paragraph(Flowable):
                 fontSize = f.fontSize
 
                 if not words:
-                    n = dSpaceShrink = spaceShrink = spaceWidth = currentWidth = 0
+                    n = spaceWidth = currentWidth = 0
                     maxSize = fontSize
                     maxAscent, minDescent = getAscentDescent(fontName,fontSize)
 
@@ -2218,9 +2217,20 @@ class Paragraph(Flowable):
                 #test to see if this frag is a line break. If it is we will only act on it
                 #if the current width is non-negative or the previous thing was a deliberate lineBreak
                 lineBreak = f._fkind==_FK_BREAK
-                if not lineBreak and newWidth>(maxWidth+spaceShrink) and not isinstance(w,_SplitFragH) and not hasattr(f,'cbDefn'):
+                limWidth = maxWidth
+                if spaceShrinkage:
+                    spaceShrink = spaceWidth
+                    for wi in words:
+                        if wi._fkind==_FK_TEXT:
+                            ns = wi.text.count(' ')
+                            if ns:
+                                spaceShrink += ns*stringWidth(' ',wi.fontName,wi.fontSize)
+                    spaceShrink *= spaceShrinkage
+                    limWidth += spaceShrink
+                #print(f'c: {currentWidth=} {spaceShrink=} {newWidth=} {limWidth=} {newWidth>(maxWidth+spaceShrink)} cond={not lineBreak and newWidth>limWidth and not isinstance(w,_SplitFragH) and not hasattr(f,"cbDefn")} word={w[1][1]}')
+                if not lineBreak and newWidth>limWidth and not isinstance(w,_SplitFragH) and not hasattr(f,'cbDefn'):
                     if isinstance(w,_SHYWord):
-                        hsw = w.shyphenate(newWidth, maxWidth+spaceShrink)
+                        hsw = w.shyphenate(newWidth, limWidth)
                         if hsw:
                             _words[0:0] = hsw
                             _words.insert(1,_InjectedFrag([0,(f.clone(_fkind=_FK_BREAK,text=''),'')]))
@@ -2239,7 +2249,7 @@ class Paragraph(Flowable):
                     elif attemptHyphenation:
                         hyOk = not getattr(f,'nobr',False)
                         hsw = _hyphenateFragWord(hyphenator if hyOk else None,
-                                    w,newWidth,maxWidth+spaceShrink,
+                                    w,newWidth,limWidth,
                                     uriWasteReduce if hyOk else False,
                                     embeddedHyphenation and hyOk, hymwl)
                         if hsw:
@@ -2267,8 +2277,9 @@ class Paragraph(Flowable):
                             FW.pop(-1)  #remove this as we are doing this one again
                             self._splitLongWordCount += 1
                             continue
-                endLine = (newWidth>(maxWidth+spaceShrink) and n>0) or lineBreak
+                endLine = (newWidth>limWidth and n>0) or lineBreak
                 if not endLine:
+                    #print(f'c: |line|={len(words)} {newWidth=} spaceShrink={limWidth-maxWidth}')
                     if lineBreak: continue      #throw it away
                     nText = w[1][1]
                     if nText: n += 1
@@ -2296,7 +2307,6 @@ class Paragraph(Flowable):
                                 if wi._fkind==_FK_TEXT:
                                     if not wi.text.endswith(' '):
                                         wi.text += ' '
-                                        spaceShrink += dSpaceShrink
                                     break
                         g = f.clone()
                         words.append(g)
@@ -2304,14 +2314,12 @@ class Paragraph(Flowable):
                     elif spaceWidth:
                         if not g.text.endswith(' '):
                             g.text += ' ' + nText
-                            spaceShrink += dSpaceShrink
                         else:
                             g.text += nText
                     else:
                         g.text += nText
 
                     spaceWidth = stringWidth(' ',fontName,fontSize) if isinstance(w,_HSFrag) else 0 #of the space following this word
-                    dSpaceShrink = spaceWidth*spaceShrinkage
 
                     ni = 0
                     for i in w[2:]:
@@ -2333,18 +2341,21 @@ class Paragraph(Flowable):
                     if not nText and ni:
                         #one bit at least of the word was real
                         n+=1
-
+                    #print(f'{n=} words={[_.text for _ in words]!r}')
                     currentWidth = newWidth
                 else:  #either it won't fit, or it's a lineBreak tag
                     if lineBreak:
                         g = f.clone()
                         #del g.lineBreak
                         words.append(g)
+                        llb = njlbv and not isinstance(w,_InjectedFrag)
+                    else:
+                        llb = False
 
                     if currentWidth>self._width_max: self._width_max = currentWidth
                     #end of line
                     lines.append(FragLine(extraSpace=maxWidth-currentWidth, wordCount=n,
-                                        lineBreak=lineBreak and njlbv, words=words, fontSize=maxSize, ascent=maxAscent, descent=minDescent, maxWidth=maxWidth,
+                                        lineBreak=llb, words=words, fontSize=maxSize, ascent=maxAscent, descent=minDescent, maxWidth=maxWidth,
                                         sFW=sFW))
                     sFW = len(FW)-1
 
@@ -2360,7 +2371,6 @@ class Paragraph(Flowable):
                     dSpaceShrink = spaceWidth*spaceShrinkage
                     currentWidth = wordWidth
                     n = 1
-                    spaceShrink = 0
                     g = f.clone()
                     maxSize = g.fontSize
                     if calcBounds:

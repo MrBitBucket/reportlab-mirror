@@ -14,7 +14,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import cm, mm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus.paragraph import Paragraph
+from reportlab.platypus import ShowBoundaryValue
 from reportlab.platypus.frames import Frame
 from reportlab.lib.randomtext import randomText, PYTHON
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, Indenter, SimpleDocTemplate, LayoutError
@@ -169,6 +169,66 @@ I hope we don't, but you never do Know.</a></font>""",bt)
                 )
         doc.multiBuild(makeStory())
 
+class RenderMeasuringPara:
+    def __init__(self,canv,style,aW,measuring=True,annotations=[],errors=[],length_errors=[],onDrawFuncName='_onDrawFunc'):
+        ends = []
+        def _onDrawFunc(canv,name,label):
+            if measuring and label=='end':
+                ends.append(canv._curr_tx_info)
+            annotations.append(canv._curr_tx_info)
+        setattr(canv,onDrawFuncName,_onDrawFunc)
+        self._state = (canv,style,aW,measuring,ends,annotations,errors,length_errors)
+        if measuring:
+            self._end = ('<ondraw name="%s" label="end"/>' % onDrawFuncName)
+
+    def __call__(self,x,y,text,wc,ns,n,hrep=' ',crep=' ',hdw=0,cdw=0):
+        canv,style,aW,measuring,ends,annotations,errors,length_errors = self._state
+        if measuring: text += self._end
+        if '{H}' in text:
+            text = text.replace('{H}',hrep)
+            wc += hdw
+        if '{C}' in text:
+            text = text.replace('{C}',crep)
+            wc += cdw
+        p = Paragraph(text,style)
+        w,h = p.wrap(aW,1000)
+        annotations[:] = []
+        if measuring:
+            ends[:] = []
+        p.drawOn(canv,x,y-h)
+        canv.saveState()
+        canv.setLineWidth(0.1)
+        canv.setStrokeColorRGB(1,0,0)
+        canv.rect(x,y-h,wc,h)
+
+        if n is not None:
+            canv.setFillColorRGB(0,1,0)
+            canv.drawRightString(x,y-h,'%3d: ' % n)
+
+        if annotations:
+            canv.setLineWidth(0.1)
+            canv.setStrokeColorRGB(0,1,0)
+            canv.setFillColorRGB(0,0,1)
+            canv.setFont('Helvetica',0.2)
+            for info in annotations:
+                cur_x = info['cur_x']+x
+                cur_y = info['cur_y']+y-h
+                canv.drawCentredString(cur_x, cur_y+0.3,'%.2f' % (cur_x-x))
+                canv.line(cur_x,cur_y,cur_x,cur_y+0.299)
+        if measuring:
+            if not ends:
+                errors.append('Paragraph measurement failure no ends found for %s\n%r' % (ns,text))
+            elif len(ends)>1:
+                errors.append('Paragraph measurement failure no len(ends)==%d for %s\n%r' % (len(ends),ns,text))
+            else:
+                cur_x = ends[0]['cur_x']
+                adiff = abs(wc-cur_x)
+                length_errors.append(adiff)
+                if adiff>1e-8:
+                    errors.append('Paragraph measurement error wc=%.4f measured=%.4f for %s\n%r' % (wc,cur_x,ns,text))
+        canv.restoreState()
+        return h
+
 class BreakingTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
     def test0(self):
@@ -241,51 +301,6 @@ class BreakingTestCase(unittest.TestCase):
         x = stringWidth('999: ','Courier',bfs) + 5
         aW = int(pageWidth)-2*x
 
-        def doPara(x,text,wc,ns,n,hrep=' ',crep=' ',hdw=0,cdw=0):
-            if '{H}' in text:
-                text = text.replace('{H}',hrep)
-                wc += hdw
-            if '{C}' in text:
-                text = text.replace('{C}',crep)
-                wc += cdw
-            p = Paragraph(text,bt)
-            w,h = p.wrap(aW,1000)
-            annotations[:] = []
-            if measuring:
-                ends[:] = []
-            p.drawOn(canv,x,y-h)
-            canv.saveState()
-            canv.setLineWidth(0.1)
-            canv.setStrokeColorRGB(1,0,0)
-            canv.rect(x,y-h,wc,h)
-
-            if n is not None:
-                canv.setFillColorRGB(0,1,0)
-                canv.drawRightString(x,y-h,'%3d: ' % n)
-
-            if annotations:
-                canv.setLineWidth(0.1)
-                canv.setStrokeColorRGB(0,1,0)
-                canv.setFillColorRGB(0,0,1)
-                canv.setFont('Helvetica',0.2)
-                for info in annotations:
-                    cur_x = info['cur_x']+x
-                    cur_y = info['cur_y']+y-h
-                    canv.drawCentredString(cur_x, cur_y+0.3,'%.2f' % (cur_x-x))
-                    canv.line(cur_x,cur_y,cur_x,cur_y+0.299)
-            if measuring:
-                if not ends:
-                    errors.append('Paragraph measurement failure no ends found for %s\n%r' % (ns,text))
-                elif len(ends)>1:
-                    errors.append('Paragraph measurement failure no len(ends)==%d for %s\n%r' % (len(ends),ns,text))
-                else:
-                    cur_x = ends[0]['cur_x']
-                    adiff = abs(wc-cur_x)
-                    length_errors.append(adiff)
-                    if adiff>1e-8:
-                        errors.append('Paragraph measurement error wc=%.4f measured=%.4f for %s\n%r' % (wc,cur_x,ns,text))
-            canv.restoreState()
-            return h
         swc = lambda t: stringWidth(t,'Courier',bfs)
         swcbo = lambda t: stringWidth(t,'Courier-BoldOblique',bfs)
         swh = lambda t: stringWidth(t,'Helvetica',bfs)
@@ -358,37 +373,33 @@ class BreakingTestCase(unittest.TestCase):
         x3 = x2 + max(_tmp[2]+10+gex(2,_tmp[0]) for _tmp in data) + 5
         x4 = x3 + max(_tmp[2]+20+gex(3,_tmp[0]) for _tmp in data) + 5
         annotations = []
-        ends = []
         errors = []
         measuring = True
         length_errors = []
-        def _onDrawFunc(canv,name,label):
-            if measuring and label=='end':
-                ends.append(canv._curr_tx_info)
-            annotations.append(canv._curr_tx_info)
-        canv._onDrawFunc = _onDrawFunc
+        onDrawFuncName = '_onDrawFunc'
+        doPara = RenderMeasuringPara(canv,bt,aW,measuring,annotations,errors,length_errors,onDrawFuncName)
 
-        rep0 = '<ondraw name="_onDrawFunc"/>\\1'
+        rep0 = '<ondraw name="%s"/>\\1' % onDrawFuncName
         for n,text,wc in data:
             if argv and str(n) not in argv: continue
-            text0 = (apat.sub(rep0,text) if rep0 else text)+('<ondraw name="_onDrawFunc" label="end"/>' if measuring else '')
+            text0 = (apat.sub(rep0,text) if rep0 else text)
             ns = str(n)
-            h = doPara(x,text0,wc,ns,n)
+            h = doPara(x,y,text0,wc,ns,n)
             if '<a' in text:
                 text1 = apat.sub('<img width="10" height="5" src="pythonpowered.gif"/>',text0)
-                doPara(x1,text1,wc+10+gex(1,n),ns+'.11',None)
+                doPara(x1,y,text1,wc+10+gex(1,n),ns+'.11',None)
                 text2 = apat.sub('\\1<img width="10" height="5" src="pythonpowered.gif"/>',text0)
-                doPara(x2,text1,wc+10+gex(2,n),ns+'.12',None)
+                doPara(x2,y,text1,wc+10+gex(2,n),ns+'.12',None)
                 text3 = apat.sub('\\1<img width="10" height="5" src="pythonpowered.gif"/><img width="10" height="5" src="pythonpowered.gif"/>\\1',text0)
-                doPara(x3,text3,wc+20+gex(3,n),ns+'.13',None)
-                doPara(x4,text3,wc+20+gex(3,n),ns+'.14',None,
+                doPara(x3,y,text3,wc+20+gex(3,n),ns+'.13',None)
+                doPara(x4,y,text3,wc+20+gex(3,n),ns+'.14',None,
                         hrep='<span face="Courier-BoldOblique"> </span>',
                         crep='<span face="Helvetica-BoldOblique"> </span>',
                         hdw = swcbo(' ') - swhbo(' '),
                         cdw = swhbo(' ') - swcbo(' '),
                         )
             else:
-                doPara(x1,text0,wc,ns+'.21',None,
+                doPara(x1,y,text0,wc,ns+'.21',None,
                         hrep='<span face="Courier-BoldOblique"> </span>',
                         crep='<span face="Helvetica-BoldOblique"> </span>',
                         hdw = swcbo(' ') - swhbo(' '),
@@ -432,6 +443,42 @@ class BreakingTestCase(unittest.TestCase):
                 )
             doc.build(story)
 
+    def test6(self):
+        """test of single/multi-frag text and shrinkSpace calculation"""
+        pagesize = (200+20, 400)
+        canv = Canvas(outputfile('test_platypus_breaking_lelegaifax.pdf'), pagesize=pagesize)
+        f = Frame(10, 0, 200, 400,
+                  showBoundary=ShowBoundaryValue(dashArray=(1,1)),
+                  leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0)
+        style = ParagraphStyle(
+                                'normal',
+                                fontName='Helvetica',
+                                fontSize=11.333628,
+                                spaceBefore=20,
+                                hyphenationLang='en-US',
+                                alignment=TA_JUSTIFY,
+                                spaceShrinkage=0.05,
+                                )
+        text1 = """My recent use case was the preparation"""
+
+        text2 = """<span color='red'>My </span> recent use case was the preparation"""
+        ix0 = len(canv._code)
+        f.addFromList([Paragraph(text1, style),
+                   Paragraph(text2, style),
+                   ],
+                  canv)
+        self.assertEqual(canv._code[ix0:],
+                ['q', '0 0 0 RG', '.1 w', '[1 1] 0 d', 'n 10 0 200 400 re S', 'Q', 'q', '1 0 0 1 10 388 cm',
+                    'q', '0 0 0 rg',
+                    'BT 1 0 0 1 0 .666372 Tm /F1 11.33363 Tf 12 TL -0.157537 Tw'
+                    ' (My recent use case was the preparation) Tj T* 0 Tw ET',
+                    'Q', 'Q', 'q', '1 0 0 1 10 356 cm', 'q',
+                    'BT 1 0 0 1 0 .666372 Tm -0.157537 Tw 12 TL /F1 11.33363 Tf 1 0 0 rg'
+                    ' (My ) Tj 0 0 0 rg (recent use case was the preparation) Tj T* 0 Tw ET', 'Q', 'Q'],
+                'Lele Gaifax bug example did not produce the right code',
+                )
+        canv.showPage()
+        canv.save()
 
 def makeSuite():
     return makeSuiteForClasses(BreakingTestCase)

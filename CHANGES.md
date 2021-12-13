@@ -11,6 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.6.4	  7/12/2021
+---------------------------
+	* try to improve multi-frag paragraph justification
+	* fix justification condition
+	* allow validator OneOf to take re.Pattern
+
 CHANGES  3.6.3	  4/11/2021
 ---------------------------
 	* modernisation of para.py contribution from <Andrews Searle at BMC dot com>
