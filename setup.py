@@ -776,6 +776,7 @@ def main():
                 'Programming Language :: Python :: 3.8',
                 'Programming Language :: Python :: 3.9',
                 'Programming Language :: Python :: 3.10',
+                'Programming Language :: Python :: 3.11',
                 ],
             
             #this probably only works for setuptools, but distutils seems to ignore it

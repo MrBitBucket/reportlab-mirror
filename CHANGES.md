@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.6.5	 24/12/2021
+---------------------------
+	* only skip listwrap on for small height objects
+	* changes to allow for deprecated stuff in Python-3.11
+
 CHANGES  3.6.4	  7/12/2021
 ---------------------------
 	* try to improve multi-frag paragraph justification
