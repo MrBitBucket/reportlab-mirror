@@ -640,7 +640,7 @@ def _listWrapOn(F,availWidth,canv,mergeSpace=1,obj=None,dims=None,fakeWidth=None
             if dims is not None: dims.append((w,h))
             if cframe:
                 _addGeneratedContent(F,cframe)
-            if w<=_FUZZ or h<=_FUZZ: continue
+            if (w<=_FUZZ and False) or h<=_FUZZ: continue
             W = max(W,min(w,availWidth) if fakeWidth else w)
             H += h
             if not atTop:
@@ -946,7 +946,7 @@ class _Container(_ContainerSpace):  #Abstract some common container like behavio
                 aW -= (c.left+c.right)*scale
                 continue
             w, h = c.wrapOn(canv,aW,0xfffffff)
-            if (w<_FUZZ or h<_FUZZ) and not getattr(c,'_ZEROSIZE',None): continue
+            if h<_FUZZ and not getattr(c,'_ZEROSIZE',None): continue
             if yt!=y:
                 s = c.getSpaceBefore()
                 if not getattr(c,'_SPACETRANSFER',False):
