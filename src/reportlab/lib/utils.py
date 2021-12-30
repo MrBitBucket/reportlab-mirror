@@ -94,8 +94,6 @@ def asUnicodeEx(v,enc='utf8'):
 def asNative(v,enc='utf8'):
     return asUnicode(v,enc=enc)
 
-uniChr = chr
-
 def int2Byte(i):
     return bytes([i])
 

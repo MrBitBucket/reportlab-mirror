@@ -17,11 +17,11 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, add32
 from reportlab import rl_config
-from reportlab.lib.utils import getBytesIO, uniChr, int2Byte
+from reportlab.lib.utils import getBytesIO, int2Byte
 
 def utf8(code):
     "Convert a given UCS character index into UTF-8"
-    return uniChr(code).encode('utf8')
+    return chr(code).encode('utf8')
 
 def _simple_subset_generation(fn,npages,alter=0,fonts=('Vera','VeraBI')):
     c = Canvas(outputfile(fn))
@@ -43,13 +43,12 @@ def show_all_glyphs(fn,fontName='Vera'):
     c.setFont('Helvetica', 20)
     c.drawString(72,c._pagesize[1]-30, 'Unicode TrueType Font Test %s' % fontName)
     from reportlab.pdfbase.pdfmetrics import _fonts
-    from reportlab.lib.utils import uniChr
     font = _fonts[fontName]
     doc = c._doc
     kfunc = font.face.charToGlyph.keys
     for s in sorted(list(kfunc())):
         if s<0x10000:
-            font.splitString(uniChr(s),doc)
+            font.splitString(chr(s),doc)
     state = font.state[doc]
     cn = {}
     #print('len(assignments)=%d'%  len(state.assignments))
@@ -57,7 +56,7 @@ def show_all_glyphs(fn,fontName='Vera'):
     ifunc = state.assignments.items
     for code, n in sorted(list(ifunc())):
         if code==0: nzero += 1
-        cn[n] = uniChr(code)
+        cn[n] = chr(code)
     if nzero>1: print('%s there were %d zero codes' % (fontName,nzero))
 
 
@@ -76,7 +75,7 @@ def show_all_glyphs(fn,fontName='Vera'):
             if i%32 == 0:
                 y -= 12
                 x = 72
-            c.drawString(x,y,uniChr(code))
+            c.drawString(x,y,chr(code))
             x += 13
         y -= 18
 
