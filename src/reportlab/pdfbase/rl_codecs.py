@@ -715,7 +715,36 @@ class RL_Codecs:
             0x00ff: None, # UNDEFINED
             },None),
     'pdfdoc':StdCodecData({
-            0x007f: None, # UNDEFINED
+            #compatibility with pike pdf
+            0x0000: 0x0000, #(NULL) U
+            0x0001: 0x0001, #(START OF HEADING) U
+            0x0002: 0x0002, #(START OF TEXT) U
+            0x0003: 0x0003, #(END OF TEXT) U
+            0x0004: 0x0004, #(END OF TEXT) U
+            0x0005: 0x0005, #(END OF TRANSMISSION) U
+            0x0006: 0x0006, #(ACKNOWLEDGE) U
+            0x0007: 0x0007, #(BELL) U
+            0x0008: 0x0008, #(BACKSPACE) U
+            0x000B: 0x000B, #(LINE TABULATION) U
+            0x000C: 0x000C, #(FORM FEED) U
+            0x000E: 0x000E, #(SHIFT OUT) U
+            0x000F: 0x000F, #(SHIFT IN) U
+            0x0010: 0x0010, #(DATA LINK ESCAPE) U
+            0x0011: 0x0011, #(DEVICE CONTROL ONE) U
+            0x0012: 0x0012, #(DEVICE CONTROL TWO) U
+            0x0013: 0x0013, #(DEVICE CONTROL THREE) U
+            0x0014: 0x0014, #(DEVICE CONTROL FOUR) U
+            0x0015: 0x0015, #(NEGATIVE ACKNOWLEDGE) U
+            0x0016: 0x0016, #was a typo U+0017 in in PDF SPEC U
+            0x0017: 0x0017, #(END OF TRANSMISSION BLOCK) U
+            0x007f: 0x007f, # delete pdf spec UNDEFINED
+            0x009f: 0x009f, # application program command APC pdf spec UNDEFINED
+            0x00ad: 0x00ad, # soft hyphen spec UNDEFINED
+
+            #properly defined by the pdf spec
+            0x0009: 0x0009, #(CHARACTER TABULATION) SR
+            0x000A: 0x000A, #(LINE FEED) SR
+            0x000D: 0x000D, #(CARRIAGE RETURN) SR
             0x0080: 0x2022, # BULLET
             0x0081: 0x2020, # DAGGER
             0x0082: 0x2021, # DOUBLE DAGGER
@@ -747,9 +776,7 @@ class RL_Codecs:
             0x009c: 0x0153, # LATIN SMALL LIGATURE OE
             0x009d: 0x0161, # LATIN SMALL LETTER S WITH CARON
             0x009e: 0x017e, # LATIN SMALL LETTER Z WITH CARON
-            0x009f: None, # UNDEFINED
             0x00a0: 0x20ac, # EURO SIGN
-            0x00ad: None, # UNDEFINED
             24: 0x02d8, #breve
             25: 0x02c7, #caron
             26: 0x02c6, #circumflex
@@ -981,7 +1008,7 @@ class RL_Codecs:
             },None),
         }
     __rl_extension_codecs = {
-            'extpdfdoc':ExtCodecData('pdfdoc',{0x000a:0x000a,0x000d:0x000d},None),
+            'extpdfdoc':ExtCodecData('pdfdoc',None,None),
             }
     #for k,v in __rl_codecs_data.items():
     #   __rl_codecs_data[k+'enc'] = __rl_codecs_data[k+'encoding'] = v
