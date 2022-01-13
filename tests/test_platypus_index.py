@@ -78,7 +78,7 @@ class IndexTestCase(unittest.TestCase):
 
     def test0(self):
         '''
-        Test case for Indexes. This will draw an index %sat the end of the
+        Test case for Indexes. This will draw an index at the end of the
         document with dots seperating the indexing terms from the page numbers.
         Index terms are grouped by their first 2, and first 3 characters.
         The page numbers should be clickable and link to the indexed word.
@@ -93,7 +93,9 @@ class IndexTestCase(unittest.TestCase):
             styleSheet = getSampleStyleSheet()
             bt = styleSheet['BodyText']
     
-            description = '<font color=red>%s</font>' % (self.test0.__doc__  % (headers and 'with alphabetic headers ' or ''))
+            description = self.test0.__doc__ 
+            if headers: description = description.replace('index at','index with alphabetic headers at')
+            description = '<font color=red>%s</font>' % description
             story.append(Paragraph(description, bt))
             index = SimpleIndex(dot=' . ', headers=headers)
 
