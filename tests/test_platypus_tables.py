@@ -976,7 +976,8 @@ class TablesTestCase(unittest.TestCase):
             ['012', '01', '02', '03', '04', '05'],
             ]
     def test3(self):
-        '''bug reported by David VanEe <david.vanee@convergent.ca>'''
+        '''bug reported by David VanEe <david.vanee at convergent.ca>
+        another gradient bg bug from Justin Brzozoski <justin.brzozoski at gmail.com>'''
         story = []
         story_add = story.append
         ts_tables = [
@@ -990,6 +991,8 @@ class TablesTestCase(unittest.TestCase):
                  ('LINEABOVE', (0,1), (-1,1), 1, colors.orange),
                  ('LINEBELOW', (0,1), (-1,1), 2, colors.orange),
                  ('FONT', (2,2), (5,8), 'Times-Bold'),
+                 ('BACKGROUND',(0,1), (0,1),['VERTICAL', colors.lightblue, colors.pink]),
+                 ('BACKGROUND',(1,1), (1,1),['HORIZONTAL', colors.lightblue, colors.pink]),
                  ]
         data = self.data34
         from reportlab.platypus import Paragraph, Table, SimpleDocTemplate, PageBreak
@@ -1008,7 +1011,7 @@ class TablesTestCase(unittest.TestCase):
         story_add(T[1])
         self.assertIn(('BACKGROUND', (0, 0), (-1, 0), colors.lightblue),T[1]._bkgrndcmds)
         self.assertIn(('BACKGROUND', (0, 1), (-1, 1), colors.grey),T[1]._bkgrndcmds)
-        self.assertEqual(len(T[1]._bkgrndcmds),2)
+        self.assertEqual(len(T[1]._bkgrndcmds),4)
 
         # do the same again with repeatRows=1
         story_add(PageBreak())

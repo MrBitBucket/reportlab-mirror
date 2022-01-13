@@ -1748,11 +1748,11 @@ class Table(Flowable):
                     p = canv.beginPath()
                     p.rect(x0, y0, w, h)
                     canv.clipPath(p, stroke=0)
-                    direction=arg.pop(0)
+                    direction=arg[0]
                     if direction=="HORIZONTAL":
-                        canv.linearGradient(x0,y0,x0+w,y0,arg,extend=False)
+                        canv.linearGradient(x0,y0,x0+w,y0,arg[1:],extend=False)
                     else:   #VERTICAL
-                        canv.linearGradient(x0,y0,x0,y0+h,arg,extend=False)
+                        canv.linearGradient(x0,y0,x0,y0+h,arg[1:],extend=False)
                     canv.restoreState()
                 else:
                     color = colors.toColorOrNone(arg)
