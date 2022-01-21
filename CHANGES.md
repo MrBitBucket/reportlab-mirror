@@ -11,6 +11,13 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.6.6	 24/01/2022
+---------------------------
+	* remove uniChr alias of chr (patch contribution from Claude Paroz)
+	* modify pdfdoc template to be eventually compatible with pikepdf suggested by Lennart Regebro lregebro at shoobx.com
+	* fix bug in table gradient bg; contribution by Justin Brzozoski <justin.brzozoski at gmail.com>
+	* fix bug in validateSetattr (__dict__) discovered and reported by Chris Buergi  cb at enerweb dot ch 
+
 CHANGES  3.6.5	 24/12/2021
 ---------------------------
 	* only skip listwrap on for small height objects

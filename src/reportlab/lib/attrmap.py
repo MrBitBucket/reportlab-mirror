@@ -119,6 +119,9 @@ def validateSetattr(obj,name,value):
             prop.__set__(obj,value)
         except AttributeError:
             pass
+    elif name=='__dict__':
+        obj.__dict__.clear()
+        obj.__dict__.update(value)
     else:
         obj.__dict__[name] = value
 

@@ -1474,7 +1474,7 @@ class Canvas(_PDFColorSetter):
             if text:
                 self.setFillColor(strokeColor)
         if strokeWidth:
-            self.setLineWidth(StrokeWidth)
+            self.setLineWidth(strokeWidth)
         self.lines(crosshairs)
         if text:
             if fontSize is not None: self.setFontSize(fontSize)
