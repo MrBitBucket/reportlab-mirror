@@ -255,20 +255,14 @@ class EitherOr(Validator):
             if t(x): return True
         return False
 
-class NoneOr(Validator):
-    def __init__(self,elemTest,name=None):
-        self._elemTest = elemTest
-        if name: self._str = name
-
+class NoneOr(EitherOr):
     def test(self, x):
-        if x is None: return True
-        return self._elemTest(x)
+        return x is None or super().test(x)
 
-class NotSetOr(NoneOr):
+class NotSetOr(EitherOr):
     _not_set = object()
     def test(self, x):
-        if x is NotSetOr._not_set: return True
-        return self._elemTest(x)
+        return x is NotSetOr._not_set or super().test(x)
 
     @staticmethod
     def conditionalValue(v,a):
@@ -285,9 +279,9 @@ class Auto(Validator):
     def test(self,x):
         return x is self.__class__ or isinstance(x,self.__class__)
 
-class AutoOr(NoneOr):
+class AutoOr(EitherOr):
     def test(self,x):
-        return isAuto(x) or self._elemTest(x)
+        return isAuto(x) or super().test(x)
 
 class isInstanceOf(Validator):
     def __init__(self,klass=None):

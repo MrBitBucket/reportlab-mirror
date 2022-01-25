@@ -15,8 +15,9 @@ CHANGES  3.6.6	 24/01/2022
 ---------------------------
 	* remove uniChr alias of chr (patch contribution from Claude Paroz)
 	* modify pdfdoc template to be eventually compatible with pikepdf suggested by Lennart Regebro lregebro at shoobx.com
-	* fix bug in table gradient bg; contribution by Justin Brzozoski <justin.brzozoski at gmail.com>
-	* fix bug in validateSetattr (__dict__) discovered and reported by Chris Buergi  cb at enerweb dot ch 
+	* fix bug in table gradient bg; contribution by Justin Brzozoski justin.brzozoski at gmail.com
+	* fix bug in validateSetattr (__dict__) discovered and reported by Chris Buergi  cb at enerweb dot ch
+	* fix handling of ddfStyle in XLabel class
 
 CHANGES  3.6.5	 24/12/2021
 ---------------------------

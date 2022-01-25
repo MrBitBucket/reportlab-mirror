@@ -360,3 +360,10 @@ def equalStrings(a,b,enc='utf8'):
 def eqCheck(r,x):
     if r!=x:
         print('Strings unequal\nexp: %s\ngot: %s' % (ascii(x),ascii(r)))
+
+def rlextraNeeded():
+    try:
+        import rlextra
+        return False
+    except:
+        return True

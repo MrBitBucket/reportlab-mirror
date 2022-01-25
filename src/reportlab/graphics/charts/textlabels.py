@@ -8,7 +8,7 @@ from reportlab.lib import colors
 from reportlab.lib.utils import simpleSplit, _simpleSplit
 from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, \
         isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf, isNoneOrString, isNoneOrCallable, \
-        isSubclassOf
+        isSubclassOf, EitherOr
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent, getFont
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
@@ -75,7 +75,7 @@ class Label(Widget):
         customDrawChanger = AttrMapValue(isNoneOrCallable,desc="An instance of CustomDrawChanger to modify the behavior at draw time", _advancedUsage=1),
         ddf = AttrMapValue(NoneOr(isSubclassOf(DirectDraw),'NoneOrDirectDraw'),desc="A DirectDrawFlowable instance", _advancedUsage=1),
         ddfKlass = AttrMapValue(NoneOr(isSubclassOf(Flowable),'NoneOrDirectDraw'),desc="A Flowable class for direct drawing (default is XPreformatted", _advancedUsage=1),
-        ddfStyle = AttrMapValue(NoneOr(isSubclassOf(PropertySet)),desc="A style for a ddfKlass or None", _advancedUsage=1),
+        ddfStyle = AttrMapValue(NoneOr((isSubclassOf(PropertySet),isInstanceOf(PropertySet))),desc="A style or style class for a ddfKlass or None", _advancedUsage=1),
         )
 
     def __init__(self,**kw):
@@ -219,7 +219,15 @@ class Label(Widget):
                     fillColor=self.fillColor,
                     strokeColor=self.strokeColor,
                     )
-            sty = self._style =  (ddfStyle.clone if self.ddfStyle else ParagraphStyle)(**sty)
+
+            if not self.ddfStyle:
+                sty = ParagraphStyle(**sty)
+            elif issubclass(self.ddfStyle,PropertySet):
+                sty = self.ddfStyle(**sty)
+            else:
+                sty = self.ddfStyle.clone()
+
+            self._style = sty
             self._getBaseLineRatio()
             if self.useAscentDescent:
                 sty.autoLeading = True
