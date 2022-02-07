@@ -13,7 +13,8 @@ mentioned. If we missed you, please let us know!
 
 CHANGES  3.6.7	 07/02/2022
 ---------------------------
-	* Remove use of cPickle patch from Claude Paroz < claude at 2xlibre dot net >
+	* Remove use of cPickle; patch from Claude Paroz < claude at 2xlibre dot net >
+	* Remove unneccessary object inheritance; patch by Claude Paroz
 
 CHANGES  3.6.6	 24/01/2022
 ---------------------------

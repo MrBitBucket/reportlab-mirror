@@ -587,7 +587,7 @@ class QRMaskPattern:
     PATTERN110 = 6
     PATTERN111 = 7
 
-class QRUtil(object):
+class QRUtil:
     PATTERN_POSITION_TABLE = [
         [],
         [6, 18],

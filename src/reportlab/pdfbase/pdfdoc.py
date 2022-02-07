@@ -109,7 +109,7 @@ class NoEncryption:
         # the representation of self in file if any (should be None or PDFDict)
         return None
 
-class PDFObject(object):
+class PDFObject:
     pass
 
 class DummyDoc(PDFObject):

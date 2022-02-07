@@ -18,7 +18,7 @@ from reportlab.graphics.shapes import Group, Rect
 def _numConv(x):
     return x if isinstance(x,(int,float)) else paraparser_num(x)
 
-class _DMTXCheck(object):
+class _DMTXCheck:
     @classmethod
     def pylibdmtx_check(cls):
         if not pylibdmtx:

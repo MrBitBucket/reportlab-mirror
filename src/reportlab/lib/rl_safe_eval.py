@@ -839,7 +839,7 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 def astFormat(node):
 	return ast.dump(copy.deepcopy(node),annotate_fields=True, include_attributes=True,indent=4)
 
-class __rl_SafeIter__(object):
+class __rl_SafeIter__:
 	def __init__(self, it, owner):
 		self.__rl_iter__ = owner().__rl_real_iter__(it)
 		self.__rl_owner__ = owner
@@ -865,7 +865,7 @@ def safer_globals(g=None):
 
 math_log10 = math.log10
 __rl_undef__ = object()
-class __RL_SAFE_ENV__(object):
+class __RL_SAFE_ENV__:
 	__time_time__ = time.time
 	__weakref_ref__ = weakref.ref
 	__slicetype__ = type(slice(0))
@@ -889,7 +889,7 @@ class __RL_SAFE_ENV__(object):
 						args = (self.__rl_getiter__(it),)
 				return dict.__new__(cls,*args,**kwds)
 
-		class __rl_missing_func__(object):
+		class __rl_missing_func__:
 			def __init__(self,name):
 				self.__name__ = name
 			def __call__(self,*args,**kwds):
@@ -1205,7 +1205,7 @@ class __RL_SAFE_ENV__(object):
 			if obi:
 				G['__builtins__'] = obi[0]
 
-class __rl_safe_eval__(object):
+class __rl_safe_eval__:
 	'''creates one environment and re-uses it'''
 	mode = 'eval'
 	def __init__(self):

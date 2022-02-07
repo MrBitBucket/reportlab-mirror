@@ -15,7 +15,7 @@ from reportlab.lib.logger import warnOnce
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
 from . rl_safe_eval import rl_safe_exec, rl_safe_eval, safer_globals
 
-class __UNSET__(object):
+class __UNSET__:
     @staticmethod
     def __bool__():
         return False
@@ -663,7 +663,7 @@ def _isPILImage(im):
     except AttributeError:
         return 0
 
-class ImageReader(object):
+class ImageReader:
     "Wraps up either PIL or Java to get data from bitmaps"
     _cache={}
     _max_image_size = None
@@ -1363,7 +1363,7 @@ class FixedOffsetTZ(datetime.tzinfo):
     def dst(self, dt):
         return datetime.timedelta(0)
 
-class TimeStamp(object):
+class TimeStamp:
     def __init__(self,invariant=None):
         if invariant is None:
             from reportlab.rl_config import invariant

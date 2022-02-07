@@ -14,7 +14,7 @@ from reportlab.lib.utils import rl_safe_eval, rl_safe_exec, annotateException
 from reportlab.lib.rl_safe_eval import BadCode
 
 testObj = [1,('a','b',2),{'A':1,'B':2.0},"32"]
-class TestClass(object):
+class TestClass:
     a = 1
     format = 3
 testInst = TestClass()

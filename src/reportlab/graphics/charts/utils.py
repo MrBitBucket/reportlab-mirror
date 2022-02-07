@@ -212,7 +212,7 @@ def maverage(data,n=6):
 def pairMaverage(data,n=6):
     return [(x[0],s) for x,s in zip(data, maverage([x[1] for x in data],n))]
 
-class DrawTimeCollector(object):
+class DrawTimeCollector:
     '''
     generic mechanism for collecting information about nodes at the time they are about to be drawn
     '''
