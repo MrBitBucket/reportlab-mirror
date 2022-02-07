@@ -4,7 +4,7 @@
 __version__='3.5.34'
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
-import os, sys, time, types, datetime, ast, importlib
+import os, pickle, sys, time, types, datetime, ast, importlib
 from functools import reduce as functools_reduce
 literal_eval = ast.literal_eval
 try:
@@ -24,11 +24,6 @@ class __UNSET__(object):
         return '__UNSET__'
     __repr__ = __str__
 __UNSET__ = __UNSET__()
-
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 
 try:
     from hashlib import md5

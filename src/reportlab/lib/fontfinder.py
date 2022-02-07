@@ -58,8 +58,8 @@ of non-Python applications.
 Future plans might include using this to auto-register fonts; and making it
 update itself smartly on repeated instantiation.
 """
-import sys, os, tempfile
-from reportlab.lib.utils import pickle, asNative as _asNative
+import sys, os, pickle, tempfile
+from reportlab.lib.utils import asNative as _asNative
 from xml.sax.saxutils import quoteattr
 from reportlab.lib.utils import asBytes
 try:
