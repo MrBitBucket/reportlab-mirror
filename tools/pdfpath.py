@@ -1,5 +1,5 @@
 #a class that will convert a pdfpath definition to our format
-from reportlab.graphics.shapes import Path, definePath
+from reportlab.graphics.shapes import Path, definePath, _PATH_OP_ARG_COUNT, _PATH_OP_NAMES
 __all__ = ('PDFPath',)
 class PDFPath(Path):
     ops = dict(m='moveTo',l='lineTo',c='curveTo',h='closePath')
