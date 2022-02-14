@@ -52,7 +52,7 @@ Canvas and TextObject have special support for dynamic fonts.
 """
 
 from struct import pack, unpack, error as structError
-from reportlab.lib.utils import getBytesIO, bytestr, isUnicode, char2int, bytesT, isStr, isBytes
+from reportlab.lib.utils import getBytesIO, bytestr, isUnicode, char2int, isStr, isBytes
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
 from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF
@@ -394,14 +394,14 @@ class TTFontMaker:
 #this is used in the cmap encoding fmt==2 case
 CMapFmt2SubHeader = namedtuple('CMapFmt2SubHeader', 'firstCode entryCount idDelta idRangeOffset')
 
-class TTFNameBytes(bytesT):
+class TTFNameBytes(bytes):
     '''class used to return named strings'''
     def __new__(cls,b,enc='utf8'):
         try:
             ustr = b.decode(enc)
         except:
             ustr = b.decode('latin1')
-        self = bytesT.__new__(cls,ustr.encode('utf8'))
+        self = bytes.__new__(cls,ustr.encode('utf8'))
         self.ustr = ustr
         return self
     

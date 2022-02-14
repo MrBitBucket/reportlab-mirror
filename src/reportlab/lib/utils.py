@@ -59,8 +59,6 @@ def isNative(v):
 #isBytes for bytes strings only
 #isUnicode for proper unicode
 _rl_NoneType=type(None)
-bytesT = bytes
-unicodeT = str
 strTypes = (str,bytes)
 def _digester(s):
     return md5(s if isBytes(s) else s.encode('utf8')).hexdigest()

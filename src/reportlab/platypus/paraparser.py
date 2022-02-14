@@ -15,7 +15,7 @@ import unicodedata
 import reportlab.lib.sequencer
 
 from reportlab.lib.abag import ABag
-from reportlab.lib.utils import ImageReader, annotateException, encode_label, asUnicode, asBytes, isStr, unicodeT
+from reportlab.lib.utils import ImageReader, annotateException, encode_label, asUnicode, asBytes, isStr
 from reportlab.lib.colors import toColor, white, black, red, Color
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY

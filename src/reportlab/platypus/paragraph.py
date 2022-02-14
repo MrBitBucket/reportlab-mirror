@@ -24,7 +24,7 @@ from copy import deepcopy
 from reportlab.lib.abag import ABag
 from reportlab.rl_config import platypus_link_underline, decimalSymbol, _FUZZ,\
         paraFontSizeHeightOffset, hyphenationMinWordLength
-from reportlab.lib.utils import _className, isBytes, unicodeT, bytesT, isStr
+from reportlab.lib.utils import _className, isBytes, isStr
 from reportlab.lib.rl_accel import sameFrag
 import re
 from types import MethodType
@@ -551,7 +551,7 @@ class _SplitFragLL(_SplitFragHS):
     """a frag that is forced to end in - because of paragraph split"""
     pass
 
-class _SHYIndexedStr(unicodeT):
+class _SHYIndexedStr(str):
     def __new__(cls, u, X=None):
         if not X:
             u = u.split(_shy)
@@ -563,7 +563,7 @@ class _SHYIndexedStr(unicodeT):
                 a(x)
             u = u''.join(u)
             X = X[:-1]
-        self = unicodeT.__new__(cls,u)
+        self = str.__new__(cls,u)
         self._shyIndices = X
         return self
 
@@ -1162,7 +1162,7 @@ def _hyphenateFragWord(hyphenator,FW,newWidth,maxWidth,uriWasteReduce,embeddedHy
 
     return None
 
-class _SplitWord(unicodeT):
+class _SplitWord(str):
     pass
 
 class _SplitWordEnd(_SplitWord):
@@ -1175,23 +1175,23 @@ class _SplitWordHY(_SplitWordH):
     '''head part of a hyphenation word pair'''
     pass
 
-class _SplitWordLL(unicodeT):
+class _SplitWordLL(str):
     '''a word that's forced to end with - because of paragraph split'''
     pass
 
-class _SHYStr(unicodeT):
+class _SHYStr(str):
     '''for simple soft hyphenated words'''
     def __new__(cls,s):
         S = s.split(_shy)
         if len(S)>1:
-            self = unicodeT.__new__(cls, u''.join(S))
+            self = str.__new__(cls, u''.join(S))
             sp = [0]
             asp = sp.append
             for ss in S:
                 asp(sp[-1]+len(ss))
             self.__sp__ = sp[1:-1]
         else:
-            self = unicodeT.__new__(cls, s)
+            self = str.__new__(cls, s)
             self.__sp__ = []
         return self
 
@@ -1561,11 +1561,11 @@ def textTransformFrags(frags,style):
     if tt:
         tt=tt.lower()
         if tt=='lowercase':
-            tt = unicodeT.lower
+            tt = str.lower
         elif tt=='uppercase':
-            tt = unicodeT.upper
+            tt = str.upper
         elif  tt=='capitalize':
-            tt = unicodeT.title
+            tt = str.title
         elif tt=='none':
             return
         else:
@@ -1574,7 +1574,7 @@ def textTransformFrags(frags,style):
         if n==1:
             #single fragment the easy case
             frags[0].text = tt(frags[0].text)
-        elif tt is unicodeT.title:
+        elif tt is str.title:
             pb = True
             for f in frags:
                 u = f.text
@@ -1593,10 +1593,10 @@ def textTransformFrags(frags,style):
                 if not u: continue
                 f.text = tt(u)
 
-class cjkU(unicodeT):
+class cjkU(str):
     '''simple class to hold the frag corresponding to a str'''
     def __new__(cls,value,frag,encoding):
-        self = unicodeT.__new__(cls,value)
+        self = str.__new__(cls,value)
         self._frag = frag
         if hasattr(frag,'cbDefn'):
             w = getattr(frag.cbDefn,'width',0)

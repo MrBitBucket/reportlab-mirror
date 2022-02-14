@@ -17,6 +17,7 @@ CHANGES  3.6.7a2 10/02/2022
 	* Remove unneccessary object inheritance; patch by Claude Paroz
 	* minor changes to python rendering in shapes.Drawing
 	* remove jython (dead project no python3) patch by  Claude Paroz < claude at 2xlibre dot net >
+	* remove unicodeT/bytesT patch by  Claude Paroz < claude at 2xlibre dot net >
 
 CHANGES  3.6.6	 24/01/2022
 ---------------------------
