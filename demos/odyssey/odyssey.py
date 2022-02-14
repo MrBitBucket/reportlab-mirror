@@ -58,16 +58,12 @@ def drawPageFrame(canv):
 
 
 def run(verbose=1):
-    if sys.platform[0:4] == 'java':
-        impl = 'Jython'
-    else:
-        impl = 'Python'
     verStr = '%d.%d' % (sys.version_info[0:2])
     if ACCEL:
         accelStr = 'with _rl_accel'
     else:
         accelStr = 'without _rl_accel'
-    print('Benchmark of %s %s %s' % (impl, verStr, accelStr))
+    print('Benchmark of Python %s %s' % (verStr, accelStr))
 
     started = time.time()
     canv = canvas.Canvas('odyssey.pdf', invariant=1)

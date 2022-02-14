@@ -23,16 +23,7 @@ from reportlab.lib.rl_accel import escapePDF, fp_str, asciiBase85Encode, asciiBa
 from reportlab.pdfbase import pdfmetrics
 from hashlib import md5
 
-from sys import platform
-from sys import version_info
 from sys import stderr
-
-if platform[:4] == 'java' and version_info[:2] == (2, 1):
-    # workaround for list()-bug in Jython 2.1 (should be fixed in 2.2)
-    def list(sequence):
-        def f(x):
-            return x
-        return list(map(f, sequence))
 
 class PDFError(Exception):
     pass

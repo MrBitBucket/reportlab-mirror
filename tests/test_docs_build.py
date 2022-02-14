@@ -34,8 +34,7 @@ class ManualTestCase(SecureTestCase):
 def makeSuite():
     suite = unittest.TestSuite()
     loader = unittest.TestLoader()
-    if sys.platform[:4] != 'java':
-        suite.addTest(loader.loadTestsFromTestCase(ManualTestCase))
+    suite.addTest(loader.loadTestsFromTestCase(ManualTestCase))
     return suite
 
 #noruntests

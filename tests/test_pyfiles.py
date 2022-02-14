@@ -141,9 +141,8 @@ class FirstLineTestCase(SecureTestCase):
 
 def makeSuite():
     suite = makeSuiteForClasses(SelfTestCase, AsciiFileTestCase, FilenameTestCase)
-    if sys.platform[:4] != 'java':
-        loader = unittest.TestLoader()
-        suite.addTest(loader.loadTestsFromTestCase(FirstLineTestCase))
+    loader = unittest.TestLoader()
+    suite.addTest(loader.loadTestsFromTestCase(FirstLineTestCase))
     return suite
 
 #noruntests

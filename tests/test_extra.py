@@ -78,8 +78,7 @@ class ExternalTestCase(SecureTestCase):
 def makeSuite():
     suite = unittest.TestSuite()
     loader = unittest.TestLoader()
-    if sys.platform[:4] != 'java':
-        suite.addTest(loader.loadTestsFromTestCase(ExternalTestCase))
+    suite.addTest(loader.loadTestsFromTestCase(ExternalTestCase))
 
     return suite
 

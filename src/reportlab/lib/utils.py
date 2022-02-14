@@ -420,25 +420,17 @@ def import_zlib():
     return zlib
 
 # Image Capability Detection.  Set a flag haveImages
-# to tell us if either PIL or Java imaging libraries present.
+# to tell us if PIL library is present.
 # define PIL_Image as either None, or an alias for the PIL.Image
 # module, as there are 2 ways to import it
-if sys.platform[0:4] == 'java':
+try:
+    from PIL import Image
+except ImportError:
     try:
-        import javax.imageio
-        import java.awt.image
-        haveImages = 1
-    except:
-        haveImages = 0
-else:
-    try:
-        from PIL import Image
+        import Image
     except ImportError:
-        try:
-            import Image
-        except ImportError:
-            Image = None
-    haveImages = Image is not None
+        Image = None
+haveImages = Image is not None
 
 class ArgvDictValue:
     '''A type to allow clients of getArgvDict to specify a conversion function'''
@@ -664,7 +656,7 @@ def _isPILImage(im):
         return 0
 
 class ImageReader:
-    "Wraps up either PIL or Java to get data from bitmaps"
+    "Wraps up PIL to get data from bitmaps"
     _cache={}
     _max_image_size = None
     def __init__(self, fileName,ident=None):
@@ -742,11 +734,7 @@ class ImageReader:
         return '[%s@%s%s%s]' % (self.__class__.__name__,hex(id(self)),ident and (' ident=%r' % ident) or '',fn and (' filename=%r' % fn) or '')
 
     def _read_image(self,fp):
-        if sys.platform[0:4] == 'java':
-            from javax.imageio import ImageIO
-            return ImageIO.read(fp)
-        else:
-            return Image.open(fp)
+        return Image.open(fp)
 
     @classmethod
     def check_pil_image_size(cls, im):
@@ -775,11 +763,7 @@ class ImageReader:
 
     def getSize(self):
         if (self._width is None or self._height is None):
-            if sys.platform[0:4] == 'java':
-                self._width = self._image.getWidth()
-                self._height = self._image.getHeight()
-            else:
-                self._width, self._height = self._image.size
+            self._width, self._height = self._image.size
         return (self._width, self._height)
 
     def getRGBData(self):
@@ -787,42 +771,24 @@ class ImageReader:
         try:
             if self._data is None:
                 self._dataA = None
-                if sys.platform[0:4] == 'java':
-                    import jarray
-                    from java.awt.image import PixelGrabber
-                    width, height = self.getSize()
-                    buffer = jarray.zeros(width*height, 'i')
-                    pg = PixelGrabber(self._image, 0,0,width,height,buffer,0,width)
-                    pg.grabPixels()
-                    # there must be a way to do this with a cast not a byte-level loop,
-                    # I just haven't found it yet...
-                    pixels = []
-                    a = pixels.append
-                    for i in range(len(buffer)):
-                        rgb = buffer[i]
-                        a(chr((rgb>>16)&0xff))
-                        a(chr((rgb>>8)&0xff))
-                        a(chr(rgb&0xff))
-                    self._data = ''.join(pixels)
+                im = self._image
+                mode = self.mode = im.mode
+                if mode in ('LA','RGBA'):
+                    if getattr(Image,'VERSION','').startswith('1.1.7'):
+                        im.load()
+                    self._dataA = ImageReader(im.split()[3 if mode=='RGBA' else 1])
+                    nm = mode[:-1]
+                    im = im.convert(nm)
+                    self.mode = nm
+                elif mode not in ('L','RGB','CMYK'):
+                    if im.format=='PNG' and im.mode=='P' and 'transparency' in im.info:
+                        im = im.convert('RGBA')
+                        self._dataA = ImageReader(im.split()[3])
+                        im = im.convert('RGB')
+                    else:
+                        im = im.convert('RGB')
                     self.mode = 'RGB'
-                else:
-                    im = self._image
-                    mode = self.mode = im.mode
-                    if mode in ('LA','RGBA'):
-                        if getattr(Image,'VERSION','').startswith('1.1.7'): im.load()
-                        self._dataA = ImageReader(im.split()[3 if mode=='RGBA' else 1])
-                        nm = mode[:-1]
-                        im = im.convert(nm)
-                        self.mode = nm
-                    elif mode not in ('L','RGB','CMYK'):
-                        if im.format=='PNG' and im.mode=='P' and 'transparency' in im.info:
-                            im = im.convert('RGBA')
-                            self._dataA = ImageReader(im.split()[3])
-                            im = im.convert('RGB')
-                        else:
-                            im = im.convert('RGB')
-                        self.mode = 'RGB'
-                    self._data = (im.tobytes if hasattr(im, 'tobytes') else im.tostring)()  #make pillow and PIL both happy, for now
+                self._data = (im.tobytes if hasattr(im, 'tobytes') else im.tostring)()  #make pillow and PIL both happy, for now
             return self._data
         except:
             annotateException('\nidentity=%s'%self.identity())
@@ -832,22 +798,19 @@ class ImageReader:
         return width, height, self.getRGBData()
 
     def getTransparent(self):
-        if sys.platform[0:4] == 'java':
-            return None
-        else:
-            if "transparency" in self._image.info:
-                transparency = self._image.info["transparency"] * 3
-                palette = self._image.palette
+        if "transparency" in self._image.info:
+            transparency = self._image.info["transparency"] * 3
+            palette = self._image.palette
+            try:
+                palette = palette.palette
+            except:
                 try:
-                    palette = palette.palette
+                    palette = palette.data
                 except:
-                    try:
-                        palette = palette.data
-                    except:
-                        return None
-                return palette[transparency:transparency+3]
-            else:
-                return None
+                    return None
+            return palette[transparency:transparency+3]
+        else:
+            return None
 
 class LazyImageReader(ImageReader): 
     def fp(self): 
@@ -859,7 +822,7 @@ class LazyImageReader(ImageReader):
     _image=property(_image) 
 
 def getImageData(imageFileName):
-    "Get width, height and RGB pixels from image file.  Wraps Java/PIL"
+    "Get width, height and RGB pixels from image file.  Wraps PIL"
     try:
         return imageFileName.getImageData()
     except AttributeError:

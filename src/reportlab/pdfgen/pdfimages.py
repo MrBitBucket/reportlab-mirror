@@ -157,12 +157,7 @@ class PDFImage:
             else:
                 imagedata, imgwidth, imgheight = self.non_jpg_imagedata(image)
         else:
-            import sys
-            if sys.platform[0:4] == 'java':
-                #jython, PIL not available
-                imagedata, imgwidth, imgheight = self.JAVA_imagedata()
-            else:
-                imagedata, imgwidth, imgheight = self.PIL_imagedata()
+            imagedata, imgwidth, imgheight = self.PIL_imagedata()
         self.imageData = imagedata
         self.imgwidth = imgwidth
         self.imgheight = imgheight

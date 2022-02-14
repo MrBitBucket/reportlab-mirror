@@ -15,7 +15,7 @@ and unzip to extract odyssey.full.txt (608kb).
 
 Benchmark speed depends quite critically
 on the presence of our accelerator module,
-_rl_accel, which is a C (or Java) extension.
+_rl_accel, which is a C extension.
 Serious users ought to compile or download this!
 
 The times quoted are from one machine (Andy Robinson's

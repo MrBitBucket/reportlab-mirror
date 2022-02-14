@@ -720,9 +720,9 @@ cost to performance.""")
     t = c.beginText(inch, 10 * inch)
     if not haveImages:
         c.drawString(inch, 11*inch,
-                     "Python or Java Imaging Library not found! Below you see rectangles instead of images.")
+                     "Python Imaging Library not found! Below you see rectangles instead of images.")
 
-    t.textLines("""PDFgen uses the Python Imaging Library (or, under Jython, java.awt.image and javax.imageio)
+    t.textLines("""PDFgen uses the Python Imaging Library
         to process a very wide variety of image formats.
         This page shows image capabilities.  If I've done things right, the bitmap should have
         its bottom left corner aligned with the crosshairs.
