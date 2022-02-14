@@ -536,16 +536,14 @@ def _repr(self,I=None):
         P = self.getProperties()
         s = self.__class__.__name__+'('
         for n in args[1:]:
-            v = P[n]
-            del P[n]
-            s = s + '%s,' % _repr(v,I)
+            v = P.pop(n,None)
+            s += '%s,' % _repr(v,I)
         for n in kargs:
-            v = P[n]
-            del P[n]
-            s = s + '%s=%s,' % (n,_repr(v,I))
+            v = P.pop(n,None)
+            s += '%s=%s,' % (n,_repr(v,I))
         for n,v in P.items():
             v = P[n]
-            s = s + '%s=%s,' % (n, _repr(v,I))
+            s += '%s=%s,' % (n, _repr(v,I))
         return s[:-1]+')'
     else:
         return repr(self)
@@ -1143,7 +1141,7 @@ def definePath(pathSegs=[],isClipPath=0, dx=0, dy=0, **kw):
                 #if   there's a  lower bound shift so min is lower bound
                 #else there's an upper bound shift so max is upper bound
                 c = d[0] - a if d[0] is not None else d[1] - b
-                for i in range(i,len(P),2):
+                for i in range(j,len(P),2):
                     P[i] += c
 
     return Path(P,O,isClipPath,**kw)
