@@ -6,6 +6,7 @@ __doc__='''Gazillions of miscellaneous internal utility functions'''
 
 import os, pickle, sys, time, types, datetime, ast, importlib
 from functools import reduce as functools_reduce
+from io import BytesIO
 literal_eval = ast.literal_eval
 try:
     from base64 import decodebytes as base64_decodebytes, encodebytes as base64_encodebytes
@@ -112,20 +113,6 @@ def isNonPrimitiveInstance(x):
 
 def instantiated(v):
     return not isinstance(v,type)
-
-from io import BytesIO, StringIO
-def getBytesIO(buf=None):
-    '''unified StringIO instance interface'''
-    if buf:
-        return BytesIO(buf)
-    return BytesIO()
-_bytesIOType = BytesIO 
-
-def getStringIO(buf=None):
-    '''unified StringIO instance interface'''
-    if buf:
-        return StringIO(buf)
-    return StringIO()
 
 def bytestr(x,enc='utf8'):
     if isinstance(x,str):
@@ -508,7 +495,7 @@ def open_for_read_by_name(name,mode='b'):
         name = _startswith_rl(name)
         s = __rl_loader__.get_data(name)
         if 'b' not in mode and os.linesep!='\n': s = s.replace(os.linesep,'\n')
-        return getBytesIO(s)
+        return BytesIO(s)
 
 from urllib.parse import unquote, urlparse
 from urllib.request import urlopen
@@ -567,7 +554,7 @@ def open_for_read(name,mode='b'):
                     purl = urlparse(name)
                     if purl[0] and not ((purl[0] in ('data','file') or trustedHosts.match(purl[1])) and (purl[0] in trustedSchemes)):
                         raise ValueError('Attempted untrusted host access')
-                return getBytesIO((datareader if name[:5].lower()=='data:' else rlUrlRead)(name))
+                return BytesIO((datareader if name[:5].lower()=='data:' else rlUrlRead)(name))
             except:
                 raise IOError('Cannot open resource "%s"' % name)
     globals()['open_for_read'] = open_for_read
@@ -679,7 +666,7 @@ class ImageReader:
             try:
                 from reportlab.rl_config import imageReaderFlags
                 self.fp = open_for_read(fileName,'b')
-                if isinstance(self.fp,_bytesIOType): imageReaderFlags=0 #avoid messing with already internal files
+                if isinstance(self.fp, BytesIO): imageReaderFlags=0 #avoid messing with already internal files
                 if imageReaderFlags>0:  #interning
                     data = self.fp.read()
                     if imageReaderFlags&2:  #autoclose
@@ -692,7 +679,7 @@ class ImageReader:
                             from rl_config import register_reset
                             register_reset(self._cache.clear)
                         data=self._cache.setdefault(_digester(data),data)
-                    self.fp=getBytesIO(data)
+                    self.fp=BytesIO(data)
                 elif imageReaderFlags==-1 and isinstance(fileName,str):
                     #try Ralf Schmitt's re-opening technique of avoiding too many open files
                     self.fp.close()
@@ -864,7 +851,7 @@ class DebugMemo:
         self.store = store = {}
         if capture_traceback and sys.exc_info() != (None,None,None):
             import traceback
-            s = getBytesIO()
+            s = BytesIO()
             traceback.print_exc(None,s)
             store['__traceback'] = s.getvalue()
         cwd=os.getcwd()
@@ -955,7 +942,7 @@ class DebugMemo:
             pickle.dump(self.store,f)
         except:
             S=self.store.copy()
-            ff=getBytesIO()
+            ff=BytesIO()
             for k,v in S.items():
                 try:
                     pickle.dump({k:v},ff)
@@ -972,7 +959,7 @@ class DebugMemo:
             f.close()
 
     def dumps(self):
-        f = getBytesIO()
+        f = BytesIO()
         self._dump(f)
         return f.getvalue()
 
@@ -987,7 +974,7 @@ class DebugMemo:
             f.close()
 
     def loads(self,s):
-        self._load(getBytesIO(s))
+        self._load(BytesIO(s))
 
     def _show_module_versions(self,k,v):
         self._writeln(k[2:])

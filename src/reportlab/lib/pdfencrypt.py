@@ -5,7 +5,9 @@ __version__='3.3.0'
 """helpers for pdf encryption/decryption"""
 import sys, os, tempfile
 from binascii import hexlify, unhexlify
-from reportlab.lib.utils import getBytesIO, md5, asBytes, int2Byte, char2int, rawUnicode, rawBytes, asNative
+from io import BytesIO
+
+from reportlab.lib.utils import md5, asBytes, int2Byte, char2int, rawUnicode, rawBytes, asNative
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfdoc import PDFObject
@@ -558,7 +560,7 @@ See https://www.reportlab.com/downloads''')
     firstPageSize = bboxInfo['PageForms0'][2:]
 
     #now make a new PDF document
-    buf = getBytesIO()
+    buf = BytesIO()
     canv = Canvas(buf, pagesize=firstPageSize)
 
     # set a standard ID while debugging

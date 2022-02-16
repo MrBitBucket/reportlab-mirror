@@ -8,6 +8,7 @@ from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, p
 if __name__=='__main__':
     setOutDir(__name__)
 import unittest
+from io import BytesIO
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.pdfdoc import PDFDocument, PDFError
@@ -17,7 +18,7 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, add32
 from reportlab import rl_config
-from reportlab.lib.utils import getBytesIO, int2Byte
+from reportlab.lib.utils import int2Byte
 
 def utf8(code):
     "Convert a given UCS character index into UTF-8"
@@ -127,10 +128,10 @@ class TTFontFileTestCase(NearTestCase):
     def testFontFileFailures(self):
         "Tests TTFontFile constructor error checks"
         self.assertRaises(TTFError, TTFontFile, "nonexistent file")
-        self.assertRaises(TTFError, TTFontFile, getBytesIO(b""))
-        self.assertRaises(TTFError, TTFontFile, getBytesIO(b"invalid signature"))
-        self.assertRaises(TTFError, TTFontFile, getBytesIO(b"OTTO - OpenType not supported yet"))
-        self.assertRaises(TTFError, TTFontFile, getBytesIO(b"\0\1\0\0"))
+        self.assertRaises(TTFError, TTFontFile, BytesIO(b""))
+        self.assertRaises(TTFError, TTFontFile, BytesIO(b"invalid signature"))
+        self.assertRaises(TTFError, TTFontFile, BytesIO(b"OTTO - OpenType not supported yet"))
+        self.assertRaises(TTFError, TTFontFile, BytesIO(b"\0\1\0\0"))
 
     def testFontFileReads(self):
         "Tests TTFontParset.read_xxx"
@@ -189,17 +190,17 @@ class TTFontFileTestCase(NearTestCase):
     def testFontFileChecksum(self):
         "Tests TTFontFile and TTF parsing code"
         F = TTFOpenFile("Vera.ttf")[1].read()
-        TTFontFile(getBytesIO(F), validate=1) # should not fail
+        TTFontFile(BytesIO(F), validate=1) # should not fail
         F1 = F[:12345] + b"\xFF" + F[12346:] # change one byte
-        self.assertRaises(TTFError, TTFontFile, getBytesIO(F1), validate=1)
+        self.assertRaises(TTFError, TTFontFile, BytesIO(F1), validate=1)
         F1 = F[:8] + b"\xFF" + F[9:] # change one byte
-        self.assertRaises(TTFError, TTFontFile, getBytesIO(F1), validate=1)
+        self.assertRaises(TTFError, TTFontFile, BytesIO(F1), validate=1)
 
     def testSubsetting(self):
         "Tests TTFontFile and TTF parsing code"
         ttf = TTFontFile("Vera.ttf")
         subset = ttf.makeSubset([0x41, 0x42])
-        subset = TTFontFile(getBytesIO(subset), 0)
+        subset = TTFontFile(BytesIO(subset), 0)
         for tag in ('cmap', 'head', 'hhea', 'hmtx', 'maxp', 'name', 'OS/2',
                     'post', 'cvt ', 'fpgm', 'glyf', 'loca', 'prep'):
             self.assertTrue(subset.get_table(tag))
@@ -225,7 +226,7 @@ class TTFontFileTestCase(NearTestCase):
         ttf.add("QUUX", b"123")
         ttf.add("head", b"12345678xxxx")
         stm = ttf.makeStream()
-        ttf = TTFontParser(getBytesIO(stm), 0)
+        ttf = TTFontParser(BytesIO(stm), 0)
         self.assertEqual(ttf.get_table("ABCD"), b"xyzzy")
         self.assertEqual(ttf.get_table("QUUX"), b"123")
 
@@ -270,7 +271,7 @@ class TTFontTestCase(NearTestCase):
         # Glyphless variation of vedaal's invisible font retrieved from
         # http://www.angelfire.com/pr/pgpf/if.html, which says:
         # 'Invisible font' is unrestricted freeware. Enjoy, Improve, Distribute freely
-        import io, zlib, base64
+        import zlib, base64
         font = """
         eJzdlk1sG0UUx/+zs3btNEmrUKpCPxikSqRS4jpfFURUagmkEQQoiRXgAl07Y3vL2mvt2ml8APXG
         hQPiUEGEVDhWVHyIC1REPSAhBOWA+BCgSoULUqsKcWhVBKjhzfPU+VCi3Flrdn7vzZv33ryZ3TUE
@@ -294,7 +295,7 @@ class TTFontTestCase(NearTestCase):
         CMGjwvxTsr74/f/F95m3TH9x8o0/TU//N+7/D/ScVcA=
         """.encode('latin1')
         uncompressed = zlib.decompress(base64.decodebytes(font))
-        ttf = io.BytesIO(uncompressed)
+        ttf = BytesIO(uncompressed)
         setattr(ttf ,"name", "(invisible.ttf)")
         font = TTFont('invisible', ttf)
         for coord in font.face.bbox:

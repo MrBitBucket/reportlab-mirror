@@ -8,6 +8,7 @@ from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, p
 setOutDir(__name__)
 import os
 import unittest
+from io import BytesIO
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
@@ -1256,7 +1257,6 @@ class PdfgenTestCase(unittest.TestCase):
             c.save()
 
     def testBytesIOSaves(self):
-        from io import BytesIO
         with BytesIO() as f:
             c = canvas.Canvas(f)
             c.drawString(100, 700, 'Hello World I write to %s' % repr(f))
@@ -1271,8 +1271,7 @@ class PdfgenTestCase(unittest.TestCase):
         self.assertRaises(TypeError,c.save)
 
 def trySomeColors(C,enforceColorSpace=None):
-    from reportlab.lib.utils import getBytesIO
-    out=getBytesIO()
+    out = BytesIO()
     canv = canvas.Canvas(out,enforceColorSpace=enforceColorSpace)
     canv.setFont('Helvetica',10)
     x = 0

@@ -11,6 +11,7 @@ __version__ = '0.8'
 import sys
 sys.path.insert(0, '.')
 import os, re, types, getopt, pickle, copy, time, pprint, traceback
+from io import StringIO
 from reportlab import rl_config
 
 from docpy import PackageSkeleton0, ModuleSkeleton0
@@ -24,7 +25,6 @@ from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT
-from reportlab.lib.utils import getStringIO
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.pdfgen import canvas
 from reportlab.platypus.flowables import Flowable, Spacer
@@ -464,7 +464,7 @@ class GraphPdfDocBuilder0(PdfDocBuilder0):
         for key in keys:
             value = props[key]
 
-            f = getStringIO()
+            f = StringIO()
             pprint.pprint(value, f)
             value = f.getvalue()[:-1]
             valueLines = value.split('\n')
@@ -648,7 +648,7 @@ class GraphHtmlDocBuilder0(HtmlDocBuilder0):
             value = props[key]
 
             # Method 3
-            f = getStringIO()
+            f = StringIO()
             pprint.pprint(value, f)
             value = f.getvalue()[:-1]
             valueLines = value.split('\n')

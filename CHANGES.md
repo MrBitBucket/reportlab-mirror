@@ -19,6 +19,7 @@ CHANGES  3.6.7a3 16/02/2022
 	* remove jython (dead project no python3) patch by  Claude Paroz < claude at 2xlibre dot net >
 	* remove unicodeT/bytesT patch by  Claude Paroz < claude at 2xlibre dot net >
 	* import directly from string module patch by  Claude Paroz < claude at 2xlibre dot net >
+	* eliminate getBytesIO and getStringIO patch by  Claude Paroz < claude at 2xlibre dot net >
 
 CHANGES  3.6.6	 24/01/2022
 ---------------------------

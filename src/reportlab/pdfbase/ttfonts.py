@@ -52,11 +52,12 @@ Canvas and TextObject have special support for dynamic fonts.
 """
 
 from struct import pack, unpack, error as structError
-from reportlab.lib.utils import getBytesIO, bytestr, isUnicode, char2int, isStr, isBytes
+from reportlab.lib.utils import bytestr, isUnicode, char2int, isStr, isBytes
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
 from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF
 from collections import namedtuple
+from io import BytesIO
 import os, time
 
 class TTFError(pdfdoc.PDFError):
@@ -349,7 +350,7 @@ class TTFontMaker:
 
     def makeStream(self):
         "Finishes the generation and returns the TTF file as a string"
-        stm = getBytesIO()
+        stm = BytesIO()
         write = stm.write
 
         tables = self.tables

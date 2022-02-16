@@ -16,6 +16,7 @@ Feel free to add more.
 '''
 
 import os, sys, base64
+from io import BytesIO
 
 from reportlab.lib import colors
 from reportlab.lib.units import cm
@@ -455,11 +456,10 @@ def getDrawing13():
 def smallArrow():
     '''create a small PIL image'''
     from reportlab.graphics.renderPM import _getImage
-    from reportlab.lib.utils import getBytesIO
     b = base64_decodebytes(b'''R0lGODdhCgAHAIMAAP/////29v/d3f+ysv9/f/9VVf9MTP8iIv8ICP8AAAAAAAAAAAAAAAAAAAAA
 AAAAACwAAAAACgAHAAAIMwABCBxIsKABAQASFli4MAECAgEAJJhIceKBAQkyasx4YECBjx8TICAQ
 AIDJkwYEAFgZEAA7''')
-    return _getImage().open(getBytesIO(b))
+    return _getImage().open(BytesIO(b))
 
 def getDrawing14():
     '''test shapes.Image'''

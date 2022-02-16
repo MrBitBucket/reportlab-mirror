@@ -12,18 +12,19 @@
 #
 #
 
+from io import BytesIO
 try :
     from Shared.reportlab.platypus.paragraph import Paragraph
     from Shared.reportlab.platypus.doctemplate import *
     from Shared.reportlab.lib.units import inch
     from Shared.reportlab.lib import styles
-    from Shared.reportlab.lib.utils import ImageReader, getBytesIO
+    from Shared.reportlab.lib.utils import ImageReader
 except ImportError :
     from reportlab.platypus.paragraph import Paragraph
     from reportlab.platypus.doctemplate import *
     from reportlab.lib.units import inch
     from reportlab.lib import styles
-    from reportlab.lib.utils import ImageReader, getBytesIO
+    from reportlab.lib.utils import ImageReader
 
 class MyPDFDoc :
     class MyPageTemplate(PageTemplate) :
@@ -54,7 +55,7 @@ class MyPDFDoc :
                 return None
 
             # Convert it to PIL
-            image = ImageReader(getBytesIO(str(logo.data)))
+            image = ImageReader(BytesIO(logo.data))
             (width, height) = image.getSize()
 
             # scale it to be 0.75 inch high
@@ -83,7 +84,7 @@ class MyPDFDoc :
 
         # we will build an in-memory document
         # instead of creating an on-disk file.
-        self.report = getBytesIO()
+        self.report = BytesIO()
 
         # initialise a PDF document using ReportLab's platypus
         self.document = BaseDocTemplate(self.report)
@@ -157,7 +158,7 @@ def rlzope(self) :
         self.REQUEST.RESPONSE.setHeader('Content-Disposition', 'attachment; filename=%s' % filename)
     except:
         import traceback, sys, cgi
-        content = sys.stdout = sys.stderr = getBytesIO()
+        content = sys.stdout = sys.stderr = BytesIO()
         self.REQUEST.RESPONSE.setHeader('Content-Type', 'text/html')
         traceback.print_exc()
         sys.stdout = sys.__stdout__

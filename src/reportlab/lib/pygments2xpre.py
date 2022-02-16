@@ -9,8 +9,9 @@ For a list of available lexers see http://pygments.org/docs/
 
 """
 __all__ = ('pygments2xpre',)
-from reportlab.lib.utils import asBytes, getBytesIO, getStringIO, asUnicode, isUnicode
+from reportlab.lib.utils import asBytes, asUnicode, isUnicode
 import re
+from io import StringIO
 
 def _2xpre(s,styles):
     "Helper to transform Pygments HTML output to ReportLab markup"
@@ -34,7 +35,7 @@ def pygments2xpre(s, language="python"):
 
     from pygments.lexers import get_lexer_by_name
     rconv = lambda x: x
-    out = getStringIO()
+    out = StringIO()
 
     l = get_lexer_by_name(language)
     

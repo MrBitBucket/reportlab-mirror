@@ -8,17 +8,18 @@ objects download the svglib module here:
 """
 
 import math, types, sys, os, codecs, base64
+from io import BytesIO, StringIO
 from operator import getitem
 
 from reportlab.pdfbase.pdfmetrics import stringWidth # for font info
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.colors import black
-from reportlab.lib.utils import asNative, getBytesIO
+from reportlab.lib.utils import asNative
 from reportlab.graphics.renderbase import StateTracker, getStateDelta, Renderer, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS, Path, UserNode
 from reportlab.graphics.shapes import * # (only for test0)
 from reportlab import rl_config
-from reportlab.lib.utils import getStringIO, RLString, isUnicode, isBytes
+from reportlab.lib.utils import RLString, isUnicode, isBytes
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
 from .renderPM import _getImage
 
@@ -39,7 +40,7 @@ EXTRA_FILL_STYLES = 'fill fill-opacity'.split()
 ### top-level user function ###
 def drawToString(d, showBoundary=rl_config.showBoundary,**kwds):
     "Returns a SVG as a string in memory, without touching the disk"
-    s = getStringIO()
+    s = StringIO()
     drawToFile(d, s, showBoundary=showBoundary,**kwds)
     return s.getvalue()
 
@@ -521,7 +522,7 @@ class SVGCanvas:
         # self.currGroup.appendChild(comment)
 
     def drawImage(self, image, x, y, width, height, embed=True):
-        buf = getBytesIO()
+        buf = BytesIO()
         image.save(buf,'png')
         buf = asNative(base64.b64encode(buf.getvalue()))
         self.currGroup.appendChild(
