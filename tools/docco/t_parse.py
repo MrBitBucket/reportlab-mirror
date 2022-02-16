@@ -80,7 +80,6 @@ Template directives:
 """
 
 import re, string
-from reportlab.lib.utils import ascii_letters
 
 #
 # template parsing
@@ -215,7 +214,7 @@ class Template:
 
 # some useful regular expressions
 USERNAMEREGEX = \
-  "["+ascii_letters+"]["+ascii_letters+string.digits+"_]*"
+  "["+string.ascii_letters+"]["+string.ascii_letters+string.digits+"_]*"
 STRINGLITREGEX = "'[^\n']*'"
 SIMPLEINTREGEX = "["+string.digits+"]+"
 id = re.compile(USERNAMEREGEX)

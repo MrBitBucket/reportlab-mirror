@@ -113,8 +113,6 @@ def isNonPrimitiveInstance(x):
 def instantiated(v):
     return not isinstance(v,type)
 
-from string import ascii_letters, ascii_uppercase, ascii_lowercase
-
 from io import BytesIO, StringIO
 def getBytesIO(buf=None):
     '''unified StringIO instance interface'''
