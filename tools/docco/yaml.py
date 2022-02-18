@@ -39,7 +39,6 @@ Special commands understood at present are:
 
 
 import sys
-import imp
 from . import codegrab
 
 #modes:

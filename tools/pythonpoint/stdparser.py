@@ -7,9 +7,8 @@ The parser has a getPresentation method; it is called from
 pythonpoint.py.
 """
 
-import string, imp, sys, os, copy
+import imp, sys, os, copy
 from reportlab.lib.utils import isSeq
-from reportlab.lib import colors
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import recursiveImport
 from reportlab.platypus.paraparser import HTMLParser, known_entities

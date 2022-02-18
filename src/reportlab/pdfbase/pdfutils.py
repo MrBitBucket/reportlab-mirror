@@ -6,7 +6,6 @@ __doc__=''
 # pdfutils.py - everything to do with images, streams,
 # compression, and some constants
 
-import sys
 import os
 import binascii
 from io import BytesIO

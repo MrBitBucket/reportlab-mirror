@@ -71,15 +71,14 @@ Recently added features are:
 - add pyRXP support (TODO)
 """
 __version__='3.3.0'
-import os, sys, imp, pprint, getopt, glob, re
+import os, sys, getopt, glob, re
 from io import BytesIO
 
 from reportlab import rl_config
-from reportlab.lib import styles
 from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.utils import isStr, isBytes, isUnicode
-from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
+from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen import canvas
 from reportlab.platypus.doctemplate import SimpleDocTemplate

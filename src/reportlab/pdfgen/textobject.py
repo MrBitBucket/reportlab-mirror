@@ -9,9 +9,7 @@ instantiate directly, obtain one from the Canvas instead.
 Progress Reports:
 8.83, 2000-01-13, gmcm: created from pdfgen.py
 """
-import string
-from types import *
-from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor, black, white, _CMYK_black, _CMYK_white
+from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor
 from reportlab.lib.utils import isBytes, isStr, asUnicode
 from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase import pdfmetrics

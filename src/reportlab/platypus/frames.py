@@ -17,7 +17,6 @@ logger = logging.getLogger('reportlab.platypus')
 
 _geomAttr=('x1', 'y1', 'width', 'height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
 from reportlab import rl_config
-from reportlab.lib.rl_accel import fp_str
 _FUZZ=rl_config._FUZZ
 
 class ShowBoundaryValue:

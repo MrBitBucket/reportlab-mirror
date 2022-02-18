@@ -1,4 +1,4 @@
-import os, time, sys
+import time
 from reportlab.pdfbase.pdfmetrics import _py_getFont, _py_unicode2T1
 from _rl_accel import unicode2T1
 from getrc import getrc, checkrc

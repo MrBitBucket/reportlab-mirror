@@ -5,9 +5,8 @@
 #to use this, which is wrong.
 
 
-from reportlab.platypus import PageTemplate, \
-     BaseDocTemplate, Frame, Paragraph
-from reportlab.lib.units import inch, cm
+from reportlab.platypus import PageTemplate, BaseDocTemplate, Frame, Paragraph
+from reportlab.lib.units import inch
 from reportlab.lib.sequencer import Sequencer
 from reportlab.rl_config import defaultPageSize
 

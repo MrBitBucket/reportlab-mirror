@@ -5,21 +5,19 @@
 __version__='3.3.0'
 __doc__="""This will be a collection of legends to be used with charts."""
 
-import copy, operator
+import copy
 
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone,\
-        isNumberOrNone, isListOfNumbersOrNone, isStringOrNone, isBoolean,\
+        isNumberOrNone, isListOfNumbersOrNone, isBoolean,\
         EitherOr, NoneOr, AutoOr, isAuto, Auto, isBoxAnchor, SequenceOf, isInstanceOf
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Drawing, Group, String, Rect, Line, STATE_DEFAULTS
-from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.utils import isSeq, find_locals, isStr, asNative
 from reportlab.graphics.shapes import _baseGFontName
-from functools import reduce
 
 def _transMax(n,A):
     X = n*[0]
@@ -608,7 +606,6 @@ class LineSwatch(Widget):
 
     def __init__(self):
         from reportlab.lib.colors import red
-        from reportlab.graphics.shapes import Line
         self.x = 0
         self.y = 0
         self.width  = 20

@@ -419,11 +419,10 @@ if __name__=='__main__':
     def main():
         from reportlab.graphics.barcode.code128 import Code128
         from reportlab.platypus import Spacer, SimpleDocTemplate
-        from reportlab.lib.units import inch, cm
+        from reportlab.lib.units import inch
         from reportlab.lib.styles import getSampleStyleSheet
         from reportlab.platypus.paragraph import Paragraph
         from reportlab.platypus.flowables import KeepTogether
-        import os
         styles = getSampleStyleSheet()
         styleN = styles['Normal']
         styleH = styles['Heading1']

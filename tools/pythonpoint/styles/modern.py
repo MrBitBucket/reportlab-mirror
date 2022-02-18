@@ -20,7 +20,7 @@ A style sheet MUST define a style called 'Normal'.
 """
 
 from reportlab.lib import styles
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
+from reportlab.lib.enums import TA_CENTER
 
 def getParagraphStyles():
     """Returns a dictionary of styles based on Helvetica"""

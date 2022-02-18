@@ -368,7 +368,6 @@ def parsexml0(xmltext, startingat=0, toplevel=1,
     t = (NameString, AttDict, ContentList, ExtraStuff)
     return (t, cursor)
 
-import types
 def pprettyprint(parsedxml):
     """pretty printer mainly for testing"""
     st = bytes

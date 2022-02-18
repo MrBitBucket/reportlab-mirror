@@ -1,7 +1,7 @@
 #How to add bleed to a page in this case 6mm to a landscape A4
 from reportlab.lib import units, pagesizes
 from reportlab.pdfgen.canvas import Canvas
-import sys, os, glob, time
+import sys, os
 bleedX = 6*units.mm
 bleedY = 6*units.mm
 pageWidth, pageHeight = pagesizes.landscape(pagesizes.A4)

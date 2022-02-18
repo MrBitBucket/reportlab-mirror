@@ -58,7 +58,7 @@ of non-Python applications.
 Future plans might include using this to auto-register fonts; and making it
 update itself smartly on repeated instantiation.
 """
-import sys, os, pickle, tempfile
+import sys, os, pickle
 from reportlab.lib.utils import asNative as _asNative
 from xml.sax.saxutils import quoteattr
 from reportlab.lib.utils import asBytes
@@ -256,7 +256,6 @@ class FontFinder:
                 except:
                     pass  #pickle load failed.  Ho hum, maybe it's an old pickle.  Better rebuild it.
 
-        from stat import ST_MTIME
         for dirName in self._dirs:
             try:
                 fileNames = rl_listdir(dirName)

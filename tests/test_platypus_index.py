@@ -11,7 +11,7 @@ from os.path import join, basename, splitext
 from math import sqrt
 import unittest
 from reportlab.lib.units import cm
-from reportlab.lib.utils import commajoin, asUnicode
+from reportlab.lib.utils import commajoin
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.xpreformatted import XPreformatted
@@ -100,7 +100,6 @@ class IndexTestCase(unittest.TestCase):
             index = SimpleIndex(dot=' . ', headers=headers)
 
             def addParas(words):
-                words = [asUnicode(w) for w in words]
                 txt = u' '.join([(len(w) > 5 and u'<index item=%s/>%s' % (quoteattr(commajoin([w[:2], w[:3], w])), w) or w) for w in words])
                 para = Paragraph(txt, makeBodyStyle())
                 story.append(para)

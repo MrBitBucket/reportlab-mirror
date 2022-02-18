@@ -11,25 +11,15 @@ Can handle multiple series (which produce concentric 'rings' in the chart).
 
 """
 
-import copy
 from math import sin, cos, pi
 from reportlab.lib import colors
-from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
-                                    isListOfNumbers, isColorOrNone, isString,\
-                                    isListOfStringsOrNone, OneOf, SequenceOf,\
-                                    isBoolean, isListOfColors,\
-                                    isNoneOrListOfNoneOrStrings,\
-                                    isNoneOrListOfNoneOrNumbers,\
-                                    isNumberOrNone, isListOfNoneOrNumber,\
+from reportlab.lib.validators import isNumber, isListOfStringsOrNone, OneOf,\
+                                    isBoolean, isNumberOrNone, isListOfNoneOrNumber,\
                                     isListOfListOfNoneOrNumber, EitherOr
 from reportlab.lib.attrmap import *
-from reportlab.pdfgen.canvas import Canvas
-from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, Ellipse, \
-    Wedge, String, SolidShape, UserNode, STATE_DEFAULTS
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
+from reportlab.graphics.shapes import Group, Drawing, Wedge
+from reportlab.graphics.widgetbase import TypedPropertyCollection
 from reportlab.graphics.charts.piecharts import AbstractPieChart, WedgeProperties, _addWedgeLabel, fixLabelOverlaps
-from reportlab.graphics.charts.textlabels import Label
-from reportlab.graphics.widgets.markers import Marker
 from functools import reduce
 
 class SectorProperties(WedgeProperties):

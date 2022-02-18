@@ -8,7 +8,7 @@ __all__ = (
 __version__='3.5.20'
 __doc__='''A 'rich preformatted text' widget allowing internal markup'''
 from reportlab.lib import PyFontify
-from reportlab.platypus.paragraph import Paragraph, cleanBlockQuotedText, _handleBulletWidth, \
+from reportlab.platypus.paragraph import Paragraph, _handleBulletWidth, \
      ParaLines, _getFragWords, stringWidth, getAscentDescent, imgVRange, imgNormV
 from reportlab.lib.utils import isSeq
 from reportlab.platypus.flowables import _dedenter

@@ -14,7 +14,7 @@ The classes within this generally mirror structures in the PDF file
 and are not part of any public interface.  Instead, canvas and font
 classes are made available elsewhere for users to manipulate.
 """
-import types, binascii, codecs, time
+import binascii, codecs
 from collections import OrderedDict
 from reportlab.pdfbase import pdfutils
 from reportlab import rl_config
@@ -1511,7 +1511,6 @@ class PDFOutlines(PDFObject):
 
 def count(tree, closedict=None):
     """utility for outline: recursively count leaves in a tuple/list tree"""
-    from operator import add
     if isinstance(tree,tuple):
         # leaf with subsections XXXX should clean up this structural usage
         (leafdict, subsections) = tree

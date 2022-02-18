@@ -7,7 +7,6 @@ __doc__='''Core of the graphics library - defines Drawing and Shapes'''
 
 import os, sys
 from math import pi, cos, sin, sqrt, radians, floor
-from pprint import pprint
 
 from reportlab.platypus import Flowable
 from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName as _baseGFontName, _unset_, decimalSymbol
@@ -24,9 +23,6 @@ from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
 _baseGFontNameB = tt2ps(_baseGFontName,1,0)
 _baseGFontNameI = tt2ps(_baseGFontName,0,1)
 _baseGFontNameBI = tt2ps(_baseGFontName,1,1)
-
-class NotImplementedError(Exception):
-    pass
 
 # two constants for filling rules
 NON_ZERO_WINDING = 'Non-Zero Winding'
@@ -389,7 +385,6 @@ class Group(Shape):
 
     def _explode(self):
         ''' return a fully expanded object'''
-        from reportlab.graphics.widgetbase import Widget
         obj = Group()
         if hasattr(self,'__label__'):
             obj.__label__=self.__label__

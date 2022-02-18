@@ -4,19 +4,15 @@
 __all__ = ('ParaFrag', 'ParaParser')
 __version__='3.5.20'
 __doc__='''The parser used to process markup within paragraphs'''
-import string
 import re
 import sys
-import os
 import copy
-import base64
-from pprint import pprint as pp
 import unicodedata
 import reportlab.lib.sequencer
 
 from reportlab.lib.abag import ABag
-from reportlab.lib.utils import ImageReader, annotateException, encode_label, asUnicode, asBytes, isStr
-from reportlab.lib.colors import toColor, white, black, red, Color
+from reportlab.lib.utils import ImageReader, annotateException, encode_label, asUnicode
+from reportlab.lib.colors import toColor, black
 from reportlab.lib.fonts import tt2ps, ps2tt
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.units import inch,mm,cm,pica

@@ -10,41 +10,30 @@ __version__ = '0.8'
 
 import sys
 sys.path.insert(0, '.')
-import os, re, types, getopt, pickle, copy, time, pprint, traceback
+import os, re, getopt, pickle, time, pprint, traceback
 from io import StringIO
 from reportlab import rl_config
 
-from docpy import PackageSkeleton0, ModuleSkeleton0
+from docpy import ModuleSkeleton0
 from docpy import DocBuilder0, PdfDocBuilder0, HtmlDocBuilder0
-from docpy import htmlescape, htmlrepr, defaultformat, \
-     getdoc, reduceDocStringLength
-from docpy import makeHtmlSection, makeHtmlSubSection, \
-     makeHtmlInlineImage
+from docpy import makeHtmlInlineImage
 
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
-from reportlab.lib import colors
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.pdfgen import canvas
-from reportlab.platypus.flowables import Flowable, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus.flowables import Spacer
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.tableofcontents import TableOfContents
-from reportlab.platypus.flowables \
-     import Flowable, Preformatted,Spacer, Image, KeepTogether, PageBreak
+from reportlab.platypus.flowables import Preformatted, Spacer, PageBreak
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
-from reportlab.platypus.doctemplate \
-     import PageTemplate, BaseDocTemplate
-from reportlab.platypus.tables import TableStyle, Table
-from reportlab.graphics.shapes import NotImplementedError
+from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate
 import inspect
 
 # Needed to draw Widget/Drawing demos.
 
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.shapes import Drawing
-from reportlab.graphics import shapes
 from reportlab.graphics import renderPDF
 
 VERBOSE = rl_config.verbose

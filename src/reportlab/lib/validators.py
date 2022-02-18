@@ -4,7 +4,7 @@
 __version__='3.5.33'
 __doc__="""Standard verifying functions used by attrmap."""
 
-import sys, codecs, re
+import codecs, re
 from reportlab.lib.utils import isSeq, isBytes, isStr
 from reportlab.lib import colors
 try:

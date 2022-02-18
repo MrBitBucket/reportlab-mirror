@@ -26,16 +26,15 @@ higher level components).
 """
 import os
 from copy import deepcopy, copy
-from reportlab.lib.colors import red, gray, lightgrey
+from reportlab.lib.colors import gray, lightgrey
 from reportlab.lib.rl_accel import fp_str
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
+from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 from reportlab.lib.styles import _baseFontName
 from reportlab.lib.utils import strTypes, rl_safe_exec
 from reportlab.lib.abag import ABag
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.rl_config import _FUZZ, overlapAttachedSpace, ignoreContainerActions, listWrapOnFakeWidth
-import collections
 
 __all__ = '''AnchorFlowable BalancedColumns BulletDrawer CallerMacro CondPageBreak DDIndenter DocAssert
         DocAssign DocExec DocIf DocPara DocWhile FailOnDraw FailOnWrap Flowable FrameBG FrameSplitter
@@ -1529,7 +1528,7 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
     def _generated_content(self,aW,aH):
         G = []
         frame = self._frame
-        from reportlab.platypus.doctemplate import CurrentFrameFlowable,LayoutError, ActionFlowable, Indenter
+        from reportlab.platypus.doctemplate import LayoutError, ActionFlowable, Indenter
         from reportlab.platypus.frames import Frame
         from reportlab.platypus.doctemplate import FrameBreak
         lpad = frame._leftPadding if self._leftPadding is None else self._leftPadding

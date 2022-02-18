@@ -13,7 +13,6 @@ of up to 4 implementation fonts to use.
 Most font-handling code lives in pdfbase, and this probably should too.
 
 '''
-import sys, os
 ###############################################################################
 #   A place to put useful font stuff
 ###############################################################################

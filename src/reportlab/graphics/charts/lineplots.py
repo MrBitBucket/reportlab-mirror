@@ -5,19 +5,17 @@
 __version__='3.3.0'
 __doc__="""This module defines a very preliminary Line Plot example."""
 
-import string, time
-
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
 from reportlab.lib.utils import flatten, isStr
-from reportlab.graphics.shapes import Drawing, Group, Rect, Line, PolyLine, Polygon, _SetKeyWordArgs
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder, tpcGetItem
+from reportlab.graphics.shapes import Drawing, Group, Rect, PolyLine, Polygon, _SetKeyWordArgs
+from reportlab.graphics.widgetbase import TypedPropertyCollection, PropHolder, tpcGetItem
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.charts.axes import XValueAxis, YValueAxis, AdjYValueAxis, NormalDateXValueAxis
 from reportlab.graphics.charts.utils import *
-from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol, makeMarker
-from reportlab.graphics.widgets.grids import Grid, DoubleGrid, ShadedRect, ShadedPolygon
+from reportlab.graphics.widgets.markers import uSymbol2Symbol, makeMarker
+from reportlab.graphics.widgets.grids import Grid, DoubleGrid, ShadedPolygon
 from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
 from reportlab.graphics.charts.areas import PlotArea
 from .utils import FillPairedData

@@ -4,17 +4,16 @@
 __version__='3.3.0'
 __doc__="""Render drawing objects in Postscript"""
 
+import math
+from io import BytesIO, StringIO
 from reportlab.pdfbase.pdfmetrics import getFont, stringWidth, unicode2T1 # for font info
 from reportlab.lib.utils import asBytes, char2int, rawBytes, asNative, isUnicode
 from reportlab.lib.rl_accel import fp_str
-from reportlab.lib.colors import black
-from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing
+from reportlab.graphics.renderbase import Renderer, getStateDelta, renderScaledDrawing
 from reportlab.graphics.shapes import STATE_DEFAULTS
-import math
-from io import BytesIO, StringIO
-from operator import getitem
 from reportlab import rl_config
-from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
+from reportlab.pdfgen.canvas import FILL_EVEN_ODD
+
 _ESCAPEDICT={}
 for c in range(256):
     if c<32 or c>=127:

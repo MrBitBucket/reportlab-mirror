@@ -15,7 +15,7 @@ but we will expand them to try and trip up any parser.
 Feel free to add more.
 '''
 
-import os, sys, base64
+import os, sys
 from io import BytesIO
 
 from reportlab.lib import colors
@@ -23,9 +23,7 @@ from reportlab.lib.units import cm
 from reportlab.lib.utils import asNative, base64_decodebytes
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.platypus import Flowable
 from reportlab.graphics.shapes import *
-from reportlab.graphics.renderPDF import _PDFRenderer
 import unittest
 
 _FONTS = ['Times-Roman','Vera','Times-BoldItalic',]

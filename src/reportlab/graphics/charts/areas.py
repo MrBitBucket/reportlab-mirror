@@ -5,7 +5,7 @@
 __version__='3.3.0'
 __doc__='''This module defines a Area mixin classes'''
 
-from reportlab.lib.validators import isNumber, isColor, isColorOrNone, isNoneOrShape
+from reportlab.lib.validators import isNumber, isColorOrNone, isNoneOrShape
 from reportlab.graphics.widgetbase import Widget
 from reportlab.graphics.shapes import Rect, Group, Line, Polygon
 from reportlab.lib.attrmap import AttrMap, AttrMapValue

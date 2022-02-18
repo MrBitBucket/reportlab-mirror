@@ -442,7 +442,7 @@ def rotatedEnclosingRect(P, angle, rect):
 
     The class R
     '''
-    from math import pi, cos, sin, tan
+    from math import pi, cos, sin
     x0, y0 = centroid(P)
     theta = (angle/180.)*pi
     s,c=sin(theta),cos(theta)
@@ -511,8 +511,6 @@ class ShadedPolygon(Widget,LineShape):
         return g
 
 if __name__=='__main__': #noruntests
-    from reportlab.lib.colors import blue
-    from reportlab.graphics.shapes import Drawing
     angle=45
     D = Drawing(120,120)
     D.add(ShadedPolygon(points=(10,10,60,60,110,10),strokeColor=None,strokeWidth=1,angle=90,numShades=50,cylinderMode=0))

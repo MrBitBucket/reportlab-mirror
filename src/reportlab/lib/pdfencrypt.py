@@ -3,13 +3,12 @@
 __version__='3.3.0'
 
 """helpers for pdf encryption/decryption"""
-import sys, os, tempfile
+import sys, os
 from binascii import hexlify, unhexlify
 from io import BytesIO
 
-from reportlab.lib.utils import md5, asBytes, int2Byte, char2int, rawUnicode, rawBytes, asNative
+from reportlab.lib.utils import md5, asBytes, int2Byte, rawBytes, asNative
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfdoc import PDFObject
 from reportlab.platypus.flowables import Flowable
 from reportlab import rl_config
@@ -255,7 +254,7 @@ class StandardEncryptionDictionary(PDFObject):
         self.revision = revision
     def format(self, document):
         # use a dummy document to bypass encryption
-        from reportlab.pdfbase.pdfdoc import DummyDoc, PDFDictionary, PDFString, PDFName
+        from reportlab.pdfbase.pdfdoc import DummyDoc, PDFDictionary, PDFName
         dummy = DummyDoc()
         dict = {"Filter": PDFName("Standard"),
                 "O": hexText(self.O),
@@ -766,7 +765,6 @@ See PdfEncryptIntro.pdf for more information.
         print(usage)
 
 def main():
-    from reportlab.rl_config import verbose
     scriptInterp()
 
 if __name__=="__main__": #NO RUNTESTS

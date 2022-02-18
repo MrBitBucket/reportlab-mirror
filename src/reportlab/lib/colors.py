@@ -40,7 +40,6 @@ Traceback (most recent call last):
 ValueError: css color 'pcmyka(100,0,0,0)' has wrong number of components
 '''
 import math, re, functools
-from reportlab import cmp
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.utils import asNative, isStr, rl_safe_eval
 from ast import literal_eval
@@ -62,6 +61,7 @@ class Color:
     @property
     def __key__(self):
         '''simple comparison by component; cmyk != color ever
+        >>> from reportlab import cmp
         >>> cmp(Color(0,0,0),None)
         -1
         >>> cmp(Color(0,0,0),black)

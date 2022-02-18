@@ -8,21 +8,17 @@ __doc__ = """
 This module contains utilities for generating guides
 """
 
-import os, sys, glob
-import string
+import os
 from reportlab.lib.utils import asUnicode
 
-from .rltemplate import RLDocTemplate
 from .stylesheet import getStyleSheet
 styleSheet = getStyleSheet()
 
 #from reportlab.platypus.doctemplate import SimpleDocTemplate
 from reportlab.lib.units import inch
-from reportlab.lib.pagesizes import letter, A4, A5, A3  # latter two for testing
-from reportlab.rl_config import defaultPageSize
 from reportlab.platypus import figures
 from reportlab.platypus import Paragraph, Spacer, Preformatted,\
-            PageBreak, CondPageBreak, Flowable, Table, TableStyle, \
+            PageBreak, CondPageBreak, Table, TableStyle,\
             NextPageTemplate, KeepTogether, Image, XPreformatted
 from reportlab.platypus.xpreformatted import PythonPreformatted
 from reportlab.lib.styles import ParagraphStyle

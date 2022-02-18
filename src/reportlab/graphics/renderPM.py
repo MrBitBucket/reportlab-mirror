@@ -13,15 +13,15 @@ Other functions let you create a PM drawing as string or into a PM buffer.
 Execute the script to see some test drawings."""
 
 from reportlab.graphics.shapes import *
-from reportlab.graphics.renderbase import StateTracker, getStateDelta, renderScaledDrawing
+from reportlab.graphics.renderbase import getStateDelta, renderScaledDrawing
 from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1
-from math import sin, cos, pi, ceil
-from reportlab.lib.utils import open_and_read, isUnicode
+from reportlab.lib.utils import isUnicode
 from reportlab import rl_config
 from .utils import setFont as _setFont, RenderPMError
 
 import os, sys
 from io import BytesIO, StringIO
+from math import sin, cos, pi, ceil
 
 try:
     from reportlab.graphics import _renderPM

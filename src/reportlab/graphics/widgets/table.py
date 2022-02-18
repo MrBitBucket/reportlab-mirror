@@ -5,7 +5,6 @@
 __version__='3.3.0'
 
 from reportlab.graphics.widgetbase import Widget
-from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics import shapes
 from reportlab.lib import colors
 from reportlab.lib.validators import *

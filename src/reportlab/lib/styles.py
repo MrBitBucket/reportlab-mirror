@@ -22,7 +22,7 @@ __all__=(
         'StyleSheet1',
         'getSampleStyleSheet',
         )
-from reportlab.lib.colors import white, black
+from reportlab.lib.colors import black
 from reportlab.lib.enums import TA_LEFT, TA_CENTER
 from reportlab.lib.fonts import tt2ps
 from reportlab.rl_config import canvas_basefontname as _baseFontName, \

@@ -4,7 +4,6 @@ from __future__ import print_function
 __version__='3.3.0'
 __all__ = ('USPS_4State',)
 
-from reportlab.lib.colors import black
 from reportlab.graphics.barcode.common import Barcode
 from reportlab.lib.utils import asNative
 

@@ -13,13 +13,13 @@ This permits you to customize and pop out individual wedges;
 supports elliptical and circular pies.
 """
 
-import copy, functools
+import functools
 from math import sin, cos, pi
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
+from reportlab.lib.validators import isNumber, isListOfNumbersOrNone,\
                                     isListOfNumbers, isColorOrNone, isString,\
-                                    isListOfStringsOrNone, OneOf, SequenceOf,\
+                                    isListOfStringsOrNone, OneOf,\
                                     isBoolean, isListOfColors, isNumberOrNone,\
                                     isNoneOrListOfNoneOrStrings, isTextAnchor,\
                                     isNoneOrListOfNoneOrNumbers, isBoxAnchor,\
@@ -27,9 +27,8 @@ from reportlab.lib.validators import isColor, isNumber, isListOfNumbersOrNone,\
                                     isNumberInRange
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.attrmap import *
-from reportlab.pdfgen.canvas import Canvas
 from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon, Rect, PolyLine, Line
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
+from reportlab.graphics.widgetbase import TypedPropertyCollection, PropHolder
 from reportlab.graphics.charts.areas import PlotArea
 from reportlab.graphics.charts.legends import _objStr
 from reportlab.graphics.charts.textlabels import Label
@@ -1091,7 +1090,7 @@ class LegendedPie(Pie):
         drawing.add(self.draw())
         return drawing
 
-from reportlab.graphics.charts.utils3d import _getShaded, _2rad, _360, _pi_2, _2pi, _180_pi
+from reportlab.graphics.charts.utils3d import _getShaded, _2rad, _360, _180_pi
 class Wedge3dProperties(PropHolder):
     """This holds descriptive information about the wedges in a pie chart.
 

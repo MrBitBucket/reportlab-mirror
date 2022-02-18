@@ -11,7 +11,7 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  3.6.7a3 16/02/2022
+CHANGES  3.6.7   18/02/2022
 ---------------------------
 	* Remove use of cPickle; patch from Claude Paroz < claude at 2xlibre dot net >
 	* Remove unneccessary object inheritance; patch by Claude Paroz
@@ -20,6 +20,7 @@ CHANGES  3.6.7a3 16/02/2022
 	* remove unicodeT/bytesT patch by  Claude Paroz < claude at 2xlibre dot net >
 	* import directly from string module patch by  Claude Paroz < claude at 2xlibre dot net >
 	* eliminate getBytesIO and getStringIO patch by  Claude Paroz < claude at 2xlibre dot net >
+	* remove unused and indirect imports patch by  Claude Paroz < claude at 2xlibre dot net >
 
 CHANGES  3.6.6	 24/01/2022
 ---------------------------

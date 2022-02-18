@@ -16,7 +16,6 @@ try:
 except ImportError:
     from md5 import md5
 
-import reportlab
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase._cidfontdata import allowedTypeFaces, allowedEncodings, CIDFontInfo, \
      defaultUnicodeEncodings, widthsByUnichar

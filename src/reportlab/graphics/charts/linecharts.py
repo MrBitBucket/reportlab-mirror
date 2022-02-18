@@ -6,12 +6,12 @@ __version__='3.3.0'
 __doc__="""This modules defines a very preliminary Line Chart example."""
 
 from reportlab.lib import colors
-from reportlab.lib.validators import isNumber, isNumberOrNone, isColor, isColorOrNone, isListOfStrings, \
-                                    isListOfStringsOrNone, SequenceOf, isBoolean, NoneOr, \
+from reportlab.lib.validators import isNumber, isNumberOrNone, isColorOrNone, \
+                                    isListOfStringsOrNone, isBoolean, NoneOr, \
                                     isListOfNumbersOrNone, isStringOrNone, OneOf, Percentage
 from reportlab.lib.attrmap import *
 from reportlab.lib.utils import flatten
-from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder, tpcGetItem
+from reportlab.graphics.widgetbase import TypedPropertyCollection, PropHolder, tpcGetItem
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing, Polygon, PolyLine
 from reportlab.graphics.widgets.signsandsymbols import NoEntry
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis

@@ -25,7 +25,6 @@ _monthName = '''January February March April May June
 _monthNameLower = _monthName.lower().split()
 _monthName = _monthName.split()
 
-from reportlab import cmp
 import re, time, datetime
 from .utils import isStr
 

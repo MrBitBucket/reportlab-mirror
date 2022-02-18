@@ -12,7 +12,7 @@ __doc__='''The standard paragraph implementation'''
 from string import whitespace
 from operator import truth
 from unicodedata import category
-from reportlab.pdfbase.pdfmetrics import stringWidth, getFont, getAscentDescent
+from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent
 from reportlab.platypus.paraparser import ParaParser, _PCT, _num as _parser_num, _re_us_value
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
@@ -22,8 +22,8 @@ from reportlab.lib.textsplit import wordSplit, ALL_CANNOT_START
 from reportlab.lib.styles import ParagraphStyle
 from copy import deepcopy
 from reportlab.lib.abag import ABag
-from reportlab.rl_config import platypus_link_underline, decimalSymbol, _FUZZ,\
-        paraFontSizeHeightOffset, hyphenationMinWordLength
+from reportlab.rl_config import decimalSymbol, _FUZZ, paraFontSizeHeightOffset,\
+    hyphenationMinWordLength
 from reportlab.lib.utils import _className, isBytes, isStr
 from reportlab.lib.rl_accel import sameFrag
 import re
@@ -2431,7 +2431,6 @@ class Paragraph(Flowable):
             else:
                 text = ''.join(getattr(f,'words',[]))
 
-            from reportlab.lib.textsplit import wordSplit
             lines = wordSplit(text, maxWidths, f.fontName, f.fontSize)
             #the paragraph drawing routine assumes multiple frags per line, so we need an
             #extra list like this

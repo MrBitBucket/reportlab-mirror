@@ -3,7 +3,7 @@
 #history https://hg.reportlab.com/hg-public/reportlab/log/tip/tools/docco/stylesheet.py
 #standard stylesheet for our manuals
 from reportlab.lib.styles import StyleSheet1, ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_RIGHT, TA_JUSTIFY
+from reportlab.lib.enums import TA_CENTER
 from reportlab.lib import colors
 
 

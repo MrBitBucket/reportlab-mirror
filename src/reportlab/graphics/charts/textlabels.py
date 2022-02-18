@@ -2,26 +2,22 @@
 #see license.txt for license details
 #history https://hg.reportlab.com/hg-public/reportlab/log/tip/src/reportlab/graphics/charts/textlabels.py
 __version__='3.3.0'
-import string
 
 from reportlab.lib import colors
-from reportlab.lib.utils import simpleSplit, _simpleSplit
+from reportlab.lib.utils import simpleSplit
 from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, \
         isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf, isNoneOrString, isNoneOrCallable, \
-        isSubclassOf, EitherOr
+        isSubclassOf
 from reportlab.lib.attrmap import *
-from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent, getFont
+from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
 from reportlab.graphics.widgetbase import Widget, PropHolder
-from reportlab.graphics.shapes import _baseGFontName, DirectDraw
-from reportlab.platypus import XPreformatted, Paragraph, Flowable
+from reportlab.graphics.shapes import DirectDraw
+from reportlab.platypus import XPreformatted, Flowable
 from reportlab.lib.styles import ParagraphStyle, PropertySet
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER
 _ta2al = dict(start=TA_LEFT,end=TA_RIGHT,middle=TA_CENTER)
-from ..utils import (text2Path as _text2Path,   #here for continuity
-                    pathNumTrunc as _pathNumTrunc,
-                    processGlyph as _processGlyph,
-                    text2PathDescription as _text2PathDescription)
+from ..utils import text2Path as _text2Path   #here for continuity
 
 _A2BA=  {
         'x': {0:'n', 45:'ne', 90:'e', 135:'se', 180:'s', 225:'sw', 270:'w', 315: 'nw', -45: 'nw'},
@@ -369,7 +365,6 @@ class LabelDecorator:
         g.add(L)
 
     def __call__(self,l):
-        from copy import deepcopy
         L = Label()
         for a,v in self.__dict__.items():
             if v is None: v = getattr(l,a,None)

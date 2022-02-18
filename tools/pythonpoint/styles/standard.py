@@ -1,9 +1,7 @@
 from reportlab.lib import styles
 from reportlab.lib import colors
-from reportlab.lib.units import cm
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
-from reportlab.platypus import Preformatted, Paragraph, Frame, \
-     Image, Table, TableStyle, Spacer
+from reportlab.lib.enums import TA_CENTER
+from reportlab.platypus import TableStyle
 
 
 def getParagraphStyles():

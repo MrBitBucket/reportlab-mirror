@@ -33,18 +33,14 @@ Type the following for usage info:
 __version__ = '0.8'
 
 
-import sys, os, re, types, getopt, copy, time
-from reportlab.pdfgen import canvas
+import sys, os, getopt, time
 from reportlab.lib import colors
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
-from reportlab.lib import enums
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.enums import TA_CENTER
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus.flowables import Flowable, Spacer
+from reportlab.platypus.flowables import Spacer, PageBreak
 from reportlab.platypus.paragraph import Paragraph
-from reportlab.platypus.flowables \
-     import Flowable, Preformatted,Spacer, Image, KeepTogether, PageBreak
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame

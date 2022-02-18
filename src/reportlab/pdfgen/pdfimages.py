@@ -208,7 +208,6 @@ if __name__=='__main__':
     assert os.path.isfile(srcfile), 'image not found'
     pdfdoc.LongFormat = 1
     img = PDFImage(srcfile, 100, 100)
-    import pprint
     doc = pdfdoc.PDFDocument()
     print('source=',img.source)
     print(img.format(doc))

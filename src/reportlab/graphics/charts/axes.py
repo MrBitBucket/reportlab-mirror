@@ -34,7 +34,7 @@ the former axes in its own coordinate system.
 from math import log10 as math_log10
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
-                                        isString, EitherOr, Validator, NoneOr, isInstanceOf, \
+                                        isString, EitherOr, Validator, NoneOr, \
                                         isNormalDate, isNoneOrCallable
 from reportlab.lib.attrmap import *
 from reportlab.lib import normalDate
@@ -45,11 +45,6 @@ from reportlab.graphics.charts.utils import nextRoundNumber
 from reportlab.graphics.widgets.grids import ShadedRect
 from reportlab.lib.colors import Color
 from reportlab.lib.utils import isSeq
-import copy
-try:
-    reduce  # Python 2.x
-except NameError:
-    from functools import reduce
 
 # Helpers.
 def _findMinMaxValue(V, x, default, func, special=None):

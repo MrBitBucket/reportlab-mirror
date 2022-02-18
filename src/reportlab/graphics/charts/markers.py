@@ -10,7 +10,7 @@ the smiley.
 """
 
 from reportlab.lib import colors
-from reportlab.graphics.shapes import Rect, Line, Circle, Polygon
+from reportlab.graphics.shapes import Rect, Circle, Polygon
 from reportlab.graphics.widgets.signsandsymbols import SmileyFace
 
 

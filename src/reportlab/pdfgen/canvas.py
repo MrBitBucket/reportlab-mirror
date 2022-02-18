@@ -9,18 +9,15 @@ doc/reportlab-userguide.pdf for copious examples.
 __all__ = ['Canvas']
 ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 
-import os
 import sys
 import re
 import hashlib
 from string import digits
-import tempfile
-from math import sin, cos, tan, pi, ceil
+from math import sin, cos, tan, pi
 from reportlab import rl_config
-from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfgen  import pdfgeom, pathobject
+from reportlab.pdfgen  import pathobject
 from reportlab.pdfgen.textobject import PDFTextObject, _PDFColorSetter
 from reportlab.lib.colors import black, _chooseEnforceColorSpace, Color, CMYKColor, toColor
 from reportlab.lib.utils import import_zlib, ImageReader, isSeq, isStr, isUnicode, _digester, asUnicode

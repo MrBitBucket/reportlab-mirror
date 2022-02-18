@@ -95,7 +95,7 @@ def getCodeNames():
 def createBarcodeDrawing(codeName, **options):
     """This creates and returns a drawing with a barcode.
     """    
-    from reportlab.graphics.shapes import Drawing, Group
+    from reportlab.graphics.shapes import Drawing
 
     codes = getCodes()
     bcc = codes[codeName]

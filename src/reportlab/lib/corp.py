@@ -17,7 +17,6 @@ from reportlab.graphics.shapes import definePath, Group, Drawing, Rect, PolyLine
 from reportlab.graphics.widgetbase import Widget
 from reportlab.lib.colors import Color, black, white, ReportLabBlue
 from reportlab.pdfbase.pdfmetrics import stringWidth
-from math import sin, pi
 
 class RL_CorpLogo(Widget):
     '''Dinu's fat letter logo as hacked into decent paths by Robin'''

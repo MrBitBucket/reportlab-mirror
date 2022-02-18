@@ -31,7 +31,7 @@ for fn in __all__:
     del D
 
 if _py_funcs:
-    from reportlab.lib.utils import isBytes, isUnicode, isSeq, rawBytes, asNative, asUnicode, asBytes
+    from reportlab.lib.utils import isUnicode, isSeq, rawBytes, asNative, asBytes
     from math import log
     from struct import unpack
 
@@ -330,7 +330,7 @@ for fn in __all__:
 del fn, f, G
 
 if __name__=='__main__':
-    import sys, os, subprocess
+    import sys, subprocess
     for modname in 'reportlab.lib.rl_accel','reportlab.lib._rl_accel':
         for cmd  in (
             #"unicode2T1('abcde fghi . jkl ; mno',fonts)",

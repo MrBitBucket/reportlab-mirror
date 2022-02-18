@@ -8,14 +8,9 @@ __doc__="""This file is a
 """
 
 from reportlab.lib import colors
-from reportlab.lib.validators import *
-from reportlab.lib.attrmap import *
-from reportlab.graphics.shapes import Line, Rect, Polygon, Drawing, Group, String, Circle, Wedge
+from reportlab.graphics.shapes import Rect, Drawing, Group, String
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgetbase import Widget
-from reportlab.graphics import renderPDF
-
-
 
 
 class EventCalendar(Widget):

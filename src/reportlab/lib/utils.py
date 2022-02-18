@@ -5,7 +5,6 @@ __version__='3.5.34'
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
 import os, pickle, sys, time, types, datetime, ast, importlib
-from functools import reduce as functools_reduce
 from io import BytesIO
 literal_eval = ast.literal_eval
 try:
@@ -13,7 +12,7 @@ try:
 except ImportError:
     from base64 import decodestring as base64_decodebytes, encodestring as base64_encodebytes
 from reportlab.lib.logger import warnOnce
-from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir, _rl_getuid
+from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir
 from . rl_safe_eval import rl_safe_exec, rl_safe_eval, safer_globals
 
 class __UNSET__:
@@ -838,7 +837,7 @@ class DebugMemo:
     of information which are also printed in the show() method.
     '''
     def __init__(self,fn='rl_dbgmemo.dbg',mode='w',getScript=1,modules=(),capture_traceback=1, stdout=None, **kw):
-        import time, socket
+        import socket
         self.fn = fn
         if not stdout: 
             self.stdout = sys.stdout

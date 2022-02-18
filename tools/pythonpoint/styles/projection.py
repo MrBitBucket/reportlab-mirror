@@ -15,8 +15,8 @@ A style sheet MUST define a style called 'Normal'.
 """
 
 from reportlab.lib import styles
-from reportlab.lib.colors import *
-from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT, TA_JUSTIFY
+from reportlab.lib.colors import chartreuse, green, white
+from reportlab.lib.enums import TA_LEFT, TA_CENTER
 
 
 def getParagraphStyles():

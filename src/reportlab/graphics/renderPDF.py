@@ -21,7 +21,7 @@ from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab import rl_config
-from reportlab.graphics.renderbase import Renderer, StateTracker, getStateDelta, renderScaledDrawing, STATE_DEFAULTS
+from reportlab.graphics.renderbase import Renderer, getStateDelta, renderScaledDrawing, STATE_DEFAULTS
 
 # the main entry point for users...
 def draw(drawing, canvas, x, y, showBoundary=rl_config._unset_):

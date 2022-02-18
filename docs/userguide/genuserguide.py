@@ -9,7 +9,7 @@ This module contains the script for building the user guide.
 
 def run(pagesize=None, verbose=0, outDir=None):
     import sys,os
-    from reportlab.lib.utils import open_and_read, asUnicode
+    from reportlab.lib.utils import open_and_read
     cwd = os.getcwd()
     docsDir=os.path.dirname(os.path.dirname(sys.argv[0]) or cwd)
     topDir=os.path.dirname(docsDir)
@@ -24,7 +24,9 @@ def run(pagesize=None, verbose=0, outDir=None):
     pdfmetrics.registerFont(TTFont('VeraIt', 'VeraIt.ttf'))
     pdfmetrics.registerFont(TTFont('VeraBI', 'VeraBI.ttf'))
     registerFontFamily('Vera',normal='Vera',bold='VeraBd',italic='VeraIt',boldItalic='VeraBI')
-    from tools.docco.rl_doc_utils import setStory, getStory, RLDocTemplate, defaultPageSize, H1, H2, H3, H4
+    from reportlab.rl_config import defaultPageSize
+    from tools.docco.rl_doc_utils import setStory, getStory, H1, H2, H3, H4
+    from tools.docco.rltemplate import RLDocTemplate
     from tools.docco import rl_doc_utils
     exec('from tools.docco.rl_doc_utils import *', G, G)
     destfn = os.path.join(outDir,'reportlab-userguide.pdf')
@@ -51,7 +53,7 @@ def run(pagesize=None, verbose=0, outDir=None):
         'app_demos',
         ):
         #python source is supposed to be utf8 these days
-        exec(asUnicode(open_and_read(f+'.py')), G, G)
+        exec(open_and_read(f+'.py', mode='r'), G, G)
     del G
 
     story = getStory()

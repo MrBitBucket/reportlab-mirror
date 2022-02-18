@@ -19,13 +19,8 @@ import imp
 
 from . import yaml
 from .rltemplate import RLDocTemplate
-from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.enums import *
 from reportlab.lib.pagesizes import A4
 from reportlab.platypus import *
-from reportlab.lib import colors
-from reportlab.lib.units import inch
-
 
 from .stylesheet import getStyleSheet
 

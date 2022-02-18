@@ -16,11 +16,11 @@ __all__= (
         'BarcodeUSPS_4State',
         )
 
-from reportlab.lib.validators import isInt, isNumber, isColor, isString, isColorOrNone, OneOf, isBoolean, EitherOr, isNumberOrNone
+from reportlab.lib.validators import isInt, isNumber, isString, isColorOrNone, isBoolean, EitherOr, isNumberOrNone
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.lib.colors import black
 from reportlab.lib.utils import rl_exec
-from reportlab.graphics.shapes import Line, Rect, Group, NotImplementedError, String
+from reportlab.graphics.shapes import Rect, Group, String
 from reportlab.graphics.charts.areas import PlotArea
 
 '''

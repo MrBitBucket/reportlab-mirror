@@ -8,7 +8,7 @@ __doc__="""
 These help format numbers and dates in a user friendly way.
 Used by the graphics framework.
 """
-import string, sys, os, re
+import re
 
 class Formatter:
     "Base formatter - simply applies python format strings"

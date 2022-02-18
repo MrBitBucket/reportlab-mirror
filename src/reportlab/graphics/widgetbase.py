@@ -141,11 +141,11 @@ class Widget(PropHolder, shapes.UserNode):
 
     def draw(self):
         msg = "draw() must be implemented for each Widget!"
-        raise shapes.NotImplementedError(msg)
+        raise NotImplementedError(msg)
 
     def demo(self):
         msg = "demo() must be implemented for each Widget!"
-        raise shapes.NotImplementedError(msg)
+        raise NotImplementedError(msg)
 
     def provideNode(self):
         return self.draw()

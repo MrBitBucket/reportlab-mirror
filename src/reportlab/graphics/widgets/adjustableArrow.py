@@ -1,7 +1,6 @@
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
-from reportlab.lib.utils import flatten
 from reportlab.graphics.shapes import Drawing, _DrawingEditorMixin, Group, Polygon
 from reportlab.graphics.widgetbase import Widget
 
