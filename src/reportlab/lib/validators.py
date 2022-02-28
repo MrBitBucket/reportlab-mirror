@@ -7,6 +7,10 @@ __doc__="""Standard verifying functions used by attrmap."""
 import codecs, re
 from reportlab.lib.utils import isSeq, isBytes, isStr
 from reportlab.lib import colors
+try:
+    _re_Pattern = re.Pattern
+except AttributeError:
+    _re_Pattern = re._pattern_type
 
 class Percentage(float):
     pass
@@ -204,9 +208,9 @@ class OneOf(Validator):
             self._enum = tuple(enum)+args
         else:
             self._enum = (enum,)+args
-        self._patterns = tuple((_ for _ in self._enum if isinstance(_, re.Pattern)))
+        self._patterns = tuple((_ for _ in self._enum if isinstance(_,_re_Pattern)))
         if self._patterns:
-            self._enum =  tuple((_ for _ in self._enum if not isinstance(_, re.Pattern)))
+            self._enum =  tuple((_ for _ in self._enum if not isinstance(_,_re_Pattern)))
             self.test = self._test_patterns
 
     def test(self, x):
