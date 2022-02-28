@@ -2,6 +2,8 @@
 #see license.txt for license details
 __version__='3.6.3'
 import os, sys, glob, shutil, re, sysconfig, traceback, io, subprocess
+from configparser import RawConfigParser
+from urllib.parse import quote as urlquote
 platform = sys.platform
 pjoin = os.path.join
 abspath = os.path.abspath
@@ -11,11 +13,6 @@ dirname = os.path.dirname
 basename = os.path.basename
 splitext = os.path.splitext
 archName = 'amd64' if sys.maxsize > 2**32 else 'x86'    #correct for windows builds
-
-try:
-    from urllib.parse import quote as urlquote
-except ImportError:
-    from urllib import quote as urlquote
 
 INFOLINES=[]
 def infoline(t,
@@ -73,10 +70,6 @@ mdbg = specialOption('--memory-debug')
 verbose = specialOption('--verbose',ceq=True)
 nullDivert = not verbose
 
-try:
-    import configparser
-except ImportError:
-    import ConfigParser as configparser
 if __name__=='__main__':
     pkgDir=dirname(sys.argv[0])
 else:
@@ -95,10 +88,6 @@ try:
     from setuptools import setup, Extension
 except ImportError:
     from distutils.core import setup, Extension
-try:
-    import sysconfig
-except ImportError:
-    from distutils import sysconfig
 
 def _packages_path(d):
     P = [_ for _ in sys.path if basename(_)==d]
@@ -171,7 +160,7 @@ def get_version():
 class config:
     def __init__(self):
         try:
-            self.parser = configparser.RawConfigParser()
+            self.parser = RawConfigParser()
             self.parser.read([pjoin(pkgDir,'setup.cfg'),pjoin(pkgDir,'local-setup.cfg')])
         except:
             self.parser = None
@@ -239,7 +228,6 @@ class inc_lib_dirs:
 inc_lib_dirs=inc_lib_dirs()
 
 def getVersionFromCCode(fn):
-    import re
     tag = re.search(r'^#define\s+VERSION\s+"([^"]*)"',open(fn,'r').read(),re.M)
     return tag and tag.group(1) or ''
 
@@ -331,7 +319,6 @@ reportlab_files= [
         ]
 
 def url2data(url,returnRaw=False):
-    import io
     import urllib.request as ureq
     remotehandle = ureq.urlopen(url)
     try:

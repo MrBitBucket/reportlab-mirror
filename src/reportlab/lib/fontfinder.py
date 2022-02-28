@@ -59,17 +59,10 @@ Future plans might include using this to auto-register fonts; and making it
 update itself smartly on repeated instantiation.
 """
 import sys, os, pickle
-from reportlab.lib.utils import asNative as _asNative
+from hashlib import md5
 from xml.sax.saxutils import quoteattr
-from reportlab.lib.utils import asBytes
-try:
-    from time import process_time as clock
-except ImportError:
-    from time import clock
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
+from time import process_time as clock
+from reportlab.lib.utils import asBytes, asNative as _asNative
 
 def asNative(s):
     try:

@@ -11,7 +11,7 @@ import reportlab
 from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
-from reportlab.lib.utils import import_zlib, haveImages, isStr
+from reportlab.lib.utils import haveImages, isStr
 from reportlab.lib.rl_accel import fp_str, asciiBase85Encode
 from reportlab.lib.boxstuff import aspectRatioFix
 
@@ -74,8 +74,6 @@ class PDFImage:
     def cache_imagedata(self):
         image = self.image
         if not pdfutils.cachedImageExists(image):
-            zlib = import_zlib()
-            if not zlib: return
             if not haveImages: return
             pdfutils.cacheImageFile(image)
 
@@ -87,14 +85,13 @@ class PDFImage:
         return imagedata
 
     def PIL_imagedata(self):
+        import zlib
         image = self.image
         if image.format=='JPEG':
             fp=image.fp
             fp.seek(0)
             return self._jpg_imagedata(fp)
         self.source = 'PIL'
-        zlib = import_zlib()
-        if not zlib: return
 
         bpc = 8
         # Use the colorSpace in the image

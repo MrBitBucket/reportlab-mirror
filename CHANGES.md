@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.6.8   28/02/2022
+---------------------------
+	* remove old Python2 constructs; patch from Claude Paroz < claude at 2xlibre dot net >
+
 CHANGES  3.6.7   18/02/2022
 ---------------------------
 	* Remove use of cPickle; patch from Claude Paroz < claude at 2xlibre dot net >

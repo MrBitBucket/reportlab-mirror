@@ -516,13 +516,8 @@ def _repr(self,I=None):
         return 'EmptyClipPath'
     elif isinstance(self,Shape):
         if I: _addObjImport(self,I)
-        try:
-            from inspect import getfullargspec
-            args, varargs, varkw, defaults, kwonlyargs, kwonlydefaults, annotations = getfullargspec(self.__init__)
-        except ImportError:
-            from inspect import getargspec
-            args, varargs, varkw, defaults = getargspec(self.__init__)
-            kwonlyargs, kwonlydefaults, annotations = None, None, None
+        from inspect import getfullargspec
+        args, varargs, varkw, defaults, kwonlyargs, kwonlydefaults, annotations = getfullargspec(self.__init__)
         if defaults:
             kargs = args[-len(defaults):]
             del args[-len(defaults):]

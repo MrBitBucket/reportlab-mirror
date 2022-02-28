@@ -23,7 +23,6 @@ def xorKey(num,key):
     "xor's each byte of the key with the number, which is <256"
     if num==0: return key
     return bytes(num^k for k in key)
-bytes3 = bytes
 
 #AR debug hooks - leaving in for now
 CLOBBERID = 0  # set a constant Doc ID to allow comparison with other software like iText
@@ -213,7 +212,7 @@ class StandardEncryption:
 
             # the permission array should be enrypted in the Perms field
             encrypter = pyaes.Encrypter(pyaes.AESModeOfOperationCBC(self.key, iv=iv))
-            self.Perms = encrypter.feed(bytes3(permsarr))
+            self.Perms = encrypter.feed(bytes(permsarr))
             self.Perms += encrypter.feed()
                         
             if DEBUG:

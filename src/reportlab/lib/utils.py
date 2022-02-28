@@ -4,14 +4,11 @@
 __version__='3.5.34'
 __doc__='''Gazillions of miscellaneous internal utility functions'''
 
-import os, pickle, sys, time, types, datetime, ast, importlib
+import os, pickle, sys, time, types, datetime, importlib
+from ast import literal_eval
+from base64 import decodebytes as base64_decodebytes, encodebytes as base64_encodebytes
 from io import BytesIO
-literal_eval = ast.literal_eval
-try:
-    from base64 import decodebytes as base64_decodebytes, encodebytes as base64_encodebytes
-except ImportError:
-    from base64 import decodestring as base64_decodebytes, encodestring as base64_encodebytes
-from reportlab.lib.logger import warnOnce
+
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir
 from . rl_safe_eval import rl_safe_exec, rl_safe_eval, safer_globals
 
@@ -391,15 +388,6 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
         _importlib_invalidate_caches()
         if debug:
             print('===== restore sys.path=%s' % repr(opath))
-
-def import_zlib():
-    try:
-        import zlib
-    except ImportError:
-        zlib = None
-        from reportlab.rl_config import ZLIB_WARNINGS
-        if ZLIB_WARNINGS: warnOnce('zlib not available')
-    return zlib
 
 # Image Capability Detection.  Set a flag haveImages
 # to tell us if PIL library is present.

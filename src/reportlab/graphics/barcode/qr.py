@@ -27,20 +27,7 @@ from reportlab.lib.validators import isNumber, isNumberOrNone, isColor, Validato
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.graphics.widgetbase import Widget
 from reportlab.lib.units import mm
-try:
-    from reportlab.lib.utils import asUnicodeEx, isUnicode
-except ImportError:
-    # ReportLab 2.x compatibility
-    def asUnicodeEx(v, enc='utf8'):
-        if isinstance(v, unicode):
-            return v
-        if isinstance(v, str):
-            return v.decode(enc)
-        return str(v).decode(enc)
-
-    def isUnicode(v):
-        return isinstance(v, unicode)
-
+from reportlab.lib.utils import asUnicodeEx, isUnicode
 from reportlab.graphics.barcode import qrencoder
 
 class isLevel(Validator):

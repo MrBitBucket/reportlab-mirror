@@ -9,7 +9,6 @@ strTypes = (bytes,str)
 isPy39 = sys.version_info[:2]>=(3,9)
 
 haveNameConstant = hasattr(ast,'NameConstant')
-haveMatMult = haveMultiStarred = hasattr(ast,'MatMult')
 import textwrap
 
 class BadCode(ValueError):
@@ -17,7 +16,6 @@ class BadCode(ValueError):
 
 # For AugAssign the operator must be converted to a string.
 augOps = {
-	# Shared by python2 and python3
 	ast.Add: '+=',
 	ast.Sub: '-=',
 	ast.Mult: '*=',
@@ -29,12 +27,9 @@ augOps = {
 	ast.BitOr: '|=',
 	ast.BitXor: '^=',
 	ast.BitAnd: '&=',
-	ast.FloorDiv: '//='
+	ast.FloorDiv: '//=',
+	ast.MatMult: '@=',
 }
-
-if haveMatMult:
-	augOps[ast.MatMult] = '@='
-
 
 # For creation allowed magic method names. See also
 # https://docs.python.org/3/reference/datamodel.html#special-method-names
@@ -430,23 +425,12 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 
 		needs_wrap = False
 
-		# In python2.7 till python3.4 '*args', '**kwargs' have dedicated
-		# attributes on the ast.Call node.
-		# In python 3.5 and greater this has changed due to the fact that
-		# multiple '*args' and '**kwargs' are possible.
-		# '*args' can be detected by 'ast.Starred' nodes.
-		# '**kwargs' can be deteced by 'keyword' nodes with 'arg=None'.
+		for pos_arg in node.args:
+			if isinstance(pos_arg, ast.Starred):
+				needs_wrap = True
 
-		if haveMultiStarred:
-			for pos_arg in node.args:
-				if isinstance(pos_arg, ast.Starred):
-					needs_wrap = True
-
-			for keyword_arg in node.keywords:
-				if keyword_arg.arg is None:
-					needs_wrap = True
-		else:
-			if (node.starargs is not None) or (node.kwargs is not None):
+		for keyword_arg in node.keywords:
+			if keyword_arg.arg is None:
 				needs_wrap = True
 
 		node = self.visit_children(node)

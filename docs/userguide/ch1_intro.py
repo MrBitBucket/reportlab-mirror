@@ -332,7 +332,6 @@ may be queried for information on TrueType fonts""")
 bullet("""CMapSearchPath: this is a python list of strings representing directories that
 may be queried for information on font code maps.""")
 bullet("""showBoundary: set to non-zero to get boundary lines drawn.""")
-bullet("""ZLIB_WARNINGS: set to non-zero to get warnings if the Python compression extension is not found.""")
 bullet("""pageCompression: set to non-zero to try and get compressed PDF.""")
 bullet("""allowtableBoundsErrors: set to 0 to force an error on very large Platypus table elements""")
 bullet("""emptyTableAction: Controls behaviour for empty tables, can be 'error' (default), 'indicate' or 'ignore'.""")

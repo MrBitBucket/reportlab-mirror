@@ -390,11 +390,6 @@ class ParagraphTestCase(unittest.TestCase):
             template.build(story)
 
         def testRTLBullets(self):
-            try:
-                import mwlib.ext
-            except ImportError:
-                pass
-
             font_name = getAFont()
             doc = SimpleDocTemplate(outputfile('test_rtl_bullets.pdf'),showBoundary=True)
             p_style = ParagraphStyle('default')

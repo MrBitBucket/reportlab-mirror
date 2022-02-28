@@ -15,7 +15,6 @@ pageCompression
 useA85
 defaultPageSize
 defaultImageCaching
-ZLIB_WARNINGS
 warnOnMissingFontGlyphs
 verbose
 showBoundary
@@ -78,7 +77,6 @@ pageCompression =           1                       # default page compression m
 useA85 =                    1                       #set to 0 to disable Ascii Base 85 stream filters
 defaultPageSize =           'A4'                    #default page size
 defaultImageCaching =       0                       #set to zero to remove those annoying cached images
-ZLIB_WARNINGS =             1
 warnOnMissingFontGlyphs =   0                       #if 1, warns of each missing glyph
 verbose =                   0
 showBoundary =              0                       # turns on and off boundary behaviour in Drawing

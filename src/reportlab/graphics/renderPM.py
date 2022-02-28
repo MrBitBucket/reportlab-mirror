@@ -343,20 +343,9 @@ class PMCanvas:
         elif fmt in ('PCT','PICT'):
             return _saveAsPICT(im,fn,fmt,transparent=configPIL.get('transparent',None))
         elif fmt in ('PNG','BMP', 'PPM'):
-            if fmt=='PNG':
-                try:
-                    from PIL import PngImagePlugin
-                except ImportError:
-                    import PngImagePlugin
-            elif fmt=='BMP':
-                try:
-                    from PIL import BmpImagePlugin
-                except ImportError:
-                    import BmpImagePlugin
+            pass
         elif fmt in ('JPG','JPEG'):
             fmt = 'JPEG'
-        elif fmt in ('GIF',):
-            pass
         else:
             raise RenderPMError("Unknown image kind %s" % fmt)
         if fmt=='TIFF':

@@ -1,24 +1,11 @@
 #!/usr/bin/env python
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import sys
 from xml.dom import minidom
-from xml.sax._exceptions import SAXReaderNotAvailable
 import unittest
 from reportlab.graphics.shapes import *
 from reportlab.graphics import renderPS
 
-def warnIgnoredRestofTest():
-    "Raise a warning (if possible) about a not fully completed test."
-
-    version = sys.version_info[:2]
-    msg = "XML parser not found - consider installing expat! Rest of test(s) ignored!"
-    if version >= (2, 1):
-        import warnings
-        warnings.warn(msg)
-    else:
-        # should better also be printed only once...
-        print(msg)
 
 class RenderPSSimpleTestCase(unittest.TestCase):
     "Testing renderPS module."

@@ -13,10 +13,7 @@ nothing more than "reportlab.whatever..."
 """
 
 import sys, os, fnmatch, re
-try:
-    from configparser import ConfigParser
-except ImportError:
-    from ConfigParser import ConfigParser
+from configparser import ConfigParser
 import unittest
 from reportlab.lib.utils import isCompactDistro, __rl_loader__, rl_isdir, asUnicode
 

@@ -9,7 +9,6 @@ doc/reportlab-userguide.pdf for copious examples.
 __all__ = ['Canvas']
 ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 
-import sys
 import re
 import hashlib
 from string import digits
@@ -20,12 +19,11 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfgen  import pathobject
 from reportlab.pdfgen.textobject import PDFTextObject, _PDFColorSetter
 from reportlab.lib.colors import black, _chooseEnforceColorSpace, Color, CMYKColor, toColor
-from reportlab.lib.utils import import_zlib, ImageReader, isSeq, isStr, isUnicode, _digester, asUnicode
+from reportlab.lib.utils import ImageReader, isSeq, isStr, isUnicode, _digester, asUnicode
 from reportlab.lib.rl_accel import fp_str, escapePDF
 from reportlab.lib.boxstuff import aspectRatioFix
 
 digitPat = re.compile(r'\d')  #used in decimal alignment
-zlib = import_zlib()
 
 # Robert Kern
 # Constants for closing paths.
@@ -1606,7 +1604,7 @@ class Canvas(_PDFColorSetter):
 
     def drawRightString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None):
         """Draws a string right-aligned with the x coordinate"""
-        if sys.version_info[0] == 3 and not isinstance(text, str):
+        if not isinstance(text, str):
             text = text.decode('utf-8')
         width = self.stringWidth(text, self._fontname, self._fontsize)
         if charSpace: width += (len(text)-1)*charSpace
@@ -1625,7 +1623,7 @@ class Canvas(_PDFColorSetter):
         """Draws a string centred on the x coordinate. 
         
         We're British, dammit, and proud of our spelling!"""
-        if sys.version_info[0] == 3 and not isinstance(text, str):
+        if not isinstance(text, str):
             text = text.decode('utf-8')
         width = self.stringWidth(text, self._fontname, self._fontsize)
         if charSpace: width += (len(text)-1)*charSpace
@@ -1822,10 +1820,7 @@ class Canvas(_PDFColorSetter):
         This applies to all subsequent pages, or until setPageCompression()
         is next called."""
         if pageCompression is None: pageCompression = rl_config.pageCompression
-        if pageCompression and not zlib:
-            self._pageCompression = 0
-        else:
-            self._pageCompression = pageCompression
+        self._pageCompression = pageCompression
         self._doc.setCompression(self._pageCompression)
 
     def setPageDuration(self, duration=None):
