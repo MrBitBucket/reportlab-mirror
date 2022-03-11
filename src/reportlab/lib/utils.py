@@ -1331,10 +1331,10 @@ class TimeStamp:
 
 def recursiveGetAttr(obj, name, g=None):
     "Can call down into e.g. object1.object2[4].attr"
-    if not isStr(name): raise TypeError('invalid reursive acess using %r' % name)
+    if not isStr(name): raise TypeError('invalid recursive access of %s.%s' % (repr(obj),name))
     name = asNative(name)
     name = name.strip()
-    if not name: raise ValueError('empty recursive access')
+    if not name: raise ValueError('empty recursive access of %s' % repr(obj))
     dot = '.' if name and name[0] not in '[.(' else ''
     return rl_safe_eval('obj%s%s'%(dot,name), g={}, l=dict(obj=obj))
 
