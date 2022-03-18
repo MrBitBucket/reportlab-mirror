@@ -56,52 +56,6 @@
 #define EXC_SET(exc,...)  PyErr_Format(exc, "%s @ %s:%d:" FIRST(__VA_ARGS__),__func__,__FILE__,__LINE__ REST(__VA_ARGS__))
 #define EXC_EXIT(exc,...)  do{if(!PyErr_Occurred())EXC_SET(exc,__VA_ARGS__);goto L_exit;}while(0)
 #define MODULE_STATE_SIZE 0
-#if 0
-struct module_state	{
-	int moduleLineno;
-	};
-#undef MODULE_STATE_SIZE
-#define MODULE_STATE_SIZE sizeof(struct module_state)
-#define GETSTATE(m) ((struct module_state*)PyModule_GetState(m))
-#define ERROR_EXIT() {GETSTATE(module)->moduleLineno=__LINE__;goto L_ERR;}
-#define ADD_TB(module,name) _add_TB(module,name)
-#include "compile.h"
-#include "frameobject.h"
-#include "traceback.h"
-#if PY_VERSION_HEX >= 0x030b00a6
-  #ifndef Py_BUILD_CORE
-	#define Py_BUILD_CORE 1
-  #endif
-  #include "internal/pycore_frame.h"
-#endif
-static void _add_TB(PyObject *module,const char *funcname) {
-	int	moduleLineno = GETSTATE(module)->moduleLineno;
-	PyObject *py_globals = NULL;
-	PyCodeObject *py_code = NULL;
-	PyFrameObject *py_frame = NULL;
-
-	py_globals = PyModule_GetDict(module);
-	if(!py_globals) goto bad;
-	py_code = PyCode_NewEmpty(
-						__FILE__,		/*PyObject *filename,*/
-						funcname,	/*PyObject *name,*/
-						moduleLineno	/*int firstlineno,*/
-						);
-	if(!py_code) goto bad;
-	py_frame = PyFrame_New(
-		PyThreadState_Get(), /*PyThreadState *tstate,*/
-		py_code,			 /*PyCodeObject *code,*/
-		py_globals,			 /*PyObject *globals,*/
-		0					 /*PyObject *locals*/
-		);
-	if(!py_frame) goto bad;
-	py_frame->f_lineno = moduleLineno;
-	PyTraceBack_Here(py_frame);
-bad:
-	Py_XDECREF(py_code);
-	Py_XDECREF(py_frame);
-}
-#endif
 
 #define a85_0		   1L
 #define a85_1		   85L
@@ -590,82 +544,82 @@ static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 	font = Py_None; Py_INCREF(Py_None);
 
 
-	_o2 = PyList_New(0); if(!_o2) EXC_EXIT(PyExc_MemoryError);
+	_o2 = PyList_New(0); if(!_o2) EXC_EXIT(PyExc_MemoryError,"unable to create list");
 	Py_DECREF(R);
 	R = _o2;
 	_o2 = NULL;
 
-	_o2 = PySequence_GetItem(fonts,0); if(!_o2) EXC_EXIT(PyExc_IndexError);
-	_o1 = PySequence_GetSlice(fonts, 1, 0x7fffffff); if(!_o1) EXC_EXIT(PyExc_IndexError);
+	_o2 = PySequence_GetItem(fonts,0); if(!_o2) EXC_EXIT(PyExc_IndexError,"fonts[0] failed");
+	_o1 = PySequence_GetSlice(fonts, 1, 0x7fffffff); if(!_o1) EXC_EXIT(PyExc_IndexError,"fonts[1:] failed");
 	Py_DECREF(font);
 	font = _o2;
 	Py_DECREF(fonts);
 	fonts = _o1;
 	_o1 = _o2 = NULL;
 
-	_o2 = _GetAttrString(font, "encName"); if(!_o2) EXC_EXIT(PyExc_RuntimeError);
+	_o2 = _GetAttrString(font, "encName"); if(!_o2) EXC_EXIT(PyExc_AttributeError);
 	encObj = _GetStringBuf(_o2, &encStr);
 	Py_DECREF(_o2);
 	_o2 = NULL;
-	if (!encObj) EXC_EXIT(PyExc_RuntimeError);
+	if (!encObj) EXC_EXIT(PyExc_TypeError,"could not convert str(font.encName) failed");
 	if(strstr(encStr,"UCS-2")) encStr = "UTF16";
 
 	while((_i1=PyObject_IsTrue(utext))>0){
 		if((_o1 = PyUnicode_AsEncodedString(utext, encStr, NULL))){
-			_o2 = PyTuple_New(2); if(!_o2) EXC_EXIT(PyExc_RuntimeError);
+			_o2 = PyTuple_New(2); if(!_o2) EXC_EXIT(PyExc_MemoryError,"create tuple length 2 failed");
 			Py_INCREF(font);
 			PyTuple_SET_ITEM(_o2, 0, font);
 			PyTuple_SET_ITEM(_o2, 1, _o1);
 			_o1 = NULL;
-			if(PyList_Append(R, _o2)) EXC_EXIT(PyExc_RuntimeError);
+			if(PyList_Append(R, _o2)) EXC_EXIT(PyExc_RuntimeError,"could not append to result list");
 			Py_DECREF(_o2); _o2 = NULL;
 			break;
 			}
 		else{
 			Py_XDECREF(_o1); _o1 = NULL;
 			if(!PyErr_ExceptionMatches(PyExc_UnicodeEncodeError)) EXC_EXIT(PyExc_RuntimeError);
-			_o1 = _GetExcValue(); if(!_o1) EXC_EXIT(PyExc_RuntimeError);
+			_o1 = _GetExcValue(); if(!_o1) EXC_EXIT(PyExc_RuntimeError,"could not obtain exception value");
 			PyErr_Clear();
-			_o2 = _GetAttrString(_o1, "args"); if(!_o2) EXC_EXIT(PyExc_RuntimeError);
+			_o2 = _GetAttrString(_o1, "args"); if(!_o2) EXC_EXIT(PyExc_AttributeError);
 			Py_DECREF(_o1);
-			_o1 = PySequence_GetSlice(_o2, 2, 4); if(!_o1) EXC_EXIT(PyExc_RuntimeError);
+			_o1 = PySequence_GetSlice(_o2, 2, 4); if(!_o1) EXC_EXIT(PyExc_IndexError,"args[2:4] failed");
 			Py_DECREF(_o2);
-			_o2 = PySequence_GetItem(_o1, 0); if(!_o2) EXC_EXIT(PyExc_RuntimeError);
-			i = PyLong_AsLong(_o2); if(PyErr_Occurred()) EXC_EXIT(PyExc_RuntimeError);
+			_o2 = PySequence_GetItem(_o1, 0); if(!_o2) EXC_EXIT(PyExc_IndexError,"args[2:4][0] failed");
+			i = PyLong_AsLong(_o2); if(PyErr_Occurred()) EXC_EXIT(PyExc_ValueError,"int(args[2:4][0]) failed");
 			Py_DECREF(_o2);
 
-			_o2 = PySequence_GetItem(_o1, 1); if(!_o1) EXC_EXIT(PyExc_RuntimeError);
-			j = PyLong_AsLong(_o2); if(PyErr_Occurred()) EXC_EXIT(PyExc_RuntimeError);
+			_o2 = PySequence_GetItem(_o1, 1); if(!_o1) EXC_EXIT(PyExc_IndexError,"args[2:4][1] failed");
+			j = PyLong_AsLong(_o2); if(PyErr_Occurred()) EXC_EXIT(PyExc_ValueError,"int(args[2:4][1]) failed");
 			Py_DECREF(_o2);
 
 			Py_DECREF(_o1); _o2 = _o1 = 0;
 
 			if(i){
-				_o1 = PySequence_GetSlice(utext, 0, i); if(!_o1) EXC_EXIT(PyExc_RuntimeError);
-				_o2 = PyUnicode_AsEncodedString(_o1, encStr, NULL); if(!_o2) EXC_EXIT(PyExc_RuntimeError);
+				_o1 = PySequence_GetSlice(utext, 0, i); if(!_o1) EXC_EXIT(PyExc_IndexError,"utext[0:%d] failed",i);
+				_o2 = PyUnicode_AsEncodedString(_o1, encStr, NULL); if(!_o2) EXC_EXIT(PyExc_UnicodeEncodeError,"encode(utext[0:%d],'%s') failed",i,encStr);
 				Py_DECREF(_o1);
-				_o1 = PyTuple_New(2); if(!_o1) EXC_EXIT(PyExc_RuntimeError);
+				_o1 = PyTuple_New(2); if(!_o1) EXC_EXIT(PyExc_MemoryError,"create tuple of length 2 failed");
 				Py_INCREF(font);
 				PyTuple_SET_ITEM(_o1, 0, font);
 				PyTuple_SET_ITEM(_o1, 1, _o2);
 				_o2 = NULL;
-				if(PyList_Append(R, _o1)) EXC_EXIT(PyExc_RuntimeError);
+				if(PyList_Append(R, _o1)) EXC_EXIT(PyExc_RuntimeError,"could not append to result list");
 				Py_DECREF(_o1); _o1 = NULL;
 				}
 
-			_i2 = PyObject_IsTrue(fonts); if(_i2<0) EXC_EXIT(PyExc_RuntimeError);
+			_i2 = PyObject_IsTrue(fonts); if(_i2<0) EXC_EXIT(PyExc_ValueError,"bool(fonts) is not True");
 			if(_i2){
-				_o1 = PySequence_GetSlice(utext, i, j); if(!_o1) EXC_EXIT(PyExc_RuntimeError);
-				_o2 = PyTuple_New(2); if(!_o2) EXC_EXIT(PyExc_RuntimeError);
+				_o1 = PySequence_GetSlice(utext, i, j); if(!_o1) EXC_EXIT(PyExc_IndexError,"utext[%d:%d] failed");
+				_o2 = PyTuple_New(2); if(!_o2) EXC_EXIT(PyExc_MemoryError,"create tuple of length 2 failed");
 				PyTuple_SET_ITEM(_o2, 0, _o1);
 				Py_INCREF(fonts);
 				PyTuple_SET_ITEM(_o2, 1, fonts);
 				_o1 = unicode2T1(module,_o2,NULL); if(!_o1) EXC_EXIT(PyExc_RuntimeError);
 				Py_DECREF(_o2); _o2 = 0;
-				_o3 = PyTuple_New(1); if(!_o3) EXC_EXIT(PyExc_RuntimeError);
+				_o3 = PyTuple_New(1); if(!_o3) EXC_EXIT(PyExc_MemoryError,"create tuple of length 1 failed");
 				PyTuple_SET_ITEM(_o3, 0, _o1);
 				_o1 = _GetAttrString(R, "extend"); if(!_o1) EXC_EXIT(PyExc_RuntimeError);
-				_o2 = PyObject_CallObject(_o1, _o3); if(!_o2) EXC_EXIT(PyExc_RuntimeError);
+				_o2 = PyObject_CallObject(_o1, _o3); if(!_o2) EXC_EXIT(PyExc_TypeError,"result.extend call failed");
 				Py_DECREF(_o1);
 				Py_DECREF(_o3);
 				Py_DECREF(_o2); _o1 = _o2 = _o3 = NULL;
@@ -673,26 +627,26 @@ static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 			else{
 				_o3 = _GetAttrString(font,"_notdefChar");
 				if(!_o3) EXC_EXIT(PyExc_RuntimeError);
-				_o2 = PyLong_FromLong((j - i)); if(!_o2) EXC_EXIT(PyExc_RuntimeError);
-				_o1 = PyNumber_Multiply(_o3, _o2); if(!_o1) EXC_EXIT(PyExc_RuntimeError);
+				_o2 = PyLong_FromLong((j - i)); if(!_o2) EXC_EXIT(PyExc_ValueError,"int((%d - %d)) failed",j,i);
+				_o1 = PyNumber_Multiply(_o3, _o2); if(!_o1) EXC_EXIT(PyExc_ArithmeticError,"_notdefChar multiply failed");
 				Py_DECREF(_o2); Py_DECREF(_o3); _o2=_o3=NULL;
-				_o2 = PyTuple_New(2); if(!_o2) EXC_EXIT(PyExc_RuntimeError);
-				_o3 = _GetAttrString(font,"_notdefFont"); if(!_o3) EXC_EXIT(PyExc_RuntimeError);
+				_o2 = PyTuple_New(2); if(!_o2) EXC_EXIT(PyExc_MemoryError,"create tuple of length 2 failed");
+				_o3 = _GetAttrString(font,"_notdefFont"); if(!_o3) EXC_EXIT(PyExc_AttributeError);
 				PyTuple_SET_ITEM(_o2, 0, _o3);
 				PyTuple_SET_ITEM(_o2, 1, _o1);
 				Py_INCREF(_o3); _o3=NULL;
 				_o1 = NULL;
-				if(PyList_Append(R, _o2)) EXC_EXIT(PyExc_RuntimeError);
+				if(PyList_Append(R, _o2)) EXC_EXIT(PyExc_RuntimeError,"Could not append to result");
 				Py_DECREF(_o2); _o2 = NULL;
 				}
 
-			_o1 = PySequence_GetSlice(utext, j, 0x7fffffff); if(!_o1) EXC_EXIT(PyExc_RuntimeError);
+			_o1 = PySequence_GetSlice(utext, j, 0x7fffffff); if(!_o1) EXC_EXIT(PyExc_IndexError,"utext[%d:] failed",j);
 			Py_DECREF(utext);
 			utext = _o1;
 			_o1 = NULL;
 			}
 		}
-	if(_i1<0) EXC_EXIT(PyExc_RuntimeError);
+	if(_i1<0) EXC_EXIT(PyExc_ValueError,"_i1=%d became negative",_i1);
 
 	Py_INCREF(R);
 	res = R;
