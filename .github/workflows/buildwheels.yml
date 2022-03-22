@@ -44,6 +44,7 @@ jobs:
       CIBW_TEST_SKIP: "*-manylinux_{aarch64,ppc64le,s390x} *-musllinux_* *-macosx_arm64 *-macosx_universal2:arm64"
       CIBW_TEST_COMMAND: python -u -c "import sys,os,subprocess;r=subprocess.call((sys.executable,'-u',os.path.join(r'{project}','setup.py'),'tests-postinstall','--show-env','--verbose','--pip-install=pyphen','--pip-install=rlPyCairo','--rl-index-url=https://${{secrets.CITOOLS_USER}}:${{secrets.CITOOLS_PASSWORD}}@www.reportlab.com/pypi','--rl-pip-install=pyfribidi'),stderr=subprocess.STDOUT,timeout=180);marker=20*(chr(33) if r else '=');print('%s test command --> %s %s'%(marker,r,marker));sys.exit(r)" 2>&1
       CIBW_BUILD_VERBOSITY: 3
+      RL_CACHE_DIR: "/tmp/${{github.event.repository.name}}"
     strategy:
       fail-fast: true
       matrix:
@@ -70,8 +71,15 @@ jobs:
         run: python -m cibuildwheel --output-dir wheelhouse
         env:
           CIBW_ARCHS_LINUX: all #auto aarch64 #needs quemu setup
-          CIBW_ARCHS_MACOS: x86_64 arm64 universal2
-
+          CIBW_ARCHS_MACOS: x86_64 arm64
+          CIBW_REPAIR_WHEEL_COMMAND_MACOS: >
+            if [ "{delocate_archs}" = "arm64" ]; then
+              DYLD_LIBRARY_PATH=$RL_CACHE_DIR/m1stuff/m1stuff/opt/homebrew/lib delocate-listdeps {wheel} &&
+              DYLD_LIBRARY_PATH=$RL_CACHE_DIR/m1stuff/m1stuff/opt/homebrew/lib delocate-wheel --require-archs {delocate_archs} -w {dest_dir} {wheel}
+            else
+              delocate-listdeps {wheel} &&
+              delocate-wheel --require-archs {delocate_archs} -w {dest_dir} {wheel}
+            fi
       - name: upload wheels
         env:
           CITOOLS_USER: "${{secrets.CITOOLS_USER}}"

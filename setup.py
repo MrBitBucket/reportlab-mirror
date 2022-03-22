@@ -12,7 +12,8 @@ isdir = os.path.isdir
 dirname = os.path.dirname
 basename = os.path.basename
 splitext = os.path.splitext
-archName = 'amd64' if sys.maxsize > 2**32 else 'x86'    #correct for windows builds
+addrSize = 64 if sys.maxsize > 2**32 else 32
+sysconfig_platform = sysconfig.get_platform()
 
 INFOLINES=[]
 def infoline(t,
@@ -21,8 +22,7 @@ def infoline(t,
         ):
     bn = splitext(basename(sys.argv[0]))[0]
     ver = '.'.join(map(str,sys.version_info[:3]))
-    platform = sysconfig.get_platform()
-    s = '%s %s-python-%s-%s: %s' % (pfx, bn, ver, platform, t)
+    s = '%s %s-python-%s-%s: %s' % (pfx, bn, ver, sysconfig_platform, t)
     print(s)
     if add: INFOLINES.append(s)
 
@@ -189,42 +189,101 @@ def aDir(P, d, x=None):
         else:
             P.insert(x, d)
 
+def findFile(root, wanted, followlinks=True):
+    for p, _, F in os.walk(root,followlinks=followlinks):
+        for fn in F:
+            if fn==wanted:  
+                return abspath(pjoin(p,fn))
+
+def listFiles(root,followlinks=True,strJoin=None):
+    R = [].append
+    for p, _, F in os.walk(root,followlinks=followlinks):
+        for fn in F:
+            R(abspath(pjoin(p,fn)))
+    R = R.__self__
+    return strJoin.join(R) if strJoin else R
+
+def freetypeVersion(fn,default='20'):
+    with open(fn,'r') as _:
+        text = _.read()
+    pat = re.compile(r'^#define\s+FREETYPE_(?P<level>MAJOR|MINOR|PATCH)\s*(?P<value>\d*)\s*$',re.M)
+    locmap=dict(MAJOR=0,MINOR=1,PATCH=2)
+    loc = ['','','']
+    for m in pat.finditer(text):
+        loc[locmap[m.group('level')]] = m.group('value')
+    loc = list(filter(None,loc))
+    return '.'.join(loc) if loc else default
+
 class inc_lib_dirs:
-    L = None
-    I = None
-    def __call__(self):
-        if self.L is None:
-            L = []
-            I = []
-            if platform == "cygwin":
-                aDir(L, os.path.join("/usr/lib", "python%s" % sys.version[:3], "config"))
-            elif platform == "darwin":
-                # attempt to make sure we pick freetype2 over other versions
-                aDir(I, "/sw/include/freetype2")
-                aDir(I, "/sw/lib/freetype2/include")
-                # fink installation directories
-                aDir(L, "/sw/lib")
-                aDir(I, "/sw/include")
-                # darwin ports installation directories
-                aDir(L, "/opt/local/lib")
-                aDir(I, "/opt/local/include")
-            aDir(I, "/usr/local/include")
-            aDir(L, "/usr/local/lib")
-            aDir(I, "/usr/include")
-            aDir(L, "/usr/lib")
-            aDir(I, "/usr/include/freetype2")
-            if archName=='amd64':
-                aDir(L, "/usr/lib/lib64")
-                aDir(L, "/usr/lib/x86_64-linux-gnu")
-            else:
-                aDir(L, "/usr/lib/lib32")
-            prefix = sysconfig.get_config_var("prefix")
-            if prefix:
-                aDir(L, pjoin(prefix, "lib"))
-                aDir(I, pjoin(prefix, "include"))
-            self.L=L
-            self.I=I
-        return self.I,self.L
+    def __call__(self,libname=None):
+        L = config('FREETYPE_PATHS','lib')
+        L = [L] if L else []
+        I = config('FREETYPE_PATHS','inc')
+        I = [I] if I else []
+        if platform == "cygwin":
+            aDir(L, os.path.join("/usr/lib", "python%s" % sys.version[:3], "config"))
+        elif platform == "darwin":
+            machine = sysconfig_platform.split('-')[-1]
+            if machine=='arm64' or os.environ.get('ARCHFLAGS','')=='-arch arm64':
+                #print('!!!!! detected darwin arm64 build')
+                #probably an M1
+                target = pjoin(
+                            ensureResourceStuff('m1stuff.tar.gz','m1stuff','tar',
+                                baseDir=os.environ.get('RL_CACHE_DIR','/tmp/reportlab')),
+                            'm1stuff','opt','homebrew'
+                            )
+                _lib = pjoin(target,'lib')
+                _inc = pjoin(target,'include','freetype2')
+                #print('!!!!! target=%s' % target)
+                #print('!!!!! _lib=%s -->\n %s'%(_lib,listFiles(_lib,strJoin='\n ')))
+                #print('!!!!! _inc=%s -->\n %s'%(_inc,listFiles(_inc,strJoin='\n ')))
+                aDir(L, _lib)
+                aDir(I, _inc)
+                #print('!!!!! L=%s I=%s' % (L,I))
+            elif machine=='x86_64':
+                aDir(L,'/usr/local/lib')
+                aDir(I, "/usr/local/include/freetype2")
+            # attempt to make sure we pick freetype2 over other versions
+            aDir(I, "/sw/include/freetype2")
+            aDir(I, "/sw/lib/freetype2/include")
+            # fink installation directories
+            aDir(L, "/sw/lib")
+            aDir(I, "/sw/include")
+            # darwin ports installation directories
+            aDir(L, "/opt/local/lib")
+            aDir(I, "/opt/local/include")
+        aDir(I, "/usr/local/include")
+        aDir(L, "/usr/local/lib")
+        aDir(I, "/usr/include")
+        aDir(L, "/usr/lib")
+        aDir(I, "/usr/include/freetype2")
+        if addrSize==64:
+            aDir(L, "/usr/lib/lib64")
+            aDir(L, "/usr/lib/x86_64-linux-gnu")
+        else:
+            aDir(L, "/usr/lib/lib32")
+        prefix = sysconfig.get_config_var("prefix")
+        if prefix:
+            aDir(L, pjoin(prefix, "lib"))
+            aDir(I, pjoin(prefix, "include"))
+        if libname:
+            gsn = ''.join((('lib' if not libname.startswith('lib') else ''),libname,'*'))
+            L = list(filter(lambda _: glob.glob(pjoin(_,gsn)),L))
+        for d in I:
+            mif = findFile(d,'ft2build.h')
+            if mif:
+                #print('!!!!! d=%s --> mif=%r' % (d,mif))
+                break
+        else:
+            mif = None
+        if mif:
+            d = dirname(mif)
+            I = [dirname(d), d]
+            ftv = freetypeVersion(findFile(d,'freetype.h'),'22')
+        else:
+            print('!!!!! cannot find ft2build.h')
+            sys.exit(1)
+        return ftv,I,L
 inc_lib_dirs=inc_lib_dirs()
 
 def getVersionFromCCode(fn):
@@ -327,16 +386,25 @@ def url2data(url,returnRaw=False):
     finally:
         remotehandle.close()
 
-def ensureWinStuff(
-                    url='https://www.reportlab.com/ftp/winstuff.zip',
-                    target=pjoin(pkgDir,'build','winstuff'),
+def ensureResourceStuff(
+                ftpName='winstuff.zip',
+                buildName='winstuff',
+                extract='zip',
+                baseDir=pjoin(pkgDir,'build'),
                 ):
+    url='https://www.reportlab.com/ftp/%s' % ftpName
+    target=pjoin(baseDir,buildName)
     done = pjoin(target,'.done')
     if not isfile(done):
         if not isdir(target):
             os.makedirs(target)
-            import zipfile, time
-            zipfile.ZipFile(url2data(url), 'r').extractall(path=target)
+            if extract=='zip':
+                import zipfile
+                zipfile.ZipFile(url2data(url), 'r').extractall(path=target)
+            elif extract=='tar':
+                import tarfile
+                tarfile.open(fileobj=url2data(url), mode='r:gz').extractall(path=target)
+            import time
             with open(done,'w') as _:
                 _.write(time.strftime('%Y%m%dU%H%M%S\n',time.gmtime()))
     return target
@@ -477,6 +545,8 @@ def performPipInstalls():
             raise ValueError('rl-pip-install requires exactly 1 --rl-index-url not %d' % len(rl_ixu))
 
 def showEnv():
+    action = -1 if specialOption('--show-env-only') else 1 if specialOption('--show-env') else 0
+    if not action: return
     print('+++++ setup.py environment')
     print('+++++ sys.version = %s' % sys.version.replace('\n',''))
     import platform
@@ -496,10 +566,11 @@ def showEnv():
     for k, v in sorted(os.environ.items()):
         print('+++++ environ[%s] = %r' % (k,v))
     print('--------------------------')
+    if action<0:
+        sys.exit(0)
 
 def main():
-    if specialOption('--show-env'):
-        showEnv()
+    showEnv()
     performPipInstalls()
     #test to see if we've a special command
     if 'test' in sys.argv \
@@ -644,8 +715,8 @@ def main():
                     ]+LIBART_SOURCES
 
         if platform=='win32':
-            target = ensureWinStuff()
-            FT_LIB = pjoin(target,'libs',archName,'freetype.lib')
+            target = ensureResourceStuff()
+            FT_LIB = pjoin(target,'libs','amd64' if addrSize==64 else 'x86','freetype.lib')
             if not isfile(FT_LIB):
                 infoline('freetype lib %r not found' % FT_LIB, pfx='!!!!')
                 FT_LIB=[]
@@ -666,37 +737,13 @@ def main():
             else:
                 FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
         else:
-            if os.path.isdir('/usr/include/freetype2'):
-                FT_LIB_DIR = []
-                FT_INC_DIR = ['/usr/include/freetype2']
-            else:
-                FT_LIB_DIR=config('FREETYPE_PATHS','lib')
-                FT_LIB_DIR=[FT_LIB_DIR] if FT_LIB_DIR else []
-                FT_INC_DIR=config('FREETYPE_PATHS','inc')
-                FT_INC_DIR=[FT_INC_DIR] if FT_INC_DIR else []
-            I,L=inc_lib_dirs()
-            ftv = None
-            for d in I:
-                if isfile(pjoin(d, "ft2build.h")):
-                    ftv = 21
-                    FT_INC_DIR=[d,pjoin(d, "freetype2")]
-                    break
-                d = pjoin(d, "freetype2")
-                if isfile(pjoin(d, "ft2build.h")):
-                    ftv = 21
-                    FT_INC_DIR=[d]
-                    break
-                if isdir(pjoin(d, "freetype")):
-                    ftv = 20
-                    FT_INC_DIR=[d]
-                    break
-            if ftv:
-                FT_LIB=['freetype']
-                FT_LIB_DIR=L
-                FT_MACROS = [('RENDERPM_FT',None)]
-                infoline('# installing with freetype version %d' % ftv)
-            else:
-                FT_LIB=FT_LIB_DIR=FT_INC_DIR=FT_MACROS=[]
+            ftv, I, L = inc_lib_dirs('freetype')
+            FT_LIB=['freetype']
+            FT_LIB_DIR=L
+            FT_INC_DIR=I
+            FT_MACROS = [('RENDERPM_FT',None)]
+            infoline('installing with freetype version %s' % ftv)
+            infoline('FT_LIB_DIR=%r FT_INC_DIR=%r' % (FT_LIB_DIR,FT_INC_DIR))
         if not FT_LIB:
             infoline('# installing without freetype no ttf, sorry!')
             infoline('# You need to install a static library version of the freetype2 software')
@@ -758,7 +805,6 @@ def main():
                 'Topic :: Printing',
                 'Topic :: Text Processing :: Markup',
                 'Programming Language :: Python :: 3',
-                'Programming Language :: Python :: 3.6',
                 'Programming Language :: Python :: 3.7',
                 'Programming Language :: Python :: 3.8',
                 'Programming Language :: Python :: 3.9',
@@ -768,7 +814,7 @@ def main():
             
             #this probably only works for setuptools, but distutils seems to ignore it
             install_requires=['pillow>=4.0.0'],
-            python_requires='>=3.6, <4',
+            python_requires='>=3.7, <4',
             extras_require={
                 'RLPYCAIRO': ['rlPyCairo>=0.0.5'],
                 },

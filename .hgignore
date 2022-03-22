@@ -74,3 +74,5 @@ syntax: regexp
 ^src/rl_addons/renderPM/libart_lgpl/art_config.h
 ^demos/.*\.pdf$
 ^src/reportlab.egg-info/
+^.git
+^.gitignore

@@ -99,7 +99,7 @@ if 'instanceStringWidthT1' in _py_funcs:
     def instanceStringWidthT1(self, text, size, encoding='utf8'):
         """This is the "purist" approach to width"""
         if not isUnicode(text): text = text.decode(encoding)
-        return sum([sum(map(f.widths.__getitem__,t)) for f, t in unicode2T1(text,[self]+self.substitutionFonts)])*0.001*size
+        return sum((sum(map(f.widths.__getitem__,t)) for f, t in unicode2T1(text,[self]+self.substitutionFonts)))*0.001*size
     _py_funcs['instanceStringWidthT1'] = instanceStringWidthT1
 
 if 'instanceStringWidthTTF' in _py_funcs:
@@ -109,7 +109,7 @@ if 'instanceStringWidthTTF' in _py_funcs:
             text = text.decode(encoding or 'utf-8')
         g = self.face.charWidths.get
         dw = self.face.defaultWidth
-        return 0.001*size*sum([g(ord(u),dw) for u in text])
+        return 0.001*size*sum((g(ord(u),dw) for u in text))
     _py_funcs['instanceStringWidthTTF'] = instanceStringWidthTTF
 
 if 'hex32' in _py_funcs:
