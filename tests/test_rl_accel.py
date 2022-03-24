@@ -128,6 +128,17 @@ class RlAccelTestCase(unittest.TestCase):
                         rcc = checkrc(defns,rcv)
                         if rcc: F.append("%s %s refcount diffs (%s)" % (fontType,kind,rcc))
         assert not F,"instanceStringWidth failures\n\t%s" % '\n\t'.join(F)
+        isw = _c_funcs.get('instanceStringWidthTTF',None)
+        if isw:
+            saved = ttf.face.charWidths
+            del ttf.face.charWidths
+            try:
+                w = isw(ttf,'hello world',10)
+            except AttributeError as e:
+                se = str(e)
+                assert 'charWidths' in se,f"expected 'charWidths' not in\n{se!r}"
+            finally:
+                ttf.face.charWidths = saved
 
     def test_unicode2T1(self):
         from reportlab.pdfbase.pdfmetrics import getFont, _fonts

@@ -8,7 +8,6 @@
 #define PY_SSIZE_T_CLEAN
 #include "Python.h"
 #include <stdlib.h>
-#include <stdarg.h>
 #include <math.h>
 #define DEFERRED_ADDRESS(A) 0
 #if defined(__GNUC__) || defined(sun) || defined(_AIX) || defined(__hpux)
@@ -33,6 +32,91 @@
 
 #define STRNAME "str"
 #define BYTESNAME "bytes"
+#include "compile.h"
+#include "frameobject.h"
+#include "traceback.h"
+#if PY_VERSION_HEX >= 0x030b00a6
+  #ifndef Py_BUILD_CORE
+	#define Py_BUILD_CORE 1
+  #endif
+  #include "internal/pycore_frame.h"
+#endif
+static void ModifyExcValue(PyObject *exc,const char *funcname,int lineno,const char* fmt,va_list ap)
+{
+	PyObject *type = NULL, *value = NULL, *tb = NULL, *aval=NULL, *uval=NULL;
+	const char* sval=NULL;
+	PyErr_Fetch(&type, &value, &tb);
+	PyErr_NormalizeException(&type, &value, &tb);
+	if(PyErr_Occurred()) goto L_BAD;
+	uval = PyUnicode_FromFormatV(fmt,ap);
+	PyErr_Format(exc,"%U in %s @ %s:%d\ncaused by %S",uval,funcname,__FILE__,lineno,value);
+
+L_exit:
+	Py_XDECREF(uval);
+	Py_XDECREF(type);
+	Py_XDECREF(value);
+	Py_XDECREF(tb);
+	return;
+L_BAD:
+	if(type && value){
+		PyErr_Restore(type,value,tb);
+		type = value = tb = NULL;
+		}
+	goto L_exit;
+}
+
+static void _excAddInfo(const char* funcname,int lineno, PyObject *exc, const char* fmt, va_list ap)
+{
+	PyObject *uval = NULL;
+	if(PyErr_Occurred()){
+		ModifyExcValue(exc,funcname,lineno,fmt,ap);
+		}
+	else{
+		uval = PyUnicode_FromFormatV(fmt,ap);
+		PyErr_Format(exc,"in %s@%s:%d %U",funcname,__FILE__,lineno,uval);
+		Py_XDECREF(uval);
+		}
+}
+
+static void excAddInfo(const char* funcname,int lineno, PyObject *exc, const char* fmt, ...)
+{
+	va_list ap;
+	va_start(ap,fmt);
+	_excAddInfo(funcname,lineno,exc,fmt,ap);
+	va_end(ap);
+}
+
+static void add_TB(PyObject* module,const char* funcname,int lineno, PyObject *exc, const char* fmt, ...)
+{
+	PyObject *py_globals = NULL;
+	PyCodeObject *py_code = NULL;
+	PyFrameObject *py_frame = NULL;
+	va_list ap;
+	va_start(ap,fmt);
+	_excAddInfo(funcname,lineno,exc,fmt,ap);
+	va_end(ap);
+
+	py_globals = PyModule_GetDict(module);
+	if(!py_globals) goto bad;
+	py_code = PyCode_NewEmpty(
+						__FILE__,		/*PyObject *filename,*/
+						funcname,	/*PyObject *name,*/
+						lineno	/*int firstlineno,*/
+						);
+	if(!py_code) goto bad;
+	py_frame = PyFrame_New(
+		PyThreadState_Get(), /*PyThreadState *tstate,*/
+		py_code,			 /*PyCodeObject *code,*/
+		py_globals,			 /*PyObject *globals,*/
+		0					 /*PyObject *locals*/
+		);
+	if(!py_frame) goto bad;
+	py_frame->f_lineno = lineno;
+	PyTraceBack_Here(py_frame);
+bad:
+	Py_XDECREF(py_code);
+	Py_XDECREF(py_frame);
+}
 /*
  * https://stackoverflow.com/questions/5588855/standard-alternative-to-gccs-va-args-trick
  * expands to the first argument
@@ -54,10 +138,8 @@
     SELECT_10TH(__VA_ARGS__, TWOORMORE, TWOORMORE, TWOORMORE, TWOORMORE,\
                 TWOORMORE, TWOORMORE, TWOORMORE, TWOORMORE, ONE, throwaway)
 #define SELECT_10TH(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, ...) a10
-#define EXC_SET(exc,...)  PyErr_Format(exc, "%s @ %s:%d:" FIRST(__VA_ARGS__),__func__,__FILE__,__LINE__ REST(__VA_ARGS__))
-static void ModifyExcValue(PyObject *exc,const char *fmt,const char *funcname,const char* filename, int lineno,...);
-#define EXC_MOD(exc,...)  ModifyExcValue(exc, "%s\ncaused %s @ %s:%d:" FIRST(__VA_ARGS__),__func__,__FILE__,__LINE__ REST(__VA_ARGS__))
-#define EXC_EXIT(exc,...)  do{if(PyErr_Occurred()) EXC_MOD(exc,__VA_ARGS__); else EXC_SET(exc,__VA_ARGS__);goto L_exit;}while(0)
+#define EXC_SET(exc,...) do{excAddInfo(__func__,__LINE__,exc,FIRST(__VA_ARGS__) REST(__VA_ARGS__));}while(0)
+#define EXC_EXIT(exc,...)  do{add_TB(module,__func__,__LINE__,exc, FIRST(__VA_ARGS__) REST(__VA_ARGS__));goto L_exit;}while(0)
 #define MODULE_STATE_SIZE 0
 
 #define a85_0		   1L
@@ -259,12 +341,13 @@ static	char *_fp_one(PyObject* module,PyObject *pD)
 	static	char s[30];
 	int l;
 	char*	dot;
-	if((pD=PyNumber_Float(pD))){
-		d = PyFloat_AS_DOUBLE(pD);
-		Py_DECREF(pD);
+	PyObject *cD;
+	if((cD=PyNumber_Float(pD))){
+		d = PyFloat_AS_DOUBLE(cD);
+		Py_DECREF(cD);
 		}
 	else {
-		EXC_SET(PyExc_ValueError, "bad numeric value");
+		EXC_SET(PyExc_ValueError, "bad numeric value %S",pD);
 		return NULL;
 		}
 	ad = fabs(d);
@@ -274,7 +357,7 @@ static	char *_fp_one(PyObject* module,PyObject *pD)
 		}
 	else{
 		if(ad>1e20){
-			EXC_SET(PyExc_ValueError, "number too large");
+			EXC_SET(PyExc_ValueError, "number too large %S",pD);
 			return NULL;
 			}
 		if(ad>1) l = min(max(0,6-(int)log10(ad)),6);
@@ -325,7 +408,7 @@ PyObject *_fp_str(PyObject *module, PyObject *args)
 			else pD = NULL;
 			if(!pD){
 				free(buf);
-				return NULL;
+				EXC_EXIT(PyExc_ValueError,"_fp_one failed");
 				}
 			if(pB!=buf){
 				*pB++ = ' ';
@@ -341,7 +424,7 @@ PyObject *_fp_str(PyObject *module, PyObject *args)
 	else {
 		PyErr_Clear();
 		PyArg_ParseTuple(args, "O:_fp_str", &retVal);
-		return NULL;
+L_exit: return NULL;
 		}
 }
 
@@ -482,34 +565,6 @@ static PyObject *hex32(PyObject *module, PyObject* args)
 	return PyUnicode_FromString(buf);
 }
 
-static void ModifyExcValue(PyObject *exc,const char *fmt,const char *funcname,const char* filename, int lineno,...)
-{
-	va_list	ap;
-	PyObject *type = NULL, *value = NULL, *tb = NULL, *aval=NULL, *bval=NULL;
-	const char* sval=NULL;
-	PyErr_Fetch(&type, &value, &tb);
-	PyErr_NormalizeException(&type, &value, &tb);
-	if(PyErr_Occurred()) goto L_BAD;
-	if(value){
-		aval = PyObject_ASCII(value);
-		if(aval){
-			bval = PyUnicode_AsUTF8String(aval);
-			if(bval) sval = PyBytes_AsString(bval);
-			}
-		}
-	if(!sval) sval="unknown exception";
-	va_start(ap,lineno);
-	PyErr_Format(exc,fmt,sval,funcname,filename,lineno,ap);
-	va_end(ap);
-
-L_BAD:
-	Py_XDECREF(type);
-	Py_XDECREF(value);
-	Py_XDECREF(tb);
-	Py_XDECREF(aval);
-	Py_XDECREF(bval);
-}
-
 static PyObject *_GetExcValue(void)
 {
 	PyObject *type = NULL, *value = NULL, *tb = NULL, *result=NULL;
@@ -531,7 +586,7 @@ L_BAD:
 static PyObject *_GetAttrString(PyObject *obj, char *name)
 {
 	PyObject *res = PyObject_GetAttrString(obj, name);
-	if(!res) EXC_SET(PyExc_AttributeError, "for attribute %s",name);
+	if(!res) EXC_SET(PyExc_AttributeError, "missing attribute %s",name);
 	return res;
 }
 
@@ -1203,6 +1258,8 @@ static PyTypeObject BoxList_type = {
 	"\tGlue(width,stretch,shrink) creates a Knuth glue Box with the specified width, stretch and shrink.\n" \
 	"\tPenalty(width,penalty,flagged=0) creates a Knuth penalty Box with the specified width and penalty.\n" \
 	"\tBoxList() creates a knuth box list.\n"
+#else
+#define _BOX__DOC__
 #endif
 
 PyDoc_STRVAR(__DOC__,
