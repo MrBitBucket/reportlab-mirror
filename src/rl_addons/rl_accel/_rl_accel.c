@@ -32,15 +32,6 @@
 
 #define STRNAME "str"
 #define BYTESNAME "bytes"
-#include "compile.h"
-#include "frameobject.h"
-#include "traceback.h"
-#if PY_VERSION_HEX >= 0x030b00a6
-  #ifndef Py_BUILD_CORE
-	#define Py_BUILD_CORE 1
-  #endif
-  #include "internal/pycore_frame.h"
-#endif
 static void ModifyExcValue(PyObject *exc,const char *funcname,int lineno,const char* fmt,va_list ap)
 {
 	PyObject *type = NULL, *value = NULL, *tb = NULL, *aval=NULL, *uval=NULL;
@@ -49,7 +40,12 @@ static void ModifyExcValue(PyObject *exc,const char *funcname,int lineno,const c
 	PyErr_NormalizeException(&type, &value, &tb);
 	if(PyErr_Occurred()) goto L_BAD;
 	uval = PyUnicode_FromFormatV(fmt,ap);
-	PyErr_Format(exc,"%U in %s @ %s:%d\ncaused by %S",uval,funcname,__FILE__,lineno,value);
+	if(uval){
+		PyErr_Format(exc,"%U in %s @ %s:%d\ncaused by %S",uval,funcname,__FILE__,lineno,value);
+		}
+	else {
+		PyErr_Format(exc,"in %s:%d\ncaused by %S",funcname,__FILE__,lineno,value);
+		}
 
 L_exit:
 	Py_XDECREF(uval);
@@ -73,8 +69,12 @@ static void _excAddInfo(const char* funcname,int lineno, PyObject *exc, const ch
 		}
 	else{
 		uval = PyUnicode_FromFormatV(fmt,ap);
-		PyErr_Format(exc,"in %s@%s:%d %U",funcname,__FILE__,lineno,uval);
-		Py_XDECREF(uval);
+		if(uval) {
+			PyErr_Format(exc,"in %s@%s:%d %U",funcname,__FILE__,lineno,uval);
+			Py_DECREF(uval);
+			}
+		else
+			PyErr_Format(exc,"in %s@%s:%d",funcname,__FILE__,lineno,uval);
 		}
 }
 
@@ -84,38 +84,6 @@ static void excAddInfo(const char* funcname,int lineno, PyObject *exc, const cha
 	va_start(ap,fmt);
 	_excAddInfo(funcname,lineno,exc,fmt,ap);
 	va_end(ap);
-}
-
-static void add_TB(PyObject* module,const char* funcname,int lineno, PyObject *exc, const char* fmt, ...)
-{
-	PyObject *py_globals = NULL;
-	PyCodeObject *py_code = NULL;
-	PyFrameObject *py_frame = NULL;
-	va_list ap;
-	va_start(ap,fmt);
-	_excAddInfo(funcname,lineno,exc,fmt,ap);
-	va_end(ap);
-
-	py_globals = PyModule_GetDict(module);
-	if(!py_globals) goto bad;
-	py_code = PyCode_NewEmpty(
-						__FILE__,		/*PyObject *filename,*/
-						funcname,	/*PyObject *name,*/
-						lineno	/*int firstlineno,*/
-						);
-	if(!py_code) goto bad;
-	py_frame = PyFrame_New(
-		PyThreadState_Get(), /*PyThreadState *tstate,*/
-		py_code,			 /*PyCodeObject *code,*/
-		py_globals,			 /*PyObject *globals,*/
-		0					 /*PyObject *locals*/
-		);
-	if(!py_frame) goto bad;
-	py_frame->f_lineno = lineno;
-	PyTraceBack_Here(py_frame);
-bad:
-	Py_XDECREF(py_code);
-	Py_XDECREF(py_frame);
 }
 /*
  * https://stackoverflow.com/questions/5588855/standard-alternative-to-gccs-va-args-trick
@@ -139,7 +107,7 @@ bad:
                 TWOORMORE, TWOORMORE, TWOORMORE, TWOORMORE, ONE, throwaway)
 #define SELECT_10TH(a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, ...) a10
 #define EXC_SET(exc,...) do{excAddInfo(__func__,__LINE__,exc,FIRST(__VA_ARGS__) REST(__VA_ARGS__));}while(0)
-#define EXC_EXIT(exc,...)  do{add_TB(module,__func__,__LINE__,exc, FIRST(__VA_ARGS__) REST(__VA_ARGS__));goto L_exit;}while(0)
+#define EXC_EXIT(exc,...)  do{EXC_SET(exc,FIRST(__VA_ARGS__) REST(__VA_ARGS__));goto L_exit;}while(0)
 #define MODULE_STATE_SIZE 0
 
 #define a85_0		   1L
