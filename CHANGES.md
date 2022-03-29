@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.6.10  ??/??/2022
+---------------------------
+	* fix symlink looping in setup.py reported by Michał Górny &lt; mgorny at gentoo dot org &gt;
+
 CHANGES  3.6.9   22/03/2022
 ---------------------------
 	* fix up _rl_accel.c 0.81 to allow better error messages and support python 3.11.0a6

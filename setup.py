@@ -189,15 +189,40 @@ def aDir(P, d, x=None):
         else:
             P.insert(x, d)
 
+# protection against loops needed. reported by
+# Michał Górny &lt; mgorny at gentoo dot org &gt;
+# see https://stackoverflow.com/questions/36977259
 def findFile(root, wanted, followlinks=True):
-    for p, _, F in os.walk(root,followlinks=followlinks):
+    visited = set()
+    for p, D, F in os.walk(root,followlinks=followlinks):
+        #scan directories to check for prior visits
+        #use dev/inode to make unique key
+        SD = [].append
+        for d in D:
+            dk = os.stat(pjoin(p,d))
+            dk = dk.st_dev, dk.st_ino
+            if dk not in visited:
+                visited.add(dk)
+                SD(d)
+        D[:] = SD.__self__  #set the dirs to be scanned
         for fn in F:
             if fn==wanted:  
                 return abspath(pjoin(p,fn))
 
 def listFiles(root,followlinks=True,strJoin=None):
+    visited = set()
     R = [].append
-    for p, _, F in os.walk(root,followlinks=followlinks):
+    for p, D, F in os.walk(root,followlinks=followlinks):
+        #scan directories to check for prior visits
+        #use dev/inode to make unique key
+        SD = [].append
+        for d in D:
+            dk = os.stat(pjoin(p,d))
+            dk = dk.st_dev, dk.st_ino
+            if dk not in visited:
+                visited.add(dk)
+                SD(d)
+        D[:] = SD.__self__  #set the dirs to be scanned
         for fn in F:
             R(abspath(pjoin(p,fn)))
     R = R.__self__
