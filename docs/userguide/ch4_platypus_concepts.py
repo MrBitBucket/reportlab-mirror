@@ -123,7 +123,7 @@ Paragraphs skip past the title string.
 
 disc("""
 To see the output of this example program run the module
-$docs/userguide/examples.py$ (from the ReportLab $docs$ distribution)
+$tools/docco/examples.py$ (from the ReportLab $source$ distribution)
 as a "top level script".  The script interpretation $python examples.py$ will
 generate the Platypus output $phello.pdf$.
 """)

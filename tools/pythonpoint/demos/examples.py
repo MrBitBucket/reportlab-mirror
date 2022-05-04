@@ -14,7 +14,7 @@ def annotations(canvas):
 
 test1 = """
 def f(a,b):
-    print "it worked", a, b
+    print("it worked", a, b)
     return a+b
 """
 
@@ -22,7 +22,7 @@ test2 = """
 def g(n):
     if n==0: return 1
     else: return n*g(n-1)
-    """
+"""
 
 testhello = """
 def hello(c):
@@ -781,21 +781,18 @@ class PingoIllust:
 ##        canvas.restoreState()
 
 # D = dir()
-g = globals()
-Dprime = {}
-for a,b in list(g.items()):
-    if a[:4]=="test" and isinstance(b,str):
-        #print 'for', a
-        #print b
+TESTS=[(a,b) for a, b in globals().items() if a.startswith('test')]
+for a,b in TESTS:
+    if isinstance(b,str):
         b = b.strip()
         exec(b+'\n')
 
 platypussetup = """
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.lib.pagesizes import DEFAULT_PAGE_SIZE
+from reportlab.rl_config import defaultPageSize
 from reportlab.lib.units import inch
-PAGE_HEIGHT=DEFAULT_PAGE_SIZE[1]; PAGE_WIDTH=DEFAULT_PAGE_SIZE[0]
+PAGE_HEIGHT=defaultPageSize[1]; PAGE_WIDTH=defaultPageSize[0]
 styles = getSampleStyleSheet()
 """
 platypusfirstpage = """
