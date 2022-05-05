@@ -37,15 +37,19 @@ def myMainPageFrame(canvas, doc):
     canvas.rect(2.5*cm, 2.5*cm, 15*cm, 25*cm)
     canvas.setFont('Times-Roman', 12)
     pageNumber = canvas.getPageNumber()
-    canvas.drawString(10*cm, cm, str(pageNumber))
+    if doc.rLPN:
+        pns = 'page %d of %d' % (pageNumber,doc._lpn0)
+    else:
+        pns = str(pageNumber)
+    canvas.drawCentredString(10*cm, cm, pns)
 
     canvas.restoreState()
-
 
 class MyDocTemplate(BaseDocTemplate):
     "The document template used for all PDF documents."
 
     _invalidInitArgs = ('pageTemplates',)
+    rLPN = False    #record last page number
 
     def __init__(self, filename, **kw):
         frame1 = Frame(2.5*cm, 2.5*cm, 15*cm, 25*cm, id='F1')
@@ -53,7 +57,6 @@ class MyDocTemplate(BaseDocTemplate):
         BaseDocTemplate.__init__(self, filename, **kw)
         template = PageTemplate('normal', [frame1], myMainPageFrame)
         self.addPageTemplates(template)
-
 
     def afterFlowable(self, flowable):
         "Registers TOC entries."
@@ -75,6 +78,22 @@ class MyDocTemplate(BaseDocTemplate):
                 else:
                     self.notify('TOCEntry', (level, text, pageNum))
 
+    def beforeDocument(self):
+        if self.rLPN:
+            self._lpn0 = getattr(self,'_lpn',-100)
+            self._lpn = 0
+        super().beforeDocument()
+
+    def beforePage(self):
+        if self.rLPN:
+            self._lpn = self.canv.getPageNumber()
+        super().beforePage()
+
+    def _allSatisfied(self):
+        r = super()._allSatisfied()
+        if r and self.rLPN:
+            r = self._lpn0==self._lpn
+        return r
 
 def makeHeaderStyle(level, fontName='Times-Roman'):
     "Make a header style for different levels."
@@ -134,47 +153,49 @@ class TocTestCase(unittest.TestCase):
             3. Only entries of every second level has links
             ...
         """
-        if rl_invariant: random.seed(2077179149)
-        maxLevels = 12
+        def doTest(rLPN=False):
+            if rl_invariant: random.seed(2077179149)
+            maxLevels = 12
 
-        # Create styles to be used for document headers
-        # on differnet levels.
-        headerLevelStyles = []
-        for i in range(maxLevels):
-            headerLevelStyles.append(makeHeaderStyle(i))
+            # Create styles to be used for document headers
+            # on differnet levels.
+            headerLevelStyles = []
+            for i in range(maxLevels):
+                headerLevelStyles.append(makeHeaderStyle(i))
 
-        # Create styles to be used for TOC entry lines
-        # for headers on differnet levels.
-        tocLevelStyles = []
-        d, e = tableofcontents.delta, tableofcontents.epsilon
-        for i in range(maxLevels):
-            tocLevelStyles.append(makeTocHeaderStyle(i, d, e))
+            # Create styles to be used for TOC entry lines
+            # for headers on differnet levels.
+            tocLevelStyles = []
+            d, e = tableofcontents.delta, tableofcontents.epsilon
+            for i in range(maxLevels):
+                tocLevelStyles.append(makeTocHeaderStyle(i, d, e))
 
-        # Build story.
-        story = []
-        styleSheet = getSampleStyleSheet()
-        bt = styleSheet['BodyText']
+            # Build story.
+            story = []
+            styleSheet = getSampleStyleSheet()
+            bt = styleSheet['BodyText']
 
-        description = '<font color=red>%s</font>' % self.test0.__doc__
-        story.append(XPreformatted(description, bt))
+            description = '<font color=red>%s</font>' % self.test0.__doc__
+            story.append(XPreformatted(description, bt))
 
-        toc = tableofcontents.TableOfContents(dotsMinLevel=1)
-        toc.levelStyles = tocLevelStyles
-        story.append(toc)
+            toc = tableofcontents.TableOfContents(dotsMinLevel=1)
+            toc.levelStyles = tocLevelStyles
+            story.append(toc)
 
-        for i in range(maxLevels):
-            story.append(Paragraph('HEADER, LEVEL %d' % i,
-                                   headerLevelStyles[i]))
-            #now put some body stuff in.
-            txt = xmlEscape(randomtext.randomText(randomtext.PYTHON, 5))
-            para = Paragraph(txt, makeBodyStyle())
-            story.append(para)
+            for i in range(maxLevels):
+                story.append(Paragraph('HEADER, LEVEL %d' % i,
+                                       headerLevelStyles[i]))
+                #now put some body stuff in.
+                txt = xmlEscape(randomtext.randomText(randomtext.PYTHON, 5))
+                para = Paragraph(txt, makeBodyStyle())
+                story.append(para)
 
-        path = outputfile('test_platypus_toc.pdf')
-        doc = MyDocTemplate(path)
-        doc.multiBuild(story)
-
-
+            path = outputfile('test_platypus_toc%s.pdf' % ('_page_x_of_y' if rLPN else ''))
+            doc = MyDocTemplate(path)
+            doc.rLPN = rLPN
+            doc.multiBuild(story)
+        doTest(False)
+        doTest(True)
 
     def test1(self):
         """This shows a table which would take more than one page,
