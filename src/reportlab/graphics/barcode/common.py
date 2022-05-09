@@ -138,10 +138,16 @@ class Barcode(Flowable):
                 left = left + wx
 
         if self.bearers:
-            self.rect(self.lquiet, 0, \
-                self._width - (self.lquiet + self.rquiet), b)
-            self.rect(self.lquiet, self.barHeight - b, \
-                self._width - (self.lquiet + self.rquiet), b)
+            if getattr(self,'bearerBox', None):
+                canv = self.canv
+                canv.saveState()
+                canv.setLineWidth(b)
+                canv.rect(bb, bb, self.width, self.barHeight-b, stroke=1, fill=0)
+                canv.restoreState()
+            else:
+                w = self._width - (self.lquiet + self.rquiet)
+                self.rect(self.lquiet, 0, w, b)
+                self.rect(self.lquiet, self.barHeight - b, w, b)
 
         self.drawHumanReadable()
 
@@ -260,6 +266,9 @@ class I2of5(Barcode):
             Set to zero for no bearer bars. (Bearer bars help detect
             misscans, so it is suggested to leave them on).
 
+        bearerBox (bool default False)
+            if true draw a  true rectangle of width bearers around the barcode.
+
         quiet (bool, default 1):
             Whether to include quiet zones in the symbol.
 
@@ -304,6 +313,7 @@ class I2of5(Barcode):
     ratio = 2.2
     checksum = 1
     bearers = 3.0
+    bearerBox = False
     quiet = 1
     lquiet = None
     rquiet = None

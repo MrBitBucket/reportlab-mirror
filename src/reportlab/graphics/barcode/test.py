@@ -32,7 +32,11 @@ def run():
 
     #for codeNames in code
     storyAdd(Paragraph('I2of5', styleN))
-    storyAdd(I2of5(1234, barWidth = inch*0.02, checksum=0))
+    storyAdd(I2of5('05400141288766', barWidth = inch*0.02, checksum=0))
+    storyAdd(I2of5('0001234567890', barWidth = inch*0.02, checksum=1))
+    storyAdd(I2of5('00012345678905', barWidth = inch*0.02, checksum=0))
+    storyAdd(I2of5('0001234567890', barWidth = inch*0.02, checksum=1, bearerBox = True))
+    
 
     storyAdd(Paragraph('MSI', styleN))
     storyAdd(MSI(1234))
