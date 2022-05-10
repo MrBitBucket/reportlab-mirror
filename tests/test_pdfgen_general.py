@@ -980,6 +980,7 @@ cost to performance.""")
     c.addOutlineEntry(title+" section", title, level=0, closed=True)
     c.bookmarkHorizontalAbsolute(title, 10.8*inch)
 
+    c.drawString(0.75*inch, 2.25*inch, "This is the End my only Friend the End and I like it :)")
     c.saveState()
     p = c.beginPath()
     p.moveTo(1*inch,2*inch)
@@ -987,10 +988,11 @@ cost to performance.""")
     p.curveTo(2*inch,3*inch,3.0*inch,3*inch,4*inch,2.9*inch)
     p.lineTo(5.5*inch,2.1*inch)
     p.close()
-    c.clipPath(p)
+    c.clipPath(p, stroke=0)
 
     # Draw a linear gradient from (0, 2*inch) to (5*inch, 3*inch), from orange to white.
     # The gradient will extend past the endpoints (so you probably want a clip path in place)
+    c._setFillAlpha(0.8)
     c.linearGradient(1*inch, 2*inch, 6*inch, 3*inch, (red, blue))
     c.restoreState()
 
