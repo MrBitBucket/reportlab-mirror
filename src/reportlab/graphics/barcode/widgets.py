@@ -68,8 +68,13 @@ class _BarcodeWidget(PlotArea):
         self._BCC.__init__(self,**kw)
 
     def rect(self,x,y,w,h,**kw):
-        self._Gadd(Rect(self.x+x,self.y+y,w,h,
-                    strokeColor=self.barStrokeColor,strokeWidth=self.barStrokeWidth, fillColor=self.barFillColor))
+        #this allows the base code to draw rectangles for us using self.rect
+        #using direct keyword argument overrides see eg common.py line 140 on
+        for k,v in (('strokeColor',self.barStrokeColor),
+                    ('strokeWidth',self.barStrokeWidth),
+                    ('fillColor',self.barFillColor)):
+            kw.setdefault(k,v)
+        self._Gadd(Rect(self.x+x,self.y+y,w,h, **kw))
 
     def draw(self):
         if not self._BCC: raise NotImplementedError("Abstract class %s cannot be drawn" % self.__class__.__name__)
@@ -137,6 +142,8 @@ BarcodeI2of5 = _BCW(
             bottom of the barcode). Default is 3 x-dimensions.
             Set to zero for no bearer bars. (Bearer bars help detect
             misscans, so it is suggested to leave them on).'''),
+        bearerBox = AttrMapValue(isBoolean,'''(bool, default 0):
+            if True turn bearers into a box'''),
         quiet = AttrMapValue(isBoolean,'''(bool, default 1):
             Whether to include quiet zones in the symbol.'''),
 

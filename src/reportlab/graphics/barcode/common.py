@@ -140,10 +140,15 @@ class Barcode(Flowable):
         if self.bearers:
             if getattr(self,'bearerBox', None):
                 canv = self.canv
-                canv.saveState()
-                canv.setLineWidth(b)
-                canv.rect(bb, bb, self.width, self.barHeight-b, stroke=1, fill=0)
-                canv.restoreState()
+                if hasattr(canv,'_Gadd'):
+                    #this is a widget rect takes other arguments
+                    canv.rect(bb, bb, self.width, self.barHeight-b,
+                            strokeWidth=b, strokeColor=self.barFillColor or self.barStrokeColor, fillColor=None)
+                else:
+                    canv.saveState()
+                    canv.setLineWidth(b)
+                    canv.rect(bb, bb, self.width, self.barHeight-b, stroke=1, fill=0)
+                    canv.restoreState()
             else:
                 w = self._width - (self.lquiet + self.rquiet)
                 self.rect(self.lquiet, 0, w, b)
