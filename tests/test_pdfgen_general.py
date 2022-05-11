@@ -12,7 +12,7 @@ from io import BytesIO
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
-from reportlab.lib.utils import haveImages, fileName2FSEnc
+from reportlab.lib.utils import fileName2FSEnc
 from reportlab.lib.boxstuff import rectCorner
 
 #################################################################
@@ -719,9 +719,6 @@ cost to performance.""")
     framePage(c, "Images")
     c.setFont('Times-Roman', 12)
     t = c.beginText(inch, 10 * inch)
-    if not haveImages:
-        c.drawString(inch, 11*inch,
-                     "Python Imaging Library not found! Below you see rectangles instead of images.")
 
     t.textLines("""PDFgen uses the Python Imaging Library
         to process a very wide variety of image formats.
@@ -736,28 +733,20 @@ cost to performance.""")
 
     c.drawText(t)
 
-    if haveImages:
-        from reportlab.lib.testutils import testsFolder
-        gif = os.path.join(testsFolder,'pythonpowered.gif')
-        c.drawInlineImage(gif,2*inch, 7*inch)
-        c.drawInlineImage(os.path.join(testsFolder,'pythonpowered-gs.gif'),4*inch, 7.5*inch)
-        tif = os.path.join(testsFolder,'test-cross.tiff')   #example of a mode '1' image
-        c.drawInlineImage(tif,1*inch, 1*inch)
-        from reportlab.lib.utils import Image as PilImage
-        if PilImage:
-            c.drawInlineImage(PilImage.open(tif),1.25*inch, 1*inch)
-    else:
-        c.rect(2*inch, 7*inch, 110, 44)
-        c.rect(4*inch, 7*inch, 110, 44)
+    from reportlab.lib.testutils import testsFolder
+    gif = os.path.join(testsFolder,'pythonpowered.gif')
+    c.drawInlineImage(gif,2*inch, 7*inch)
+    c.drawInlineImage(os.path.join(testsFolder,'pythonpowered-gs.gif'),4*inch, 7.5*inch)
+    tif = os.path.join(testsFolder,'test-cross.tiff')   #example of a mode '1' image
+    c.drawInlineImage(tif,1*inch, 1*inch)
+    from reportlab.lib.utils import Image as PilImage
+    c.drawInlineImage(PilImage.open(tif),1.25*inch, 1*inch)
 
     c.line(1.5*inch, 7*inch, 4*inch, 7*inch)
     c.line(2*inch, 6.5*inch, 2*inch, 8*inch)
     c.drawString(4.5 * inch, 7.25*inch, 'inline image drawn at natural size')
 
-    if haveImages:
-        c.drawInlineImage(gif,2*inch, 5*inch, inch, inch)
-    else:
-        c.rect(2*inch, 5*inch, inch, inch)
+    c.drawInlineImage(gif,2*inch, 5*inch, inch, inch)
 
     c.line(1.5*inch, 5*inch, 4*inch, 5*inch)
     c.line(2*inch, 4.5*inch, 2*inch, 6*inch)
@@ -767,25 +756,17 @@ cost to performance.""")
     c.drawString(1.5 * inch, 3.75*inch, 'This results in faster generation and much smaller files.')
 
     for i in range(5):
-        if haveImages:
-            (w, h) = c.drawImage(gif, (1.5 + i)*inch, 3*inch)
-        else:
-            (w, h) = (144, 10)
-            c.rect((1.5 + i)*inch, 3*inch, 110, 44)
+        (w, h) = c.drawImage(gif, (1.5 + i)*inch, 3*inch)
 
     myMask = [254,255,222,223,0,1]
     c.drawString(1.5 * inch, 2.5*inch, "The optional 'mask' parameter lets you define transparent colors. We used a color picker")
     c.drawString(1.5 * inch, 2.3*inch, "to determine that the yellow in the image above is RGB=(225,223,0).  We then define a mask")
     c.drawString(1.5 * inch, 2.1*inch, "spanning these RGB values:  %s.  The background vanishes!!" % myMask)
     c.drawString(2.5*inch, 1.2*inch, 'This would normally be obscured')
-    if haveImages:
-        c.drawImage(gif, 1*inch, 1.2*inch, w, h, mask=myMask)
-        c.drawImage(gif, 3*inch, 1.2*inch, w, h, mask='auto')
-        c.drawImage(os.path.join(testsFolder,'test-rgba.png'),5*inch,1.2*inch,width=10,height=10,mask='auto')
-        c.drawImage(os.path.join(testsFolder,'test-indexed.png'),5.5*inch,1.2*inch,width=10,height=10,mask='auto')
-    else:
-        c.rect(1*inch, 1.2*inch, w, h)
-        c.rect(3*inch, 1.2*inch, w, h)
+    c.drawImage(gif, 1*inch, 1.2*inch, w, h, mask=myMask)
+    c.drawImage(gif, 3*inch, 1.2*inch, w, h, mask='auto')
+    c.drawImage(os.path.join(testsFolder,'test-rgba.png'),5*inch,1.2*inch,width=10,height=10,mask='auto')
+    c.drawImage(os.path.join(testsFolder,'test-indexed.png'),5.5*inch,1.2*inch,width=10,height=10,mask='auto')
 
     c.showPage()
     c.drawString(1*inch, 10.25*inch, "For rgba type images we can use the alpha channel if we set mask='auto'.")
@@ -804,114 +785,112 @@ cost to performance.""")
     c.rect(3*inch, 8+14.4*inch, w, h)
     c.rect(1*inch, 6+14.4*inch, w, h)
     c.rect(3*inch, 6+14.4*inch, w, h)
-    if haveImages:
-        from reportlab.lib.testutils import testsFolder
-        png = os.path.join(testsFolder,'solid_red_alpha.png')
-        c.drawImage(png, 1*inch, 8*inch+14.4, w, h, mask=None)
-        c.drawImage(png, 3*inch, 8*inch+14.4, w, h, mask='auto')
-        png = os.path.join(testsFolder,'alpha_test.png')
-        c.drawImage(png, 1*inch, 6*inch+14.4, w, h, mask=None)
-        c.drawImage(png, 3*inch, 6*inch+14.4, w, h, mask='auto')
+    from reportlab.lib.testutils import testsFolder
+    png = os.path.join(testsFolder,'solid_red_alpha.png')
+    c.drawImage(png, 1*inch, 8*inch+14.4, w, h, mask=None)
+    c.drawImage(png, 3*inch, 8*inch+14.4, w, h, mask='auto')
+    png = os.path.join(testsFolder,'alpha_test.png')
+    c.drawImage(png, 1*inch, 6*inch+14.4, w, h, mask=None)
+    c.drawImage(png, 3*inch, 6*inch+14.4, w, h, mask='auto')
     c.showPage()
 
-    if haveImages:
-        import shutil
-        c.drawString(1*inch, 10.25*inch, 'This jpeg is actually a gif')
-        jpg = outputfile('_i_am_actually_a_gif.jpg')
-        shutil.copyfile(gif,jpg)
-        c.drawImage(jpg, 1*inch, 9.25*inch, w, h, mask='auto')
-        tjpg = os.path.join(os.path.dirname(os.path.dirname(gif)),'docs','images','lj8100.jpg')
-        if os.path.isfile(tjpg):
-            c.drawString(4*inch, 10.25*inch, 'This gif is actually a jpeg')
-            tgif = outputfile(os.path.basename('_i_am_actually_a_jpeg.gif'))
-            shutil.copyfile(tjpg,tgif)
-            c.drawImage(tgif, 4*inch, 9.25*inch, w, h, mask='auto')
+    import shutil
+    c.drawString(1*inch, 10.25*inch, 'This jpeg is actually a gif')
+    jpg = outputfile('_i_am_actually_a_gif.jpg')
+    shutil.copyfile(gif,jpg)
+    c.drawImage(jpg, 1*inch, 9.25*inch, w, h, mask='auto')
+    tjpg = os.path.join(os.path.dirname(os.path.dirname(gif)),'docs','images','lj8100.jpg')
+    if os.path.isfile(tjpg):
+        c.drawString(4*inch, 10.25*inch, 'This gif is actually a jpeg')
+        tgif = outputfile(os.path.basename('_i_am_actually_a_jpeg.gif'))
+        shutil.copyfile(tjpg,tgif)
+        c.drawImage(tgif, 4*inch, 9.25*inch, w, h, mask='auto')
 
-        c.drawString(inch, 9.0*inch, 'Image positioning tests with preserveAspectRatio')
+    c.drawString(inch, 9.0*inch, 'Image positioning tests with preserveAspectRatio')
 
-        #preserveAspectRatio test
-        c.drawString(inch, 8.8*inch, 'Both of these should appear within the boxes, vertically centered')
+    #preserveAspectRatio test
+    c.drawString(inch, 8.8*inch, 'Both of these should appear within the boxes, vertically centered')
 
 
-        x, y, w, h = inch, 6.75* inch, 2*inch, 2*inch
-        c.rect(x, y, w, h)
-        (w2, h2) = c.drawImage(gif,  #anchor southwest, drawImage
-                    x, y, width=w, height=h,
-                    preserveAspectRatio=True,
-                    anchor='c'
-                    )
+    x, y, w, h = inch, 6.75* inch, 2*inch, 2*inch
+    c.rect(x, y, w, h)
+    (w2, h2) = c.drawImage(gif,  #anchor southwest, drawImage
+                x, y, width=w, height=h,
+                preserveAspectRatio=True,
+                anchor='c'
+                )
 
-        #now test drawInlineImage across the page
-        x = 5 * inch
-        c.rect(x, y, w, h)
-        (w2, h2) = c.drawInlineImage(gif,  #anchor southwest, drawInlineImage
-                    x, y, width=w, height=h,
-                    preserveAspectRatio=True,
-                    anchor='c'
-                    )
+    #now test drawInlineImage across the page
+    x = 5 * inch
+    c.rect(x, y, w, h)
+    (w2, h2) = c.drawInlineImage(gif,  #anchor southwest, drawInlineImage
+                x, y, width=w, height=h,
+                preserveAspectRatio=True,
+                anchor='c'
+                )
 
-        c.drawString(inch, 5.75*inch,
-        'anchored by respective corners - use both a wide and a tall one as tests')
-        x = 0.25 * inch
-        y = 5*inch
-        for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
-            x += 0.75*inch
-            c.rect(x, y, 0.6*inch, 0.6*inch)
-            c.drawImage(
-                    gif, x, y,
-                    width=0.6*inch, height=0.6*inch,
-                    preserveAspectRatio=True,
-                    anchor=anchor
-                    )
-            c.drawString(x, y-0.1*inch, anchor)
+    c.drawString(inch, 5.75*inch,
+    'anchored by respective corners - use both a wide and a tall one as tests')
+    x = 0.25 * inch
+    y = 5*inch
+    for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
+        x += 0.75*inch
+        c.rect(x, y, 0.6*inch, 0.6*inch)
+        c.drawImage(
+                gif, x, y,
+                width=0.6*inch, height=0.6*inch,
+                preserveAspectRatio=True,
+                anchor=anchor
+                )
+        c.drawString(x, y-0.1*inch, anchor)
 
-        x = 0.25 * inch
-        y = 4*inch
-        tall_red = os.path.join(testsFolder,'tall_red.png')
-        for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
-            x += 0.75*inch
-            c.rect(x, y, 0.6*inch, 0.6*inch)
-            c.drawImage(
-                    tall_red, x, y,
-                    width=0.6*inch, height=0.6*inch,
-                    preserveAspectRatio=True,
-                    anchor=anchor
-                    )
-            c.drawString(x, y-0.1*inch, anchor)
+    x = 0.25 * inch
+    y = 4*inch
+    tall_red = os.path.join(testsFolder,'tall_red.png')
+    for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
+        x += 0.75*inch
+        c.rect(x, y, 0.6*inch, 0.6*inch)
+        c.drawImage(
+                tall_red, x, y,
+                width=0.6*inch, height=0.6*inch,
+                preserveAspectRatio=True,
+                anchor=anchor
+                )
+        c.drawString(x, y-0.1*inch, anchor)
 
-        #Andy's positioning code fails for this case when the image is not reaching the limit
-        x = 0.25 * inch
-        y = 3*inch
-        tall_red = os.path.join(testsFolder,'tall_red.png')
-        for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
-            x += 0.75*inch
-            c.rect(x, 3*inch, 0.7*inch, 0.7*inch)
-            c.drawImage(
-                    tall_red, x, 3*inch,
-                    width=0.6*inch, height=0.6*inch,
-                    preserveAspectRatio=True,
-                    anchor=anchor
-                    )
-            c.drawString(x, y-0.1*inch, anchor)
+    #Andy's positioning code fails for this case when the image is not reaching the limit
+    x = 0.25 * inch
+    y = 3*inch
+    tall_red = os.path.join(testsFolder,'tall_red.png')
+    for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
+        x += 0.75*inch
+        c.rect(x, 3*inch, 0.7*inch, 0.7*inch)
+        c.drawImage(
+                tall_red, x, 3*inch,
+                width=0.6*inch, height=0.6*inch,
+                preserveAspectRatio=True,
+                anchor=anchor
+                )
+        c.drawString(x, y-0.1*inch, anchor)
 
-        #fix by using anchorAtXY
-        x = 0.25 * inch
-        y = 2*inch
-        tall_red = os.path.join(testsFolder,'tall_red.png')
-        for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
-            x += 0.75*inch
-            c.rect(x, y, 0.7*inch, 0.7*inch)
-            ax, ay = rectCorner(x, y, 0.7*inch, 0.7*inch, anchor)
-            c.drawImage(
-                    tall_red, ax, ay,
-                    width=0.6*inch, height=0.6*inch,
-                    preserveAspectRatio=True,
-                    anchor=anchor,
-                    anchorAtXY=True,
-                    )
-            c.drawString(x, y-0.1*inch, anchor)
+    #fix by using anchorAtXY
+    x = 0.25 * inch
+    y = 2*inch
+    tall_red = os.path.join(testsFolder,'tall_red.png')
+    for anchor in ('nw','n','ne','w','c','e','sw','s','se'):
+        x += 0.75*inch
+        c.rect(x, y, 0.7*inch, 0.7*inch)
+        ax, ay = rectCorner(x, y, 0.7*inch, 0.7*inch, anchor)
+        c.drawImage(
+                tall_red, ax, ay,
+                width=0.6*inch, height=0.6*inch,
+                preserveAspectRatio=True,
+                anchor=anchor,
+                anchorAtXY=True,
+                )
+        c.drawString(x, y-0.1*inch, anchor)
 
-        c.showPage()
+    c.showPage()
 
 
 #########################################################################

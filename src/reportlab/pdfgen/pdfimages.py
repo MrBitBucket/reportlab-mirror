@@ -11,7 +11,7 @@ import reportlab
 from reportlab import rl_config
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase import pdfdoc
-from reportlab.lib.utils import haveImages, isStr
+from reportlab.lib.utils import isStr
 from reportlab.lib.rl_accel import fp_str, asciiBase85Encode
 from reportlab.lib.boxstuff import aspectRatioFix
 
@@ -74,7 +74,6 @@ class PDFImage:
     def cache_imagedata(self):
         image = self.image
         if not pdfutils.cachedImageExists(image):
-            if not haveImages: return
             pdfutils.cacheImageFile(image)
 
         #now we have one cached, slurp it in

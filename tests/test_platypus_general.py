@@ -24,16 +24,14 @@ from reportlab.lib.units import inch, cm
 from reportlab.lib.styles import PropertySet, getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
 from reportlab.rl_config import defaultPageSize
-from reportlab.lib.utils import haveImages, _RL_DIR, rl_isfile, open_for_read, fileName2FSEnc, asNative
+from reportlab.lib.utils import _RL_DIR, rl_isfile, open_for_read, fileName2FSEnc, asNative
 import unittest
 from reportlab.lib.testutils import testsFolder
-if haveImages:
-    _GIF = os.path.join(testsFolder,'pythonpowered.gif')
-    if not rl_isfile(_GIF): _GIF = None
-    _GAPNG = os.path.join(testsFolder,'gray-alpha.png')
-    if not rl_isfile(_GAPNG): _GAPNG = None
-else:
-    _GIF = None
+
+_GIF = os.path.join(testsFolder,'pythonpowered.gif')
+if not rl_isfile(_GIF): _GIF = None
+_GAPNG = os.path.join(testsFolder,'gray-alpha.png')
+if not rl_isfile(_GAPNG): _GAPNG = None
 if _GIF: _GIFFSEnc=fileName2FSEnc(_GIF)
 if _GAPNG: _GAPNGFSEnc=fileName2FSEnc(_GAPNG)
 

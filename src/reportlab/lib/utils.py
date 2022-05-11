@@ -11,6 +11,7 @@ from io import BytesIO
 
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir
 from . rl_safe_eval import rl_safe_exec, rl_safe_eval, safer_globals
+from PIL import Image
 
 class __UNSET__:
     @staticmethod
@@ -389,17 +390,6 @@ def recursiveImport(modulename, baseDir=None, noCWD=0, debug=0):
         if debug:
             print('===== restore sys.path=%s' % repr(opath))
 
-# Image Capability Detection.  Set a flag haveImages
-# to tell us if PIL library is present.
-# define PIL_Image as either None, or an alias for the PIL.Image
-# module, as there are 2 ways to import it
-try:
-    from PIL import Image
-except ImportError:
-    try:
-        import Image
-    except ImportError:
-        Image = None
 haveImages = Image is not None
 
 class ArgvDictValue:
@@ -672,26 +662,12 @@ class ImageReader:
                     self.fp.close()
                     del self.fp #will become a property in the next statement
                     self.__class__=LazyImageReader
-                if haveImages:
-                    #detect which library we are using and open the image
-                    if not self._image:
-                        self._image = self._read_image(self.fp)
-                        self.check_pil_image_size(self._image)
-                    if getattr(self._image,'format',None)=='JPEG': self.jpeg_fh = self._jpeg_fh
-                else:
-                    from reportlab.pdfbase.pdfutils import readJPEGInfo
-                    try:
-                        self._width,self._height, c, dpi = readJPEGInfo(self.fp)
-                    except:
-                        annotateException('\nImaging Library not available, unable to import bitmaps only jpegs\nfileName=%r identity=%s'%(fileName,self.identity()))
-                    size = self._width*self._height*c
-                    if self._max_image_size is not None and size>self._max+image_size:
-                        raise MemoryError('JPEG %s color %s x %s image would use %s > %s bytes'
-                                            %(c,self._width,self._height,size,self._max_image_size))
+                #detect which library we are using and open the image
+                if not self._image:
+                    self._image = self._read_image(self.fp)
+                    self.check_pil_image_size(self._image)
+                if getattr(self._image,'format',None)=='JPEG':
                     self.jpeg_fh = self._jpeg_fh
-                    self._data = self.fp.read()
-                    self._dataA=None
-                    self.fp.seek(0)
             except:
                 annotateException('\nfileName=%r identity=%s'%(fileName,self.identity()))
 
