@@ -14,6 +14,8 @@ mentioned. If we missed you, please let us know!
 CHANGES  3.6.10  ??/??/2022
 ---------------------------
 	* fix symlink looping in setup.py reported by Michał Górny &lt; mgorny at gentoo dot org &gt;
+	* allow bearerBox attribute for some barcodes
+	* require pillow>=9.0.0 patch contributed by Claude Paroz claude at 2xlibre.net
 
 CHANGES  3.6.9   22/03/2022
 ---------------------------
