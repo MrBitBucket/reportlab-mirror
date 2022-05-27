@@ -5,9 +5,10 @@ __version__='3.3.0'
 """helpers for pdf encryption/decryption"""
 import sys, os
 from binascii import hexlify, unhexlify
+from hashlib import md5
 from io import BytesIO
 
-from reportlab.lib.utils import md5, asBytes, int2Byte, rawBytes, asNative
+from reportlab.lib.utils import asBytes, int2Byte, rawBytes, asNative
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfbase.pdfdoc import PDFObject
 from reportlab.platypus.flowables import Flowable

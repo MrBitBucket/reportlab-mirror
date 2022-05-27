@@ -8,11 +8,8 @@ Most of them make use of test\\pythonpowereed.gif."""
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
 setOutDir(__name__)
 import os
-try:
-    from hashlib import md5
-except ImportError:
-    from md5 import md5
 import unittest
+from hashlib import md5
 from reportlab.lib.utils import ImageReader
 
 

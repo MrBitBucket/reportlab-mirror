@@ -57,14 +57,15 @@ def makeSuite():
 if __name__ == "__main__":
     # add some diagnostics, useful in invariant tests
     import sys, os
-    from reportlab.lib.utils import md5, bytestr
+    from hashlib import md5
+    from reportlab.lib.utils import bytestr
     verbose = ('-v' in sys.argv)
     unittest.TextTestRunner().run(makeSuite())
     if verbose:
         #tell us about the file we produced
         fileSize = os.stat(filename)[6]
         raw = open(filename,'rb').read()
-        digest = md5.md5(bytestr(raw)).hexdigest()
+        digest = md5(bytestr(raw)).hexdigest()
         major, minor = sys.version_info[0:2]
         print('%s on %s (Python %d.%d):\n    %d bytes, digest %s' % (
             filename,sys.platform, major, minor, fileSize, digest))

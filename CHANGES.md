@@ -11,11 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  3.6.10  ??/??/2022
+CHANGES  3.6.10  31/05/2022
 ---------------------------
 	* fix symlink looping in setup.py reported by Michał Górny &lt; mgorny at gentoo dot org &gt;
 	* allow bearerBox attribute for some barcodes
 	* require pillow>=9.0.0 patch contributed by Claude Paroz claude at 2xlibre.net
+	* Apply Claude Paroz  < claude at 2xlibre dot net > patch to assume hashlib md5 exists
 
 CHANGES  3.6.9   22/03/2022
 ---------------------------
