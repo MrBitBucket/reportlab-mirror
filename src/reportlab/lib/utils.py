@@ -638,30 +638,17 @@ class ImageReader:
         else:
             try:
                 from reportlab.rl_config import imageReaderFlags
-                self.fp = open_for_read(fileName,'b')
-                if isinstance(self.fp, BytesIO): imageReaderFlags=0 #avoid messing with already internal files
-                if imageReaderFlags>0:  #interning
-                    data = self.fp.read()
-                    if imageReaderFlags&2:  #autoclose
-                        try:
-                            self.fp.close()
-                        except:
-                            pass
-                    if imageReaderFlags&4:  #cache the data
-                        if not self._cache:
-                            from rl_config import register_reset
-                            register_reset(self._cache.clear)
-                        data=self._cache.setdefault(_digester(data),data)
-                    self.fp=BytesIO(data)
-                elif imageReaderFlags==-1 and isinstance(fileName,str):
-                    #try Ralf Schmitt's re-opening technique of avoiding too many open files
-                    self.fp.close()
-                    del self.fp #will become a property in the next statement
-                    self.__class__=LazyImageReader
-                #detect which library we are using and open the image
-                if not self._image:
-                    self._image = self._read_image(self.fp)
-                    self.check_pil_image_size(self._image)
+                if imageReaderFlags != 0:
+                    raise ValueError('imageReaderFlags values other than 0 are no longer supported; all images are interned now')
+                fp = open_for_read(fileName,'b')
+                if not isinstance(fp, BytesIO):
+                    tfp, fp = fp, BytesIO(fp.read())
+                    tfp.close()
+                    del tfp
+                self.fp = fp
+                self._image = self._read_image(self.fp)
+                self._image.fileName = fileName if isinstance(fileName,str) else repr(fileName)
+                self.check_pil_image_size(self._image)
                 if getattr(self._image,'format',None)=='JPEG':
                     self.jpeg_fh = self._jpeg_fh
             except:
@@ -755,13 +742,7 @@ class ImageReader:
             return None
 
 class LazyImageReader(ImageReader): 
-    def fp(self): 
-        return open_for_read(self.fileName, 'b') 
-    fp=property(fp) 
-
-    def _image(self):
-        return self._read_image(self.fp)
-    _image=property(_image) 
+    pass #now same as base class since we intern everything
 
 def getImageData(imageFileName):
     "Get width, height and RGB pixels from image file.  Wraps PIL"

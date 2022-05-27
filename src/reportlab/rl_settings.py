@@ -101,11 +101,7 @@ canvas_basefontname=        'Helvetica'             #this is used to initialize 
                                                     #if the bold/italic/bold italic fonts are also registered and defined as a family.
 
 allowShortTableRows=1                               #allows some rows in a table to be short
-imageReaderFlags=0                                  #attempt to convert images into internal memory files to reduce
-                                                    #the number of open files (see lib.utils.ImageReader)
-                                                    #if imageReaderFlags&2 then attempt autoclosing of those files
-                                                    #if imageReaderFlags&4 then cache data 
-                                                    #if imageReaderFlags==-1 then use Ralf Schmitt's re-opening approach
+imageReaderFlags=0                                  #no longer in use
 paraFontSizeHeightOffset=   1                       #if true paragraphs start at height-fontSize
 canvas_baseColor=           None                    #initialize the canvas fill and stroke colors if this is set
 ignoreContainerActions=     1                       #if true then action flowables in flowable _Containers will be ignored

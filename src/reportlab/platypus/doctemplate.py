@@ -350,6 +350,9 @@ class onDrawStr(str):
         self.label = label
         return self
 
+    def __getnewargs__(self):
+        return str(self),self.onDraw,self.label,self.kind
+
 class PageAccumulator:
     '''gadget to accumulate information in a page
     and then allow it to be interrogated at the end
