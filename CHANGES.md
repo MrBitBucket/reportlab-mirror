@@ -17,7 +17,9 @@ CHANGES  3.6.10  31/05/2022
 	* allow bearerBox attribute for some barcodes
 	* require pillow>=9.0.0 patch contributed by Claude Paroz claude at 2xlibre.net
 	* Apply Claude Paroz  < claude at 2xlibre dot net > patch to assume hashlib md5 exists
-	* ImageReader updated to allow deepcopy
+	* ImageReader updated to allow deepcopy; similarly for doctemplate.onDrawStr
+	* fix 3.11.0b2 regression in rl_safe_eval.
+	* apply massive contribution for Table inRowSplit from Lennart Regebro < lregebro at shoobx dot com >
 
 CHANGES  3.6.9   22/03/2022
 ---------------------------

@@ -60,8 +60,9 @@ class CellStyle(PropertySet):
             parent.copy(self)
     def copy(self, result=None):
         if result is None:
-            result = CellStyle()
+            result = CellStyle(self.name)
         for name in dir(self):
+            if name.startswith('_'): continue
             setattr(result, name, getattr(self, name))
         return result
 
@@ -251,7 +252,7 @@ RoundingRectLine = namedtuple('RoundingRectLine','xs ys xe ye weight color cap d
 
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
-                repeatRows=0, repeatCols=0, splitByRow=1, emptyTableAction=None, ident=None,
+                repeatRows=0, repeatCols=0, splitByRow=1, splitInRow=0, emptyTableAction=None, ident=None,
                 hAlign=None,vAlign=None, normalizedData=0, cellStyles=None, rowSplitRange=None,
                 spaceBefore=None,spaceAfter=None, longTableOptimize=None, minRowHeights=None,
                 cornerRadii=__UNSET__, #or [topLeft, topRight, bottomLeft bottomRight]
@@ -336,6 +337,7 @@ class Table(Flowable):
         self.repeatRows = repeatRows
         self.repeatCols = repeatCols
         self.splitByRow = splitByRow
+        self.splitInRow = splitInRow
 
         if style:
             self.setStyle(style)
@@ -464,6 +466,10 @@ class Table(Flowable):
         w = 0
         canv = getattr(self,'canv',None)
         sb0 = None
+        if isinstance(V, str):
+            vw = self._elementWidth(V, s)
+            vh = len(V.split('\n'))*s.fontsize*1.2
+            return max(w, vw), vh
         for v in V:
             vw, vh = v.wrapOn(canv, aW, aH)
             sb = v.getSpaceBefore()
@@ -1199,7 +1205,7 @@ class Table(Flowable):
                 sc, ec, sr, er = self.normCellRange(sc,ec,sr,er)
                 getattr(self,_LineOpMap.get(op, '_drawUnknown' ))( (sc, sr), (ec, er), weight, color, count, space)
         finally:
-            if rrd: 
+            if rrd:
                 canv.line = ocanvline
         canv.restoreState()
         self._curcolor = None
@@ -1356,44 +1362,97 @@ class Table(Flowable):
             if er>=n: er -= n
             self._addCommand((c[0],)+((sc, sr), (ec, er))+tuple(c[3:]))
 
-    def _splitRows(self,availHeight):
-        n=self._getFirstPossibleSplitRowPosition(availHeight)
-        repeatRows = self.repeatRows
-        if n<= (repeatRows if isinstance(repeatRows,int) else (max(repeatRows)+1)): return []
-        lim = len(self._rowHeights)
-        if n==lim: return [self]
+    def _splitCell(self, value, style, oldHeight, newHeight, width):
+        # Content height of the new top row
+        height0 = newHeight - style.topPadding
+        # Content height of the new bottom row
+        height1 = oldHeight - (style.topPadding + newHeight)
 
-        lo = self._rowSplitRange
-        if lo:
-            lo, hi = lo
-            if lo<0: lo += lim
-            if hi<0: hi += lim
-            if n>hi:
-                return self._splitRows(availHeight - sum(self._rowHeights[hi:n]))
-            elif n<lo:
+        if isinstance(value, (tuple, list)):
+            newCellContent = []
+            postponedContent = []
+            split = False
+            cellHeight = self._listCellGeom(value, width, style)[1]
+
+            if style.valign == "MIDDLE":
+                usedHeight = (oldHeight - cellHeight) / 2
+            else:
+                usedHeight = 0
+
+            for flowable in value:
+                if split:
+                    if flowable.height <= height1:
+                        postponedContent.append(flowable)
+                        # Shrink the available height:
+                        height1 -= flowable.height
+                    else:
+                        # The content doesn't fit after the split:
+                        return []
+                elif usedHeight + flowable.height <= height0:
+                    newCellContent.append(flowable)
+                    usedHeight += flowable.height
+                else:
+                    # This is where we need to split
+                    splits = flowable.split(width, height0-usedHeight)
+                    if splits:
+                        newCellContent.append(splits[0])
+                        postponedContent.append(splits[1])
+                    else:
+                        # We couldn't split this flowable at the desired
+                        # point. If we already has added previous paragraphs
+                        # to the content, just add everything after the split.
+                        # Also try adding it after the split if valign isn't TOP
+                        if newCellContent or style.valign != "TOP":
+                            if flowable.height <= height1:
+                                postponedContent.append(flowable)
+                                # Shrink the available height:
+                                height1 -= flowable.height
+                            else:
+                                # The content doesn't fit after the split:
+                                return []
+                        else:
+                            # We could not split this, so we fail:
+                            return []
+
+                    split = True
+
+            return (tuple(newCellContent), tuple(postponedContent))
+
+        elif isinstance(value, str):
+            rows = value.split("\n")
+            lineHeight = 1.2 * style.fontsize
+            contentHeight = (style.leading or lineHeight) * len(rows)
+            if style.valign == "TOP" and contentHeight <= height0:
+                # This fits in the first cell, all is good
+                return (value, '')
+            elif style.valign == "BOTTOM" and contentHeight <= height1:
+                # This fits in the second cell, all is good
+                return ('', value)
+            elif style.valign == "MIDDLE":
+                # Put it in the largest cell:
+                if height1 > height0:
+                    return ('', value)
+                else:
+                    return (value, '')
+
+            elif len(rows) < 2:
+                # It doesn't fit, and there's nothing to split: Fail
                 return []
+            # We need to split this, and there are multiple lines, so we can
+            if style.valign == "TOP":
+                splitPoint = height0 // lineHeight
+            elif style.valign == "BOTTOM":
+                splitPoint = len(rows) - (height1 // lineHeight)
+            else:  # MID
+                splitPoint = (height0 - height1 + contentHeight) // (2 * lineHeight)
 
-        repeatCols = self.repeatCols
-        splitByRow = self.splitByRow
-        data = self._cellvalues
+            splitPoint = int(splitPoint)
+            return ('\n'.join(rows[:splitPoint]), '\n'.join(rows[splitPoint:]))
 
-        #we're going to split into two superRows
-        ident = self.ident
-        if ident: ident = IdentStr(ident)
-        lto = self._longTableOptimize
-        if lto:
-            splitH = self._rowHeights
-        else:
-            splitH = self._argH
-        cornerRadii = getattr(self,'_cornerRadii',None)
-        R0 = self.__class__( data[:n], colWidths=self._colWidths, rowHeights=splitH[:n],
-                repeatRows=repeatRows, repeatCols=repeatCols,
-                splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[:n],
-                ident=ident,
-                spaceBefore=getattr(self,'spaceBefore',None),
-                longTableOptimize=lto,
-                cornerRadii=cornerRadii[:2] if cornerRadii else None)
+        # No content
+        return ('', '')
 
+    def _splitLineCmds(self, n, doInRowSplit=0):
         nrows = self._nrows
         ncols = self._ncols
         #copy the commands
@@ -1414,20 +1473,24 @@ class Table(Flowable):
             if er < 0: er += nrows
 
             if op in ('BOX','OUTLINE','GRID'):
-                if sr<n and er>=n:
+                if (sr<n and er>=n) or (doInRowSplit and sr==n):
                     # we have to split the BOX
                     A.append(('LINEABOVE',(sc,sr), (ec,sr), weight, color, cap, dash, join, count, space))
                     A.append(('LINEBEFORE',(sc,sr), (sc,er), weight, color, cap, dash, join, count, space))
                     A.append(('LINEAFTER',(ec,sr), (ec,er), weight, color, cap, dash, join, count, space))
                     A.append(('LINEBELOW',(sc,er), (ec,er), weight, color, cap, dash, join, count, space))
                     if op=='GRID':
-                        A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join, count, space))
-                        A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join, count, space))
-                        A.append(('INNERGRID',(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
+                        if doInRowSplit:
+                            A.append(('INNERGRID',(sc,sr), (ec,n-1), weight, color, cap, dash, join, count, space))
+                            A.append(('INNERGRID',(sc,n), (ec,er), weight, color, cap, dash, join, count, space))
+                        else:
+                            A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join, count, space))
+                            A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join, count, space))
+                            A.append(('INNERGRID',(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
                 else:
                     A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
             elif op == 'INNERGRID':
-                if sr<n and er>=n:
+                if sr<n and er>=n and not doInRowSplit:
                     A.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join, count, space))
                     A.append(('LINEABOVE',(sc,n), (ec,n), weight, color, cap, dash, join, count, space))
                 A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
@@ -1442,11 +1505,459 @@ class Table(Flowable):
             else:
                 A.append((op,(sc,sr), (ec,er), weight, color, cap, dash, join, count, space))
 
-        R0._cr_0(n,A,nrows)
-        R0._cr_0(n,self._bkgrndcmds,nrows,_srflMode=True)
-        R0._cr_0(n,self._spanCmds,nrows)
-        R0._cr_0(n,self._nosplitCmds,nrows)
-        for c in self._srflcmds:
+        return A
+
+    def _stretchCommands(self, n, cmds, oldrowcount):
+        """Stretches the commands when a row is split
+
+        The row start is sr, the row end is er.
+
+         sr   | er  | result
+        ---------------------------------------------------------------------
+          <n  |  <n | Do nothing.
+              | >=n | A command that spans the break, extend end.
+        ---------------------------------------------------------------------
+         ==n  | ==n | Zero height. Extend the end, unless it's a LINEABOVE
+              |     | commands, it's between rows so do nothing.
+              |     | For LINEBELOW increase both.
+              |  >n | A command that spans the break, extend end.
+        ---------------------------------------------------------------------
+          >n  |  >n | This command comes after the break, increase both.
+        ---------------------------------------------------------------------
+
+        Summary:
+        1. If er > n then increase er
+        2. If sr > n then increase sr
+        3. If er == n and sr < n, increase er
+        4. If er == sr == n and cmd is not line, increase er
+
+        """
+        stretched = []
+        for c in cmds:
+            cmd, (sc,sr), (ec,er) = c[0:3]
+
+            if sr in ("splitlast", "splitfirst") or er in ("splitlast", "splitfirst"):
+                stretched.append(c)
+                continue
+
+            if er < 0:
+                er += oldrowcount
+            if sr < 0:
+                sr += oldrowcount
+
+            if er > n:
+                er += 1
+            elif  er == n:
+                if sr < n or (sr == n and cmd != "LINEABOVE"):
+                    er += 1
+
+            if sr > n or (sr == n and cmd == "LINEBELOW"):
+                sr += 1
+
+            stretched.append((c[0], (sc,sr), (ec,er)) + c[3:])
+
+        return stretched
+
+    def _splitRows(self,availHeight,doInRowSplit=0):
+        # Get the split position. if we split between rows (doInRowSplit=0),
+        # then n will be the first row after the split. If we split a row,
+        # then n is the row we split in two.
+        n=self._getFirstPossibleSplitRowPosition(availHeight,ignoreSpans=doInRowSplit)
+
+        # We can't split before or in the repeatRows/headers
+        repeatRows = self.repeatRows
+        maxrepeat = repeatRows if isinstance(repeatRows,int) else max(repeatRows)+1
+        if doInRowSplit and n<maxrepeat or not doInRowSplit and n<=maxrepeat:
+            return []
+
+        # If the whole table fits, return it
+        lim = len(self._rowHeights)
+        if n==lim: return [self]
+
+        lo = self._rowSplitRange
+        if lo:
+            lo, hi = lo
+            if lo<0: lo += lim
+            if hi<0: hi += lim
+            if n>hi:
+                return self._splitRows(availHeight - sum(self._rowHeights[hi:n]), doInRowSplit=doInRowSplit)
+            elif n<lo:
+                return []
+
+        repeatCols = self.repeatCols
+
+        if not doInRowSplit:
+            T = self
+            data = self._cellvalues
+        else:
+            data = [_[:] for _ in self._cellvalues]
+            # We are splitting the n row into two, if possible.
+            # We can't split if the available height is less than the minimum set:
+            if self._minRowHeights and availHeight < self._minRowHeights[n]:
+                return []
+
+            usedHeights = sum(self._rowHeights[:n])
+
+            cellvalues = self._cellvalues[n]
+            cellStyles = self._cellStyles[n]
+            cellWidths = self._colWidths
+            curRowHeight = self._rowHeights[n]
+
+            # First find the min/max split point
+            minSplit = 0  # Counted from top
+            maxSplit = 0  # Counted from bottom
+            maxHeight = 0
+
+            for column, (value, style, width) in enumerate(zip(cellvalues, cellStyles, cellWidths)):
+                if self._spanCmds and self._spanRanges.get((column, n), None) is None:
+                    # This is part of another cell span, the value will not be displayed
+                    continue
+
+                if isinstance(value, (tuple, list)):
+                    # A sequence of flowables:
+                    w, height = self._listCellGeom(value, width, style)
+                    height += style.topPadding + style.bottomPadding
+                    if height > maxHeight:
+                        maxHeight = height
+                elif isinstance(value, str):
+                    rows = value.split("\n")
+                    lineHeight = 1.2 * style.fontsize
+                    height = lineHeight * len(rows) + style.topPadding + style.bottomPadding
+
+                    # Make sure we don't try to split in the middle of the first or last line
+                    minSplit = max(minSplit, lineHeight + style.topPadding)
+                    maxSplit = max(maxSplit, lineHeight + style.bottomPadding)
+
+                    if height > maxHeight:
+                        maxHeight = height
+
+            if ((minSplit + maxSplit > curRowHeight) or
+                 (minSplit > (availHeight - usedHeights))):
+                # We can't split this row. So we should fail, and let the split get retried
+                # with splitInRow = 0. However, if there is a spanned row that will also
+                # fail. So first we need to check if any cell in the current row is spanned.
+                if not self._spanCmds:
+                    # There are no spans to look at, so we can skip this and fail directly
+                    return []
+
+                splitCells = set()
+                for column in range(self._ncols):
+                    cell = (column, n)
+                    if (cell in self._rowSpanCells and
+                        self._spanRanges.get((column, n), None) is None):
+                        # This cell is a part of a rowSpan, and not the main cell.
+                        # Find the real cell and cell value
+                        for cell, span in self._spanRanges.items():
+                            if span is None:
+                                continue
+                            start_col, start_row, end_col, end_row = span
+                            if (column >= start_col and
+                                column <= end_col and
+                                n > start_row and
+                                n <= end_row):
+                                splitCells.add(cell)
+                                break
+
+                if not splitCells:
+                    # There were no spanned rows that could be split, so we fail.
+                    return []
+
+                spanCmds = []
+                for cmd, (sc, sr), (ec, er) in self._spanCmds:
+                    # -1 means last row/column, handle that here.
+                    if sc < 0:
+                        sc += self._ncols
+                    if ec < 0:
+                        ec += self._ncols
+                    if sr < 0:
+                        sr += self._nrows
+                    if er < 0:
+                        er += self._nrows
+                    spanCmds.append((cmd, (sc, sr), (ec, er)))
+
+                newCellStyles = [_[:] for _ in self._cellStyles]
+                bkgrndcmds = self._bkgrndcmds
+
+                # There are cells spanning the rows we want to split. They can be split,
+                # because the  _getFirstPossibleSplitRowPosition() call above checked
+                # that they are not in a nosplit range, so let's split them.
+                for cell in splitCells:
+                    span_sc, span_sr, span_ec, span_er = self._spanRanges[cell]
+                    spanRect = self._spanRects[cell]
+                    oldHeight = spanRect[3]
+                    newHeight = sum(self._rowHeights[span_sr:n])
+
+                    # Copy the style:
+                    oldStyle = newCellStyles[span_sr][span_sc]
+
+                    res = self._splitCell(self._cellvalues[span_sr][span_sc],
+                                          oldStyle, oldHeight, newHeight, width)
+                    if not res:
+                        # Could not split
+                        return []
+
+                    # Replace the data values:
+                    data[span_sr][span_sc] = res[0]
+                    data[n][span_sc] = res[1]
+
+                    # Now get replace the rowspan with two new rowspans, or
+                    # remove the spans if no span remains
+
+                    newSpanCmds = []
+                    for cmd, start, end in spanCmds:
+                        if ((span_sc, span_sr) == start and
+                            (span_ec, span_er) == end):
+                            # Modify this:
+                            if n-1 > span_sr or span_sc != span_ec:
+                                newSpanCmds.append((cmd, (span_sc, span_sr), (span_ec, n-1)))
+                            if n < span_er or span_sc != span_ec:
+                                newSpanCmds.append((cmd, (span_sc, n), (span_ec, span_er)))
+                        else:
+                            newSpanCmds.append((cmd, start, end))
+
+                    spanCmds = newSpanCmds
+
+                    newbkgrndcmds = []
+                    for cmd, start, end, color in bkgrndcmds:
+                        if start == (span_sc, span_sr):
+                            # The cell we are splitting has a background color command.
+                            # Add commands for the new split cells:
+                            newbkgrndcmds.append((cmd, start, (end[0], n-1), color))
+                            newbkgrndcmds.append((cmd, (start[0], n), (end[0], n), color))
+                        else:
+                            newbkgrndcmds.append((cmd, start, end, color))
+
+                    bkgrndcmds = newbkgrndcmds
+
+                    # And adjust the style
+                    newStyle = oldStyle.copy()
+                    if oldStyle.valign == "MIDDLE":
+                        # Adjust margins
+                        if res[0] and res[1]:
+                            # We split the content, so fix up the valign:
+                            oldStyle.valign = "BOTTOM"
+                            newStyle.valign = "TOP"
+                        else:
+                            # Adjust the margins to push it towards the true middle
+                            h = self._listCellGeom(v[0] or v[1], width, oldStyle)[1]
+                            margin = (curRowHeight - h) / 2
+                            if v[0]:
+                                oldStyle.topPadding += margin
+                            elif v[1]:
+                                newStyle.bottomPadding += margin
+                    newCellStyles[n][span_sc] = newStyle
+
+                # Make a new table here
+                T = self.__class__( data, colWidths=self._colWidths,
+                    rowHeights=self._rowHeights, repeatRows=self.repeatRows,
+                    repeatCols=self.repeatCols, splitByRow=self.splitByRow,
+                    splitInRow=self.splitInRow, normalizedData=1,
+                    cellStyles=newCellStyles, ident=self.ident,
+                    spaceBefore=getattr(self,'spaceBefore',None),
+                    longTableOptimize=self._longTableOptimize,
+                    cornerRadii=getattr(self,'_cornerRadii',None))
+
+                T._bkgrndcmds = bkgrndcmds
+                T._spanCmds = spanCmds
+                T._nosplitCmds = self._nosplitCmds
+                T._srflcmds = self._srflcmds
+                T._colpositions = self._colpositions
+                T._rowpositions = self._rowpositions
+
+                T._calcNoSplitRanges()
+                T._calcSpanRanges()
+                T._calcSpanRects()
+
+                # And then, remove any lines that now appear that were inside
+                # the spanning cell before the split. First, we need to split
+                # the grids, and convert the bit of the grid that spans the
+                # split to a line.
+                newlinecmds = []
+                for linecmd in self._linecmds:
+                    op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space = linecmd
+                    # -1 means "to the end", so we handle that here
+                    if er < 0:
+                        er += T._nrows
+                    if ec < 0:
+                        ec += T._ncols
+
+                    if ((op == 'BOX') or (op == 'GRID' and (sr <= n or er >=n)) or
+                        (op == 'INNERGRID' and (sr < n or er > n))):
+
+                        if op in ('GRID', 'INNERGRID'):
+                            newlinecmds.append(('INNERGRID',(sc,sr), (ec,n-1), weight, color, cap, dash, join, count, space))
+                            newlinecmds.append(('INNERGRID',(sc,n), (ec,er), weight, color, cap, dash, join, count, space))
+                            newlinecmds.append(('LINEBELOW',(sc,n-1), (ec,n-1), weight, color, cap, dash, join, count, space))
+                        if op in ('GRID', 'BOX'):
+                            # The box must be made of lines, because  otherwise
+                            # it might not get split where it should, below.
+                            newlinecmds.append(('LINEABOVE', (sc,sr), (ec,sr), weight, color, cap, dash, join, count, space))
+                            newlinecmds.append(('LINEBELOW', (sc,er), (ec,er), weight, color, cap, dash, join, count, space))
+                            newlinecmds.append(('LINEBEFORE', (sc,sr), (sc,er), weight, color, cap, dash, join, count, space))
+                            newlinecmds.append(('LINEAFTER', (ec,sr), (ec,er), weight, color, cap, dash, join, count, space))
+                    else:
+                        newlinecmds.append(linecmd)
+                        continue
+
+                # Then secondly split any LINEABOVE and LINEBELOW so that the
+                # split cells don't get them.
+                for cell in splitCells:
+
+                    moddedcmds = []
+                    for linecmd in newlinecmds:
+                        op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space = linecmd
+                        span_sc, span_sr, span_ec, span_er = self._spanRanges[cell]
+
+                        if (((op == "LINEABOVE" and er > span_sr and sr <= span_er) or
+                           (op == "LINEBELOW" and er >= span_sr and sr < span_er)) and
+                           (sc <= span_ec and ec >= span_sc)):
+                            # This needs handling of some sort
+
+                            if op == "LINEABOVE":
+                                startrow = span_sr
+                                endrow = span_er + 1
+                            else:
+                                startrow = span_sr - 1
+                                endrow = span_er
+
+                            if sr <= startrow:
+                                # Anything before the span should be unaffected:
+                                moddedcmds.append(
+                                    (op, (sc, sr), (ec, startrow), weight, color, cap, dash, join, count, space)
+                                )
+
+                            # For any lines in between we need to remove the split cell
+                            if span_sc > sc:
+                                # The start column of the span is higher than the start column of
+                                # the line. So we need a line up until but not including the start column
+                                moddedcmds.append(
+                                    (op, (sc, max(startrow, sr)), (span_sc-1, min(er, endrow)), weight, color, cap, dash, join, count, space)
+                                )
+                            if span_ec < ec:
+                                # The start column of the span is lower than the end column of
+                                # the line. So we need a line up starting after but not including the end column
+                                moddedcmds.append(
+                                    (op, (span_ec+1, max(startrow, sr)), (ec, min(er, endrow)), weight, color, cap, dash, join, count, space)
+                                )
+
+                            if er >= endrow:
+                                moddedcmds.append(
+                                    (op, (sc, endrow), (ec, er), weight, color, cap, dash, join, count, space)
+                                )
+                                # Anything after the span should be unaffected:
+
+                        else:
+                            moddedcmds.append(linecmd)
+
+                    newlinecmds = moddedcmds
+
+                T._linecmds = newlinecmds
+
+                return T._splitRows(availHeight,doInRowSplit=False)
+
+            # This is where we split the row:
+            splitPoint = min(availHeight - usedHeights, maxHeight - maxSplit)
+            if splitPoint+1 < self.splitInRow:
+                # The height of the split is smaller than the minimum.
+                # Fail, and the whole table will be moved to the next page.
+                return []
+
+            remaining = self._height - splitPoint
+            if remaining < self.splitInRow:
+                # The remaining height of the table is smaller than the minimum.
+                # Fail, and the whole table will be moved to the next page.
+                return []
+
+            R0 = []  # Top half of the row
+            R0Height = 0  # Minimum height
+            R1 = []  # Bottom half of the row
+            R1Height = 0  # Minimum height
+            R1Styles = []
+            for (value, style, width) in zip(cellvalues, cellStyles, cellWidths):
+                v = self._splitCell(value, style, curRowHeight, splitPoint, width)
+                if not v:
+                    # Splitting the table failed
+                    return []
+
+                newStyle = style.copy()
+                if style.valign == "MIDDLE":
+                    # Adjust margins
+                    if v[0] and v[1]:
+                        # We split the content, so fix up the valign:
+                        style.valign = "BOTTOM"
+                        newStyle.valign = "TOP"
+                    else:
+                        # Adjust the margins to push it towards the true middle
+                        h = self._listCellGeom(v[0] or v[1], width, style)[1]
+                        margin = (curRowHeight - h) / 2
+                        if v[0]:
+                            style.topPadding += margin
+                        elif v[1]:
+                            newStyle.bottomPadding += margin
+                R0.append(v[0])
+                R1.append(v[1])
+                h0 = self._listCellGeom(v[0], width, style)[1] + style.topPadding + style.bottomPadding
+                R0Height = max(R0Height, h0)
+                h1 = self._listCellGeom(v[1], width, style)[1] + style.topPadding + style.bottomPadding
+                R1Height = max(R1Height, h1)
+                R1Styles.append(newStyle)
+
+            # Make a new table with the row split into two:
+            usedHeight = min(splitPoint, R0Height)
+            newRowHeight = max(R1Height, self._rowHeights[n] - usedHeight)
+            newRowHeights = self._rowHeights[:]
+            newRowHeights.insert(n + 1, newRowHeight)
+            newRowHeights[n] = usedHeight
+            newCellStyles = self._cellStyles[:]
+            newCellStyles.insert(n + 1, R1Styles)
+
+            data = data[:n] + [R0] + [R1] + data[n+1:]
+
+            T = self.__class__( data, colWidths=self._colWidths,
+                rowHeights=newRowHeights, repeatRows=self.repeatRows,
+                repeatCols=self.repeatCols, splitByRow=self.splitByRow,
+                splitInRow=self.splitInRow, normalizedData=1,
+                cellStyles=newCellStyles, ident=self.ident,
+                spaceBefore=getattr(self,'spaceBefore',None),
+                longTableOptimize=self._longTableOptimize,
+                cornerRadii=getattr(self,'_cornerRadii',None))
+
+            T._linecmds = self._stretchCommands(n, self._linecmds, lim)
+            T._bkgrndcmds = self._stretchCommands(n, self._bkgrndcmds, lim)
+            T._spanCmds = self._stretchCommands(n, self._spanCmds, lim)
+            T._nosplitCmds = self._stretchCommands(n, self._nosplitCmds, lim)
+            T._srflcmds = self._stretchCommands(n, self._srflcmds, lim)
+            n = n + 1
+
+        #we're going to split into two superRows
+        ident = self.ident
+        if ident: ident = IdentStr(ident)
+        lto = T._longTableOptimize
+        if lto:
+            splitH = T._rowHeights
+        else:
+            splitH = T._argH
+
+        cornerRadii = getattr(self,'_cornerRadii',None)
+        R0 = self.__class__( data[:n], colWidths=T._colWidths, rowHeights=splitH[:n],
+                repeatRows=repeatRows, repeatCols=repeatCols, splitByRow=self.splitByRow,
+                splitInRow=self.splitInRow, normalizedData=1, cellStyles=T._cellStyles[:n],
+                ident=ident,
+                spaceBefore=getattr(self,'spaceBefore',None),
+                longTableOptimize=lto,
+                cornerRadii=cornerRadii[:2] if cornerRadii else None)
+
+        nrows = T._nrows
+        ncols = T._ncols
+
+        _linecmds = T._splitLineCmds(n, doInRowSplit=doInRowSplit)
+
+        R0._cr_0(n,_linecmds,nrows)
+        R0._cr_0(n,T._bkgrndcmds,nrows,_srflMode=True)
+        R0._cr_0(n,T._spanCmds,nrows)
+        R0._cr_0(n,T._nosplitCmds,nrows)
+
+        for c in T._srflcmds:
             R0._addCommand(c)
             if c[1][1]!='splitlast': continue
             (sc,sr), (ec,er) = c[1:3]
@@ -1457,50 +1968,53 @@ class Table(Flowable):
             if isinstance(repeatRows,int):
                 iRows = data[:repeatRows]
                 iRowH = splitH[:repeatRows]
-                iCS = self._cellStyles[:repeatRows]
+                iCS = T._cellStyles[:repeatRows]
                 repeatRows = list(range(repeatRows))
             else:
                 #we have a list of repeated rows eg (1,3)
                 repeatRows = list(sorted(repeatRows))
                 iRows = [data[i] for i in repeatRows]
                 iRowH = [splitH[i] for i in repeatRows]
-                iCS = [self._cellStyles[i] for i in repeatRows]
-            R1 = self.__class__(iRows+data[n:],colWidths=self._colWidths,
+                iCS = [T._cellStyles[i] for i in repeatRows]
+            R1 = self.__class__(iRows+data[n:],colWidths=T._colWidths,
                     rowHeights=iRowH+splitH[n:],
                     repeatRows=len(repeatRows), repeatCols=repeatCols,
-                    splitByRow=splitByRow, normalizedData=1,
-                    cellStyles=iCS+self._cellStyles[n:],
+                    splitByRow=self.splitByRow, splitInRow=self.splitInRow,
+                    normalizedData=1,
+                    cellStyles=iCS+T._cellStyles[n:],
                     ident=ident,
                     spaceAfter=getattr(self,'spaceAfter',None),
                     longTableOptimize=lto,
                     cornerRadii = cornerRadii,
                     )
-            R1._cr_1_1(n,nrows,repeatRows,A) #linecommands
-            R1._cr_1_1(n,nrows,repeatRows,self._bkgrndcmds,_srflMode=True)
-            R1._cr_1_1(n,nrows,repeatRows,self._spanCmds)
-            R1._cr_1_1(n,nrows,repeatRows,self._nosplitCmds)
+            R1._cr_1_1(n,nrows,repeatRows,_linecmds)
+            R1._cr_1_1(n,nrows,repeatRows,T._bkgrndcmds,_srflMode=True)
+            R1._cr_1_1(n,nrows,repeatRows,T._spanCmds)
+            R1._cr_1_1(n,nrows,repeatRows,T._nosplitCmds)
         else:
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
-            R1 = self.__class__(data[n:], colWidths=self._colWidths, rowHeights=splitH[n:],
+            R1 = self.__class__(data[n:], colWidths=T._colWidths, rowHeights=splitH[n:],
                     repeatRows=repeatRows, repeatCols=repeatCols,
-                    splitByRow=splitByRow, normalizedData=1, cellStyles=self._cellStyles[n:],
+                    splitByRow=self.splitByRow, splitInRow=self.splitInRow,
+                    normalizedData=1, cellStyles=T._cellStyles[n:],
                     ident=ident,
                     spaceAfter=getattr(self,'spaceAfter',None),
                     longTableOptimize=lto,
                     cornerRadii = ([0,0] + cornerRadii[2:]) if cornerRadii else None,
                     )
-            R1._cr_1_0(n,A)
-            R1._cr_1_0(n,self._bkgrndcmds,_srflMode=True)
-            R1._cr_1_0(n,self._spanCmds)
-            R1._cr_1_0(n,self._nosplitCmds)
-        for c in self._srflcmds:
+
+            R1._cr_1_0(n,_linecmds)
+            R1._cr_1_0(n,T._bkgrndcmds,_srflMode=True)
+            R1._cr_1_0(n,T._spanCmds)
+            R1._cr_1_0(n,T._nosplitCmds)
+        for c in T._srflcmds:
             R1._addCommand(c)
             if c[1][1]!='splitfirst': continue
             (sc,sr), (ec,er) = c[1:3]
             R1._addCommand((c[0],)+((sc, 0), (ec, 0))+tuple(c[3:]))
 
-        R0.hAlign = R1.hAlign = self.hAlign
-        R0.vAlign = R1.vAlign = self.vAlign
+        R0.hAlign = R1.hAlign = T.hAlign
+        R0.vAlign = R1.vAlign = T.vAlign
         self.onSplit(R0)
         self.onSplit(R1)
         return [R0,R1]
@@ -1520,9 +2034,11 @@ class Table(Flowable):
                         y+=1
     _getRowImpossible=staticmethod(_getRowImpossible)
 
-    def _getFirstPossibleSplitRowPosition(self,availHeight):
+    def _getFirstPossibleSplitRowPosition(self,availHeight,ignoreSpans=0):
+        # Returns the LAST possible split row position
         impossible={}
-        if self._spanCmds:
+        # With inRowSplits we ignore spans
+        if self._spanCmds and not ignoreSpans:
             self._getRowImpossible(impossible,self._rowSpanCells,self._spanRanges)
         if self._nosplitCmds:
             self._getRowImpossible(impossible,self._rowNoSplitCells,self._nosplitRanges)
@@ -1540,11 +2056,23 @@ class Table(Flowable):
 
     def split(self, availWidth, availHeight):
         self._calc(availWidth, availHeight)
-        if self.splitByRow:
+        if self.splitByRow or self.splitInRow:
             if not rl_config.allowTableBoundsErrors and self._width>availWidth: return []
-            return self._splitRows(availHeight)
-        else:
-            raise NotImplementedError
+
+            # If self.splitByRow is true, first try with doInRowSplit as false.
+            # Otherwise, first try with doInRowSplit as true
+            result = self._splitRows(availHeight, doInRowSplit=not self.splitByRow)
+            if result:
+                # That worked, return that:
+                return result
+
+            # The first attempt did NOT succeed, now try with the flag flipped
+            # (unless self.splitInRow is false)
+            if self.splitInRow:
+                return self._splitRows(availHeight, doInRowSplit=self.splitByRow)
+
+        # We can't split this table in any way, raise an error:
+        return []
 
     def _makeRoundedCornersClip(self, FUZZ=rl_config._FUZZ):
         self._roundingRectDef = None
@@ -1552,7 +2080,7 @@ class Table(Flowable):
         if not cornerRadii or max(cornerRadii)<=FUZZ: return
         nrows = self._nrows
         ncols = self._ncols
-        ar = [min(self._rowHeights[i],self._colWidths[j],cornerRadii[k]) for 
+        ar = [min(self._rowHeights[i],self._colWidths[j],cornerRadii[k]) for
                 k,(i,j) in enumerate((
                     (0,0),
                     (0,ncols-1),
