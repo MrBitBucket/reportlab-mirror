@@ -57,9 +57,9 @@ __rl_unsafe__ = frozenset('''builtins breakpoint __annotations__ co_argcount co_
 						)
 __rl_unsafe_re__ = re.compile(r'\b(?:%s)' % '|'.join(__rl_unsafe__),re.M)
 
+
 def copy_locations(new_node, old_node):
-	new_node.lineno = old_node.lineno
-	new_node.col_offset = old_node.col_offset
+	ast.copy_location(new_node, old_node)
 	ast.fix_missing_locations(new_node)
 
 class UntrustedAstTransformer(ast.NodeTransformer):
