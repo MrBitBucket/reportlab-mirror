@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.6.11  ??/06/2022
+---------------------------
+	* support HORIZONTAL2 & VERTICAL2 table cell backgrounds; as suggested by Sina Khelil < sina at khelil dot com >
+
 CHANGES  3.6.10  31/05/2022
 ---------------------------
 	* fix symlink looping in setup.py reported by Michał Górny &lt; mgorny at gentoo dot org &gt;

@@ -2258,7 +2258,8 @@ class Table(Flowable):
                         canv.rect(x0, y0, w, h, stroke=0,fill=1)
                     x0 = x0 +w
             else:   #cmd=='BACKGROUND'
-                if arg and isinstance(arg,(list,tuple)) and arg[0] in ('VERTICAL','HORIZONTAL'):
+                if (arg and isinstance(arg,(list,tuple))
+                        and arg[0] in ('VERTICAL','HORIZONTAL', 'VERTICAL2', 'HORIZONTAL2')):
                     #
                     # Arg is a list, assume we are going for a gradient fill
                     # where we expect a containing a direction for the gradient
@@ -2276,11 +2277,19 @@ class Table(Flowable):
                     p = canv.beginPath()
                     p.rect(x0, y0, w, h)
                     canv.clipPath(p, stroke=0)
-                    direction=arg[0]
+                    direction, arg = arg[0],arg[1:]
                     if direction=="HORIZONTAL":
-                        canv.linearGradient(x0,y0,x0+w,y0,arg[1:],extend=False)
-                    else:   #VERTICAL
-                        canv.linearGradient(x0,y0,x0,y0+h,arg[1:],extend=False)
+                        canv.linearGradient(x0,y0,x0+w,y0,arg,extend=False)
+                    elif direction == "HORIZONTAL2":
+                        xh = x0 + w/2.0
+                        canv.linearGradient(x0, y0, xh, y0, arg, extend=False)
+                        canv.linearGradient(xh, y0, x0 + w, y0, arg[::-1], extend=False)
+                    elif direction == "VERTICAL2":
+                        yh = y0 + h/2.0
+                        canv.linearGradient(x0, y0, x0, yh, arg, extend=False)
+                        canv.linearGradient(x0, yh, x0, y0 + h, arg[::-1], extend=False)
+                    else:  # Assuming "VERTICAL"
+                        canv.linearGradient(x0, y0, x0, y0 + h, arg, extend=False)
                     canv.restoreState()
                 else:
                     color = colors.toColorOrNone(arg)

@@ -686,6 +686,39 @@ class TableTestCase(unittest.TestCase):
         for split in (30,40,50,60):
             lennartExample(split=split)
 
+        plainlg = (
+            ("ALIGN", (0,0), (-1,-1), "LEFT"),
+            ("FONTNAME", (0,0), (-1,-1), "Helvetica"),
+            ("FONTSIZE", (0,0), (-1,-1), 10),
+            ("VALIGN", (1,2), (1,3), "MIDDLE"),
+            ("VALIGN", (2,2), (2,3), "TOP"),
+            ("ALIGN", (1,1), (1,1), "CENTER"),
+            ("ALIGN", (1,4), (1,4), "CENTER"),
+            ('GRID', (0,0), (-1,-1), 1, colors.black),
+            ('OUTLINE', (0,0), (-1,-1), 2, colors.black),
+            ("BOTTOMPADDING", (0,0), (-1,-1), 0),
+            ("TOPPADDING", (0,0), (-1,-1), 0),
+            ("LEFTPADDING", (0,0), (-1,-1), 0),
+            ("RIGHTPADDING", (0,0), (-1,-1), 0),
+            ("BACKGROUND", (1,1), (1,1), ("HORIZONTAL", colors.green, colors.yellow)),
+            ("BACKGROUND", (0,2), (1,2), ("VERTICAL", colors.red, colors.green)),
+            ("BACKGROUND", (0,3), (1,3), ("VERTICAL2", colors.blue, colors.yellow)),
+            ("BACKGROUND", (1,4), (1,4), ("HORIZONTAL2", colors.green, colors.yellow)),
+            )
+        datalg = [
+            ["00","01","02"],
+            ["10","11 this is a long string","12"],
+            ["20\nthis is the\nend\nmy friend","21\nthe bells of hell\ngo ting-aling-aling",
+                "22\ndespair all who\nenter here"],
+            ["30\nthis is the\nend\nmy friend","31\nthe bells of hell\ngo ting-aling-aling",
+                "32\ndespair all who\nenter here"],
+            ["40","41 this is a long string","42"],
+            ["50","51","52"],
+            ]
+        lst.append(PageBreak())
+        lst.append(Paragraph("Table with gradient backgrounds", styleSheet['Heading1']))
+        lst.append(Table(datalg,style=plainlg))
+
         SimpleDocTemplate(outputfile('test_table_layout.pdf'), showBoundary=1).build(lst)
 
 def makeSuite():
