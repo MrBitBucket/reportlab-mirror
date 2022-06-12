@@ -14,6 +14,7 @@ mentioned. If we missed you, please let us know!
 CHANGES  3.6.11  ??/06/2022
 ---------------------------
 	* support HORIZONTAL2 & VERTICAL2 table cell backgrounds; as suggested by Sina Khelil < sina at khelil dot com >
+	* support general LINEAR & RADIAL gradient table cell backgrounds
 
 CHANGES  3.6.10  31/05/2022
 ---------------------------

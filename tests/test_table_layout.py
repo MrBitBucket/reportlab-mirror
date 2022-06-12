@@ -704,6 +704,16 @@ class TableTestCase(unittest.TestCase):
             ("BACKGROUND", (0,2), (1,2), ("VERTICAL", colors.red, colors.green)),
             ("BACKGROUND", (0,3), (1,3), ("VERTICAL2", colors.blue, colors.yellow)),
             ("BACKGROUND", (1,4), (1,4), ("HORIZONTAL2", colors.green, colors.yellow)),
+            ("BACKGROUND", (2,2), (2,2), ("LINEARGRADIENT", (0,0),(1,1), True, (colors.green, colors.yellow, colors.red), (0.25,0.5,0.75))),
+            ("BACKGROUND", (2,3), (2,3), ("LINEARGRADIENT", (0,1),(1,0), True, (colors.green, colors.yellow, colors.red), (0.25,0.5,0.75))),
+            ("BACKGROUND", (1,5), (1,5), ("LINEARGRADIENT", (0,0),(1,0), True, (colors.pink, colors.lightgreen, colors.lightblue), (0.25,0.5,0.75))),
+            ("BACKGROUND", (0,6), (1,6), ("LINEARGRADIENT", (0,0),(0,1), True, (colors.pink, colors.lightgreen, colors.lightblue), (0.25,0.5,0.75))),
+            ("BACKGROUND", (2,6), (2,6), ("LINEARGRADIENT", (1,0.2),(0,0.8), True, (colors.red, colors.yellow, colors.green, colors.lightblue), (0.2,0.4,0.6,0.8))),
+            ("BACKGROUND", (0,7), (0,7), ("RADIALGRADIENT", (0.5,0.5),(1,'width'), True, (colors.red, colors.yellow, colors.green, colors.lightblue), (0.2,0.4,0.6,0.8))),
+            ("BACKGROUND", (1,7), (1,7), ("RADIALGRADIENT", (0.5,0.5),(1,'height'), True, (colors.red, colors.yellow, colors.green, colors.lightblue), (0.2,0.4,0.6,0.8))),
+            ("BACKGROUND", (2,7), (2,7), ("RADIALGRADIENT", (0.6,0.4),(1,'max'), True, (colors.red, colors.yellow, colors.green, colors.lightblue), (0.2,0.4,0.6,0.8))),
+            ("BACKGROUND", (0,8), (1,8), ("LINEARGRADIENT", (0,1),(0,0), True, (colors.blue, colors.yellow, colors.blue), (0.25,0.5,0.75))),
+            ("BACKGROUND", (2,8), (2,8), ("LINEARGRADIENT", (0,1),(1,0), True, (colors.green, colors.yellow, colors.green), (0.25,0.5,0.75))),
             )
         datalg = [
             ["00","01","02"],
@@ -713,7 +723,13 @@ class TableTestCase(unittest.TestCase):
             ["30\nthis is the\nend\nmy friend","31\nthe bells of hell\ngo ting-aling-aling",
                 "32\ndespair all who\nenter here"],
             ["40","41 this is a long string","42"],
-            ["50","51","52"],
+            ["50","51 this is a long string","52"],
+            ["60\nthis is the\nend\nmy friend","61\nthe bells of hell\ngo ting-aling-aling",
+                "62\ndespair all who\nenter here"],
+            ["70\nthis is the\nend\nmy friend","71\nthe bells of hell\ngo ting-aling-aling",
+                "72\ndespair all who\nenter here"],
+            ["80\nthis is the\nend\nmy friend","81\nthe bells of hell\ngo ting-aling-aling",
+                "82\ndespair all who\nenter here"],
             ]
         lst.append(PageBreak())
         lst.append(Paragraph("Table with gradient backgrounds", styleSheet['Heading1']))

@@ -2259,37 +2259,86 @@ class Table(Flowable):
                     x0 = x0 +w
             else:   #cmd=='BACKGROUND'
                 if (arg and isinstance(arg,(list,tuple))
-                        and arg[0] in ('VERTICAL','HORIZONTAL', 'VERTICAL2', 'HORIZONTAL2')):
+                        and arg[0] in ('VERTICAL','HORIZONTAL', 'VERTICAL2', 'HORIZONTAL2',
+                                'LINEARGRADIENT', 'RADIALGRADIENT')):
+                    if ec==sc and er==sr and spanRects:
+                        xywh = spanRects.get((sc,sr))
+                        if xywh:
+                            #it's a single spanned cell
+                            x0, y0, w, h = xywh
+                    arg0, arg = arg[0], arg[1:]
                     #
-                    # Arg is a list, assume we are going for a gradient fill
+                    # arg is a list, assume we are going for a gradient fill
                     # where we expect a containing a direction for the gradient
                     # and the starting an final gradient colors. For example:
                     # ['HORIZONTAL', colors.white, colors.grey]   or
                     # ['VERTICAL', colors.red, colors.blue]
                     #
                     canv.saveState()
-
-                    if ec==sc and er==sr and spanRects:
-                        xywh = spanRects.get((sc,sr))
-                        if xywh:
-                            #it's a single cell
-                            x0, y0, w, h = xywh
                     p = canv.beginPath()
                     p.rect(x0, y0, w, h)
                     canv.clipPath(p, stroke=0)
-                    direction, arg = arg[0],arg[1:]
-                    if direction=="HORIZONTAL":
+                    if arg0=="HORIZONTAL":
                         canv.linearGradient(x0,y0,x0+w,y0,arg,extend=False)
-                    elif direction == "HORIZONTAL2":
+                    elif arg0 == "HORIZONTAL2":
                         xh = x0 + w/2.0
                         canv.linearGradient(x0, y0, xh, y0, arg, extend=False)
                         canv.linearGradient(xh, y0, x0 + w, y0, arg[::-1], extend=False)
-                    elif direction == "VERTICAL2":
+                        #canv.linearGradient(x0, y0, x0 + w, y0, arg+arg[1::-1], extend=False)
+                    elif arg0 == "VERTICAL2":
                         yh = y0 + h/2.0
                         canv.linearGradient(x0, y0, x0, yh, arg, extend=False)
                         canv.linearGradient(x0, yh, x0, y0 + h, arg[::-1], extend=False)
-                    else:  # Assuming "VERTICAL"
+                        #canv.linearGradient(x0, y0, x0, y0 + h, arg+arg[1::-1], extend=False)
+                    elif arg0=="VERTICAL":
                         canv.linearGradient(x0, y0, x0, y0 + h, arg, extend=False)
+                    elif arg0=='LINEARGRADIENT':
+                        # the remaining arguments define the axis, extend, colors, stops as
+                        # axis = (x0,y0, x1, y1)    given as fractions of width / height
+                        # extend = bool or [bool, bool]
+                        # colors a sequence/list of colors
+                        # stops an optional sequence of fractions 0 - 1
+                        if 4<=len(arg)<=5:
+                            (ax0, ay0), (ax1, ay1) = arg[:2]
+                            ax0 = x0 + ax0*w
+                            ax1 = x0 + ax1*w
+                            ay0 = y0 + ay0*h
+                            ay1 = y0 + ay1*h
+                            extend = arg[2]
+                            C = arg[3]
+                            P = arg[4] if len(arg)==4 else None
+                            canv.linearGradient(ax0, ay0, ax1, ay1, C, positions=P, extend=extend)
+                        else:
+                            raise ValueError('Wrong length for %s arguments %r' % (op, arg))
+                    elif arg0=='RADIALGRADIENT':
+                        # the remaining arguments define the centre, radius, extend, colors, stops as
+                        # center = (xc,yc) given as fractions of width / height
+                        # radius = (r,'ref') op in ('width','height','min','max')
+                        # extend = bool or [bool, bool]
+                        # colors a sequence/list of colors
+                        # stops an optional sequence of fractions 0 - 1
+                        if 4<=len(arg)<=5:
+                            xc, yc = arg[0]
+                            xc = x0 + xc*w
+                            yc = y0 + yc*h
+                            r, ref = arg[1]
+                            if ref=='width':
+                                ref = w
+                            elif ref=='height':
+                                ref = h
+                            elif ref=='min':
+                                ref = min (w,h)
+                            elif ref=='max':
+                                ref = max(w,h)
+                            else:
+                                raise ValueError('Bad radius, %r, for %s arguments %r' % (ascii(arg[1]),op, arg))
+                            r *= ref
+                            extend = arg[2]
+                            C = arg[3]
+                            P = arg[4] if len(arg)==4 else None
+                            canv.radialGradient(xc, yc, r, C, positions=P, extend=extend)
+                        else:
+                            raise ValueError('Wrong length for %s arguments %r' % (op, arg))
                     canv.restoreState()
                 else:
                     color = colors.toColorOrNone(arg)
