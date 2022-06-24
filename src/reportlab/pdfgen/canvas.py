@@ -1010,7 +1010,8 @@ class Canvas(_PDFColorSetter):
         self._code.append("/%s Do" % regName)
         self.restoreState()
         if showBoundary:
-            self.rect(x,y,width,height,stroke=1,fill=0)
+            #self.rect(x,y,width,height,stroke=1,fill=0)
+            self.drawBoundary(showBoundary,x,y,width,height)
 
         # track what's been used on this page
         self._formsinuse.append(name)

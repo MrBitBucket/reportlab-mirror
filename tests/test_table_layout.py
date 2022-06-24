@@ -701,7 +701,7 @@ class TableTestCase(unittest.TestCase):
             ("LEFTPADDING", (0,0), (-1,-1), 0),
             ("RIGHTPADDING", (0,0), (-1,-1), 0),
             ("BACKGROUND", (1,1), (1,1), ("HORIZONTAL", colors.green, colors.yellow)),
-            ("BACKGROUND", (0,2), (1,2), ("VERTICAL", colors.red, colors.green)),
+            ("BACKGROUND", (0,2), (1,2), ("VERTICAL", colors.red, '#008000')),
             ("BACKGROUND", (0,3), (1,3), ("VERTICAL2", colors.blue, colors.yellow)),
             ("BACKGROUND", (1,4), (1,4), ("HORIZONTAL2", colors.green, colors.yellow)),
             ("BACKGROUND", (2,2), (2,2), ("LINEARGRADIENT", (0,0),(1,1), True, (colors.green, colors.yellow, colors.red), (0.25,0.5,0.75))),
