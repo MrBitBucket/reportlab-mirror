@@ -92,7 +92,7 @@ class _PMRenderer(Renderer):
 
     def initState(self,x,y):
         deltas = self._tracker._combined[-1]
-        deltas['transform'] = self._canvas._baseCTM[0:4]+(x,y)
+        deltas['transform'] = deltas['ctm'] = self._canvas._baseCTM[0:4]+(x,y)
         self._tracker.push(deltas)
         self.applyState()
 

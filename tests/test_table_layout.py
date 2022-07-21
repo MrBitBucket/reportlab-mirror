@@ -671,12 +671,12 @@ class TableTestCase(unittest.TestCase):
                 t = makeTable()
                 S = t.split(4*72,size)
                 if not S:
-                    storyAdd(Paragraph(f"<span color=red>Illustrating splits failed</span>: split(4in,{size}) {splitByRow=} {splitInRow=}", btStyle))
+                    storyAdd(Paragraph(f"<span color=red>Illustrating splits failed</span>: split(4in,{size}) splitByRow={splitByRow} splitInRow={splitInRow}", btStyle))
                     storyAdd(Spacer(0,6))
                     #print('!!!!! Failed')
                 else:
                     #print('##### OK')
-                    storyAdd(Paragraph(f"Illustrating splits: split(4in,{size}) {splitByRow=} {splitInRow=}", btStyle))
+                    storyAdd(Paragraph(f"Illustrating splits: split(4in,{size}) splitByRow={splitByRow} splitInRow={splitInRow}", btStyle))
                     storyAdd(Spacer(0,6))
                     for s in S:
                         storyAdd(s)

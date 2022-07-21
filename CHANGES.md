@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.6.12  20/07/2022
+---------------------------
+	* fix dpi handling in renderPM.py; bug found by Terry Zhao Terry dot Zhao at fil dot com
+
 CHANGES  3.6.11  24/06/2022
 ---------------------------
 	* support HORIZONTAL2 & VERTICAL2 table cell backgrounds; as suggested by Sina Khelil < sina at khelil dot com >
