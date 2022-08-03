@@ -67,7 +67,8 @@ documentLang
 encryptionStrength
 trustedHosts
 trustedSchemes
-renderPMBackend'''.split())
+renderPMBackend
+xmlParser'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -157,6 +158,7 @@ trustedHosts=None                                   #set to a list of trusted fo
 trustedSchemes=['file', 'rml', 'data', 'https',     #these url schemes are trusted
                 'http', 'ftp']
 renderPMBackend='_renderPM'                         #or 'rlPyCairo' if available
+xmlParser='lxml'                                    #or 'pyrxp' for preferred xml parsing
 
 # places to look for T1Font information
 T1SearchPath =  (
