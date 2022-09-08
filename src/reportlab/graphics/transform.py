@@ -13,7 +13,7 @@ __all__ = (
     'transformPoints',
     'zTransformPoints',
     )
-from math import pi, cos, sin, tan
+from math import cos, sin, tan, radians
 
 # constructors for matrices:
 def nullTransform():
@@ -26,16 +26,16 @@ def scale(sx, sy):
     return (sx, 0, 0, sy, 0, 0)
 
 def rotate(angle):
-    a = angle * pi/180
-    return (cos(a), sin(a), -sin(a), cos(a), 0, 0)
+    a = radians(angle)
+    sina = sin(a)
+    cosa = cos(a)
+    return (cosa, sina, -sina, cosa, 0, 0)
 
 def skewX(angle):
-    a = angle * pi/180
-    return (1, 0, tan(a), 1, 0, 0)
+    return (1, 0, tan(radians(angle)), 1, 0, 0)
 
 def skewY(angle):
-    a = angle * pi/180
-    return (1, tan(a), 0, 1, 0, 0)
+    return (1, tan(radians(angle)), 0, 1, 0, 0)
 
 def mmult(A, B):
     "A postmultiplied by B"
