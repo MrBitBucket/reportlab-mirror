@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2021
 #see license.txt for license details
-__version__='3.6.3'
+__version__='3.6.12'
 import os, sys, glob, shutil, re, sysconfig, traceback, io, subprocess
 from configparser import RawConfigParser
 from urllib.parse import quote as urlquote
@@ -304,6 +304,12 @@ class inc_lib_dirs:
         if mif:
             d = dirname(mif)
             I = [dirname(d), d]
+
+            #fix for some RHEL systems from James Brown jbrown at easypost dot com
+            subdir = pjoin(d,'freetype2')
+            if isdir(subdir):
+                I.append(subdir)
+
             ftv = freetypeVersion(findFile(d,'freetype.h'),'22')
         else:
             print('!!!!! cannot find ft2build.h')
@@ -841,7 +847,7 @@ def main():
             install_requires=['pillow>=9.0.0'],
             python_requires='>=3.7, <4',
             extras_require={
-                'RLPYCAIRO': ['rlPyCairo>=0.0.5'],
+                'RLPYCAIRO': ['rlPyCairo>=0.0.8'],
                 },
             )
         print()
