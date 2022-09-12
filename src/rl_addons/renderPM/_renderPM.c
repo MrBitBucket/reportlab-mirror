@@ -19,7 +19,7 @@
 #endif
 
 
-#define VERSION "4.01"
+#define VERSION "4.02"
 #define MODULENAME "_renderPM"
 #define PyInt_FromLong	PyLong_FromLong
 #define staticforward static
@@ -174,11 +174,11 @@ static py_FT_FontObject *_get_ft_face(char *fontName)
 		}
 
 	ft_face = PyObject_NEW(py_FT_FontObject, &py_FT_Font_Type);
-	ft_face->face = NULL;
 	if(!ft_face){
 		PyErr_Format(PyExc_MemoryError, "Cannot allocate ft_face for TTFont %s", fontName);
 		goto RET;
 		}
+	ft_face->face = NULL;
 	face = PyObject_GetAttrString(font,"face");
 	if(!face) goto RET;
 	_data = PyObject_GetAttrString(face,"_ttf_data");
