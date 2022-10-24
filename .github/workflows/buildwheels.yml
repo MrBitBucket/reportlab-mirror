@@ -44,6 +44,7 @@ jobs:
       CIBW_TEST_SKIP: "*-manylinux_{aarch64,ppc64le,s390x} *-musllinux_* *-macosx_arm64 *-macosx_universal2:arm64"
       CIBW_TEST_COMMAND: python -u -c "import sys,os,subprocess;r=subprocess.call((sys.executable,'-u',os.path.join(r'{project}','setup.py'),'tests-postinstall','--show-env','--verbose','--pip-install=pyphen','--pip-install=rlPyCairo','--rl-index-url=https://${{secrets.CITOOLS_USER}}:${{secrets.CITOOLS_PASSWORD}}@www.reportlab.com/pypi','--rl-pip-install=pyfribidi'),stderr=subprocess.STDOUT,timeout=180);marker=20*(chr(33) if r else '=');print('%s test command --> %s %s'%(marker,r,marker));sys.exit(r)" 2>&1
       CIBW_BUILD_VERBOSITY: 3
+      CIBW_PRERELEASE_PYTHONS: True
       RL_CACHE_DIR: "/tmp/${{github.event.repository.name}}"
     strategy:
       fail-fast: true
@@ -64,7 +65,7 @@ jobs:
 
       - name: Install cibuildwheel
         run: |
-          python -m pip install 'cibuildwheel==2.2.0a1'
+          python -m pip install 'cibuildwheel==2.10.2'
           python -c "import os;print('+++++ cwd=%r;dir=%r' % (os.getcwd(),os.listdir('.')))"
 
       - name: Build wheels
