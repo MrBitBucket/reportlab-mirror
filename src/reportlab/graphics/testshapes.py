@@ -415,8 +415,8 @@ def getDrawing11():
 def getDrawing12():
     """Text strings in a non-standard font.
     All that is required is to place the .afm and .pfb files
-    on the font patch given in rl_config.py,
-    for example in reportlab/lib/fonts/.
+    on the font path given in rl_config.py,
+    for example in reportlab/fonts/.
     """
     faceName = "DarkGardenMK"
     D = Drawing(400, 200)
