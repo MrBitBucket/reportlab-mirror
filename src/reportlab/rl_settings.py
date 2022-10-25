@@ -68,7 +68,8 @@ encryptionStrength
 trustedHosts
 trustedSchemes
 renderPMBackend
-xmlParser'''.split())
+xmlParser
+textPaths'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -159,6 +160,9 @@ trustedSchemes=['file', 'rml', 'data', 'https',     #these url schemes are trust
                 'http', 'ftp']
 renderPMBackend='_renderPM'                         #or 'rlPyCairo' if available
 xmlParser='lxml'                                    #or 'pyrxp' for preferred xml parsing
+textPaths='backend'                                 #freetype or _renderPM or backend
+                                                    #determines what code is used to create Paths from str
+                                                    #see reportlab/graphics/utils.py for full horror
 
 # places to look for T1Font information
 T1SearchPath =  (
