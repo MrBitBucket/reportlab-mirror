@@ -19,7 +19,7 @@
 #endif
 
 
-#define VERSION "4.02"
+#define VERSION "4.03"
 #define MODULENAME "_renderPM"
 #define PyInt_FromLong	PyLong_FromLong
 #define staticforward static
@@ -87,6 +87,7 @@ typedef	struct {
 		} gstateColorX;
 
 #ifdef	RENDERPM_FT
+#ifdef	RENDERPM_PARSE_UTF8
 static	PyObject* parse_utf8(PyObject* self, PyObject* args)
 {
 	char		*c, *msg;
@@ -128,6 +129,7 @@ RL_ERROR_EXIT:
     Py_INCREF(Py_None);
 	return Py_None;
 }
+#endif
 
 PyObject*	_pdfmetrics__fonts=0;
 static PyObject *_get_pdfmetrics__fonts(void){
@@ -1975,7 +1977,7 @@ static int pict_putRow(BYTE_STREAM* fd, int row, int cols, pixel* rowpixels, cha
 	register char *p;
 
 	run = count = 0;
-	for (cols--, i = cols, pP = rowpixels + cols, p = packed, lastp = *pP;
+	for (i = cols-1, pP = rowpixels + i, p = packed, lastp = *pP;
 		i >= 0; i--, lastp = *pP, pP--){
 		if (lastp == *pP) run++;
 		else if (run < RUN_THRESH){
@@ -2020,14 +2022,14 @@ static int pict_putRow(BYTE_STREAM* fd, int row, int cols, pixel* rowpixels, cha
 			rep = run > MAX_RUN ? MAX_RUN : run;
 			*p++ = lastp;
 			*p++ = runtochar(rep);
-				run -= rep;
+			run -= rep;
 			}
 		run = 1;
 		}
 	if (count > 0) *p++ = counttochar(count);
 
 	packcols = (int)(p - packed);		/* how many did we write? */
-	if (cols > 250){
+	if (cols >= 250){/*bytesperline>=250*/
 		pict_putShort(fd, packcols);
 		oc = packcols + 2;
 		}
@@ -2158,7 +2160,9 @@ static struct PyMethodDef _methods[] = {
 	{"pil2pict", (PyCFunction)pil2pict, METH_VARARGS, "pil2pict(cols,rows,datastr,palette) return PICT version of im as bytes"},
 #ifdef	RENDERPM_FT
     {"ft_get_face", (PyCFunction)ft_get_face, METH_VARARGS|METH_KEYWORDS,"ft_get_face(fontName) --> ft_face instance"},
+#ifdef	RENDERPM_PARSE_UTF8
 	{"parse_utf8", (PyCFunction)parse_utf8, METH_VARARGS, "parse_utf8(utf8_string) return UCS list"},
+#endif
 #endif /*ifdef	RENDERPM_FT*/
 #ifdef MEMORY_DEBUG
     {"mtrace", (PyCFunction)_py_mtrace, METH_VARARGS|METH_KEYWORDS,"mtrace(startStop) start or stop malloc tracing"},
