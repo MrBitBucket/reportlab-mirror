@@ -11,13 +11,15 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  3.6.12  30/08/2022
+CHANGES  3.6.12  25/10/2022
 ---------------------------
 	* fix dpi handling in renderPM.py; bug found by Terry Zhao Terry dot Zhao at fil dot com
 	* attempt fix in rparsexml.py
 	* add rl_settings.xmlParser with default 'lxml'
 	* nano RHEL related fix to setup.py contributed by James Brown jbrown at easypost dot com
 	* minor speedup in reportlab.graphics.transform functions
+	* allow usage of freetype testpaths via rl_config/rl_settings textPaths
+	* _renderPM.c remove parse_utf8, make pict_putrow same as for rlPyCairo
 
 CHANGES  3.6.11  24/06/2022
 ---------------------------
