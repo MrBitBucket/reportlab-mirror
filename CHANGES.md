@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.6.13  15/11/2022
+---------------------------
+	* fixes for python 3.12.0a1
+
 CHANGES  3.6.12  25/10/2022
 ---------------------------
 	* fix dpi handling in renderPM.py; bug found by Terry Zhao Terry dot Zhao at fil dot com

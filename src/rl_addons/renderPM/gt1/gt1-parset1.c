@@ -601,8 +601,7 @@ print_string (Gt1String *str)
 	start = str->start;
 	size = str->size;
 
-	for (i = 0; i < size; i++);
-		printf ("%c", start[i]);
+	for (i = 0; i < size; i++) printf ("%c", start[i]);
 }
 
 static void
@@ -704,8 +703,6 @@ print_token_short (TokenType type, MyGt1String *lexeme)
 		}
 }
 
-#endif
-
 static void
 print_value_deep (Gt1PSContext *psc, Gt1Value *val, int nest)
 {
@@ -781,8 +778,6 @@ print_value_deep (Gt1PSContext *psc, Gt1Value *val, int nest)
 		}
 	printf ("\n");
 }
-
-#ifdef DEBUG
 
 static void
 print_stack (Gt1PSContext *psc)
@@ -1904,7 +1899,7 @@ pscontext_new (Gt1TokenContext *tc)
 
 	systemdict = gt1_dict_new (psc->r, sizeof(internal_procs) /
 			 sizeof(InternalGt1ProcListing));
-	for (i = 0; i < sizeof(internal_procs) / sizeof(InternalGt1ProcListing); i++)
+	for (i = 0; i < (int)(sizeof(internal_procs) / sizeof(InternalGt1ProcListing)); i++)
 		{
 			val.type = GT1_VAL_INTERNAL;
 			val.val.internal_val = internal_procs[i].function;

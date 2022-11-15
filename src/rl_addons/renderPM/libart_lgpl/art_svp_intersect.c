@@ -1399,7 +1399,7 @@ art_svp_intersect_add_seg (ArtIntersectCtx *ctx, const ArtSVPSeg *in_seg)
   ArtActiveSeg *seg = art_new (ArtActiveSeg, 1);
   ArtActiveSeg *test;
   double x0, y0;
-  ArtActiveSeg *beg_range;
+  /*ArtActiveSeg *beg_range; unused*/
   ArtActiveSeg *last = NULL;
   ArtActiveSeg *left, *right;
   ArtPriPoint *pri_pt = art_new (ArtPriPoint, 1);
@@ -1425,7 +1425,7 @@ art_svp_intersect_add_seg (ArtIntersectCtx *ctx, const ArtSVPSeg *in_seg)
 
   x0 = in_seg->points[0].x;
   y0 = in_seg->points[0].y;
-  beg_range = NULL;
+  /*beg_range = NULL; unused*/
   for (test = ctx->active_head; test != NULL; test = test->right)
     {
       double d;

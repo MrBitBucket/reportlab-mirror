@@ -80,9 +80,9 @@ typedef struct {
 } pixBufT;
 
 typedef	struct {
-		size_t	width;
-		size_t	height;
-		size_t	stride;
+		Py_ssize_t	width;
+		Py_ssize_t	height;
+		Py_ssize_t	stride;
 		art_u8	*buf;
 		} gstateColorX;
 
@@ -257,7 +257,7 @@ static pixBufT* pixBufAlloc(int w, int h, int nchan, gstateColorX bg)
 		if(p->buf){
 			/*initialise the pixmap pixels*/
 			art_u8	*b, *lim = p->buf+n;
-			size_t	stride = w*nchan, i;
+			Py_ssize_t	stride = w*nchan, i;
 			p->width = w;
 			p->height = h;
 			p->nchan = nchan;
@@ -266,7 +266,7 @@ static pixBufT* pixBufAlloc(int w, int h, int nchan, gstateColorX bg)
 			/*set up the background*/
 			if(bg.stride==0){	/*simple color case*/
 				art_u32	bgv = (bg.buf[0]<<16) | (bg.buf[1]<<8) | bg.buf[2];
-				for(i=0;i<(size_t)nchan;i++){
+				for(i=0;i<(Py_ssize_t)nchan;i++){
 					art_u8 	c= (bgv>>(8*(nchan-i-1)))&0xff;
 					b = p->buf+i;
 					while(b<lim){
@@ -276,7 +276,7 @@ static pixBufT* pixBufAlloc(int w, int h, int nchan, gstateColorX bg)
 					}
 				}
 			else{	/*image case*/
-				size_t	j = 0;
+				Py_ssize_t	j = 0;
 				art_u8	*r = bg.buf;
 				b = p->buf;
 				i = 0;
@@ -873,7 +873,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 	PyObject	*textObj, *obj0;
 #ifdef	RENDERPM_FT
 	int				ft_font = self->ft_font;
-	Py_UNICODE		*utext;
+	Py_UCS4		*utext=NULL;
 	_ft_outliner_user_t _ft_data;
 #endif
 	if(!font){
@@ -894,8 +894,13 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 			if(!obj0) return NULL;
 			}
 		else goto L0;
-		textlen = PyUnicode_GetSize(obj0);
-		utext = PyUnicode_AsUnicode(obj0);
+		textlen = PyUnicode_GET_LENGTH(obj0);
+		utext = PyUnicode_AsUCS4Copy(obj0);	/*we own this as of now*/
+		if(!utext){
+			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: Cannot allocate UCS4 memory!");
+			if(textObj!=obj0) Py_DECREF(obj0);
+			return NULL;
+		}
 		_ft_data.pathMax = 0;
 		_ft_data.path = NULL;
 		}
@@ -982,6 +987,7 @@ static PyObject* gstate_drawString(gstateObject* self, PyObject* args)
 		}
 	if(textObj!=obj0) Py_DECREF(obj0);
 #ifdef	RENDERPM_FT
+	if(utext) PyMem_Free(utext);
 	if(ft_font) art_free(_ft_data.path);
 #endif
 
@@ -1026,7 +1032,7 @@ static PyObject* _fmtVPathElement(ArtVpath *p, char* name, int n)
 static PyObject* _get_gstatePath(int n, ArtBpath* path)
 {
 	PyObject	*P = PyTuple_New(n);
-	PyObject	*e;
+	PyObject	*e = NULL;
 	ArtBpath	*p;
 	int			i;
 	for(i=0;i<n;i++){
@@ -1044,6 +1050,7 @@ static PyObject* _get_gstatePath(int n, ArtBpath* path)
 			case ART_CURVETO:
 				e = _fmtPathElement(p,"curveTo",6);
 				break;
+			/*should never be seen*/
 			case ART_END:
 				break;
 			}
@@ -1054,7 +1061,7 @@ static PyObject* _get_gstatePath(int n, ArtBpath* path)
 
 static PyObject* _get_gstateVPath(gstateObject *self)
 {
-	PyObject	*e, *P;
+	PyObject	*e = NULL, *P;
 	ArtVpath	*vpath, *v;
 	int			i;
 
@@ -1075,6 +1082,7 @@ static PyObject* _get_gstateVPath(gstateObject *self)
 			case ART_LINETO:
 				e = _fmtVPathElement(v,"lineTo",2);
 				break;
+			/*these should never be seen*/
 			case ART_CURVETO:
 			case ART_END:
 				break;
@@ -1099,7 +1107,7 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 	PyObject	*textObj, *obj0;
 #ifdef	RENDERPM_FT
 	int				ft_font = self->ft_font;
-	Py_UNICODE		*utext;
+	Py_UCS4		*utext=NULL;
 	_ft_outliner_user_t _ft_data;
 #endif
 	if(!font){
@@ -1120,8 +1128,13 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 			if(!obj0) return NULL;
 			}
 		else goto L0;
-		textlen = PyUnicode_GetSize(obj0);
-		utext = PyUnicode_AsUnicode(obj0);
+		textlen = PyUnicode_GET_LENGTH(obj0);
+		utext = PyUnicode_AsUCS4Copy(obj0);	/*we own this as of now*/
+		if(!utext){
+			PyErr_SetString(PyExc_ValueError, "_renderPM.gstate__stringPath: Cannot allocate UCS4 memory!");
+			if(textObj!=obj0) Py_DECREF(obj0);
+			return NULL;
+		}
 		_ft_data.pathMax = 0;
 		_ft_data.path = NULL;
 		}
@@ -1196,11 +1209,12 @@ static PyObject* gstate__stringPath(gstateObject* self, PyObject* args)
 		}
 	if(textObj!=obj0) Py_DECREF(obj0);
 #ifdef	RENDERPM_FT
+	if(utext) PyMem_Free(utext);
 	if(ft_font) art_free(_ft_data.path);
 #endif
 	return P;
 
-L0:	PyErr_SetString(PyExc_ValueError, "_renderPM.gstate_drawString: text must be bytes/unicode!");
+L0:	PyErr_SetString(PyExc_ValueError, "_renderPM.gstate__stringPath: text must be bytes/unicode!");
 	return NULL;
 }
 
@@ -1801,7 +1815,7 @@ static	char* my_pfb_reader(void *data, const char *filename, int *psize)
 	PyObject	*arglist;
 	PyObject	*result;
 	arglist = Py_BuildValue("(s)",filename);
-	result = PyEval_CallObject(reader, arglist);
+	result = PyObject_CallObject(reader, arglist);
 	Py_DECREF(arglist);
 	if(result){
 		/*the file should have been read as binary*/

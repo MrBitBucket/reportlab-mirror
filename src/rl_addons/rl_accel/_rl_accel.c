@@ -34,8 +34,7 @@
 #define BYTESNAME "bytes"
 static void ModifyExcValue(PyObject *exc,const char *funcname,int lineno,const char* fmt,va_list ap)
 {
-	PyObject *type = NULL, *value = NULL, *tb = NULL, *aval=NULL, *uval=NULL;
-	const char* sval=NULL;
+	PyObject *type = NULL, *value = NULL, *tb = NULL, *uval=NULL;
 	PyErr_Fetch(&type, &value, &tb);
 	PyErr_NormalizeException(&type, &value, &tb);
 	if(PyErr_Occurred()) goto L_BAD;
@@ -130,7 +129,7 @@ PyObject *_a85_encode(PyObject *module, PyObject *args)
 		if(!_o1){
 			EXC_EXIT(PyExc_ValueError,"argument not decodable as latin1");
 			}
-		inData = PyBytes_AsString(_o1);
+		inData = (unsigned char*)PyBytes_AsString(_o1);
 		inObj = _o1;
 		if(!inData){
 			EXC_EXIT(PyExc_ValueError,"argument not converted to internal char string");
@@ -139,7 +138,7 @@ PyObject *_a85_encode(PyObject *module, PyObject *args)
 	else if(!PyBytes_Check(inObj)){
 		EXC_EXIT(PyExc_ValueError,"argument should be " BYTESNAME " or latin1 decodable " STRNAME);
 		}
-	inData = PyBytes_AsString(inObj);
+	inData = (unsigned char*)PyBytes_AsString(inObj);
 	length = PyBytes_GET_SIZE(inObj);
 
 	blocks = length / 4;
@@ -223,7 +222,7 @@ PyObject *_a85_decode(PyObject *module, PyObject *args)
 		if(!_o1){
 			EXC_EXIT(PyExc_ValueError,"argument not decodable as latin1");
 			}
-		inData = PyBytes_AsString(_o1);
+		inData = (unsigned char*)PyBytes_AsString(_o1);
 		inObj = _o1;
 		if(!inData){
 			EXC_EXIT(PyExc_ValueError,"argument not converted to internal char string");
@@ -232,7 +231,7 @@ PyObject *_a85_decode(PyObject *module, PyObject *args)
 	else if(!PyBytes_Check(inObj)){
 		EXC_EXIT(PyExc_ValueError,"argument should be " BYTESNAME " or latin1 decodable " STRNAME);
 		}
-	inData = PyBytes_AsString(inObj);
+	inData = (unsigned char*)PyBytes_AsString(inObj);
 	length = (unsigned int)PyBytes_GET_SIZE(inObj);
 	for(k=0,q=inData, p=q+length;q<p && (q=(unsigned char*)strchr((const char*)q,'z'));k++, q++);	/*count 'z'*/
 	length += k*4;
@@ -434,7 +433,7 @@ static PyObject *escapePDF(PyObject *module, PyObject* args)
 		if(!_o1){
 			EXC_EXIT(PyExc_ValueError,"argument not decodable as latin1");
 			}
-		inData = PyBytes_AsString(_o1);
+		inData = (unsigned char*)PyBytes_AsString(_o1);
 		inObj = _o1;
 		if(!inData){
 			EXC_EXIT(PyExc_ValueError,"argument not converted to internal char string");
@@ -443,7 +442,7 @@ static PyObject *escapePDF(PyObject *module, PyObject* args)
 	else if(!PyBytes_Check(inObj)){
 		EXC_EXIT(PyExc_ValueError,"argument should be " BYTESNAME " or latin1 decodable " STRNAME);
 		}
-	inData = PyBytes_AsString(inObj);
+	inData = (unsigned char*)PyBytes_AsString(inObj);
 	length = PyBytes_GET_SIZE(inObj);
 	retVal = _escapePDF(inData,length);
 L_exit:
@@ -612,7 +611,7 @@ static PyObject *unicode2T1(PyObject *module, PyObject *args, PyObject *kwds)
 	_o1 = _o2 = NULL;
 
 	_o2 = _GetAttrString(font, "encName"); if(!_o2) EXC_EXIT(PyExc_AttributeError,"no encName");
-	encObj = _GetStringBuf(_o2, &encStr);
+	encObj = _GetStringBuf(_o2, (const char**)&encStr);
 	Py_DECREF(_o2);
 	_o2 = NULL;
 	if (!encObj) EXC_EXIT(PyExc_TypeError,"could not convert str(font.encName) failed");
@@ -823,7 +822,7 @@ static PyObject *instanceStringWidthTTF(PyObject *module, PyObject *args, PyObje
 {
 	PyObject *self, *text, *size, *res,
 				*encoding = 0, *_o1=NULL, *_o2=NULL, *_o3=NULL;
-	Py_UNICODE *b;
+	Py_UCS4 *b=NULL;
 	Py_ssize_t n;
 	int	i;
 	double s, _d1, dw;
@@ -868,8 +867,9 @@ static PyObject *instanceStringWidthTTF(PyObject *module, PyObject *args, PyObje
 	if(PyErr_Occurred()) EXC_EXIT(PyExc_RuntimeError,"float() failed");
 	Py_DECREF(_o3);	_o3=NULL;
 
-	n = PyUnicode_GET_SIZE(text);
-	b = PyUnicode_AS_UNICODE(text);
+	n = PyUnicode_GET_LENGTH(text);
+	b = PyUnicode_AsUCS4Copy(text);
+	if(!b) EXC_EXIT(PyExc_MemoryError,"memory failed for UCS4Copy");
 
 	for(s=i=0;i<n;++i){
 		_o3 = PyLong_FromLong((long)b[i]); if(!_o3) EXC_EXIT(PyExc_RuntimeError,"FromLong failed");
@@ -887,16 +887,17 @@ static PyObject *instanceStringWidthTTF(PyObject *module, PyObject *args, PyObje
 	_o1 = PyFloat_FromDouble((s * 0.001)); if(!_o1) EXC_EXIT(PyExc_RuntimeError,"float(s*0.001) failed");
 	res = PyNumber_Multiply(_o1, size); if(!res) EXC_EXIT(PyExc_RuntimeError,"multiply by size failed");
 	Py_DECREF(_o1);
-	goto L_OK;
+L_OK:
+	if(b) PyMem_Free(b);
+	Py_DECREF(text);
+	Py_DECREF(encoding);
+	return res;
 L_exit:
 	Py_XDECREF(_o1);
 	Py_XDECREF(_o2);
 	Py_XDECREF(_o3);
 	res = NULL;
-L_OK:
-	Py_DECREF(text);
-	Py_DECREF(encoding);
-	return res;
+	goto L_OK;
 }
 
 #define HAVE_BOX
