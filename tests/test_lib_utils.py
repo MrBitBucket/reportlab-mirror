@@ -224,7 +224,7 @@ class ImporterTestCase(unittest.TestCase):
         self.assertEqual(asBytes(u'abc'),b'abc')
         self.assertEqual(asBytes(b'abc'),b'abc')
         self.assertRaises(AttributeError,asBytes,['abc'])
-        self.myAssertRaisesRegex(AttributeError,"asBytes\(.*'list' object has no attribute 'encode'", asBytes,['abc'])
+        self.myAssertRaisesRegex(AttributeError,r"asBytes\(.*'list' object has no attribute 'encode'", asBytes,['abc'])
 
 class RaccessTest:
     l = [1, 2]
