@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2021
 #see license.txt for license details
-__version__='3.6.12'
+__version__='3.6.13'
 import os, sys, glob, shutil, re, sysconfig, traceback, io, subprocess
 from configparser import RawConfigParser
 from urllib.parse import quote as urlquote
@@ -609,6 +609,9 @@ def main():
         or 'tests-postinstall' in sys.argv \
         or 'tests-preinstall' in sys.argv:
         verboseTests = specialOption('--verbose-tests')
+        excludes = [_ for _ in sys.argv if _.startswith('--exclude=')]
+        for _ in excludes:
+            sys.argv.remove(_)
         if len(sys.argv)!=2:
             raise ValueError('tests commands may only be used alone sys.argv[1:]=%s' % repr(sys.argv[1:]))
         cmd = sys.argv[-1]
@@ -617,7 +620,7 @@ def main():
             PYTHONPATH.insert(0,pjoin(pkgDir,'src'))
         if PYTHONPATH: os.environ['PYTHONPATH']=os.pathsep.join(PYTHONPATH)
         os.chdir(pjoin(pkgDir,'tests'))
-        cli = [sys.executable, 'runAll.py']
+        cli = [sys.executable, 'runAll.py']+excludes
         if cmd=='tests-postinstall':
             cli.append('--post-install')
         if verboseTests:

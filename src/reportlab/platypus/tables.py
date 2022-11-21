@@ -170,7 +170,7 @@ def _quadrantDef(xpos, ypos, corner, r, kind=0, direction='left-right', m=0.4472
         xlo,ylo = corner
         P = [(xlo, ylo + r),(xlo, ylo + t), (xlo + t, ylo), (xlo + r, ylo)]
     else:
-        raise ValueError('Unknown quadrant position %s' % repr((xpos,ypos)))
+        raise ValueError(f'Unknown quadrant position (xpos,ypos)={(xpos,ypos)!r}')
     if direction=='left-right' and P[0][0]>P[-1][0] or direction=='bottom-top' and P[0][1]>P[-1][1]:
         P.reverse()
     P = _calcBezierPoints(P, kind)
@@ -215,7 +215,7 @@ def _convert2int(value, map, low, high, name, cmd):
             if low<=ivalue<=high: return ivalue
         except:
             pass
-    raise ValueError('Bad %s value %s in %s'%(name,value,ascii(cmd)))
+    raise ValueError(f'Bad {name} value {value} in {cmd!a}')
 
 def _endswith(obj,s):
     try:
@@ -261,7 +261,7 @@ class Table(Flowable):
         self.hAlign = hAlign or 'CENTER'
         self.vAlign = vAlign or 'MIDDLE'
         if not isinstance(data,(tuple,list)):
-            raise ValueError("%s invalid data type" % self.identity())
+            raise ValueError(f'{self.identity()} invalid data of type {type(data)}')
         self._nrows = nrows = len(data)
         self._cellvalues = []
         _seqCW = isinstance(colWidths,(tuple,list))
@@ -274,7 +274,7 @@ class Table(Flowable):
                                     if longTableOptimize is None else longTableOptimize)
         if not (nrows and ncols):
             if emptyTableAction=='error':
-                raise ValueError("%s must have at least a row and column" % self.identity())
+                raise ValueError(f'{self.identity()} must have at least a row and column')
             elif emptyTableAction=='indicate':
                 self.__class__ = Preformatted
                 global _emptyTableStyle
@@ -286,7 +286,7 @@ class Table(Flowable):
             elif emptyTableAction=='ignore':
                 self.__class__ = NullActionFlowable
             else:
-                raise ValueError('%s bad emptyTableAction: "%s"' % (self.identity(),emptyTableAction))
+                raise ValueError(f'{self.identitiy()} bad emptyTableAction: {emptyTableAction!a}')
             return
 
         # we need a cleanup pass to ensure data is strings - non-unicode and non-null
@@ -303,17 +303,17 @@ class Table(Flowable):
                 else:
                     colWidths = colWidths[:ncols]
             else:
-                raise ValueError("%s data error - %d columns in data but %d in column widths" % (self.identity(),ncols, len(colWidths)))
+                raise ValueError(f'{self.identity()} data error - {ncols} columns in data but {len(colWidths)} column widths')
         if not _seqRH: rowHeights = nrows*[rowHeights]
         elif len(rowHeights) != nrows:
-            raise ValueError("%s data error - %d rows in data but %d in row heights" % (self.identity(),nrows, len(rowHeights)))
+            raise ValueError(f'{self.identity()} data error - {nrows} rows in data but {len(rowHeights)} row heights')
         for i,d in enumerate(data):
             n = len(d)
             if n!=ncols:
                 if rl_config.allowShortTableRows and isinstance(d,list):
                     d[n:] = (ncols-n)*['']
                 else:
-                    raise ValueError("%s expected %d not %d columns in row %d!" % (self.identity(),ncols,n,i))
+                    raise ValueError(f'{self.identity()} expected {ncols} not {n} columns in row {i}!')
         self._rowHeights = self._argH = rowHeights
         self._colWidths = self._argW = colWidths
         if cellStyles is None:
@@ -354,7 +354,7 @@ class Table(Flowable):
         if minRowHeights != None:
             lmrh = len(minRowHeights)
             if not lmrh:
-                raise ValueError("%s Supplied mismatching minimum row heights of length %d" % (self.identity(),lmrh))
+                raise ValueError('{self.idenity()} Supplied mismatching minimum row heights of length {lmrh}')
             elif lmrh<nrows:
                 minRowHeights = minRowHeights+(nrows-lmrh)*minRowHeights.__class__((0,))
         self._minRowHeights = minRowHeights
@@ -523,7 +523,7 @@ class Table(Flowable):
                     else:#work out size
                         t = self._elementWidth(v,s)
                         if t is None:
-                            raise ValueError("Flowable %s in cell(%d,%d) can't have auto width\n%s" % (v.identity(30),i,j,self.identity(30)))
+                            raise ValueError(f'Flowable {v.identity()} in cell({i},{j}) can\'t have auto width\n{self.identity(30)}')
                         t += s.leftPadding+s.rightPadding
                         if span:
                             c0 = span[0]
@@ -632,7 +632,7 @@ class Table(Flowable):
                             else: v = flatten(v)
                             v = V[j] = self._cellListProcess(v,w,None)
                             if w is None and not self._canGetWidth(v):
-                                raise ValueError("Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30)))
+                                raise ValueError(f'Flowable {v[0].identity()} in cell({i},{j}) can\'t have auto width\n{self.identity(30)}')
                             if canv: canv._fontname, canv._fontsize, canv._leading = s.fontname, s.fontsize, s.leading or 1.2*s.fontsize
                             if ji in colSpanCells:
                                 if not span: continue
@@ -1114,7 +1114,7 @@ class Table(Flowable):
         elif _isLineCommand(cmd):
             # we expect op, start, stop, weight, colour, cap, dashes, join
             cmd = list(cmd)
-            if len(cmd)<5: raise ValueError('bad line command '+ascii(cmd))
+            if len(cmd)<5: raise ValueError(f'bad line command {cmd!a}')
 
             #determine line cap value at position 5. This can be str or numeric.
             if len(cmd)<6:
@@ -1214,7 +1214,7 @@ class Table(Flowable):
         #we are only called from _drawLines which is one level up
         import sys
         op = sys._getframe(1).f_locals['op']
-        raise ValueError("Unknown line command '%s'" % op)
+        raise ValueError(f'Unknown line command {op!a}')
 
     def _drawGrid(self, start, end, weight, color, count, space):
         self._drawBox( start, end, weight, color, count, space)
@@ -2309,7 +2309,7 @@ class Table(Flowable):
                             P = arg[4] if len(arg)==4 else None
                             canv.linearGradient(ax0, ay0, ax1, ay1, C, positions=P, extend=extend)
                         else:
-                            raise ValueError('Wrong length for %s arguments %r' % (op, arg))
+                            raise ValueError(f'Wrong length for {op!a} arguments {arg!a}')
                     elif arg0=='RADIALGRADIENT':
                         # the remaining arguments define the centre, radius, extend, colors, stops as
                         # center = (xc,yc) given as fractions of width / height
@@ -2331,14 +2331,14 @@ class Table(Flowable):
                             elif ref=='max':
                                 ref = max(w,h)
                             else:
-                                raise ValueError('Bad radius, %r, for %s arguments %r' % (ascii(arg[1]),op, arg))
+                                raise ValueError(f'Bad radius, {arg[1]!a}, for {op!a} arguments {arg!r}')
                             r *= ref
                             extend = arg[2]
                             C = arg[3]
                             P = arg[4] if len(arg)==4 else None
                             canv.radialGradient(xc, yc, r, C, positions=P, extend=extend)
                         else:
-                            raise ValueError('Wrong length for %s arguments %r' % (op, arg))
+                            raise ValueError(f'Wrong length for {op!a} arguments {arg}')
                     canv.restoreState()
                 else:
                     color = colors.toColorOrNone(arg)
@@ -2383,7 +2383,7 @@ class Table(Flowable):
                 elif just in ('CENTRE', 'CENTER'):
                     x = colpos+(colwidth+cellstyle.leftPadding-cellstyle.rightPadding-w)/2.0
                 else:
-                    raise ValueError('Invalid justification %s' % just)
+                    raise ValueError(f'Invalid justification {just!a} for {type(v)}')
                 y -= v.getSpaceBefore()
                 y -= h
                 v.drawOn(self.canv,x,y)
@@ -2402,7 +2402,7 @@ class Table(Flowable):
                 draw = self.canv.drawAlignedString
                 x = colpos + colwidth - cellstyle.rightPadding
             else:
-                raise ValueError('Invalid justification %s' % just)
+                raise ValueError(f'Invalid justification {just!a}')
             vals = str(cellval).split("\n")
             n = len(vals)
             leading = cellstyle.leading
@@ -2415,7 +2415,7 @@ class Table(Flowable):
                 #tim roberts pointed out missing fontsize correction 2004-10-04
                 y = rowpos + (cellstyle.bottomPadding + rowheight-cellstyle.topPadding+n*leading)/2.0 - fontsize
             else:
-                raise ValueError("Bad valign: '%s'" % str(valign))
+                raise ValueError(f'Bad valign: {valign!a}')
 
             for v in vals:
                 draw(x, y, v)
@@ -2435,7 +2435,7 @@ class Table(Flowable):
         if isListOfNumbersOrNone(cornerRadii):
             self._cornerRadii = None if not cornerRadii else list(cornerRadii) + (max(4-len(cornerRadii),0)*[0])
         else:
-            raise ValueError('cornerRadii should be None or a list/tuple of numeric radii')
+            raise ValueError(f'cornerRadii should be None or a list/tuple of numeric radii\nnot {cornerRadii!a}')
 
 _LineOpMap = {  'GRID':'_drawGrid',
                 'BOX':'_drawBox',
