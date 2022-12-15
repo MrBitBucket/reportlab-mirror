@@ -7,9 +7,9 @@ from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, p
 setOutDir(__name__)
 import unittest, os, sys, glob
 try:
-    from reportlab.graphics import _renderPM
+    from reportlab.graphics import renderPM
 except:
-    _renderPM = None
+    renderPM = None
 from reportlab.graphics.shapes import _DrawingEditorMixin, Drawing, Group, Rect, Path, String, Polygon, Hatching, Line, definePath
 from reportlab.lib.colors import Color, CMYKColor, PCMYKColor, toColor
 
@@ -149,7 +149,7 @@ class RenderTestCase(unittest.TestCase):
         from reportlab.graphics.renderPDF import test
         assert test(self.outDir) is None
 
-    @unittest.skipIf(not _renderPM,'no _renderPM')
+    @unittest.skipIf(not renderPM,'no renderPM')
     def test2(self):
         from reportlab.graphics.renderPM import test
         assert test(self.outDir) is None
@@ -159,7 +159,7 @@ class RenderTestCase(unittest.TestCase):
         assert test(self.outDir) is None
 
     def test4(self):
-        formats = ('pdf svg ps py' + (' png' if _renderPM else '')).split()
+        formats = ('pdf svg ps py' + (' png' if renderPM else '')).split()
         for fm in (0,1):
             FillModeDrawing(fillMode=fm).save(formats=formats,outDir=self.outDir,fnRoot='fillmode-'+('non-zero' if fm else 'even-odd'))
         _410Drawing().save(formats=formats,outDir=self.outDir,fnRoot='410')
@@ -168,7 +168,7 @@ class RenderTestCase(unittest.TestCase):
         HatchDrawing().save(formats=formats,outDir=self.outDir,fnRoot='hatch')
         TextRenderModeDrawing().save(formats=formats,outDir=self.outDir,fnRoot='textmode')
 
-    @unittest.skipIf(not _renderPM,'no _renderPM')
+    @unittest.skipIf(not renderPM,'no renderPM')
     def testSVGLibIssues(self):
         SVGLibIssue104().save(formats=['pdf','png'],outDir=self.outDir, fnRoot='svglib-issue104')
         from PIL import Image

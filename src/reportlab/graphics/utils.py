@@ -6,7 +6,6 @@ __all__ = (
         'text2Path',
         'RenderPMError',
         )
-from . _renderPM import makeT1Font
 from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1
 from reportlab.lib.utils import open_and_read, isBytes, rl_exec
 from .shapes import _baseGFontName, _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, definePath
@@ -35,6 +34,7 @@ def setFont(gs,fontName,fontSize):
         if not e.args[0].endswith("Can't find font!"):
             _errorDump(fontName,fontSize)
         #here's where we try to add a font to the canvas
+        from _rl_renderPM import makeT1Font
         try:
             f = getFont(fontName)
             makeT1Font(fontName,f.face.findT1File(),f.encoding.vector,open_and_read)
@@ -47,15 +47,15 @@ def pathNumTrunc(n):
     return round(n,5)
 
 
-def __makeTextPathsCode__(tp=None, _TP = ('freetype','_renderPM')):
+def __makeTextPathsCode__(tp=None, _TP = ('freetype','_rl_renderPM')):
     from reportlab.rl_config import textPaths, renderPMBackend
     if tp is not None: textPaths = tp
     if textPaths=='backend':
-        tp = 'freetype' if renderPMBackend!='_renderPM' else '_renderPM'
+        tp = 'freetype' if renderPMBackend!='_rl_renderPM' else '_rl_renderPM'
     elif textPaths in _TP:
         tp = textPaths
     else:
-        raise ValueError(f"textPaths={textPaths!r} should be one of 'backend', 'freetype' or '_renderPM')")
+        raise ValueError(f"textPaths={textPaths!r} should be one of 'backend', 'freetype' or '_rl_renderPM')")
     TP = (tp,) + tuple((_ for _ in _TP if _!=tp))
     for tp in TP:
         if tp=='freetype':
@@ -172,11 +172,12 @@ def __makeTextPathsCode__(tp=None, _TP = ('freetype','_renderPM')):
                             x += f.stringWidth(t, fontSize)
                 return P_extend.__self__
             return dict(text2PathDescription=text2PathDescription,FTTextPath=FTTextPath)
-        elif tp=='_renderPM':
+        elif tp=='_rl_renderPM':
             try:
-                from . import _renderPM
+                import _rl_renderPM
             except ImportError:
                 continue
+
             def processGlyph(G, truncate=1, pathReverse=0):
                 O = []
                 P = []
@@ -208,7 +209,7 @@ def __makeTextPathsCode__(tp=None, _TP = ('freetype','_renderPM')):
 
             def text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
                                         anchor='start', truncate=1, pathReverse=0, gs=None):
-                '''_renderPM text2PathDescription(text, x=0, y=0, fontName='fontname',
+                '''_rl_renderPM text2PathDescription(text, x=0, y=0, fontName='fontname',
                                     fontSize=1000, font = 'fontName',
                                     anchor='start', truncate=1, pathReverse=0, gs=None)
                 '''
@@ -223,7 +224,7 @@ def __makeTextPathsCode__(tp=None, _TP = ('freetype','_renderPM')):
                     elif anchor=='middle':
                         x = x - textLen/2.
                 if gs is None:
-                    from ._renderPM import gstate
+                    from _rl_renderPM import gstate
                     gs = gstate(1,1)
                 setFont(gs,fontName,fontSize)
                 if font._dynamicFont:
@@ -248,7 +249,7 @@ def __makeTextPathsCode__(tp=None, _TP = ('freetype','_renderPM')):
                         if i!=nm1:
                             x += f.stringWidth(t.decode(f.encName), fontSize)
                 return P_extend.__self__
-            return dict(text2PathDescription=text2PathDescription,processGlyph=processGlyph)
+            return dict(text2PathDescription=text2PathDescription,processGlyph=processGlyph,setFont=setFont)
     raise ImportError(f'Could not create text2PathDescription for using backends from {TP!a}')
 
 globals().update(__makeTextPathsCode__())

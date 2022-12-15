@@ -23,7 +23,7 @@ del reportlab
 for fn in __all__:
     D={}
     try:
-        exec('from reportlab.lib._rl_accel import %s as f' % fn,D)
+        exec('from _rl_accel import %s as f' % fn,D)
         _c_funcs[fn] = D['f']
         if testing: _py_funcs[fn] = None
     except ImportError:
