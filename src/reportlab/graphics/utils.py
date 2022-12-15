@@ -47,15 +47,15 @@ def pathNumTrunc(n):
     return round(n,5)
 
 
-def __makeTextPathsCode__(tp=None, _TP = ('freetype','_rl_renderPM')):
+def __makeTextPathsCode__(tp=None, _TP = ('freetype','_renderPM')):
     from reportlab.rl_config import textPaths, renderPMBackend
     if tp is not None: textPaths = tp
     if textPaths=='backend':
-        tp = 'freetype' if renderPMBackend!='_rl_renderPM' else '_rl_renderPM'
+        tp = 'freetype' if renderPMBackend!='rlPyCairo' else '_renderPM'
     elif textPaths in _TP:
         tp = textPaths
     else:
-        raise ValueError(f"textPaths={textPaths!r} should be one of 'backend', 'freetype' or '_rl_renderPM')")
+        raise ValueError(f"textPaths={textPaths!r} should be one of 'backend', 'freetype' or '_renderPM')")
     TP = (tp,) + tuple((_ for _ in _TP if _!=tp))
     for tp in TP:
         if tp=='freetype':
@@ -172,7 +172,7 @@ def __makeTextPathsCode__(tp=None, _TP = ('freetype','_rl_renderPM')):
                             x += f.stringWidth(t, fontSize)
                 return P_extend.__self__
             return dict(text2PathDescription=text2PathDescription,FTTextPath=FTTextPath)
-        elif tp=='_rl_renderPM':
+        elif tp=='_renderPM':
             try:
                 import _rl_renderPM
             except ImportError:
@@ -209,7 +209,7 @@ def __makeTextPathsCode__(tp=None, _TP = ('freetype','_rl_renderPM')):
 
             def text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
                                         anchor='start', truncate=1, pathReverse=0, gs=None):
-                '''_rl_renderPM text2PathDescription(text, x=0, y=0, fontName='fontname',
+                '''_renderPM text2PathDescription(text, x=0, y=0, fontName='fontname',
                                     fontSize=1000, font = 'fontName',
                                     anchor='start', truncate=1, pathReverse=0, gs=None)
                 '''

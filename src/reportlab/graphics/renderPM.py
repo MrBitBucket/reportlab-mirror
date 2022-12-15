@@ -25,7 +25,7 @@ from math import sin, cos, pi, ceil
 
 def _getPMBackend(backend=None):
     if not backend: backend = rl_config.renderPMBackend
-    if backend=='_rl_renderPM':
+    if backend=='_renderPM':
         try:
             import _rl_renderPM as M
         except ImportError as errMsg:
@@ -302,7 +302,7 @@ class PMCanvas:
     @staticmethod
     def _getGState(w, h, bg, backend=None, fmt='RGB24'):
         mod = _getPMBackend(backend)
-        if backend=='_rl_renderPM':
+        if backend=='_renderPM':
             return mod.gstate(w,h,bg=bg)
         elif 'cairo' in backend.lower():
             return mod.GState(w,h,bg,fmt=fmt)

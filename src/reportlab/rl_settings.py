@@ -158,9 +158,9 @@ trustedHosts=None                                   #set to a list of trusted fo
                                                     #allowed. In environment use a comma separated string.
 trustedSchemes=['file', 'rml', 'data', 'https',     #these url schemes are trusted
                 'http', 'ftp']
-renderPMBackend='rlPyCairo'                         #or '_rl_renderPM' if available
+renderPMBackend='rlPyCairo'                         #or '_renderPM' if available
 xmlParser='lxml'                                    #or 'pyrxp' for preferred xml parsing
-textPaths='freetype'                                    #freetype or _renderPM or backend
+textPaths='freetype'                                #freetype or _renderPM or backend
                                                     #determines what code is used to create Paths from str
                                                     #see reportlab/graphics/utils.py for full horror
 

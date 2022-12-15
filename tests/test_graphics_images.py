@@ -47,7 +47,7 @@ class ImageTestCase(unittest.TestCase):
         if rlPyCairo:
             d.save(formats=['png', 'gif', 'ps','svg'],outDir=os.path.dirname(outPath), fnRoot='test_graphics_images', _renderPM_backend='rlPyCairo')
         if _rl_renderPM:
-            d.save(formats=['png', 'gif'],outDir=os.path.dirname(outPath), fnRoot='test_graphics_images-libart', _renderPM_backend='_rl_renderPM')
+            d.save(formats=['png', 'gif'],outDir=os.path.dirname(outPath), fnRoot='test_graphics_images-libart', _renderPM_backend='_renderPM')
 
 
     def test0(self):
