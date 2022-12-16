@@ -76,3 +76,11 @@ syntax: regexp
 ^src/reportlab.egg-info/
 ^.git
 ^.gitignore
+^[lL]ib(64|)/
+^[lL]ib64
+^[iI]nclude/
+^share/
+^local/
+^(bin|[Ss]cripts)/
+^pyvenv.cfg
+^reportlab_(settings|mod)\.py
