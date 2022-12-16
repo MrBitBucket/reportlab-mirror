@@ -197,6 +197,15 @@ reportlab_files= [
         'license.txt',
         ]
 
+def url2data(url,returnRaw=False):
+    import urllib.request as ureq
+    remotehandle = ureq.urlopen(url)
+    try:
+        raw = remotehandle.read()
+        return raw if returnRaw else io.BytesIO(raw)
+    finally:
+        remotehandle.close()
+
 def get_fonts(PACKAGE_DIR, reportlab_files):
     import zipfile
     rl_dir = PACKAGE_DIR['reportlab']
