@@ -198,7 +198,7 @@ class KutenRowCodeChart(CodeChartBase):
             font = cidfonts.CIDFont(self.faceName, self.encodingName)
             pdfmetrics.registerFont(font)
         except:
-            # fall back to English and at least shwo we can draw the boxes
+            # fall back to English and at least show we can draw the boxes
             self.faceName = 'Helvetica'
             self.encodingName = 'WinAnsiEncoding'
         self.fontName = self.faceName + '-' + self.encodingName
@@ -252,7 +252,7 @@ class Big5CodeChart(CodeChartBase):
             font = cidfonts.CIDFont(self.faceName, self.encodingName)
             pdfmetrics.registerFont(font)
         except:
-            # fall back to English and at least shwo we can draw the boxes
+            # fall back to English and at least show we can draw the boxes
             self.faceName = 'Helvetica'
             self.encodingName = 'WinAnsiEncoding'
         self.fontName = self.faceName + '-' + self.encodingName
