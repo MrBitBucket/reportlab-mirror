@@ -256,12 +256,14 @@ class Table(Flowable):
                 hAlign=None,vAlign=None, normalizedData=0, cellStyles=None, rowSplitRange=None,
                 spaceBefore=None,spaceAfter=None, longTableOptimize=None, minRowHeights=None,
                 cornerRadii=__UNSET__, #or [topLeft, topRight, bottomLeft bottomRight]
+                renderCB=None,
                 ):
         self.ident = ident
         self.hAlign = hAlign or 'CENTER'
         self.vAlign = vAlign or 'MIDDLE'
         if not isinstance(data,(tuple,list)):
             raise ValueError("%s invalid data type" % self.identity())
+        self._renderCB = renderCB
         self._nrows = nrows = len(data)
         self._cellvalues = []
         _seqCW = isinstance(colWidths,(tuple,list))
@@ -1755,7 +1757,9 @@ class Table(Flowable):
                     cellStyles=newCellStyles, ident=self.ident,
                     spaceBefore=getattr(self,'spaceBefore',None),
                     longTableOptimize=self._longTableOptimize,
-                    cornerRadii=getattr(self,'_cornerRadii',None))
+                    cornerRadii=getattr(self,'_cornerRadii',None),
+                    renderCB=getattr(self,'_renderCB',None),
+                    )
 
                 T._bkgrndcmds = bkgrndcmds
                 T._spanCmds = spanCmds
@@ -1920,7 +1924,9 @@ class Table(Flowable):
                 cellStyles=newCellStyles, ident=self.ident,
                 spaceBefore=getattr(self,'spaceBefore',None),
                 longTableOptimize=self._longTableOptimize,
-                cornerRadii=getattr(self,'_cornerRadii',None))
+                cornerRadii=getattr(self,'_cornerRadii',None),
+                renderCB=getattr(self,'_renderCB',None),
+                )
 
             T._linecmds = self._stretchCommands(n, self._linecmds, lim)
             T._bkgrndcmds = self._stretchCommands(n, self._bkgrndcmds, lim)
@@ -1939,13 +1945,16 @@ class Table(Flowable):
             splitH = T._argH
 
         cornerRadii = getattr(self,'_cornerRadii',None)
+        renderCB = getattr(self,'_renderCB',None)
         R0 = self.__class__( data[:n], colWidths=T._colWidths, rowHeights=splitH[:n],
                 repeatRows=repeatRows, repeatCols=repeatCols, splitByRow=self.splitByRow,
                 splitInRow=self.splitInRow, normalizedData=1, cellStyles=T._cellStyles[:n],
                 ident=ident,
                 spaceBefore=getattr(self,'spaceBefore',None),
                 longTableOptimize=lto,
-                cornerRadii=cornerRadii[:2] if cornerRadii else None)
+                cornerRadii=cornerRadii[:2] if cornerRadii else None,
+                renderCB=renderCB,
+                )
 
         nrows = T._nrows
         ncols = T._ncols
@@ -1986,6 +1995,7 @@ class Table(Flowable):
                     spaceAfter=getattr(self,'spaceAfter',None),
                     longTableOptimize=lto,
                     cornerRadii = cornerRadii,
+                    renderCB = renderCB,
                     )
             R1._cr_1_1(n,nrows,repeatRows,_linecmds)
             R1._cr_1_1(n,nrows,repeatRows,T._bkgrndcmds,_srflMode=True)
@@ -2001,6 +2011,7 @@ class Table(Flowable):
                     spaceAfter=getattr(self,'spaceAfter',None),
                     longTableOptimize=lto,
                     cornerRadii = ([0,0] + cornerRadii[2:]) if cornerRadii else None,
+                    renderCB = renderCB,
                     )
 
             R1._cr_1_0(n,_linecmds)
@@ -2184,26 +2195,52 @@ class Table(Flowable):
     def draw(self):
         c = self.canv
         c.saveState()
+        renderCB = getattr(self,'_renderCB')
+        if renderCB: renderCB(self,'startTable')
         self._makeRoundedCornersClip()
         self._curweight = self._curcolor = self._curcellstyle = None
         self._drawBkgrnd()
         if not self._spanCmds:
             # old fashioned case, no spanning, steam on and do each cell
-            for row, rowstyle, rowpos, rowheight in zip(self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
-                for cellval, cellstyle, colpos, colwidth in zip(row, rowstyle, self._colpositions[:-1], self._colWidths):
-                    self._drawCell(cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
+            if renderCB:
+                for rowNo, (row, rowstyle, rowpos, rowheight) in enumerate(zip(self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights)):
+                    renderCB(self,'startRow',rowNo)
+                    for colNo, (cellval, cellstyle, colpos, colwidth) in enumerate(zip(row, rowstyle, self._colpositions[:-1], self._colWidths)):
+                        renderCB(self,'startCell', rowNo, colNo, cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
+                        self._drawCell(cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
+                        renderCB(self,'endCell')
+                    renderCB(self,'endRow')
+            else:
+                for row, rowstyle, rowpos, rowheight in zip(self._cellvalues, self._cellStyles, self._rowpositions[1:], self._rowHeights):
+                    for colNo, (cellval, cellstyle, colpos, colwidth) in enumerate(zip(row, rowstyle, self._colpositions[:-1], self._colWidths)):
+                        self._drawCell(cellval, cellstyle, (colpos, rowpos), (colwidth, rowheight))
         else:
             # we have some row or col spans, need a more complex algorithm
             # to find the rect for each
-            for rowNo in range(self._nrows):
-                for colNo in range(self._ncols):
-                    cellRect = self._spanRects[colNo, rowNo]
-                    if cellRect is not None:
-                        (x, y, width, height) = cellRect
-                        cellval = self._cellvalues[rowNo][colNo]
-                        cellstyle = self._cellStyles[rowNo][colNo]
-                        self._drawCell(cellval, cellstyle, (x, y), (width, height))
+            if renderCB:
+                for rowNo in range(self._nrows):
+                    renderCB(self,'startRow',rowNo)
+                    for colNo in range(self._ncols):
+                        cellRect = self._spanRects[colNo, rowNo]
+                        if cellRect is not None:
+                            (x, y, width, height) = cellRect
+                            cellval = self._cellvalues[rowNo][colNo]
+                            cellstyle = self._cellStyles[rowNo][colNo]
+                            renderCB(self,'startCell', rowNo, colNo, cellval, cellstyle, (x, y), (width, height))
+                            self._drawCell(cellval, cellstyle, (x, y), (width, height))
+                            renderCB(self,'endCell')
+                    renderCB(self,'endRow')
+            else:
+                for rowNo in range(self._nrows):
+                    for colNo in range(self._ncols):
+                        cellRect = self._spanRects[colNo, rowNo]
+                        if cellRect is not None:
+                            (x, y, width, height) = cellRect
+                            cellval = self._cellvalues[rowNo][colNo]
+                            cellstyle = self._cellStyles[rowNo][colNo]
+                            self._drawCell(cellval, cellstyle, (x, y), (width, height))
         self._drawLines()
+        if renderCB: renderCB(self,'endTable')
         c.restoreState()
         if self._roundingRectDef:
             self._restoreRoundingObscuredLines()
@@ -2451,6 +2488,26 @@ class LongTable(Table):
     _longTableOptimize = 1
 
 LINECOMMANDS = list(_LineOpMap.keys())
+
+class TableRenderCB:
+    '''table render callback abstract base klass to be called in Table.draw'''
+    def __call__(self,T,cmd,*args):
+        if not isinstance(T,Table): raise ValueError(f'TableRenderCB first argument, {repr(T)} is not a Table')
+        cmd = getattr(self,cmd,None)
+        if not cmd: raise ValueError(f'invalid TablerenderCB cmd {cmd}')
+        cmd(T,*args)
+    def startTable(self,T):
+        raise NotImplementedError('startTable')
+    def startRow(self,T,rowNo):
+        raise NotImplementedError('startRow')
+    def startCell(self,T,rowNo, colNo, cellval, cellstyle, pos, size):
+        raise NotImplementedError('startCell')
+    def endCell(self,T):
+        raise NotImplementedError('endCell')
+    def endRow(self,T):
+        raise NotImplementedError('endRow')
+    def endTable(self,T):
+        raise NotImplementedError('endTable')
 
 def _isLineCommand(cmd):
     return cmd[0] in LINECOMMANDS
