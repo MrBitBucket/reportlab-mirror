@@ -2195,11 +2195,14 @@ class Table(Flowable):
     def draw(self):
         c = self.canv
         c.saveState()
-        renderCB = getattr(self,'_renderCB')
-        if renderCB: renderCB(self,'startTable')
-        self._makeRoundedCornersClip()
         self._curweight = self._curcolor = self._curcellstyle = None
+        renderCB = getattr(self,'_renderCB')
+        if renderCB:
+            renderCB(self,'startTable')
+            renderCB(self,'startBG')
+        self._makeRoundedCornersClip()
         self._drawBkgrnd()
+        if renderCB: renderCB(self,'endBG')
         if not self._spanCmds:
             # old fashioned case, no spanning, steam on and do each cell
             if renderCB:
@@ -2239,8 +2242,11 @@ class Table(Flowable):
                             cellval = self._cellvalues[rowNo][colNo]
                             cellstyle = self._cellStyles[rowNo][colNo]
                             self._drawCell(cellval, cellstyle, (x, y), (width, height))
+        if renderCB: renderCB(self,'startLines')
         self._drawLines()
-        if renderCB: renderCB(self,'endTable')
+        if renderCB:
+            renderCB(self,'endLines')
+            renderCB(self,'endTable')
         c.restoreState()
         if self._roundingRectDef:
             self._restoreRoundingObscuredLines()
@@ -2498,6 +2504,10 @@ class TableRenderCB:
         cmd(T,*args)
     def startTable(self,T):
         raise NotImplementedError('startTable')
+    def startBG(self,T):
+        raise NotImplementedError('startBG')
+    def endBG(self,T):
+        raise NotImplementedError('endBG')
     def startRow(self,T,rowNo):
         raise NotImplementedError('startRow')
     def startCell(self,T,rowNo, colNo, cellval, cellstyle, pos, size):
@@ -2506,6 +2516,10 @@ class TableRenderCB:
         raise NotImplementedError('endCell')
     def endRow(self,T):
         raise NotImplementedError('endRow')
+    def startLines(self,T):
+        raise NotImplementedError('startLines')
+    def endLines(self,T):
+        raise NotImplementedError('endLines')
     def endTable(self,T):
         raise NotImplementedError('endTable')
 
