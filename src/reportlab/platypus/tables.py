@@ -2497,18 +2497,11 @@ LINECOMMANDS = list(_LineOpMap.keys())
 
 class TableRenderCB:
     '''table render callback abstract base klass to be called in Table.draw'''
-    def __init__(self):
-        self.allowedCmds = set()
-        self.addCmds('Table','BG','Row','Cell', 'Lines')
-    def addCmds(self,*args):
-        self.allowedCmds |= {pfx+v for pfx in ('start','end') for v in args}
-    def subCmds(self,*args):
-        self.allowedCmds -= {pfx+v for pfx in ('start','end') for v in args}
     def __call__(self,T,cmd,*args):
         if not isinstance(T,Table): raise ValueError(f'TableRenderCB first argument, {repr(T)} is not a Table')
         meth = getattr(self,cmd,None)
         if not meth: raise ValueError(f'invalid TablerenderCB cmd {cmd}')
-        if cmd in self.allowedCmds: meth(T,*args)
+        meth(T,*args)
     def startTable(self,T):
         raise NotImplementedError('startTable')
     def startBG(self,T):
