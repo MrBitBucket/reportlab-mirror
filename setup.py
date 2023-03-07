@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2022
 #see LICENSE for license details
-__version__='3.6.12'
+__version__='4.0.0'
 import os, sys, glob, shutil, re, sysconfig, traceback, io, subprocess
 from urllib.parse import quote as urlquote
 platform = sys.platform
@@ -62,10 +62,7 @@ dlt1 = not specialOption('--no-download-t1-files')
 verbose = specialOption('--verbose',ceq=True)
 nullDivert = not verbose
 
-if __name__=='__main__':
-    pkgDir=dirname(sys.argv[0])
-else:
-    pkgDir=dirname(__file__)
+pkgDir=dirname(__file__)
 if not pkgDir:
     pkgDir=os.getcwd()
 elif not os.path.isabs(pkgDir):
@@ -75,17 +72,7 @@ try:
 except:
     showTraceback('warning could not change directory to %r' % pkgDir)
 
-try:
-    from setuptools import setup, Extension
-except ImportError:
-    from distutils.core import setup, Extension
-
-def _packages_path(d):
-    P = [_ for _ in sys.path if basename(_)==d]
-    if P: return P[0]
-
-package_path = _packages_path('dist-packages') or _packages_path('site-packages')
-package_path = pjoin(package_path, 'reportlab')
+from setuptools import setup
 
 def get_version():
     #determine Version
@@ -270,106 +257,7 @@ def get_glyphlist_module(PACKAGE_DIR):
         xitmsg = "Failed to download glyphlist.txt"
     infoline(xitmsg)
 
-def canImport(pkg):
-    ns = [pkg.find(_) for _ in '<>=' if _ in pkg]
-    if ns: pkg =pkg[:min(ns)]
-    ns = {}
-    try:
-        exec('import %s as M' % pkg,{},ns)
-    except:
-        if verbose>=2:
-            showTraceback("can't import %s" % pkg)
-    return 'M' in ns
-
-def pipInstall(pkg, ixu=None):
-    if canImport(pkg): return True
-    i = ['-i%s' % ixu] if ixu else []
-    r = spCall([sys.executable, '-mpip', 'install']+i+[pkg],dropOutput=verbose<3)
-    return canImport(pkg)
-
-def pipUninstall(pkg):
-    spCall((sys.executable,'-mpip','-q','uninstall','-y', pkg), dropOutput=verbose<3)
-
-def pipInstallGroups(pkgs, ixu=None):
-    '''install groups of packages; if any of a group fail we backout the group'''
-    for g in pkgs:
-        I = []  #thse are the installed in this group
-        for pkg in g.split():
-            if pipInstall(pkg,ixu):
-                I.append(pkg)
-            else:
-                print('!!!!! pip uninstalled %s' % repr(I)) 
-                for pkg in I:
-                    pipUninstall(pkg)
-                I = []
-                break
-        if I:
-            print('===== pip installed %s' % repr(I)) 
-
-def vopt(opt):
-    opt = '--%s=' % opt
-    v = [_ for _ in sys.argv if _.startswith(opt)]
-    for _ in v: sys.argv.remove(_)
-    n = len(opt)
-    return list(filter(None,[_[n:] for _ in v]))
-
-class QUPStr(str):
-    def __new__(cls,s,u,p):
-        self = str.__new__(cls,s)
-        self.u = u
-        self.p = p
-        return self
-
-def qup(url, pat=re.compile(r'(?P<scheme>https?://)(?P<up>[^@]*)(?P<rest>@.*)$')):
-    '''urlquote the user name and password'''
-    m = pat.match(url)
-    if m:
-        u, p = m.group('up').split(':',1)
-        url = "%s%s:%s%s" % (m.group('scheme'),urlquote(u),urlquote(p),m.group('rest'))
-    else:
-        u = p = ''
-    return QUPStr(url,u,p)
-
-def performPipInstalls():
-    pip_installs = vopt('pip-install')
-    pipInstallGroups(pip_installs)
-    rl_pip_installs = vopt('rl-pip-install')
-    if rl_pip_installs:
-        rl_ixu = vopt('rl-index-url')
-        if len(rl_ixu)==1:
-            pipInstallGroups(rl_pip_installs,qup(rl_ixu[0]))
-        else:
-            raise ValueError('rl-pip-install requires exactly 1 --rl-index-url not %d' % len(rl_ixu))
-
-def showEnv():
-    action = -1 if specialOption('--show-env-only') else 1 if specialOption('--show-env') else 0
-    if not action: return
-    print('+++++ setup.py environment')
-    print('+++++ sys.version = %s' % sys.version.replace('\n',''))
-    import platform
-    for k in sorted((_ for _ in dir(platform) if not _.startswith('_'))):
-        try:
-            v = getattr(platform,k)
-            if isinstance(v,(str,list,tuple,bool)):
-                v = repr(v)
-            if callable(v) and v.__module__=='platform':
-                v = repr(v())
-            else:
-                continue
-        except:
-            v = '?????'
-        print('+++++ platform.%s = %s' % (k,v))
-    print('--------------------------')
-    for k, v in sorted(os.environ.items()):
-        print('+++++ environ[%s] = %r' % (k,v))
-    print('--------------------------')
-    if action<0:
-        sys.exit(0)
-
 def main():
-    showEnv()
-    performPipInstalls()
-    #test to see if we've a special command
     if 'test' in sys.argv \
         or 'tests' in sys.argv \
         or 'tests-postinstall' in sys.argv \
@@ -390,10 +278,6 @@ def main():
             cli.append('--verbosity=2')
         r = spCall(cli)
         sys.exit(('!!!!! runAll.py --> %s should exit with error !!!!!' % r) if r else r)
-    elif 'null-cmd' in sys.argv or 'null-command' in sys.argv:
-        sys.exit(0)
-
-    EXT_MODULES = []
 
     #copy some special case files into place so package_data will treat them properly
     PACKAGE_DIR = {'':'src','reportlab': pjoin('src','reportlab')}
@@ -423,7 +307,6 @@ def main():
                 ],
         package_dir = PACKAGE_DIR,
         package_data = {'reportlab': reportlab_files},
-        ext_modules =   EXT_MODULES,
         classifiers = [
             'Development Status :: 5 - Production/Stable',
             'Intended Audience :: Developers',
