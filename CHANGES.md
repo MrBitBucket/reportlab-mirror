@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.0.0a1 08/03/2023
+---------------------------
+	* release 4.0.0a1 with support for rlextra pluscode
+
 CHANGES  3.6.13  15/11/2022
 ---------------------------
 	* fixes for python 3.12.0a1
