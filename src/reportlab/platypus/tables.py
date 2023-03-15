@@ -246,6 +246,13 @@ def spanFixDim(V0,V,spanCons,lim=None,FUZZ=rl_config._FUZZ):
 class _ExpandedCellTuple(tuple):
     pass
 
+class _ExpandedCellTupleEx(tuple):
+    def __new__(cls,seq,tagType,altText,extras):
+        self = tuple.__new__(cls,seq)
+        self.tagType = tagType
+        self.altText = altText
+        self.extras = extras
+        return self
 
 RoundingRectDef = namedtuple('RoundingRectDefs','x0 y0 w h x1 y1 ar SL')
 RoundingRectLine = namedtuple('RoundingRectLine','xs ys xe ye weight color cap dash join')
@@ -441,8 +448,9 @@ class Table(Flowable):
             else:
                 yield c
 
-    def _cellListProcess(self,C,aW,aH):
-        if not isinstance(C,_ExpandedCellTuple):
+    def _cellListProcess(self,v,aW,aH):
+        if not isinstance(v,_ExpandedCellTuple):
+            C = (v,) if isinstance(v,Flowable) else flatten(v)
             frame = None
             R = [].append
             for c in self._cellListIter(C,aW,aH):
@@ -457,7 +465,10 @@ class Table(Flowable):
                     R(LIIndenter(c,leftIndent=frame._leftExtraIndent,rightIndent=frame._rightExtraIndent))
                 else:
                     R(c)
-            C = _ExpandedCellTuple(R.__self__)
+            if hasattr(v,'tagType'):
+                C = _ExpandedCellTupleEx(R.__self__,v.tagType,v.altText,v.extras)
+            else:
+                C = _ExpandedCellTuple(R.__self__)
         return C
 
     def _listCellGeom(self, V,w,s,W=None,H=None,aH=72000):
@@ -630,8 +641,6 @@ class Table(Flowable):
                         continue # don't count it, it's either occluded or unreliable
                     else:
                         if isinstance(v,(tuple,list,Flowable)):
-                            if isinstance(v,Flowable): v = (v,)
-                            else: v = flatten(v)
                             v = V[j] = self._cellListProcess(v,w,None)
                             if w is None and not self._canGetWidth(v):
                                 raise ValueError("Flowable %s in cell(%d,%d) can't have auto width in\n%s" % (v[0].identity(30),i,j,self.identity(30)))
