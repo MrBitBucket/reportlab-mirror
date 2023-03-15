@@ -449,7 +449,9 @@ class Table(Flowable):
                 yield c
 
     def _cellListProcess(self,v,aW,aH):
-        if not isinstance(v,_ExpandedCellTuple):
+        if isinstance(v,_ExpandedCellTuple):
+            C = v
+        else:
             C = (v,) if isinstance(v,Flowable) else flatten(v)
             frame = None
             R = [].append
@@ -469,6 +471,7 @@ class Table(Flowable):
                 C = _ExpandedCellTupleEx(R.__self__,v.tagType,v.altText,v.extras)
             else:
                 C = _ExpandedCellTuple(R.__self__)
+
         return C
 
     def _listCellGeom(self, V,w,s,W=None,H=None,aH=72000):
