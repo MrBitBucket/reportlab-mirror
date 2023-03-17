@@ -694,7 +694,7 @@ class KeepTogether(_ContainerSpace,Flowable):
             from reportlab.lib.utils import annotateException
             KeepTogether.NullActionFlowable = NullActionFlowable
             KeepTogether.FrameBreak = FrameBreak
-            KeepTogether.annotateException = annotateException
+            self.annotateException = annotateException
 
         if not flowables:
             flowables = [self.NullActionFlowable()]
