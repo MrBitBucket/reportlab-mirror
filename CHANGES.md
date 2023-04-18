@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.0.0a3 18/04/2023
+---------------------------
+	* Allow ListFlowable to have a caption
+
 CHANGES  4.0.0a2 14/03/2023
 ---------------------------
 	* added _ExpandedCellTupleEx for more tagging support
