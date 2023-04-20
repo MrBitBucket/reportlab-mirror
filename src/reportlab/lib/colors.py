@@ -872,7 +872,29 @@ class toColor:
                         literal_eval obj_R_G_B opaqueColor rgb2cmyk setColors toColor toColorOrNone'''.split()}
                 G.update(self._G)
                 try:
-                    return toColor(rl_safe_eval(arg,g=G,l={}))
+                    import ast
+                    try:
+                        return toColor(ast.literal_eval(arg))
+                    except:
+                        ##################################################################################
+                        import re
+                        allowedColorClasses = '''Color CMYKColor PCMYKColor CMYKColorSep PCMYKColorSep'''
+                        def get_class_instance(class_string):
+                            pattern = r'^(\w+)\((.*)\)$'
+                            match = re.match(pattern, class_string)
+                            if match:
+                                class_name = match.group(1)
+                                args_str = match.group(2)
+                                args = [int(x) if x.isdigit() else x for x in args_str.split(',')]
+                                if class_name in allowedColorClasses:
+                                    class_obj = globals().get(class_name)
+                                    instance = class_obj(*args)
+                                    return instance
+                                raise ValueError('Invalid color object %r' % (class_name))
+                        ###################################################################################
+                        inst = get_class_instance(arg)
+                        if inst is not None:
+                            return inst
                 except:
                     pass
 
