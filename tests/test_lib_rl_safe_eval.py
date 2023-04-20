@@ -52,7 +52,6 @@ class SafeEvalTestSequenceMeta(type):
                 'dict(a=1).get("a",2)',
                 'dict(a=1).pop("a",2)',
                 '{"_":1+_ for _ in (1,2)}.pop(1,None)',
-                '(type(1),type(str),type(testObj),type(TestClass))',
                 '1 if True else "a"',
                 '1 if False else "a"',
                 'testFunc(bad=False)',
@@ -74,6 +73,7 @@ class SafeEvalTestSequenceMeta(type):
                 (
                 'fail',
                 (
+                '(type(1),type(str),type(testObj),type(TestClass))',
                 'open("/tmp/myfile")',
                 'SafeEvalTestCase.__module__',
                 ("testInst.__class__.__bases__[0].__subclasses__()",dict(g=dict(testInst=testInst))),

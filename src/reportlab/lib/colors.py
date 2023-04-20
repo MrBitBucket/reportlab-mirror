@@ -860,20 +860,21 @@ class toColor:
             C = getAllNamedColors()
             s = arg.lower()
             if s in C: return C[s]
-            G = C.copy()
-            G.update(self.extraColorsNS)
-            if not self._G:
-                C = globals()
-                self._G = {s:C[s] for s in '''Blacker CMYKColor CMYKColorSep Color ColorType HexColor PCMYKColor PCMYKColorSep Whiter
-                    _chooseEnforceColorSpace _enforceCMYK _enforceError _enforceRGB _enforceSEP _enforceSEP_BLACK
-                    _enforceSEP_CMYK _namedColors _re_css asNative cmyk2rgb cmykDistance color2bw colorDistance
-                    cssParse describe fade fp_str getAllNamedColors hsl2rgb hue2rgb isStr linearlyInterpolatedColor
-                    literal_eval obj_R_G_B opaqueColor rgb2cmyk setColors toColor toColorOrNone'''.split()}
-            G.update(self._G)
-            try:
-                return toColor(rl_safe_eval(arg,g=G,l={}))
-            except:
-                pass
+            if True:    #*TODO* replace with rl_config option
+                G = C.copy()
+                G.update(self.extraColorsNS)
+                if not self._G:
+                    C = globals()
+                    self._G = {s:C[s] for s in '''Blacker CMYKColor CMYKColorSep Color ColorType HexColor PCMYKColor PCMYKColorSep Whiter
+                        _chooseEnforceColorSpace _enforceCMYK _enforceError _enforceRGB _enforceSEP _enforceSEP_BLACK
+                        _enforceSEP_CMYK _namedColors _re_css asNative cmyk2rgb cmykDistance color2bw colorDistance
+                        cssParse describe fade fp_str getAllNamedColors hsl2rgb hue2rgb isStr linearlyInterpolatedColor
+                        literal_eval obj_R_G_B opaqueColor rgb2cmyk setColors toColor toColorOrNone'''.split()}
+                G.update(self._G)
+                try:
+                    return toColor(rl_safe_eval(arg,g=G,l={}))
+                except:
+                    pass
 
         try:
             return HexColor(arg)

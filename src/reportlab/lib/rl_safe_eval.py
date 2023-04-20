@@ -53,7 +53,9 @@ __rl_unsafe__ = frozenset('''builtins breakpoint __annotations__ co_argcount co_
 						func_doc func_globals func_name gi_code gi_frame gi_running gi_yieldfrom
 						__globals__ im_class im_func im_self __iter__ __kwdefaults__ __module__
 						__name__ next __qualname__ __self__ tb_frame tb_lasti tb_lineno tb_next
-						globals vars locals'''.split()
+						globals vars locals
+						type eval exec aiter anext classmethod compile dir open
+						dir print classmethod staticmethod __import__ super property'''.split()
 						)
 __rl_unsafe_re__ = re.compile(r'\b(?:%s)' % '|'.join(__rl_unsafe__),re.M)
 
