@@ -835,6 +835,17 @@ class cssParse:
 cssParse=cssParse()
 
 class toColor:
+    """Accepot an expression returnng a Color subclass.
+
+    This used to accept arbitrary Python expressions, which resulted in increasngly devilish CVEs and
+    security holes from tie to time.  In April 2023 we are creating explicit, "dumb" parsing code to
+    replace this.  Acceptable patterns are
+
+    a Color instance passed in by the Python programmer
+    a named list of colours ('pink' etc')
+    list of 3 or 4 numbers
+    all CSS colour expression
+    """
     _G = {} #globals we like (eventually)
 
     def __init__(self):
@@ -853,6 +864,7 @@ class toColor:
             assert 0<=min(arg) and max(arg)<=1
             return len(arg)==3 and Color(arg[0],arg[1],arg[2]) or CMYKColor(arg[0],arg[1],arg[2],arg[3])
         elif isStr(arg):
+            import re  # why needed? imported at top of file
             arg = asNative(arg)
             C = cssParse(arg)
             if C: return C
@@ -860,43 +872,80 @@ class toColor:
             C = getAllNamedColors()
             s = arg.lower()
             if s in C: return C[s]
-            if True:    #*TODO* replace with rl_config option
-                G = C.copy()
-                G.update(self.extraColorsNS)
-                if not self._G:
-                    C = globals()
-                    self._G = {s:C[s] for s in '''Blacker CMYKColor CMYKColorSep Color ColorType HexColor PCMYKColor PCMYKColorSep Whiter
-                        _chooseEnforceColorSpace _enforceCMYK _enforceError _enforceRGB _enforceSEP _enforceSEP_BLACK
-                        _enforceSEP_CMYK _namedColors _re_css asNative cmyk2rgb cmykDistance color2bw colorDistance
-                        cssParse describe fade fp_str getAllNamedColors hsl2rgb hue2rgb isStr linearlyInterpolatedColor
-                        literal_eval obj_R_G_B opaqueColor rgb2cmyk setColors toColor toColorOrNone'''.split()}
-                G.update(self._G)
-                try:
-                    import ast
-                    try:
-                        return toColor(ast.literal_eval(arg))
-                    except:
-                        ##################################################################################
-                        import re
-                        allowedColorClasses = '''Color CMYKColor PCMYKColor CMYKColorSep PCMYKColorSep'''
-                        def get_class_instance(class_string):
-                            pattern = r'^(\w+)\((.*)\)$'
-                            match = re.match(pattern, class_string)
-                            if match:
-                                class_name = match.group(1)
-                                args_str = match.group(2)
-                                args = [int(x) if x.isdigit() else x for x in args_str.split(',')]
-                                if class_name in allowedColorClasses:
-                                    class_obj = globals().get(class_name)
-                                    instance = class_obj(*args)
-                                    return instance
-                                raise ValueError('Invalid color object %r' % (class_name))
-                        ###################################################################################
-                        inst = get_class_instance(arg)
-                        if inst is not None:
-                            return inst
-                except:
-                    pass
+
+
+            # allow expressions like 'Blacker(red, 0.5)'
+            # >>> re.compile(r"(Blacker|Whiter)\((\w+)\,\s?([0-9.]+)\)").match(msg).groups()
+            # ('Blacker', 'red', '0.5')
+            # >>> 
+            pat = re.compile(r"(Blacker|Whiter)\((\w+)\,\s?([0-9.]+)\)")
+            m = pat.match(arg)
+            if m:
+                funcname, rootcolor, num = m.groups()
+                if funcname == 'Blacker':
+                    return Blacker(rootcolor, float(num))
+                else:
+                    return Whiter(rootcolor, float(num))
+
+
+            try:
+                import ast
+                expr = ast.literal_eval(arg)
+                return toColor(expr)
+        
+            except (SyntaxError, ValueError):
+                pass
+                
+
+            ##################################################################################
+            
+            allowedColorClasses = '''Color CMYKColor PCMYKColor CMYKColorSep PCMYKColorSep'''
+            def get_class_instance(class_string):
+                "Explicit parser for simple class instantiations.  We do NOT allow arithmetic in attributes"
+                pattern = r'^(\w+)\((.*)\)$'
+                m = re.match(pattern, class_string)
+                if m:
+                    class_name = m.group(1)
+                    args_str = m.group(2)
+                    args = []
+                    kwargs = {}
+                    for arg in args_str.split(","):
+                        if '=' in arg:
+                            key, value = arg.split('=')[0:2]
+                            kwargs[key] = value
+                        else:
+                            try:
+                                arg = float(arg)
+                                args.append(arg)
+                            except ValueError:
+                                args.append(arg)
+                        
+                    if class_name in allowedColorClasses:
+                        class_obj = globals().get(class_name)
+                        instance = class_obj(*args, **kwargs)
+                        return instance
+                    raise ValueError('Invalid color object %r' % (class_name))
+            ###################################################################################
+            inst = get_class_instance(arg)
+            if inst is not None:
+                return inst
+
+            raise ValueError('Invalid color value %r' % arg)
+
+            # end of string path
+
+            # if True:    #*TODO* replace with rl_config option
+            #     G = C.copy()
+            #     G.update(self.extraColorsNS)
+            #     if not self._G:
+            #         C = globals()
+            #         self._G = {s:C[s] for s in '''Blacker CMYKColor CMYKColorSep Color ColorType HexColor PCMYKColor PCMYKColorSep Whiter
+            #             _chooseEnforceColorSpace _enforceCMYK _enforceError _enforceRGB _enforceSEP _enforceSEP_BLACK
+            #             _enforceSEP_CMYK _namedColors _re_css asNative cmyk2rgb cmykDistance color2bw colorDistance
+            #             cssParse describe fade fp_str getAllNamedColors hsl2rgb hue2rgb isStr linearlyInterpolatedColor
+            #             literal_eval obj_R_G_B opaqueColor rgb2cmyk setColors toColor toColorOrNone'''.split()}
+            #     G.update(self._G)
+
 
         try:
             return HexColor(arg)
