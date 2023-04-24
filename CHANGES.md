@@ -25,9 +25,15 @@ CHANGES  4.0.0a1 08/03/2023
 ---------------------------
 	* release 4.0.0a1 with support for rlextra pluscode
 
-CHANGES  3.6.13  15/11/2022
+CHANGES  3.6.14  24/04/2023
+---------------------------
+	* implement a safer toColor with rl_config.toColorCanUse option and rl_extended_literal_eval
+
+CHANGES  3.6.13  21/11/2022
 ---------------------------
 	* fixes for python 3.12.0a1
+	* tables.py error improvement
+	* allow exclusions in tests in runAll.py and setup.py; allows for coverage.py importing failures.
 
 CHANGES  3.6.12  25/10/2022
 ---------------------------

@@ -865,7 +865,6 @@ class toColor:
             assert 0<=min(arg) and max(arg)<=1
             return len(arg)==3 and Color(arg[0],arg[1],arg[2]) or CMYKColor(arg[0],arg[1],arg[2],arg[3])
         elif isStr(arg):
-            import re  # why needed? imported at top of file
             arg = asNative(arg)
             C = cssParse(arg)
             if C: return C
@@ -887,7 +886,6 @@ class toColor:
                     return Blacker(rootcolor, float(num))
                 else:
                     return Whiter(rootcolor, float(num))
-
 
             try:
                 import ast
