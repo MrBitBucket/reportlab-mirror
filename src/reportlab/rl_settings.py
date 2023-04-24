@@ -69,7 +69,8 @@ trustedHosts
 trustedSchemes
 renderPMBackend
 xmlParser
-textPaths'''.split())
+textPaths
+toColorCanUse'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -163,6 +164,7 @@ xmlParser='lxml'                                    #or 'pyrxp' for preferred xm
 textPaths='backend'                                 #freetype or _renderPM or backend
                                                     #determines what code is used to create Paths from str
                                                     #see reportlab/graphics/utils.py for full horror
+toColorCanUse='rl_extended_literal_eval'            #change to None or 'rl_safe_eval' depending on trust
 
 # places to look for T1Font information
 T1SearchPath =  (

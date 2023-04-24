@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  3.6.14  24/04/2023
+---------------------------
+	* implement a safer toColor with rl_config.toColorCanUse option and rl_extended_literal_eval
+
 CHANGES  3.6.13  21/11/2022
 ---------------------------
 	* fixes for python 3.12.0a1
