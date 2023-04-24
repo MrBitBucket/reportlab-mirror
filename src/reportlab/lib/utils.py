@@ -11,7 +11,7 @@ from io import BytesIO
 from hashlib import md5
 
 from reportlab.lib.rltempfile import get_rl_tempfile, get_rl_tempdir
-from . rl_safe_eval import rl_safe_exec, rl_safe_eval, safer_globals
+from . rl_safe_eval import rl_safe_exec, rl_safe_eval, safer_globals, rl_extended_literal_eval
 from PIL import Image
 
 class __UNSET__:

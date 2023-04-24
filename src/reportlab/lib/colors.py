@@ -41,7 +41,8 @@ ValueError: css color 'pcmyka(100,0,0,0)' has wrong number of components
 '''
 import math, re, functools
 from reportlab.lib.rl_accel import fp_str
-from reportlab.lib.utils import asNative, isStr, rl_safe_eval
+from reportlab.lib.utils import asNative, isStr, rl_safe_eval, rl_extended_literal_eval
+from reportlab import rl_config
 from ast import literal_eval
 
 class Color:
@@ -890,62 +891,40 @@ class toColor:
 
             try:
                 import ast
-                expr = ast.literal_eval(arg)
+                expr = ast.literal_eval(arg)    #safe probably only a tuple or list of values
                 return toColor(expr)
-        
             except (SyntaxError, ValueError):
                 pass
-                
 
-            ##################################################################################
-            
-            allowedColorClasses = '''Color CMYKColor PCMYKColor CMYKColorSep PCMYKColorSep'''
-            def get_class_instance(class_string):
-                "Explicit parser for simple class instantiations.  We do NOT allow arithmetic in attributes"
-                pattern = r'^(\w+)\((.*)\)$'
-                m = re.match(pattern, class_string)
-                if m:
-                    class_name = m.group(1)
-                    args_str = m.group(2)
-                    args = []
-                    kwargs = {}
-                    for arg in args_str.split(","):
-                        if '=' in arg:
-                            key, value = arg.split('=')[0:2]
-                            kwargs[key] = value
-                        else:
-                            try:
-                                arg = float(arg)
-                                args.append(arg)
-                            except ValueError:
-                                args.append(arg)
-                        
-                    if class_name in allowedColorClasses:
-                        class_obj = globals().get(class_name)
-                        instance = class_obj(*args, **kwargs)
-                        return instance
-                    raise ValueError('Invalid color object %r' % (class_name))
-            ###################################################################################
-            inst = get_class_instance(arg)
-            if inst is not None:
-                return inst
-
-            raise ValueError('Invalid color value %r' % arg)
-
-            # end of string path
-
-            # if True:    #*TODO* replace with rl_config option
-            #     G = C.copy()
-            #     G.update(self.extraColorsNS)
-            #     if not self._G:
-            #         C = globals()
-            #         self._G = {s:C[s] for s in '''Blacker CMYKColor CMYKColorSep Color ColorType HexColor PCMYKColor PCMYKColorSep Whiter
-            #             _chooseEnforceColorSpace _enforceCMYK _enforceError _enforceRGB _enforceSEP _enforceSEP_BLACK
-            #             _enforceSEP_CMYK _namedColors _re_css asNative cmyk2rgb cmykDistance color2bw colorDistance
-            #             cssParse describe fade fp_str getAllNamedColors hsl2rgb hue2rgb isStr linearlyInterpolatedColor
-            #             literal_eval obj_R_G_B opaqueColor rgb2cmyk setColors toColor toColorOrNone'''.split()}
-            #     G.update(self._G)
-
+            if rl_config.toColorCanUse=='rl_safe_eval':
+                #the most dangerous option
+                G = C.copy()
+                G.update(self.extraColorsNS)
+                if not self._G:
+                    C = globals()
+                    self._G = {s:C[s] for s in '''Blacker CMYKColor CMYKColorSep Color ColorType HexColor PCMYKColor PCMYKColorSep Whiter
+                        _chooseEnforceColorSpace _enforceCMYK _enforceError _enforceRGB _enforceSEP _enforceSEP_BLACK
+                        _enforceSEP_CMYK _namedColors _re_css asNative cmyk2rgb cmykDistance color2bw colorDistance
+                        cssParse describe fade fp_str getAllNamedColors hsl2rgb hue2rgb isStr linearlyInterpolatedColor
+                        literal_eval obj_R_G_B opaqueColor rgb2cmyk setColors toColor toColorOrNone'''.split()}
+                G.update(self._G)
+                try:
+                    return toColor(rl_safe_eval(arg,g=G,l={}))
+                except:
+                    pass
+            elif rl_config.toColorCanUse=='rl_extended_literal_eval':
+                C = globals()
+                S = getAllNamedColors().copy()
+                C = {k:C[k] for k in '''Blacker CMYKColor CMYKColorSep Color ColorType HexColor PCMYKColor PCMYKColorSep Whiter
+                        _chooseEnforceColorSpace _enforceCMYK _enforceError _enforceRGB _enforceSEP _enforceSEP_BLACK
+                        _enforceSEP_CMYK _namedColors _re_css asNative cmyk2rgb cmykDistance color2bw colorDistance
+                        cssParse describe fade fp_str getAllNamedColors hsl2rgb hue2rgb linearlyInterpolatedColor
+                        obj_R_G_B opaqueColor rgb2cmyk setColors toColor toColorOrNone'''.split()
+                        if callable(C.get(k,None))}
+                try:
+                    return rl_extended_literal_eval(arg,C,S)
+                except (ValueError, SyntaxError):
+                    pass
 
         try:
             return HexColor(arg)

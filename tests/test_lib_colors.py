@@ -89,7 +89,11 @@ class ColorTestCase(unittest.TestCase):
 
         # Make a roundtrip test (RGB > CMYK > RGB).
         for name, rgbCol in rgbCols:
-            r1, g1, b1 = rgbCol.red, rgbCol.green, rgbCol.blue
+            try:
+                r1, g1, b1 = rgbCol.red, rgbCol.green, rgbCol.blue
+            except:
+                print(name,rgbCol)
+                raise
             c, m, y, k = colors.rgb2cmyk(r1, g1, b1)
             r2, g2, b2 = colors.cmyk2rgb((c, m, y, k))
             rgbCol2 = colors.Color(r2, g2, b2)

@@ -13,7 +13,9 @@ mentioned. If we missed you, please let us know!
 
 CHANGES  4.0.0a3 18/04/2023
 ---------------------------
-	* Allow ListFlowable to have a caption
+	* initial support for rml ul ol dl tagging
+    * added support for an ol/ul/dl caption paragraph
+	* implement a safer toColor with rl_config.toColorCanUse option and rl_extended_literal_eval
 
 CHANGES  4.0.0a2 14/03/2023
 ---------------------------
