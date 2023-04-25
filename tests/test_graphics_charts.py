@@ -46,6 +46,7 @@ def getFontName():
         fontName = 'Helvetica'
     return fontName
 fontName = getFontName()
+fontName = 'Helvetica'
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
