@@ -3,7 +3,7 @@
 #https://github.com/zopefoundation/RestrictedPython
 #https://github.com/danthedeckie/simpleeval
 #hopefully we are standing on giants' shoulders
-import sys, os, ast, re, weakref, time, copy, math
+import sys, os, ast, re, weakref, time, copy, math, types
 eval_debug = int(os.environ.get('EVAL_DEBUG','0'))
 strTypes = (bytes,str)
 isPy39 = sys.version_info[:2]>=(3,9)
@@ -53,7 +53,9 @@ __rl_unsafe__ = frozenset('''builtins breakpoint __annotations__ co_argcount co_
 						func_doc func_globals func_name gi_code gi_frame gi_running gi_yieldfrom
 						__globals__ im_class im_func im_self __iter__ __kwdefaults__ __module__
 						__name__ next __qualname__ __self__ tb_frame tb_lasti tb_lineno tb_next
-						globals vars locals'''.split()
+						globals vars locals
+						type eval exec aiter anext compile open
+						dir print classmethod staticmethod __import__ super property'''.split()
 						)
 __rl_unsafe_re__ = re.compile(r'\b(?:%s)' % '|'.join(__rl_unsafe__),re.M)
 
@@ -1203,6 +1205,71 @@ class __rl_safe_eval__:
 
 class __rl_safe_exec__(__rl_safe_eval__):
 	mode = 'exec'
+
+def rl_extended_literal_eval(expr, safe_callables=None, safe_names=None):
+	if safe_callables is None:
+		safe_callables = {}
+	if safe_names is None:
+		safe_names = {}
+	safe_names = safe_names.copy()
+	safe_names.update({'None': None, 'True': True, 'False': False})
+	#make these readonly with MappingProxyType
+	safe_names = types.MappingProxyType(safe_names)
+	safe_callables = types.MappingProxyType(safe_callables)
+	if isinstance(expr, str):
+		expr = ast.parse(expr, mode='eval')
+	if isinstance(expr, ast.Expression):
+		expr = expr.body
+	try:
+		# Python 3.4 and up
+		ast.NameConstant
+		safe_test = lambda n: isinstance(n, ast.NameConstant) or isinstance(n,ast.Name) and n.id in safe_names
+		safe_extract = lambda n: n.value if isinstance(n,ast.NameConstant) else safe_names[n.id]
+	except AttributeError:
+		# Everything before
+		safe_test = lambda n: isinstance(n, ast.Name) and n.id in safe_names
+		safe_extract = lambda n: safe_names[n.id]
+	def _convert(node):
+		if isinstance(node, (ast.Str, ast.Bytes)):
+			return node.s
+		elif isinstance(node, ast.Num):
+			return node.n
+		elif isinstance(node, ast.Tuple):
+			return tuple(map(_convert, node.elts))
+		elif isinstance(node, ast.List):
+			return list(map(_convert, node.elts))
+		elif isinstance(node, ast.Dict):
+			return dict((_convert(k), _convert(v)) for k, v
+						in zip(node.keys, node.values))
+		elif safe_test(node):
+			return safe_extract(node)
+		elif isinstance(node, ast.UnaryOp) and \
+			 isinstance(node.op, (ast.UAdd, ast.USub)) and \
+			 isinstance(node.operand, (ast.Num, ast.UnaryOp, ast.BinOp)):
+			operand = _convert(node.operand)
+			if isinstance(node.op, ast.UAdd):
+				return + operand
+			else:
+				return - operand
+		elif isinstance(node, ast.BinOp) and \
+			 isinstance(node.op, (ast.Add, ast.Sub)) and \
+			 isinstance(node.right, (ast.Num, ast.UnaryOp, ast.BinOp)) and \
+			 isinstance(node.right.n, complex) and \
+			 isinstance(node.left, (ast.Num, ast.UnaryOp, astBinOp)):
+			left = _convert(node.left)
+			right = _convert(node.right)
+			if isinstance(node.op, ast.Add):
+				return left + right
+			else:
+				return left - right
+		elif isinstance(node, ast.Call) and \
+			 isinstance(node.func, ast.Name) and \
+			 node.func.id in safe_callables:
+			return safe_callables[node.func.id](
+				*[_convert(n) for n in node.args],
+				**{kw.arg: _convert(kw.value) for kw in node.keywords})
+		raise ValueError('Bad expression')
+	return _convert(expr)
 
 rl_safe_exec = __rl_safe_exec__()
 rl_safe_eval = __rl_safe_eval__()

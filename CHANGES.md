@@ -11,9 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  3.6.13  15/11/2022
+CHANGES  3.6.13  24/04/2023
 ---------------------------
 	* fixes for python 3.12.0a1
+	* tables.py error improvement
+	* allow exclusions in tests in runAll.py and setup.py; allows for coverage.py importing failures.
+	* implement a safer toColor with rl_config.toColorCanUse option and rl_extended_literal_eval
 
 CHANGES  3.6.12  25/10/2022
 ---------------------------

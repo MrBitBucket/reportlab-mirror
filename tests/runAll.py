@@ -106,7 +106,12 @@ def main(pattern='test_*.py'):
     verbosity = [_ for _ in sys.argv if _.startswith('--verbosity=')]
     verbosity = int(verbosity[-1][12:]) if verbosity else 1
     if not cleanOnly:
-        testSuite = makeSuite(folder,nonImportable=NI,pattern=pattern+(not haveSRC and 'c' or ''))
+        exclude = sum([
+                    [os.path.splitext(os.path.basename(_.strip()))[0]
+                            for _ in a[10:].split(',') if _.strip()]
+                                for a in sys.argv if a.startswith('--exclude=')
+                    ],[])
+        testSuite = makeSuite(folder,nonImportable=NI,exclude=exclude,pattern=pattern+(not haveSRC and 'c' or ''))
         result = unittest.TextTestRunner(verbosity=verbosity).run(testSuite)
     else:
         result = None

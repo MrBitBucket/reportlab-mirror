@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2017
 #see license.txt for license details
-"""Tests for reportlab.lib.rl_eval
+"""Tests for reportlab.lib.rl_safe_eval
 """
 __version__='3.5.33'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
@@ -10,7 +10,7 @@ import reportlab
 from reportlab import rl_config
 import unittest
 from reportlab.lib import colors
-from reportlab.lib.utils import rl_safe_eval, rl_safe_exec, annotateException
+from reportlab.lib.utils import rl_safe_eval, rl_safe_exec, annotateException, rl_extended_literal_eval
 from reportlab.lib.rl_safe_eval import BadCode
 
 testObj = [1,('a','b',2),{'A':1,'B':2.0},"32"]
@@ -52,7 +52,6 @@ class SafeEvalTestSequenceMeta(type):
                 'dict(a=1).get("a",2)',
                 'dict(a=1).pop("a",2)',
                 '{"_":1+_ for _ in (1,2)}.pop(1,None)',
-                '(type(1),type(str),type(testObj),type(TestClass))',
                 '1 if True else "a"',
                 '1 if False else "a"',
                 'testFunc(bad=False)',
@@ -74,6 +73,8 @@ class SafeEvalTestSequenceMeta(type):
                 (
                 'fail',
                 (
+                'vars()',
+                '(type(1),type(str),type(testObj),type(TestClass))',
                 'open("/tmp/myfile")',
                 'SafeEvalTestCase.__module__',
                 ("testInst.__class__.__bases__[0].__subclasses__()",dict(g=dict(testInst=testInst))),
@@ -97,6 +98,8 @@ class SafeEvalTestSequenceMeta(type):
                 'testFunc(bad=True)',
                 'getattr(testInst,"__class__",14)',
                 '"{1}{2}".format(1,2)',
+                'builtins',
+                '[ [ [ [ ftype(ctype(0, 0, 0, 0, 3, 67, b"t\\x00d\\x01\\x83\\x01\\xa0\\x01d\\x02\\xa1\\x01\\x01\\x00d\\x00S\\x00", (None, "os", "touch /tmp/exploited"), ("__import__", "system"), (), "<stdin>", "", 1, b"\\x12\\x01"), {})() for ftype in [type(lambda: None)] ] for ctype in [type(getattr(lambda: {None}, Word("__code__")))] ] for Word in [orgTypeFun("Word", (str,), { "mutated": 1, "startswith": lambda self, x: False, "__eq__": lambda self,x: self.mutate() and self.mutated < 0 and str(self) == x, "mutate": lambda self: {setattr(self, "mutated", self.mutated - 1)}, "__hash__": lambda self: hash(str(self)) })] ] for orgTypeFun in [type(type(1))]] and "red"',
                 )
                 ),
                 ):
@@ -155,8 +158,46 @@ class SafeEvalTestBasics(unittest.TestCase):
     def test_002(self):
         self.assertTrue(rl_safe_eval("GA=='ga'"))
 
+class ExtendedLiteralEval(unittest.TestCase):
+    def test_001(self):
+        S = colors.getAllNamedColors().copy()
+        C = {s:getattr(colors,s) for s in '''Blacker CMYKColor CMYKColorSep Color ColorType HexColor PCMYKColor PCMYKColorSep Whiter
+                        _chooseEnforceColorSpace _enforceCMYK _enforceError _enforceRGB _enforceSEP _enforceSEP_BLACK
+                        _enforceSEP_CMYK _namedColors _re_css asNative cmyk2rgb cmykDistance color2bw colorDistance
+                        cssParse describe fade fp_str getAllNamedColors hsl2rgb hue2rgb linearlyInterpolatedColor
+                        obj_R_G_B opaqueColor rgb2cmyk setColors toColor toColorOrNone'''.split()
+                        if callable(getattr(colors,s,None))}
+        def showVal(s):
+            try:
+                r = rl_extended_literal_eval(s,C,S)
+            except:
+                r = str(sys.exc_info()[1])
+            return r
+
+        for expr, expected in (
+                ('1.0', 1.0),
+                ('1', 1),
+                ('red', colors.red),
+                ('True', True),
+                ('False', False),
+                ('None', None),
+                ('Blacker(red,0.5)', colors.Color(.5,0,0,1)),
+                ('PCMYKColor(21,10,30,5,spotName="ABCD")', colors.PCMYKColor(21,10,30,5,spotName='ABCD',alpha=100)),
+                ('HexColor("#ffffff")', colors.Color(1,1,1,1)),
+                ('linearlyInterpolatedColor(red, blue, 0, 1, 0.5)', colors.Color(.5,0,.5,1)),
+                ('red.rgb()', 'Bad expression'),
+                ('__import__("sys")', 'Bad expression'),
+                ('globals()', 'Bad expression'),
+                ('locals()', 'Bad expression'),
+                ('vars()', 'Bad expression'),
+                ('builtins', 'Bad expression'),
+                ('__file__', 'Bad expression'),
+                ('__name__', 'Bad expression'),
+                ):
+            self.assertEqual(showVal(expr),expected,f"rl_extended_literal_eval({expr!r}) is not equal to expected {expected}")
+
 def makeSuite():
-    return makeSuiteForClasses(SafeEvalTestCase,SafeEvalTestBasics)
+    return makeSuiteForClasses(SafeEvalTestCase,SafeEvalTestBasics,ExtendedLiteralEval)
 
 if __name__ == "__main__": #noruntests
     unittest.TextTestRunner().run(makeSuite())
