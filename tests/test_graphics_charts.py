@@ -46,7 +46,6 @@ def getFontName():
         fontName = 'Helvetica'
     return fontName
 fontName = getFontName()
-fontName = 'Helvetica'
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
@@ -332,10 +331,17 @@ def eps():
 
 def run_samples(L):
     outDir = outputfile('charts-out')
-    for k,f,kind in L:
-        d = f()
-        if not isinstance(d,Drawing): continue
-        d.save(formats=['pdf', 'gif', 'svg', 'ps', 'py']+eps(),outDir=outDir, fnRoot='test_graphics_charts_%s_%s' % (kind,k))
+    global fontName
+    oFontName = fontName
+    def innerRun(formats):
+        for k,f,kind in L:
+            d = f()
+            if not isinstance(d,Drawing): continue
+            d.save(formats=formats,outDir=outDir, fnRoot='test_graphics_charts_%s_%s' % (kind,k))
+    innerRun(['pdf', 'gif', 'svg', 'py']+eps())
+    fontName = 'Helvetica'
+    innerRun(['ps'])
+    fontName = oFontName
 
 class ChartTestCase(unittest.TestCase):
     "Test chart classes."
@@ -354,8 +360,6 @@ class ChartTestCase(unittest.TestCase):
         doc = MyDocTemplate(path)
         doc.build(cls.story)
 
-        global fontName
-        fontName = 'Helvetica'
         run_samples([(k,v,'special') for k,v in globals().items() if k.lower().startswith('sample')
                             or k in ('lpleg', 'hlcleg', 'bcleg', 'pcleg', 'scleg', 'plpleg')
                             ])
