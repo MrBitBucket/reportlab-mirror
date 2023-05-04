@@ -47,14 +47,27 @@ _DEFAULTS=_defaults_init()
 _SAVED = {}
 sys_version=None
 
+def _enumChk(name,value,allowed=()):
+    if value not in allowed:
+        raise ValueError(f'invalid value {value!r} for rl_config.{name}\nneed one of {allowed}')
+
+from functools import partial
+_rlChecks=dict(
+        renderPMBackend = partial(_enumChk,allowed=('rlPyCairo','_renderPM')),
+        xmlParser = partial(_enumChk,allowed=('lxml','pyrxp')),
+        textPaths = partial(_enumChk,allowed=('freetype','_renderPM','backend')),
+        )
+
 #this is used to set the options from
-def _setOpt(name, value, conv=None):
+def _setOpt(name, value, conv=None, chk=None):
     '''set a module level value from environ/default'''
     from os import environ
     ename = 'RL_'+name
     if ename in environ:
         value = environ[ename]
     if conv: value = conv(value)
+    chk = _rlChecks.get(name,None)
+    if chk: chk(name,value)
     globals()[name] = value
 
 def _startUp():

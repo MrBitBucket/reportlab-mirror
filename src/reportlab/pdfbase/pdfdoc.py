@@ -1,7 +1,7 @@
-#Copyright ReportLab Europe Ltd. 2000-2017
+#Copyright ReportLab Europe Ltd. 2000-2023
 #see license.txt for license details
 #history https://hg.reportlab.com/hg-public/reportlab/log/tip/src/reportlab/pdfbase/pdfdoc.py
-__version__='3.4.1'
+__version__='3.6.0'
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -998,7 +998,8 @@ class PDFCatalog(PDFObject):
                 }
     __NoDefault__ = """
         Dests Outlines Pages Threads AcroForm Names OpenAction PageMode URI
-        ViewerPreferences PageLabels PageLayout JavaScript StructTreeRoot SpiderInfo""".split()
+        ViewerPreferences PageLabels PageLayout JavaScript StructTreeRoot SpiderInfo
+        MarkInfo Metadata Tabs""".split()
     __Refs__ = __NoDefault__
 
     def format(self, document):

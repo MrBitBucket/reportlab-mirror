@@ -11,6 +11,20 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.0.0a3 18/04/2023
+---------------------------
+	* initial support for rml ul ol dl tagging
+    * added support for an ol/ul/dl caption paragraph
+	* implement a safer toColor with rl_config.toColorCanUse option and rl_extended_literal_eval
+
+CHANGES  4.0.0a2 14/03/2023
+---------------------------
+	* added _ExpandedCellTupleEx for more tagging support
+
+CHANGES  4.0.0a1 08/03/2023
+---------------------------
+	* release 4.0.0a1 with support for rlextra pluscode
+
 CHANGES  3.6.13  24/04/2023
 ---------------------------
 	* fixes for python 3.12.0a1

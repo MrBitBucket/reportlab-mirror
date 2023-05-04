@@ -694,7 +694,7 @@ class KeepTogether(_ContainerSpace,Flowable):
             from reportlab.lib.utils import annotateException
             KeepTogether.NullActionFlowable = NullActionFlowable
             KeepTogether.FrameBreak = FrameBreak
-            KeepTogether.annotateException = annotateException
+            self.annotateException = annotateException
 
         if not flowables:
             flowables = [self.NullActionFlowable()]
@@ -1281,7 +1281,7 @@ class _FindSplitterMixin:
         C = content if content is not None else self._content
         for f in C:
             if isinstance(f,ListFlowable):
-                F.extend(self._getContent(f._content))
+                F.extend(f._getContent())
             else:
                 F.append(f)
         return F
@@ -2056,7 +2056,7 @@ class DDIndenter(Flowable):
                 return self.__dict__[a]
             except KeyError:
                 if a not in ('spaceBefore','spaceAfter'):
-                    raise AttributeError('%r has no attribute %s' % (self,a))
+                    raise AttributeError(f'{self!r} has no attribute {a} dict={self.__dict__}')
         return getattr(self._flowable,a)
 
     def __setattr__(self,a,v):
@@ -2213,6 +2213,7 @@ class ListFlowable(_Container,Flowable):
 
         self._list_content = None
         self._dims = None
+        self._caption = kwds.pop('caption',None)
 
     @property
     def _content(self):
@@ -2403,6 +2404,9 @@ class ListFlowable(_Container,Flowable):
         if spaceAfter is not None:
             f=S[-1]
             f.__dict__['spaceAfter'] = max(f.__dict__.get('spaceAfter',0),spaceAfter)
+
+        if self._caption: S.insert(0,self._caption)
+
         return S
 
 class TopPadder(Flowable):

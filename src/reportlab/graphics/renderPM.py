@@ -27,9 +27,9 @@ def _getPMBackend(backend=None):
     if not backend: backend = rl_config.renderPMBackend
     if backend=='_renderPM':
         try:
-            from reportlab.graphics import _renderPM as M
+            import _rl_renderPM as M
         except ImportError as errMsg:
-            raise ImportError("""No module named _renderPM
+            raise ImportError("""No module named _rl_renderPM
 it may be badly or not installed!
 You may need to install development tools
 or seek advice at the users list see
@@ -285,7 +285,8 @@ def _saveAsPICT(im,fn,fmt,transparent=None):
 
 BEZIER_ARC_MAGIC = 0.5522847498     #constant for drawing circular arcs w/ Beziers
 class PMCanvas:
-    def __init__(self,w,h,dpi=72,bg=0xffffff,configPIL=None,backend=rl_config.renderPMBackend):
+    def __init__(self,w,h,dpi=72,bg=0xffffff,configPIL=None,backend=rl_config.renderPMBackend,
+                    backendFmt='RGB'):
         '''configPIL dict is passed to image save method'''
         scale = dpi/72.0
         w = int(w*scale+0.5)
@@ -297,6 +298,7 @@ class PMCanvas:
         self.__dict__['configPIL'] = configPIL
         self.__dict__['_dpi'] = dpi
         self.__dict__['_backend'] = backend
+        self.__dict__['_backendfmt'] = backendFmt
         self.ctm = self._baseCTM
 
     @staticmethod
@@ -323,7 +325,7 @@ class PMCanvas:
 
     def toPIL(self):
         im = _getImage().new('RGB', size=(self._gs.width, self._gs.height))
-        (getattr(im,'frombytes',None) or getattr(im,'fromstring'))(self._gs.pixBuf)
+        im.frombytes(self._gs.pixBuf)
         return im
 
     def saveToFile(self,fn,fmt=None):

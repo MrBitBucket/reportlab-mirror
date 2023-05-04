@@ -1,9 +1,8 @@
 include *.txt *.yml CHANGES.md
 include src/reportlab/graphics/barcode/README
 include src/reportlab/graphics/barcode/TODO
-include src/reportlab/license.txt
+include src/reportlab/LICENSE
 include src/reportlab/MANIFEST.in
-recursive-include src/rl_addons *.c *.h *.in AUTHORS autogen.* ChangeLog *.am NEWS README* COPYING *.m4 *.py hyphen.mashed
 recursive-include demos *.py *.txt
 recursive-include docs *.py *.txt *.gif *.a85 *.png *.jpg *.rst *.html gen_epydoc *.bat Makefile *.yml *.css
 recursive-include tests *.py *.gif *.jpg *.png 00readme.txt *.tiff

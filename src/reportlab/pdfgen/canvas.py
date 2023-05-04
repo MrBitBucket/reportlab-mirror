@@ -874,7 +874,8 @@ class Canvas(_PDFColorSetter):
     #
     ######################################################
     def drawInlineImage(self, image, x,y, width=None,height=None,
-            preserveAspectRatio=False,anchor='c', anchorAtXY=False, showBoundary=False):
+            preserveAspectRatio=False,anchor='c', anchorAtXY=False, showBoundary=False,
+            extraReturn=None):
         """See drawImage, which should normally be used instead... 
         
         drawInlineImage behaves like drawImage, but stores the image content
@@ -893,11 +894,13 @@ class Canvas(_PDFColorSetter):
         img_obj = PDFImage(image, x,y, width, height)
         img_obj.drawInlineImage(self,
             preserveAspectRatio=preserveAspectRatio, 
-            anchor=anchor,anchorAtXY=anchorAtXY,showBoundary=showBoundary)
+            anchor=anchor,anchorAtXY=anchorAtXY,showBoundary=showBoundary,
+            extraReturn=extraReturn)
         return (img_obj.width, img_obj.height)
 
     def drawImage(self, image, x, y, width=None, height=None, mask=None, 
-            preserveAspectRatio=False, anchor='c', anchorAtXY=False, showBoundary=False):
+            preserveAspectRatio=False, anchor='c', anchorAtXY=False, showBoundary=False,
+            extraReturn=None):
         """Draws the image (ImageReader object or filename) as specified.
 
         "image" may be an image filename or an ImageReader object. 
@@ -1015,6 +1018,9 @@ class Canvas(_PDFColorSetter):
 
         # track what's been used on this page
         self._formsinuse.append(name)
+        if extraReturn:
+            for k in extraReturn.keys():
+                extraReturn[k] = vars()[k]
 
         return (imgObj.width, imgObj.height)
 

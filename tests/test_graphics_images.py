@@ -38,11 +38,16 @@ class ImageTestCase(unittest.TestCase):
         except ImportError:
             rlPyCairo = None
 
+        try:
+            import _rl_renderPM
+        except ImportError:
+            _rl_renderPM = None
+
         from reportlab.rl_config import renderPMBackend
-        d.save(formats=['png', 'gif', 'ps','svg'],outDir=os.path.dirname(outPath), fnRoot='test_graphics_images', _renderPM_backend='_renderPM')
         if rlPyCairo:
-            d.save(formats=['png', 'gif'],outDir=os.path.dirname(outPath), fnRoot='test_graphics_images-cairo',
-                    **(dict(_renderPM_backend='rlPyCairo') if renderPMBackend=='_renderPM' else {}))
+            d.save(formats=['png', 'gif', 'ps','svg'],outDir=os.path.dirname(outPath), fnRoot='test_graphics_images', _renderPM_backend='rlPyCairo')
+        if _rl_renderPM:
+            d.save(formats=['png', 'gif'],outDir=os.path.dirname(outPath), fnRoot='test_graphics_images-libart', _renderPM_backend='_renderPM')
 
 
     def test0(self):
