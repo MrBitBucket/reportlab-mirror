@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2023
 #see LICENSE for license details
-__version__='4.0.0'
+__version__='4.0.1'
 import os, sys, glob, shutil, re, sysconfig, traceback, io, subprocess
 from urllib.parse import quote as urlquote
 platform = sys.platform
@@ -324,12 +324,14 @@ def main():
             'Programming Language :: Python :: 3.11',
             ],
         
-        #this probably only works for setuptools, but distutils seems to ignore it
-        install_requires=['pillow>=9.0.0', 'rlPyCairo>=0.2.0,<1','freetype-py>=2.3.0,<2.4'],
+        # this probably only works for setuptools, but distutils seems to ignore it
+        install_requires=['pillow>=9.0.0'],
+        # moved to pyproject.toml
         python_requires='>=3.7,<4',
         extras_require={
             'RL_ACCEL': ['rl_accel>=0.9.0,<1.1'],
             'RL_RENDERPM': ['rl_renderPM>=4.0.3,<4.1'],
+            'bitmaps': ['rlPyCairo>=0.2.0,<1','freetype-py>=2.3.0,<2.4']
             },
         )
     print()
