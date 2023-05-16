@@ -3,7 +3,7 @@
 """
 Tests for chart class.
 """
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, rlextraNeeded
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, rlextraNeeded, haveRenderPM
 setOutDir(__name__)
 
 import os, sys, copy
@@ -33,6 +33,7 @@ from reportlab.graphics.widgets.adjustableArrow import AdjustableArrowDrawing
 
 try:
     from reportlab.graphics import renderPM
+    if not haveRenderPM(): renderPM = None
 except ImportError:
     renderPM = None
 
@@ -336,9 +337,10 @@ def run_samples(L):
     def innerRun(formats):
         for k,f,kind in L:
             d = f()
+            if not renderPM: d.__dict__['preview'] = 0
             if not isinstance(d,Drawing): continue
             d.save(formats=formats,outDir=outDir, fnRoot='test_graphics_charts_%s_%s' % (kind,k))
-    innerRun(['pdf', 'gif', 'svg', 'py']+eps())
+    innerRun(['pdf']+(['gif'] if renderPM else [])+['svg', 'py']+eps())
     fontName = 'Helvetica'
     innerRun(['ps'])
     fontName = oFontName
@@ -621,42 +623,6 @@ class ChartTestCase(unittest.TestCase):
             xAxis.setPosition(75, 75, 300)
             xAxis.configure(data)
             xAxis.categoryNames = ['Ying']
-            xAxis.labels.boxAnchor = 'n'
-            drawing.add(xAxis)
-            return drawing
-
-        @unittest.skipIf(rlextraNeeded(),'s')
-        def sample0c():
-            "Sample drawing with one xcat axis and two buckets."
-            class DDFStyle(ParagraphStyle):
-                def __init__(self,**kwds):
-                    if 'fillColor' in kwds:
-                        kwds['textColor'] = kwds.pop('fillColor')
-                    kwds.update({k:v for k,v in (
-                                    ('name','DDFStyle'),
-                                    ('alignment',0),
-                                    ('hyphenationLang',None),
-                                    ('hyphenationMinWordLength',4),
-                                    ('uriWasteReduce',0.3),
-                                    ('embeddedHyphenation',2),
-                                    ('textColor',colors.blue),
-                                    ('backColor',colors.yellow),
-                                    ) if k not in kwds})
-                    super().__init__(**kwds)
-
-            drawing = Drawing(400, 200)
-            data = [(10, 20)]
-            xAxis = XCategoryAxis()
-            xAxis.labels.ddfKlass = Paragraph
-            xAxis.labels.ddfStyle = DDFStyle
-            xAxis.labels.maxWidth = 48
-            xAxis.labels.fillColor = colors.red
-            xAxis.labels.fontName = 'Helvetica'
-            xAxis.labels.fontSize = 12
-            xAxis.labels.leading = 12
-            xAxis.setPosition(75, 75, 100)
-            xAxis.configure(data)
-            xAxis.categoryNames = ['Ying and Mao\xadTse\xadTung are bonkers', 'Yang is not a comm\xadun\xadist']
             xAxis.labels.boxAnchor = 'n'
             drawing.add(xAxis)
             return drawing
@@ -1102,6 +1068,45 @@ class ChartTestCase(unittest.TestCase):
 
         run_samples([(k,v,'axes') for k,v in locals().items() if k.lower().startswith('sample')])
         run_samples(extract_samples())
+
+    @unittest.skipIf(rlextraNeeded(),'s')
+    def test_axes_rlx(self):
+        from reportlab.graphics.charts.axes import YValueAxis, XValueAxis, LogYValueAxis, LogXValueAxis, LogYValueAxis, XCategoryAxis, YCategoryAxis
+        def sample0c():
+            "Sample drawing with one xcat axis and two buckets."
+            class DDFStyle(ParagraphStyle):
+                def __init__(self,**kwds):
+                    if 'fillColor' in kwds:
+                        kwds['textColor'] = kwds.pop('fillColor')
+                    kwds.update({k:v for k,v in (
+                                    ('name','DDFStyle'),
+                                    ('alignment',0),
+                                    ('hyphenationLang',None),
+                                    ('hyphenationMinWordLength',4),
+                                    ('uriWasteReduce',0.3),
+                                    ('embeddedHyphenation',2),
+                                    ('textColor',colors.blue),
+                                    ('backColor',colors.yellow),
+                                    ) if k not in kwds})
+                    super().__init__(**kwds)
+
+            drawing = Drawing(400, 200)
+            data = [(10, 20)]
+            xAxis = XCategoryAxis()
+            xAxis.labels.ddfKlass = Paragraph
+            xAxis.labels.ddfStyle = DDFStyle
+            xAxis.labels.maxWidth = 48
+            xAxis.labels.fillColor = colors.red
+            xAxis.labels.fontName = 'Helvetica'
+            xAxis.labels.fontSize = 12
+            xAxis.labels.leading = 12
+            xAxis.setPosition(75, 75, 100)
+            xAxis.configure(data)
+            xAxis.categoryNames = ['Ying and Mao\xadTse\xadTung are bonkers', 'Yang is not a comm\xadun\xadist']
+            xAxis.labels.boxAnchor = 'n'
+            drawing.add(xAxis)
+            return drawing
+        run_samples([(k,v,'axes') for k,v in locals().items() if k.lower().startswith('sample')])
 
     def test_legends(self):
         from reportlab.graphics.charts.legends import Legend, LineLegend, LineSwatch

@@ -29,7 +29,11 @@ def _getPMBackend(backend=None):
         try:
             import _rl_renderPM as M
         except ImportError as errMsg:
-            raise ImportError("""No module named _rl_renderPM
+            try:
+                import rlPyCairo as M
+            except ImportError:
+                raise RenderPMError("""Cannot import desired renderPM backend, {backend}.
+No module named _rl_renderPM
 it may be badly or not installed!
 You may need to install development tools
 or seek advice at the users list see
@@ -38,14 +42,20 @@ https://pairlist2.pair.net/mailman/listinfo/reportlab-users""")
         try:
             import rlPyCairo as M
         except ImportError as errMsg:
-            raise ImportError("""cannot import desired renderPM backend rlPyCairo
+            try:
+                import _rl_renderPM as M
+            except ImportError:
+                raise RenderPMError(f"""cannot import desired renderPM backend {backend}
 Seek advice at the users list see
 https://pairlist2.pair.net/mailman/listinfo/reportlab-users""")
     else:
         raise RenderPMError(f'Invalid renderPM backend, {backend}')
     return M
 
-_pmBackend = _getPMBackend(rl_config.renderPMBackend)
+try:
+    _pmBackend = _getPMBackend(rl_config.renderPMBackend)
+except RenderPMError:
+    _pmBackend=None
 
 def _getImage():
     try:
@@ -285,7 +295,7 @@ def _saveAsPICT(im,fn,fmt,transparent=None):
 
 BEZIER_ARC_MAGIC = 0.5522847498     #constant for drawing circular arcs w/ Beziers
 class PMCanvas:
-    def __init__(self,w,h,dpi=72,bg=0xffffff,configPIL=None,backend=rl_config.renderPMBackend,
+    def __init__(self,w,h,dpi=72,bg=0xffffff,configPIL=None,backend=None,
                     backendFmt='RGB'):
         '''configPIL dict is passed to image save method'''
         scale = dpi/72.0
@@ -297,17 +307,30 @@ class PMCanvas:
         self.__dict__['_clipPaths'] = []
         self.__dict__['configPIL'] = configPIL
         self.__dict__['_dpi'] = dpi
-        self.__dict__['_backend'] = backend
+        #the _rl_renderPM.gstate object doesn't support hasattr so we use this as a proxy test for 'isbuiltin' 
+        self.__dict__['_backend'] = '_renderPM' if type(self._gs._aapixbuf)==type(pow) else 'rlPyCairo'
         self.__dict__['_backendfmt'] = backendFmt
         self.ctm = self._baseCTM
 
     @staticmethod
     def _getGState(w, h, bg, backend=None, fmt='RGB24'):
         mod = _getPMBackend(backend)
+        if backend is None:
+            backend = rl_config.renderPMBackend
         if backend=='_renderPM':
-            return mod.gstate(w,h,bg=bg)
+            try:
+                return mod.gstate(w,h,bg=bg)
+            except TypeError:
+                try:
+                    return mod.GState(w,h,bg,fmt=fmt)
+                except:
+                    pass
         elif 'cairo' in backend.lower():
-            return mod.GState(w,h,bg,fmt=fmt)
+            try:
+                return mod.GState(w,h,bg,fmt=fmt)
+            except AttributeError:
+                return mod.gstate(w,h,bg=bg)
+        raise RuntimeError(f'Cannot obtain PM graphics state using backend {backend!r}')
 
     def _drawTimeResize(self,w,h,bg=None):
         if bg is None: bg = self._bg

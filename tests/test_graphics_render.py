@@ -3,11 +3,12 @@
 """
 Tests for renderers
 """
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, haveRenderPM
 setOutDir(__name__)
 import unittest, os, sys, glob
 try:
     from reportlab.graphics import renderPM
+    if not haveRenderPM(): renderPM = None
 except:
     renderPM = None
 from reportlab.graphics.shapes import _DrawingEditorMixin, Drawing, Group, Rect, Path, String, Polygon, Hatching, Line, definePath

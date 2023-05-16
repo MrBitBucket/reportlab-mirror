@@ -11,6 +11,19 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.0.2   16/05/2023
+---------------------------
+	* setup.py test --failfast works
+    * allow running all tests without renderPM support
+
+CHANGES  4.0.1   12/05/2023
+---------------------------
+	* AR made some changes to allow running without renderPM support
+
+CHANGES  4.0.0   04/05/2023
+---------------------------
+	* AR merged accessibility branch and released 4.0.0
+
 CHANGES  4.0.0a3 18/04/2023
 ---------------------------
 	* initial support for rml ul ol dl tagging

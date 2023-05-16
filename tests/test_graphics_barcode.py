@@ -3,7 +3,7 @@
 """
 Tests for barcodes
 """
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, haveRenderPM
 setOutDir(__name__)
 import unittest, os, sys, glob, time
 
@@ -268,11 +268,13 @@ def fullTest(fileName):
 
 try:
     from reportlab.graphics import renderPM
+    if not haveRenderPM(): renderPM = None
 except ImportError:
     renderPM = None
 
 class BarcodeWidgetTestCase(unittest.TestCase):
     "Test barcode classes."
+    _safe_formats = (['gif','pict'] if renderPM else []) + ['pdf']
 
     @classmethod
     def setUpClass(cls):
@@ -283,13 +285,12 @@ class BarcodeWidgetTestCase(unittest.TestCase):
         for x in glob.glob(os.path.join(outDir,'*')):
             os.remove(x)
 
-    @unittest.skipIf(not renderPM,'no renderPM')
     def test0(self):
         from reportlab.graphics.shapes import Drawing
         outDir = self.outDir
         html = ['<html><head></head><body>']
         a = html.append
-        formats = ['gif','pict','pdf']
+        formats = self._safe_formats
         from reportlab.graphics.barcode import getCodes
         CN = list(getCodes().items())
         for name,C in CN:
@@ -298,7 +299,8 @@ class BarcodeWidgetTestCase(unittest.TestCase):
             D = Drawing(x1-x0,y1-y0)
             D.add(i)
             D.save(formats=formats,outDir=outDir,fnRoot=name)
-            a('<h2>%s</h2><img src="%s.gif"><br>' % (name, name))
+            if renderPM:
+                a('<h2>%s</h2><img src="%s.gif"><br>' % (name, name))
             for fmt in formats:
                 efn = os.path.join(outDir,'%s.%s' % (name,fmt))
                 self.assertTrue(os.path.isfile(efn),msg="Expected file %r was not created" % efn)
@@ -321,7 +323,7 @@ class BarcodeWidgetTestCase(unittest.TestCase):
         x0, y0, x1, y1 = i.getBounds()
         D = Drawing(x1-x0, y1-y0)
         D.add(i)
-        D.save(['gif','pict','pdf'], outDir=self.outDir, fnRoot="QR_with_comma")
+        D.save(self._safe_formats, outDir=self.outDir, fnRoot="QR_with_comma")
 
     def test_qr_character_set_valid(self):
         from reportlab.graphics.barcode.qrencoder import QRNumber, QRAlphaNum
@@ -337,10 +339,12 @@ class BarcodeWidgetTestCase(unittest.TestCase):
     def test_graphics_barcode(self):
         run(self.makeFn('graphics-barcode-out.pdf'))
         fullTest(self.makeFn('graphics-barcode-full.pdf'))
-        self.createSample('test_cbcim.png',createBarcodeImageInMemory('EAN13', value='123456789012'))
-        self.createSample('test_cbcim.gif',createBarcodeImageInMemory('EAN8', value='1234567', format='gif'))
+        if renderPM:
+            self.createSample('test_cbcim.png',createBarcodeImageInMemory('EAN13', value='123456789012'))
+            self.createSample('test_cbcim.gif',createBarcodeImageInMemory('EAN8', value='1234567', format='gif'))
         self.createSample('test_cbcim.pdf',createBarcodeImageInMemory('UPCA', value='03600029145',format='pdf', barHeight=40))
-        self.createSample('test_cbcim.tiff',createBarcodeImageInMemory('USPS_4State', value='01234567094987654321',routing='01234567891',format='tiff'))
+        if renderPM:
+            self.createSample('test_cbcim.tiff',createBarcodeImageInMemory('USPS_4State', value='01234567094987654321',routing='01234567891',format='tiff'))
 
 def makeSuite():
     return makeSuiteForClasses(BarcodeWidgetTestCase)

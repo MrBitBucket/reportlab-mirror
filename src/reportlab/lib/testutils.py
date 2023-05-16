@@ -3,7 +3,7 @@
 import reportlab
 reportlab._rl_testing=True
 del reportlab
-__version__='3.3.0'
+__version__='4.0.1'
 __doc__="""Provides support for the test suite.
 
 The test suite as a whole, and individual tests, need to share
@@ -16,6 +16,13 @@ import sys, os, fnmatch, re
 from configparser import ConfigParser
 import unittest
 from reportlab.lib.utils import isCompactDistro, __rl_loader__, rl_isdir, asUnicode
+
+def haveRenderPM():
+    from reportlab.graphics.renderPM import _getPMBackend, RenderPMError
+    try:
+        return _getPMBackend()
+    except RenderPMError:
+        return False
 
 # Helper functions.
 def isWritable(D):
