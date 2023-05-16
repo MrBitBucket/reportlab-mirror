@@ -106,6 +106,7 @@ def main(pattern='test_*.py'):
     verbosity = [_ for _ in sys.argv if _.startswith('--verbosity=')]
     if not verbosity: verbosity = [f'''--verbosity={os.environ.get('RL_testVerbosity','1')}''']
     verbosity = int(verbosity[-1][12:])
+    failfast = bool([_ for _ in sys.argv if _=='--failfast'])
     if not cleanOnly:
         exclude = sum([
                     [os.path.splitext(os.path.basename(_.strip()))[0]
@@ -113,7 +114,7 @@ def main(pattern='test_*.py'):
                                 for a in sys.argv if a.startswith('--exclude=')
                     ],[])
         testSuite = makeSuite(folder,nonImportable=NI,exclude=exclude,pattern=pattern+(not haveSRC and 'c' or ''))
-        result = unittest.TextTestRunner(verbosity=verbosity).run(testSuite)
+        result = unittest.TextTestRunner(verbosity=verbosity,failfast=failfast).run(testSuite)
     else:
         result = None
 

@@ -262,6 +262,7 @@ def main():
         or 'tests' in sys.argv \
         or 'tests-postinstall' in sys.argv \
         or 'tests-preinstall' in sys.argv:
+        failfast = specialOption('--failfast')
         verboseTests = specialOption('--verbose-tests')
         excludes = [_ for _ in sys.argv if _.startswith('--exclude=')]
         for _ in excludes:
@@ -279,6 +280,8 @@ def main():
             cli.append('--post-install')
         if verboseTests:
             cli.append('--verbosity=2')
+        if failfast:
+            cli.append('--failfast')
         r = spCall(cli)
         sys.exit(('!!!!! runAll.py --> %s should exit with error !!!!!' % r) if r else r)
 
@@ -331,7 +334,7 @@ def main():
         extras_require={
             'RL_ACCEL': ['rl_accel>=0.9.0,<1.1'],
             'RL_RENDERPM': ['rl_renderPM>=4.0.3,<4.1'],
-            'bitmaps': ['rlPyCairo>=0.2.0,<1','freetype-py>=2.3.0,<2.4']
+            'RLPYCAIRO': ['rlPyCairo>=0.2.0,<1','freetype-py>=2.3.0,<2.4']
             },
         )
     print()
