@@ -3,7 +3,7 @@
 """
 Tests for chart class.
 """
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, rlextraNeeded, haveRenderPM
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, rlextraNeeded, haveRenderPM, rlSkipIf
 setOutDir(__name__)
 
 import os, sys, copy
@@ -526,7 +526,7 @@ class ChartTestCase(unittest.TestCase):
             story.append(makeArrow(y=-10,x=deltax*i,angle=angle,strokeColor=colors.black,strokeWidth=0.5,headSweep=-i*0.6))
         story.append(Spacer(0,1*cm))
 
-    @unittest.skipIf(not renderPM,'no renderPM')
+    @rlSkipIf(not renderPM,'no renderPM')
     def test8(self):
         '''text _text2Path'''
         story = self.story
@@ -1069,7 +1069,7 @@ class ChartTestCase(unittest.TestCase):
         run_samples([(k,v,'axes') for k,v in locals().items() if k.lower().startswith('sample')])
         run_samples(extract_samples())
 
-    @unittest.skipIf(rlextraNeeded(),'s')
+    @rlSkipIf(rlextraNeeded(),'rlextra needed')
     def test_axes_rlx(self):
         from reportlab.graphics.charts.axes import YValueAxis, XValueAxis, LogYValueAxis, LogXValueAxis, LogYValueAxis, XCategoryAxis, YCategoryAxis
         def sample0c():

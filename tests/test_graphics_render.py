@@ -3,7 +3,7 @@
 """
 Tests for renderers
 """
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, haveRenderPM
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, haveRenderPM, rlSkipIf
 setOutDir(__name__)
 import unittest, os, sys, glob
 try:
@@ -150,7 +150,7 @@ class RenderTestCase(unittest.TestCase):
         from reportlab.graphics.renderPDF import test
         assert test(self.outDir) is None
 
-    @unittest.skipIf(not renderPM,'no renderPM')
+    @rlSkipIf(not renderPM,'no renderPM')
     def test2(self):
         from reportlab.graphics.renderPM import test
         assert test(self.outDir) is None
@@ -169,7 +169,7 @@ class RenderTestCase(unittest.TestCase):
         HatchDrawing().save(formats=formats,outDir=self.outDir,fnRoot='hatch')
         TextRenderModeDrawing().save(formats=formats,outDir=self.outDir,fnRoot='textmode')
 
-    @unittest.skipIf(not renderPM,'no renderPM')
+    @rlSkipIf(not renderPM,'no renderPM')
     def testSVGLibIssues(self):
         SVGLibIssue104().save(formats=['pdf','png'],outDir=self.outDir, fnRoot='svglib-issue104')
         from PIL import Image
