@@ -1,12 +1,17 @@
 __version__='3.3.0'
 __doc__='''basic tests.'''
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation, rlSkipUnless
 from reportlab.lib.utils import asBytes, isPyPy
 setOutDir(__name__)
 
+try:
+    import _rl_accel
+except:
+    _rl_accel = None
+
 import unittest
 def getFuncs(name):
-    return (_c_funcs.get(name,None),'c'),(_py_funcs.get(name,None),'py')
+    return tuple((_ for _ in ((_c_funcs.get(name,None),'c'),(_py_funcs.get(name,None),'py')) if _[0]))
 
 def getrc(defns,depth=1):
     if isPyPy: return ''
@@ -95,6 +100,7 @@ class RlAccelTestCase(unittest.TestCase):
             assert func('test')==1952805748, "%s calcChecksum('test')==1952805748 fails with value %s!" % (
                     kind,ascii(func(rawBytes('test'))))
 
+    @rlSkipUnless(_rl_accel,'need working _rl_accel')
     def test_instanceStringWidth(self):
         from reportlab.pdfbase.pdfmetrics import registerFont, getFont, _fonts, unicode2T1
         from reportlab.pdfbase.ttfonts import TTFont
@@ -140,6 +146,7 @@ class RlAccelTestCase(unittest.TestCase):
             finally:
                 ttf.face.charWidths = saved
 
+    @rlSkipUnless(_rl_accel,'need working _rl_accel')
     def test_unicode2T1(self):
         from reportlab.pdfbase.pdfmetrics import getFont, _fonts
         t1fn = 'Times-Roman'
@@ -207,7 +214,7 @@ class RlAccelTestCase(unittest.TestCase):
 def makeSuite():
     # only run the tests if _rl_accel is present
     try:
-        from reportlab.lib import _rl_accel, rl_accel
+        from reportlab.lib import rl_accel
         Klass = RlAccelTestCase
         global _py_funcs, _c_funcs
         _c_funcs=rl_accel._c_funcs
