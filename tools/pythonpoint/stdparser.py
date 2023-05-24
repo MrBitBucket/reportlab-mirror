@@ -7,7 +7,7 @@ The parser has a getPresentation method; it is called from
 pythonpoint.py.
 """
 
-import imp, sys, os, copy
+import importlib, sys, os, copy
 from reportlab.lib.utils import isSeq
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import recursiveImport
@@ -27,15 +27,27 @@ def getModule(modulename,fromPath='tools.pythonpoint.styles'):
     """
 
     try:
-        exec('from tools.pythonpoint import '+modulename)
-        return eval(modulename)
+        NS = {}
+        exec(f'from tools.pythonpoint import {modulename} as mod',NS)
+        return NS['mod']
     except ImportError:
         try:
-            exec('from tools.pythonpoint.styles import '+modulename)
-            return eval(modulename)
+            exec(f'from tools.pythonpoint.styles import {modulename} as mod',NS)
+            return NS['mod']
         except ImportError:
-            exec('import '+modulename)
-            return eval(modulename)
+            exec(f'import {modulename} as mod',NS)
+            return NS['mod']
+
+def loadModule(modulename, paths=()):
+    if not isSeq(paths): paths = (paths,)
+    for path in paths:
+        try:
+            spec = importlib.util.find_spec(modulename, path)
+            if spec:
+                return spec.loader.load_module()
+        except ImportError:
+            pass
+    return getModule(modulename)
 
 
 class PPMLParser(HTMLParser):
@@ -326,19 +338,15 @@ class PPMLParser(HTMLParser):
     def start_stylesheet(self, args):
         #makes it the current style sheet.
         path = self._arg('stylesheet',args,'path')
-        if path=='None': path = []
+        if path=='None': path = None
         if not isSeq(path): path = [path]
         path.append('styles')
         path.append(os.getcwd())
         modulename = self._arg('stylesheet', args, 'module')
         funcname = self._arg('stylesheet', args, 'function')
-        try:
-            found = imp.find_module(modulename, path)
-            (file, pathname, description) = found
-            mod = imp.load_module(modulename, file, pathname, description)
-        except ImportError:
-            #last gasp
-            mod = getModule(modulename)
+
+        #dynamically load the module
+        mod = loadModule(modulename,path)
 
         #now get the function
         func = getattr(mod, funcname)
@@ -702,12 +710,9 @@ class PPMLParser(HTMLParser):
 
         modulename = self._arg('customshape',args,'module')
         funcname = self._arg('customshape',args,'class')
-        try:
-            found = imp.find_module(modulename, path)
-            (file, pathname, description) = found
-            mod = imp.load_module(modulename, file, pathname, description)
-        except ImportError:
-            mod = getModule(modulename)
+
+        #dynamically load the module
+        mod = loadModule(modulename,path)
 
         #now get the function
 
