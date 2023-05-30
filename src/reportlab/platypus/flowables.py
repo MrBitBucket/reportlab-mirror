@@ -1771,14 +1771,22 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
 
     def wrap(self,aW,aH):
         #here's where we mess with everything
+        self_frame = getattr(self,'_frame',None)
         if aH<self.spaceBefore+self._needed-_FUZZ:
             #we are going straight to the nextTemplate with no attempt to modify the frames
             G = [PageBreak(), self]
             H1 = 0
         else:
+            if not self_frame:
+                #probably in some kind of container
+                from reportlab.platypus.frames import Frame
+                self._frame = Frame(0,0,aW,0x7fffffff,leftPadding=0, rightPadding=0,
+                                    topPadding=0,bottomPadding=0)
             H1, G = self._generated_content(aW,aH)
+            if not self_frame:
+                del self._frame
 
-        self._frame.add_generated_content(*G)
+        if self_frame: self_frame.add_generated_content(*G)
         return 0,min(H1,aH)
 
 class AnchorFlowable(Spacer):
