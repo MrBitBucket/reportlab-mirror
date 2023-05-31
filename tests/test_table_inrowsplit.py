@@ -158,6 +158,79 @@ class TableTestCase(unittest.TestCase):
         lst.append(Spacer(0,6))
         lst.append(parts[1])
 
+        #create extra page keep in xlist
+        xlst=[].append
+        xlst(PageBreak())
+        xlst(Paragraph("""Modifying the inrow split linebelow and lineabove""", styleSheet['Heading1']))
+        xlst(Paragraph("""Table, with splitByRow=0 and splitInRow=1. It splits inside a row without
+                       split row line below and line above (the normal case).""", styNormal))
+
+        # This is the table with splitInRow, which splits in row 2
+        t = Table(tableData,
+                  colWidths=colWidths,
+                  rowHeights=None,
+                  style=ministy,
+                  splitByRow=0,
+                  splitInRow=1)
+
+        parts = t.split(451, 60)
+        xlst(parts[0])
+        xlst(Spacer(0,6))
+        xlst(parts[1])
+        xlst(Paragraph("""Same Table: splits inside a row without
+                       With thicker blue LINEBELOW & red LINEABOVE""", styNormal))
+        newsty = TableStyle([
+                ('LINEBELOW', (0,'inrowsplitstart'), (-1,'inrowsplitstart'), 1, colors.blue,'butt'),
+                ('LINEABOVE', (0,'inrowsplitend'), (-1,'inrowsplitend'), 1, colors.red,'butt'),
+            ],parent=ministy)
+        t = Table(tableData,
+                  colWidths=colWidths,
+                  rowHeights=None,
+                  style=newsty,
+                  splitByRow=0,
+                  splitInRow=1)
+
+        parts = t.split(451, 60)
+        xlst(parts[0])
+        xlst(Spacer(0,6))
+        xlst(parts[1])
+
+        xlst(Paragraph("""Table and repeatrow, with splitByRow=0 and splitInRow=1. It splits inside a row without
+                       split row line below and line above (the normal case).""", styNormal))
+
+        xTableData = [['Spanned repeat row',"","","","",""]]+tableData
+        # This is the table with splitInRow, which splits in row 2
+        t = Table(xTableData,
+                  colWidths=colWidths,
+                  rowHeights=None,
+                  style=ministy,
+                  splitByRow=0,
+                  splitInRow=1,
+                  repeatRows=1)
+
+        parts = t.split(451, 75)
+        xlst(parts[0])
+        xlst(Spacer(0,6))
+        xlst(parts[1])
+        xlst(Paragraph("""Same Table: splits inside a row without
+                       With thicker blue LINEBELOW & red LINEABOVE""", styNormal))
+        newsty = TableStyle([
+                ('LINEBELOW', (0,'inrowsplitstart'), (-1,'inrowsplitstart'), 1, colors.blue,'butt'),
+                ('LINEABOVE', (0,'inrowsplitend'), (-1,'inrowsplitend'), 1, colors.red,'butt'),
+            ],parent=ministy)
+        t = Table(xTableData,
+                  colWidths=colWidths,
+                  rowHeights=None,
+                  style=newsty,
+                  splitByRow=0,
+                  splitInRow=1,
+                  repeatRows=1)
+
+        parts = t.split(451, 75)
+        xlst(parts[0])
+        xlst(Spacer(0,6))
+        xlst(parts[1])
+
         lst.append(PageBreak())
         lst.append(Paragraph("""Long cell with multiple splits, and minimum split size""",
                              styleSheet['Heading2']))
@@ -407,6 +480,7 @@ class TableTestCase(unittest.TestCase):
                 lst.append(Spacer(0,6))
             lst.append(Spacer(18,18))
 
+        lst.extend(xlst.__self__)
         SimpleDocTemplate(outputfile('test_table_inrowsplit.pdf'), showBoundary=1).build(lst)
 
 def makeSuite():

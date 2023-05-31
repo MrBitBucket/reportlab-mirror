@@ -257,6 +257,7 @@ class _ExpandedCellTupleEx(tuple):
 RoundingRectDef = namedtuple('RoundingRectDefs','x0 y0 w h x1 y1 ar SL')
 RoundingRectLine = namedtuple('RoundingRectLine','xs ys xe ye weight color cap dash join')
 
+_SPECIALROWS=("splitfirst", "splitlast", "inrowsplitstart","inrowsplitend")
 class Table(Flowable):
     def __init__(self, data, colWidths=None, rowHeights=None, style=None,
                 repeatRows=0, repeatCols=0, splitByRow=1, splitInRow=0, emptyTableAction=None, ident=None,
@@ -340,7 +341,8 @@ class Table(Flowable):
         self._linecmds = []
         self._spanCmds = []
         self._nosplitCmds = []
-        self._srflcmds = []
+        self._srflcmds = [] # split first last
+        self._sircmds = []  # split in row special commands
         # NB repeatRows can be a list or tuple eg (1,) repeats only the second row of a table
         # or an integer eg 2 to repeat both rows 0 & 1
         self.repeatRows = repeatRows
@@ -1102,6 +1104,13 @@ class Table(Flowable):
         if not isinstance(tblstyle,TableStyle):
             tblstyle = TableStyle(tblstyle)
         for cmd in tblstyle.getCommands():
+            if len(cmd)>=3:
+                c, (sc,sr), (ec,er) = cmd[0:3]
+                if (isinstance(sc,str) or isinstance(ec,str)
+                    or (isinstance(sr,str) and sr not in _SPECIALROWS)
+                    or (isinstance(er,str) and er not in _SPECIALROWS)):
+                    raise ValueError(f'''bad style command {cmd!r} illegal of invalid string coordinate
+only rows may be strings with values in {_SPECIALROWS!r}''')
             self._addCommand(cmd)
         for k,v in tblstyle._opts.items():
             setattr(self,k,v)
@@ -1169,8 +1178,8 @@ class Table(Flowable):
             self._setCornerRadii(cmd[1])
         else:
             (op, (sc, sr), (ec, er)), values = cmd[:3] , cmd[3:]
-            if sr in ('splitfirst','splitlast'):
-                self._srflcmds.append(cmd)
+            if sr in _SPECIALROWS:
+                (self._srflcmds if sr[0]=='s' else self._sircmds).append(cmd)
             else:
                 sc, ec, sr, er = self.normCellRange(sc,ec,sr,er)
                 ec += 1
@@ -1202,7 +1211,7 @@ class Table(Flowable):
 
         try:
             for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
-                if isinstance(sr,strTypes) and sr.startswith('split'): continue
+                if isinstance(sr,strTypes) and sr in _SPECIALROWS: continue
                 if cap!=None and ccap!=cap:
                     canv.setLineCap(cap)
                     ccap = cap
@@ -1316,10 +1325,20 @@ class Table(Flowable):
         '''
         pass
 
-    def _cr_0(self,n,cmds,nr0,_srflMode=False):
+    def _cr_0(self,n,cmds,nr0,doInRowSplit, _srflMode=False):
+        #ths is used to modify/apply styles in splitIn row case
+        #for the first part of a split. 
+        ncols = self._ncols
         for c in cmds:
             (sc,sr), (ec,er) = c[1:3]
-            if sr in ('splitfirst','splitlast'):
+            if sr in _SPECIALROWS:
+                if sr[0]=='i':
+                    self._addCommand(c)             #re-append the command
+                    if sr=='inrowsplitstart' and doInRowSplit:
+                        if sc<0: sc+=ncols
+                        if ec<0: ec+=ncols
+                        self._addCommand((c[0],)+((sc, n-1), (ec, n-1))+tuple(c[3:]))
+                    continue
                 if not _srflMode: continue
                 self._addCommand(c)             #re-append the command
                 if sr=='splitfirst': continue
@@ -1329,12 +1348,20 @@ class Table(Flowable):
             if er>=n: er = n-1
             self._addCommand((c[0],)+((sc, sr), (ec, er))+tuple(c[3:]))
 
-    def _cr_1_1(self, n, nRows, repeatRows, cmds, _srflMode=False):
+    def _cr_1_1(self, n, nRows, repeatRows, cmds, doInRowSplit, _srflMode=False):
         nrr = len(repeatRows)
         rrS = set(repeatRows)
+        ncols = self._ncols
         for c in cmds:
             (sc,sr), (ec,er) = c[1:3]
-            if sr in ('splitfirst','splitlast'):
+            if sr in _SPECIALROWS:
+                if sr[0]=='i':
+                    self._addCommand(c)             #re-append the command
+                    if sr=='inrowsplitend' and doInRowSplit:
+                        if sc<0: sc+=ncols
+                        if ec<0: ec+=ncols
+                        self._addCommand((c[0],)+((sc, nrr), (ec, nrr))+tuple(c[3:]))
+                    continue
                 if not _srflMode: continue
                 self._addCommand(c)
                 if sr=='splitlast': continue
@@ -1362,10 +1389,17 @@ class Table(Flowable):
                 er = max(er-n,0)+nrr
                 self._rowSplitRange = sr,er
 
-    def _cr_1_0(self,n,cmds,_srflMode=False):
+    def _cr_1_0(self,n,cmds,doInRowSplit,_srflMode=False):
         for c in cmds:
             (sc,sr), (ec,er) = c[1:3]
-            if sr in ('splitfirst','splitlast'):
+            if sr in _SPECIALROWS:
+                if sr[0]=='i':
+                    self._addCommand(c)             #re-append the command
+                    if sr=='inrowsplitend' and doInRowSplit:
+                        if sc<0: sc+=ncols
+                        if ec<0: ec+=ncols
+                        self._addCommand((c[0],)+((sc, 0), (ec, 0))+tuple(c[3:]))
+                    continue
                 if not _srflMode: continue
                 self._addCommand(c)
                 if sr=='splitlast': continue
@@ -1473,13 +1507,18 @@ class Table(Flowable):
         A = []
         # hack up the line commands
         for op, (sc,sr), (ec,er), weight, color, cap, dash, join, count, space in self._linecmds:
-            if isinstance(sr,strTypes) and sr.startswith('split'):
+            if isinstance(sr,strTypes) and sr in _SPECIALROWS:
                 A.append((op,(sc,sr), (ec,sr), weight, color, cap, dash, join, count, space))
                 if sr=='splitlast':
                     sr = er = n-1
                 elif sr=='splitfirst':
                     sr = n
                     er = n
+                else:
+                    if sc < 0: sc += ncols
+                    if ec < 0: ec += ncols
+                    A[-1] = (op,(sc,sr), (ec,sr), weight, color, cap, dash, join, count, space)
+                    continue
 
             if sc < 0: sc += ncols
             if ec < 0: ec += ncols
@@ -1546,12 +1585,12 @@ class Table(Flowable):
         4. If er == sr == n and cmd is not line, increase er
 
         """
-        stretched = []
+        stretched = [].append
         for c in cmds:
             cmd, (sc,sr), (ec,er) = c[0:3]
 
-            if sr in ("splitlast", "splitfirst") or er in ("splitlast", "splitfirst"):
-                stretched.append(c)
+            if sr in _SPECIALROWS or er in _SPECIALROWS:
+                stretched(c)
                 continue
 
             if er < 0:
@@ -1568,9 +1607,9 @@ class Table(Flowable):
             if sr > n or (sr == n and cmd == "LINEBELOW"):
                 sr += 1
 
-            stretched.append((c[0], (sc,sr), (ec,er)) + c[3:])
+            stretched((cmd, (sc,sr), (ec,er)) + c[3:])
 
-        return stretched
+        return stretched.__self__
 
     def _splitRows(self,availHeight,doInRowSplit=0):
         # Get the split position. if we split between rows (doInRowSplit=0),
@@ -1777,6 +1816,7 @@ class Table(Flowable):
                 T._spanCmds = spanCmds
                 T._nosplitCmds = self._nosplitCmds
                 T._srflcmds = self._srflcmds
+                T._sircmds = self._sircmds
                 T._colpositions = self._colpositions
                 T._rowpositions = self._rowpositions
 
@@ -1945,6 +1985,7 @@ class Table(Flowable):
             T._spanCmds = self._stretchCommands(n, self._spanCmds, lim)
             T._nosplitCmds = self._stretchCommands(n, self._nosplitCmds, lim)
             T._srflcmds = self._stretchCommands(n, self._srflcmds, lim)
+            T._sircmds = self._stretchCommands(n, self._sircmds, lim)
             n = n + 1
 
         #we're going to split into two superRows
@@ -1973,10 +2014,10 @@ class Table(Flowable):
 
         _linecmds = T._splitLineCmds(n, doInRowSplit=doInRowSplit)
 
-        R0._cr_0(n,_linecmds,nrows)
-        R0._cr_0(n,T._bkgrndcmds,nrows,_srflMode=True)
-        R0._cr_0(n,T._spanCmds,nrows)
-        R0._cr_0(n,T._nosplitCmds,nrows)
+        R0._cr_0(n,_linecmds,nrows,doInRowSplit)
+        R0._cr_0(n,T._bkgrndcmds,nrows,doInRowSplit,_srflMode=True)
+        R0._cr_0(n,T._spanCmds,nrows,doInRowSplit)
+        R0._cr_0(n,T._nosplitCmds,nrows,doInRowSplit)
 
         for c in T._srflcmds:
             R0._addCommand(c)
@@ -2009,10 +2050,10 @@ class Table(Flowable):
                     cornerRadii = cornerRadii,
                     renderCB = renderCB,
                     )
-            R1._cr_1_1(n,nrows,repeatRows,_linecmds)
-            R1._cr_1_1(n,nrows,repeatRows,T._bkgrndcmds,_srflMode=True)
-            R1._cr_1_1(n,nrows,repeatRows,T._spanCmds)
-            R1._cr_1_1(n,nrows,repeatRows,T._nosplitCmds)
+            R1._cr_1_1(n,nrows,repeatRows,_linecmds,doInRowSplit)
+            R1._cr_1_1(n,nrows,repeatRows,T._bkgrndcmds,doInRowSplit,_srflMode=True)
+            R1._cr_1_1(n,nrows,repeatRows,T._spanCmds,doInRowSplit)
+            R1._cr_1_1(n,nrows,repeatRows,T._nosplitCmds,doInRowSplit)
         else:
             #R1 = slelf.__class__(data[n:], self._argW, self._argH[n:],
             R1 = self.__class__(data[n:], colWidths=T._colWidths, rowHeights=splitH[n:],
@@ -2026,10 +2067,10 @@ class Table(Flowable):
                     renderCB = renderCB,
                     )
 
-            R1._cr_1_0(n,_linecmds)
-            R1._cr_1_0(n,T._bkgrndcmds,_srflMode=True)
-            R1._cr_1_0(n,T._spanCmds)
-            R1._cr_1_0(n,T._nosplitCmds)
+            R1._cr_1_0(n,_linecmds,doInRowSplit)
+            R1._cr_1_0(n,T._bkgrndcmds,doInRowSplit,_srflMode=True)
+            R1._cr_1_0(n,T._spanCmds,doInRowSplit)
+            R1._cr_1_0(n,T._nosplitCmds,doInRowSplit)
         for c in T._srflcmds:
             R1._addCommand(c)
             if c[1][1]!='splitfirst': continue
@@ -2273,7 +2314,7 @@ class Table(Flowable):
         colWidths = self._colWidths
         spanRects = getattr(self,'_spanRects',None)
         for cmd, (sc, sr), (ec, er), arg in self._bkgrndcmds:
-            if sr in ('splitfirst','splitlast'): continue
+            if sr in _SPECIALROWS: continue
             if sc < 0: sc = sc + ncols
             if ec < 0: ec = ec + ncols
             if sr < 0: sr = sr + nrows

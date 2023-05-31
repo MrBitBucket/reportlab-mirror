@@ -11,9 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  4.0.3   30/05/2023
+CHANGES  4.0.3   31/05/2023
 ---------------------------
 	* allow BalancedColumns to work in a container flowable (ie with no frame)
+	* allow custom styles for inrowsplitStaart & inrowsplitend
 
 CHANGES  4.0.2   16/05/2023
 ---------------------------
