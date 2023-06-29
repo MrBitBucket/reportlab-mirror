@@ -2227,6 +2227,17 @@ class LogAxisTickLabeller(TickLabeller):
         if e==1: return '10'
         return '10<sup>%s</sup>' % e
 
+class LogAxisTickLabellerS(TickLabeller):
+    '''simple log axis labeller tries to use integers
+    and short forms else exponential format'''
+    def __call__(self,axis,value):
+        e = math_log10(value)
+        p = int(e-0.001 if e<0 else e+0.001)
+        if p==0: return '1'
+        s = '1'+p*'0' if p>0 else '0.'+(-(1+p)*'0')+'1'
+        se = '%.0e' % value
+        return se if len(se)<len(s) else s
+
 class LogAxisLabellingSetup:
     def __init__(self):
         if DirectDrawFlowable is not None:
@@ -2241,7 +2252,7 @@ class LogAxisLabellingSetup:
                 self.labels.dy = -5
             self.labelTextFormat = LogAxisTickLabeller()
         else:
-            self.labelTextFormat = "%.0e"
+            self.labelTextFormat = LogAxisTickLabellerS()
 
 class LogXValueAxis(LogValueAxis,LogAxisLabellingSetup,XValueAxis):
     _attrMap = AttrMap(BASE=XValueAxis)
