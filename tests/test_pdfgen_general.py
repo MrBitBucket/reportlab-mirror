@@ -12,7 +12,7 @@ from io import BytesIO
 from reportlab.pdfgen import canvas   # gmcm 2000/10/13, pdfgen now a package
 from reportlab.lib.units import inch, cm
 from reportlab.lib import colors
-from reportlab.lib.utils import fileName2FSEnc
+from reportlab.lib.utils import fileName2FSEnc, ImageReader
 from reportlab.lib.boxstuff import rectCorner
 
 #################################################################
@@ -185,6 +185,14 @@ def drawCode(canvas, code):
     canvas.addLiteral('-36 0 Td')
     canvas.setFont('Times-Roman',10)
 
+
+def alpha_composite_color(img, composite_color=(255,255,255)):
+    imgObj = ImageReader(img)
+    from PIL import Image
+    png = imgObj._image.convert('RGBA')
+    bg = Image.new('RGBA', png.size, composite_color)
+    alpha_composite = Image.alpha_composite(bg, png)
+    return ImageReader(alpha_composite.convert('RGB'))
 
 def makeDocument(filename, pageCallBack=None):
     #the extra arg is a hack added later, so other
@@ -792,6 +800,14 @@ cost to performance.""")
     png = os.path.join(testsFolder,'alpha_test.png')
     c.drawImage(png, 1*inch, 6*inch+14.4, w, h, mask=None)
     c.drawImage(png, 3*inch, 6*inch+14.4, w, h, mask='auto')
+
+    c.drawString(1*inch,4*inch,"red alpha --> (0,255,0)")
+    c.drawImage(alpha_composite_color(png,composite_color=(0,255,0)),
+                1*inch,4*inch+14.4, mask=None)
+    c.drawString(3*inch,4*inch,"red alpha --> (0,0,255)")
+    c.drawImage(alpha_composite_color(png,composite_color=(0,0,255)),
+                3*inch,4*inch+14.4, mask=None)
+
     c.showPage()
 
     import shutil
