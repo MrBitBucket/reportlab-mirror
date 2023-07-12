@@ -85,7 +85,6 @@ class _PDFRenderer(Renderer):
                     path,
                     image.x, image.y,
                     image.width, image.height,
-                    mask='auto',
                     )
 
     def drawLine(self, line):
