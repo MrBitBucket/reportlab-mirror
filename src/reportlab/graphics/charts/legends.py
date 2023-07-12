@@ -601,6 +601,7 @@ class LineSwatch(Widget):
         width = AttrMapValue(isNumber, desc="length of swatch line"),
         height = AttrMapValue(isNumber, desc="used for line strokeWidth"),
         strokeColor = AttrMapValue(isColorOrNone, desc="color of swatch line"),
+        strokeWidth = AttrMapValue(isNumberOrNone, desc="thickness of the swatch"),
         strokeDashArray = AttrMapValue(isListOfNumbersOrNone, desc="dash array for swatch line"),
     )
 
@@ -612,12 +613,13 @@ class LineSwatch(Widget):
         self.height = 1
         self.strokeColor = red
         self.strokeDashArray = None
+        self.strokeWidth = 1
 
     def draw(self):
         l = Line(self.x,self.y,self.x+self.width,self.y)
         l.strokeColor = self.strokeColor
         l.strokeDashArray  = self.strokeDashArray
-        l.strokeWidth = self.height
+        l.strokeWidth = self.strokeWidth
         return l
 
 class LineLegend(Legend):
@@ -641,4 +643,5 @@ class LineLegend(Legend):
         l.width = dx
         l.height = dy
         l.strokeColor = fillColor
+        l.strokeWidth = strokeWidth
         return l
