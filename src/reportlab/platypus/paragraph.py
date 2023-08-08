@@ -265,6 +265,7 @@ def _getDotsInfo(style):
 _56=5./6
 _16=1./6
 def _putFragLine(cur_x, tx, line, last, pKind):
+    linkRecord = getattr(tx,'_linkRecord',lambda *args, **kwds: None)
     preformatted = tx.preformatted
     xs = tx.XtraState
     cur_y = xs.cur_y
@@ -378,8 +379,10 @@ def _putFragLine(cur_x, tx, line, last, pKind):
                 nL = NS - S #new linkis
                 eL = S - NS #ending links
                 for l in eL:
+                    linkRecord(l,'end')
                     links[l] = links[l],end_x
                 for l in nL:
+                    linkRecord(l,'start')
                     links[l] = (l,cur_x),nlo,nhi
                 AL = f.link
             if AL:
@@ -419,6 +422,7 @@ def _putFragLine(cur_x, tx, line, last, pKind):
 
     if AL:
         for l in AL:
+            linkRecord(l,'end')
             links[l] = links[l], cur_x_s
 
     if xs.backColor:
