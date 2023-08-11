@@ -379,11 +379,11 @@ def _putFragLine(cur_x, tx, line, last, pKind):
                 nL = NS - S #new linkis
                 eL = S - NS #ending links
                 for l in eL:
-                    linkRecord(l,'end')
                     links[l] = links[l],end_x
+                    linkRecord(l,'end')
                 for l in nL:
-                    linkRecord(l,'start')
                     links[l] = (l,cur_x),nlo,nhi
+                    linkRecord(l,'start')
                 AL = f.link
             if AL:
                 for l in AL:
@@ -422,8 +422,8 @@ def _putFragLine(cur_x, tx, line, last, pKind):
 
     if AL:
         for l in AL:
-            linkRecord(l,'end')
             links[l] = links[l], cur_x_s
+            linkRecord(l,'end')
 
     if xs.backColor:
         xs.backColors.append( (xs.backColor_x, cur_x_s, xs.backColor) )
