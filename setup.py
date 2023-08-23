@@ -203,7 +203,7 @@ def get_fonts(PACKAGE_DIR, reportlab_files):
     else:
         try:
             infoline("Downloading standard T1 font curves")
-            zipdata = url2data("http://www.reportlab.com/ftp/pfbfer-20180109.zip")
+            zipdata = url2data("https://www.reportlab.com/ftp/pfbfer-20180109.zip")
             archive = zipfile.ZipFile(zipdata)
             dst = pjoin(rl_dir, 'fonts')
 
@@ -298,7 +298,7 @@ def main():
 
         author="Andy Robinson, Robin Becker, the ReportLab team and the community",
         author_email="reportlab-users@lists2.reportlab.com",
-        url="http://www.reportlab.com/",
+        url="https://www.reportlab.com/",
         packages=[
                 'reportlab',
                 'reportlab.graphics.charts',
