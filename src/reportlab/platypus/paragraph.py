@@ -353,16 +353,28 @@ def _putFragLine(cur_x, tx, line, last, pKind):
             if xs.rise!=rise:
                 xs.rise=rise
                 tx.setRise(rise)
-            text = f.text
-            tx._textOut(text,f is words[-1])    # cheap textOut
+
+            #we should end stuff bfore outputting more text so we can record
+            #the text code position correctly if needed
             if LL != f.us_lines:
                 S = set(LL)
                 NS = set(f.us_lines)
-                nL = NS - S #new lines
-                eL = S - NS #ending lines
-                for l in eL:
+                nLL = NS - S #new lines
+                eLL = S - NS #ending lines
+                for l in eLL:
                     us_lines[l] = us_lines[l],end_x
-                for l in nL:
+            if AL != f.link:
+                S = set(AL)
+                NS = set(f.link)
+                nAL = NS - S #new linkis
+                eAL = S - NS #ending links
+                for l in eAL:
+                    links[l] = links[l],end_x
+                    linkRecord(l,'end')
+            text = f.text
+            tx._textOut(text,f is words[-1])    # cheap textOut
+            if LL != f.us_lines:
+                for l in nLL:
                     us_lines[l] = (l,fontSize,textColor,cur_x_s),fontSize
                 LL = f.us_lines
             if LL:
@@ -374,14 +386,7 @@ def _putFragLine(cur_x, tx, line, last, pKind):
             nlo = rise - 0.2*fontSize
             nhi = rise + fontSize
             if AL != f.link:
-                S = set(AL)
-                NS = set(f.link)
-                nL = NS - S #new linkis
-                eL = S - NS #ending links
-                for l in eL:
-                    links[l] = links[l],end_x
-                    linkRecord(l,'end')
-                for l in nL:
+                for l in nAL:
                     links[l] = (l,cur_x),nlo,nhi
                     linkRecord(l,'start')
                 AL = f.link
