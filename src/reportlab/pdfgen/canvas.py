@@ -47,7 +47,7 @@ PATH_OPS = {(0, 0, FILL_EVEN_ODD) : 'n',  #no op
             }
 
 def _annFormat(D,color,thickness,dashArray,hradius=0,vradius=0):
-    from reportlab.pdfbase.pdfdoc import PDFArray, PDFDictionary
+    from reportlab.pdfbase.pdfdoc import PDFArray
     if color and 'C' not in D:
         D["C"] = PDFArray([color.red, color.green, color.blue])
     if 'Border' not in D:
