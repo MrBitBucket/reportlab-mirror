@@ -2133,7 +2133,7 @@ class LogValueAxis(ValueAxis):
         if valueMin>valueMax:
             raise ValueError('%s: valueMin=%r should not be greater than valueMax=%r!' % (self.__class__.__name__valueMin, valueMax))
         if valueMin<=0:
-            raise ValueError('%s: valueMin=%r negative values are not allowed!' % valueMin)
+            raise ValueError('%s: valueMin=%r negative values are not allowed!' % (self.__class__.__name__,valueMin))
         abS = self.avoidBoundSpace
         if abS:
             lMin = math_log10(aMin)
