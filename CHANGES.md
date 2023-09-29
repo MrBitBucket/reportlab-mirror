@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.0.6   ??/??/2023
+---------------------------
+    * fix importlib usage in reportlab init, reported by Frank Epperlein and others
+    * add value axes extraMinMaxValues as aid to parallel axes
+
 CHANGES  4.0.5   12/07/2023
 ---------------------------
     * add in test for alpha composite colour

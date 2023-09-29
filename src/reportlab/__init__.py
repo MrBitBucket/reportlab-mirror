@@ -18,12 +18,15 @@ def cmp(a,b):
     return -1 if a<b else (1 if a>b else 0)
 
 def _fake_import(fn,name):
-    from importlib import machinery
-    m = machinery.SourceFileLoader(name,fn)
+    from importlib.util import spec_from_loader, module_from_spec
+    from importlib.machinery import SourceFileLoader 
+    spec = spec_from_loader(name, SourceFileLoader(name, fn))
+    module = module_from_spec(spec)
     try:
-        sys.modules[name] = m.load_module(name)
+        spec.loader.exec_module(module)
     except FileNotFoundError:
         raise ImportError('file %s not found' % ascii(fn))
+    sys.modules[name] = module
 
 #try to use dynamic modifications from
 #reportlab.local_rl_mods.py
