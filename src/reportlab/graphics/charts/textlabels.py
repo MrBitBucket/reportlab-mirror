@@ -218,10 +218,12 @@ class Label(Widget):
 
             if not self.ddfStyle:
                 sty = ParagraphStyle(**sty)
-            elif issubclass(self.ddfStyle,PropertySet):
+            elif isinstance(self.ddfStyle,PropertySet):
+                sty = self.ddfStyle.clone(**sty)
+            elif isinstance(self.ddfStyle,type) and issubclass(self.ddfStyle,PropertySet):
                 sty = self.ddfStyle(**sty)
             else:
-                sty = self.ddfStyle.clone()
+                raise ValueError(f'ddfStyle has invalid type {type(self.ddfStyle)}')
 
             self._style = sty
             self._getBaseLineRatio()
@@ -232,6 +234,7 @@ class Label(Widget):
                 sty.leading = self.leading if self.leading else self.fontSize*1.2
             self._leading = sty.leading
             ta = self._getTextAnchor()
+
             aW = self.maxWidth or 0x7fffffff
             if ta!='start':
                 sty.alignment = TA_LEFT
