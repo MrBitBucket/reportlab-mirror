@@ -24,7 +24,7 @@ from reportlab.lib.validators import isNumber, isListOfNumbersOrNone,\
                                     isNoneOrListOfNoneOrStrings, isTextAnchor,\
                                     isNoneOrListOfNoneOrNumbers, isBoxAnchor,\
                                     isStringOrNone, NoneOr, EitherOr,\
-                                    isNumberInRange
+                                    isNumberInRange, isCallable
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.attrmap import *
 from reportlab.graphics.shapes import Group, Drawing, Ellipse, Wedge, String, STATE_DEFAULTS, ArcPath, Polygon, Rect, PolyLine, Line
@@ -147,7 +147,7 @@ class WedgeProperties(PropHolder):
         self.shadingAngle = 2.0137
         self.shadingDirection = 'normal'    #or 'anti'
 
-def _addWedgeLabel(self,text,angle,labelX,labelY,wedgeStyle,labelClass=WedgeLabel):
+def _addWedgeLabel(self,text,angle,labelX,labelY,wedgeStyle,labelClass=None):
     # now draw a label
     if self.simpleLabels:
         theLabel = String(labelX, labelY, text)
@@ -161,6 +161,8 @@ def _addWedgeLabel(self,text,angle,labelX,labelY,wedgeStyle,labelClass=WedgeLabe
         theLabel._pmv = angle
         theLabel._simple_pointer = 0
     else:
+        if labelClass is None:
+            labelClass = getattr(self,'labelClass',WedgeLabel)
         theLabel = labelClass()
         theLabel._pmv = angle
         theLabel.x = labelX
@@ -535,6 +537,7 @@ class Pie(AbstractPieChart):
         wedgeRecord = AttrMapValue(None, desc="callable(wedge,*args,**kwds)",advancedUsage=1),
         sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make piechart with labels along side and pointers"),
         sideLabelsOffset = AttrMapValue(isNumber, desc="The fraction of the pie width that the labels are situated at from the edges of the pie"),
+        labelClass=AttrMapValue(NoneOr(isCallable), desc="A class factory to use for non simple labels"),
         )
     other_threshold=None
 
@@ -619,7 +622,7 @@ class Pie(AbstractPieChart):
             style = self.slices[i%styleCount]
             if not style.label_visible or not style.visible: continue
             n += 1
-            l=_addWedgeLabel(self,sn,180,labelX,labelY,style,labelClass=WedgeLabel)
+            l=_addWedgeLabel(self,sn,180,labelX,labelY,style)
             L_add(l)
             b = l.getBounds()
             w = b[2]-b[0]

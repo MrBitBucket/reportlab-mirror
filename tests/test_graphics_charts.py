@@ -1108,6 +1108,30 @@ class ChartTestCase(unittest.TestCase):
             return drawing
         run_samples([(k,v,'axes') for k,v in locals().items() if k.lower().startswith('sample')])
 
+    @rlSkipIf(rlextraNeeded(),'rlextra needed')
+    def test_pie_ddf_labels(self):
+        from reportlab.graphics.charts.piecharts import Pie, WedgeLabel
+        from reportlab.platypus import Paragraph, XPreformatted
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, str2alignment
+        def samplePieDDFLabels():
+            d = Drawing(width=200,height=200)
+            pie = Pie()
+            d.add(pie)
+            pie.x = 30
+            pie.y = 30
+            pie.width = 130
+            pie.height = 130
+            ss = getSampleStyleSheet()
+            pie.labels = ('<u>a<sup><span color="red">2</span></sup></u><br/>2', 'b<sup><span color="red">2</span></sup>','c','d')
+            DWL = type('DWL',(WedgeLabel,),{})
+            dwlStyle = ss['Normal'].clone('DWL',fontSize=12,autoLeading='min')
+            pie.labelClass = lambda : DWL(ddfKlass=Paragraph,ddfStyle=dwlStyle)
+            #pie.labelClass = lambda : DWL(ddfKlass=XPreformatted)
+            pie.slices.label_textAnchor = 'middle'
+            pie.simpleLabels = 0
+            return d
+        run_samples([(k,v,'axes') for k,v in locals().items() if k.lower().startswith('sample')])
+
     def test_legends(self):
         from reportlab.graphics.charts.legends import Legend, LineLegend, LineSwatch
 

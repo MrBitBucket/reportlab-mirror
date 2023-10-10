@@ -11,10 +11,14 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  4.0.6   ??/??/2023
+CHANGES  4.0.6   10/10/2023
 ---------------------------
     * fix importlib usage in reportlab init, reported by Frank Epperlein and others
     * add value axes extraMinMaxValues as aid to parallel axes
+    * add styles str2alignment maps left/right/center/centre/justify etc
+    * fix validators.isSubclassOf
+    * test ddfStyle as instance first in textlabels.py
+    * allow Pie Doughnut classes to control label class
 
 CHANGES  4.0.5   12/07/2023
 ---------------------------

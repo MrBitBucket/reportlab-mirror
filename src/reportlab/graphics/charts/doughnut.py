@@ -15,7 +15,8 @@ from math import sin, cos, pi
 from reportlab.lib import colors
 from reportlab.lib.validators import isNumber, isListOfStringsOrNone, OneOf,\
                                     isBoolean, isNumberOrNone, isListOfNoneOrNumber,\
-                                    isListOfListOfNoneOrNumber, EitherOr
+                                    isListOfListOfNoneOrNumber, EitherOr, NoneOr, \
+                                    isCallable
 from reportlab.lib.attrmap import *
 from reportlab.graphics.shapes import Group, Drawing, Wedge
 from reportlab.graphics.widgetbase import TypedPropertyCollection
@@ -50,6 +51,7 @@ class Doughnut(AbstractPieChart):
         sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make chart with labels along side and pointers", advancedUsage=1),
         innerRadiusFraction = AttrMapValue(isNumberOrNone,
                 desc='None or the fraction of the radius to be used as the inner hole.\nIf not a suitable default will be used.'),
+        labelClass=AttrMapValue(NoneOr(isCallable), desc="A class factory to use for non simple labels"),
         )
 
     def __init__(self):
@@ -74,8 +76,8 @@ class Doughnut(AbstractPieChart):
         self.slices[4].fillColor = colors.pink
         self.slices[5].fillColor = colors.magenta
         self.slices[6].fillColor = colors.yellow
-        
-        
+
+
     def demo(self):
         d = Drawing(200, 100)
 
@@ -126,12 +128,12 @@ class Doughnut(AbstractPieChart):
             normData = self.normalizeData(data)
             n = len(normData)
             self._seriesCount = n
-        
+
         #labels
         checkLabelOverlap = self.checkLabelOverlap
         L = []
         L_add = L.append
-        
+
         labels = self.labels
         if labels is None:
             labels = []
@@ -167,7 +169,7 @@ class Doughnut(AbstractPieChart):
             whichWay = -1
 
         g  = Group()
-        
+
         startAngle = self.startAngle #% 360
         styleCount = len(self.slices)
         irf = self.innerRadiusFraction
@@ -371,11 +373,11 @@ class Doughnut(AbstractPieChart):
 
         if checkLabelOverlap and L:
             fixLabelOverlaps(L)
-        
+
         for l in L: g.add(l)
-        
+
         return g
-        
+
     def draw(self):
         g = Group()
         g.add(self.makeSectors())
