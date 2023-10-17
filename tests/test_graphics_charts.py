@@ -1109,8 +1109,10 @@ class ChartTestCase(unittest.TestCase):
         run_samples([(k,v,'axes') for k,v in locals().items() if k.lower().startswith('sample')])
 
     @rlSkipIf(rlextraNeeded(),'rlextra needed')
-    def test_pie_ddf_labels(self):
+    def test_ddf_labels(self):
         from reportlab.graphics.charts.piecharts import Pie, WedgeLabel
+        from reportlab.graphics.charts.doughnut import Doughnut
+        from reportlab.graphics.charts.spider import SpiderChart, SpokeLabel, StrandLabel
         from reportlab.platypus import Paragraph, XPreformatted
         from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle, str2alignment
         def samplePieDDFLabels():
@@ -1130,7 +1132,67 @@ class ChartTestCase(unittest.TestCase):
             pie.slices.label_textAnchor = 'middle'
             pie.simpleLabels = 0
             return d
-        run_samples([(k,v,'axes') for k,v in locals().items() if k.lower().startswith('sample')])
+
+        def sampleDoughnutDDFLabels():
+            d = Drawing(width=200,height=200)
+            dnut = Doughnut()
+            d.add(dnut)
+            dnut.x = 30
+            dnut.y = 30
+            dnut.width = 130
+            dnut.height = 130
+            ss = getSampleStyleSheet()
+            dnut.labels = ('<u>a<sup><span color="red">2</span></sup></u><br/>2', 'b<sup><span color="red">2</span></sup>','c','d')
+            DWL = type('DWL',(WedgeLabel,),{})
+            dwlStyle = ss['Normal'].clone('DWL',fontSize=12,autoLeading='min')
+            dnut.labelClass = lambda : DWL(ddfKlass=Paragraph,ddfStyle=dwlStyle)
+            #dnut.labelClass = lambda : DWL(ddfKlass=XPreformatted)
+            dnut.slices.label_textAnchor = 'middle'
+            dnut.simpleLabels = 0
+            return d
+
+        def sampleSpiderDDFLabels():
+            d = Drawing(width=200,height=200)
+            sp = SpiderChart()
+            d.add(sp)
+            sp.x = 30
+            sp.y = 30
+            sp.width = 130
+            sp.height = 130
+            ss = getSampleStyleSheet()
+            sp.data = [[10,12,14,16,14,12], [6,8,10,12,9,15],[7,8,17,4,12,8]]
+            SKL = type('SKL',(SpokeLabel,),{})
+            sklStyle = ss['Normal'].clone('SKL',fontSize=12,autoLeading='min')
+            sp.spokeLabelClass = lambda : SKL(ddfKlass=Paragraph,ddfStyle=sklStyle)
+            sp.spokeLabels.textAnchor='middle'
+            sp.spokes.labelRadius     = 1.15
+            #sp.spokeLabelClass = lambda : SKL(ddfKlass=XPreformatted)
+            sp.labels = ['<u>U<sup><span color="red">2</span></sup></u><br/>3','V<sup><span color="red">3</span></sup>','W','X','Y','Z']
+            sp.strands.strokeWidth = 1
+            SDL = type('SDL',(StrandLabel,),{})
+            sdlStyle = ss['Normal'].clone('SDL',fontSize=12,autoLeading='min')
+            sp.strandLabelClass = lambda : SDL(ddfKlass=Paragraph,ddfStyle=sdlStyle)
+            sp.strands[0].fillColor = colors.pink
+            sp.strands[1].fillColor = colors.lightblue
+            sp.strands[2].fillColor = colors.palegreen
+            sp.strands[0].strokeColor = colors.red
+            sp.strands[1].strokeColor = colors.blue
+            sp.strands[2].strokeColor = colors.green
+            sp.strands.symbol = "FilledDiamond"
+            sp.strands[1].symbol = makeMarker("Circle")
+            sp.strands[1].symbol.strokeWidth = 0.5
+            sp.strands[1].symbol.fillColor = colors.yellow
+            sp.strands.symbolSize = 6
+            sp.strandLabels[0,3]._text = 'special'
+            sp.strandLabels[0,1]._text = 'one'
+            sp.strandLabels[0,0]._text = 'zero'
+            sp.strandLabels[1,0]._text = 'Earth<sup>1</sup>'
+            sp.strandLabels[1,0].dR = -7
+            sp.strandLabels[2,2]._text = 'Mars'
+            sp.strandLabels.format = 'values'
+            sp.strandLabels.dR = -5
+            return d
+        run_samples([(k,v,'ddf') for k,v in locals().items() if k.lower().startswith('sample')])
 
     def test_legends(self):
         from reportlab.graphics.charts.legends import Legend, LineLegend, LineSwatch

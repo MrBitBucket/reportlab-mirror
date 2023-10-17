@@ -18,7 +18,7 @@ from reportlab.lib.validators import isNumber, isListOfNumbersOrNone,\
                                     isColorOrNone, isListOfStringsOrNone, OneOf,\
                                     isBoolean, isNumberOrNone,\
                                     isStringOrNone, isStringOrNone, EitherOr,\
-                                    isCallable
+                                    isCallable, NoneOr
 from reportlab.lib.attrmap import *
 from reportlab.graphics.shapes import Group, Drawing, Line, Rect, Polygon, PolyLine, \
     STATE_DEFAULTS
@@ -122,7 +122,9 @@ class SpiderChart(PlotArea):
         strands = AttrMapValue(None, desc="collection of strand descriptor objects"),
         spokes = AttrMapValue(None, desc="collection of spoke descriptor objects"),
         strandLabels = AttrMapValue(None, desc="collection of strand label descriptor objects"),
+        strandLabelClass=AttrMapValue(NoneOr(isCallable), desc="A class factory to use for the strand labels"),
         spokeLabels = AttrMapValue(None, desc="collection of spoke label descriptor objects"),
+        spokeLabelClass=AttrMapValue(NoneOr(isCallable), desc="A class factory to use for the spoke labels"),
         )
 
     def makeSwatchSample(self, rowNo, x, y, width, height):
@@ -191,7 +193,7 @@ class SpiderChart(PlotArea):
         self._norm = norm
         return [[e/norm for e in row] for row in data]
 
-    def _innerDrawLabel(self, sty, radius, cx, cy, angle, car, sar, labelClass=StrandLabel):
+    def _innerDrawLabel(self, sty, radius, cx, cy, angle, car, sar, labelClass=None):
         "Draw a label for a given item in the list."
         fmt = sty.format
         value = radius*self._norm
@@ -216,6 +218,12 @@ class SpiderChart(PlotArea):
         else:
             L = None
         return L
+
+    def labelClass(self,kind):
+        klass = getattr(self,f'{kind}LabelClass',None)
+        if not klass:
+            klass = globals()[f'{kind.capitalize()}Label']
+        return klass
 
     def draw(self):
         # normalize slice data
@@ -266,7 +274,7 @@ class SpiderChart(PlotArea):
             text = sli._text
             if not text: text = labels[i]
             if text:
-                S.append(_setupLabel(WedgeLabel, text, si.labelRadius, cx, cy, angle, car, sar, sli))
+                S.append(_setupLabel(self.labelClass('spoke'), text, si.labelRadius, cx, cy, angle, car, sar, sli))
             angle += angleBetween
 
         # now plot the polygons
@@ -286,7 +294,7 @@ class SpiderChart(PlotArea):
                 r = row[i]
                 points.append(cx+car*r)
                 points.append(cy+sar*r)
-                L = self._innerDrawLabel(strandLabels[(rowIdx,i)], r, cx, cy, angle, car, sar, labelClass=StrandLabel)
+                L = self._innerDrawLabel(strandLabels[(rowIdx,i)], r, cx, cy, angle, car, sar, labelClass=self.labelClass('strand'))
                 if L: labs.append(L)
                 sty = strands[(rowIdx,i)]
                 uSymbol = sty.symbol
