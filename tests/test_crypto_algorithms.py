@@ -125,10 +125,8 @@ class EyeballTestCase(unittest.TestCase):
                             if VERBOSE: print('saved %s' % filepath)
         
 def makeSuite():
-    return unittest.TestSuite((
-        unittest.makeSuite(EncryptionAlgorithmTestCase,'check'),
-        unittest.makeSuite(EyeballTestCase,'check'),
-        ))
+    return  makeSuiteForClasses(EncryptionAlgorithmTestCase, EyeballTestCase, testMethodPrefix="check")
+        
         
 if __name__=='__main__':
     unittest.TextTestRunner().run(makeSuite())

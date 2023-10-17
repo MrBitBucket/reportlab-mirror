@@ -115,11 +115,13 @@ def printLocation(depth=1):
         if outDir!=_OUTDIR:
             print('Logs and output files written to folder "%s"' % outDir)
 
-def makeSuiteForClasses(*classes):
+def makeSuiteForClasses(*classes,testMethodPrefix=None):
     "Return a test suite with tests loaded from provided classes."
 
     suite = unittest.TestSuite()
     loader = unittest.TestLoader()
+    if testMethodPrefix:
+        loader.testMethodPrefix = testMethodPrefix
     for C in classes:
         suite.addTest(loader.loadTestsFromTestCase(C))
     return suite
