@@ -252,7 +252,7 @@ def __makeTextPathsCode__(tp=None, _TP = ('freetype','_renderPM')):
             return dict(text2PathDescription=text2PathDescription,processGlyph=processGlyph,setFont=setFont)
     else:
         def _(*args,**kwds):
-            raise RuntimeError(f'''This installation of reportLab has neither RLPYCAIRO or RLRENDERPM extras installed.
+            raise RuntimeError(f'''This installation of reportLab has neither PYCAIRO or RENDERPM extras installed.
 It cannot create paths from text.
 Could not create text2PathDescription for using backends from {TP!a}''')
         return dict(processGlyph=_,setFont=_,FTTextPath=_,text2PathDescription=_)
