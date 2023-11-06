@@ -1130,6 +1130,7 @@ class ChartTestCase(unittest.TestCase):
             pie.labelClass = lambda : DWL(ddfKlass=Paragraph,ddfStyle=dwlStyle)
             #pie.labelClass = lambda : DWL(ddfKlass=XPreformatted)
             pie.slices.label_textAnchor = 'middle'
+            pie.slices.fontName = fontName
             pie.simpleLabels = 0
             return d
 
@@ -1148,6 +1149,7 @@ class ChartTestCase(unittest.TestCase):
             dnut.labelClass = lambda : DWL(ddfKlass=Paragraph,ddfStyle=dwlStyle)
             #dnut.labelClass = lambda : DWL(ddfKlass=XPreformatted)
             dnut.slices.label_textAnchor = 'middle'
+            dnut.slices.fontName = fontName
             dnut.simpleLabels = 0
             return d
 
@@ -1165,6 +1167,7 @@ class ChartTestCase(unittest.TestCase):
             sklStyle = ss['Normal'].clone('SKL',fontSize=12,autoLeading='min')
             sp.spokeLabelClass = lambda : SKL(ddfKlass=Paragraph,ddfStyle=sklStyle)
             sp.spokeLabels.textAnchor='middle'
+            sp.spokeLabels.fontName = fontName
             sp.spokes.labelRadius     = 1.15
             #sp.spokeLabelClass = lambda : SKL(ddfKlass=XPreformatted)
             sp.labels = ['<u>U<sup><span color="red">2</span></sup></u><br/>3','V<sup><span color="red">3</span></sup>','W','X','Y','Z']
@@ -1183,6 +1186,7 @@ class ChartTestCase(unittest.TestCase):
             sp.strands[1].symbol.strokeWidth = 0.5
             sp.strands[1].symbol.fillColor = colors.yellow
             sp.strands.symbolSize = 6
+            sp.strandLabels.fontName = fontName
             sp.strandLabels[0,3]._text = 'special'
             sp.strandLabels[0,1]._text = 'one'
             sp.strandLabels[0,0]._text = 'zero'

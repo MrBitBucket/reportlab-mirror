@@ -435,6 +435,7 @@ class BarChart(PlotArea):
         # 'Baseline' correction...
         vA = self.valueAxis
         vScale = vA.scale
+        vARD = vA.reverseDirection
         vm, vM = vA._valueMin, vA._valueMax
         if vm <= 0 <= vM:
             baseLine = vScale(0)
@@ -476,12 +477,12 @@ class BarChart(PlotArea):
                 if style not in ('parallel','parallel_3d') and not isLine:
                     if datum<=-1e-6:
                         y = vScale(accumNeg[accx])
-                        if y>baseLine: y = baseLine
+                        if (y<baseLine if vARD else y>baseLine): y = baseLine
                         accumNeg[accx] += datum
                         datum = accumNeg[accx]
                     else:
                         y = vScale(accumPos[accx])
-                        if y<baseLine: y = baseLine
+                        if (y>baseLine if vARD else y<baseLine): y = baseLine
                         accumPos[accx] += datum
                         datum = accumPos[accx]
                 else:
@@ -1039,7 +1040,7 @@ class BarChart3D(BarChart):
         fg_value = fg.value()
         cAStyle = self.categoryAxis.style
         if cAStyle=='stacked':
-            fg_value=fg_value.reverse()
+            fg_value.reverse()
         elif cAStyle=='mixed':
             fg_value = [_[1] for _ in sorted((((t[1],t[2],t[3],t[4]),t) for t in fg_value))]
 

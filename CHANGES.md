@@ -11,10 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  4.0.7   ??/??/2023
+CHANGES  4.0.7   06/11/2023
 ---------------------------
     * allow testutils.makeSuiteForClasses to specify a prefix for test method names
     * SpiderChart can have direct draw flowable labels
+    * fix and improve tests for python -mreportlab.lib.rl_accel
+    * fix barchart 3D stacked case & fix barchart valueAxis reverseDirection behaviour.
 
 CHANGES  4.0.6   10/10/2023
 ---------------------------
