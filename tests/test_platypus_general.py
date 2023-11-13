@@ -749,6 +749,14 @@ This should be a mailto link <a href="mailto:reportlab-users@lists2.reportlab.co
         second()
         doc.build(story)
 
+    def test4(Self):
+        '''existence test for reportlab/platypus/para.py
+        contributed by Matt Folwell mjf at pearson co uk'''
+        from reportlab.platypus.para import Paragraph
+        from reportlab.lib.styles import ParagraphStyle
+        style = ParagraphStyle("trivial")
+        Paragraph("&amp;", style)
+
 def makeSuite():
     return makeSuiteForClasses(PlatypusTestCase)
 
