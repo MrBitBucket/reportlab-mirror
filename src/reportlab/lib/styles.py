@@ -17,7 +17,7 @@ development, with a few basic heading and text styles.
 __all__=(
         'PropertySet',
         'ParagraphStyle',
-        'str2alignment'
+        'str2alignment',
         'LineStyle',
         'ListStyle',
         'StyleSheet1',
