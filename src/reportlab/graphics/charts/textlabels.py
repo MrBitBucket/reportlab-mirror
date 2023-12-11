@@ -105,8 +105,8 @@ class Label(Widget):
                 visible = 1,
                 useAscentDescent = False,
                 ddf = DirectDrawFlowable,
-                ddfKlass = None,
-                ddfStyle = None,
+                ddfKlass = getattr(self.__class__,'ddfKlass',None),
+                ddfStyle = getattr(self.__class__,'ddfStyle',None),
                 )
 
     def setText(self, text):
