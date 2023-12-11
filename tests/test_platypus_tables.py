@@ -1135,6 +1135,32 @@ class TablesTestCase(unittest.TestCase):
         assert(T[0]._cornerRadii==[0,3,0,0])
         assert(T[1]._cornerRadii==[0,3,5,0])
 
+    def test6(self):
+        '''test a very long url bug contributed by manuel dot koch at shinefour de''' 
+        styleSheet = getSampleStyleSheet()
+        bodyText = styleSheet['BodyText']
+        table = Table(
+                [
+                    [
+                    Paragraph("Test Text", style=bodyText),
+                    Paragraph(
+                        "Test Text averyveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryveryvveryveryverylongword",
+                        style=bodyText),
+                    Paragraph(
+                        "Label: This is text with a long URI https://www.foo.com/hello/world/this/is/a/very/long/website/path/11111/222222/?abc=123&def=756&ghj=888",
+                        style=bodyText),
+                    ""
+                    ]
+                ],
+                colWidths=[
+                    "*",
+                    113,
+                    ],
+            )
+        w, h = table.wrap(544,745)
+        expectedWidth = 544
+        self.assertEqual(w,expectedWidth,"long paragraph as not been wrapped as expected")
+
 def makeSuite():
     return makeSuiteForClasses(TablesTestCase)
 

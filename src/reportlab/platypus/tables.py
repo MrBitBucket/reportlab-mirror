@@ -790,7 +790,7 @@ class Table(Flowable):
         and assign some best-guess values."""
 
         W = list(self._argW) # _calc_pc(self._argW,availWidth)
-        #verbose = 1
+        #_debug = getattr(self,'_debug',0)
         totalDefined = 0.0
         percentDefined = 0
         percentTotal = 0
@@ -808,7 +808,7 @@ class Table(Flowable):
             else:
                 assert isinstance(w,(int,float))
                 totalDefined = totalDefined + w
-        #if verbose: print('prelim width calculation.  %d columns, %d undefined width, %0.2f units remain' % (self._ncols, numberUndefined, availWidth - totalDefined))
+        #if _debug: print('prelim width calculation.  %d columns, %d undefined width, %0.2f units remain' % (self._ncols, numberUndefined, availWidth - totalDefined))
 
         #check columnwise in each None column to see if they are sizable.
         given = []
@@ -827,7 +827,7 @@ class Table(Flowable):
                     style = self._cellStyles[rowNo][colNo]
                     new = elementWidth(value,style) or 0
                     new += style.leftPadding+style.rightPadding
-                    #if verbose: print('[%d,%d] new=%r-->%r' % (rowNo,colNo,new - style.leftPadding+style.rightPadding, new))
+                    #if _debug: print('[%d,%d] new=%r-->%r' % (rowNo,colNo,new - style.leftPadding+style.rightPadding, new))
                     final = max(final, new)
                     siz = siz and self._canGetWidth(value) # irrelevant now?
                 if siz:
@@ -840,10 +840,10 @@ class Table(Flowable):
                 given.append(colNo)
         if len(given) == self._ncols:
             return
-        #if verbose: print('predefined width:   ',given)
-        #if verbose: print('uncomputable width: ',unsizeable)
-        #if verbose: print('computable width:   ',sizeable)
-        #if verbose: print('minimums=%r' % (list(sorted(list(minimums.items()))),))
+        #if _debug: print('predefined width: ',given)
+        #if _debug: print('uncomputable width: ',unsizeable)
+        #if _debug: print('computable width: ',sizeable)
+        #if _debug: print('minimums=%r' % (list(sorted(list(minimums.items()))),))
 
         # how much width is left:
         remaining = availWidth - (totalMinimum + totalDefined)
@@ -925,9 +925,38 @@ class Table(Flowable):
                     assert adjusted >= minimum
                     W[colNo] = adjusted
         else:
+            if percentTotal>0:
+                #transfer percentages to the defined cols
+                d = []
+                for colNo, w in minimums.items():
+                    if w.endswith('%'):
+                        W[colNo] = w = availWidth*float(w[:-1])/percentTotal
+                        totalDefined += w
+                        d.append(colNo)
+                for colNo in d:
+                    del minimums[colNo]
+                del d
+                totalMinimum = sum(minimums.values())
+                remaining = availWidth - (totalDefined + totalMinimum)
+            #if _debug: print(f'0:remaining={remaining} totalDefined={totalDefined}')
+            #if _debug: print(f'0:minimums={minimums}')
+            if remaining<0 and totalDefined*rl_config.defCWRF+remaining>=0:
+                adj = -remaining/totalDefined
+                for colNo, w in enumerate(W):
+                    if colNo not in minimums:
+                        dw = adj*w
+                        W[colNo] -= dw
+                        totalDefined -= dw
+                remaining = availWidth - (totalDefined + totalMinimum)
+                #if _debug: print(f'1:remaining={remaining} totalDefined={totalDefined}')
+                #if _debug: print(f'1:minimums={minimums}')
+                adj = 1
+            else:
+                remaining = availWidth - totalDefined
+                adj = 1 if remaining<=0 else remaining/totalMinimum
             for colNo, minimum in minimums.items():
-                W[colNo] = minimum
-        #if verbose: print('new widths are:', W)
+                W[colNo] = minimum * adj
+        #if _debug: print(f'new widths are: {W} sum={sum(W)} availWidth={availWidth}')
         self._argW = self._colWidths = W
         return W
 
