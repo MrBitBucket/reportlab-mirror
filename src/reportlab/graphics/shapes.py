@@ -558,12 +558,8 @@ def _renderGroupPy(G,pfx,I,i=0,indent='\t\t'):
 
 def _extraKW(self,pfx,**kw):
     kw.update(self.__dict__)
-    R = {}
     n = len(pfx)
-    for k in kw.keys():
-        if k.startswith(pfx):
-            R[k[n:]] = kw[k]
-    return R
+    return {k[n:]:v for k,v in kw.items() if k.startswith(pfx)}
 
 class Drawing(Group, Flowable):
     """Outermost container; the thing a renderer works on.
