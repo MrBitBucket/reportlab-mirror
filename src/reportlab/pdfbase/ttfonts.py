@@ -711,8 +711,8 @@ class TTFontFile(TTFontParser):
             lang = self.read_ushort()
         if fmt==0:
             T = [self.read_uint8() for i in range(length-6)]
-            for unichar in range(min(256,self.numGlyphs,len(table))):
-                glyph = T[glyph]
+            for unichar in range(min(256,self.numGlyphs,len(T))):
+                glyph = T[unichar]
                 charToGlyph[unichar] = glyph
                 glyphToChar.setdefault(glyph,[]).append(unichar)
         elif fmt==4:
@@ -953,7 +953,8 @@ class TTFontFile(TTFontParser):
         n = len(hmtx)-2
         while n and hmtx[n]==hmtx[n-2]:
             n -= 2
-        if not n: n = 2                 #need at least one pair
+        #fails when hmtx[n]!=hmtx[n-2] if there's a run it starts at n+2
+        n += 2
         numberOfHMetrics = n>>1         #number of full H Metric pairs
         hmtx = hmtx[:n] + hmtx[n+1::2]  #full pairs + all the trailing lsb's
 
@@ -1100,6 +1101,7 @@ class TTFontFace(TTFontFile, pdfmetrics.TypeFace):
             'ItalicAngle': self.italicAngle,
             'StemV': self.stemV,
             'FontFile2': fontFileRef,
+            'MissingWidth': self.defaultWidth,
             })
         return doc.Reference(fontDescriptor, 'fontDescriptor:' + fontname)
 
@@ -1132,12 +1134,13 @@ class TTFont:
     class State:
         namePrefix = 'F'
         def __init__(self,asciiReadable=None,ttf=None):
-            A = self.assignments = {}
+            A = self.assignments = {}   #maps unicode to subset and index
             self.nextCode = 0
             self.internalName = None
             self.frozen = 0
-            if getattr(getattr(ttf,'face',None),'_full_font',None):
-                C = set(self.charToGlyph.keys())
+            face = getattr(ttf,'face',None)
+            if getattr(face,'_full_font',None):
+                C = set(face.charToGlyph.keys())
                 if 0xa0 in C: C.remove(0xa0)
                 for n in range(256):
                     if n in C:
@@ -1156,13 +1159,17 @@ class TTFont:
                 # Let's add the first 128 unicodes to the 0th subset, so ' '
                 # always has code 32 (for word spacing to work) and the ASCII
                 # output is readable
+                #simple asciiReadable setup
                 subset0 = list(range(128))
-                self.subsets = [subset0]
                 for n in subset0:
                     A[n] = n
+                self.subsets = [subset0]
+                #self.nextCode = 1  #if doing fillin of [1-31]
                 self.nextCode = 128
             else:
-                self.subsets = [[32]*33]
+                self.subsets = [[0]+[32]*32]
+                A[0] = 0
+                self.nextCode = 1
                 A[32] = 32
 
     _multiByte = 1      # We want our own stringwidth
@@ -1206,6 +1213,7 @@ class TTFont:
         asciiReadable = self._asciiReadable
         try: state = self.state[doc]
         except KeyError: state = self.state[doc] = TTFont.State(asciiReadable,self)
+        #_31skip = 31 if asciiReadable and state.nextCode<32 else -256
         curSet = -1
         cur = []
         results = []
@@ -1213,7 +1221,7 @@ class TTFont:
             text = text.decode('utf-8')     # encoding defaults to utf-8
         assignments = state.assignments
         subsets = state.subsets
-        reserveTTFNotdef = rl_config.reserveTTFNotdef
+        #reserveTTFNotdef = rl_config.reserveTTFNotdef we ignore this now
         for code in map(ord,text):
             if code==0xa0: code = 32    #map nbsp into space
             if code in assignments:
@@ -1229,14 +1237,15 @@ class TTFont:
                     n = state.nextCode
                 if n>32:
                     if not(n&0xFF):
-                        if reserveTTFNotdef:
-                            subsets.append([0]) #force code 0 in as notdef
-                            state.nextCode += 1
-                            n = state.nextCode
-                        else:
-                            subsets.append([])
+                        subsets.append([0]) #force code 0 in as notdef
+                        state.nextCode += 1
+                        n = state.nextCode
                     subsets[n >> 8].append(code)
                 else:
+                    #if n==_31skip:
+                    #   #we heve filled in first part of subsets[0] skip past subset[32:127]
+                    #   #this code will be executed once if asciiReadable
+                    #   state.nextCode = 127
                     subsets[0][n] = code
                 state.nextCode += 1
                 assignments[code] = n

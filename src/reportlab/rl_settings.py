@@ -151,8 +151,9 @@ uriWasteReduce=0                                    #split URI if we would waste
                                                     #is attempted. suggested value = 0.3
 embeddedHyphenation=0                               #if true attempt hypenation of words with embedded hyphens
 hyphenationMinWordLength=5                          #minimum length of words that can be hyphenated
-reserveTTFNotdef=0                                  #if true force subset element 0 to be zero(.notdef)
-                                                    #helps to fix bug in edge
+reserveTTFNotdef=1                                  #if true force subset element 0 to be zero(.notdef)
+                                                    #helps to fix bug in edge; this is now ignored in code
+                                                    #PDFUA forbids index 0(.notdef) in strings
 documentLang=None                                   #pdf document catalog Lang value xx-xx not ee_xx
 encryptionStrength=40                               #the bits for standard encryption 40, 128 or 256 (AES)
 trustedHosts=None                                   #set to a list of trusted for access hosts None means
