@@ -12,8 +12,7 @@ def getFurl(fn):
 
 def run():
     from reportlab.platypus import  BaseDocTemplate, PageTemplate, Image, Frame, PageTemplate, \
-                                    ShowBoundaryValue, SimpleDocTemplate, FrameBG, Paragraph, \
-                                    FrameBreak
+                                    SimpleDocTemplate, FrameBG, Paragraph, FrameBreak
     from reportlab.lib.colors import toColor
     from reportlab.lib.utils import _RL_DIR, rl_isfile, open_for_read, fileName2FSEnc, asNative
     from reportlab.lib.styles import getSampleStyleSheet

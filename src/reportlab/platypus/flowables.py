@@ -30,7 +30,7 @@ from reportlab.lib.colors import gray, lightgrey
 from reportlab.lib.rl_accel import fp_str
 from reportlab.lib.enums import TA_LEFT, TA_CENTER, TA_RIGHT
 from reportlab.lib.styles import _baseFontName
-from reportlab.lib.utils import strTypes, rl_safe_exec
+from reportlab.lib.utils import strTypes, rl_safe_exec, annotateException
 from reportlab.lib.abag import ABag
 from reportlab.pdfbase import pdfutils
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -691,10 +691,8 @@ class KeepTogether(_ContainerSpace,Flowable):
             #cache these on the class
             from reportlab.platypus.doctemplate import NullActionFlowable
             from reportlab.platypus.doctemplate import FrameBreak
-            from reportlab.lib.utils import annotateException
             KeepTogether.NullActionFlowable = NullActionFlowable
             KeepTogether.FrameBreak = FrameBreak
-            self.annotateException = annotateException
 
         if not flowables:
             flowables = [self.NullActionFlowable()]
@@ -713,7 +711,7 @@ class KeepTogether(_ContainerSpace,Flowable):
         try:
             W,H = _listWrapOn(self._content,aW,self.canv,dims=dims)
         except:
-            self.annotateException('\nraised by class %s(%s)@0x%8.8x wrap\n' % (self.__class__.__name__,self.__class__.__module__,id(self)))
+            annotateException('\nraised by class %s(%s)@0x%8.8x wrap\n' % (self.__class__.__name__,self.__class__.__module__,id(self)))
         self._H = H
         self._H0 = dims and dims[0][1] or 0
         self._wrapInfo = aW,aH

@@ -6,7 +6,10 @@ The Canvas object is the primary interface for creating PDF files. See
 doc/reportlab-userguide.pdf for copious examples.
 """
 
-__all__ = ['Canvas']
+__all__ = [
+        'Canvas',
+        'ShowBoundaryValue',
+        ]
 ENABLE_TRACKING = 1 # turn this off to do profile testing w/o tracking
 
 import re
@@ -208,6 +211,15 @@ def _gradientExtendStr(extend):
             raise ValueError('wrong length for extend argument' % extend)
         return "[%s %s]" % ['true' if _ else 'false' for _ in extend]
     return "[true true]" if extend else "[false false]"
+
+class ShowBoundaryValue:
+    def __init__(self,color=(0,0,0),width=0.1,dashArray=None):
+        self.color = color
+        self.width = width
+        self.dashArray = dashArray
+
+    def __bool__(self):
+        return self.color is not None and self.width>=0
 
 class Canvas(_PDFColorSetter):
     """This class is the programmer's interface to the PDF file format.  Methods
@@ -1977,12 +1989,27 @@ class Canvas(_PDFColorSetter):
             self._doc._catalog.AcroForm = self.AcroForm = AcroForm(self)
             return self.AcroForm
 
-    @property
-    def drawBoundary(self):
-        if not hasattr(self,'_drawBoundary'):
-            from reportlab.platypus import Frame
-            self._drawBoundary = lambda sb,x,y,w,h: Frame._drawBoundary(self,sb,x,y,w,h)
-        return self._drawBoundary
+    def drawBoundary(self,sb,x1,y1,width,height):
+        "draw a boundary as a rectangle (primarily for debugging)."
+        ss = isinstance(sb,(str,tuple,list)) or isinstance(sb,Color)
+        w = -1
+        da = None
+        if ss:
+            c = toColor(sb,-1)
+            ss = c != -1
+        elif isinstance(sb,ShowBoundaryValue) and sb:
+            c = toColor(sb.color,-1)
+            ss = c != -1
+            if ss:
+                w = sb.width
+                da = sb.dashArray
+        if ss:
+            self.saveState()
+            self.setStrokeColor(c)
+            if w>=0: self.setLineWidth(w)
+            if da: self.setDash(da)
+        self.rect(x1,y1,width,height)
+        if ss: self.restoreState()
 
 if __name__ == '__main__':
     print('For test scripts, look in tests')

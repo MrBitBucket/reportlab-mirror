@@ -24,8 +24,8 @@ from reportlab.platypus.doctemplate \
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.paragraph import *
 from reportlab.platypus.paragraph import _getFragWords
-from reportlab.platypus import FrameBG, FrameSplitter, Frame, Spacer, ShowBoundaryValue
-
+from reportlab.platypus import FrameBG, FrameSplitter, Frame, Spacer
+from reportlab.pdfgen.canvas  import ShowBoundaryValue
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."

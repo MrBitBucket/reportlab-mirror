@@ -34,7 +34,7 @@ def _simple_subset_generation(fn,npages,alter=0,fonts=('Vera','VeraBI')):
             c.setFont(fontName, 10)
             for i in range(32):
                 for j in range(32):
-                    ch = utf8(i * 32 + j+p*alter)
+                    ch = chr(i * 32 + j+p*alter)
                     c.drawString(80 + j * 13 + int(j / 16.0) * 4, 600 - i * 13 - int(i / 8.0) * 8, ch)
         c.showPage()
     c.save()
@@ -306,21 +306,34 @@ class TTFontTestCase(NearTestCase):
     def testSplitString(self):
         "Tests TTFont.splitString"
         doc = PDFDocument()
-        font = TTFont("Vera", "Vera.ttf")
-        text = b"".join(utf8(i) for i in range(511))
-        allchars = b"".join(int2Byte(i) for i in range(256))
+        font = TTFont("Vera", "Vera.ttf", asciiReadable=True)
+        T = list(range(256))
+        for c in sorted(font.face.charToGlyph):
+            if c not in T: T.append(c)
+        text = "".join(map(chr,T))
         #we ignore rserveTTFNotDef by assuming it's always True
         #PDFUA forbids index 0(.notdef) in strings
-        chunks = [(0, allchars[:0xa0]+b' '+allchars[0xa0:])] + [
-                (1, allchars[1:32] + allchars[33:])]# if rl_config.reserveTTFNotdef else
-                #(1, allchars[:32] + allchars[33:-1])]
+        chunks = [(0,
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 !"#$%&\''
+            b'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmno'
+            b'pqrstuvwxyz{|}~\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00'
+            b'\x00\x00\x00\x00 \x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f'
+            b'\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f'
+            b'\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f'
+            b'\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f'
+            b'\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf'
+            b'\xb0\xb1\xb2\xb3\xb4\xb5\xb6\xb7\xb8\xb9\xba\xbb\xbc\xbd\xbe\xbf'
+            b'\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xc7\xc8\xc9\xca\xcb\xcc\xcd\xce\xcf'
+            b'\xd0\xd1\xd2\xd3\xd4\xd5\xd6\xd7\xd8\xd9\xda\xdb\xdc\xdd\xde\xdf'
+            b'\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef'
+            b'\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff'),
+         (1,
+            b'\x01\x02\x03\x04\x05\x06\x07\x08\t\n\x0b\x0c\r\x0e\x0f\x10\x11\x12\x13\x14'
+            b'\x15\x16\x17\x18\x19\x1a\x1b\x1c')]
         self.assertEqual(font.splitString(text, doc), chunks)
         # Do it twice
-        self.assertEqual(font.splitString(text, doc), chunks)
-
-        text = b"".join(utf8(i) for i in range(510, -1, -1))
-        revver = lambda b: map(int2Byte,reversed(b))
-        chunks = [(i[0],b"".join(revver(i[1]))) for i in reversed(chunks)]
         self.assertEqual(font.splitString(text, doc), chunks)
 
     def testSplitStringSpaces(self):
@@ -335,7 +348,6 @@ class TTFontTestCase(NearTestCase):
         state = font.state[doc]
         self.assertEqual(state.assignments[32], 32)
         self.assertEqual(state.subsets[0][32], 32)
-        self.assertEqual(state.subsets[1][32], 32)
 
     def testSubsetInternalName(self):
         "Tests TTFont.getSubsetInternalName"
@@ -347,8 +359,6 @@ class TTFontTestCase(NearTestCase):
         self.assertRaises(IndexError, font.getSubsetInternalName, -1, doc)
         self.assertRaises(IndexError, font.getSubsetInternalName, 3, doc)
         self.assertEqual(font.getSubsetInternalName(0, doc), "/F1+0")
-        self.assertEqual(font.getSubsetInternalName(1, doc), "/F1+1")
-        self.assertEqual(font.getSubsetInternalName(2, doc), "/F1+2")
         self.assertEqual(doc.delayedFonts, [font])
 
     def testAddObjectsEmpty(self):
@@ -373,46 +383,39 @@ class TTFontTestCase(NearTestCase):
 
     def testParallelConstruction(self):
         "Test that TTFont can be used for different documents at the same time"
-        ttfAsciiReadable = rl_config.ttfAsciiReadable
-        try:
-            rl_config.ttfAsciiReadable = 1
-            doc1 = PDFDocument()
-            doc2 = PDFDocument()
-            font = TTFont("Vera", "Vera.ttf")
-            self.assertEqual(font.splitString('hello ', doc1), [(0, b'hello ')])
-            self.assertEqual(font.splitString('hello ', doc2), [(0, b'hello ')])
-            self.assertEqual(font.splitString(u'\u0410\u0411'.encode('UTF-8'), doc1), [(0, b'\x80\x81')])
-            self.assertEqual(font.splitString(u'\u0412'.encode('UTF-8'), doc2), [(0, b'\x80')])
-            font.addObjects(doc1)
-            self.assertEqual(font.splitString(u'\u0413'.encode('UTF-8'), doc2), [(0, b'\x81')])
-            font.addObjects(doc2)
-        finally:
-            rl_config.ttfAsciiReadable = ttfAsciiReadable
+        doc1 = PDFDocument()
+        doc2 = PDFDocument()
+        font = TTFont("Vera", "Vera.ttf", asciiReadable=1)
+        self.assertEqual(font.splitString('hello ', doc1), [(0, b'hello ')])
+        self.assertEqual(font.splitString('hello ', doc2), [(0, b'hello ')])
+        self.assertEqual(font.splitString('\xae\xab', doc1), [(0, b'\x01\x02')])
+        self.assertEqual(font.splitString('\xab\xae', doc2), [(0, b'\x01\x02')])
+        self.assertEqual(font.splitString('\xab\xae', doc1), [(0, b'\x02\x01')])
+        self.assertEqual(font.splitString('\xae\xab', doc2), [(0, b'\x02\x01')])
+        font.addObjects(doc1)
+        #after addObjects doc1 state is no longer valid, doc2 should be OK
+        self.assertEqual(font.splitString('\xae\xab', doc2), [(0, b'\x02\x01')])
+        font.addObjects(doc2)
 
     def testAddObjects(self):
         "Test TTFont.addObjects"
         # Actually generate some subsets
-        ttfAsciiReadable = rl_config.ttfAsciiReadable
-        try:
-            rl_config.ttfAsciiReadable = 1
-            doc = PDFDocument()
-            font = TTFont("Vera", "Vera.ttf")
-            font.splitString('a', doc)            # create some subset
-            internalName = font.getSubsetInternalName(0, doc)[1:]
-            font.addObjects(doc)
-            pdfFont = doc.idToObject[internalName]
-            self.assertEqual(doc.idToObject['BasicFonts'].dict[internalName], pdfFont)
-            self.assertEqual(pdfFont.Name, internalName)
-            self.assertEqual(pdfFont.BaseFont, "AAAAAA+BitstreamVeraSans-Roman")
-            self.assertEqual(pdfFont.FirstChar, 0)
-            self.assertEqual(pdfFont.LastChar, 127)
-            self.assertEqual(len(pdfFont.Widths.sequence), 128)
-            toUnicode = doc.idToObject[pdfFont.ToUnicode.name]
-            self.assertTrue(toUnicode.content != "")
-            fontDescriptor = doc.idToObject[pdfFont.FontDescriptor.name]
-            self.assertEqual(fontDescriptor.dict['Type'], '/FontDescriptor')
-        finally:
-            rl_config.ttfAsciiReadable = ttfAsciiReadable
+        doc = PDFDocument()
+        font = TTFont("Vera", "Vera.ttf", asciiReadable=1)
+        font.splitString('a', doc)            # create some subset
+        internalName = font.getSubsetInternalName(0, doc)[1:]
+        font.addObjects(doc)
+        pdfFont = doc.idToObject[internalName]
+        self.assertEqual(doc.idToObject['BasicFonts'].dict[internalName], pdfFont)
+        self.assertEqual(pdfFont.Name, internalName)
+        self.assertEqual(pdfFont.BaseFont, "AAAAAA+BitstreamVeraSans-Roman")
+        self.assertEqual(pdfFont.FirstChar, 0)
+        self.assertEqual(pdfFont.LastChar, 127)
+        self.assertEqual(len(pdfFont.Widths.sequence), 128)
+        toUnicode = doc.idToObject[pdfFont.ToUnicode.name]
+        self.assertTrue(toUnicode.content != "")
+        fontDescriptor = doc.idToObject[pdfFont.FontDescriptor.name]
+        self.assertEqual(fontDescriptor.dict['Type'], '/FontDescriptor')
 
     def testMakeToUnicodeCMap(self):
         "Test makeToUnicodeCMap"

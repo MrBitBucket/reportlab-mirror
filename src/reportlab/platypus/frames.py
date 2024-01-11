@@ -8,7 +8,6 @@ __doc__="""A frame is a container for content on a page.
 """
 
 __all__ = (
-            'ShowBoundaryValue',
             'Frame',
             )
 
@@ -18,16 +17,6 @@ logger = logging.getLogger('reportlab.platypus')
 _geomAttr=('x1', 'y1', 'width', 'height', 'leftPadding', 'bottomPadding', 'rightPadding', 'topPadding')
 from reportlab import rl_config
 _FUZZ=rl_config._FUZZ
-
-class ShowBoundaryValue:
-    def __init__(self,color=(0,0,0),width=0.1,dashArray=None):
-        self.color = color
-        self.width = width
-        self.dashArray = dashArray
-
-    def __bool__(self):
-        return self.color is not None and self.width>=0
-
 
 class Frame:
     '''
@@ -251,33 +240,8 @@ class Frame:
                     delattr(flowable,a)
         return r
 
-
-    @staticmethod
-    def _drawBoundary(canv,sb,x1,y1,width,height):
-        "draw the frame boundary as a rectangle (primarily for debugging)."
-        from reportlab.lib.colors import Color, toColor
-        ss = isinstance(sb,(str,tuple,list)) or isinstance(sb,Color)
-        w = -1
-        da = None
-        if ss:
-            c = toColor(sb,-1)
-            ss = c != -1
-        elif isinstance(sb,ShowBoundaryValue) and sb:
-            c = toColor(sb.color,-1)
-            ss = c != -1
-            if ss:
-                w = sb.width
-                da = sb.dashArray
-        if ss:
-            canv.saveState()
-            canv.setStrokeColor(c)
-            if w>=0: canv.setLineWidth(w)
-            if da: canv.setDash(da)
-        canv.rect(x1,y1,width,height)
-        if ss: canv.restoreState()
-
-    def drawBoundary(self,canv, __boundary__=None):
-        self._drawBoundary(canv,__boundary__ or self.showBoundary, self._x1, self._y1,
+    def drawBoundary(self, canv, __boundary__=None):
+        canv.drawBoundary(__boundary__ or self.showBoundary, self._x1, self._y1,
                                 self._x2 - self._x1, self._y2 - self._y1)
 
     def addFromList(self, drawlist, canv):

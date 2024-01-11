@@ -14,12 +14,11 @@ from reportlab.lib import colors
 from reportlab.lib.units import cm, mm
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.platypus import ShowBoundaryValue
 from reportlab.platypus.frames import Frame
 from reportlab.lib.randomtext import randomText, PYTHON
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, Indenter, SimpleDocTemplate, LayoutError
 from reportlab.platypus.paragraph import *
-from reportlab.pdfgen.canvas import Canvas
+from reportlab.pdfgen.canvas import Canvas, ShowBoundaryValue
 from reportlab.rl_config import paraFontSizeHeightOffset
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.lib.pagesizes import A4, portrait
