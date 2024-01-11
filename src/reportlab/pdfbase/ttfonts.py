@@ -1160,12 +1160,19 @@ class TTFont:
                 # always has code 32 (for word spacing to work) and the ASCII
                 # output is readable
                 #simple asciiReadable setup
-                subset0 = list(range(128))
-                for n in subset0:
-                    A[n] = n
-                self.subsets = [subset0]
-                #self.nextCode = 1  #if doing fillin of [1-31]
-                self.nextCode = 128
+                subset0 = list(range(32,128))   #assume we have all of ASCII
+                charToGlyph = getattr(face,'charToGlyph',None)
+                if charToGlyph:
+                    for n in subset0:
+                        if n in charToGlyph:
+                            A[n] = n
+                else:
+                    for n in subset0:
+                        A[n] = n
+                A[0] = 0
+                self.subsets = [32*[0] + subset0]
+                self.nextCode = 1   #if doing fillin of [1-31]
+                #self.nextCode = 128 #if not doing fillin
             else:
                 self.subsets = [[0]+[32]*32]
                 A[0] = 0
@@ -1213,12 +1220,13 @@ class TTFont:
         asciiReadable = self._asciiReadable
         try: state = self.state[doc]
         except KeyError: state = self.state[doc] = TTFont.State(asciiReadable,self)
-        #_31skip = 31 if asciiReadable and state.nextCode<32 else -256
+        _31skip = 31 if asciiReadable and state.nextCode<32 else -256
         curSet = -1
         cur = []
         results = []
         if not isUnicode(text):
             text = text.decode('utf-8')     # encoding defaults to utf-8
+        charToGlyph = self.face.charToGlyph
         assignments = state.assignments
         subsets = state.subsets
         #reserveTTFNotdef = rl_config.reserveTTFNotdef we ignore this now
@@ -1226,6 +1234,8 @@ class TTFont:
             if code==0xa0: code = 32    #map nbsp into space
             if code in assignments:
                 n = assignments[code]
+            elif code not in charToGlyph:
+                n = 0
             else:
                 if state.frozen:
                     raise pdfdoc.PDFError("Font %s is already frozen, cannot add new character U+%04X" % (self.fontName, code))
@@ -1242,10 +1252,10 @@ class TTFont:
                         n = state.nextCode
                     subsets[n >> 8].append(code)
                 else:
-                    #if n==_31skip:
-                    #   #we heve filled in first part of subsets[0] skip past subset[32:127]
-                    #   #this code will be executed once if asciiReadable
-                    #   state.nextCode = 127
+                    if n==_31skip:
+                        #we heve filled in first part of subsets[0] skip past subset[32:127]
+                        #this code will be executed once if asciiReadable
+                        state.nextCode = 127
                     subsets[0][n] = code
                 state.nextCode += 1
                 assignments[code] = n

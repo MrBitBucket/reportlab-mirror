@@ -7,7 +7,7 @@ from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, p
 setOutDir(__name__)
 import sys, os, unittest
 from operator import truth
-from reportlab.pdfgen.canvas import Canvas
+from reportlab.pdfgen.canvas import Canvas, ShowBoundaryValue
 from reportlab.pdfbase.pdfmetrics import stringWidth, registerFont, registerFontFamily
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus.paraparser import ParaParser
@@ -18,7 +18,7 @@ from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.lib.utils import _className, asBytes, asUnicode, asNative
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus.xpreformatted import XPreformatted
-from reportlab.platypus.frames import Frame, ShowBoundaryValue
+from reportlab.platypus import Frame
 from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, PageBreak, NextPageTemplate
 from reportlab.platypus import tableofcontents
 from reportlab.platypus.tableofcontents import TableOfContents
@@ -171,7 +171,7 @@ class ParagraphCorners(unittest.TestCase):
     def test5(self):
         '''some soft hyphenation'''
         from reportlab.pdfgen import canvas
-        from reportlab.platypus import Frame, ShowBoundaryValue, Paragraph
+        from reportlab.platypus import Frame, Paragraph
         from reportlab.lib.styles import ParagraphStyle
 
         pagesize = (80+20, 400)
