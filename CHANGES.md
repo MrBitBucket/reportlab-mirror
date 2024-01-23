@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.0.9.1 23/01/2024
+---------------------------
+    * use ttf subsets[0][1:32] fillin
+    * implement drawBoundary as a proper canvas method (removing it from Frame)
+
 CHANGES  4.0.9   08/01/2024
 ---------------------------
     * fix TTFont hmtx bug and force index 0(.notdef) in subsets as better for PDFUA 
