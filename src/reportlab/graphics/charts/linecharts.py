@@ -319,6 +319,7 @@ class HorizontalLineChart(LineChart):
             inFillX1 = inFillX0 + self.categoryAxis._length
             inFillG = getattr(self,'_inFillG',g)
         yzero = self._yzero
+        bypos = None
 
         # Iterate over data rows.
         for rowNo, row in enumerate(reversed(P) if self.reversePlotOrder else P):
@@ -339,13 +340,18 @@ class HorizontalLineChart(LineChart):
 
             # Iterate over data columns.
             if lineStyle=='bar':
+                if bypos is None:
+                    x = self.valueAxis
+                    bypos = max(x._y,yzero)
+                    byneg = min(x._y+x._length,yzero)
                 barWidth = getattr(rowStyle,'barWidth',Percentage(50))
                 if isinstance(barWidth,Percentage):
                     hbw = self._hngs*barWidth*0.01
                 else:
                     hbw = barWidth*0.5
                 for x, y in row:
-                    g.add(Rect(x-hbw,min(y,yzero),2*hbw,abs(y-yzero),strokeWidth=strokeWidth,strokeColor=strokeColor,fillColor=fillColor))
+                    _y0 = byneg if y<yzero else bypos
+                    g.add(Rect(x-hbw,_y0,2*hbw,y-_y0,strokeWidth=strokeWidth,strokeColor=strokeColor,fillColor=fillColor))
             elif self.joinedLines or lineStyle=='joinedLine':
                 points = flatten(row)
                 if inFill or isinstance(row,FillPairedData):

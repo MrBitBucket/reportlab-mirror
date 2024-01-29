@@ -31,6 +31,8 @@ class LinePlotProperties(PropHolder):
         shader = AttrMapValue(None, desc='Shader Class.',advancedUsage=1),
         filler = AttrMapValue(None, desc='Filler Class.',advancedUsage=1),
         name = AttrMapValue(isStringOrNone, desc='Name of the line.'),
+        lineStyle = AttrMapValue(NoneOr(OneOf('line','joinedLine','bar')), desc="What kind of plot this line is",advancedUsage=1),
+        barWidth = AttrMapValue(isNumberOrNone,desc="Percentage of available width to be used for a bar",advancedUsage=1),
         inFill = AttrMapValue(isBoolean, desc='If true flood fill to x axis',advancedUsage=1),
         )
 
@@ -91,7 +93,7 @@ class LinePlot(AbstractLineChart):
         lineLabels = AttrMapValue(None, desc='Handle to the list of data point labels.'),
         lineLabelFormat = AttrMapValue(None, desc='Formatting string or function used for data point labels.'),
         lineLabelArray = AttrMapValue(None, desc='explicit array of line label values, must match size of data if present.'),
-        joinedLines = AttrMapValue(isNumber, desc='Display data points joined with lines if true.'),
+        #joinedLines = AttrMapValue(isNumber, desc='Display data points joined with lines if true.'),
         strokeColor = AttrMapValue(isColorOrNone, desc='Color used for background border of plot area.'),
         fillColor = AttrMapValue(isColorOrNone, desc='Color used for background interior of plot area.'),
         lines = AttrMapValue(None, desc='Handle of the lines.'),
@@ -118,6 +120,7 @@ class LinePlot(AbstractLineChart):
 
         self.lines = TypedPropertyCollection(LinePlotProperties)
         self.lines.strokeWidth = 1
+        self.joinedLines = 1 # Connect items with straight lines.
         self.lines[0].strokeColor = colors.red
         self.lines[1].strokeColor = colors.blue
 
@@ -135,14 +138,19 @@ class LinePlot(AbstractLineChart):
         # if you have multiple series, by default they butt
         # together.
 
-        # New line chart attributes.
-        self.joinedLines = 1 # Connect items with straight lines.
-
         #private attributes
         self._inFill = None
         self.annotations = []
         self.behindAxes = 0
         self.gridFirst = 0
+
+    @property
+    def joinedLines(self):
+        return self.lines.lineStyle=='joinedLine'
+
+    @joinedLines.setter
+    def joinedLines(self,v):
+        self.lines.lineStyle = 'joinedLine' if v else 'line'
 
     def demo(self):
         """Shows basic use of a line chart."""
@@ -292,6 +300,7 @@ class LinePlot(AbstractLineChart):
             inFillX0 = yA._x
             inFillX1 = inFillX0 + xA._length
             inFillG = getattr(self,'_inFillG',g)
+        bw = None
         lG = getattr(self,'_lineG',g)
         # Iterate over data rows.
         R = range(len(P))
@@ -301,9 +310,11 @@ class LinePlot(AbstractLineChart):
             styleRowNo = rowNo % styleCount
             rowStyle = lines[styleRowNo]
             strokeColor = getattr(rowStyle,'strokeColor',None)
+            strokeWidth = getattr(rowStyle,'strokeWidth',None)
             fillColor = getattr(rowStyle, 'fillColor', strokeColor)
             inFill = getattr(rowStyle,'inFill',_inFill)
             dash = getattr(rowStyle, 'strokeDashArray', None)
+            lineStyle = getattr(rowStyle,'lineStyle',None)
 
             if hasattr(rowStyle, 'strokeWidth'):
                 width = rowStyle.strokeWidth
@@ -313,7 +324,33 @@ class LinePlot(AbstractLineChart):
                 width = None
 
             # Iterate over data columns.
-            if self.joinedLines:
+            if lineStyle=='bar':
+                if bw is None:
+                    x = max(map(len,P)) - 1 #the number of gaps
+                    bw = (self.width/x - 1) if x>0 else self.width
+                    barWidth = getattr(rowStyle,'barWidth',Percentage(50))
+                    x = self.yValueAxis
+                    y0 = x.scale(0)
+                    bypos = max(x._y,y0)
+                    byneg = min(x._y+x._length,y0)
+                    xmin = self.xValueAxis._x
+                    xmax = xmin + self.xValueAxis._length
+                    if isinstance(barWidth,Percentage):
+                        bw *= barWidth*0.005
+                    else:
+                        bw = barWidth*0.5
+                for x, y in row:
+                    w = bw
+                    #print(f'{x=} {y=} {y0=} {byneg=} {bypos=}')
+                    _y0 = byneg if y<y0 else bypos
+                    x -= w/2
+                    if x<xmin:
+                        w -= xmin - x
+                        x = xmin
+                    elif x+w > xmax:
+                        w -= xmax - x
+                    g.add(Rect(x,_y0,w,y-_y0,strokeWidth=strokeWidth,strokeColor=strokeColor,fillColor=fillColor))
+            elif lineStyle=='joinedLine':
                 points = flatten(row)
                 if inFill or isinstance(row,FillPairedData):
                     filler = getattr(rowStyle, 'filler', None)
