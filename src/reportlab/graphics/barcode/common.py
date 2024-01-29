@@ -103,15 +103,21 @@ class Barcode(Flowable):
         self._height = self.barHeight
         self._width = w
 
+    @property
     def width(self):
         self._calculate()
         return self._width
-    width = property(width)
+    @width.setter
+    def width(self,v):
+        pass
 
+    @property
     def height(self):
         self._calculate()
         return self._height
-    height = property(height)
+    @height.setter
+    def height(self,v):
+        pass
 
     def draw(self):
         self._calculate()

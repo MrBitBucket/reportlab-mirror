@@ -307,15 +307,23 @@ class USPS_4State(Barcode):
     widthScale = property(lambda self: min(1,max(0,self.widthSize)))
     heightScale = property(lambda self: min(1,max(0,self.heightSize)))
 
+    @property
     def width(self):
         self.computeSize()
         return self._width
-    width = property(width)
 
+    @property
     def height(self):
         self.computeSize()
         return self._height
-    height = property(height)
+
+    #we ignore attempts to set the dimensions
+    @width.setter
+    def width(self,v):
+        pass
+    @height.setter
+    def height(self,v):
+        pass
 
     def computeSize(self):
         if not getattr(self,'_sized',None):
