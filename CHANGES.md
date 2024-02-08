@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+
+CHANGES  4.1.0 08/02/2024
+-------------------------
+    * No change.  Changes to commercial package, re-released with same version number
+
 CHANGES  4.0.9.1 23/01/2024
 ---------------------------
     * use ttf subsets[0][1:32] fillin
