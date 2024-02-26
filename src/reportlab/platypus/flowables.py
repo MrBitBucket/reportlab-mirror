@@ -2095,14 +2095,22 @@ class LIIndenter(DDIndenter):
             self.spaceAfter = spaceAfter
 
     def split(self, aW, aH):
-        S = self._flowable.split(aW-self._leftIndent-self._rightIndent, aH)
+        f = self._flowable
+        S = f.split(aW-self._leftIndent-self._rightIndent, aH)
+        if len(S)>1 and hasattr(f,'blPara'):
+            cnl = len(f.blPara.lines)
+            nnl = len(S[0].blPara.lines)
+            #avoid 1/2 line widow when justified else avoid 1 line widow
+            if ((getattr(getattr(f,'style',None),'alignment',None)==4 and nnl>=(cnl-2)) 
+                    or nnl==(cnl-1)):
+                S = []
         return [
                 LIIndenter(s,
                         leftIndent=self._leftIndent,
                         rightIndent=self._rightIndent,
                         bullet = (s is S[0] and self._bullet or None),
                         ) for s in S
-                ]
+                ] if S else []
 
     def drawOn(self, canv, x, y, _sW=0):
         if self._bullet:

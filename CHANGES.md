@@ -11,6 +11,9 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.1.x 08/02/2024
+--------------------------
+    * change LIItem split to avoid 1/2 line when justified else 1 line widow
 
 CHANGES  4.1.0 08/02/2024
 -------------------------
