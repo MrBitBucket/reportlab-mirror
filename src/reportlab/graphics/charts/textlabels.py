@@ -213,6 +213,7 @@ class Label(Widget):
                     fontName=self.fontName,
                     fontSize=self.fontSize,
                     fillColor=self.fillColor,
+                    textColor=self.fillColor,
                     strokeColor=self.strokeColor,
                     )
 
