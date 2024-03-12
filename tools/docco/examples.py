@@ -556,10 +556,6 @@ def cursormoves1(canvas):
     for line in lyrics:
         textobject.textLine(line)
     textobject.setFillGray(0.4)
-    textobject.textLines('''
-    With many apologies to the Beach Boys
-    and anyone else who finds this objectionable
-    ''')
     canvas.drawText(textobject)
 """
 
@@ -573,10 +569,6 @@ def cursormoves2(canvas):
         textobject.textOut(line)
         textobject.moveCursor(14,14) # POSITIVE Y moves down!!!
     textobject.setFillColorRGB(0.4,0,1)
-    textobject.textLines('''
-    With many apologies to the Beach Boys
-    and anyone else who finds this objectionable
-    ''')
     canvas.drawText(textobject)
 """
 
@@ -592,10 +584,6 @@ def charspace(canvas):
         textobject.textLine("%s: %s" %(charspace,line))
         charspace = charspace+0.5
     textobject.setFillGray(0.4)
-    textobject.textLines('''
-    With many apologies to the Beach Boys
-    and anyone else who finds this objectionable
-    ''')
     canvas.drawText(textobject)
 """
 
@@ -611,10 +599,6 @@ def wordspace(canvas):
         textobject.textLine("%s: %s" %(wordspace,line))
         wordspace = wordspace+2.5
     textobject.setFillColorCMYK(0.4,0,0.4,0.2)
-    textobject.textLines('''
-    With many apologies to the Beach Boys
-    and anyone else who finds this objectionable
-    ''')
     canvas.drawText(textobject)
 """
 testhorizontalscale = """
@@ -629,10 +613,6 @@ def horizontalscale(canvas):
         textobject.textLine("%s: %s" %(horizontalscale,line))
         horizontalscale = horizontalscale+10
     textobject.setFillColorCMYK(0.0,0.4,0.4,0.2)
-    textobject.textLines('''
-    With many apologies to the Beach Boys
-    and anyone else who finds this objectionable
-    ''')
     canvas.drawText(textobject)
 """
 testleading = """
@@ -647,10 +627,6 @@ def leading(canvas):
         textobject.textLine("%s: %s" %(leading,line))
         leading = leading+2.5
     textobject.setFillColorCMYK(0.8,0,0,0.3)
-    textobject.textLines('''
-    With many apologies to the Beach Boys
-    and anyone else who finds this objectionable
-    ''')
     canvas.drawText(textobject)
 """
 
