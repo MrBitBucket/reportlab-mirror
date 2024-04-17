@@ -275,3 +275,6 @@ if __name__=='__main__':
     createSample('test_cbcim.gif',createBarcodeImageInMemory('EAN8', value='1234567', format='gif'))
     createSample('test_cbcim.pdf',createBarcodeImageInMemory('UPCA', value='03600029145',format='pdf', barHeight=40))
     createSample('test_cbcim.tiff',createBarcodeImageInMemory('USPS_4State', value='01234567094987654321',routing='01234567891',format='tiff'))
+    createSample('test_cbcim-1.pdf',createBarcodeImageInMemory('QR',
+                                                value='This is the end my only friend the end at the end of the Universe.',format='pdf'))
+
