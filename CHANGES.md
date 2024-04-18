@@ -11,10 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  4.1.1 ??/??/????
+CHANGES  4.2.0 18/04/2024
 -------------------------
     * change LIItem split to avoid 1/2 line when justified else 1 line widow
     * add longer text QR code example
+    * allow renderPM + rlPyCairo to produce both RGB & RGBA images
 
 CHANGES  4.1.0 08/02/2024
 -------------------------

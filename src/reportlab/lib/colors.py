@@ -119,7 +119,11 @@ class Color:
 
     def int_rgba(self):
         v = self.bitmap_rgba()
-        return int((v[0]<<24|v[1]<<16|v[2]<<8|v[3])&0xffffff)
+        return int(v[0]<<24|v[1]<<16|v[2]<<8|v[3])
+
+    def int_argb(self):
+        v = self.bitmap_rgba()
+        return int(v[3]<<24|v[0]<<16|v[1]<<8|v[2])
 
     _cKwds='red green blue alpha'.split()
     def cKwds(self):

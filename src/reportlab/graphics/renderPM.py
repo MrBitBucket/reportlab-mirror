@@ -16,6 +16,7 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.renderbase import getStateDelta, renderScaledDrawing
 from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1
 from reportlab.lib.utils import isUnicode
+from reportlab.lib.colors import toColor, white
 from reportlab import rl_config
 from .utils import setFont as _setFont, RenderPMError
 
@@ -68,6 +69,13 @@ def Color2Hex(c):
     #assert isinstance(colorobj, colors.Color) #these checks don't work well RGB
     if c: return ((0xFF&int(255*c.red)) << 16) | ((0xFF&int(255*c.green)) << 8) | (0xFF&int(255*c.blue))
     return c
+
+def CairoColor(c):
+    '''
+    c should be None or something convertible to Color
+    rlPyCairo.GState can handle Color directly in either RGB24 or ARGB32
+    '''
+    return toColor(c) if c is not None else c
 
 # the main entry point for users...
 def draw(drawing, canvas, x, y, showBoundary=rl_config._unset_):
@@ -293,6 +301,7 @@ def _saveAsPICT(im,fn,fmt,transparent=None):
     else:
         fn.write(s)
 
+_pycairoFmtsMap = dict(ARGB='ARGB32',RGBA='ARGB32',RGB='RGB24')
 BEZIER_ARC_MAGIC = 0.5522847498     #constant for drawing circular arcs w/ Beziers
 class PMCanvas:
     def __init__(self,w,h,dpi=72,bg=0xffffff,configPIL=None,backend=None,
@@ -301,7 +310,7 @@ class PMCanvas:
         scale = dpi/72.0
         w = int(w*scale+0.5)
         h = int(h*scale+0.5)
-        self.__dict__['_gs'] = self._getGState(w,h,bg,backend)
+        self.__dict__['_gs'] = self._getGState(w,h,bg,backend,fmt=backendFmt)
         self.__dict__['_bg'] = bg
         self.__dict__['_baseCTM'] = (scale,0,0,scale,0,0)
         self.__dict__['_clipPaths'] = []
@@ -310,6 +319,7 @@ class PMCanvas:
         #the _rl_renderPM.gstate object doesn't support hasattr so we use this as a proxy test for 'isbuiltin' 
         self.__dict__['_backend'] = '_renderPM' if type(self._gs._aapixbuf)==type(pow) else 'rlPyCairo'
         self.__dict__['_backendfmt'] = backendFmt
+        self.__dict__['_colorConverter'] = CairoColor if self._backend=='rlPyCairo' else Color2Hex
         self.ctm = self._baseCTM
 
     @staticmethod
@@ -326,6 +336,8 @@ class PMCanvas:
                 except:
                     pass
         elif 'cairo' in backend.lower():
+            fmt = fmt.upper()
+            fmt = _pycairoFmtsMap.get(fmt,fmt)
             try:
                 return mod.GState(w,h,bg,fmt=fmt)
             except AttributeError:
@@ -347,7 +359,7 @@ class PMCanvas:
         gs.setFont(fN,fS)
 
     def toPIL(self):
-        im = _getImage().new('RGB', size=(self._gs.width, self._gs.height))
+        im = _getImage().new('RGBA' if self._backend=='rlPyCairo' and getattr(self,'_fmt')=='ARGB32' else 'RGB', size=(self._gs.width, self._gs.height))
         im.frombytes(self._gs.pixBuf)
         return im
 
@@ -419,7 +431,13 @@ class PMCanvas:
         '''
         import struct
         gs = self._gs
-        pix, width, height = gs.pixBuf, gs.width, gs.height
+        if self._backend=='rlPyCairo' and gs._fmt=='ARGB32':    #pixBuf would have 4 bytes
+            gs._fmt = 'RGB24'   #force 3 bytes out until our BMP allows Alpha
+            pix = gs.pixBuf
+            gs._fmt = 'ARGB32'
+        else:
+            pix = gs.pixBuf
+        width, height = gs.width, gs.height
         f.write(struct.pack('=2sLLLLLLhh24x','BM',len(pix)+54,0,54,40,width,height,1,24))
         rowb = width * 3
         for o in range(len(pix),0,-rowb):
@@ -673,13 +691,13 @@ class PMCanvas:
         pass
 
     def setFillColor(self,aColor):
-        self.fillColor = Color2Hex(aColor)
+        self.fillColor = self._colorConverter(aColor)
         alpha = getattr(aColor,'alpha',None)
         if alpha is not None:
             self.fillOpacity = alpha
 
     def setStrokeColor(self,aColor):
-        self.strokeColor = Color2Hex(aColor)
+        self.strokeColor = self._colorConverter(aColor)
         alpha = getattr(aColor,'alpha',None)
         if alpha is not None:
             self.strokeOpacity = alpha
@@ -696,29 +714,29 @@ class PMCanvas:
     def setLineWidth(self,width):
         self.strokeWidth = width
 
-def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend):
+def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB'):
     d = renderScaledDrawing(d)
-    c = PMCanvas(d.width, d.height, dpi=dpi, bg=bg, configPIL=configPIL, backend=backend)
+    c = PMCanvas(d.width, d.height, dpi=dpi, bg=bg, configPIL=configPIL, backend=backend,backendFmt=backendFmt)
     draw(d, c, 0, 0, showBoundary=showBoundary)
     return c
 
-def drawToPIL(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend):
-    return drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary, backend=backend).toPIL()
+def drawToPIL(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB'):
+    return drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary, backend=backend,backendFmt=backendFmt).toPIL()
 
-def drawToPILP(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend):
+def drawToPILP(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB'):
     Image = _getImage()
-    im = drawToPIL(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary,backend=backend)
+    im = drawToPIL(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary,backend=backend,backendFmt=backendFmt)
     return im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
 
-def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend):
+def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB'):
     '''create a pixmap and draw drawing, d to it then save as a file
     configPIL dict is passed to image save method'''
-    c = drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary,backend=backend)
+    c = drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary,backend=backend,backendFmt=backendFmt)
     c.saveToFile(fn,fmt)
 
-def drawToString(d,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend):
+def drawToString(d,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB'):
     s = BytesIO()
-    drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, configPIL=configPIL,backend=backend)
+    drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, configPIL=configPIL,backend=backend,backendFmt=backendFmt)
     return s.getvalue()
 
 save = drawToFile
@@ -784,7 +802,6 @@ def test(outDir='pmout', shout=False):
                 if os.path.isfile(fullpath):
                     os.remove(fullpath)
                 if k=='pct':
-                    from reportlab.lib.colors import white
                     drawToFile(drawing,fullpath,fmt=k,configPIL={'transparent':white})
                 elif k in ['py','svg']:
                     drawing.save(formats=['py','svg'],outDir=outDir,fnRoot=fnRoot)
