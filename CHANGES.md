@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.2.1 ??/??/2024
+-------------------------
+    * rl_safe_eval.py nano-fix for python 3.13.0b1 changes
+
 CHANGES  4.2.0 18/04/2024
 -------------------------
     * change LIItem split to avoid 1/2 line when justified else 1 line widow

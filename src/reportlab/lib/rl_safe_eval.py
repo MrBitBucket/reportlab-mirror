@@ -7,6 +7,7 @@ import sys, os, ast, re, weakref, time, copy, math, types
 eval_debug = int(os.environ.get('EVAL_DEBUG','0'))
 strTypes = (bytes,str)
 isPy39 = sys.version_info[:2]>=(3,9)
+isPy313 = sys.version_info[:2]>=(3,13)
 
 haveNameConstant = hasattr(ast,'NameConstant')
 import textwrap
@@ -1165,7 +1166,7 @@ class __RL_SAFE_ENV__:
 				visit=UntrustedAstTransformer(nameIsAllowed=self.__rl_is_allowed_name__).visit)
 		if None in (l,g):
 			G = sys._getframe(__frame_depth__)
-			L = G.f_locals.copy() if l is None else l
+			L = {n:r for n,r in G.f_locals.items()} if l is None else l
 			G = G.f_globals.copy() if g is None else g
 		else:
 			G = g
