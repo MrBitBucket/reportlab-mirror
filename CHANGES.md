@@ -11,9 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  4.2.1 ??/??/2024
+CHANGES  4.2.1 21/05/2024
 -------------------------
     * rl_safe_eval.py nano-fix for python 3.13.0b1 changes
+    * flowable security fixes discovered by hn13, FionaQX, and lz from Fudan University reported by Lennart Regebro regebro at gmail dot com
+    * added support for XMP packet
 
 CHANGES  4.2.0 18/04/2024
 -------------------------
@@ -1274,6 +1276,7 @@ Here is what's different now:
 	Splitting of tables across pages did not work correctly when the table had
 	row/column spans
   * Fix runtime error affecting keepWithNext
+  * security fixes discovered by hn13, FionaQX, and lz from Fudan University and reported by Lennart Regebro regebro at gmail dot com
 
 
 Older releases

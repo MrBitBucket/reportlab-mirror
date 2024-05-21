@@ -283,7 +283,7 @@ class GraphicsFlowable(Flowable):
     def draw(self):
         draw(self.drawing, self.canv, 0, 0)
 
-def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, canvasKwds={}):
+def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, canvasKwds={}, **kwds):
     """Makes a one-page PDF with just the drawing.
 
     If autoSize=1, the PDF will be the same size as
@@ -294,6 +294,7 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, canvas
     for x in ('Name','Size'):
         a = 'initialFont'+x
         canvasKwds[a] = getattr(d,a,canvasKwds.pop(a,STATE_DEFAULTS['font'+x]))
+    metadataPath = kwds.pop('metadataPath',None)
     c = Canvas(fn,**canvasKwds)
     if msg:
         c.setFont(rl_config.defaultGraphicsFontName, 36)
@@ -311,6 +312,9 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, canvas
         y = y - d.height
         draw(d, c, 80, y, showBoundary=showBoundary)
 
+    if metadataPath:
+        from reportlab.pdfbase.pdfdoc import XMP
+        c._doc.Catalog.Metadata = XMP(path=metadataPath)
     c.showPage()
     c.save()
     if sys.platform=='mac' and not hasattr(fn, "write"):
@@ -321,10 +325,10 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, canvas
         except:
             pass
 
-def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1,canvasKwds={}):
+def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1,canvasKwds={}, **kwds):
     "Returns a PDF as a string in memory, without touching the disk"
     s = BytesIO()
-    drawToFile(d, s, msg=msg, showBoundary=showBoundary,autoSize=autoSize, canvasKwds=canvasKwds)
+    drawToFile(d, s, msg=msg, showBoundary=showBoundary,autoSize=autoSize, canvasKwds=canvasKwds, **kwds)
     return s.getvalue()
 
 #########################################################

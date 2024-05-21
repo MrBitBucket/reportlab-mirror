@@ -1,7 +1,7 @@
 #Copyright ReportLab Europe Ltd. 2000-2023
 #see license.txt for license details
 #history https://hg.reportlab.com/hg-public/reportlab/log/tip/src/reportlab/pdfbase/pdfdoc.py
-__version__='3.6.0'
+__version__='4.2.0'
 __doc__="""
 The module pdfdoc.py handles the 'outer structure' of PDF documents, ensuring that
 all objects are properly cross-referenced and indexed to the nearest byte.  The
@@ -199,7 +199,7 @@ class PDFDocument(PDFObject):
             filename = getattr(f,'name',None)
             if isinstance(filename,int):
                 filename = '<os fd:%d>'% filename
-            elif not isStr(filename): #try to fix bug reported by Robert Schroll <rschroll at gmail.com> 
+            elif not isStr(filename): #try to fix bug reported by Robert Schroll <rschroll at gmail.com>
                 filename = '<%s@0X%8.8X>' % (f.__class__.__name__,id(f))
             filename = makeFileName(filename)
         elif isStr(filename):
@@ -207,7 +207,7 @@ class PDFDocument(PDFObject):
             filename = makeFileName(filename)
             f = open(filename, "wb")
         else:
-            raise TypeError('Cannot use %s as a filename or file' % repr(filename)) 
+            raise TypeError('Cannot use %s as a filename or file' % repr(filename))
 
         data = self.GetPDFData(canvas)
         if isUnicode(data):
@@ -988,6 +988,35 @@ class PDFTrailer(PDFObject):
 
 #### chapter 6, doc structure
 
+class XMP(PDFStream):
+    def __init__(self,path=None,creator=None):
+        if path and creator:
+            raise ValueError('XMP is ambiguous with both path and creator arguments')
+        elif not (path or creator):
+            raise ValueError('XMP needs at least a path or creator argument')
+        super().__init__(
+            dictionary=PDFDictionary(dict(
+                Type=PDFName('Metadata'),
+                Subtype=PDFName('XML'),
+                )))
+        self.__path =  path
+        self.__pathContent = None
+        self.__creator = creator
+
+    def format(self,doc):
+        self.content = self.makeContent(doc)
+        return super(XMP,self).format(doc)
+
+    def makeContent(self,doc):
+        if self.__path:
+            if self.__pathContent is None:
+                from reportlab.lib.rparsexml import smartDecode
+                with open(self.__path,'rb') as _:
+                    self.__pathContent = smartDecode(_.read())
+            return self.__pathContent
+        else:
+            return self.__creator(doc)
+
 class PDFCatalog(PDFObject):
     __Comment__ = "Document Root"
     __RefOnly__ = 1
@@ -1696,7 +1725,7 @@ class TextAnnotation(HighlightAnnotation):
                 Rect,
                 Contents,
                 QuadPoints=kw.pop("QuadPoints",None) or rect_to_quad(Rect),
-                Color=kw.pop("Color",(0,0,0)), 
+                Color=kw.pop("Color",(0,0,0)),
                 **kw)
     def Dict(self):
         d = HighlightAnnotation.Dict(self)
