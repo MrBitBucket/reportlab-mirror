@@ -49,6 +49,7 @@ for the current frame).
 from reportlab.platypus.flowables import *
 from reportlab.platypus.flowables import _ContainerSpace
 from reportlab.lib.units import inch
+from reportlab.lib import rl_safe_eval
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.platypus.frames import Frame
 from reportlab.rl_config import defaultPageSize, verbose
@@ -1241,7 +1242,7 @@ class BaseDocTemplate:
         try:
             if lifetime not in self._allowedLifetimes:
                 raise ValueError('bad lifetime %r not in %r'%(lifetime,self._allowedLifetimes))
-            exec(stmt, NS)
+            rl_safe_eval.rl_safe_exec(stmt.strip(),{},NS)
         except:
             K1 = [k for k in NS if k not in K0] #the added keys we need to delete
             for k in K1:
@@ -1272,7 +1273,7 @@ class BaseDocTemplate:
 
     def docEval(self,expr):
         try:
-            return eval(expr.strip(),{},self._nameSpace)
+            return rl_safe_eval.rl_safe_eval(expr.strip(),{},self._nameSpace)
         except:
             annotateException('\ndocEval %s failed!\n' % expr)
 

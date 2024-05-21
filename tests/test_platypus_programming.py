@@ -19,7 +19,7 @@ class PlatypusProgrammingTestCase(unittest.TestCase):
             story = [
                     DocAssert(val,'this should fail'),
                     DocPara("'val=%r'" % val),
-                    DocPara('"{"+", ".join(("%s=%s" % (_k,(_v.__class__.__name__ if "<" in repr(_v) else repr(_v)[1:] if repr(_v) and repr(_v)[0] in "ub" else repr(_v))) for _k,_v in sorted(doc._nameSpace.items()) if _k not in ("_k","_v")))+"}"',escape=True),
+                    DocPara('"{"+", ".join(("%s=%s" % (_k,(repr(_v).replace("<","").replace(">","") if "<" in repr(_v) else repr(_v)[1:] if repr(_v) and repr(_v)[0] in "ub" else repr(_v))) for _k,_v in sorted(doc._nameSpace.items()) if _k not in ("_k","_v")))+"}"',escape=True),
                     ]
             doc = SimpleDocTemplate(outputfile('test_doc_programming_asserts.pdf'))
             doc.build(story)
@@ -44,7 +44,8 @@ class PlatypusProgrammingTestCase(unittest.TestCase):
                 DocIf('i==3',Paragraph('The value of i is equal to 3',normal),Paragraph('The value of i is not equal to 3',normal)),
                 DocIf('i<3',Paragraph('The value of i is less than 3',normal),Paragraph('The value of i is not less than 3',normal)),
                 DocWhile('i',[DocPara('i',format='The value of i is %(__expr__)d',style=normal),DocExec('i-=1')]),
-                DocPara('"{"+", ".join(("%s=%s" % (_k,(_v.__class__.__name__ if "<" in repr(_v) else repr(_v)[1:] if repr(_v) and repr(_v)[0] in "ub" else repr(_v))) for _k,_v in sorted(doc._nameSpace.items()) if _k not in ("_k","_v")))+"}"',escape=True),
+                DocPara("'doc._nameSpace=' + repr(doc._nameSpace)"),
+                DocPara('"{"+", ".join(("%s=%s" % (_k,(repr(_v).replace("<","").replace(">","") if "<" in repr(_v) else repr(_v)[1:] if repr(_v) and repr(_v)[0] in "ub" else repr(_v))) for _k,_v in sorted(doc._nameSpace.items()) if _k not in ("_k","_v")))+"}"',escape=True),
                 DocPara('doc.canv.getPageNumber()','The current page number is %(__expr__)d',style=normal) 
                 ]
         doc = SimpleDocTemplate(outputfile('test_doc_programming.pdf'))
@@ -115,7 +116,7 @@ class PlatypusProgrammingTestCase(unittest.TestCase):
                     DocIf('i==3',Paragraph('The value of i is equal to 3',bt),Paragraph('The value of i is not equal to 3',bt)),
                     DocIf('i<3',Paragraph('The value of i is less than 3',bt),Paragraph('The value of i is not less than 3',bt)),
                     DocWhile('i',[DocPara('i',format='The value of i is %(__expr__)d',style=bt),DocExec('i-=1')]),
-                    DocPara('"{"+", ".join(("%s=%s" % (_k,(_v.__class__.__name__ if "<" in repr(_v) else repr(_v)[1:] if repr(_v) and repr(_v)[0] in "ub" else repr(_v))) for _k,_v in sorted(doc._nameSpace.items()) if _k not in ("_k","_v")))+"}"',escape=True),
+                    DocPara('"{"+", ".join(("%s=%s" % (_k,(repr(_v).replace("<","").replace(">","") if "<" in repr(_v) else repr(_v)[1:] if repr(_v) and repr(_v)[0] in "ub" else repr(_v))) for _k,_v in sorted(doc._nameSpace.items()) if _k not in ("_k","_v")))+"}"',escape=True),
                     DocPara('doc.canv.getPageNumber()','The current page number is %(__expr__)d') 
                     ])
         story.append(Paragraph('The Index which goes at the back', h1))

@@ -262,7 +262,7 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 		return (tmp_target, cleanup)
 
 	def gen_none_node(self):
-		return ast.NameConstant(value=None) if hasNameConstant else ast.Name(id='None', ctx=ast.Load())
+		return ast.NameConstant(value=None) if haveNameConstant else ast.Name(id='None', ctx=ast.Load())
 
 	def gen_lambda(self, args, body):
 		return ast.Lambda(
@@ -1039,7 +1039,7 @@ class __RL_SAFE_ENV__:
 		explanation.
 		"""
 		# Do the guarded unpacking of the sequence.
-		ret = list(self.__rl__getiter__(it))
+		ret = list(self.__rl_getiter__(it))
 
 		# If the sequence is shorter then expected the interpreter will raise
 		# 'ValueError: need more than X value to unpack' anyway
@@ -1274,3 +1274,9 @@ def rl_extended_literal_eval(expr, safe_callables=None, safe_names=None):
 
 rl_safe_exec = __rl_safe_exec__()
 rl_safe_eval = __rl_safe_eval__()
+
+def rl_less_safe_eval(expr,NS):
+	'''eval with our so called safe globals'''
+	if not __rl_safe_builtins__:
+		rl_safe_eval('""')
+	return eval(expr,__rl_safe_builtins__,NS)
