@@ -45,6 +45,16 @@ __allowed_magic_methods__ = frozenset([
 	'__ge__',
 	])
 
+def __fix_set__(value, default=frozenset()):
+	if isinstance(value,(tuple,list,set,dict)):
+		return frozenset(value)
+	elif isinstance(value,frozenset):
+		return value
+	elif bool(value):
+		return default
+	else:
+		return frozenset()
+
 __rl_unsafe__ = frozenset('''builtins breakpoint __annotations__ co_argcount co_cellvars co_code co_consts
 						__code__ co_filename co_firstlineno co_flags co_freevars co_kwonlyargcount
 						co_lnotab co_name co_names co_nlocals co_posonlyargcount co_stacksize
@@ -451,7 +461,7 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 
 		'a.b' becomes '__rl_getattr__(a, "b")'
 		"""
-		if node.attr.startswith('__') and node.attr != '__':
+		if node.attr.startswith('__') and node.attr != '__' and not self.nameIsAllowed(node.attr,False):
 			self.error(node, '"%s" is an invalid attribute'%node.attr)
 
 		if isinstance(node.ctx, ast.Load):
@@ -856,10 +866,10 @@ class __RL_SAFE_ENV__:
 	__time_time__ = time.time
 	__weakref_ref__ = weakref.ref
 	__slicetype__ = type(slice(0))
-	def __init__(self, timeout=None, allowed_magic_methods=None):
+	def __init__(self, timeout=None, allowed_magic_methods=None, allowed_magic_names=None):
 		self.timeout = timeout if timeout is not None else self.__rl_tmax__
-		self.allowed_magic_methods = (__allowed_magic_methods__ if allowed_magic_methods==True
-									else allowed_magic_methods) if allowed_magic_methods else []
+		self.allowed_magic_methods = __fix_set__(allowed_magic_methods, __allowed_magic_methods__)
+		self.allowed_magic_names = __fix_set__(allowed_magic_names)
 		import builtins
 		self.__rl_gen_range__ = builtins.range
 
@@ -888,7 +898,7 @@ class __RL_SAFE_ENV__:
 				('iter',self.__rl_getiter__),
 				)
 
-		__rl_safe_builtins__.update({_:getattr(builtins,_) for _ in 
+		__rl_safe_builtins__.update({_:getattr(builtins,_) for _ in
 			('''None False True abs bool callable chr complex divmod float hash hex id int
 		isinstance issubclass len oct ord range repr round slice str tuple setattr
 		classmethod staticmethod property divmod next object getattr dict iter pow list
@@ -1014,7 +1024,7 @@ class __RL_SAFE_ENV__:
 	def __rl_set__(self, it):
 		return set(self.__rl_args_iter__(it))
 
-	def __rl_frozenset__(self, it):
+	def __rl_frozenset__(self, it=()):
 		return frozenset(self.__rl_args_iter__(it))
 
 	def __rl_iter_unpack_sequence__(self, it, spec, _getiter_):
@@ -1052,16 +1062,19 @@ class __RL_SAFE_ENV__:
 			ret[idx] = self.__rl_unpack_sequence__(ret[idx], child_spec, _getiter_)
 		return ret
 
-	def __rl_is_allowed_name__(self, name):
+	def __rl_is_allowed_name__(self, name, crash=True):
 		"""Check names if they are allowed.
 		If ``allow_magic_methods is True`` names in `__allowed_magic_methods__`
 		are additionally allowed although their names start with `_`.
 		"""
 		if isinstance(name,strTypes):
-			if name in __rl_unsafe__ or (name.startswith('__')
-				and name!='__'
-				and name not in self.allowed_magic_methods):
+			if (name not in self.allowed_magic_names
+					and (name in __rl_unsafe__ or (name.startswith('__')
+						and name!='__'
+						and name not in self.allowed_magic_methods))):
+				if not crash: return False
 				raise BadCode('unsafe access of %s' % name)
+			return True
 
 	def __rl_getattr__(self, obj, a, *args):
 		if isinstance(obj, strTypes) and a=='format':
@@ -1161,7 +1174,13 @@ class __RL_SAFE_ENV__:
 			bcode = compile(astc, fname, mode=mode)
 		return bcode, names_seen
 
-	def __rl_safe_eval__(self, expr, g, l, mode, timeout=None, allowed_magic_methods=None, __frame_depth__=3):
+	def __rl_safe_eval__(self, expr, g, l, mode, timeout=None, allowed_magic_methods=None, __frame_depth__=3,
+					  allowed_magic_names=None):
+		if allowed_magic_methods is not None:
+			self.allowed_magic_methods = __fix_set__(allowed_magic_methods, __allowed_magic_methods__)
+		if allowed_magic_names is not None:
+			self.allowed_magic_names = __fix_set__(allowed_magic_names)
+
 		bcode, ns = self.__rl_compile__(expr, fname='<string>', mode=mode, flags=0, inherit=True,
 				visit=UntrustedAstTransformer(nameIsAllowed=self.__rl_is_allowed_name__).visit)
 		if None in (l,g):
@@ -1198,11 +1217,11 @@ class __rl_safe_eval__:
 	def __init__(self):
 		self.env = None
 
-	def __call__(self, expr, g=None, l=None, timeout=None, allowed_magic_methods=None):
-		if not self.env: self.env = __RL_SAFE_ENV__(timeout=timeout, allowed_magic_methods=allowed_magic_methods)
+	def __call__(self, expr, g=None, l=None, timeout=None, allowed_magic_methods=None, allowed_magic_names=None):
+		if not self.env: self.env = __RL_SAFE_ENV__()
 		return self.env.__rl_safe_eval__(expr, g, l, self.mode, timeout=timeout,
 			allowed_magic_methods=allowed_magic_methods,
-			__frame_depth__=2)
+			__frame_depth__=2, allowed_magic_names=allowed_magic_names)
 
 class __rl_safe_exec__(__rl_safe_eval__):
 	mode = 'exec'
