@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.2.1.1 31/05/202
+---------------------------
+    * add support for allowing some magic names in rl_safe_eval.py
+    * fix display layout of multi-line in acroform textfield; bug reported by Kip Nalley lt kip at sophicalliance dot com gt
+
 CHANGES  4.2.1 21/05/2024
 -------------------------
     * rl_safe_eval.py nano-fix for python 3.13.0b1 changes

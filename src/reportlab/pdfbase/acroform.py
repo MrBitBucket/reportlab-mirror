@@ -613,7 +613,8 @@ class AcroForm(PDFObject):
                 sel_bg='0.600006 0.756866 0.854904 rg',
                 sel_fg='0 g',
                 ):
-        stream = [].append
+        _stream = []
+        stream = _stream.append
         if opaqueColor(fillColor):
             streamFill = self.streamFillColor(fillColor)
             stream('%(streamFill)s\n0 0 %(width)s %(height)s re\nf')
@@ -705,15 +706,17 @@ class AcroForm(PDFObject):
                 stream('ET')
         else:
             stream('0 g\n0 G\n%(undash)s')
-            y = height - fontSize - _2bw
-            stream('BT\n/%(iFontName)s %(fontSize)s Tf\n%(textFill)s')
-            for line in value.split('\n'):
-                stream('%%(_4bw)s %s Td\n(%s) Tj' % (y,escPDF(line)))
-                y -= leading
-            stream('ET')
+            if value:
+                stream('BT\n/%(iFontName)s %(fontSize)s Tf\n%(textFill)s')
+                stream('1 0 0 1 %%(_4bw)s %s Tm' % fp_str(height - fontSize - _2bw)) 
+                for line in value.split('\n'):
+                    stream('(%s) Tj\n0 %s Td' % (escPDF(line),fp_str(-leading)))
+                #the last change is not needed
+                _stream[-1] = _stream[-1][:_stream[-1].rfind('\n')]
+                stream('ET')
         leading = fp_str(leading)
         stream('Q\nEMC\n')
-        stream = ('\n'.join(stream.__self__) % vars()).replace('  ',' ').replace('\n\n','\n')
+        stream = ('\n'.join(_stream) % vars()).replace('  ',' ').replace('\n\n','\n')
         return self.makeStream(
                 width, height, stream,
                 Resources = PDFFromString('<< /ProcSet [/PDF /Text] /Font %(rFontName)s >>' % vars()),
