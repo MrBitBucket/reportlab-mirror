@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.2.2   ??/06/202
+---------------------------
+    * allow changing TableOfContents & Index notification token using keyword argument notifyKind
+
 CHANGES  4.2.1.1 31/05/202
 ---------------------------
     * add support for allowing some magic names in rl_safe_eval.py
