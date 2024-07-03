@@ -113,7 +113,7 @@ class StandardEncryption:
         return encodePDF(self.key, self.objnum, self.version, t, revision=self.revision)
     def prepare(self, document, overrideID=None):
         # get ready to do encryption
-        if DEBUG: print('StandardEncryption.prepare(...) - revision %d' % self.revision)
+        if DEBUG>=10: print('StandardEncryption.prepare(...) - revision %d' % self.revision)
         if self.prepared:
             raise ValueError("encryption already prepared!")
         # get the unescaped string value of the document id (first array element).
@@ -128,13 +128,13 @@ class StandardEncryption:
             if CLOBBERID:
                 internalID = "xxxxxxxxxxxxxxxx"
 
-        if DEBUG:
+        if DEBUG>=10:
             print('userPassword    = %r' % self.userPassword)
             print('ownerPassword   = %r' % self.ownerPassword)
             print('internalID      = %r' % internalID)
         self.P = int(self.permissionBits() - 2**31)
         if CLOBBERPERMISSIONS: self.P = -44 # AR hack
-        if DEBUG:
+        if DEBUG>=10:
             print("self.P          = %s" % repr(self.P))
         if self.revision == 5:
             
@@ -148,7 +148,7 @@ class StandardEncryption:
             # the main encryption key
             self.key = asBytes(os_urandom(32))
             
-            if DEBUG:
+            if DEBUG>=10:
                 print("uvs      (hex)  = %s" % hexText(uvs))
                 print("uks      (hex)  = %s" % hexText(uks))
                 print("self.key (hex)  = %s" % hexText(self.key))
@@ -157,7 +157,7 @@ class StandardEncryption:
             md = sha256(asBytes(self.userPassword[:127]) + uvs)
             self.U = md.digest() + uvs + uks
 
-            if DEBUG:
+            if DEBUG>=10:
                 print("self.U (hex)  = %s" % hexText(self.U))
 
             # Calculate the User encryption key (UE)
@@ -167,7 +167,7 @@ class StandardEncryption:
             self.UE = encrypter.feed(self.key)
             self.UE += encrypter.feed()
 
-            if DEBUG:
+            if DEBUG>=10:
                 print("self.UE (hex)  = %s" % hexText(self.UE))
 
             # Random Owner salts
@@ -178,7 +178,7 @@ class StandardEncryption:
             md = sha256(asBytes(self.ownerPassword[:127]) + ovs + self.U )
             self.O = md.digest() + ovs + oks
 
-            if DEBUG:
+            if DEBUG>=10:
                 print("self.O (hex)  = %s" % hexText(self.O))
 
             # Calculate the User encryption key (OE)
@@ -188,7 +188,7 @@ class StandardEncryption:
             self.OE = encrypter.feed(self.key)
             self.OE += encrypter.feed()
 
-            if DEBUG:
+            if DEBUG>=10:
                 print("self.OE (hex)  = %s" % hexText(self.OE))
 
             # Compute permissions array 
@@ -216,21 +216,21 @@ class StandardEncryption:
             self.Perms = encrypter.feed(bytes(permsarr))
             self.Perms += encrypter.feed()
                         
-            if DEBUG:
+            if DEBUG>=10:
                 print("self.Perms (hex)  = %s" % hexText(self.Perms))
 
         elif self.revision in (2, 3):
             self.O = computeO(self.userPassword, self.ownerPassword, self.revision)
 
-            if DEBUG:
+            if DEBUG>=10:
                 print("self.O (as hex) = %s" % hexText(self.O))
 
             #print "\nself.O", self.O, repr(self.O)
             self.key = encryptionkey(self.userPassword, self.O, self.P, internalID, revision=self.revision)
-            if DEBUG:
+            if DEBUG>=10:
                 print("self.key (hex)  = %s" % hexText(self.key))
             self.U = computeU(self.key, revision=self.revision, documentId=internalID)
-            if DEBUG:
+            if DEBUG>=10:
                 print("self.U (as hex) = %s" % hexText(self.U))
 
         self.objnum = self.version = None
@@ -354,7 +354,7 @@ def encryptionkey(password, OwnerKey, Permissions, FileId1, revision=None):
         for x in range(50):
             md5output = md5(md5output).digest()
         key = md5output[:16]
-    if DEBUG: print('encryptionkey(%s,%s,%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (password, OwnerKey, Permissions, FileId1, revision, key)]))
+    if DEBUG>=10: print('encryptionkey(%s,%s,%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (password, OwnerKey, Permissions, FileId1, revision, key)]))
     return key
 
 def computeO(userPassword, ownerPassword, revision):
@@ -371,7 +371,7 @@ def computeO(userPassword, ownerPassword, revision):
     userPad = password[:32]
 
     digest = md5(ownerPad).digest()
-    if DEBUG: print('PadString=%s\nownerPad=%s\npassword=%s\nuserPad=%s\ndigest=%s\nrevision=%s' % (ascii(PadString),ascii(ownerPad),ascii(password),ascii(userPad),ascii(digest),revision))
+    if DEBUG>=10: print('PadString=%s\nownerPad=%s\npassword=%s\nuserPad=%s\ndigest=%s\nrevision=%s' % (ascii(PadString),ascii(ownerPad),ascii(password),ascii(userPad),ascii(digest),revision))
     if revision == 2:
         O = ArcIV(digest[:5]).encode(userPad)
     elif revision == 3:
@@ -382,7 +382,7 @@ def computeO(userPassword, ownerPassword, revision):
         for i in range(20):
             thisKey = xorKey(i, digest)
             O = ArcIV(thisKey).encode(O)
-    if DEBUG: print('computeO(%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (userPassword, ownerPassword, revision,O)]))
+    if DEBUG>=10: print('computeO(%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (userPassword, ownerPassword, revision,O)]))
     return O
 
 def computeU(encryptionkey, encodestring=PadString,revision=None,documentId=None):
@@ -402,7 +402,7 @@ def computeU(encryptionkey, encodestring=PadString,revision=None,documentId=None
         while len(tmp) < 32:
             tmp += b'\0'
         result = tmp
-    if DEBUG: print('computeU(%s,%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (encryptionkey, encodestring,revision,documentId,result)]))
+    if DEBUG>=10: print('computeU(%s,%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (encryptionkey, encodestring,revision,documentId,result)]))
     return result
 
 def checkU(encryptionkey, U):
@@ -456,7 +456,7 @@ def encodePDF(key, objectNumber, generationNumber, string, revision=None):
         encrypted = iv + encrypter.feed(string)
         encrypted += encrypter.feed()
 
-    if DEBUG: print('encodePDF(%s,%s,%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (key, objectNumber, generationNumber, string, revision,encrypted)]))
+    if DEBUG>=10: print('encodePDF(%s,%s,%s,%s,%s)==>%s' % tuple([hexText(str(x)) for x in (key, objectNumber, generationNumber, string, revision,encrypted)]))
     return encrypted
 
 def equalityCheck(observed,expected,label):
