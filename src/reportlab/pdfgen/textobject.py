@@ -382,13 +382,14 @@ class PDFTextObject(_PDFColorSetter):
         font = pdfmetrics.getFont(self._fontname)
         R = []
         if font._dynamicFont:
+            canv_escape = canv._escape
             #it's a truetype font and should be utf8.  If an error is raised,
             for subset, t in font.splitString(text, canv._doc):
                 if subset!=self._curSubset:
                     pdffontname = font.getSubsetInternalName(subset, canv._doc)
                     R.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
                     self._curSubset = subset
-                R.append("(%s) Tj" % canv._escape(t))
+                R.append("(%s) Tj" % canv_escape(t))
         elif font._multiByte:
             #all the fonts should really work like this - let them know more about PDF...
             R.append("%s %s Tf %s TL" % (
@@ -407,14 +408,36 @@ class PDFTextObject(_PDFColorSetter):
                     i,j = e.args[2:4]
                     raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[max(i-10,0):i],text[i:j],text[j:j+10]),)))
 
+            canv_escape = canv._escape
             for f, t in pdfmetrics.unicode2T1(text,[font]+font.substitutionFonts):
                 if f!=fc:
                     R.append("%s %s Tf %s TL" % (canv._doc.getInternalFontName(f.fontName), fp_str(self._fontsize), fp_str(self._leading)))
                     fc = f
-                R.append("(%s) Tj" % canv._escape(t))
+                R.append("(%s) Tj" % canv_escape(t))
             if font!=fc:
                 R.append("%s %s Tf %s TL" % (canv._doc.getInternalFontName(self._fontname), fp_str(self._fontsize), fp_str(self._leading)))
         return ' '.join(R)
+
+    def _shapedTextOut(self, text, dx, dy):
+        add = self._code.append
+        canv = self._canvas
+        font = pdfmetrics.getFont(self._fontname)
+        canv_escape = canv._escape
+        for subset, t in font.splitString(text, canv._doc):
+            if subset!=self._curSubset:
+                pdffontname = font.getSubsetInternalName(subset, canv._doc)
+                R.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
+                self._curSubset = subset
+            if dy:
+                print(f'{dy} -->',end='')
+                dy = (dy / font.face.unitsPerEm) * self._fontsize
+                print(f'{dy}')
+                add(f'{fp_str(dy)} Ts')
+            if dx:
+                add(f'[{fp_str(font.pdfScale(dx))} ({canv_escape(t)})] TJ')
+            if dy:
+                add(f'{fp_str(-dy)} Ts')
+            
 
     def _textOut(self, text, TStar=0):
         "prints string at current point, ignores text cursor"

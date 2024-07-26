@@ -60,6 +60,11 @@ from collections import namedtuple
 from io import BytesIO
 import os, time
 
+try:
+    import uharfbuzz
+except:
+    uharfbuzz = None
+
 class TTFError(pdfdoc.PDFError):
     "TrueType font exception"
     pass
@@ -562,7 +567,14 @@ class TTFontFile(TTFontParser):
             raise TTFError('Invalid head table magic %04x' % magic)
         self.skip(2)
         self.unitsPerEm = unitsPerEm = self.read_ushort()
-        scale = lambda x, unitsPerEm=unitsPerEm: x * 1000. / unitsPerEm
+        if unitsPerEm==1000:
+            scale = lambda x: x
+        else:
+            _1000mult = 1000 / unitsPerEm
+            scale = lambda x: x*_1000mult
+        self._pdfScale = scale
+        #scale = ((lambda x: x) if unitsPerEm==1000
+                #else (lambda x, unitsPerEm=unitsPerEm: x * (1000 / unitsPerEm)))
         self.skip(16)
         xMin = self.read_short()
         yMin = self.read_short()
@@ -701,7 +713,7 @@ class TTFontFile(TTFontParser):
         self.seek(encoffs)
         fmt = self.read_ushort()
         self.charToGlyph = charToGlyph = {}
-        glyphToChar = {}
+        self.glyphToChar = glyphToChar = {}
         if fmt in (13,12,10,8):
             self.skip(2)    #padding
             length = self.read_ulong()
@@ -1323,6 +1335,151 @@ class TTFont:
             fontDict = doc.idToObject['BasicFonts'].dict
             fontDict[internalName] = pdfFont
         del self.state[doc]
+
+    @property
+    def hbFace(self):
+        '''return uharbuzz.Face'''
+        face = getattr(self,'__hbFace__',None)
+        if not face:
+            if uharfbuzz is None:
+                raise ValueError('Cannot import uharfbuzz so shaping is not allowed\nplease pip install uharfbuzz')
+            blob = uharfbuzz.Blob(self.face._ttf_data)
+            face = self.__hbFace__ = uharfbuzz.Face(blob)
+            del blob
+        return face
+
+    def hbFont(self, fontSize=10):
+        '''return uharfbuzz Font'''
+        font = uharfbuzz.Font(self.hbFace)
+        font.ptem = fontSize
+        self.hbAddPrivate = self.__addPrivate
+        self.__hbUnis = {}
+        self.__hbPrivate = 0xE000
+        return font
+
+    def __addPrivate(self, name, gid, advance):
+        uchar = self.__hbUnis.get(name,None)
+        if not uchar:
+            face = self.face
+            uchar = self.__hbPrivate
+            while uchar in face.charToGlyph:
+                uchar += 1
+            assert uchar<=0xF800
+            self.__hbPrivate = self.__hbUnis[name] = uchar
+            face.charToGlyph[uchar] = gid
+            face.glyphToChar.setdefault(gid,[]).append(gid)
+            face.charWidths[uchar] = advance
+        return uchar
+
+    def pdfScale(self,v):
+        return self.face._pdfScale(v)
+
+    def unregister(self):
+        if self.fontName in pdfmetrics._fonts: del pdfmetrics._fonts[self.fontName]
+        if self.face.name in pdfmetrics._dynFaceNames: del pdfmetrics._dynFaceNames[self.face.name]
+
+#we only expect to use/see these if uharfbuzz is importable
+class ShapedFragWord(list):
+    '''list class to distinguish frag words that have been shaped'''
+    pass
+
+class ShapedFragTuple(tuple):
+    def __new__(cls, t, shapeData=None):
+        self = super().__new__(cls,t)
+        self.__shapeData__ = shapeData
+        return self
+
+ShapeData = namedtuple('ShapeData','x_advance y_advance x_offset y_offset')
+
+if not uharfbuzz:
+    def shapeFragWord(w, features=None):
+        return w
+else:
+    def shapeFragWord(w, features=dict(kern=True,liga=True,dlig=True)):
+        '''take a frag word and return a shaped fragword if uharfbuzz makes any changes
+        if no changes are made retrn the original word
+        '''
+        F = []
+        text = ''
+        specials = {}
+        for f, s in w[1:]:
+            if not s:
+                specials.setdefault(len(text),[]).append(f)
+                continue
+            F.extend(len(s)*[f])
+            text += s
+        ntext = len(text)
+        ttfn = F[0].fontName
+        ttfs = F[0].fontSize
+        ttf = pdfmetrics.getFont(ttfn)
+        hbf = ttf.hbFont(ttfs)
+        ttfs /= 1000
+        buf = uharfbuzz.Buffer()
+        buf.cluster_level = uharfbuzz.BufferClusterLevel.CHARACTERS
+        buf.add_str(text)
+        buf.guess_segment_properties()
+        infos = buf.glyph_infos
+        uharfbuzz.shape(hbf, buf, features)
+
+        infos = buf.glyph_infos
+        positions = buf.glyph_positions
+
+        changed = False
+        shaped = False
+        new = ShapedFragWord([0])
+        nf = None
+        xpos = 0
+        ypos = 0
+        shapeDataAppend = [].append
+        shaped = False
+        for i,(info,pos) in enumerate(zip(infos,positions)):
+            gid = info.codepoint
+            name = hbf.glyph_to_string(gid)
+            cluster = info.cluster
+            x_advance = pos.x_advance
+            x_offset = pos.x_offset
+            y_advance = pos.y_advance
+            y_offset = pos.y_offset
+            f = F[cluster]
+            if nf is not f:
+                if nf:
+                    new.append(ShapedFragTuple((nf,ns),shapeData=shapeDataAppend.__self__))
+                    new[0] += newlen
+                nf = f
+                ns = ''
+                newlen = 0  #the new word length
+                shapeDataAppend = [].append
+                _ = nf.fontName
+                if _!=ttfn:
+                    ttfn = _
+                    ttf = pdfmetrics.getFont(ttfn)
+                ttfs = nf.fontSize/1000
+            try:
+                uchar = ttf.face.glyphToChar[gid][0]
+            except KeyError:
+                uchar = ttf.hbAddPrivate(name, gid, x_advance)
+            uchar = chr(uchar)
+            ns += uchar
+            #scale to ensure unitsPerEm == 1000
+            x_advance = ttf.pdfScale(x_advance)     #fontsize related units
+            x_offset = ttf.pdfScale(x_offset)
+            y_advance = ttf.pdfScale(y_advance)*ttfs    #absolute units
+            y_offset = ttf.pdfScale(y_offset)*ttfs
+            if x_advance: newlen += x_advance*ttfs
+            shaped = shaped or (x_offset!=0 or y_offset!=0 
+                                or i>=ntext 
+                                or (text[i]==uchar and x_advance!=ttf.face.charWidths[ord(text[i])]))
+            changed = changed or shaped or i>=ntext or text[i]!=uchar
+            shapeDataAppend(ShapeData(x_advance,y_advance,x_offset,y_offset))
+        if nf:  #we have at least one frag
+            new.append(ShapedFragTuple((nf,ns),shapeData=shapeDataAppend.__self__))
+            new[0] += newlen
+        if not changed: return w
+        if not shaped:
+            if changed:
+                #make all the tuples simple
+                new = [new[0]] + [tuple(_) for _ in new[1:]]
+        return new
 
 #preserve the initial values here
 def _reset():

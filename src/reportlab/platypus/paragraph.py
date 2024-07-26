@@ -2934,3 +2934,14 @@ It should be a normal<onDraw name="_indexAdd" label="normal"/> paragraph, set in
         dumpParagraphFrags(P)
         w,h = P.wrap(6.27*72-12,10000)
         dumpParagraphLines(P)
+
+    if flagged(12):
+        from reportlab.pdfbase.ttfonts import TTFont
+        from reportlab.pdfbase.pdfmetrics import registerFont
+        registerFont(TTFont('DejaVuSans','DejaVuSans.ttf'))
+        registerFont(TTFont('NotoSansKhmer-Regular','NotoSansKhmer-Regular.ttf'))
+        text="Hello clifftop <font name='NotoSansKhmer-Regular'>\u1786\u17D2\u1793\u17B6\u17C6</font> world <span color='red'>of </span>wonder!"
+        P=Paragraph(text,style=ParagraphStyle('dvsstyle',fontName="DejaVuSans",fontSize=10))
+        dumpParagraphFrags(P)
+        #w,h = P.wrap(6.27*72-12,10000)
+        #dumpParagraphLines(P)
