@@ -384,7 +384,7 @@ class PDFTextObject(_PDFColorSetter):
         R = []
         if font._dynamicFont:
             canv_escape = canv._escape
-            if font.isShaped:
+            if font.isShaped and isinstance(text,ShapedStr):
                 pass
             else:
                 #it's a truetype font and should be utf8.  If an error is raised,
