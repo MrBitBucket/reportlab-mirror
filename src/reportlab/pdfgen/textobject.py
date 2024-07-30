@@ -13,6 +13,7 @@ from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor
 from reportlab.lib.utils import isBytes, isStr, asUnicode
 from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import ShapedStr
 from reportlab.rl_config import rtlSupport
 
 log2vis = None
@@ -383,13 +384,16 @@ class PDFTextObject(_PDFColorSetter):
         R = []
         if font._dynamicFont:
             canv_escape = canv._escape
-            #it's a truetype font and should be utf8.  If an error is raised,
-            for subset, t in font.splitString(text, canv._doc):
-                if subset!=self._curSubset:
-                    pdffontname = font.getSubsetInternalName(subset, canv._doc)
-                    R.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
-                    self._curSubset = subset
-                R.append("(%s) Tj" % canv_escape(t))
+            if font.isShaped:
+                pass
+            else:
+                #it's a truetype font and should be utf8.  If an error is raised,
+                for subset, t in font.splitString(text, canv._doc):
+                    if subset!=self._curSubset:
+                        pdffontname = font.getSubsetInternalName(subset, canv._doc)
+                        R.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
+                        self._curSubset = subset
+                    R.append("(%s) Tj" % canv_escape(t))
         elif font._multiByte:
             #all the fonts should really work like this - let them know more about PDF...
             R.append("%s %s Tf %s TL" % (

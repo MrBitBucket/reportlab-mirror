@@ -1194,7 +1194,7 @@ class TTFont:
     _multiByte = 1      # We want our own stringwidth
     _dynamicFont = 1    # We want dynamic subsetting
 
-    def __init__(self, name, filename, validate=0, subfontIndex=0,asciiReadable=None):
+    def __init__(self, name, filename, validate=0, subfontIndex=0, asciiReadable=None, shaped=False):
         """Loads a TrueType font from filename.
 
         If validate is set to a false values, skips checksum validation.  This
@@ -1208,6 +1208,7 @@ class TTFont:
         if asciiReadable is None:
             asciiReadable = rl_config.ttfAsciiReadable
         self._asciiReadable = asciiReadable
+        self._shaped = bool(shaped and hb)
 
     def stringWidth(self,text,size,encoding='utf8'):
         return instanceStringWidthTTF(self,text,size,encoding)
@@ -1378,14 +1379,18 @@ class TTFont:
         if self.fontName in pdfmetrics._fonts: del pdfmetrics._fonts[self.fontName]
         if self.face.name in pdfmetrics._dynFaceNames: del pdfmetrics._dynFaceNames[self.face.name]
 
+    @property
+    def isShaped(self):
+        return bool(self._shaped and hb)
+
 #we only expect to use/see these if uharfbuzz is importable
 class ShapedFragWord(list):
     '''list class to distinguish frag words that have been shaped'''
     pass
 
-class ShapedFragTuple(tuple):
-    def __new__(cls, t, shapeData=None):
-        self = super().__new__(cls,t)
+class ShapedStr(str):
+    def __new__(cls, s, shapeData=None):
+        self = super().__new__(cls,s)
         self.__shapeData__ = shapeData
         return self
 
@@ -1443,7 +1448,7 @@ else:
             f = F[cluster]
             if nf is not f:
                 if nf:
-                    new.append(ShapedFragTuple((nf,ns),shapeData=shapeDataAppend.__self__))
+                    new.append((nf,ShapedStr(ns,shapeData=shapeDataAppend.__self__)))
                     new[0] += newlen
                 nf = f
                 ns = ''
@@ -1472,7 +1477,7 @@ else:
             changed = changed or shaped or i>=ntext or text[i]!=uchar
             shapeDataAppend(ShapeData(x_advance,y_advance,x_offset,y_offset))
         if nf:  #we have at least one frag
-            new.append(ShapedFragTuple((nf,ns),shapeData=shapeDataAppend.__self__))
+            new.append((nf,ShapedStr(ns,shapeData=shapeDataAppend.__self__)))
             new[0] += newlen
         if not changed: return w
         if not shaped:

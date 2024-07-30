@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.2.3   ??/08/202
+---------------------------
+    * preliminary changes to allow TTF fonts to be shaped.
+
 CHANGES  4.2.2   21/06/202
 ---------------------------
     * allow changing TableOfContents & Index notification token using keyword argument notifyKind

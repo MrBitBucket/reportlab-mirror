@@ -17,7 +17,7 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       makeToUnicodeCMap, \
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, add32, uharfbuzz, shapeFragWord, \
-                                      ShapedFragWord, ShapedFragTuple, ShapeData
+                                      ShapedFragWord, ShapedStr, ShapeData
 import zlib, bz2, base64
 from reportlab import rl_config
 from reportlab.lib.utils import int2Byte
@@ -445,26 +445,40 @@ CMapName currentdict /CMap defineresource pop
 end
 end""")
 
-    @rlSkipUnless(uharfbuzz,'no harfbuzz support')
-    def test_hb_interface(self):
-        ttf = hb_test_ttf()
-        fontName = 'hb-test'
+    def hbIfaceTest(self, ttf, text, exLen, exText, exShapedData):
+        fontName = ttf.fontName
         fontSize = 30
         pdfmetrics.registerFont(ttf)
-        text = '\u1786\u17D2\u1793\u17B6\u17C6'
         w = [pdfmetrics.stringWidth(text,fontName,fontSize),(ABag(fontName=fontName,fontSize=fontSize),text)]
         new = shapeFragWord(w)
         self.assertEqual(len(new),2,'expected a len of 2')
         self.assertTrue(isinstance(new,ShapedFragWord),f'returned list class is {new.__class__.__name__} not expected ShapedFragWord')
-        self.assertEqual(new[0],27.689999999999998,f'new[0]={new[0]} not expected =27.689999999999998')
-        self.assertTrue(isinstance(new[1],ShapedFragTuple),f'returned list class is {new[1].__class__.__name__} not expected ShapedFragTuple')
-        self.assertTrue(new[1][1]=='\ue000\ue001\u17c6','shaped string is wrong')
-        self.assertEqual(new[1].__shapeData__,
-                                        [ShapeData(x_advance=923, y_advance=0.0, x_offset=0, y_offset=0.0),
-                                         ShapeData(x_advance=0, y_advance=0.0, x_offset=-296, y_offset=-0.78),
-                                         ShapeData(x_advance=0, y_advance=0.0, x_offset=47, y_offset=-0.87)],
-                                            'shape data is wrong')
+        self.assertEqual(new[0],exLen,f'new[0]={new[0]} not expected ={exLen}')
+        self.assertTrue(isinstance(new[1][1],ShapedStr),f'returned str class is {new[1].__class__.__name__} not expected ShapedStr')
+        self.assertTrue(new[1][1]==exText,'shaped string is wrong')
+        self.assertEqual(new[1][1].__shapeData__,exShapedData, 'shape data is wrong')
         ttf.unregister()
+
+    @rlSkipUnless(uharfbuzz,'no harfbuzz support')
+    def test_hb_shape_change(self):
+        ttf = hb_test_ttf()
+        return self.hbIfaceTest(ttf,'\u1786\u17D2\u1793\u17B6\u17C6',27.689999999999998,'\ue000\ue001\u17c6',
+                                [ShapeData(x_advance=923, y_advance=0.0, x_offset=0, y_offset=0.0),
+                                ShapeData(x_advance=0, y_advance=0.0, x_offset=-296, y_offset=-0.78),
+                                ShapeData(x_advance=0, y_advance=0.0, x_offset=47, y_offset=-0.87)])
+
+    @rlSkipUnless(uharfbuzz,'no harfbuzz support')
+    def test_hb_ligature(self):
+        ttf = TTFont('Vera','Vera.ttf')
+        #ligatures cause the standard length 133.2275390625 to be reduced to 130.78125
+        return self.hbIfaceTest(ttf,'Aon Way',130.78125,'Aon Way',
+                                [ShapeData(x_advance=675.29296875, y_advance=0.0, x_offset=0.0, y_offset=0.0),
+                                ShapeData(x_advance=603.02734375, y_advance=0.0, x_offset=-8.7890625, y_offset=0.0),
+                                ShapeData(x_advance=633.7890625, y_advance=0.0, x_offset=0.0, y_offset=0.0),
+                                ShapeData(x_advance=317.87109375, y_advance=0.0, x_offset=0.0, y_offset=0.0),
+                                ShapeData(x_advance=956.54296875, y_advance=0.0, x_offset=0.0, y_offset=0.0),
+                                ShapeData(x_advance=581.0546875, y_advance=0.0, x_offset=-31.73828125, y_offset=0.0),
+                                ShapeData(x_advance=591.796875, y_advance=0.0, x_offset=0.0, y_offset=0.0)])
 
 def hb_test_ttf():
     return TTFont('hb-test',
