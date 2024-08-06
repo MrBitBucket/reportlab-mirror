@@ -451,37 +451,87 @@ end""")
         pdfmetrics.registerFont(ttf)
         w = [pdfmetrics.stringWidth(text,fontName,fontSize),(ABag(fontName=fontName,fontSize=fontSize),text)]
         new = shapeFragWord(w)
+        ttf.unregister()
         self.assertEqual(len(new),2,'expected a len of 2')
         self.assertTrue(isinstance(new,ShapedFragWord),f'returned list class is {new.__class__.__name__} not expected ShapedFragWord')
         self.assertEqual(new[0],exLen,f'new[0]={new[0]} not expected ={exLen}')
         self.assertTrue(isinstance(new[1][1],ShapedStr),f'returned str class is {new[1].__class__.__name__} not expected ShapedStr')
         self.assertTrue(new[1][1]==exText,'shaped string is wrong')
         self.assertEqual(new[1][1].__shapeData__,exShapedData, 'shape data is wrong')
-        ttf.unregister()
 
     @rlSkipUnless(uharfbuzz,'no harfbuzz support')
     def test_hb_shape_change(self):
         ttf = hb_test_ttf()
-        return self.hbIfaceTest(ttf,'\u1786\u17D2\u1793\u17B6\u17C6',27.689999999999998,'\ue000\ue001\u17c6',
-                                [ShapeData(x_advance=923, y_advance=0.0, x_offset=0, y_offset=0.0),
-                                ShapeData(x_advance=0, y_advance=0.0, x_offset=-296, y_offset=-0.78),
-                                ShapeData(x_advance=0, y_advance=0.0, x_offset=47, y_offset=-0.87)])
+        return self.hbIfaceTest(ttf,'\u1786\u17D2\u1793\u17B6\u17C6|', 44.22,'\ue000\ue001\u17c6|',
+                                [ShapeData(cluster=0, x_advance=923, y_advance=0, x_offset=0, y_offset=0, width=923),
+                                ShapeData(cluster=0, x_advance=0, y_advance=0, x_offset=-296, y_offset=-26, width=0),
+                                ShapeData(cluster=4, x_advance=0, y_advance=0, x_offset=47, y_offset=-29, width=0),
+                                ShapeData(cluster=5, x_advance=551, y_advance=0, x_offset=0, y_offset=0, width=551)])
 
     @rlSkipUnless(uharfbuzz,'no harfbuzz support')
     def test_hb_ligature(self):
         ttf = TTFont('Vera','Vera.ttf')
         #ligatures cause the standard length 133.2275390625 to be reduced to 130.78125
         return self.hbIfaceTest(ttf,'Aon Way',130.78125,'Aon Way',
-                                [ShapeData(x_advance=675.29296875, y_advance=0.0, x_offset=0.0, y_offset=0.0),
-                                ShapeData(x_advance=603.02734375, y_advance=0.0, x_offset=-8.7890625, y_offset=0.0),
-                                ShapeData(x_advance=633.7890625, y_advance=0.0, x_offset=0.0, y_offset=0.0),
-                                ShapeData(x_advance=317.87109375, y_advance=0.0, x_offset=0.0, y_offset=0.0),
-                                ShapeData(x_advance=956.54296875, y_advance=0.0, x_offset=0.0, y_offset=0.0),
-                                ShapeData(x_advance=581.0546875, y_advance=0.0, x_offset=-31.73828125, y_offset=0.0),
-                                ShapeData(x_advance=591.796875, y_advance=0.0, x_offset=0.0, y_offset=0.0)])
+                                [ShapeData(cluster=0, x_advance=675.29296875, y_advance=0, x_offset=0.0, y_offset=0, width=684.08203125),
+                                ShapeData(cluster=1, x_advance=603.02734375, y_advance=0, x_offset=-8.7890625, y_offset=0, width=611.81640625),
+                                ShapeData(cluster=2, x_advance=633.7890625, y_advance=0, x_offset=0.0, y_offset=0, width=633.7890625),
+                                ShapeData(cluster=3, x_advance=317.87109375, y_advance=0, x_offset=0.0, y_offset=0, width=317.87109375),
+                                ShapeData(cluster=4, x_advance=956.54296875, y_advance=0, x_offset=0.0, y_offset=0, width=988.76953125),
+                                ShapeData(cluster=5, x_advance=581.0546875, y_advance=0, x_offset=-31.73828125, y_offset=0, width=612.79296875),
+                                ShapeData(cluster=6, x_advance=591.796875, y_advance=0, x_offset=0.0, y_offset=0, width=591.796875)])
 
-def hb_test_ttf():
-    return TTFont('hb-test',
+    @rlSkipUnless(uharfbuzz,'no harfbuzz support')
+    def test_hb0(self):
+        ttf = hb_test_ttf()
+        try:
+            text = '\u1786\u17D2\u1793\u17B6\u17C6|'
+            #'\ue000\ue001\u17c6'
+            fontName = ttf.fontName
+            fontSize = 30
+            pdfmetrics.registerFont(ttf)
+            from reportlab.pdfgen.textobject import PDFTextObject
+            from reportlab.pdfgen.canvas import Canvas
+            canv = Canvas(outputfile('test_pdfbase_ttfonts_hb0.pdf'))
+            ttf.splitString(text,canv._doc)
+            w = [pdfmetrics.stringWidth(text,fontName,fontSize),(ABag(fontName=fontName,fontSize=fontSize),text)]
+            new = shapeFragWord(w)
+            canv.addLiteral(r"""
+1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
+BT 1 0 0 1 0 0 Tm 1 0 0 1 36 806 Tm /F2+0 30 Tf 36 TL (\001\002\003\004\005) Tj /F3+0 12 Tf 14.4 TL ( '\\u1786\\u17d2\\u1793\\u17b6\\u17c6') Tj T* ET
+q
+.1 w
+0 .501961 0 RG
+n 63.69 750 m 63.69 786 l S
+1 0 0 RG
+n 54.81 750 m 54.81 786 l S
+0 0 1 RG
+n 53.4 750 m 53.4 786 l S
+Q
+BT 1 0 0 1 0 0 Tm 1 0 0 1 36 756 Tm /F2+0 30 Tf 36 TL (\006) Tj -0.78 Ts [296 (\007) -296] TJ -0.87 Ts [-47 (\005) 47] TJ .87 Ts (|) Tj /F3+0 12 Tf 14.4 TL ( '\\ue000\\ue001\\u17c6') Tj T* ET
+BT 1 0 0 1 0 0 Tm 1 0 0 1 36 706 Tm /F2+0 30 Tf 36 TL (\006) Tj 1 0 0 1 54.81 705.22 Tm (\007) Tj 1 0 0 1 63.69 706 Tm 1 0 0 1 65.1 705.13 Tm (\005) Tj 1 0 0 1 63.49 706 Tm (|) Tj  ET
+q
+.1 w
+0 .501961 0 RG
+n 36 650 m 36 686 l S
+Q
+BT 1 0 0 1 0 0 Tm 1 0 0 1 36 656 Tm /F2+0 30 Tf 36 TL (|) Tj ET""")
+            ttf._shaped = True
+            canv.setFont(fontName,fontSize)
+            t = canv.beginText(36, 626)
+            t._textOut(new[1][1],False)
+            code = t.getCode()
+            excode = r'''BT 1 0 0 1 36 626 Tm /F2+0 30 Tf 36 TL (\006) Tj -0.78 Ts [296 (\007) -296] TJ -0.87 Ts [-47 (\005) 47] TJ (|) Tj ET'''
+            canv.drawText(t)
+            canv.showPage()
+            canv.save()
+            self.assertEqual(code,excode,'PDF _textOut is wrong')
+        finally:
+            ttf.unregister()
+
+def hb_test_ttf(ttfn='hb-test'):
+    #return TTFont(ttfn,'NotoSansKhmer-Regular.ttf')
+    return TTFont(ttfn,
             BytesIO(bz2.decompress(base64.a85decode(r'''
                 6<\%_0gSqh;d&_^k#q`bI"21rs8W-!s8W-!s8U^Ns8W-!=3b*]`,jh\T3pD8i0RO'#2LZ])_
                 JAJ!!!C-`c0E5R5"e3$2UDddQL;]BnU2^)B&V&Bq^3sBo!TQ+:U/@)DopmBPHZqciCua"&/b

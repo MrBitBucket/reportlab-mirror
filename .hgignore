@@ -84,3 +84,4 @@ syntax: regexp
 ^(bin|[Ss]cripts)/
 ^pyvenv.cfg
 ^reportlab_(settings|mod)\.py
+^devel/

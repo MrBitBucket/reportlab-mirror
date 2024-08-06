@@ -1381,7 +1381,7 @@ class TTFont:
 
     @property
     def isShaped(self):
-        return bool(self._shaped and hb)
+        return bool(self._shaped and uharfbuzz)
 
 #we only expect to use/see these if uharfbuzz is importable
 class ShapedFragWord(list):
@@ -1394,7 +1394,7 @@ class ShapedStr(str):
         self.__shapeData__ = shapeData
         return self
 
-ShapeData = namedtuple('ShapeData','x_advance y_advance x_offset y_offset')
+ShapeData = namedtuple('ShapeData','cluster x_advance y_advance x_offset y_offset width')
 
 if not uharfbuzz:
     def shapeFragWord(w, features=None):
@@ -1402,7 +1402,7 @@ if not uharfbuzz:
 else:
     def shapeFragWord(w, features=dict(kern=True,liga=True,dlig=True)):
         '''take a frag word and return a shaped fragword if uharfbuzz makes any changes
-        if no changes are made retrn the original word
+        if no changes are made return the original word
         '''
         F = []
         text = ''
@@ -1420,7 +1420,7 @@ else:
         hbf = ttf.hbFont(ttfs)
         ttfs /= 1000
         buf = uharfbuzz.Buffer()
-        buf.cluster_level = uharfbuzz.BufferClusterLevel.CHARACTERS
+        buf.cluster_level = uharfbuzz.BufferClusterLevel.MONOTONE_CHARACTERS
         buf.add_str(text)
         buf.guess_segment_properties()
         infos = buf.glyph_infos
@@ -1463,19 +1463,20 @@ else:
                 uchar = ttf.face.glyphToChar[gid][0]
             except KeyError:
                 uchar = ttf.hbAddPrivate(name, gid, x_advance)
+            ucharWidth = ttf.face.charWidths[uchar]
             uchar = chr(uchar)
             ns += uchar
             #scale to ensure unitsPerEm == 1000
             x_advance = ttf.pdfScale(x_advance)     #fontsize related units
             x_offset = ttf.pdfScale(x_offset)
-            y_advance = ttf.pdfScale(y_advance)*ttfs    #absolute units
-            y_offset = ttf.pdfScale(y_offset)*ttfs
+            y_advance = ttf.pdfScale(y_advance)     #absolute units
+            y_offset = ttf.pdfScale(y_offset)
             if x_advance: newlen += x_advance*ttfs
             shaped = shaped or (x_offset!=0 or y_offset!=0 
                                 or i>=ntext 
-                                or (text[i]==uchar and x_advance!=ttf.face.charWidths[ord(text[i])]))
+                                or (text[i]==uchar and x_advance!=ucharWidth))
             changed = changed or shaped or i>=ntext or text[i]!=uchar
-            shapeDataAppend(ShapeData(x_advance,y_advance,x_offset,y_offset))
+            shapeDataAppend(ShapeData(cluster, x_advance, y_advance, x_offset, y_offset, ucharWidth))
         if nf:  #we have at least one frag
             new.append((nf,ShapedStr(ns,shapeData=shapeDataAppend.__self__)))
             new[0] += newlen
