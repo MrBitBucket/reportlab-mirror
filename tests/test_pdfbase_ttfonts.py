@@ -497,6 +497,9 @@ end""")
                 advances = [0]
                 for a in new[1][1].__shapeData__:
                     advances.append(fontSize*a.x_advance/1000 + advances[-1])
+                print(f'\nx_advance={[_.x_advance for _ in new[1][1].__shapeData__]}')
+                print(f'x_offset ={[_.x_offset  for _ in new[1][1].__shapeData__]}')
+                print(f'width    ={[_.width     for _ in new[1][1].__shapeData__]}')
 
                 def drawLines(x,y):
                     canv.saveState()
@@ -523,6 +526,9 @@ end""")
                 canv.drawText(t)
                 drawLines(36,y-1.2*fontSize)
                 canv.restoreState()
+                if code!=excode:
+                    canv.showPage()
+                    canv.save()
                 self.assertEqual(code,excode,f'{fontName} PDF _textOut is wrong\n')
             finally:
                 ttf.unregister()
@@ -537,7 +543,8 @@ end""")
             'Aon Way',
             786,
             fpdfLiteral='''BT 1 0 0 1 36 786 Tm /F2+0 30 Tf 36 TL (A) Tj 1 0 0 1 56 786 Tm (o) Tj 1 0 0 1 74.35 786 Tm (n) Tj 1 0 0 1 93.36 786 Tm ( ) Tj 1 0 0 1 102.9 786 Tm (W) Tj 1 0 0 1 130.64 786 Tm (a) Tj 1 0 0 1 149.03 786 Tm (y) Tj 1 0 0 1 166.78 786 Tm ET''',
-            excode='''BT 1 0 0 1 36 750 Tm /F2+0 30 Tf 36 TL [(A) 8.789062] TJ [8.789062 (o)] TJ (n) Tj ( ) Tj [(W) 32.22656] TJ [31.73828 (a)] TJ (y) Tj ET'''
+            excode='''BT 1 0 0 1 36 750 Tm /F2+0 30 Tf 36 TL [(A) 17.57812 (on W) 63.96484 (ay)] TJ ET'''
+            #excode='''BT 1 0 0 1 36 750 Tm /F2+0 30 Tf 36 TL [(A) 8.789062] TJ [8.789062 (o)] TJ (n) Tj ( ) Tj [(W) 32.22656] TJ [31.73828 (a)] TJ (y) Tj ET'''
             )
         canv.translate(0,-36)
         hb_example(
@@ -545,7 +552,8 @@ end""")
             '\u1786\u17D2\u1793\u17B6\u17C6|',
             706,
             fpdfLiteral=r'''BT 1 0 0 1 0 0 Tm 1 0 0 1 36 706 Tm /F3+0 30 Tf 36 TL (\006) Tj 1 0 0 1 54.81 705.22 Tm (\007) Tj 1 0 0 1 63.69 706 Tm 1 0 0 1 65.1 705.13 Tm (\005) Tj 1 0 0 1 63.49 706 Tm (|) Tj  ET''',
-            excode = r'''BT 1 0 0 1 36 670 Tm /F3+0 30 Tf 36 TL (\006) Tj -0.78 Ts [296 (\007) -296] TJ -0.87 Ts [-47 (\005) 47] TJ (|) Tj ET''',
+            #excode = r'''BT 1 0 0 1 36 670 Tm /F3+0 30 Tf 36 TL (\006) Tj -0.78 Ts [296 (\007) -296] TJ -0.87 Ts [-47 (\005) 47] TJ (|) Tj ET''',
+            excode = r'''BT 1 0 0 1 36 670 Tm /F3+0 30 Tf 36 TL (\006) Tj -0.78 Ts [296 (\007) -296] TJ -0.87 Ts [-47 (\005) 47 (|)] TJ ET'''
             )
 
         canv.showPage()

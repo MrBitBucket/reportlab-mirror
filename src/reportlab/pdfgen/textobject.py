@@ -417,11 +417,11 @@ class PDFTextObject(_PDFColorSetter):
                         sd0 = sd1
                         for i, sd in enumerate(SD):
                             r = r0 + fontsize*sd.y_offset/1000
-                            if cluster!=sd.cluster or r!=self._rise:
+                            if cluster is None or sd.cluster<0 or r!=self._rise:
                                 if cluster is not None:
                                     #end current cluster
                                     A = [v for v in ((('(%s)' % canv_escape(b''.join(g))) if k else fp_str(sum(g)))
-                                                for k, g in groupby(A.__self__,lambda x: isinstance(x,bytes))) if v!='0']
+                                                for k, g in groupby(filter(None,A.__self__),lambda x: isinstance(x,bytes))) if v!='0']
                                     if len(A)==1 and A[0].startswith('('):
                                         R(f'{A[0]} Tj')
                                     else:
@@ -439,7 +439,7 @@ class PDFTextObject(_PDFColorSetter):
                             #we assume that both harfbuzz and pdf positions are correct
                             A(-sd.x_offset)     #adjust using harfbuzz offset
                             A(bytes(chr(t[i]).encode('latin1')))
-                            A(sd.x_offset)      #remove the harfbuzz adjustment
+                            #A(sd.x_offset)     #remove the harfbuzz adjustment
                             #we assume the harfbuzz position is correct, but we will have
                             # 1<----O------|
                             # 1-----O ---->|--------------A--------->2
@@ -448,7 +448,7 @@ class PDFTextObject(_PDFColorSetter):
                             # 1--------------------W------->
                             # 
                             # W - O + x = A ==> x = A-W+O
-                            A(sd.width - sd.x_advance)
+                            A(sd.width - sd.x_advance + sd.x_offset)
                     if self._rise!=r0: self.setRise(r0)
                 else:
                     for subset, t in font.splitString(text, canv._doc):
