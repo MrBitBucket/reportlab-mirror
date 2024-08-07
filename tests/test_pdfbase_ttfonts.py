@@ -10,6 +10,7 @@ if __name__=='__main__':
 import unittest
 from io import BytesIO
 from reportlab.pdfgen.canvas import Canvas
+from reportlab.pdfgen.textobject import PDFTextObject
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.pdfdoc import PDFDocument, PDFError
 from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFile, \
@@ -482,52 +483,73 @@ end""")
                                 ShapeData(cluster=6, x_advance=591.796875, y_advance=0, x_offset=0.0, y_offset=0, width=591.796875)])
 
     @rlSkipUnless(uharfbuzz,'no harfbuzz support')
-    def test_hb0(self):
-        ttf = hb_test_ttf()
+    def test_hb_examples(self):
+        canv = Canvas(outputfile('test_pdfbase_ttfonts_hb_examples.pdf'))
+        def hb_example(ttf, text, y, fpdfLiteral, excode):
+            try:
+                fontName = ttf.fontName
+                fontSize = 30
+                pdfmetrics.registerFont(ttf)
+                ttf.splitString(text,canv._doc)
+                w = [pdfmetrics.stringWidth(text,fontName,fontSize),(ABag(fontName=fontName,fontSize=fontSize),text)]
+                new = shapeFragWord(w)
+
+                advances = [0]
+                for a in new[1][1].__shapeData__:
+                    advances.append(fontSize*a.x_advance/1000 + advances[-1])
+
+                def drawLines(x,y):
+                    canv.saveState()
+                    canv.setLineWidth(0.5)
+                    canv.setStrokeColor((1,0,0))
+                    canv.lines([(_+x,y-0.2*fontSize,_+x,y+fontSize) for _ in (advances)])
+                    canv.restoreState()
+
+                canv.setFont('Helvetica',12)
+                canv.drawString(200,y,'unshaped')
+                canv.drawString(200,y-1.2*fontSize,'fpdf2 shaping')
+                canv.drawString(200,y-2*1.2*fontSize,'rl shaping')
+                canv.setFont(fontName,fontSize)
+                canv.drawString(36,y,text)
+                drawLines(36,y)
+                canv.saveState()
+                canv.translate(0,-fontSize*1.2)
+                ttf._shaped = True
+                canv.addLiteral(fpdfLiteral)
+                drawLines(36,y)
+                t = canv.beginText(36, y-1.2*fontSize) #786 - 1.2*30
+                t._textOut(new[1][1],False)
+                code = t.getCode()
+                canv.drawText(t)
+                drawLines(36,y-1.2*fontSize)
+                canv.restoreState()
+                self.assertEqual(code,excode,f'{fontName} PDF _textOut is wrong\n')
+            finally:
+                ttf.unregister()
         try:
-            text = '\u1786\u17D2\u1793\u17B6\u17C6|'
-            #'\ue000\ue001\u17c6'
-            fontName = ttf.fontName
-            fontSize = 30
-            pdfmetrics.registerFont(ttf)
-            from reportlab.pdfgen.textobject import PDFTextObject
-            from reportlab.pdfgen.canvas import Canvas
-            canv = Canvas(outputfile('test_pdfbase_ttfonts_hb0.pdf'))
-            ttf.splitString(text,canv._doc)
-            w = [pdfmetrics.stringWidth(text,fontName,fontSize),(ABag(fontName=fontName,fontSize=fontSize),text)]
-            new = shapeFragWord(w)
-            canv.addLiteral(r"""
-1 0 0 1 0 0 cm  BT /F1 12 Tf 14.4 TL ET
-BT 1 0 0 1 0 0 Tm 1 0 0 1 36 806 Tm /F2+0 30 Tf 36 TL (\001\002\003\004\005) Tj /F3+0 12 Tf 14.4 TL ( '\\u1786\\u17d2\\u1793\\u17b6\\u17c6') Tj T* ET
-q
-.1 w
-0 .501961 0 RG
-n 63.69 750 m 63.69 786 l S
-1 0 0 RG
-n 54.81 750 m 54.81 786 l S
-0 0 1 RG
-n 53.4 750 m 53.4 786 l S
-Q
-BT 1 0 0 1 0 0 Tm 1 0 0 1 36 756 Tm /F2+0 30 Tf 36 TL (\006) Tj -0.78 Ts [296 (\007) -296] TJ -0.87 Ts [-47 (\005) 47] TJ .87 Ts (|) Tj /F3+0 12 Tf 14.4 TL ( '\\ue000\\ue001\\u17c6') Tj T* ET
-BT 1 0 0 1 0 0 Tm 1 0 0 1 36 706 Tm /F2+0 30 Tf 36 TL (\006) Tj 1 0 0 1 54.81 705.22 Tm (\007) Tj 1 0 0 1 63.69 706 Tm 1 0 0 1 65.1 705.13 Tm (\005) Tj 1 0 0 1 63.49 706 Tm (|) Tj  ET
-q
-.1 w
-0 .501961 0 RG
-n 36 650 m 36 686 l S
-Q
-BT 1 0 0 1 0 0 Tm 1 0 0 1 36 656 Tm /F2+0 30 Tf 36 TL (|) Tj ET""")
-            ttf._shaped = True
-            canv.setFont(fontName,fontSize)
-            t = canv.beginText(36, 626)
-            t._textOut(new[1][1],False)
-            code = t.getCode()
-            excode = r'''BT 1 0 0 1 36 626 Tm /F2+0 30 Tf 36 TL (\006) Tj -0.78 Ts [296 (\007) -296] TJ -0.87 Ts [-47 (\005) 47] TJ (|) Tj ET'''
-            canv.drawText(t)
-            canv.showPage()
-            canv.save()
-            self.assertEqual(code,excode,'PDF _textOut is wrong')
-        finally:
-            ttf.unregister()
+            vera = pdfmetrics.getFont('Vera')
+            vera.unregister()
+        except:
+            pass
+        vera = TTFont('Vera','Vera.ttf')
+        hb_example(
+            vera,
+            'Aon Way',
+            786,
+            fpdfLiteral='''BT 1 0 0 1 36 786 Tm /F2+0 30 Tf 36 TL (A) Tj 1 0 0 1 56 786 Tm (o) Tj 1 0 0 1 74.35 786 Tm (n) Tj 1 0 0 1 93.36 786 Tm ( ) Tj 1 0 0 1 102.9 786 Tm (W) Tj 1 0 0 1 130.64 786 Tm (a) Tj 1 0 0 1 149.03 786 Tm (y) Tj 1 0 0 1 166.78 786 Tm ET''',
+            excode='''BT 1 0 0 1 36 750 Tm /F2+0 30 Tf 36 TL [(A) 8.789062] TJ [8.789062 (o)] TJ (n) Tj ( ) Tj [(W) 32.22656] TJ [31.73828 (a)] TJ (y) Tj ET'''
+            )
+        canv.translate(0,-36)
+        hb_example(
+            hb_test_ttf(),
+            '\u1786\u17D2\u1793\u17B6\u17C6|',
+            706,
+            fpdfLiteral=r'''BT 1 0 0 1 0 0 Tm 1 0 0 1 36 706 Tm /F3+0 30 Tf 36 TL (\006) Tj 1 0 0 1 54.81 705.22 Tm (\007) Tj 1 0 0 1 63.69 706 Tm 1 0 0 1 65.1 705.13 Tm (\005) Tj 1 0 0 1 63.49 706 Tm (|) Tj  ET''',
+            excode = r'''BT 1 0 0 1 36 670 Tm /F3+0 30 Tf 36 TL (\006) Tj -0.78 Ts [296 (\007) -296] TJ -0.87 Ts [-47 (\005) 47] TJ (|) Tj ET''',
+            )
+
+        canv.showPage()
+        canv.save()
 
 def hb_test_ttf(ttfn='hb-test'):
     #return TTFont(ttfn,'NotoSansKhmer-Regular.ttf')

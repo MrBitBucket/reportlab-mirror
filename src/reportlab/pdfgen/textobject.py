@@ -437,10 +437,18 @@ class PDFTextObject(_PDFColorSetter):
                                 A = [].append
 
                             #we assume that both harfbuzz and pdf positions are correct
-                            A(-sd.x_offset)     #adjust using hb offset
+                            A(-sd.x_offset)     #adjust using harfbuzz offset
                             A(bytes(chr(t[i]).encode('latin1')))
-                            A(sd.x_offset)      #remove the harfbuzz adjustment adjustment
-                            A(sd.x_advance - sd.width ) #fix the positions
+                            A(sd.x_offset)      #remove the harfbuzz adjustment
+                            #we assume the harfbuzz position is correct, but we will have
+                            # 1<----O------|
+                            # 1-----O ---->|--------------A--------->2
+                            #
+                            # 1<----O------|<....(W-O).....><...x...>2
+                            # 1--------------------W------->
+                            # 
+                            # W - O + x = A ==> x = A-W+O
+                            A(sd.width - sd.x_advance)
                     if self._rise!=r0: self.setRise(r0)
                 else:
                     for subset, t in font.splitString(text, canv._doc):
