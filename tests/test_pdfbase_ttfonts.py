@@ -497,9 +497,9 @@ end""")
                 advances = [0]
                 for a in new[1][1].__shapeData__:
                     advances.append(fontSize*a.x_advance/1000 + advances[-1])
-                print(f'\nx_advance={[_.x_advance for _ in new[1][1].__shapeData__]}')
-                print(f'x_offset ={[_.x_offset  for _ in new[1][1].__shapeData__]}')
-                print(f'width    ={[_.width     for _ in new[1][1].__shapeData__]}')
+                #print(f'\nx_advance={[_.x_advance for _ in new[1][1].__shapeData__]}')
+                #print(f'x_offset ={[_.x_offset for _ in new[1][1].__shapeData__]}')
+                #print(f'width   ={[_.width     for _ in new[1][1].__shapeData__]}')
 
                 def drawLines(x,y):
                     canv.saveState()
