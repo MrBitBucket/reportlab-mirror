@@ -55,7 +55,7 @@ from reportlab.platypus.frames import Frame
 from reportlab.rl_config import defaultPageSize, verbose
 import reportlab.lib.sequencer
 from reportlab.pdfgen import canvas
-from reportlab.lib.utils import isSeq, encode_label, decode_label, annotateException, strTypes
+from reportlab.lib.utils import isSeq, encode_label, decode_label, annotateException, strTypes, _rl_repr
 
 try:
     set
@@ -1276,6 +1276,9 @@ class BaseDocTemplate:
             return rl_safe_eval.rl_safe_eval(expr.strip(),{},self._nameSpace)
         except:
             annotateException('\ndocEval %s failed!\n' % expr)
+
+    def __repr__(self):
+        return _rl_repr(self)
 
 class SimpleDocTemplate(BaseDocTemplate):
     """A special case document template that will handle many simple documents.
