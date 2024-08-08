@@ -18,6 +18,7 @@ import unittest
 from reportlab.lib.units import inch, cm
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.utils import _rl_docdent
 from reportlab.platypus.xpreformatted import XPreformatted
 from reportlab.platypus.frames import Frame
 from reportlab.platypus.paragraph import Paragraph
@@ -175,7 +176,7 @@ class TocTestCase(unittest.TestCase):
             styleSheet = getSampleStyleSheet()
             bt = styleSheet['BodyText']
 
-            description = '<font color=red>%s</font>' % self.test0.__doc__
+            description = f'<font color=red>{_rl_docdent(self.test0.__doc__)}</font>'
             story.append(XPreformatted(description, bt))
 
             toc = tableofcontents.TableOfContents(dotsMinLevel=1)
@@ -218,7 +219,7 @@ class TocTestCase(unittest.TestCase):
         styleSheet = getSampleStyleSheet()
         bt = styleSheet['BodyText']
 
-        description = '<font color=red>%s</font>' % self.test1.__doc__
+        description = f'<font color=red>{_rl_docdent(self.test1.__doc__)}</font>'
         story.append(XPreformatted(description, bt))
 
         for i in range(chapters):
