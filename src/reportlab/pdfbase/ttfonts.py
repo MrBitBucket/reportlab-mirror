@@ -1208,7 +1208,7 @@ class TTFont:
         if asciiReadable is None:
             asciiReadable = rl_config.ttfAsciiReadable
         self._asciiReadable = asciiReadable
-        self._shaped = bool(shaped and hb)
+        self._shaped = bool(shaped and uharfbuzz)
 
     def stringWidth(self,text,size,encoding='utf8'):
         return instanceStringWidthTTF(self,text,size,encoding)
@@ -1417,7 +1417,10 @@ else:
         ttfn = F[0].fontName
         ttfs = F[0].fontSize
         ttf = pdfmetrics.getFont(ttfn)
-        hbf = ttf.hbFont(ttfs)
+        try:
+            hbf = ttf.hbFont(ttfs)
+        except AttributeError:
+            return w
         ttfs /= 1000
         buf = uharfbuzz.Buffer()
         buf.cluster_level = uharfbuzz.BufferClusterLevel.MONOTONE_CHARACTERS
