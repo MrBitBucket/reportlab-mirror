@@ -265,6 +265,10 @@ class StyleSheet1:
         if alias:
             self.byAlias[alias] = style
 
+    def __getattr__(self,a):
+        if a in self: return self.get(a)
+        raise AttributeError(f'{self.__class__.__name__} instance has no attribute {a!a}')
+
     def list(self):
         styles = list(self.byName.items())
         styles.sort()
