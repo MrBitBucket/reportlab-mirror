@@ -7,7 +7,7 @@ Serif Regular and is covered under the license in ../fonts/bitstream-vera-licens
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, NearTestCase, rlSkipUnless
 if __name__=='__main__':
     setOutDir(__name__)
-import unittest
+import unittest, os
 from io import BytesIO
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfgen.textobject import PDFTextObject
@@ -19,7 +19,7 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, add32, uharfbuzz, shapeFragWord, \
                                       ShapedFragWord, ShapedStr, ShapeData
-import zlib, bz2, base64
+import zlib, base64
 from reportlab import rl_config
 from reportlab.lib.utils import int2Byte
 from reportlab.lib.abag import ABag
@@ -258,6 +258,16 @@ class TTFontFaceTestCase(unittest.TestCase):
         self.assertTrue(fontFile.content != "")
 
 
+def freshTTFont(ttfpath):
+    '''return a new instance corrsponding to a ttf path'''
+    ttfn = os.path.splitext(os.path.basename(ttfpath))[0]
+    try:
+        ttf = pdfmetrics.getFont(ttfn)
+        ttf.unregister()
+    except:
+        pass
+    return TTFont(ttfn,ttfpath)
+
 class TTFontTestCase(NearTestCase):
     "Tests TTFont class"
 
@@ -446,7 +456,8 @@ CMapName currentdict /CMap defineresource pop
 end
 end""")
 
-    def hbIfaceTest(self, ttf, text, exLen, exText, exShapedData):
+    def hbIfaceTest(self, ttfpath, text, exLen, exText, exShapedData):
+        ttf = freshTTFont(ttfpath)
         fontName = ttf.fontName
         fontSize = 30
         pdfmetrics.registerFont(ttf)
@@ -462,8 +473,7 @@ end""")
 
     @rlSkipUnless(uharfbuzz,'no harfbuzz support')
     def test_hb_shape_change(self):
-        ttf = hb_test_ttf()
-        return self.hbIfaceTest(ttf,'\u1786\u17D2\u1793\u17B6\u17C6|', 44.22,'\ue000\ue001\u17c6|',
+        return self.hbIfaceTest('hb-test.ttf','\u1786\u17D2\u1793\u17B6\u17C6|', 44.22,'\ue000\ue001\u17c6|',
                                 [ShapeData(cluster=0, x_advance=923, y_advance=0, x_offset=0, y_offset=0, width=923),
                                 ShapeData(cluster=0, x_advance=0, y_advance=0, x_offset=-296, y_offset=-26, width=0),
                                 ShapeData(cluster=4, x_advance=0, y_advance=0, x_offset=47, y_offset=-29, width=0),
@@ -471,9 +481,8 @@ end""")
 
     @rlSkipUnless(uharfbuzz,'no harfbuzz support')
     def test_hb_ligature(self):
-        ttf = TTFont('Vera','Vera.ttf')
         #ligatures cause the standard length 133.2275390625 to be reduced to 130.78125
-        return self.hbIfaceTest(ttf,'Aon Way',130.78125,'Aon Way',
+        return self.hbIfaceTest('Vera.ttf','Aon Way',130.78125,'Aon Way',
                                 [ShapeData(cluster=0, x_advance=675.29296875, y_advance=0, x_offset=0.0, y_offset=0, width=684.08203125),
                                 ShapeData(cluster=1, x_advance=603.02734375, y_advance=0, x_offset=-8.7890625, y_offset=0, width=611.81640625),
                                 ShapeData(cluster=2, x_advance=633.7890625, y_advance=0, x_offset=0.0, y_offset=0, width=633.7890625),
@@ -485,7 +494,8 @@ end""")
     @rlSkipUnless(uharfbuzz,'no harfbuzz support')
     def test_hb_examples(self):
         canv = Canvas(outputfile('test_pdfbase_ttfonts_hb_examples.pdf'))
-        def hb_example(ttf, text, y, fpdfLiteral, excode):
+        def hb_example(ttfpath, text, y, fpdfLiteral, excode):
+            ttf = freshTTFont(ttfpath)
             try:
                 fontName = ttf.fontName
                 fontSize = 30
@@ -532,14 +542,8 @@ end""")
                 self.assertEqual(code,excode,f'{fontName} PDF _textOut is wrong\n')
             finally:
                 ttf.unregister()
-        try:
-            vera = pdfmetrics.getFont('Vera')
-            vera.unregister()
-        except:
-            pass
-        vera = TTFont('Vera','Vera.ttf')
         hb_example(
-            vera,
+            'Vera.ttf',
             'Aon Way',
             786,
             fpdfLiteral='''BT 1 0 0 1 36 786 Tm /F2+0 30 Tf 36 TL (A) Tj 1 0 0 1 56 786 Tm (o) Tj 1 0 0 1 74.35 786 Tm (n) Tj 1 0 0 1 93.36 786 Tm ( ) Tj 1 0 0 1 102.9 786 Tm (W) Tj 1 0 0 1 130.64 786 Tm (a) Tj 1 0 0 1 149.03 786 Tm (y) Tj 1 0 0 1 166.78 786 Tm ET''',
@@ -548,7 +552,7 @@ end""")
             )
         canv.translate(0,-36)
         hb_example(
-            hb_test_ttf(),
+            'hb-test.ttf',
             '\u1786\u17D2\u1793\u17B6\u17C6|',
             706,
             fpdfLiteral=r'''BT 1 0 0 1 0 0 Tm 1 0 0 1 36 706 Tm /F3+0 30 Tf 36 TL (\006) Tj 1 0 0 1 54.81 705.22 Tm (\007) Tj 1 0 0 1 63.69 706 Tm 1 0 0 1 65.1 705.13 Tm (\005) Tj 1 0 0 1 63.49 706 Tm (|) Tj  ET''',
@@ -558,51 +562,6 @@ end""")
 
         canv.showPage()
         canv.save()
-
-def hb_test_ttf(ttfn='hb-test'):
-    #return TTFont(ttfn,'NotoSansKhmer-Regular.ttf')
-    return TTFont(ttfn,
-            BytesIO(bz2.decompress(base64.a85decode(r'''
-                6<\%_0gSqh;d&_^k#q`bI"21rs8W-!s8W-!s8U^Ns8W-!=3b*]`,jh\T3pD8i0RO'#2LZ])_
-                JAJ!!!C-`c0E5R5"e3$2UDddQL;]BnU2^)B&V&Bq^3sBo!TQ+:U/@)DopmBPHZqciCua"&/b
-                P1dD)7)DhO`9c>beae6ui%2racJ,g"17[a<4!"Cb&%5Jcg#+@@Kd@^nu!.Y/:1h[)JRP\OUP
-                <ki[)DoMQ!!!l@NALWG!#fN+)ItQX%5_`!UHf[s!,+YR.A<!Z2,>Qe-`2a-RAp%\TR'(YOu1
-                EZ8VDD]VBMk9df9Cc!!#\M$qAZ0<:X^^!,1'h)3SCUBRg1M1h[)JRP\OUP<ki[)DoMQ!!!l@
-                NALWG!#fN+)ItQX%5_`!UHf[s!(nL;"N"[fBFRnn,LjY@ANU\!b%@O";[lEh1sqC&(dgcP1c
-                .&<7aqI6:K'c^1,K(VUI-2uUHj,q*qnFjau6#oT1)/b`]sXV\#si_$U?FKi8mEs(6Qa9(NNN
-                qMIeUK%!.fe'<":[VomsHlf6sJd^J)hGp6l7HYjXINe9jiLN68nDGgM[/l'#M*9ek6QDIDMH
-                7SU3Y8'$P&f2Tl.5]/-Qn\[.nPVd&^)n%kQr2`Y&Jed4b?;qhQt'^-`9XHHBEK?']YuFiC[T
-                ?7ju'lI#j//DRb*uhgPdV8T$N:Fl&1-/"?1X=!a%==*o.$MeT1laOrGWX7!s8JJcQ+-/+r;O
-                M[@4[`I26,ePU>#`R(TAm:0h)XDu*803FI<V`TY$9L'S^KK2CZ:D7IUIr#V6XOO&Q1R6&t:f
-                BcUE/$Je6V9'mL/YEm%2kF!BYi#iGsGrIAsUEpY$o-99TfoCNcHu4m<m)s>K!6\3ZKDBNWl?
-                u7RrO\53dq2dgji-^F#,K'm$%14B/RJ.*e:G?!16n;SM&:!q2L)WVm]WFKj3*9_F]KBlVJ_"
-                >_g8<8#!,Pf;+Ue4YZgoM![H1lQ<omq:C\Xj]8_!QChLhpu*33.Xd@Ljn6(]<AqGe)9*HU0K
-                8NLO2QIf?%F!\b6%_$\T.trPpJkZuoDm$Ap0(G$%d>B<=BrR,#T[\-<g9_3"MIo=:=o(IVd>
-                5U[D\H<9nrHdQRfg;)K66T*:<<!J(2=C:i*$B8J]%$*RJ:;r(7`g-\^."X=,,X@c?*l$q8Te
-                [Ku5%JU[N6A*2WNLZced)eB,4:@ibJf#OWgJ/;h6P78KYB;XKrFggG%jj?:r2C3:16_rYD!O
-                -&QJm1VphpD)?[!9'i>M_:t&K_)A'&_6Uom]Q.Xi;dUJ^P@=PS(>1)F[k:06.Cs42C5=WHd<
-                'tQ%#oQ'(Y%m01684?/_@-c+9gg'g$;cj96,j)ak?=X@)%EA3+/gj2[YlSt008^BrOL$6G/J
-                R(h*_B/"!C$[.RHr60!fEV9jkl+$Rpt+`=[uh/:kI-_%/iU2(EgOh^S`.Wa"sboV-!DCT*)U
-                ?3-X)'PK"aM8RGFNuWcO)G@5BpZ=2krUR57?UP3r$t?6:WiE',$AKb!B^9X'bKsCS7tHtq`g
-                *jZE1#W/6^<M?'W=^sZ"K;Y",2:cW?*.BI`(1j'FeJO1"Su6"MggU-!;%)Eo7LPH&ubH$=gL
-                [od"o'no=7o.jaRl'FPP.1%Jr!V.i1qUF;VqU(g4[90c0(LI^XO`'K5<OkYjCCprOc/[YXFa
-                30Z/=`')U`#UeeG(q7GEH#7tOVCC04Cq,%NWXA-bJrTm>Ldp/B2*j5;LAKJFsJAjpDi4"F9m
-                1<Alb"%6;/gE".Gs_S5V+609g,](D1k3!jqO<aN!r7KcW8JeqOIhA9=uP5fW0uB/%+HcDEF&
-                *.mre9i=A.`K$8gaJmCU@!$eDrMa<pM],o)p@/KZRD`>2*^*kFT>f!B,LSh5R7<"e,2OE4Ol
-                >RH/Zd#/DQJnCm?!VZ-35AI"^pK_TX`Sj-0Z3UYe$.Q\*(o)J\W?Q/g;L7`R,fJ;0oP=9\_*
-                Dn\RNY1C<*^qQ>r5kjh6cVPJVo8Z@4OWN]5tBf'=W$>Bl&M)e&TKL3LXcY/n2h=?C?U-SQYR
-                R/1E)i!HKRJ@gs&W6/8S)Nq+C-.K!J%A+jL#IP_)]=.+`Yl?EUa6*?aW:g4KhWGF2A?SE+WW
-                O;$&2[nLnT/B1J',s4@9Yf'Vnp#,OSP=)`_b!.M@971'Wk=k0-\o3^VtNP4344.O'6LNh]%J
-                TJ&lRj4KoIib_/X)@6[B1r>tA1jW-"/F\DrV*n>cLoB-6L:jTDLXSZMHC35&1*\GA&di6XmZ
-                *KqN<-pODQT_J<\E-;_W8.<YHSmlAjXpS*##!q'"'C7Q3F%\T-.aA;iIT-K+@9f7=Quen9SS
-                LDqa/FJclf%PWi#Zj-sWeL+.0b<SsEJg?V-7p`NcYCd!l1X7Ul!:_A\J=#;PTeFa.Lpo6U\&
-                gD9m$R$QH0s0`k#0R>BHQnZ8:dJS]Y+AVe2i:Od.](LS_QC82\-3&R,Ze.RPE7/BaGPJ'5-R
-                !)Ea"[--RafX)U9TpdBEc=)QARN.ks=*W<?<R^fjb@cu;TeL6^_,QE3o9:K5f[,%.-D\7-RQ
-                S$^@TJn?(H*\N`;J>a_b@aH#],#Vko8uYp8r-"2sdRY(0>a1X/-8L[.?ia`N8nupUF)qFGCY
-                ]),K,00(J_hu"5emYc&<8N$WqMU=_2<33ks7YADgH*X:P<Z=9uc*tfL%=`aNmI%7-01?Xk6>
-                Rks>Kn_>HjnBB:ilq/Xc>!rlGGOYl[/6%l&uG3.gcB-d")XoN;L%j0209jlK0g+66Y0hC*!&
-                ;$\.%mj-.;'c2n"s8;l\1=m%1]_AIlH\ftMgX@Jr:`s8^V%p6Z2_euO\QT94T'JjJ,'''
-                ))))
 
 def makeSuite():
     suite = makeSuiteForClasses(

@@ -150,6 +150,7 @@ def listFiles(root,followlinks=True,strJoin=None):
 reportlab_files= [
         'fonts/00readme.txt',
         'fonts/bitstream-vera-license.txt',
+        'fonts/hb-test.ttf',
         'fonts/DarkGarden-changelog.txt',
         'fonts/DarkGarden-copying-gpl.txt',
         'fonts/DarkGarden-copying.txt',
