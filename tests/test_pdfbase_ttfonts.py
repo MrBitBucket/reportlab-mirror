@@ -1,4 +1,3 @@
-
 """Test TrueType font subsetting & embedding code.
 
 This test uses a sample font (Vera.ttf) taken from Bitstream which is called Vera
@@ -19,10 +18,28 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, add32, uharfbuzz, shapeFragWord, \
                                       ShapedFragWord, ShapedStr, ShapeData
+from reportlab.platypus import Paragraph
+from reportlab.lib.styles import getSampleStyleSheet
 import zlib, base64
 from reportlab import rl_config
 from reportlab.lib.utils import int2Byte
 from reportlab.lib.abag import ABag
+
+try:
+    TTFont("DejaVuSans", "DejaVuSans.ttf")
+except:
+    haveDejaVuSans = False
+else:
+    haveDejaVuSans = True
+
+def freshTTFont(ttfn, ttfpath,**kwds):
+    '''return a new instance corrsponding to a ttf path'''
+    try:
+        ttf = pdfmetrics.getFont(ttfn)
+        ttf.unregister()
+    except:
+        pass
+    return TTFont(ttfn,ttfpath,**kwds)
 
 def utf8(code):
     "Convert a given UCS character index into UTF-8"
@@ -94,11 +111,8 @@ class TTFontsTestCase(unittest.TestCase):
         "Test PDF generation with TrueType fonts"
         pdfmetrics.registerFont(TTFont("Vera", "Vera.ttf"))
         pdfmetrics.registerFont(TTFont("VeraBI", "VeraBI.ttf"))
-        try:
-            pdfmetrics.registerFont(TTFont("DejaVuSans", "DejaVuSans.ttf"))
-        except:
-            pass
-        else:
+        if haveDejaVuSans:
+            pdfmetrics.registerFont(freshTTFont('DejaVuSans', 'DejaVuSans.ttf'))
             show_all_glyphs('test_pdfbase_ttfonts_dejavusans.pdf',fontName='DejaVuSans')
         show_all_glyphs('test_pdfbase_ttfonts_vera.pdf',fontName='Vera')
         _simple_subset_generation('test_pdfbase_ttfonts1.pdf',1)
@@ -256,17 +270,6 @@ class TTFontFaceTestCase(unittest.TestCase):
         fontFile = fontDescriptor['FontFile2']
         fontFile = doc.idToObject[fontFile.name]
         self.assertTrue(fontFile.content != "")
-
-
-def freshTTFont(ttfpath):
-    '''return a new instance corrsponding to a ttf path'''
-    ttfn = os.path.splitext(os.path.basename(ttfpath))[0]
-    try:
-        ttf = pdfmetrics.getFont(ttfn)
-        ttf.unregister()
-    except:
-        pass
-    return TTFont(ttfn,ttfpath)
 
 class TTFontTestCase(NearTestCase):
     "Tests TTFont class"
@@ -457,7 +460,8 @@ end
 end""")
 
     def hbIfaceTest(self, ttfpath, text, exLen, exText, exShapedData):
-        ttf = freshTTFont(ttfpath)
+        ttfn = os.path.splitext(os.path.basename(ttfpath))[0]
+        ttf = freshTTFont(ttfn, ttfpath)
         fontName = ttf.fontName
         fontSize = 30
         pdfmetrics.registerFont(ttf)
@@ -491,11 +495,28 @@ end""")
                                 ShapeData(cluster=5, x_advance=581.0546875, y_advance=0, x_offset=-31.73828125, y_offset=0, width=612.79296875),
                                 ShapeData(cluster=6, x_advance=591.796875, y_advance=0, x_offset=0.0, y_offset=0, width=591.796875)])
 
+
+    @staticmethod
+    def drawVLines(canv,x,y,fontSize,Y):
+        canv.saveState()
+        canv.setLineWidth(0.5)
+        canv.setStrokeColor((1,0,0))
+        canv.lines([(_+x,y-0.2*fontSize,_+x,y+fontSize) for _ in Y])
+        canv.restoreState()
+
+    @staticmethod
+    def shapedStrAdvances(s,fontSize):
+        A = [0]
+        for a in s.__shapeData__:
+            A.append(fontSize*a.x_advance/1000 + A[-1])
+        return A
+
     @rlSkipUnless(uharfbuzz,'no harfbuzz support')
     def test_hb_examples(self):
         canv = Canvas(outputfile('test_pdfbase_ttfonts_hb_examples.pdf'))
         def hb_example(ttfpath, text, y, fpdfLiteral, excode):
-            ttf = freshTTFont(ttfpath)
+            ttfn = os.path.splitext(os.path.basename(ttfpath))[0]
+            ttf = freshTTFont(ttfn, ttfpath)
             try:
                 fontName = ttf.fontName
                 fontSize = 30
@@ -503,38 +524,27 @@ end""")
                 ttf.splitString(text,canv._doc)
                 w = [pdfmetrics.stringWidth(text,fontName,fontSize),(ABag(fontName=fontName,fontSize=fontSize),text)]
                 new = shapeFragWord(w)
-
-                advances = [0]
-                for a in new[1][1].__shapeData__:
-                    advances.append(fontSize*a.x_advance/1000 + advances[-1])
-                #print(f'\nx_advance={[_.x_advance for _ in new[1][1].__shapeData__]}')
-                #print(f'x_offset ={[_.x_offset for _ in new[1][1].__shapeData__]}')
-                #print(f'width   ={[_.width     for _ in new[1][1].__shapeData__]}')
-
-                def drawLines(x,y):
-                    canv.saveState()
-                    canv.setLineWidth(0.5)
-                    canv.setStrokeColor((1,0,0))
-                    canv.lines([(_+x,y-0.2*fontSize,_+x,y+fontSize) for _ in (advances)])
-                    canv.restoreState()
-
+                advances = self.shapedStrAdvances(new[1][1],fontSize)
                 canv.setFont('Helvetica',12)
-                canv.drawString(200,y,'unshaped')
-                canv.drawString(200,y-1.2*fontSize,'fpdf2 shaping')
-                canv.drawString(200,y-2*1.2*fontSize,'rl shaping')
+                x1 = 400
+                canv.drawString(x1,y,f'unshaped {fontName}')
+                canv.drawString(x1,y-1.2*fontSize,f'fpdf2 shaping {fontName}')
+                canv.drawString(x1,y-2*1.2*fontSize,f'rl shaping {fontName}')
                 canv.setFont(fontName,fontSize)
                 canv.drawString(36,y,text)
-                drawLines(36,y)
+                self.drawVLines(canv,36,y,fontSize,
+                   [pdfmetrics.stringWidth(text[:_],fontName,fontSize) for _ in range(len(text)+1)])
                 canv.saveState()
                 canv.translate(0,-fontSize*1.2)
                 ttf._shaped = True
-                canv.addLiteral(fpdfLiteral)
-                drawLines(36,y)
                 t = canv.beginText(36, y-1.2*fontSize) #786 - 1.2*30
                 t._textOut(new[1][1],False)
                 code = t.getCode()
                 canv.drawText(t)
-                drawLines(36,y-1.2*fontSize)
+                self.drawVLines(canv,36,y-1.2*fontSize,fontSize,advances)
+                if fpdfLiteral:
+                    canv.addLiteral(fpdfLiteral)
+                    self.drawVLines(canv,36,y,fontSize,advances)
                 canv.restoreState()
                 if code!=excode:
                     canv.showPage()
@@ -548,7 +558,6 @@ end""")
             786,
             fpdfLiteral='''BT 1 0 0 1 36 786 Tm /F2+0 30 Tf 36 TL (A) Tj 1 0 0 1 56 786 Tm (o) Tj 1 0 0 1 74.35 786 Tm (n) Tj 1 0 0 1 93.36 786 Tm ( ) Tj 1 0 0 1 102.9 786 Tm (W) Tj 1 0 0 1 130.64 786 Tm (a) Tj 1 0 0 1 149.03 786 Tm (y) Tj 1 0 0 1 166.78 786 Tm ET''',
             excode='''BT 1 0 0 1 36 750 Tm /F2+0 30 Tf 36 TL [(A) 17.57812 (on W) 63.96484 (ay)] TJ ET'''
-            #excode='''BT 1 0 0 1 36 750 Tm /F2+0 30 Tf 36 TL [(A) 8.789062] TJ [8.789062 (o)] TJ (n) Tj ( ) Tj [(W) 32.22656] TJ [31.73828 (a)] TJ (y) Tj ET'''
             )
         canv.translate(0,-36)
         hb_example(
@@ -556,10 +565,65 @@ end""")
             '\u1786\u17D2\u1793\u17B6\u17C6|',
             706,
             fpdfLiteral=r'''BT 1 0 0 1 0 0 Tm 1 0 0 1 36 706 Tm /F3+0 30 Tf 36 TL (\006) Tj 1 0 0 1 54.81 705.22 Tm (\007) Tj 1 0 0 1 63.69 706 Tm 1 0 0 1 65.1 705.13 Tm (\005) Tj 1 0 0 1 63.49 706 Tm (|) Tj  ET''',
-            #excode = r'''BT 1 0 0 1 36 670 Tm /F3+0 30 Tf 36 TL (\006) Tj -0.78 Ts [296 (\007) -296] TJ -0.87 Ts [-47 (\005) 47] TJ (|) Tj ET''',
             excode = r'''BT 1 0 0 1 36 670 Tm /F3+0 30 Tf 36 TL (\006) Tj -0.78 Ts [296 (\007) -296] TJ -0.87 Ts [-47 (\005) 47 (|)] TJ ET'''
             )
+        canv.translate(0,-50)
+        if haveDejaVuSans:
+            hb_example(
+                'DejaVuSans.ttf',
+                'Huffing Clifftop finish|',
+                706-70,
+                fpdfLiteral=r'''BT 1 0 0 1 36 636 Tm /F4+0 30 Tf 36 TL (H) Tj 1 0 0 1 58.56 636 Tm (u) Tj 1 0 0 1 77.57 636 Tm (\001) Tj 1 0 0 1 106.58 636 Tm (n) Tj 1 0 0 1 125.59 636 Tm (g) Tj 1 0 0 1 144.63 636 Tm ( ) Tj 1 0 0 1 154.17 636 Tm (C) Tj 1 0 0 1 175.12 636 Tm (l) Tj 1 0 0 1 183.45 636 Tm (i) Tj 1 0 0 1 191.79 636 Tm (\002) Tj 1 0 0 1 212.46 636 Tm (t) Tj 1 0 0 1 224.22 636 Tm (o) Tj 1 0 0 1 242.57 636 Tm (p) Tj 1 0 0 1 261.62 636 Tm ( ) Tj 1 0 0 1 271.15 636 Tm (\003) Tj 1 0 0 1 290.05 636 Tm (n) Tj 1 0 0 1 309.06 636 Tm (i) Tj 1 0 0 1 317.4 636 Tm (s) Tj 1 0 0 1 333.03 636 Tm (h) Tj 1 0 0 1 352.04 636 Tm (|) Tj 1 0 0 1 362.15 636 Tm ET''',
+                excode=r'''BT 1 0 0 1 36 600 Tm /F4+0 30 Tf 36 TL (Hu\001ng Cli\002top \003nish|) Tj ET'''
+                )
 
+        canv.showPage()
+        canv.save()
+
+    def hb_paragraph_drawon(self, canv, ttfpath, text, y=786):
+        try:
+            ttfn = os.path.splitext(os.path.basename(ttfpath))[0]
+            ttfn1 = ttfn+'1'
+            ttf = freshTTFont(ttfn,ttfpath)
+            ttf1 = freshTTFont(ttfn1,ttfpath,shaped=True)
+            ttf1.face.name = ttf.face.name + b'1'
+            pdfmetrics.registerFont(ttf)
+            pdfmetrics.registerFont(ttf1)
+            stysh = getSampleStyleSheet()
+            fontSize = 30
+            leading = 36
+            sty = stysh.Normal.clone('sty',fontName=ttfn,fontSize=fontSize,leading=leading)
+            sty1 = stysh.Normal.clone('sty1',fontName=ttfn1,fontSize=fontSize,leading=leading)
+            pW, pH = canv._pagesize 
+            x = 36
+            aW = pW - 2*36
+            aH = pH - 2*36
+            self.drawVLines(canv,x,y,fontSize,
+                   [pdfmetrics.stringWidth(text[:_],ttfn,fontSize) for _ in range(len(text)+1)])
+            p = Paragraph(f'{text}<span face="Helvetica" size="12"> {ttfn} unshaped</span>',sty)
+            w,h = p.wrap(aW,aH)
+            p.drawOn(canv, x=x, y=y)
+            y -= leading
+            p1 = Paragraph(f'{text}<span face="Helvetica" size="12"> {ttfn} shaped</span>',sty1)
+            w,h = p1.wrap(aW,aH)
+            p1.drawOn(canv, x=x, y=y)
+            #find line positions
+            old = [0,(ABag(fontName=ttfn1,fontSize=fontSize),text)]
+            new = shapeFragWord(old)
+            self.drawVLines(canv,x,y,fontSize,self.shapedStrAdvances(new[1][1],fontSize))
+            y -= leading
+        finally:
+            for _ in ('ttf','ttf1'):
+                if _ in locals():
+                    locals()[_].unregister()
+
+    @rlSkipUnless(uharfbuzz,'no harfbuzz support')
+    def test_hb_paragraph_drawOn(self):
+        canv = Canvas(outputfile('test_pdfbase_ttfonts_hb_para_drawOn.pdf'))
+        self.hb_paragraph_drawon(canv, 'hb-test.ttf', '\u1786\u17D2\u1793\u17B6\u17C6|', y=786)
+        self.hb_paragraph_drawon(canv, 'Vera.ttf', 'Aon Way|', y=786-2*36)
+        if haveDejaVuSans:
+            self.hb_paragraph_drawon(canv, 'DejaVuSans.ttf', 'Huffing Clifftop finish|', y=786-4*36)
         canv.showPage()
         canv.save()
 

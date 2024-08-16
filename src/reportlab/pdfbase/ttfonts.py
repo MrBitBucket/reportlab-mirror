@@ -52,13 +52,15 @@ Canvas and TextObject have special support for dynamic fonts.
 """
 
 from struct import pack, unpack, error as structError
+from fnmatch import fnmatch
 from reportlab.lib.utils import bytestr, isUnicode, char2int, isStr, isBytes
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
-from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF
+from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF, fp_str
+from reportlab.rl_config import register_reset, shapedFontGlob
 from collections import namedtuple
 from io import BytesIO
-import os, time
+import os, time, functools
 
 try:
     import uharfbuzz
@@ -1194,7 +1196,7 @@ class TTFont:
     _multiByte = 1      # We want our own stringwidth
     _dynamicFont = 1    # We want dynamic subsetting
 
-    def __init__(self, name, filename, validate=0, subfontIndex=0, asciiReadable=None, shaped=False):
+    def __init__(self, name, filename, validate=0, subfontIndex=0, asciiReadable=None, shaped=None):
         """Loads a TrueType font from filename.
 
         If validate is set to a false values, skips checksum validation.  This
@@ -1208,6 +1210,8 @@ class TTFont:
         if asciiReadable is None:
             asciiReadable = rl_config.ttfAsciiReadable
         self._asciiReadable = asciiReadable
+        if shaped is None:
+            shaped = any((fnmatch(name,_) for _ in shapedFontGlob))
         self._shaped = bool(shaped and uharfbuzz)
 
     def stringWidth(self,text,size,encoding='utf8'):
@@ -1368,7 +1372,7 @@ class TTFont:
             assert uchar<=0xF800
             self.__hbPrivate = self.__hbUnis[name] = uchar
             face.charToGlyph[uchar] = gid
-            face.glyphToChar.setdefault(gid,[]).append(gid)
+            face.glyphToChar.setdefault(gid,[]).append(uchar)
             face.charWidths[uchar] = advance
         return uchar
 
@@ -1388,13 +1392,40 @@ class ShapedFragWord(list):
     '''list class to distinguish frag words that have been shaped'''
     pass
 
+def makeShapedFragWord(w,K=[],V=[]):
+    klass = w.__class__
+    if klass in K: return V[K.index(klass)]
+    v = ShapedFragWord if klass in (list,ShapedFragWord) else type('ShapedFragWord',(klass,ShapedFragWord),{})
+    V.append(v)
+    K.append(klass)
+    if len(K)>=127:
+        K[:] = K[-127:]
+        V[:] = V[-127:]
+    return v
+
+ShapeData = namedtuple('ShapeData','cluster x_advance y_advance x_offset y_offset width')
+class ShapeData(ShapeData):
+    def __repr__(self):
+        return repr(tuple((map(fp_str,self))))
+_sdGuardL = [ShapeData(-1,0,0,0,0,0)]           #for the the end of ShapeData list
+_sdSimple = ShapeData(0x7fffffff,0,0,0,0,0)     #for added simple chars
+
 class ShapedStr(str):
     def __new__(cls, s, shapeData=None):
         self = super().__new__(cls,s)
         self.__shapeData__ = shapeData
         return self
 
-ShapeData = namedtuple('ShapeData','cluster x_advance y_advance x_offset y_offset width')
+    def __add__(self,other):
+        return ShapedStr(super().__add__(other),
+                            shapeData=(self.__shapeData__+other.__shapeData__ if isinstance(other,ShapedStr)
+                                else self.__shapeData__+len(other)*[_sdSimple]))
+
+    def __radd__(self,other):
+        return ShapedStr(str(other)+str(self),
+                            shapeData=(other.__shapeData__+self.__shapeData__ if isinstance(other,ShapedStr)
+                                else len(other)*[_sdSimple]+self.__shapeData__))
+
 
 if not uharfbuzz:
     def shapeFragWord(w, features=None):
@@ -1414,6 +1445,7 @@ else:
             F.extend(len(s)*[f])
             text += s
         ntext = len(text)
+        if not F: return w
         ttfn = F[0].fontName
         ttfs = F[0].fontSize
         ttf = pdfmetrics.getFont(ttfn)
@@ -1434,12 +1466,11 @@ else:
 
         changed = False
         shaped = False
-        new = ShapedFragWord([0])
+        new = makeShapedFragWord(w)([0])
         nf = None
         xpos = 0
         ypos = 0
         shapeDataAppend = [].append
-        shaped = False
         for i,(info,pos) in enumerate(zip(infos,positions)):
             gid = info.codepoint
             name = hbf.glyph_to_string(gid)
@@ -1487,13 +1518,14 @@ else:
         if not shaped:
             if changed:
                 #make all the tuples simple
-                new = [new[0]] + [tuple(_) for _ in new[1:]]
+                new = w.__class__([new[0]] + [tuple(_) for _ in new[1:]])
+            else:
+                return w
         return new
 
 #preserve the initial values here
 def _reset():
     _cached_ttf_dirs.clear()
 
-from reportlab.rl_config import register_reset
 register_reset(_reset)
 del register_reset

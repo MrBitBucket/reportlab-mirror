@@ -13,7 +13,7 @@ from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor
 from reportlab.lib.utils import isBytes, isStr, asUnicode
 from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import ShapedStr, ShapeData
+from reportlab.pdfbase.ttfonts import ShapedStr, ShapeData, _sdGuardL
 from reportlab.rl_config import rtlSupport
 from itertools import groupby
 
@@ -170,8 +170,6 @@ class _PDFColorSetter:
 
     def setOverprintMask(self,a):
         getattr(self,'_setOverprintMask',lambda x: None)(a)
-
-_sdGuard = [ShapeData(-1,0,0,0,0,0)]
 
 class PDFTextObject(_PDFColorSetter):
     """PDF logically separates text and graphics drawing; text
@@ -413,7 +411,7 @@ class PDFTextObject(_PDFColorSetter):
                             R(f'{font.getSubsetInternalName(subset, canv._doc)} {tmpl}')
                             self._curSubset = subset
                         sd1 = sd0 + len(t)
-                        SD = shapeData[sd0:sd1] + _sdGuard
+                        SD = shapeData[sd0:sd1] + _sdGuardL
                         sd0 = sd1
                         for i, sd in enumerate(SD):
                             r = r0 + fontsize*sd.y_offset/1000
