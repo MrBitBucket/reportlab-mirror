@@ -1328,7 +1328,7 @@ def yieldNoneSplits(L):
             break
 
 class _rl_repr:
-    hide = True
+    from reportlab.rl_config import invariant as hide
     @staticmethod
     def __call__(obj):
         klass = obj.__class__
