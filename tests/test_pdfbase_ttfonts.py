@@ -17,7 +17,7 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       makeToUnicodeCMap, \
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, add32, uharfbuzz, shapeFragWord, \
-                                      ShapedFragWord, ShapedStr, ShapeData
+                                      ShapedFragWord, ShapedStr, ShapeData, _sdSimple
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import getSampleStyleSheet
 import zlib, base64
@@ -459,6 +459,40 @@ CMapName currentdict /CMap defineresource pop
 end
 end""")
 
+    @rlSkipUnless(uharfbuzz,'no harfbuzz support')
+    def test_ShapedStrOps(self):
+        sd = ShapedStr('0123456789',shapeData=list(range(10)))
+        e = []
+        def sdcmp(op,v,ex):
+            e.append(f'{op} errors:')
+            i=len(e)
+            if v!=ex: e.append(f'{v!a}!={ex!a}')
+            if type(v)!=type(ex):
+                e.append(f'{v.__class__.__name__}!={ex.__class__.__name__}')
+            elif isinstance(ex,ShapedStr) and v.__shapeData__!=ex.__shapeData__:
+                e.append(f'{v.__shapeData__}!={ex.__shapeData__}')
+            if len(e)==i:
+                e.pop()
+            else:
+                e[i-1] = ' '.join(e[i-1:])
+                del e[i:]
+        sdcmp('sd[1]',sd[1],ShapedStr('1',[1]))
+        sdcmp('sd[2]',sd[2],ShapedStr('2',[2]))
+        sdcmp('sd[-1]',sd[-1],ShapedStr('9',[9]))
+        sdcmp('sd[:2]',sd[:2],ShapedStr('01',[0,1]))
+        sdcmp('sd[:-8]',sd[:-8],ShapedStr('01',[0,1]))
+        sdcmp('sd[-3:-2]',sd[-3:-2],ShapedStr('7',[7]))
+        sdcmp('sd[:0]',sd[:0],'')
+        sdcmp('sd[1:1]',sd[1:1],'')
+        sdcmp('sd[-2:-2]',sd[-2:-2],'')
+        sdcmp('sd[:2]+sd[-2:]',sd[:2]+sd[-2:],ShapedStr('0189',[0,1,8,9]))
+        sdcmp('sd+"ABC"',sd+"ABC",ShapedStr('0123456789ABC',list(range(10))+3*[_sdSimple]))
+        sdcmp('"ABC"+sd',"ABC"+sd,ShapedStr('ABC0123456789',3*[_sdSimple]+list(range(10))))
+        sd += 'ABC'
+        sdcmp('sd+="ABC"',sd,ShapedStr('0123456789ABC',list(range(10))+3*[_sdSimple]))
+        e = '\n'.join(e)
+        self.assertEqual('',e)
+
     def hbIfaceTest(self, ttfpath, text, exLen, exText, exShapedData):
         ttfn = os.path.splitext(os.path.basename(ttfpath))[0]
         ttf = freshTTFont(ttfn, ttfpath)
@@ -594,7 +628,7 @@ end""")
             leading = 36
             sty = stysh.Normal.clone('sty',fontName=ttfn,fontSize=fontSize,leading=leading)
             sty1 = stysh.Normal.clone('sty1',fontName=ttfn1,fontSize=fontSize,leading=leading)
-            pW, pH = canv._pagesize 
+            pW, pH = canv._pagesize
             x = 36
             aW = pW - 2*36
             aH = pH - 2*36

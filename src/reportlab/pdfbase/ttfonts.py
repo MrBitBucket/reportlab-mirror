@@ -1426,6 +1426,11 @@ class ShapedStr(str):
                             shapeData=(other.__shapeData__+self.__shapeData__ if isinstance(other,ShapedStr)
                                 else len(other)*[_sdSimple]+self.__shapeData__))
 
+    def __getitem__(self,i):
+        s = super().__getitem__(i)
+        if not s: return s  #a simple str
+        d = self.__shapeData__[i]
+        return ShapedStr(s,d if isinstance(i,slice) else [d])
 
 if not uharfbuzz:
     def shapeFragWord(w, features=None):
