@@ -1444,7 +1444,7 @@ else:
         text = ''
         specials = {}
         for f, s in w[1:]:
-            if not s:
+            if hasattr(f,'cbDefn'):
                 specials.setdefault(len(text),[]).append(f)
                 continue
             F.extend(len(s)*[f])
@@ -1471,7 +1471,8 @@ else:
 
         changed = False
         shaped = False
-        new = makeShapedFragWord(w)([0])
+        new = makeShapedFragWord(w)([])
+        new0 = 0
         nf = None
         xpos = 0
         ypos = 0
@@ -1488,7 +1489,7 @@ else:
             if nf is not f:
                 if nf:
                     new.append((nf,ShapedStr(ns,shapeData=shapeDataAppend.__self__)))
-                    new[0] += newlen
+                    new0 += newlen
                 nf = f
                 ns = ''
                 newlen = 0  #the new word length
@@ -1518,7 +1519,7 @@ else:
             shapeDataAppend(ShapeData(cluster, x_advance, y_advance, x_offset, y_offset, ucharWidth))
         if nf:  #we have at least one frag
             new.append((nf,ShapedStr(ns,shapeData=shapeDataAppend.__self__)))
-            new[0] += newlen
+            new0 += newlen
         if not changed: return w
         if not shaped:
             if changed:
@@ -1526,6 +1527,16 @@ else:
                 new = w.__class__([new[0]] + [tuple(_) for _ in new[1:]])
             else:
                 return w
+        if specials:
+            #now we have to readd the special cbDefn tuples
+            #first find the insertion points
+            S = []
+            for k,v in specials.items():
+                S.append(((k,k),v))
+            for _ in new:
+                S.append(((_[1].__shapeData__[0].cluster,_[1].__shapeData__[-1].cluster),_))
+            new[:] = [_[1] for _ in sorted(S)]
+        new.insert(0,new0)
         return new
 
 #preserve the initial values here

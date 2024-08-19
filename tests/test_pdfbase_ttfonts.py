@@ -3,6 +3,8 @@
 This test uses a sample font (Vera.ttf) taken from Bitstream which is called Vera
 Serif Regular and is covered under the license in ../fonts/bitstream-vera-license.txt.
 """
+import robin_debug
+rgb_control(0)
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, NearTestCase, rlSkipUnless
 if __name__=='__main__':
     setOutDir(__name__)
@@ -18,7 +20,7 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, add32, uharfbuzz, shapeFragWord, \
                                       ShapedFragWord, ShapedStr, ShapeData, _sdSimple
-from reportlab.platypus import Paragraph
+from reportlab.platypus.paragraph import Paragraph, _HSFrag
 from reportlab.lib.styles import getSampleStyleSheet
 import zlib, base64
 from reportlab import rl_config
@@ -531,12 +533,36 @@ end""")
 
 
     @staticmethod
-    def drawVLines(canv,x,y,fontSize,Y):
+    def drawVLines(canv,x,y,fontSize,X):
         canv.saveState()
+        rgb_debug(f'{x=} {y=} {fontSize=} {X=}')
         canv.setLineWidth(0.5)
         canv.setStrokeColor((1,0,0))
-        canv.lines([(_+x,y-0.2*fontSize,_+x,y+fontSize) for _ in Y])
+        canv.lines([(_+x,y-0.2*fontSize,_+x,y+fontSize) for _ in X])
         canv.restoreState()
+
+    @classmethod
+    def drawParaVLines(cls,canv,x,y,p,ttfn):
+        X = [0]
+        mfs = 0
+        frags = p.frags
+        for f in frags:
+            for t in f[1:]:
+                fontName = t[0].fontName
+                if fontName!=ttfn: continue
+                fontSize = t[0].fontSize
+                mfs = max(mfs,fontSize)
+                v = t[1]
+                if type(v) is str:
+                    for s in v:
+                        X.append(X[-1]+pdfmetrics.stringWidth(s,fontName,fontSize))
+                else:
+                    for d in v.__shapeData__:
+                        X.append(X[-1]+d.x_advance*fontSize/1000)
+            if fontName!=ttfn: break
+            if isinstance(f,_HSFrag):
+                X.append(X[-1]+pdfmetrics.stringWidth(' ',fontName,fontSize))
+        if mfs: cls.drawVLines(canv,x,y,mfs,X)
 
     @staticmethod
     def shapedStrAdvances(s,fontSize):
@@ -618,7 +644,7 @@ end""")
         try:
             ttfn = os.path.splitext(os.path.basename(ttfpath))[0]
             ttfn1 = ttfn+'1'
-            ttf = freshTTFont(ttfn,ttfpath)
+            ttf = freshTTFont(ttfn,ttfpath,shaped=False)
             ttf1 = freshTTFont(ttfn1,ttfpath,shaped=True)
             ttf1.face.name = ttf.face.name + b'1'
             pdfmetrics.registerFont(ttf)
@@ -632,19 +658,19 @@ end""")
             x = 36
             aW = pW - 2*36
             aH = pH - 2*36
-            self.drawVLines(canv,x,y,fontSize,
-                   [pdfmetrics.stringWidth(text[:_],ttfn,fontSize) for _ in range(len(text)+1)])
             p = Paragraph(f'{text}<span face="Helvetica" size="12"> {ttfn} unshaped</span>',sty)
             w,h = p.wrap(aW,aH)
             p.drawOn(canv, x=x, y=y)
+            if text.startswith('Huffing'):
+                rgb_control(1)
+                rgb_debug('')
+            self.drawParaVLines(canv,x,y,p,ttfn)
+            rgb_control(0)
             y -= leading
             p1 = Paragraph(f'{text}<span face="Helvetica" size="12"> {ttfn} shaped</span>',sty1)
             w,h = p1.wrap(aW,aH)
             p1.drawOn(canv, x=x, y=y)
-            #find line positions
-            old = [0,(ABag(fontName=ttfn1,fontSize=fontSize),text)]
-            new = shapeFragWord(old)
-            self.drawVLines(canv,x,y,fontSize,self.shapedStrAdvances(new[1][1],fontSize))
+            self.drawParaVLines(canv,x,y,p1,ttfn1)
             y -= leading
         finally:
             for _ in ('ttf','ttf1'):
@@ -657,7 +683,7 @@ end""")
         self.hb_paragraph_drawon(canv, 'hb-test.ttf', '\u1786\u17D2\u1793\u17B6\u17C6|', y=786)
         self.hb_paragraph_drawon(canv, 'Vera.ttf', 'Aon Way|', y=786-2*36)
         if haveDejaVuSans:
-            self.hb_paragraph_drawon(canv, 'DejaVuSans.ttf', 'Huffing Clifftop finish|', y=786-4*36)
+            self.hb_paragraph_drawon(canv, 'DejaVuSans.ttf', '<span color="green">H</span>u<span color="blue">f</span>fing <u>Clifftop</u> <a href="https://www.reportlab.com">finish</a>|', y=786-4*36)
         canv.showPage()
         canv.save()
 
