@@ -637,7 +637,7 @@ end""")
         canv.showPage()
         canv.save()
 
-    def hb_paragraph_drawon(self, canv, ttfpath, text, y=786):
+    def hb_paragraph_drawon(self, canv, ttfpath, text, y=786, textp=None):
         try:
             ttfn = os.path.splitext(os.path.basename(ttfpath))[0]
             ttfn1 = ttfn+'1'
@@ -664,7 +664,22 @@ end""")
             w,h = p1.wrap(aW,aH)
             p1.drawOn(canv, x=x, y=y)
             self.drawParaVLines(canv,x,y,p1,ttfn1)
-            y -= leading
+            y -= 12
+            xe = pW - 36
+            xm = pW*0.5
+            canv.saveState()
+            if textp is None: textp = text
+            canv.setFont(ttfn,10)
+            canv.drawString(x,y,textp)
+            canv.drawRightString(xe,y,textp)
+            canv.drawCentredString(xm,y,textp)
+            y -= 12
+            canv.setFont(ttfn1,10)
+            canv.drawString(x,y,textp)
+            canv.drawRightString(xe,y,textp)
+            canv.drawCentredString(xm,y,textp)
+            canv.restoreState()
+            y -= 12
         finally:
             for _ in ('ttf','ttf1'):
                 if _ in locals():
@@ -674,9 +689,11 @@ end""")
     def test_hb_paragraph_drawOn(self):
         canv = Canvas(outputfile('test_pdfbase_ttfonts_hb_para_drawOn.pdf'))
         self.hb_paragraph_drawon(canv, 'hb-test.ttf', '\u1786\u17D2\u1793\u17B6\u17C6|', y=786)
-        self.hb_paragraph_drawon(canv, 'Vera.ttf', 'Aon Way|', y=786-2*36)
+        self.hb_paragraph_drawon(canv, 'Vera.ttf', 'Aon Way|', y=786-2*48)
         if haveDejaVuSans:
-            self.hb_paragraph_drawon(canv, 'DejaVuSans.ttf', '<span color="green">H</span>u<span color="blue">f</span>fing <u>Clifftop</u> <a href="https://www.reportlab.com">finish</a>|', y=786-4*36)
+            self.hb_paragraph_drawon(canv, 'DejaVuSans.ttf',
+                            '<span color="green">H</span>u<span color="blue">f</span>fing <u>Clifftop</u> <a href="https://www.reportlab.com">finish</a>|',
+                            y=786-4*48, textp='Huffing Clifftop finish|')
         canv.showPage()
         canv.save()
 
