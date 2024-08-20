@@ -3,8 +3,6 @@
 This test uses a sample font (Vera.ttf) taken from Bitstream which is called Vera
 Serif Regular and is covered under the license in ../fonts/bitstream-vera-license.txt.
 """
-import robin_debug
-rgb_control(0)
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, NearTestCase, rlSkipUnless
 if __name__=='__main__':
     setOutDir(__name__)
@@ -535,7 +533,6 @@ end""")
     @staticmethod
     def drawVLines(canv,x,y,fontSize,X):
         canv.saveState()
-        rgb_debug(f'{x=} {y=} {fontSize=} {X=}')
         canv.setLineWidth(0.5)
         canv.setStrokeColor((1,0,0))
         canv.lines([(_+x,y-0.2*fontSize,_+x,y+fontSize) for _ in X])
@@ -661,11 +658,7 @@ end""")
             p = Paragraph(f'{text}<span face="Helvetica" size="12"> {ttfn} unshaped</span>',sty)
             w,h = p.wrap(aW,aH)
             p.drawOn(canv, x=x, y=y)
-            if text.startswith('Huffing'):
-                rgb_control(1)
-                rgb_debug('')
             self.drawParaVLines(canv,x,y,p,ttfn)
-            rgb_control(0)
             y -= leading
             p1 = Paragraph(f'{text}<span face="Helvetica" size="12"> {ttfn} shaped</span>',sty1)
             w,h = p1.wrap(aW,aH)
