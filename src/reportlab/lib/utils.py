@@ -1328,12 +1328,16 @@ def yieldNoneSplits(L):
             break
 
 class _rl_repr:
-    from reportlab.rl_config import invariant as hide
     @staticmethod
     def __call__(obj):
-        klass = obj.__class__
-        return (f'<{klass.__module__}.{klass.__name__} object at 0x?hidden?>' if _rl_repr.hide
-                else super(klass,obj).__repr__())
+        def __call__(obj):
+            klass = obj.__class__
+            return (f'<{klass.__module__}.{klass.__name__} object at 0x?hidden?>' if _rl_repr.hide
+                    else super(klass,obj).__repr__())
+        from reportlab.rl_config import invariant as hide
+        _rl_repr.hide = hide
+        _rl_repr.__call__ = __call__
+        return __call__(obj)
 _rl_repr = _rl_repr()
 
 def _rl_docdent(s):
