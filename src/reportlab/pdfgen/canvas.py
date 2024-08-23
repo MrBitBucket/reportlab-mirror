@@ -1609,10 +1609,11 @@ class Canvas(_PDFColorSetter):
         ##################################################
 
     def shapedText(self,text):
-        text = asUnicode(text)
-        font = pdfmetrics.getFont(self._fontname)
-        if font.isShaped:
-            text = shapeFragWord([0,(ABag(fontName=self._fontname,fontSize=self._fontsize),text)])[1][1]
+        if not isinstance(text,ShapedStr):
+            text = asUnicode(text)
+            font = pdfmetrics.getFont(self._fontname)
+            if font.isShaped:
+                text = shapeFragWord([0,(ABag(fontName=self._fontname,fontSize=self._fontsize),text)])[1][1]
         width = (sum((_.x_advance for _ in text.__shapeData__))*self._fontsize/1000 if isinstance(text,ShapedStr)
                     else self.stringWidth(text, self._fontname, self._fontsize))
         return text, width
