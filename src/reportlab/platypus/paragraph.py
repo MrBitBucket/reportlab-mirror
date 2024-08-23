@@ -2042,8 +2042,7 @@ class Paragraph(Flowable):
         self.height = lineno = 0
         maxlineno = len(maxWidths)-1
         style = self.style
-        shaping = getFont(style.fontName)
-        shaping = bool(shaping._dynamicFont and shaping.isShaped)
+        shaping = bool(getFont(style.fontName).isShaped)
         hyphenator = getattr(style,'hyphenationLang','')
         if hyphenator:
             if isStr(hyphenator):
