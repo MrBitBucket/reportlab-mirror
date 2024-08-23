@@ -1386,6 +1386,10 @@ class TTFont:
     @property
     def isShaped(self):
         return bool(self._shaped and uharfbuzz)
+    
+    @isShaped.setter
+    def isShaped(self,v):
+        self._shaped = bool(v and uharfbuzz)
 
 #we only expect to use/see these if uharfbuzz is importable
 class ShapedFragWord(list):
@@ -1440,6 +1444,7 @@ else:
         '''take a frag word and return a shaped fragword if uharfbuzz makes any changes
         if no changes are made return the original word
         '''
+        if isinstance(w,ShapedFragWord): return w
         F = []
         text = ''
         specials = {}
@@ -1449,6 +1454,7 @@ else:
                 continue
             F.extend(len(s)*[f])
             text += s
+        #if isinstance(text,ShapedStr): breakpoint()
         ntext = len(text)
         if not F: return w
         ttfn = F[0].fontName
@@ -1524,11 +1530,11 @@ else:
         if not shaped:
             if changed:
                 #make all the tuples simple
-                new = w.__class__([new[0]] + [tuple(_) for _ in new[1:]])
+                new = new.__class__([new[0]] + [tuple(_) for _ in new[1:]])
             else:
                 return w
         if specials:
-            #now we have to readd the special cbDefn tuples
+            #now we have to re-add the special cbDefn tuples
             #first find the insertion points
             S = []
             for k,v in specials.items():
@@ -1538,6 +1544,15 @@ else:
             new[:] = [_[1] for _ in sorted(S)]
         new.insert(0,new0)
         return new
+
+def freshTTFont(ttfn, ttfpath,**kwds):
+    '''return a new instance corrsponding to a ttf path'''
+    try:
+        ttf = pdfmetrics.getFont(ttfn)
+        ttf.unregister()
+    except:
+        pass
+    return TTFont(ttfn,ttfpath,**kwds)
 
 #preserve the initial values here
 def _reset():
