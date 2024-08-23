@@ -402,9 +402,9 @@ class PDFTextObject(_PDFColorSetter):
                     sd0 = 0
                     r0 = self._rise
                     shapeData = text.__shapeData__
-                    cluster = None
                     fontsize = self._fontsize
                     for subset, t in font.splitString(text, canv._doc):
+                        cluster = None
                         if subset!=self._curSubset:
                             if not tmpl:
                                 tmpl = f'{fp_str(fontsize)} Tf {fp_str(self._leading)} TL'
@@ -427,7 +427,6 @@ class PDFTextObject(_PDFColorSetter):
 
                                     if self._rise!=r0: self.setRise(r0)
                                     if sd.cluster<0: break
-
 
                                 #begin new cluster
                                 if r!=self._rise: self.setRise(r)
