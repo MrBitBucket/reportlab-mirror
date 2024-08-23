@@ -17,7 +17,8 @@ from reportlab.pdfbase.ttfonts import TTFont, TTFontFace, TTFontFile, TTFOpenFil
                                       makeToUnicodeCMap, \
                                       FF_SYMBOLIC, FF_NONSYMBOLIC, \
                                       calcChecksum, add32, uharfbuzz, shapeFragWord, \
-                                      ShapedFragWord, ShapedStr, ShapeData, _sdSimple
+                                      ShapedFragWord, ShapedStr, ShapeData, _sdSimple, \
+                                      freshTTFont
 from reportlab.platypus.paragraph import Paragraph, _HSFrag
 from reportlab.lib.styles import getSampleStyleSheet
 import zlib, base64
@@ -31,15 +32,6 @@ except:
     haveDejaVuSans = False
 else:
     haveDejaVuSans = True
-
-def freshTTFont(ttfn, ttfpath,**kwds):
-    '''return a new instance corrsponding to a ttf path'''
-    try:
-        ttf = pdfmetrics.getFont(ttfn)
-        ttf.unregister()
-    except:
-        pass
-    return TTFont(ttfn,ttfpath,**kwds)
 
 def utf8(code):
     "Convert a given UCS character index into UTF-8"
@@ -573,7 +565,7 @@ end""")
         canv = Canvas(outputfile('test_pdfbase_ttfonts_hb_examples.pdf'))
         def hb_example(ttfpath, text, y, fpdfLiteral, excode):
             ttfn = os.path.splitext(os.path.basename(ttfpath))[0]
-            ttf = freshTTFont(ttfn, ttfpath)
+            ttf = freshTTFont(ttfn, ttfpath, shaped=False)
             try:
                 fontName = ttf.fontName
                 fontSize = 30
@@ -593,7 +585,7 @@ end""")
                    [pdfmetrics.stringWidth(text[:_],fontName,fontSize) for _ in range(len(text)+1)])
                 canv.saveState()
                 canv.translate(0,-fontSize*1.2)
-                ttf._shaped = True
+                ttf.isShaped = True
                 t = canv.beginText(36, y-1.2*fontSize) #786 - 1.2*30
                 t._textOut(new[1][1],False)
                 code = t.getCode()
