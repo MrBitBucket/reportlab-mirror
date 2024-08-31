@@ -1351,6 +1351,8 @@ class TTFont:
             blob = uharfbuzz.Blob(self.face._ttf_data)
             face = self.__hbFace__ = uharfbuzz.Face(blob)
             del blob
+            self.__hbUnis = {}
+            self.__hbPrivate = 0xE000
         return face
 
     def hbFont(self, fontSize=10):
@@ -1358,8 +1360,6 @@ class TTFont:
         font = uharfbuzz.Font(self.hbFace)
         font.ptem = fontSize
         self.hbAddPrivate = self.__addPrivate
-        self.__hbUnis = {}
-        self.__hbPrivate = 0xE000
         return font
 
     def __addPrivate(self, name, gid, advance):
