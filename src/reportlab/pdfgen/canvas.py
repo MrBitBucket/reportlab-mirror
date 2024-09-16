@@ -289,6 +289,7 @@ class Canvas(_PDFColorSetter):
                  trimBox=None,
                  bleedBox=None,
                  lang=None,
+                 **kwds,
                  ):
         """Create a canvas of a given size. etc.
 

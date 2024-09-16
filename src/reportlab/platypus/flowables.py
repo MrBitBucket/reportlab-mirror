@@ -688,7 +688,7 @@ class KeepTogether(_ContainerSpace,Flowable):
 
     def __init__(self,flowables,maxHeight=None):
         if not hasattr(KeepTogether,'NullActionFlowable'):
-            #cache these on the class
+            #store on the class; importing into the class is cirular importing
             from reportlab.platypus.doctemplate import NullActionFlowable
             from reportlab.platypus.doctemplate import FrameBreak
             KeepTogether.NullActionFlowable = NullActionFlowable
