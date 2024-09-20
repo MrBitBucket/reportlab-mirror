@@ -17,6 +17,7 @@ CHANGES  4.2.3   ??/09/2024
     * fix test outputs to be 3.13 compatible 
     * Use lru_cache in axes.py
     * fix keyword arguments in renderPDF.py and usage in shapes.py
+    * fix missing import in reportlab/graphics/utils.py
 
 CHANGES  4.2.2   21/06/202
 ---------------------------
