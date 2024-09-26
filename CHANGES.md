@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.2.4   26/09/2024
+---------------------------
+    * Fixed timestamp not including offset relating to timezone in document metadata
+
 CHANGES  4.2.3   24/09/2024
 ---------------------------
     * add \_rl\_repr \_rl\_docdent functions
