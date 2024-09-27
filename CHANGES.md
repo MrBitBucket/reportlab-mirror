@@ -13,7 +13,7 @@ mentioned. If we missed you, please let us know!
 
 CHANGES  4.2.4   26/09/2024
 ---------------------------
-    * Fixed timestamp not including offset relating to timezone in document metadata
+    * Fixed timestamp bug in document metadata (reported by Christoph Czechner @ Nittoku Europe GmbH)
 
 CHANGES  4.2.3   24/09/2024
 ---------------------------
