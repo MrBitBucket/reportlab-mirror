@@ -175,7 +175,7 @@ class AxisLineAnnotation:
             for k,v in kwds.items():
                 setattr(L,k,v)
             if getattr(self,'_dbg',0):
-                print(f'{v=} --> {d=} {L=}')
+                print(f'v={v} --> d={d} L={L}')
         finally:
             axis._get_line_pos = oaglp
         return L
@@ -1097,7 +1097,7 @@ class ValueAxis(_AxisG):
         self._calcScaleFactor()
         self._configured = 1
 
-    @lru_cache
+    @lru_cache()
     def _getValueStepAndTicks(self, valueMin, valueMax):
         self._valueMin = valueMin
         self._valueMax = valueMax
