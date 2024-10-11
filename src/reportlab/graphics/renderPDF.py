@@ -283,7 +283,7 @@ class GraphicsFlowable(Flowable):
     def draw(self):
         draw(self.drawing, self.canv, 0, 0)
 
-def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, canvasKwds={}, **kwds):
+def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, **kwds):
     """Makes a one-page PDF with just the drawing.
 
     If autoSize=1, the PDF will be the same size as
@@ -293,9 +293,9 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, canvas
     d = renderScaledDrawing(d)
     for x in ('Name','Size'):
         a = 'initialFont'+x
-        canvasKwds[a] = getattr(d,a,canvasKwds.pop(a,STATE_DEFAULTS['font'+x]))
+        kwds[a] = getattr(d,a,kwds.pop(a,STATE_DEFAULTS['font'+x]))
     metadataPath = kwds.pop('metadataPath',None)
-    c = Canvas(fn,**canvasKwds)
+    c = Canvas(fn,**kwds)
     if msg:
         c.setFont(rl_config.defaultGraphicsFontName, 36)
         c.drawString(80, 750, msg)
@@ -325,10 +325,10 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, canvas
         except:
             pass
 
-def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1,canvasKwds={}, **kwds):
+def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1,**kwds):
     "Returns a PDF as a string in memory, without touching the disk"
     s = BytesIO()
-    drawToFile(d, s, msg=msg, showBoundary=showBoundary,autoSize=autoSize, canvasKwds=canvasKwds, **kwds)
+    drawToFile(d, s, msg=msg, showBoundary=showBoundary,autoSize=autoSize, **kwds)
     return s.getvalue()
 
 #########################################################

@@ -1261,10 +1261,11 @@ class TimeStamp:
             self.tzname = 'UTC'
         else:
             t = time.time()
-            lt = tuple(time.localtime(t))
-            dhh = int(time.timezone / (3600.0))
-            dmm = (time.timezone % 3600) % 60
-            self.tzname = '' 
+            local_time = time.localtime(t)
+            lt = tuple(local_time)
+            dhh = int(local_time.tm_gmtoff / (3600.0))
+            dmm = (local_time.tm_gmtoff % 3600) % 60
+            self.tzname = local_time.tm_zone
         self.t = t
         self.lt = lt
         self.YMDhms = tuple(lt)[:6]

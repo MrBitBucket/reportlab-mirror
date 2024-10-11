@@ -11,11 +11,26 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  4.2.3a1 23/08/2024
+
+CHANGES  4.2.6a1   11/10/2024
+---------------------------
+    * preliminary changes to allow TTF fonts to be shaped.
+
+CHANGES  4.2.5   01/10/2024
+---------------------------
+    * Fixed code interfering with python 3.7 compatibility
+
+CHANGES  4.2.4   26/09/2024
+---------------------------
+    * Fixed timestamp bug in document metadata (reported by Christoph Czechner @ Nittoku Europe GmbH)
+
+CHANGES  4.2.3   24/09/2024
 ---------------------------
     * add \_rl\_repr \_rl\_docdent functions
     * fix test outputs to be 3.13 compatible 
-    * preliminary changes to allow TTF fonts to be shaped.
+    * Use lru_cache in axes.py
+    * fix keyword arguments in renderPDF.py and usage in shapes.py
+    * fix missing import in reportlab/graphics/utils.py
 
 CHANGES  4.2.2   21/06/202
 ---------------------------

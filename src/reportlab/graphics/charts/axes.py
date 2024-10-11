@@ -32,6 +32,7 @@ the former axes in its own coordinate system.
 """
 
 from math import log10 as math_log10
+from functools import lru_cache
 from reportlab.lib.validators import    isNumber, isNumberOrNone, isListOfStringsOrNone, isListOfNumbers, \
                                         isListOfNumbersOrNone, isColorOrNone, OneOf, isBoolean, SequenceOf, \
                                         isString, EitherOr, Validator, NoneOr, \
@@ -173,6 +174,8 @@ class AxisLineAnnotation:
             L = func(v)
             for k,v in kwds.items():
                 setattr(L,k,v)
+            if getattr(self,'_dbg',0):
+                print(f'v={v} --> d={d} L={L}')
         finally:
             axis._get_line_pos = oaglp
         return L
@@ -1094,16 +1097,12 @@ class ValueAxis(_AxisG):
         self._calcScaleFactor()
         self._configured = 1
 
-    def _getValueStepAndTicks(self, valueMin, valueMax,cache={}):
-        try:
-            K = (valueMin,valueMax)
-            r = cache[K]
-        except:
-            self._valueMin = valueMin
-            self._valueMax = valueMax
-            valueStep,T = self._calcStepAndTickPositions()
-            r = cache[K] = valueStep, T, valueStep*1e-8
-        return r
+    @lru_cache()
+    def _getValueStepAndTicks(self, valueMin, valueMax):
+        self._valueMin = valueMin
+        self._valueMax = valueMax
+        valueStep,T = self._calcStepAndTickPositions()
+        return valueStep, T, valueStep*1e-8
 
     def _preRangeAdjust(self,valueMin,valueMax):
         rr = self.requiredRange
@@ -1217,13 +1216,12 @@ class ValueAxis(_AxisG):
         aL = float(self._length)
 
         go = do_rr or do_abf or do_abs
-        cache = {}
         iter = 0
         while go and iter<=10:
             iter += 1
             go = 0
             if do_abf or do_abs:
-                valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax, cache)
+                valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax)
                 if do_abf:
                     i0 = valueStep*abf[0]
                     i1 = valueStep*abf[1]
@@ -1247,7 +1245,7 @@ class ValueAxis(_AxisG):
                     go = 1
 
             if do_rr:
-                valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax, cache)
+                valueStep, T, fuzz = self._getValueStepAndTicks(valueMin, valueMax)
                 if rrn:
                     if valueMin<T[0]-fuzz:
                         valueMin = T[0]-valueStep
