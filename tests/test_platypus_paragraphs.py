@@ -8,7 +8,7 @@ setOutDir(__name__)
 import sys, os, unittest
 from operator import truth
 from reportlab.pdfgen.canvas import Canvas, ShowBoundaryValue
-from reportlab.pdfbase.pdfmetrics import stringWidth, registerFont, registerFontFamily
+from reportlab.pdfbase.pdfmetrics import stringWidth, registerFont, registerFontFamily, getFont
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus.paraparser import ParaParser
 from reportlab.platypus.flowables import Flowable, DocAssert
@@ -1101,6 +1101,16 @@ class FragmentTestCase(unittest.TestCase):
                 u'<para>%(text1)s</para>',
                 ]
         for ex,x,hymwl in [
+                (72,0,None),
+                (72,0,5),
+                (72,0,4),
+                (72,2,None),
+                (72,1,5),
+                (72,1,4),
+                (72,3,None),
+                (72,4,5),
+                (72,5,4),
+                ] if getFont('Vera').isShaped else [
                 (72,0,None),    #default is 5
                 (72,0,5),
                 (60,0,4),

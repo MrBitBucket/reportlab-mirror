@@ -123,6 +123,8 @@ def _startUp():
                 conv = lambda v,M=pagesizes: getattr(M,v)
             elif k in ('trustedHosts','trustedSchemes'):
                 conv = lambda v: None if v is None else [y for y in [x.strip() for x in v.split(',')] if y] if isinstance(v,str) else v
+            elif k.endswith('Glob'):
+                conv = lambda v: list(filter(None,(_.strip() for _ in v.split()))) if v else []
             else: conv = None
             _setOpt(k,v,conv)
 

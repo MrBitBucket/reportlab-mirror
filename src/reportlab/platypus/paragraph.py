@@ -12,7 +12,8 @@ __doc__='''The standard paragraph implementation'''
 from string import whitespace
 from operator import truth
 from unicodedata import category
-from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent
+from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent, getFont
+from reportlab.pdfbase.ttfonts import shapeFragWord
 from reportlab.platypus.paraparser import ParaParser, _PCT, _num as _parser_num, _re_us_value
 from reportlab.platypus.flowables import Flowable
 from reportlab.lib.colors import Color
@@ -2041,6 +2042,7 @@ class Paragraph(Flowable):
         self.height = lineno = 0
         maxlineno = len(maxWidths)-1
         style = self.style
+        shaping = bool(getFont(style.fontName).isShaped)
         hyphenator = getattr(style,'hyphenationLang','')
         if hyphenator:
             if isStr(hyphenator):
@@ -2074,7 +2076,7 @@ class Paragraph(Flowable):
         nFrags= len(frags)
         if (nFrags==1 
                 and not (style.endDots or hasattr(frags[0],'cbDefn') or hasattr(frags[0],'backColor')
-                            or _processed_frags(frags))):
+                            or _processed_frags(frags) or shaping)):
             f = frags[0]
             fontSize = f.fontSize
             fontName = f.fontName
@@ -2203,6 +2205,7 @@ class Paragraph(Flowable):
             FW = []
             aFW = FW.append
             _words = _getFragWords(frags,maxWidth)
+            if shaping: _words = [shapeFragWord(_) for _ in _words] 
             sFW = 0
             while _words:
                 w = _words.pop(0)
@@ -2934,3 +2937,14 @@ It should be a normal<onDraw name="_indexAdd" label="normal"/> paragraph, set in
         dumpParagraphFrags(P)
         w,h = P.wrap(6.27*72-12,10000)
         dumpParagraphLines(P)
+
+    if flagged(12):
+        from reportlab.pdfbase.ttfonts import TTFont
+        from reportlab.pdfbase.pdfmetrics import registerFont
+        registerFont(TTFont('DejaVuSans','DejaVuSans.ttf'))
+        registerFont(TTFont('NotoSansKhmer-Regular','NotoSansKhmer-Regular.ttf'))
+        text="Hello clifftop <font name='NotoSansKhmer-Regular'>\u1786\u17D2\u1793\u17B6\u17C6</font> world <span color='red'>of </span>wonder!"
+        P=Paragraph(text,style=ParagraphStyle('dvsstyle',fontName="DejaVuSans",fontSize=10))
+        dumpParagraphFrags(P)
+        #w,h = P.wrap(6.27*72-12,10000)
+        #dumpParagraphLines(P)

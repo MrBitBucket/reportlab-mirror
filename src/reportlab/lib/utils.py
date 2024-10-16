@@ -1328,14 +1328,5 @@ def yieldNoneSplits(L):
             yield L[i:]
             break
 
-class _rl_repr:
-    hide = True
-    @staticmethod
-    def __call__(obj):
-        klass = obj.__class__
-        return (f'<{klass.__module__}.{klass.__name__} object at 0x?hidden?>' if _rl_repr.hide
-                else super(klass,obj).__repr__())
-_rl_repr = _rl_repr()
-
 def _rl_docdent(s):
     return '\n'.join((_.lstrip() for _ in s.split('\n')))

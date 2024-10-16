@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+
+CHANGES  4.3.r01 16/10/2024
+---------------------------
+    * preliminary changes to allow TTF fonts to be shaped.
+
 CHANGES  4.2.5   01/10/2024
 ---------------------------
     * Fixed code interfering with python 3.7 compatibility

@@ -13,7 +13,9 @@ from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor
 from reportlab.lib.utils import isBytes, isStr, asUnicode
 from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import ShapedStr, ShapeData, _sdGuardL
 from reportlab.rl_config import rtlSupport
+from itertools import groupby
 
 log2vis = None
 def fribidiText(text,direction):
@@ -195,6 +197,7 @@ class PDFTextObject(_PDFColorSetter):
         self.setTextOrigin(x, y)
         self._textRenderMode = 0
         self._clipping = 0
+        self._rise = 0
 
     def getCode(self):
         "pack onto one line; used internally"
@@ -237,7 +240,7 @@ class PDFTextObject(_PDFColorSetter):
 
         # Check if we have a previous move cursor call, and combine
         # them if possible.
-        if self._code and self._code[-1][-3:]==' Td':
+        if self._code and self._code[-1].endswith(' Td'):
             L = self._code[-1].split()
             if len(L)==3:
                 del self._code[-1]
@@ -369,9 +372,15 @@ class PDFTextObject(_PDFColorSetter):
 
     def setRise(self, rise):
         "Move text baseline up or down to allow superscript/subscripts"
-        self._rise = rise
-        self._y = self._y - rise    # + ?  _textLineMatrix?
-        self._code.append('%s Ts' % fp_str(rise))
+        v = f'{fp_str(rise)} Ts'
+        if self._code[-1].endswith(' Ts'): #optimize out r0 Ts r1 Ts 
+            #reverse previous changes
+            self._y += self._rise
+            self._code[-1] = v
+        else:
+            self._rise = rise
+            self._y -= rise
+            self._code.append(v)
 
     def _formatText(self, text):
         "Generates PDF text output operator(s)"
@@ -380,41 +389,122 @@ class PDFTextObject(_PDFColorSetter):
             text = log2vis(text, directionsMap.get(self.direction,DIR_ON),clean=True)
         canv = self._canvas
         font = pdfmetrics.getFont(self._fontname)
-        R = []
-        if font._dynamicFont:
-            #it's a truetype font and should be utf8.  If an error is raised,
-            for subset, t in font.splitString(text, canv._doc):
-                if subset!=self._curSubset:
-                    pdffontname = font.getSubsetInternalName(subset, canv._doc)
-                    R.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
-                    self._curSubset = subset
-                R.append("(%s) Tj" % canv._escape(t))
-        elif font._multiByte:
-            #all the fonts should really work like this - let them know more about PDF...
-            R.append("%s %s Tf %s TL" % (
-                canv._doc.getInternalFontName(font.fontName),
-                fp_str(self._fontsize),
-                fp_str(self._leading)
-                ))
-            R.append("(%s) Tj" % font.formatForPdf(text))
-        else:
-            #convert to T1  coding
-            fc = font
-            if isBytes(text):
-                try:
-                    text = text.decode('utf8')
-                except UnicodeDecodeError as e:
-                    i,j = e.args[2:4]
-                    raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[max(i-10,0):i],text[i:j],text[j:j+10]),)))
+        state = (self._code, self._x, self._y)
+        try:
+            self._code = []
+            R = self._code.append
+            if font._dynamicFont:
+                canv_escape = canv._escape
+                tmpl = None
+                r0 = self._rise
+                #it's a truetype font
+                if font.isShaped and isinstance(text,ShapedStr):
+                    sd0 = 0
+                    r0 = self._rise
+                    shapeData = text.__shapeData__
+                    fontsize = self._fontsize
+                    for subset, t in font.splitString(text, canv._doc):
+                        cluster = None
+                        if subset!=self._curSubset:
+                            if not tmpl:
+                                tmpl = f'{fp_str(fontsize)} Tf {fp_str(self._leading)} TL'
+                            R(f'{font.getSubsetInternalName(subset, canv._doc)} {tmpl}')
+                            self._curSubset = subset
+                        sd1 = sd0 + len(t)
+                        SD = shapeData[sd0:sd1] + _sdGuardL
+                        sd0 = sd1
+                        for i, sd in enumerate(SD):
+                            r = r0 + fontsize*sd.y_offset/1000
+                            if cluster is None or sd.cluster<0 or r!=self._rise:
+                                if cluster is not None:
+                                    #end current cluster
+                                    A = [v for v in ((('(%s)' % canv_escape(b''.join(g))) if k else fp_str(sum(g)))
+                                                for k, g in groupby(filter(None,A.__self__),lambda x: isinstance(x,bytes))) if v!='0']
+                                    if len(A)==1 and A[0].startswith('('):
+                                        R(f'{A[0]} Tj')
+                                    else:
+                                        R(f'[{" ".join(A)}] TJ')
 
-            for f, t in pdfmetrics.unicode2T1(text,[font]+font.substitutionFonts):
-                if f!=fc:
-                    R.append("%s %s Tf %s TL" % (canv._doc.getInternalFontName(f.fontName), fp_str(self._fontsize), fp_str(self._leading)))
-                    fc = f
-                R.append("(%s) Tj" % canv._escape(t))
-            if font!=fc:
-                R.append("%s %s Tf %s TL" % (canv._doc.getInternalFontName(self._fontname), fp_str(self._fontsize), fp_str(self._leading)))
-        return ' '.join(R)
+                                    if self._rise!=r0: self.setRise(r0)
+                                    if sd.cluster<0: break
+
+                                #begin new cluster
+                                if r!=self._rise: self.setRise(r)
+                                cluster = sd.cluster
+                                A = [].append
+
+                            #we assume that both harfbuzz and pdf positions are correct
+                            A(-sd.x_offset)     #adjust using harfbuzz offset
+                            A(bytes(chr(t[i]).encode('latin1')))
+                            #A(sd.x_offset)     #remove the harfbuzz adjustment
+                            #we assume the harfbuzz position is correct, but we will have
+                            # 1<----O------|
+                            # 1-----O ---->|--------------A--------->2
+                            #
+                            # 1<----O------|<....(W-O).....><...x...>2
+                            # 1--------------------W------->
+                            # 
+                            # W - O + x = A ==> x = A-W+O
+                            A(sd.width - sd.x_advance + sd.x_offset)
+                    if self._rise!=r0: self.setRise(r0)
+                else:
+                    for subset, t in font.splitString(text, canv._doc):
+                        if subset!=self._curSubset:
+                            if not tmpl:
+                                tmpl = f'{fp_str(self._fontsize)} Tf {fp_str(self._leading)} TL'
+                            R(f'{font.getSubsetInternalName(subset, canv._doc)} {tmpl}')
+                            self._curSubset = subset
+                        R(f'({canv_escape(t)}) Tj')
+            elif font._multiByte:
+                #all the fonts should really work like this - let them know more about PDF...
+                R("%s %s Tf %s TL" % (
+                    canv._doc.getInternalFontName(font.fontName),
+                    fp_str(self._fontsize),
+                    fp_str(self._leading)
+                    ))
+                R("(%s) Tj" % font.formatForPdf(text))
+            else:
+                #convert to T1  coding
+                fc = font
+                if isBytes(text):
+                    try:
+                        text = text.decode('utf8')
+                    except UnicodeDecodeError as e:
+                        i,j = e.args[2:4]
+                        raise UnicodeDecodeError(*(e.args[:4]+('%s\n%s-->%s<--%s' % (e.args[4],text[max(i-10,0):i],text[i:j],text[j:j+10]),)))
+
+                canv_escape = canv._escape
+                for f, t in pdfmetrics.unicode2T1(text,[font]+font.substitutionFonts):
+                    if f!=fc:
+                        R("%s %s Tf %s TL" % (canv._doc.getInternalFontName(f.fontName), fp_str(self._fontsize), fp_str(self._leading)))
+                        fc = f
+                    R(f'({canv_escape(t)}) Tj')
+                if font!=fc:
+                    R("%s %s Tf %s TL" % (canv._doc.getInternalFontName(self._fontname), fp_str(self._fontsize), fp_str(self._leading)))
+        finally:
+            self._code, self._x, self._y = state
+        return ' '.join(R.__self__)
+
+    def _shapedTextOut(self, text, dx, dy):
+        add = self._code.append
+        canv = self._canvas
+        font = pdfmetrics.getFont(self._fontname)
+        canv_escape = canv._escape
+        for subset, t in font.splitString(text, canv._doc):
+            if subset!=self._curSubset:
+                pdffontname = font.getSubsetInternalName(subset, canv._doc)
+                R.append("%s %s Tf %s TL" % (pdffontname, fp_str(self._fontsize), fp_str(self._leading)))
+                self._curSubset = subset
+            if dy:
+                print(f'{dy} -->',end='')
+                dy = (dy / font.face.unitsPerEm) * self._fontsize
+                print(f'{dy}')
+                add(f'{fp_str(dy)} Ts')
+            if dx:
+                add(f'[{fp_str(font.pdfScale(dx))} ({canv_escape(t)})] TJ')
+            if dy:
+                add(f'{fp_str(-dy)} Ts')
+            
 
     def _textOut(self, text, TStar=0):
         "prints string at current point, ignores text cursor"

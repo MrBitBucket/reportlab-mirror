@@ -345,6 +345,7 @@ class Font:
 
     _multiByte = 0      # do not want our own stringwidth
     _dynamicFont = 0    # do not want dynamic subsetting
+    isShaped = False
 
     def __init__(self, name, faceName, encName, substitutionFonts=None):
         self.fontName = name

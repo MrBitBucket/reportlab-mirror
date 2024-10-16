@@ -7,6 +7,7 @@ __all__ = (
         'RenderPMError',
         )
 from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1, stringWidth
+from reportlab.pdfbase.ttfonts import ShapedStr
 from reportlab.lib.utils import open_and_read, isBytes, rl_exec
 from .shapes import _baseGFontName, _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, definePath
 from sys import exc_info
@@ -88,53 +89,72 @@ def __makeTextPathsCode__(tp=None, _TP = ('freetype','_renderPM')):
                         self.faces[fontName] = (face,font) 
                     return self.faces[fontName]
 
+                def move_to(self, a, ctx):
+                    if self.P: self.P_append(('closePath',))
+                    self.P_append(('moveTo',self.xpt(a.x),self.ypt(a.y)))
+
+                def line_to(self, a, ctx):
+                    self.P_append(('lineTo',self.xpt(a.x),self.ypt(a.y)))
+
+                def conic_to(self, a, b, ctx):
+                    '''using the cubic equivalent'''
+                    x0,y0 = self.P[-1][-2:] if self.P else (a.x, a.y)
+                    x1 = self.xpt(a.x)
+                    y1 = self.ypt(a.y)
+                    x2 = self.xpt(b.x)
+                    y2 = self.ypt(b.y)
+                    self.P_append(('curveTo',x0+((x1-x0)*2)/3,y0+((y1-y0)*2)/3,x1+(x2-x1)/3,y1+(y2-y1)/3,x2,y2))
+
+                def cubic_to(self, a, b, c, ctx):
+                    self.P_append(('curveTo',self.xpt(a.x),self.ypt(a.y),self.xpt(b.x),self.ypt(b.y),self.xpt(c.x),self.ypt(c.y)))
+
+                def close_path(self,ctx=None):
+                    self.P.append(('closePath',))
+
                 def _text2Path(self, text, x=0, y=0, fontName=_baseGFontName, fontSize=1000, **kwds):
                     face, font = self.setFont(fontName)
                     scale = fontSize/face.units_per_EM  #font scaling
                     __dx__ = x/scale
                     __dy__ = y/scale
-                    P = []
-                    S = []
-                    P_append = P.append
+                    self.P = []
+                    self.P_append = self.P.append
                     truncate = kwds.pop('truncate',0)
                     if truncate:
-                        xpt = lambda x: pathNumTrunc(scale*(x+__dx__))
-                        ypt = lambda y: pathNumTrunc(scale*(y+__dy__))
+                        self.xpt = lambda x: pathNumTrunc(scale*(x+__dx__))
+                        self.ypt = lambda y: pathNumTrunc(scale*(y+__dy__))
                     else:
-                        xpt = lambda x: scale*(x + __dx__)
-                        ypt = lambda y: scale*(y + __dy__)
-
-                    def move_to(a, ctx):
-                        if P: P_append(('closePath',))
-                        P_append(('moveTo',xpt(a.x),ypt(a.y)))
-
-                    def line_to(a, ctx):
-                        P_append(('lineTo',xpt(a.x),ypt(a.y)))
-
-                    def conic_to(a, b, ctx):
-                        '''using the cubic equivalent'''
-                        x0,y0 = P[-1][-2:] if P else (a.x, a.y)
-                        x1 = xpt(a.x)
-                        y1 = ypt(a.y)
-                        x2 = xpt(b.x)
-                        y2 = ypt(b.y)
-                        P_append(('curveTo',x0+((x1-x0)*2)/3,y0+((y1-y0)*2)/3,x1+(x2-x1)/3,y1+(y2-y1)/3,x2,y2))
-
-                    def cubic_to(a, b, c, ctx):
-                        P_append(('curveTo',xpt(a.x),ypt(a.y),xpt(b.x),ypt(b.y),xpt(c.x),ypt(c.y)))
+                        self.xpt = lambda x: scale*(x + __dx__)
+                        self.ypt = lambda y: scale*(y + __dy__)
 
                     lineHeight = fontSize*1.2/scale
                     ftLFlags = self.ftLFlags
-                    for c in text:
+                    if isinstance(text,ShapedStr):
+                        sdata = text.__shapeData__
+                        dscale = face.units_per_EM / 1000
+                        fontC2G = font.face.charToGlyph
+                    else:
+                        sdata = None
+                    for i,c in enumerate(text):
                         if c=='\n':
                             __dx__ = 0
                             __dy__ -= lineHeight
                             continue
-                        face.load_char(c, ftLFlags)
-                        face.glyph.outline.decompose(self, move_to=move_to, line_to=line_to, conic_to=conic_to, cubic_to=cubic_to)
-                        __dx__ = __dx__ + face.glyph.metrics.horiAdvance
-                    if P: P_append(('closePath',))
-                    return P
+                        if sdata:
+                            sd = sdata[i]
+                            sdx_offset = sd.x_offset*dscale
+                            sdy_offset = sd.y_offset*dscale
+                            __dx__ += sdx_offset
+                            __dy__ += sdy_offset
+                            face.load_glyph(fontC2G[ord(c)],ftLFlags)
+                        else:
+                            face.load_char(c, ftLFlags)
+                        face.glyph.outline.decompose(self, move_to=self.move_to, line_to=self.line_to, conic_to=self.conic_to, cubic_to=self.cubic_to)
+                        if sdata:
+                            __dx__ -= sdx_offset
+                            __dy__ -= sdy_offset
+                        __dx__ += sd.x_advance*dscale if sdata else face.glyph.metrics.horiAdvance
+                    if self.P: self.P_append(('closePath',))
+                    return self.P
 
             def text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
                                         anchor='start', truncate=1, pathReverse=0, gs=None):

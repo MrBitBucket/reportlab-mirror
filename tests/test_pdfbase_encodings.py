@@ -164,7 +164,11 @@ class TextEncodingTestCase(NearTestCase):
 
         extracted = extractText(c.getCurrentPageContent())
         self.assertEqual(extracted[0], expectedCp1252)
-        self.assertEqual(extracted[1], extracted[2])
+        if pdfmetrics.getFont('Vera').isShaped:
+            self.assertEqual(extracted[1:6],['copyright \\001 trademark \\002 r', 'egister', 'ed \\003 R', 'eportLab! Ol\\004!', 'copyright \\001 trademark \\002 r'])
+        else:
+            self.assertEqual(extracted[1], extracted[2])
+
         #self.assertEqual(subsetToUnicode(self.vera, extracted[1]), testUni)
         c.save()
 
