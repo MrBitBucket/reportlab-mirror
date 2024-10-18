@@ -40,9 +40,9 @@ except ImportError:
 def getFontName():
     try:
         from reportlab.pdfbase.pdfmetrics import registerFont
-        from reportlab.pdfbase.ttfonts import TTFont
+        from reportlab.pdfbase.ttfonts import freshTTFont
         fontName = 'Vera'
-        registerFont(TTFont(fontName, "Vera.ttf"))
+        registerFont(freshTTFont(fontName, "Vera.ttf"))
     except:
         fontName = 'Helvetica'
     return fontName
@@ -1110,6 +1110,7 @@ class ChartTestCase(unittest.TestCase):
 
     @rlSkipIf(rlextraNeeded(),'rlextra needed')
     def test_ddf_labels(self):
+        getFontName()
         from reportlab.graphics.charts.piecharts import Pie, WedgeLabel
         from reportlab.graphics.charts.doughnut import Doughnut
         from reportlab.graphics.charts.spider import SpiderChart, SpokeLabel, StrandLabel
