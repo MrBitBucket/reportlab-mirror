@@ -38,36 +38,36 @@ except:
 #thanks to Dirk Holtwick for helpful discussions/insight
 #on this one
 _wsc = ''.join((
-    u'\u0009',  # HORIZONTAL TABULATION
-    u'\u000A',  # LINE FEED
-    u'\u000B',  # VERTICAL TABULATION
-    u'\u000C',  # FORM FEED
-    u'\u000D',  # CARRIAGE RETURN
-    u'\u001C',  # FILE SEPARATOR
-    u'\u001D',  # GROUP SEPARATOR
-    u'\u001E',  # RECORD SEPARATOR
-    u'\u001F',  # UNIT SEPARATOR
-    u'\u0020',  # SPACE
-    u'\u0085',  # NEXT LINE
-    #u'\u00A0', # NO-BREAK SPACE
-    u'\u1680',  # OGHAM SPACE MARK
-    u'\u2000',  # EN QUAD
-    u'\u2001',  # EM QUAD
-    u'\u2002',  # EN SPACE
-    u'\u2003',  # EM SPACE
-    u'\u2004',  # THREE-PER-EM SPACE
-    u'\u2005',  # FOUR-PER-EM SPACE
-    u'\u2006',  # SIX-PER-EM SPACE
-    u'\u2007',  # FIGURE SPACE
-    u'\u2008',  # PUNCTUATION SPACE
-    u'\u2009',  # THIN SPACE
-    u'\u200A',  # HAIR SPACE
-    u'\u200B',  # ZERO WIDTH SPACE
-    u'\u2028',  # LINE SEPARATOR
-    u'\u2029',  # PARAGRAPH SEPARATOR
-    u'\u202F',  # NARROW NO-BREAK SPACE
-    u'\u205F',  # MEDIUM MATHEMATICAL SPACE
-    u'\u3000',  # IDEOGRAPHIC SPACE
+    '\u0009',   # HORIZONTAL TABULATION
+    '\u000A',   # LINE FEED
+    '\u000B',   # VERTICAL TABULATION
+    '\u000C',   # FORM FEED
+    '\u000D',   # CARRIAGE RETURN
+    '\u001C',   # FILE SEPARATOR
+    '\u001D',   # GROUP SEPARATOR
+    '\u001E',   # RECORD SEPARATOR
+    '\u001F',   # UNIT SEPARATOR
+    '\u0020',   # SPACE
+    '\u0085',   # NEXT LINE
+    #'\u00A0', # NO-BREAK SPACE
+    '\u1680',   # OGHAM SPACE MARK
+    '\u2000',   # EN QUAD
+    '\u2001',   # EM QUAD
+    '\u2002',   # EN SPACE
+    '\u2003',   # EM SPACE
+    '\u2004',   # THREE-PER-EM SPACE
+    '\u2005',   # FOUR-PER-EM SPACE
+    '\u2006',   # SIX-PER-EM SPACE
+    '\u2007',   # FIGURE SPACE
+    '\u2008',   # PUNCTUATION SPACE
+    '\u2009',   # THIN SPACE
+    '\u200A',   # HAIR SPACE
+    '\u200B',   # ZERO WIDTH SPACE
+    '\u2028',   # LINE SEPARATOR
+    '\u2029',   # PARAGRAPH SEPARATOR
+    '\u202F',   # NARROW NO-BREAK SPACE
+    '\u205F',   # MEDIUM MATHEMATICAL SPACE
+    '\u3000',   # IDEOGRAPHIC SPACE
     ))
 _wsc_re_split=re.compile('[%s]+'% re.escape(_wsc)).split
 _wsc_end_search=re.compile('[%s]+$'% re.escape(_wsc)).search
@@ -89,7 +89,7 @@ def _usConv(s, vMap, default=None):
 def split(text, delim=None):
     if isBytes(text): text = text.decode('utf8')
     if delim is not None and isBytes(delim): delim = delim.decode('utf8')
-    return [uword for uword in (_wsc_re_split(text) if delim is None and u'\xa0' in text else text.split(delim))]
+    return [uword for uword in (_wsc_re_split(text) if delim is None and '\xa0' in text else text.split(delim))]
 
 def strip(text):
     if isBytes(text): text = text.decode('utf8')
@@ -143,7 +143,7 @@ def _nbspCount(w):
     if isBytes(w):
         return w.count(b'\xc2\xa0')
     else:
-        return w.count(u'\xa0')
+        return w.count('\xa0')
 
 def _leftDrawParaLine( tx, offset, extraspace, words, last=0):
     simple = extraspace>-1e-8 or getattr(tx,'preformatted',False)
@@ -571,7 +571,7 @@ class _SHYIndexedStr(str):
             for s in u:
                 x += len(s)
                 a(x)
-            u = u''.join(u)
+            u = ''.join(u)
             X = X[:-1]
         self = str.__new__(cls,u)
         self._shyIndices = X
@@ -579,7 +579,7 @@ class _SHYIndexedStr(str):
 
 def _shyUnsplit(s,ss=None):
     '''rejoin two parts of an original _SHYIndexedStr or str that was split'''
-    u = s.rstrip(u'-')
+    u = s.rstrip('-')
     if isinstance(s,_SHYIndexedStr):
         X = s._shyIndices[:]
         x = X[-1]
@@ -609,7 +609,7 @@ class _SHYWord(list):
             sW = lambda s: stringWidth(s, f.fontName, f.fontSize)
             if isinstance(t,_SHYIndexedStr):
                 # there's a shy in this bit
-                shyLen = sW(u'-')
+                shyLen = sW('-')
                 bw = baseWidth + shyLen
                 for j, x in enumerate(t._shyIndices):
                     left, right = t[:x], t[x:]
@@ -629,7 +629,7 @@ class _SHYWord(list):
         i1 = i+1
         f, t = self[i1] #we're splitting this subfrag
         X = t._shyIndices
-        lefts = _SHYIndexedStr(left+u'-',X[:j+1])
+        lefts = _SHYIndexedStr(left+'-',X[:j+1])
         L = self[:i1] + [(f,lefts)]
         L[0] = leftw - baseWidth0
         R = [ww-L[0]+shyLen]+([] if not right else [(f,_SHYIndexedStr(right,[_-x for _ in X[j+1:]]))]) + self[i1+1:]
@@ -862,7 +862,7 @@ def _getFragWords(frags,maxWidth=None):
         if frags:
             f = frags[0]
             f._fkind = _FK_TEXT
-            R = [[0,(f,u'')]]
+            R = [[0,(f,'')]]
 
     #print('\nreturned frag words')
     #for _i,_r in enumerate(R):
@@ -897,7 +897,7 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     maxlineno = len(maxWidths)-1
     W = []
     lineWidth = 0
-    fragText = u''
+    fragText = ''
     wordWidth = 0
     f = w[1][0]
     for g,cw,c in _fragWordIter(w):
@@ -916,7 +916,7 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
                 W = []
                 newLineWidth = cw
                 wordWidth = 0
-            fragText = u''
+            fragText = ''
             f = g
         wordWidth += cw
         fragText += c
@@ -930,10 +930,10 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
 
 #derived from Django validator
 #https://github.com/django/django/blob/master/django/core/validators.py
-uri_pat = re.compile(u'(^(?:[a-z0-9\\.\\-\\+]*)://)(?:\\S+(?::\\S*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\.]+\\]|([a-z\xa1-\uffff0-9](?:[a-z\xa1-\uffff0-9-]{0,61}[a-z\xa1-\uffff0-9])?(?:\\.(?!-)[a-z\xa1-\uffff0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xa1-\uffff-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z', re.I)
+uri_pat = re.compile('(^(?:[a-z0-9\\.\\-\\+]*)://)(?:\\S+(?::\\S*)?@)?(?:(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}|\\[[0-9a-f:\\.]+\\]|([a-z\xa1-\uffff0-9](?:[a-z\xa1-\uffff0-9-]{0,61}[a-z\xa1-\uffff0-9])?(?:\\.(?!-)[a-z\xa1-\uffff0-9-]{1,63}(?<!-))*\\.(?!-)(?:[a-z\xa1-\uffff-]{2,63}|xn--[a-z0-9]{1,59})(?<!-)\\.?|localhost))(?::\\d{2,5})?(?:[/?#][^\\s]*)?\\Z', re.I)
 
 def _slash_parts(uri,scheme,slash):
-    tail = u''
+    tail = ''
     while uri.endswith(slash):
         tail += slash
         uri = uri[:-1]
@@ -952,24 +952,24 @@ def _uri_split_pairs(uri):
     scheme = m.group(1)
     uri = uri[len(scheme):]
 
-    slash = (u'\\' if not scheme and u'/' not in uri #might be a microsoft pattern
-            else u'/')
+    slash = ('\\' if not scheme and '/' not in uri #might be a microsoft pattern
+            else '/')
     R = ([(scheme, uri)] if scheme and uri else []) + list(_slash_parts(uri,scheme,slash))
     R.reverse()
     return R
 
 #valid letters determined by inspection of
 #    https://en.wikipedia.org/wiki/List_of_Unicode_characters#Latin_script
-_hy_letters=u'A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\u024f\u1e80-\u1e85\u1e00-\u1eff\u0410-\u044f\u1e02\u1e03\u1e0a\u1e0b\u1e1e\u1e1f\u1e40\u1e41\u1e56\u1e57\u1e60\u1e61\u1e6a\u1e6b\u1e9b\u1ef2\u1ef3'
+_hy_letters='A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\u024f\u1e80-\u1e85\u1e00-\u1eff\u0410-\u044f\u1e02\u1e03\u1e0a\u1e0b\u1e1e\u1e1f\u1e40\u1e41\u1e56\u1e57\u1e60\u1e61\u1e6a\u1e6b\u1e9b\u1ef2\u1ef3'
 #explicit hyphens
-_shy = u'\xad'
-_hy_shy = u'-\xad'
+_shy = '\xad'
+_hy_shy = '-\xad'
 
-_hy_pfx_pat = re.compile(u'^[\'"([{\xbf\u2018\u201a\u201c\u201e]+')
-_hy_sfx_pat = re.compile(u'[]\'")}?!.,;:\u2019\u201b\u201d\u201f]+$')
-_hy_letters_pat=re.compile(u''.join((u"^[",_hy_letters,u"]+$")))
-_hy_shy_letters_pat=re.compile(u''.join((u"^[",_hy_shy,_hy_letters,"]+$")))
-_hy_shy_pat = re.compile(u''.join((u"([",_hy_shy,u"])")))
+_hy_pfx_pat = re.compile('^[\'"([{\xbf\u2018\u201a\u201c\u201e]+')
+_hy_sfx_pat = re.compile('[]\'")}?!.,;:\u2019\u201b\u201d\u201f]+$')
+_hy_letters_pat=re.compile(''.join(("^[",_hy_letters,"]+$")))
+_hy_shy_letters_pat=re.compile(''.join(("^[",_hy_shy,_hy_letters,"]+$")))
+_hy_shy_pat = re.compile(''.join(("([",_hy_shy,"])")))
 
 def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize, uriWasteReduce, embeddedHyphenation, hymwl):
     if isBytes(s): s = s.decode('utf8') #only encoding allowed
@@ -978,9 +978,9 @@ def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize, uriWas
         pfx = m.group(0)
         s = s[len(pfx):]
     else:
-        pfx = u''
+        pfx = ''
     if isinstance(s,_SplitWordLL) and s[-1]=='-':
-        sfx = u'-'
+        sfx = '-'
         s = s[:-1]
     else:
         m = _hy_sfx_pat.search(s)
@@ -988,7 +988,7 @@ def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize, uriWas
             sfx = m.group(0)
             s = s[:-len(sfx)]
         else:
-            sfx = u''
+            sfx = ''
     if len(s) < hymwl: return
 
     w0 = newWidth - ww
@@ -1003,19 +1003,19 @@ def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize, uriWas
                 hw = stringWidth(h,fontName,fontSize)
                 tw = w0 + hw
                 if tw<=maxWidth:
-                    return u'',0,hw,ww-hw,h,t
+                    return '',0,hw,ww-hw,h,t
         return
 
     H = _hy_shy_pat.split(s)
-    if hyphenator and  (_hy_letters_pat.match(s) or (_hy_shy_letters_pat.match(s) and u'' not in H)):
-        hylen = stringWidth(u'-',fontName,fontSize)
+    if hyphenator and  (_hy_letters_pat.match(s) or (_hy_shy_letters_pat.match(s) and '' not in H)):
+        hylen = stringWidth('-',fontName,fontSize)
         for h,t in hyphenator(s):
             h = pfx + h
             if not _hy_shy_pat.match(h[-1]):
-                jc = u'-'
+                jc = '-'
                 jclen = hylen
             else:
-                jc = u''
+                jc = ''
                 jclen = 0
             t = t + sfx
             hw = stringWidth(h,fontName,fontSize)
@@ -1026,14 +1026,14 @@ def _hyGenPair(hyphenator, s, ww, newWidth, maxWidth, fontName, fontSize, uriWas
     #even though the above tries for words with '-' it may be that no split ended with '-'
     #so this may succeed where the above does not
     n = len(H)
-    if n>=3 and embeddedHyphenation and u'' not in H and _hy_shy_letters_pat.match(s):
+    if n>=3 and embeddedHyphenation and '' not in H and _hy_shy_letters_pat.match(s):
         for i in reversed(range(2,n,2)):
             h = pfx + ''.join(H[:i])
             t = ''.join(H[i:]) + sfx
             hw = stringWidth(h,fontName,fontSize)
             tw = hw+w0
             if tw<=maxWidth:
-                return u'',0,hw,ww-hw,h,t
+                return '',0,hw,ww-hw,h,t
 
 def _fragWordSplitRep(FW):
     '''takes a frag word and assembles a unicode word from it
@@ -1055,7 +1055,7 @@ def _fragWordSplitRep(FW):
         aU(t)
         eX(len(t)*[(i,cc)])
         cc += len(t)
-    return u''.join(U),tuple(X)
+    return ''.join(U),tuple(X)
 
 def _rebuildFragWord(F):
     '''F are the frags'''
@@ -1071,9 +1071,9 @@ def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth, uriWasteReduce, embedded
         pfx = m.group(0)
         s = s[len(pfx):]
     else:
-        pfx = u''
+        pfx = ''
     if isinstance(FW,_SplitFragLL) and FW[-1][1][-1]=='-':
-        sfx = u'-'
+        sfx = '-'
         s = s[:-1]
     else:
         m = _hy_sfx_pat.search(s)
@@ -1081,7 +1081,7 @@ def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth, uriWasteReduce, embedded
             sfx = m.group(0)
             s = s[:-len(sfx)]
         else:
-            sfx = u''
+            sfx = ''
     if len(s) < hymwl: return
     ww = FW[0]
     w0 = newWidth - ww
@@ -1106,11 +1106,11 @@ def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth, uriWasteReduce, embedded
                 if sfxr: FR.insert(0,(ffx,sfxr))
                 h = _rebuildFragWord(FL)
                 if w0+h[0]<=maxWidth:
-                    return u'',h,_rebuildFragWord(FR)
+                    return '',h,_rebuildFragWord(FR)
         return
 
     H = _hy_shy_pat.split(s)
-    if hyphenator and (_hy_letters_pat.match(s) or (_hy_shy_letters_pat.match(s) and u'' not in H)):
+    if hyphenator and (_hy_letters_pat.match(s) or (_hy_shy_letters_pat.match(s) and '' not in H)):
         #not too diffcult for now
         for h,t in hyphenator(s):
             h = pfx+h
@@ -1121,9 +1121,9 @@ def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth, uriWasteReduce, embedded
             ffx, sfx = FW[fx]
             sfxl = sfx[:pos-cc]
             if not _hy_shy_pat.match(h[-1]):
-                jc = u'-'
+                jc = '-'
             else:
-                jc = u''
+                jc = ''
             if sfxl or jc:
                 FL.append((ffx,sfxl+jc))
             sfxr = sfx[pos-cc:]
@@ -1136,9 +1136,9 @@ def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth, uriWasteReduce, embedded
     #even though the above tries for words with '-' it may be that no split ended with '-'
     #so this may succeed where the above does not
     n = len(H)
-    if n>=3 and embeddedHyphenation and u'' not in H and _hy_shy_letters_pat.match(s):
+    if n>=3 and embeddedHyphenation and '' not in H and _hy_shy_letters_pat.match(s):
         for i in reversed(range(2,n,2)):
-            pos = len(pfx + u''.join(H[:i]))
+            pos = len(pfx + ''.join(H[:i]))
             fx, cc = X[pos]
             #FW[fx] is split
             FL = FW[1:fx]
@@ -1150,7 +1150,7 @@ def _hyGenFragsPair(hyphenator, FW, newWidth, maxWidth, uriWasteReduce, embedded
             if sfxr: FR.insert(0,(ffx,sfxr))
             h = _rebuildFragWord(FL)
             if w0+h[0]<=maxWidth:
-                return u'',h,_rebuildFragWord(FR)
+                return '',h,_rebuildFragWord(FR)
 
 def _hyphenateFragWord(hyphenator,FW,newWidth,maxWidth,uriWasteReduce,embeddedHyphenation,
                         hymwl=hyphenationMinWordLength):
@@ -1194,7 +1194,7 @@ class _SHYStr(str):
     def __new__(cls,s):
         S = s.split(_shy)
         if len(S)>1:
-            self = str.__new__(cls, u''.join(S))
+            self = str.__new__(cls, ''.join(S))
             sp = [0]
             asp = sp.append
             for ss in S:
@@ -1222,7 +1222,7 @@ class _SHYStr(str):
                     #we found a suitable split in a soft-hyphenated word
                     T = self.__sp__[i:] + [len(self)]
                     S = [self[T[j]:T[j+1]] for j in range(len(T)-1)]
-                    sw = _SHYStr(sw+u'-')
+                    sw = _SHYStr(sw+'-')
                     sw.__sp__ = self.__sp__[:i]
                     return [sw,_SHYStr(_shy.join(S))]
 
@@ -1254,7 +1254,7 @@ def _splitWord(w, lineWidth, maxWidths, lineno, fontName, fontSize, encoding='ut
     R = []
     aR = R.append
     maxlineno = len(maxWidths)-1
-    wordText = u''
+    wordText = ''
     maxWidth = maxWidths[min(maxlineno,lineno)]
     if isBytes(w):
         w = w.decode(encoding)
@@ -1266,7 +1266,7 @@ def _splitWord(w, lineWidth, maxWidths, lineno, fontName, fontSize, encoding='ut
             lineno += 1
             maxWidth = maxWidths[min(maxlineno,lineno)]
             newLineWidth = cw
-            wordText = u''
+            wordText = ''
         wordText += c
         lineWidth = newLineWidth
     aR(_SplitWordEnd(wordText))
@@ -1281,8 +1281,8 @@ def _rejoinSplitWords(R):
         return r
     elif isinstance(R[0],_SplitWordHY):
         cf = str if isinstance(R[-1], _SplitWordEnd) else _SplitWordHY
-        s = u''.join((_[:-1] if isinstance(_,_SplitWordHY) else _ for _ in R))
-        return s if isinstance(R[-1], _SplitWordEnd) else _SplitWordHY(s+u'-')
+        s = ''.join((_[:-1] if isinstance(_,_SplitWordHY) else _ for _ in R))
+        return s if isinstance(R[-1], _SplitWordEnd) else _SplitWordHY(s+'-')
     else:
         return ''.join(R)
 
@@ -1589,13 +1589,13 @@ def textTransformFrags(frags,style):
             for f in frags:
                 u = f.text
                 if not u: continue
-                if u.startswith(u' ') or pb:
+                if u.startswith(' ') or pb:
                     u = tt(u)
                 else:
-                    i = u.find(u' ')
+                    i = u.find(' ')
                     if i>=0:
                         u = u[:i]+tt(u[i:])
-                pb = u.endswith(u' ')
+                pb = u.endswith(' ')
                 f.text = u
         else:
             for f in frags:
@@ -1638,14 +1638,14 @@ def makeCJKParaLine(U,maxWidth,widthUsed,extraSpace,lineBreak,calcBounds):
         minDescent = min(minDescent,descent)
         if not sameFrag(f0,f):
             f0=f0.clone()
-            f0.text = u''.join(CW)
+            f0.text = ''.join(CW)
             words.append(f0)
             CW = []
             f0 = f
         CW.append(u)
     if CW:
         f0=f0.clone()
-        f0.text = u''.join(CW)
+        f0.text = ''.join(CW)
         words.append(f0)
     return FragLine(kind=1,extraSpace=extraSpace,wordCount=1,words=words[1:],fontSize=maxSize,ascent=maxAscent,descent=minDescent,maxWidth=maxWidth,currentWidth=widthUsed,lineBreak=lineBreak)
 
