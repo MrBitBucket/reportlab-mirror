@@ -80,9 +80,10 @@ def CairoColor(c):
     return toColor(c) if c is not None else c
 
 # the main entry point for users...
-def draw(drawing, canvas, x, y, showBoundary=rl_config._unset_):
+def draw(drawing, canvas, x, y, showBoundary=rl_config._unset_,**kwds):
     """As it says"""
     R = _PMRenderer()
+    R.__dict__.update(kwds)
     R.draw(renderScaledDrawing(drawing), canvas, x, y, showBoundary=showBoundary)
 
 from reportlab.graphics.renderbase import Renderer
@@ -731,29 +732,29 @@ class PMCanvas:
                     else stringWidth(text, self._gs.fontName, self._gs.fontSize))
         return text, width
 
-def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB'):
+def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB',**kwds):
     d = renderScaledDrawing(d)
     c = PMCanvas(d.width, d.height, dpi=dpi, bg=bg, configPIL=configPIL, backend=backend,backendFmt=backendFmt)
-    draw(d, c, 0, 0, showBoundary=showBoundary)
+    draw(d, c, 0, 0, showBoundary=showBoundary,**kwds)
     return c
 
-def drawToPIL(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB'):
-    return drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary, backend=backend,backendFmt=backendFmt).toPIL()
+def drawToPIL(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB', **kwds):
+    return drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary, backend=backend,backendFmt=backendFmt, **kwds).toPIL()
 
-def drawToPILP(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB'):
+def drawToPILP(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB', **kwds):
     Image = _getImage()
-    im = drawToPIL(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary,backend=backend,backendFmt=backendFmt)
+    im = drawToPIL(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary,backend=backend,backendFmt=backendFmt, **kwds)
     return im.convert("P", dither=Image.NONE, palette=Image.ADAPTIVE)
 
-def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB'):
+def drawToFile(d,fn,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB', **kwds):
     '''create a pixmap and draw drawing, d to it then save as a file
     configPIL dict is passed to image save method'''
-    c = drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary,backend=backend,backendFmt=backendFmt)
+    c = drawToPMCanvas(d, dpi=dpi, bg=bg, configPIL=configPIL, showBoundary=showBoundary,backend=backend,backendFmt=backendFmt, **kwds)
     c.saveToFile(fn,fmt)
 
-def drawToString(d,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB'):
+def drawToString(d,fmt='GIF', dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB',**kwds):
     s = BytesIO()
-    drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, configPIL=configPIL,backend=backend,backendFmt=backendFmt)
+    drawToFile(d,s,fmt=fmt, dpi=dpi, bg=bg, configPIL=configPIL,backend=backend,backendFmt=backendFmt, **kwds)
     return s.getvalue()
 
 save = drawToFile
