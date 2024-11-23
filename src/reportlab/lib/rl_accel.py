@@ -38,7 +38,7 @@ if _py_funcs:
 if 'fp_str' in _py_funcs:
     _log_10 = lambda x,log=log,_log_e_10=log(10.0): log(x)/_log_e_10
     _fp_fmts = "%.0f", "%.1f", "%.2f", "%.3f", "%.4f", "%.5f", "%.6f"
-    def fp_str(*a):
+    def _py_fp_str(*a):
         '''convert separate arguments (or single sequence arg) into space separated numeric strings'''
         if len(a)==1 and isSeq(a[0]): a = a[0]
         s = []
@@ -61,14 +61,14 @@ if 'fp_str' in _py_funcs:
         return ' '.join(s)
 
     #hack test for comma users
-    if ',' in fp_str(0.25):
+    if ',' in _py_fp_str(0.25):
         _FP_STR = _fp_str
-        def _fp_str(*a):
+        def __py_fp_str(*a):
             return _FP_STR(*a).replace(',','.')
-    _py_funcs['fp_str'] = fp_str
+    _py_funcs['fp_str'] = _py_fp_str
 
 if 'unicode2T1' in _py_funcs:
-    def unicode2T1(utext,fonts):
+    def _py_unicode2T1(utext,fonts):
         '''return a list of (font,string) pairs representing the unicode text'''
         R = []
         font, fonts = fonts[0], fonts[1:]
@@ -88,34 +88,34 @@ if 'unicode2T1' in _py_funcs:
                 if i0:
                     R.append((font,utext[:i0].encode(enc)))
                 if fonts:
-                    R.extend(unicode2T1(utext[i0:il],fonts))
+                    R.extend(_py_unicode2T1(utext[i0:il],fonts))
                 else:
                     R.append((font._notdefFont,font._notdefChar*(il-i0)))
                 utext = utext[il:]
         return R
-    _py_funcs['unicode2T1'] = unicode2T1
+    _py_funcs['unicode2T1'] = _py_unicode2T1
 
 if 'instanceStringWidthT1' in _py_funcs:
-    def instanceStringWidthT1(self, text, size, encoding='utf8'):
+    def _py_instanceStringWidthT1(self, text, size, encoding='utf8'):
         """This is the "purist" approach to width"""
         if not isUnicode(text): text = text.decode(encoding)
-        return sum((sum(map(f.widths.__getitem__,t)) for f, t in unicode2T1(text,[self]+self.substitutionFonts)))*0.001*size
-    _py_funcs['instanceStringWidthT1'] = instanceStringWidthT1
+        return sum((sum(map(f.widths.__getitem__,t)) for f, t in _py_unicode2T1(text,[self]+self.substitutionFonts)))*0.001*size
+    _py_funcs['instanceStringWidthT1'] = _py_instanceStringWidthT1
 
 if 'instanceStringWidthTTF' in _py_funcs:
-    def instanceStringWidthTTF(self, text, size, encoding='utf-8'):
+    def _py_instanceStringWidthTTF(self, text, size, encoding='utf8'):
         "Calculate text width"
         if not isUnicode(text):
-            text = text.decode(encoding or 'utf-8')
+            text = text.decode(encoding or 'utf8')
         g = self.face.charWidths.get
         dw = self.face.defaultWidth
         return 0.001*size*sum((g(ord(u),dw) for u in text))
-    _py_funcs['instanceStringWidthTTF'] = instanceStringWidthTTF
+    _py_funcs['instanceStringWidthTTF'] = _py_instanceStringWidthTTF
 
 if 'hex32' in _py_funcs:
-    def hex32(i):
+    def _py_hex32(i):
         return '0X%8.8X' % (int(i)&0xFFFFFFFF)
-    _py_funcs['hex32'] = hex32
+    _py_funcs['hex32'] = _py_hex32
 
 if 'add32' in _py_funcs:
     def add32(x, y):
@@ -124,12 +124,12 @@ if 'add32' in _py_funcs:
     _py_funcs['add32'] = add32
 
 if 'calcChecksum' in _py_funcs:
-    def calcChecksum(data):
+    def _py_calcChecksum(data):
         """Calculates TTF-style checksums"""
         data = rawBytes(data)
         if len(data)&3: data = data + (4-(len(data)&3))*b"\0"
         return sum(unpack(">%dl" % (len(data)>>2), data)) & 0xFFFFFFFF
-    _py_funcs['calcChecksum'] = calcChecksum
+    _py_funcs['calcChecksum'] = _py_calcChecksum
 
 if 'escapePDF' in _py_funcs:
     _ESCAPEDICT={}
@@ -142,17 +142,17 @@ if 'escapePDF' in _py_funcs:
             _ESCAPEDICT[c] = chr(c)
     del c
     #Michael Hudson donated this
-    def escapePDF(s):
+    def _py_escapePDF(s):
         r = []
         for c in s:
             if not type(c) is int:
                 c = ord(c)
             r.append(_ESCAPEDICT[c])
         return ''.join(r)
-    _py_funcs['escapePDF'] = escapePDF
+    _py_funcs['escapePDF'] = _py_escapePDF
 
 if 'asciiBase85Encode' in _py_funcs:
-    def asciiBase85Encode(input):
+    def _py_asciiBase85Encode(input):
         """Encodes input using ASCII-Base85 coding.
 
         This is a compact encoding used for binary data within
@@ -232,10 +232,10 @@ if 'asciiBase85Encode' in _py_funcs:
         #terminator code for ascii 85
         out('~>')
         return ''.join(out.__self__)
-    _py_funcs['asciiBase85Encode'] = asciiBase85Encode
+    _py_funcs['asciiBase85Encode'] = _py_asciiBase85Encode
 
 if 'asciiBase85Decode' in _py_funcs:
-    def asciiBase85Decode(input):
+    def _py_asciiBase85Decode(input):
         """Decodes input using ASCII-Base85 coding.
 
         This is not normally used - Acrobat Reader decodes for you
@@ -309,17 +309,17 @@ if 'asciiBase85Decode' in _py_funcs:
 
         r = ''.join(out.__self__)
         return asBytes(r,enc='latin1')
-    _py_funcs['asciiBase85Decode'] = asciiBase85Decode
+    _py_funcs['asciiBase85Decode'] = _py_asciiBase85Decode
 
 if 'sameFrag' in _py_funcs:
-    def sameFrag(f,g):
+    def _py_sameFrag(f,g):
         'returns 1 if two ParaFrags map out the same'
         if (hasattr(f,'cbDefn') or hasattr(g,'cbDefn')
                 or hasattr(f,'lineBreak') or hasattr(g,'lineBreak')): return 0
         for a in ('fontName', 'fontSize', 'textColor', 'rise', 'us_lines', 'link', "backColor", "nobr"):
             if getattr(f,a,None)!=getattr(g,a,None): return 0
         return 1
-    _py_funcs['sameFrag'] = sameFrag
+    _py_funcs['sameFrag'] = _py_sameFrag
 
 G=globals()
 for fn in __all__:

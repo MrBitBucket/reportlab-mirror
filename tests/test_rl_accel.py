@@ -2,6 +2,7 @@ __version__='3.3.0'
 __doc__='''basic tests.'''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation, rlSkipUnless
 from reportlab.lib.utils import asBytes, isPyPy
+from sys import getrefcount
 setOutDir(__name__)
 
 try:
@@ -13,33 +14,8 @@ import unittest
 def getFuncs(name):
     return tuple((_ for _ in ((_c_funcs.get(name,None),'c'),(_py_funcs.get(name,None),'py')) if _[0]))
 
-def getrc(defns,depth=1):
-    if isPyPy: return ''
-    from sys import getrefcount, _getframe
-    f = _getframe(depth)
-    G0 = f.f_globals
-    L = f.f_locals
-    if L is not G0:
-        LL = [L]
-        while 1:
-            f = f.f_back
-            G = f.f_globals
-            L = f.f_locals
-            if G is not G0 or G is L: break
-            LL.append(L)
-        L = {}
-        LL.reverse()
-        for l in LL:
-            L.update(l)
-    else:
-        L = L.copy()
-    G0 = G0.copy()
-    return [getrefcount(eval(x,L,G0))-1 for x in defns.split()]
-
-def checkrc(defns,rcv0):
-    if isPyPy: return ''
-    rcv1 = getrc(defns,2)
-    return ' '.join(["%s %s-->%s" % (x,v,w) for x,v,w in zip(defns.split(),rcv0,rcv1) if abs(v-w)>1])
+def checkrc(defns,rcv1,rcv0):
+    return ' '.join(["%s %s-->%s" % (x,v,w) for x,v,w in zip(defns,rcv0,rcv1) if abs(v-w)>1])
 
 class RlAccelTestCase(unittest.TestCase):
 
@@ -115,7 +91,7 @@ class RlAccelTestCase(unittest.TestCase):
         ts = b'ABCDEF\xce\x91\xce\xb2G'
         utext = b'ABCDEF\xce\x91\xce\xb2G'.decode(senc)
         fontSize = 12
-        defns="ttfn t1fn ttf t1f testCp1252 enc senc ts utext fontSize ttf.face ttf.face.charWidths ttf.face.defaultWidth t1f.widths t1f.encName t1f.substitutionFonts _fonts"
+        defns="ttfn t1fn ttf t1f testCp1252 enc senc ts utext fontSize ttf.face ttf.face.charWidths ttf.face.defaultWidth t1f.widths t1f.encName t1f.substitutionFonts _fonts".split()
         import sys
         F = []
         def tfunc(f,ts,fontSize,enc,funcs,i):
@@ -126,12 +102,14 @@ class RlAccelTestCase(unittest.TestCase):
             funcs = getFuncs('instanceStringWidth'+fontType)
             for i,kind in enumerate(('c','py')):
                 for j in (9,8,7,6,5,4,3,2,1,0): #we run several times to allow the refcounts to stabilize
-                    if j==7: rcv = getrc(defns)
+                    #print(f'{fontType}{j}{kind}:{ {x:getrefcount(eval(x,vars())) for x in defns} }')
+                    if j==7: rcv0 = [getrefcount(eval(x,vars())) for x in defns]
                     tfunc(font,testCp1252,fontSize,enc,funcs,i)
                     tfunc(font,ts,fontSize,senc,funcs,i)
                     tfunc(font,utext,fontSize,senc,funcs,i)
                     if j==0:
-                        rcc = checkrc(defns,rcv)
+                        rcv1 = [getrefcount(eval(x,vars())) for x in defns]
+                        rcc = checkrc(defns,rcv1,rcv0)
                         if rcc: F.append("%s %s refcount diffs (%s)" % (fontType,kind,rcc))
         assert not F,"instanceStringWidth failures\n\t%s" % '\n\t'.join(F)
         isw = _c_funcs.get('instanceStringWidthTTF',None)
@@ -155,20 +133,23 @@ class RlAccelTestCase(unittest.TestCase):
         senc = 'utf8'
         testCp1252 = b'copyright \xa9 trademark \x99 registered \xae ReportLab! Ol\xe9!'.decode(enc)
         utext = b'This is the end of the \xce\x91\xce\xb2 world. This is the end of the \xce\x91\xce\xb2 world jap=\xe3\x83\x9b\xe3\x83\x86. This is the end of the \xce\x91\xce\xb2 world. This is the end of the \xce\x91\xce\xb2 world jap=\xe3\x83\x9b\xe3\x83\x86'.decode('utf8')
+        testCp1252 = b'ABCD'.decode(enc)
+        utext = 'ABCD'
         FUNCS = getFuncs('unicode2T1')
         def tfunc(f,ts,func,kind):
             w1 = func(ts,[f]+f.substitutionFonts)
             w2 = FUNCS[1][0](ts,[f]+f.substitutionFonts)
             assert w1==w2,"%s unicode2T1 %r != %r" % (kind,w1,w2)
-        defns="t1fn t1f testCp1252 enc senc utext t1f.widths t1f.encName t1f.substitutionFonts _fonts"
+        defns="t1fn t1f testCp1252 enc senc utext t1f.widths t1f.encName t1f.substitutionFonts _fonts".split()
         F = []
         for func,kind in FUNCS:
             for j in (9,8,7,6,5,4,3,2,1,0): #we run several times to allow the refcounts to stabilize
-                if j==7: rcv = getrc(defns)
+                if j==7: rcv0 = [getrefcount(eval(x,vars())) for x in defns]
                 tfunc(t1f,testCp1252,func,kind)
                 tfunc(t1f,utext,func,kind)
                 if j==0:
-                    rcc = checkrc(defns,rcv)
+                    rcv1 = [getrefcount(eval(x,vars())) for x in defns]
+                    rcc = checkrc(defns,rcv1,rcv0)
                     if rcc: F.append("%s refcount diffs (%s)" % (kind,rcc))
         assert not F,"test_unicode2T1 failures\n\t%s" % '\n\t'.join(F)
         if FUNCS[0]:

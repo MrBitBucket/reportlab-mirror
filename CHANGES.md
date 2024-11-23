@@ -18,6 +18,7 @@ CHANGES  4.3.0a1 16/10/2024
     * fix ordering of drawing 'py' renders, modernise shapes string formatting
     * modernise paragraph code
     * renderbase.py change if else ordering, keep better parent record
+    * improve rl_accel.py and its tests
 
 CHANGES  4.2.5   01/10/2024
 ---------------------------
