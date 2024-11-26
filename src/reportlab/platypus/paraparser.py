@@ -3129,6 +3129,8 @@ class ParaParser(HTMLParser):
 
         # bold, italic
         frag.fontName = tt2ps(frag.fontName,frag.bold,frag.italic)
+        #in 3.14.0a1 the needed to use the commented line below
+        #frag = frag.clone(fontName=tt2ps(frag.fontName,frag.bold,frag.italic))
 
         #save our data
         frag.text = data
