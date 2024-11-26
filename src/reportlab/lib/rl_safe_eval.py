@@ -9,7 +9,6 @@ strTypes = (bytes,str)
 isPy39 = sys.version_info[:2]>=(3,9)
 isPy313 = sys.version_info[:2]>=(3,13)
 
-haveNameConstant = hasattr(ast,'NameConstant')
 import textwrap
 
 class BadCode(ValueError):
@@ -176,7 +175,7 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 		"""
 		spec = ast.Dict(keys=[], values=[])
 
-		spec.keys.append(ast.Str('childs'))
+		spec.keys.append(ast.Constant('childs'))
 		spec.values.append(ast.Tuple([], ast.Load()))
 
 		# starred elements in a sequence do not contribute into the min_len.
@@ -196,12 +195,12 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 
 			elif isinstance(val, ast.Tuple):
 				el = ast.Tuple([], ast.Load())
-				el.elts.append(ast.Num(idx - offset))
+				el.elts.append(ast.Constant(idx - offset))
 				el.elts.append(self.gen_unpack_spec(val))
 				spec.values[0].elts.append(el)
 
-		spec.keys.append(ast.Str('min_len'))
-		spec.values.append(ast.Num(min_len))
+		spec.keys.append(ast.Constant('min_len'))
+		spec.values.append(ast.Constant(min_len))
 
 		return spec
 
@@ -271,9 +270,6 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 
 		return (tmp_target, cleanup)
 
-	def gen_none_node(self):
-		return ast.NameConstant(value=None) if haveNameConstant else ast.Name(id='None', ctx=ast.Load())
-
 	def gen_lambda(self, args, body):
 		return ast.Lambda(
 			args=ast.arguments(
@@ -301,17 +297,17 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 			if slice_.lower:
 				args.append(slice_.lower)
 			else:
-				args.append(self.gen_none_node())
+				args.append(ast.Constant(None))
 
 			if slice_.upper:
 				args.append(slice_.upper)
 			else:
-				args.append(self.gen_none_node())
+				args.append(ast.Constant(None))
 
 			if slice_.step:
 				args.append(slice_.step)
 			else:
-				args.append(self.gen_none_node())
+				args.append(ast.Constant(None))
 
 			return ast.Call(
 				func=ast.Name('slice', ast.Load()),
@@ -380,7 +376,7 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 
 		call_getattr = ast.Call(
 			func=ast.Name('__rl_getattr__', ast.Load()),
-			args=[node, ast.Str(attr_name)],
+			args=[node, ast.Constant(attr_name)],
 			keywords=[])
 
 		return ast.BoolOp(op=ast.And(), values=[call_getattr, node])
@@ -468,7 +464,7 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 			node = self.visit_children(node)
 			new_node = ast.Call(
 				func=ast.Name('__rl_getattr__', ast.Load()),
-				args=[node.value, ast.Str(node.attr)],
+				args=[node.value, ast.Constant(node.attr)],
 				keywords=[])
 
 			copy_locations(new_node, node)
@@ -605,7 +601,7 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 				value=ast.Call(
 					func=ast.Name('__rl_augAssign__', ast.Load()),
 					args=[
-						ast.Str(augOps[type(node.op)]),
+						ast.Constant(augOps[type(node.op)]),
 						ast.Name(node.target.id, ast.Load()),
 						node.value
 						],
@@ -756,6 +752,7 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 	visit_AsyncWith = not_allowed
 	visit_Print = not_allowed
 
+	visit_Constant = visit_children
 	visit_Num = visit_children
 	visit_Str = visit_children
 	visit_Bytes = visit_children
@@ -1240,20 +1237,13 @@ def rl_extended_literal_eval(expr, safe_callables=None, safe_names=None):
 		expr = ast.parse(expr, mode='eval')
 	if isinstance(expr, ast.Expression):
 		expr = expr.body
-	try:
-		# Python 3.4 and up
-		ast.NameConstant
-		safe_test = lambda n: isinstance(n, ast.NameConstant) or isinstance(n,ast.Name) and n.id in safe_names
-		safe_extract = lambda n: n.value if isinstance(n,ast.NameConstant) else safe_names[n.id]
-	except AttributeError:
-		# Everything before
-		safe_test = lambda n: isinstance(n, ast.Name) and n.id in safe_names
-		safe_extract = lambda n: safe_names[n.id]
+
+	safe_test = lambda n: isinstance(n, ast.Constant) or isinstance(n,ast.Name) and n.id in safe_names
+	safe_extract = lambda n: n.value if isinstance(n,ast.Constant) else safe_names[n.id]
+
 	def _convert(node):
-		if isinstance(node, (ast.Str, ast.Bytes)):
-			return node.s
-		elif isinstance(node, ast.Num):
-			return node.n
+		if isinstance(node, ast.Constant):
+			return node.value
 		elif isinstance(node, ast.Tuple):
 			return tuple(map(_convert, node.elts))
 		elif isinstance(node, ast.List):
@@ -1265,7 +1255,7 @@ def rl_extended_literal_eval(expr, safe_callables=None, safe_names=None):
 			return safe_extract(node)
 		elif isinstance(node, ast.UnaryOp) and \
 			 isinstance(node.op, (ast.UAdd, ast.USub)) and \
-			 isinstance(node.operand, (ast.Num, ast.UnaryOp, ast.BinOp)):
+			 isinstance(node.operand, (ast.Constant, ast.UnaryOp, ast.BinOp)):
 			operand = _convert(node.operand)
 			if isinstance(node.op, ast.UAdd):
 				return + operand
@@ -1273,9 +1263,9 @@ def rl_extended_literal_eval(expr, safe_callables=None, safe_names=None):
 				return - operand
 		elif isinstance(node, ast.BinOp) and \
 			 isinstance(node.op, (ast.Add, ast.Sub)) and \
-			 isinstance(node.right, (ast.Num, ast.UnaryOp, ast.BinOp)) and \
+			 isinstance(node.right, (ast.Constant, ast.UnaryOp, ast.BinOp)) and \
 			 isinstance(node.right.n, complex) and \
-			 isinstance(node.left, (ast.Num, ast.UnaryOp, astBinOp)):
+			 isinstance(node.left, (ast.Constant, ast.UnaryOp, astBinOp)):
 			left = _convert(node.left)
 			right = _convert(node.right)
 			if isinstance(node.op, ast.Add):

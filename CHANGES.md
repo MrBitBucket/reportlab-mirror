@@ -12,13 +12,14 @@ The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
 
-CHANGES  4.3.0a1 16/10/2024
+CHANGES  4.3.0a1 26/11/2024
 ---------------------------
     * preliminary changes to allow TTF fonts to be shaped.
     * fix ordering of drawing 'py' renders, modernise shapes string formatting
     * modernise paragraph code
     * renderbase.py change if else ordering, keep better parent record
     * improve rl_accel.py and its tests
+    * use ast.Constant in rl_safe_eval.py
 
 CHANGES  4.2.5   01/10/2024
 ---------------------------
