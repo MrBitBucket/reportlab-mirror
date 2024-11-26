@@ -2,7 +2,7 @@ __version__='3.3.0'
 __doc__='''basic tests.'''
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, printLocation, rlSkipUnless
 from reportlab.lib.utils import asBytes, isPyPy
-from sys import getrefcount
+from sys import getrefcount, version_info as sys_version_info
 setOutDir(__name__)
 
 try:
@@ -92,7 +92,8 @@ class RlAccelTestCase(unittest.TestCase):
         utext = b'ABCDEF\xce\x91\xce\xb2G'.decode(senc)
         fontSize = 12
         defns="ttfn t1fn ttf t1f testCp1252 enc senc ts utext fontSize ttf.face ttf.face.charWidths ttf.face.defaultWidth t1f.widths t1f.encName t1f.substitutionFonts _fonts".split()
-        import sys
+        if sys_version_info[:2]>=(3,12):
+            defns = [x for x in defns if not getrefcount(eval(x,vars()))&0xc0000000]
         F = []
         def tfunc(f,ts,fontSize,enc,funcs,i):
             w1 = funcs[i][0](f,ts,fontSize,enc)
@@ -141,6 +142,8 @@ class RlAccelTestCase(unittest.TestCase):
             w2 = FUNCS[1][0](ts,[f]+f.substitutionFonts)
             assert w1==w2,"%s unicode2T1 %r != %r" % (kind,w1,w2)
         defns="t1fn t1f testCp1252 enc senc utext t1f.widths t1f.encName t1f.substitutionFonts _fonts".split()
+        if sys_version_info[:2]>=(3,12):
+            defns = [x for x in defns if not getrefcount(eval(x,vars()))&0xc0000000]
         F = []
         for func,kind in FUNCS:
             for j in (9,8,7,6,5,4,3,2,1,0): #we run several times to allow the refcounts to stabilize
