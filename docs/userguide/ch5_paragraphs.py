@@ -229,8 +229,9 @@ tags. The attributes if any of the opening &lt;para&gt; tag affect the style tha
 with the $Paragraph$ $text$ and/or $bulletText$.
 """)
 disc(" ")
-
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle
 from reportlab.platypus.paraparser import _addAttributeNames, _paraAttrMap, _bulletAttrMap
+from reportlab.lib import colors
 
 def getAttrs(A):
     _addAttributeNames(A)
@@ -251,6 +252,7 @@ def getAttrs(A):
     rows=len(D)*[None]
     return D,cols,rows
 
+story = []
 t=Table(*getAttrs(_paraAttrMap))
 t.setStyle(TableStyle([
             ('FONT',(0,0),(-1,1),'Times-Bold',10,12),

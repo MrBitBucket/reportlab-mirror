@@ -268,6 +268,9 @@ Note that the $Image$ has a white background which will obscure any background y
 To get better results you should use a transparent background.
 """)
 import os, reportlab.platypus
+from reportlab.lib.units import inch
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
 I = '../images/replogo.gif'
 EmbeddedCode("""
 I = Image('%s')

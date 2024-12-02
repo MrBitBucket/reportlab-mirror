@@ -144,6 +144,7 @@ after which we can use it like any other standard font.
 eg("""
 import os
 import reportlab
+from reportlab.pdfgen import canvas
 folder = os.path.dirname(reportlab.__file__) + os.sep + 'fonts'
 afmFile = os.path.join(folder, 'DarkGardenMK.afm')
 pfbFile = os.path.join(folder, 'DarkGardenMK.pfb')
@@ -152,14 +153,20 @@ from reportlab.pdfbase import pdfmetrics
 justFace = pdfmetrics.EmbeddedType1Face(afmFile, pfbFile)
 faceName = 'DarkGardenMK' # pulled from AFM file
 pdfmetrics.registerTypeFace(justFace)
-justFont = pdfmetrics.Font('DarkGardenMK',
-                           faceName,
-                           'WinAnsiEncoding')
+justFont = pdfmetrics.Font('DarkGardenMK', faceName, 'WinAnsiEncoding')
 pdfmetrics.registerFont(justFont)
 
-canvas.setFont('DarkGardenMK', 32)
-canvas.drawString(10, 150, 'This should be in')
-canvas.drawString(10, 100, 'DarkGardenMK')
+# Create a canvas to draw on
+output_file = "output.pdf"
+c = canvas.Canvas(output_file)
+
+# Use the font and write text
+c.setFont('DarkGardenMK', 32)
+c.drawString(10, 150, 'This should be in')
+c.drawString(10, 100, 'DarkGardenMK')
+
+# Save the canvas
+c.save()
 """)
 
 
@@ -296,19 +303,32 @@ disc("""We use <b>$reportlab.pdfbase.ttfonts.TTFont$</b> to create a true type
 font object and register using <b>$reportlab.pdfbase.pdfmetrics.registerFont$</b>.
 In pdfgen drawing directly to the canvas we can do""")
 eg("""
-# we know some glyphs are missing, suppress warnings
-import reportlab.rl_config
-reportlab.rl_config.warnOnMissingFontGlyphs = 0
-
+import os
+import reportlab
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+
 pdfmetrics.registerFont(TTFont('Vera', 'Vera.ttf'))
 pdfmetrics.registerFont(TTFont('VeraBd', 'VeraBd.ttf'))
 pdfmetrics.registerFont(TTFont('VeraIt', 'VeraIt.ttf'))
 pdfmetrics.registerFont(TTFont('VeraBI', 'VeraBI.ttf'))
-canvas.setFont('Vera', 32)
-canvas.drawString(10, 150, "Some text encoded in UTF-8")
-canvas.drawString(10, 100, "In the Vera TT Font!")
+
+# we know some glyphs are missing, suppress warnings
+import reportlab.rl_config
+reportlab.rl_config.warnOnMissingFontGlyphs = 0
+
+# Create a canvas to draw on
+output_file = "output.pdf"
+c = canvas.Canvas(output_file)
+
+c.setFont('Vera', 32)
+c.drawString(10, 150, "Some text encoded in UTF-8")
+c.drawString(10, 100, "In the Vera TT Font!")
+
+# Save the canvas
+c.save()
 """)
 illust(examples.ttffont1, "Using a the Vera TrueType Font")
 disc("""In the above example the true type font object is created using""")
@@ -397,13 +417,19 @@ class.""")
 
 eg("""
 from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfgen import canvas
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
 pdfmetrics.registerFont(UnicodeCIDFont('HeiseiMin-W3'))
-canvas.setFont('HeiseiMin-W3', 16)
+
+# Create a canvas to draw on
+output_file = "output.pdf"
+c = canvas.Canvas(output_file)
+
+c.setFont('HeiseiMin-W3', 16)
 
 # the two unicode characters below are "Tokyo"
 msg = u'\\u6771\\u4EAC : Unicode font, unicode input'
-canvas.drawString(100, 675, msg)
+c.drawString(100, 675, msg)
 """)
 #had to double-escape the slashes above to get escapes into the PDF
 
