@@ -23,7 +23,8 @@ from reportlab.platypus.doctemplate import PageTemplate, BaseDocTemplate, PageBr
 from reportlab.platypus import tableofcontents
 from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
-from reportlab.platypus.paragraph import Paragraph, _getFragWords, _splitWord, _fragWordSplitRep, ABag, pyphen
+from reportlab.platypus.paragraph import Paragraph, _getFragWords, _splitWord, _splitFragWord, \
+                                            _fragWordSplitRep, ABag, pyphen
 from reportlab.rl_config import rtlSupport, trustedHosts, trustedSchemes
 
 def myMainPageFrame(canvas, doc):
@@ -146,9 +147,9 @@ class ParagraphCorners(unittest.TestCase):
         fontSize = 10
         f = ABag(fontName=fontName,fontSize=fontSize)
         sW = lambda _: stringWidth(_,fontName,fontSize)
-        text = u'Super\xadcali\xadfragi\xadlistic\xadexpi\xadali\xaddocious'
+        text = 'Super\xadcali\xadfragi\xadlistic\xadexpi\xadali\xaddocious'
         u = _SHYIndexedStr(text)
-        self.assertEqual(u,u'Supercalifragilisticexpialidocious','_SHYIndexStr not as expected')
+        self.assertEqual(u,'Supercalifragilisticexpialidocious','_SHYIndexStr not as expected')
         self.assertEqual(u._shyIndices,[5, 9, 14, 20, 24, 27], '_SHYIndexStr._shyIndices are wrong')
         shyW = _SHYWord([sW(u),(f,u)])
         hsw = shyW.shyphenate(shyW[0],50)
@@ -156,12 +157,12 @@ class ParagraphCorners(unittest.TestCase):
         self.assertTrue(
                 hsw[0][0] == 45.01
                 and hsw[0][1][0].__dict__== ABag(fontName='Helvetica', fontSize=10).__dict__
-                and hsw[0][1][1]==u'Supercali-'
+                and hsw[0][1][1]=='Supercali-'
                 and hsw[0][1][1]._shyIndices==[5,9], 'left part of shyphenate split failed')
         self.assertTrue(
                 hsw[1][0] == 101.69000000000001
                 and hsw[1][1][0].__dict__== ABag(fontName='Helvetica', fontSize=10).__dict__
-                and hsw[1][1][1]==u'fragilisticexpialidocious'
+                and hsw[1][1][1]=='fragilisticexpialidocious'
                 and hsw[1][1][1]._shyIndices== [5, 11, 15, 18], 'right part of shyphenate split failed')
         uj = _shyUnsplit(hsw[0][1][1],hsw[1][1][1])
         self.assertTrue(
@@ -186,10 +187,10 @@ class ParagraphCorners(unittest.TestCase):
         style = ParagraphStyle(
             'normal', fontName='Helvetica', fontSize=12,
             embeddedHyphenation=1, splitLongWords=0, hyphenationLang='en-GB')
-        shy = asNative(u'\xad')
+        shy = asNative('\xad')
         text = shy.join(('Super','cali','fragi','listic','expi','ali','docious'))
         f.addFromList([Paragraph(text, style)], c)
-        text = u'<span color="red">Super</span><span color="pink">&#173;cali&#173;</span>fragi&#173;listic&#173;expi&#173;ali&#173;docious'
+        text = '<span color="red">Super</span><span color="pink">&#173;cali&#173;</span>fragi&#173;listic&#173;expi&#173;ali&#173;docious'
         f.addFromList([Paragraph(text, style)], c)
         c.showPage()
         c.save() 
@@ -241,13 +242,13 @@ class ParagraphCorners(unittest.TestCase):
                 f.addFromList([Paragraph('slw=%d eh=%d' % (slw,eh), style)], c)
                 for text in texts:
                     f.addFromList([Paragraph(text, style)], c)
-                    mfText = text.split(u'\xad')
+                    mfText = text.split('\xad')
                     mfText[0] = span(mfText[0],'red')
                     if len(mfText)>1:
                         mfText[1] = span(mfText[1],'pink')
                         if len(mfText)>2:
                             mfText[-1] = span(mfText[-1],'blue')
-                    mfText = u'&#173;'.join(mfText)
+                    mfText = '&#173;'.join(mfText)
                     f.addFromList([Paragraph(mfText, style)], c)
                 observed.append((len(c._code), hashlib_md5(b"".join((asBytes(b,"latin1") for b in c._code))).digest()))
                 c.showPage()
@@ -471,7 +472,7 @@ providing the ultimate in ease of installation.''',
         story.append(Paragraph('Width 240, multi-frag soft hyphenation',h3))
         story.append(ImageAndFlowables(
                         Image(gif,width=240,height=120),
-                        Paragraph(u'''The concept of an <span color="red">integ</span><span color="green">\xadrated</span> one box solution for advanced voice and
+                        Paragraph('''The concept of an <span color="red">integ</span><span color="green">\xadrated</span> one box solution for advanced voice and
 data applica\xadtions began with the in\xadtroduction of the IMACS. The
 IMACS 200 carries on that tradition with an integrated solution
 <span color="pink">op\xadtimized</span> for smaller port size applications that the IMACS could not
@@ -487,7 +488,7 @@ providing the ultimate in ease of installation.''',
         story.append(Paragraph('Width 240, single-frag soft hyphenation',h3))
         story.append(ImageAndFlowables(
                         Image(gif,width=240,height=120),
-                        Paragraph(u'''The concept of an integ\xadrated one box solution for advanced voice and
+                        Paragraph('''The concept of an integ\xadrated one box solution for advanced voice and
 data applica\xadtions began with the in\xadtroduction of the IMACS. The
 IMACS 200 carries on that tradition with an integrated solution
 op\xadtimized for smaller port size applications that the IMACS could not
@@ -712,8 +713,8 @@ providing the ultimate in ease of installation.''',
         from reportlab.lib.colors import toColor
         pdfmetrics.registerFont(TTFont("DejaVuSans", "DejaVuSans.ttf"))
 
-        text = u'\u05e9\u05dc\u05d5\u05dd! \u05d6\u05d5 \u05ea\u05d4\u05d9\u05d4 \u05e4\u05e1\u05e7\u05d4 \u05e9\u05d4\u05e9\u05d5\u05e8\u05d4 \u05d4\u05d0\u05d7\u05e8\u05d5\u05e0\u05d4 \u05e9\u05dc\u05d4 \u05dc\u05d0 \u05ea\u05d5\u05e6\u05d3\u05e7 \u05db\u05d4\u05dc\u05db\u05d4.'
-        text = u' '.join((text,text))
+        text = '\u05e9\u05dc\u05d5\u05dd! \u05d6\u05d5 \u05ea\u05d4\u05d9\u05d4 \u05e4\u05e1\u05e7\u05d4 \u05e9\u05d4\u05e9\u05d5\u05e8\u05d4 \u05d4\u05d0\u05d7\u05e8\u05d5\u05e0\u05d4 \u05e9\u05dc\u05d4 \u05dc\u05d0 \u05ea\u05d5\u05e6\u05d3\u05e7 \u05db\u05d4\u05dc\u05db\u05d4.'
+        text = ' '.join((text,text))
 
         doc = SimpleDocTemplate(
             outputfile("test_platypus_paragraphs_rtl_2.pdf"),
@@ -743,12 +744,12 @@ providing the ultimate in ease of installation.''',
         hebrew_c = hebrew_j.clone('nhc', alignment=TA_CENTER)
         hebrew_cd = hebrew_c.clone('nhc', endDots='.')
 
-        rtext = text.replace(u'\u05db\u05d4\u05dc\u05db\u05d4',u'<span color=red>\u05db\u05d4\u05dc\u05db\u05d4</span>')
-        _utext = u''.join((u'<u>',text,u'</u>'))
-        utext = u''.join(('<u color=green>',text,'</u>'))
-        stext = u''.join(('<strike>',text,'</strike>'))
-        urtext = u''.join(('<u color=blue>',rtext,'</u>'))
-        srtext = u''.join(('<strike color=magenta>',rtext,'</strike>'))
+        rtext = text.replace('\u05db\u05d4\u05dc\u05db\u05d4','<span color=red>\u05db\u05d4\u05dc\u05db\u05d4</span>')
+        _utext = ''.join(('<u>',text,'</u>'))
+        utext = ''.join(('<u color=green>',text,'</u>'))
+        stext = ''.join(('<strike>',text,'</strike>'))
+        urtext = ''.join(('<u color=blue>',rtext,'</u>'))
+        srtext = ''.join(('<strike color=magenta>',rtext,'</strike>'))
         flowables = [
                 Paragraph('justified',latin),
                 Paragraph(text, hebrew_j),
@@ -925,7 +926,7 @@ class SplitFrameParagraphTest(unittest.TestCase):
 
         #text = " ".join([tagFormat % w for w in text.split()])
         
-        story = [Paragraph((text.decode('utf8') + u" ") * 3, style=normal)]
+        story = [Paragraph((text.decode('utf8') + " ") * 3, style=normal)]
 
         from reportlab.lib import pagesizes
         PAGESIZE = pagesizes.landscape(pagesizes.A4)
@@ -958,8 +959,25 @@ class FragmentTestCase(unittest.TestCase):
 
     def test2(self):
         '''test _splitWord'''
-        self.assertEqual(_splitWord(u'd\'op\u00e9ration',30,[30],0,'Helvetica',12),[u'', u"d'op\xe9", u'ratio', u'n'])
-        self.assertEqual(_splitWord(b'd\'op\xc3\xa9ration',30,[30],0,'Helvetica',12),[u'', u"d'op\xe9", u'ratio', u'n'])
+        self.assertEqual(_splitWord('d\'op\u00e9ration',30,[30],0,'Helvetica',12),['', "d'opé", 'ratio', 'n'])
+        self.assertEqual(_splitWord(b'd\'op\xc3\xa9ration',30,[30],0,'Helvetica',12),['', "d'opé", 'ratio', 'n'])
+        self.assertEqual(_splitWord('A',0,[6.66],0,'Helvetica',10),["A"])
+        self.assertEqual(_splitWord('A',0,[6.67],0,'Helvetica',10),["A"])
+
+    def test2Frag(self):
+        '''test _splitFragWord'''
+        class EQABag(ABag):
+            def __eq__(self,other):
+                return (isinstance(other,self.__class__) 
+                        and (other is self or other.__dict__==self.__dict__))
+
+        f10 = EQABag(rise=0,fontName='Helvetica',fontSize=10,text='A')
+        f0 = f10.clone(fontSize=1,text='')
+        fw = stringWidth(f10.text,f10.fontName,f10.fontSize)
+        self.assertEqual(_splitFragWord([fw,(f0,''),(f10,'A')],0,[6.66],0),
+                                            [[fw, (f0, ''), (f10, 'A')]])
+        self.assertEqual(_splitFragWord([fw,(f10,'A')],0,[6.66],0),
+                                            [[fw, (f10, 'A')]])
 
     def test3(self):
         '''test _fragWordSplitRep'''
@@ -967,7 +985,7 @@ class FragmentTestCase(unittest.TestCase):
         nF = BF.clone
         ww = 'unused width'
         W = [ww,(nF(cbDefn=ABag(kind='index',width=0)),''),(BF,'a'),(nF(fontSize=10),'bbb'),(nF(fontName='Helvetica-Bold'),'ccccc')]
-        self.assertEqual(_fragWordSplitRep(W),(u'abbbccccc',((2, 0), (3, 1), (3, 1), (3, 1), (4, 4), (4, 4), (4, 4), (4, 4), (4, 4))))
+        self.assertEqual(_fragWordSplitRep(W),('abbbccccc',((2, 0), (3, 1), (3, 1), (3, 1), (4, 4), (4, 4), (4, 4), (4, 4), (4, 4))))
         W[1][0].rise=2
         self.assertEqual(_fragWordSplitRep(W),None)
         W = [ww,(nF(cbDefn=ABag(kind='img',width=1)),''),(BF,'a'),(BF,'bbb'),(BF,'ccccc')]
@@ -977,12 +995,12 @@ class FragmentTestCase(unittest.TestCase):
         from reportlab.platypus.paragraph import _hy_letters_pat, _hy_shy_letters_pat, _hy_letters, _hy_pfx_pat, _hy_sfx_pat
         self.assertIsNotNone(_hy_shy_letters_pat.match(_hy_letters),'pre-hyphenated word match should succeed')
         self.assertIsNone(_hy_letters_pat.match(_hy_letters),'all letters word match should fail')
-        self.assertIsNotNone(_hy_letters_pat.match(_hy_letters.replace(u'-',u'')),'all letters word match should succeed')
-        pfx = u'\'"([{\xbf\u2018\u201a\u201c\u201e'
+        self.assertIsNotNone(_hy_letters_pat.match(_hy_letters.replace('-','')),'all letters word match should succeed')
+        pfx = '\'"([{\xbf\u2018\u201a\u201c\u201e'
         m = _hy_pfx_pat.match(pfx)
         self.assertIsNotNone(m,'pfx pattern should match')
         self.assertEqual(len(m.group(0)),len(pfx),'pfx pattern should match %d characters not %d' %(len(pfx),len(m.group(0))))
-        sfx = u']\'")}?!.,;:\u2019\u201b\u201d\u201f'
+        sfx = ']\'")}?!.,;:\u2019\u201b\u201d\u201f'
         m = _hy_sfx_pat.search(sfx)
         self.assertIsNotNone(m,'sfx pattern should match')
         self.assertEqual(len(m.group(0)),len(sfx),'sfx pattern should match %d characters not %d' %(len(sfx),len(m.group(0))))
@@ -1007,14 +1025,14 @@ class FragmentTestCase(unittest.TestCase):
                 r = _hyphenateFragWord(None,fw,ww+10,ww+5, uriWasteReduce, embeddedHyphenation)
                 if r is not None:
                     _r = r
-                    r = [u''.join((_[1] for _ in _fw[1:])) for _fw in _r]  
+                    r = [''.join((_[1] for _ in _fw[1:])) for _fw in _r]  
             self.assertEqual(r,ex,'hyphenation of w=%r u=%r e=%r ex=%r split=%r failed'%(w,uriWasteReduce,embeddedHyphenation,ex,split))
         for split in (None,0.001,0.1,0.5,0.8,0.9,1.0):
-            applyTest('https://www.reportlab.com/pypi/packages', 0.3, True, [u'https://www.reportlab.com/pypi/', u'packages'],split=split)
+            applyTest('https://www.reportlab.com/pypi/packages', 0.3, True, ['https://www.reportlab.com/pypi/', 'packages'],split=split)
             applyTest('https://www.reportlab.com/pypi/packages', False, True, None,split=split)
-            applyTest('https://www.repor-tlab.com/pypi/packages', 0.3, True, [u'https://www.repor-tlab.com/pypi/', u'packages'],split=split)
+            applyTest('https://www.repor-tlab.com/pypi/packages', 0.3, True, ['https://www.repor-tlab.com/pypi/', 'packages'],split=split)
             applyTest('https//www.repor-tlab.com/pypi/packages', 0.3, True, None,split=split) #not a uri (no :) and contains - and non letters
-            applyTest('httpsSSwwwDrepor-tlabDcomSpypiSpackages', 0.3, True, [u'httpsSSwwwDrepor-', u'tlabDcomSpypiSpackages'],split=split) #should succeed because '-' with no non-letters
+            applyTest('httpsSSwwwDrepor-tlabDcomSpypiSpackages', 0.3, True, ['httpsSSwwwDrepor-', 'tlabDcomSpypiSpackages'],split=split) #should succeed because '-' with no non-letters
             applyTest('httpsSSwwwDrepor-tlabDcomSpypiSpackages', 0.3, False, None, split=split) #fails because embeddedHyphenation=False
 
     @rlSkipUnless(pyphen,'pyphen missing')
@@ -1075,7 +1093,7 @@ class FragmentTestCase(unittest.TestCase):
         for ntext in (  b"Bedauerlicherweise ist ein Donaudampfschiffkapit\xc3\xa4n auch <font color='red'>nur</font> <font color='green'>ein</font> Dampfschiffkapit\xc3\xa4n.",
                         b"Bedauerlicherweise ist ein Donaudampfschiffkapit\xc3\xa4n auch nur ein Dampfschiffkapit\xc3\xa4n.",
                         ):
-            ntext = (ntext.decode('utf8') + u" ") * 3
+            ntext = (ntext.decode('utf8') + " ") * 3
             p = Paragraph(ntext,style=nt)
             y = _t(p,x,y,naW,aH=naH)
 
@@ -1090,15 +1108,15 @@ class FragmentTestCase(unittest.TestCase):
         """test various ways to adjust the hypenationMinWordLength"""
         registerFont(TTFont("Vera", "Vera.ttf"))
         aW = 51.0236220472
-        text  = u'\u0440\u044b\u0431\u0430 \u043f\u0438\u043b\u0430 \u0438 \u0431\u0430\u0431\u0443 \u0434\u0430\u0436\u0435 \u0432\u0435\u043b\u0430 \u043d\u0430 \u043c\u0430\u044f\u043a'
-        text1 = u'\u0440\u044b\u0431\u0430 <span color="blue">\u043f\u0438\u043b\u0430</span> \u0438 \u0431\u0430\u0431\u0443 \u0434\u0430\u0436\u0435 \u0432\u0435\u043b\u0430 \u043d\u0430 \u043c\u0430\u044f\u043a'
+        text  = '\u0440\u044b\u0431\u0430 \u043f\u0438\u043b\u0430 \u0438 \u0431\u0430\u0431\u0443 \u0434\u0430\u0436\u0435 \u0432\u0435\u043b\u0430 \u043d\u0430 \u043c\u0430\u044f\u043a'
+        text1 = '\u0440\u044b\u0431\u0430 <span color="blue">\u043f\u0438\u043b\u0430</span> \u0438 \u0431\u0430\u0431\u0443 \u0434\u0430\u0436\u0435 \u0432\u0435\u043b\u0430 \u043d\u0430 \u043c\u0430\u044f\u043a'
         tmpls = [
-                u'%(text)s',
-                u'<para hyphenationMinWordLength="%(hymwl)d">%(text)s</para>',
-                u'<para>%(text)s</para>',
-                u'%(text1)s',
-                u'<para hyphenationMinWordLength="%(hymwl)d">%(text1)s</para>',
-                u'<para>%(text1)s</para>',
+                '%(text)s',
+                '<para hyphenationMinWordLength="%(hymwl)d">%(text)s</para>',
+                '<para>%(text)s</para>',
+                '%(text1)s',
+                '<para hyphenationMinWordLength="%(hymwl)d">%(text1)s</para>',
+                '<para>%(text1)s</para>',
                 ]
         for ex,x,hymwl in [
                 (72,0,None),
@@ -1142,13 +1160,13 @@ class FragmentTestCase(unittest.TestCase):
         from reportlab.platypus.paragraph import Paragraph
         pW, pH = A4
         canv = Canvas(outputfile('test_platypus_paragraphs_hysplit.pdf'),pagesize=(pW,pH))
-        text = u'Supercalifragilisticexpialidocious'
-        mtext = u'<span color="red">Super</span>califragilisticexpialidocious'
-        mtext1 = u'Supercalifragilisticexpiali<span color="green">docious</span>'
-        stext = u'Super\xadcali\xadfragi\xadlistic\xadexpi\xadali\xaddocious'
-        mstext = u'<span color="red">Super\xad</span>cali\xadfragi\xadlistic\xadexpi\xadali\xaddocious'
-        mstext1 = u'Super\xadcali\xadfragi\xadlistic\xadexpi\xadali\xad<span color="green">docious</span>'
-        text =   u'Supercalifragilisticexpialidocious'
+        text = 'Supercalifragilisticexpialidocious'
+        mtext = '<span color="red">Super</span>califragilisticexpialidocious'
+        mtext1 = 'Supercalifragilisticexpiali<span color="green">docious</span>'
+        stext = 'Super\xadcali\xadfragi\xadlistic\xadexpi\xadali\xaddocious'
+        mstext = '<span color="red">Super\xad</span>cali\xadfragi\xadlistic\xadexpi\xadali\xaddocious'
+        mstext1 = 'Super\xadcali\xadfragi\xadlistic\xadexpi\xadali\xad<span color="green">docious</span>'
+        text =   'Supercalifragilisticexpialidocious'
         mtext2 = 'converted to a <b>Python</b> <font name=Courier><nobr>string</nobr></font>.'
         mtext3 = 'This one uses fonts with size "14pt" and also uses the em and strong tags: Here comes <font face="Helvetica" size="14pt">Helvetica 14</font> with <Strong>strong</Strong> <em>emphasis</em>.'
         textF = 'Figure [seq template="%(Chapter)s-%(FigureNo+)s"/] - Multi-level templates'
@@ -1310,7 +1328,7 @@ phonemic and morphological analysis.''']
         a(Paragraph('Link <a href="#theEnd" color="blue">jump</a> to end.<br/>Underlined link <a href="#theEnd" underline="1" ucolor="red" color="blue">jump</a> to end!',style=normal))
         a(Paragraph('<para autoleading=""><u>A</u>. Furthermore, a subset of <font size="14">English sentences</font> interesting on quite\nindependent grounds is not quite equivalent to a stipulation to place\nthe constructions into these various categories. <u>A</u>. We will bring evidence in favor of\nThe following thesis: most of the methodological work in modern\nlinguistics can be defined in such a way as to impose problems of\nphonemic and morphological analysis.</para>',normal))
         a(Paragraph('<para autoleading=""><u>A</u>. Furthermore, a subset of <font size="14">English sentences</font> interesting on quite<br/><u>A</u>.</para>',normal))
-        a(Paragraph(u"<para>This is a <sup rise=5><span color='red'>sup</span></sup>rise=5.</para>",normal))
+        a(Paragraph("<para>This is a <sup rise=5><span color='red'>sup</span></sup>rise=5.</para>",normal))
         a(Paragraph('<span fontSize="11"><u color="green"><strike color="blue">AAAAAA</strike></u></span>',normal))
         a(Paragraph("Underlining &amp; width proportional to first use font size ('f' suffix) <u offset='-0.125*f' width='0.05*f'>underlined <span size=14>underlined</span></u>!",style=normal))
         a(Paragraph("Underlining &amp; width proportional to first use font size ('F' suffix) <u offset='-0.125*F' width='0.05*F'>underlined <span size=14>underlined</span></u>!",style=normal))
@@ -1630,7 +1648,7 @@ phonemic and morphological analysis.'''
         styleSheet = getSampleStyleSheet()
         normal = ParagraphStyle(name='normal',fontName='Helvetica',fontSize=10,leading=12,parent=styleSheet['Normal'])
         bold = ParagraphStyle(name='bold',fontName='Helvetica-Bold',fontSize=12,leading=14.4,parent=normal)
-        brText=u"""
+        brText="""
 Clearly, the natural general principle that will subsume this case is
 not subject to a parasitic gap construction.  Presumably, most of the
 methodological work in modern linguistics can be defined in such a way

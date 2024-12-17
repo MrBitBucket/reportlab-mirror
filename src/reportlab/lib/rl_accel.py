@@ -312,13 +312,13 @@ if 'asciiBase85Decode' in _py_funcs:
     _py_funcs['asciiBase85Decode'] = _py_asciiBase85Decode
 
 if 'sameFrag' in _py_funcs:
-    def _py_sameFrag(f,g):
-        'returns 1 if two ParaFrags map out the same'
-        if (hasattr(f,'cbDefn') or hasattr(g,'cbDefn')
-                or hasattr(f,'lineBreak') or hasattr(g,'lineBreak')): return 0
-        for a in ('fontName', 'fontSize', 'textColor', 'rise', 'us_lines', 'link', "backColor", "nobr"):
-            if getattr(f,a,None)!=getattr(g,a,None): return 0
-        return 1
+    def _py_sameFrag(f,g, _cmp=('fontName', 'fontSize', 'textColor', 'rise', 'us_lines', 'link', "backColor", "nobr")):
+        fdict = f.__dict__
+        gdict = g.__dict__
+        if 'cbDefn' in fdict or 'lineBreak' in fdict or 'cbDefn' in gdict or 'lineBreak' in gdict: return 0
+        fg = fdict.get
+        gg = gdict.get
+        return [fg(k) for k in _cmp]==[gg(k) for k in _cmp]
     _py_funcs['sameFrag'] = _py_sameFrag
 
 G=globals()

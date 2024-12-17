@@ -884,8 +884,8 @@ def _fragWordIter(w):
 def _splitFragWord(w,maxWidth,maxWidths,lineno):
     '''given a frag word, w, as returned by getFragWords
     split it into frag words that fit in lines of length
-    maxWidth
-    maxWidths[lineno+1]
+    maxWidth the available length on the currebt line
+    maxWidths[lineno+1] the maxWidth for the next line
     .....
     maxWidths[lineno+n]
 
@@ -895,6 +895,7 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     '''
     R = []
     maxlineno = len(maxWidths)-1
+    maxWidthNext = maxWidths[min(maxlineno,lineno+1)]
     W = []
     lineWidth = 0
     fragText = ''
@@ -902,7 +903,7 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     f = w[1][0]
     for g,cw,c in _fragWordIter(w):
         newLineWidth = lineWidth+cw
-        tooLong = newLineWidth>maxWidth
+        tooLong = newLineWidth>maxWidth and bool(wordWidth or (not wordWidth and cw<=maxWidthNext))
         if g is not f or tooLong:
             f = f.clone()
             if hasattr(f,'text'):
@@ -912,7 +913,8 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
                 W = _SplitFrag([wordWidth]+W)
                 R.append(W)
                 lineno += 1
-                maxWidth = maxWidths[min(maxlineno,lineno)]
+                maxWidth = maxWidthNext
+                maxWidthNext = maxWidths[min(maxlineno,lineno+1)]
                 W = []
                 newLineWidth = cw
                 wordWidth = 0
@@ -1256,14 +1258,16 @@ def _splitWord(w, lineWidth, maxWidths, lineno, fontName, fontSize, encoding='ut
     maxlineno = len(maxWidths)-1
     wordText = ''
     maxWidth = maxWidths[min(maxlineno,lineno)]
+    maxWidthNext = maxWidths[min(maxlineno,lineno+1)]
     if isBytes(w):
         w = w.decode(encoding)
     for c in w:
         cw = stringWidth(c,fontName,fontSize,encoding)
         newLineWidth = lineWidth+cw
-        if newLineWidth>maxWidth:
+        if newLineWidth>maxWidth and (wordText or (not wordText and cw<=maxWidthNext)):
             aR(_SplitWord(wordText))
             lineno += 1
+            maxWidth = maxWidthNext
             maxWidth = maxWidths[min(maxlineno,lineno)]
             newLineWidth = cw
             wordText = ''
