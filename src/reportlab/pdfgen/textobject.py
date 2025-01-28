@@ -22,7 +22,10 @@ def fribidiText(text,direction):
     return text
 if rtlSupport:
     try:
-        from pyfribidi2 import log2vis, ON as DIR_ON, LTR as DIR_LTR, RTL as DIR_RTL
+        try:
+            from pyfribidi2 import log2vis, ON as DIR_ON, LTR as DIR_LTR, RTL as DIR_RTL
+        except ImportError:
+            from pyfribidi import log2vis, ON as DIR_ON, LTR as DIR_LTR, RTL as DIR_RTL
         directionsMap = dict(LTR=DIR_LTR,RTL=DIR_RTL)
         def fribidiText(text,direction):
             return log2vis(text, directionsMap.get(direction,DIR_ON),clean=True) if direction in ('LTR','RTL') else text
