@@ -333,7 +333,7 @@ class Group(Shape):
     def _addNamedNode(self,name,node):
         'if name is not None add an attribute pointing to node and add to the attrMap'
         if name:
-            if name not in list(self._attrMap.keys()):
+            if name not in self._attrMap:
                 self._attrMap[name] = AttrMapValue(isValidChild)
             setattr(self, name, node)
 
