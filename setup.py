@@ -1,4 +1,4 @@
-#Copyright ReportLab Europe Ltd. 2000-2023
+#Copyright ReportLab Europe Ltd. 2000-2025
 #see LICENSE for license details
 __version__='4.2.5'
 import os, sys, glob, shutil, re, sysconfig, traceback, io, subprocess
@@ -293,7 +293,7 @@ def main():
     setup(
         name="reportlab",
         version=get_version(),
-        license="BSD license (see license.txt for details), Copyright (c) 2000-2022, ReportLab Inc.",
+        license="BSD license (see license.txt for details), Copyright (c) 2000-2025, ReportLab Inc.",
         description="The Reportlab Toolkit",
         long_description="""The ReportLab Toolkit. An Open Source Python library for generating PDFs and graphics.""",
 

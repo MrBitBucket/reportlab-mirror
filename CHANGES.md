@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.3.0   03/02/2025
+---------------------------
+    * improve attr name test in \_addNamedNode
+    * allow for import pyfribidi2 to check for pyfribidi
 
 CHANGES  4.3.0a1  17/12/2024
 ---------------------------

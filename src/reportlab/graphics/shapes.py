@@ -343,11 +343,7 @@ class Group(Shape):
         """
         # propagates properties down
         if node is not None:
-            try:
-                assert isValidChild(node), "Can only add Shape or UserNode objects to a Group"
-            except:
-                breakpoint()
-                raise
+            assert isValidChild(node), "Can only add Shape or UserNode objects to a Group"
             self.contents.append(node)
             self._addNamedNode(name,node)
 
