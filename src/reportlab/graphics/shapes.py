@@ -430,23 +430,23 @@ class Group(Shape):
         """returns a copy"""
         return self._copy(self.__class__())
 
-    def rotate(self, theta):
+    def rotate(self, theta, cx=0, cy=0):
         """Convenience to help you set transforms"""
-        self.transform = mmult(self.transform, rotate(theta))
+        self.transform = mmult(self.transform, rotate(theta,cx,cy))
 
-    def translate(self, dx, dy):
+    def translate(self, dx, dy=0):
         """Convenience to help you set transforms"""
         self.transform = mmult(self.transform, translate(dx, dy))
 
-    def scale(self, sx, sy):
+    def scale(self, sx, sy=1):
         """Convenience to help you set transforms"""
         self.transform = mmult(self.transform, scale(sx, sy))
 
-    def skew(self, kx, ky):
+    def skew(self, kx, ky=0):
         """Convenience to help you set transforms"""
         self.transform = mmult(mmult(self.transform, skewX(kx)),skewY(ky))
 
-    def shift(self, x, y):
+    def shift(self, x, y=0):
         '''Convenience function to set the origin arbitrarily'''
         self.transform = self.transform[:-2]+(x,y)
 
