@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.3.1a1 10/02/2025
+---------------------------
+    * shapes.py transform.py changes to allow origin change in transforms
+    * test fixes haveDejaVu --> lib/testutils.py
+
 CHANGES  4.3.0   03/02/2025
 ---------------------------
     * improve attr name test in \_addNamedNode

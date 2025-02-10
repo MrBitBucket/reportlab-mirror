@@ -3,7 +3,8 @@
 """Tests for the reportlab.platypus.paragraphs module.
 """
 __version__='3.3.0'
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, rlSkipUnless
+from reportlab.lib.testutils import (setOutDir,makeSuiteForClasses, outputfile, 
+                                    printLocation, rlSkipUnless, haveDejaVu, DEJAVUSANS)
 setOutDir(__name__)
 import sys, os, unittest
 from operator import truth
@@ -279,16 +280,6 @@ class ParagraphCorners(unittest.TestCase):
         self.assertEqual((owh,ocode),(xwh,xcode),
                 "\n(owh,ocode)=%r\nfor test_lele_img.pdf doesn't match expected\n(xwh,xcode)=%r" %(
                     (xwh,xcode),(owh,ocode)))
-        
-DEJAVUSANS = ('DejaVuSans','DejaVuSans-Bold','DejaVuSans-Oblique','DejaVuSans-BoldOblique')
-def haveDejaVu():
-    from reportlab.pdfbase.ttfonts import TTFont
-    for x in DEJAVUSANS:
-        try:
-            TTFont(x,x+'.ttf')
-        except:
-            return False
-    return True
 
 class ParagraphSplitTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."

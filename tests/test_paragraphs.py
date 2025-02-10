@@ -2,7 +2,8 @@
 #see license.txt for license details
 # tests some paragraph styles
 __version__='3.3.0'
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import (setOutDir,makeSuiteForClasses, outputfile,
+                                    printLocation, rlSkipUnless, haveDejaVu)
 setOutDir(__name__)
 import unittest, os, random
 from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter, XPreformatted, PageBreak, Spacer
@@ -281,182 +282,184 @@ class ParagraphTestCase(unittest.TestCase):
         self.assertRaises(ValueError,Paragraph,'<para texttransform="lower">AAAAA</para>')
         self.assertRaises(ValueError,Paragraph,'<para texttransform="capitalise">aaaaa</para>')
     
-    if rtlSupport:
-        def testBidi(self):
-            fontName = getAFont()
+    @rlSkipUnless(rtlSupport and haveDejaVu(),'miss RTL and/or DejaVu')
+    def testBidi(self):
+        fontName = getAFont()
 
-            # create styles based on the registered font
-            stySTD = ParagraphStyle('STD', fontName = fontName)
-            styRJ = ParagraphStyle('RJ', parent=stySTD, alignment=TA_RIGHT)
-            styLTR = ParagraphStyle('LTR', parent=stySTD, wordWrap='LTR')
-            styRTL = ParagraphStyle('RTL', parent = stySTD, alignment = TA_RIGHT,
-                                    wordWrap = 'RTL', spaceAfter = 12)
+        # create styles based on the registered font
+        stySTD = ParagraphStyle('STD', fontName = fontName)
+        styRJ = ParagraphStyle('RJ', parent=stySTD, alignment=TA_RIGHT)
+        styLTR = ParagraphStyle('LTR', parent=stySTD, wordWrap='LTR')
+        styRTL = ParagraphStyle('RTL', parent = stySTD, alignment = TA_RIGHT,
+                                wordWrap = 'RTL', spaceAfter = 12)
 
-            # strings for testing Normal & LTR styles
-            ltrStrings = [# English followed by Arabic.
-                          b'English followed by \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a.',
-                          # English with Arabic in the middle
-                          b'English with \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a in the middle.',
-                          # English symbols (!@#$%^&*) Arabic
-                          b'English symbols (!@#$%^&*) \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a.',
-                          # ((testing integers in LTR)) 
-                          b'123 LTR 123 Integers 123.',
-                          # ((testing decimals in LTR))
-                          b'456.78 LTR 456.78 Decimals 456.78.',
-                          # Long English text with RTL script in the middle, splitting over multiple lines
-                          b'Long \xd8\xb7\xd9\x88\xd9\x8a\xd9\x84 English text'
-                              b' \xd9\x86\xd8\xb5 \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a with RTL script'
-                              b' \xd9\x83\xd8\xaa\xd8\xa7\xd8\xa8\xd8\xa9 \xd9\x85\xd9\x86'
-                              b' \xd8\xa7\xd9\x84\xd9\x8a\xd9\x85\xd9\x8a\xd9\x86 \xd8\xa5\xd9\x84\xd9\x89'
-                              b' \xd8\xa7\xd9\x84\xd9\x8a\xd8\xb3\xd8\xa7\xd8\xb1 in the middle,'
-                              b' \xd9\x81\xd9\x8a \xd8\xa7\xd9\x84\xd9\x88\xd8\xb3\xd8\xb7\xd8\x8c'
-                              b' splitting \xd9\x85\xd9\x82\xd8\xb3\xd9\x85 over \xd8\xb9\xd9\x84\xd9\x89'
-                              b' multiple lines \xd8\xb9\xd8\xaf\xd8\xa9 \xd8\xb3\xd8\xb7\xd9\x88\xd8\xb1.',
-                          ]
+        # strings for testing Normal & LTR styles
+        ltrStrings = [# English followed by Arabic.
+                      b'English followed by \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a.',
+                      # English with Arabic in the middle
+                      b'English with \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a in the middle.',
+                      # English symbols (!@#$%^&*) Arabic
+                      b'English symbols (!@#$%^&*) \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a.',
+                      # ((testing integers in LTR)) 
+                      b'123 LTR 123 Integers 123.',
+                      # ((testing decimals in LTR))
+                      b'456.78 LTR 456.78 Decimals 456.78.',
+                      # Long English text with RTL script in the middle, splitting over multiple lines
+                      b'Long \xd8\xb7\xd9\x88\xd9\x8a\xd9\x84 English text'
+                          b' \xd9\x86\xd8\xb5 \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a with RTL script'
+                          b' \xd9\x83\xd8\xaa\xd8\xa7\xd8\xa8\xd8\xa9 \xd9\x85\xd9\x86'
+                          b' \xd8\xa7\xd9\x84\xd9\x8a\xd9\x85\xd9\x8a\xd9\x86 \xd8\xa5\xd9\x84\xd9\x89'
+                          b' \xd8\xa7\xd9\x84\xd9\x8a\xd8\xb3\xd8\xa7\xd8\xb1 in the middle,'
+                          b' \xd9\x81\xd9\x8a \xd8\xa7\xd9\x84\xd9\x88\xd8\xb3\xd8\xb7\xd8\x8c'
+                          b' splitting \xd9\x85\xd9\x82\xd8\xb3\xd9\x85 over \xd8\xb9\xd9\x84\xd9\x89'
+                          b' multiple lines \xd8\xb9\xd8\xaf\xd8\xa9 \xd8\xb3\xd8\xb7\xd9\x88\xd8\xb1.',
+                      ]
 
-            # strings for testing RTL
-            rtlStrings = [# Arabic followed by English
-                          b'\xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a \xd9\x85\xd8\xaa\xd8\xa8\xd9\x88\xd8\xb9'
-                              b' \xd8\xa8\xd9\x80 English.',
-                          # Arabic with English in the middle
-                          b'\xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a \xd9\x85\xd8\xb9 English \xd9\x81\xd9\x8a'
-                              b' \xd8\xa7\xd9\x84\xd9\x85\xd9\x86\xd8\xaa\xd8\xb5\xd9\x81.',
-                          # Arabic symbols (!@##$%^&*) English
-                          b'\xd8\xb1\xd9\x85\xd9\x88\xd8\xb2 \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a\xd8\xa9'
-                              b' (!@#$%^&*) English.',
-                          # 123 from right to left 123 integer numbers 123. ((testing integers in RTL))
-                          b'123 \xd9\x85\xd9\x86 \xd8\xa7\xd9\x84\xd9\x8a\xd9\x85\xd9\x8a\xd9\x86'
-                              b' \xd8\xa5\xd9\x84\xd9\x89 \xd8\xa7\xd9\x84\xd9\x8a\xd8\xb3\xd8\xa7\xd8\xb1'
-                              b' 123 \xd8\xa3\xd8\xb1\xd9\x82\xd8\xa7\xd9\x85'
-                              b' \xd8\xb5\xd8\xad\xd9\x8a\xd8\xad\xd8\xa9 123.',
-                          # 456.78 from right to left 456.78 decimal numbers 456.78. ((testing decimals in RTL))
-                          b'456.78 \xd9\x85\xd9\x86 \xd8\xa7\xd9\x84\xd9\x8a\xd9\x85\xd9\x8a\xd9\x86'
-                              b' \xd8\xa5\xd9\x84\xd9\x89 \xd8\xa7\xd9\x84\xd9\x8a\xd8\xb3\xd8\xa7\xd8\xb1'
-                              b' 456.78 \xd8\xa3\xd8\xb1\xd9\x82\xd8\xa7\xd9\x85'
-                              b' \xd8\xb9\xd8\xb4\xd8\xb1\xd9\x8a\xd8\xa9 456.78.',
-                          # Long Arabic text with LTR text in the middle, splitting over multiple lines
-                          b'\xd9\x86\xd8\xb5 \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a \xd8\xb7\xd9\x88\xd9\x8a\xd9\x84'
-                              b' Long Arabic text \xd9\x85\xd8\xb9 with \xd9\x83\xd8\xaa\xd8\xa7\xd8\xa8\xd8\xa9'
-                              b' \xd9\x85\xd9\x86 \xd8\xa7\xd9\x84\xd9\x8a\xd8\xb3\xd8\xa7\xd8\xb1'
-                              b' \xd8\xa5\xd9\x84\xd9\x89 \xd8\xa7\xd9\x84\xd9\x8a\xd9\x85\xd9\x8a\xd9\x86'
-                              b' LTR script \xd9\x81\xd9\x8a \xd8\xa7\xd9\x84\xd9\x88\xd8\xb3\xd8\xb7\xd8\x8c'
-                              b' in the middle, \xd9\x85\xd9\x82\xd8\xb3\xd9\x85 splitted'
-                              b' \xd8\xb9\xd9\x84\xd9\x89 over \xd8\xb9\xd8\xaf\xd8\xa9'
-                              b' \xd8\xb3\xd8\xb7\xd9\x88\xd8\xb1 multiple lines.'
-                          ]
+        # strings for testing RTL
+        rtlStrings = [# Arabic followed by English
+                      b'\xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a \xd9\x85\xd8\xaa\xd8\xa8\xd9\x88\xd8\xb9'
+                          b' \xd8\xa8\xd9\x80 English.',
+                      # Arabic with English in the middle
+                      b'\xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a \xd9\x85\xd8\xb9 English \xd9\x81\xd9\x8a'
+                          b' \xd8\xa7\xd9\x84\xd9\x85\xd9\x86\xd8\xaa\xd8\xb5\xd9\x81.',
+                      # Arabic symbols (!@##$%^&*) English
+                      b'\xd8\xb1\xd9\x85\xd9\x88\xd8\xb2 \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a\xd8\xa9'
+                          b' (!@#$%^&*) English.',
+                      # 123 from right to left 123 integer numbers 123. ((testing integers in RTL))
+                      b'123 \xd9\x85\xd9\x86 \xd8\xa7\xd9\x84\xd9\x8a\xd9\x85\xd9\x8a\xd9\x86'
+                          b' \xd8\xa5\xd9\x84\xd9\x89 \xd8\xa7\xd9\x84\xd9\x8a\xd8\xb3\xd8\xa7\xd8\xb1'
+                          b' 123 \xd8\xa3\xd8\xb1\xd9\x82\xd8\xa7\xd9\x85'
+                          b' \xd8\xb5\xd8\xad\xd9\x8a\xd8\xad\xd8\xa9 123.',
+                      # 456.78 from right to left 456.78 decimal numbers 456.78. ((testing decimals in RTL))
+                      b'456.78 \xd9\x85\xd9\x86 \xd8\xa7\xd9\x84\xd9\x8a\xd9\x85\xd9\x8a\xd9\x86'
+                          b' \xd8\xa5\xd9\x84\xd9\x89 \xd8\xa7\xd9\x84\xd9\x8a\xd8\xb3\xd8\xa7\xd8\xb1'
+                          b' 456.78 \xd8\xa3\xd8\xb1\xd9\x82\xd8\xa7\xd9\x85'
+                          b' \xd8\xb9\xd8\xb4\xd8\xb1\xd9\x8a\xd8\xa9 456.78.',
+                      # Long Arabic text with LTR text in the middle, splitting over multiple lines
+                      b'\xd9\x86\xd8\xb5 \xd8\xb9\xd8\xb1\xd8\xa8\xd9\x8a \xd8\xb7\xd9\x88\xd9\x8a\xd9\x84'
+                          b' Long Arabic text \xd9\x85\xd8\xb9 with \xd9\x83\xd8\xaa\xd8\xa7\xd8\xa8\xd8\xa9'
+                          b' \xd9\x85\xd9\x86 \xd8\xa7\xd9\x84\xd9\x8a\xd8\xb3\xd8\xa7\xd8\xb1'
+                          b' \xd8\xa5\xd9\x84\xd9\x89 \xd8\xa7\xd9\x84\xd9\x8a\xd9\x85\xd9\x8a\xd9\x86'
+                          b' LTR script \xd9\x81\xd9\x8a \xd8\xa7\xd9\x84\xd9\x88\xd8\xb3\xd8\xb7\xd8\x8c'
+                          b' in the middle, \xd9\x85\xd9\x82\xd8\xb3\xd9\x85 splitted'
+                          b' \xd8\xb9\xd9\x84\xd9\x89 over \xd8\xb9\xd8\xaf\xd8\xa9'
+                          b' \xd8\xb3\xd8\xb7\xd9\x88\xd8\xb1 multiple lines.'
+                      ]
 
-            assert len(ltrStrings) == len(rtlStrings)
-            n = len(ltrStrings)
-            
-            # create a store to be printed
-            story = []
-            
-            story.append(Paragraph("<b><i>Following pairs of left justified texts have style.wordWrap=None &amp; 'LTR'.</i></b><br/>",stySTD))
-            # write every LTR string and its corresponding RTL string to be matched.
-            for i in range(n):
-                story.append(Paragraph(ltrStrings[i], stySTD))
-                story.append(Paragraph(ltrStrings[i], styLTR))
+        assert len(ltrStrings) == len(rtlStrings)
+        n = len(ltrStrings)
+        
+        # create a store to be printed
+        story = []
+        
+        story.append(Paragraph("<b><i>Following pairs of left justified texts have style.wordWrap=None &amp; 'LTR'.</i></b><br/>",stySTD))
+        # write every LTR string and its corresponding RTL string to be matched.
+        for i in range(n):
+            story.append(Paragraph(ltrStrings[i], stySTD))
+            story.append(Paragraph(ltrStrings[i], styLTR))
 
-            story.append(Paragraph("<br/><b><i>Following pairs of right justfied texts have style.wordWrap=None &amp; 'RTL'.</i></b><br/>",stySTD))
-            for i in range(n):
-                story.append(Paragraph(rtlStrings[i], styRJ))
-                story.append(Paragraph(rtlStrings[i], styRTL))
+        story.append(Paragraph("<br/><b><i>Following pairs of right justfied texts have style.wordWrap=None &amp; 'RTL'.</i></b><br/>",stySTD))
+        for i in range(n):
+            story.append(Paragraph(rtlStrings[i], styRJ))
+            story.append(Paragraph(rtlStrings[i], styRTL))
 
-            story.append(Paragraph("<b><i><br/>Following texts have style.wordWrap='RTL'</i></b>",stySTD))
-            # a few additional scripts for testing.
-            story.append(
-                Paragraph(b'\xd9\x87\xd8\xb0\xd9\x87 \xd9\x81\xd9\x82\xd8\xb1\xd8\xa9'
-                              b' \xd8\xb9\xd8\xa7\xd8\xaf\xd9\x8a\xd8\xa9. ', styRTL))
-            story.append(
-                Paragraph(b'\xd9\x87\xd8\xb0\xd9\x87 \xd8\xa7\xd9\x84\xd9\x81\xd9\x82\xd8\xb1\xd8\xa9'
-                              b' \xd9\x84\xd8\xaf\xd9\x8a\xd9\x87\xd8\xa7 12'
-                              b' \xd9\x86\xd9\x82\xd8\xb7\xd8\xa9 \xd9\x82\xd8\xa8\xd9\x84\xd9\x87\xd8\xa7'
-                              b' \xd9\x88\xd8\xa8\xd8\xb9\xd8\xaf\xd9\x87\xd8\xa7. ', styRTL))
-            story.append(
-                Paragraph(b'<para spacebefore="12" spaceafter="12">'
-                              b'\xd9\x87\xd8\xb0\xd9\x87 \xd8\xa7\xd9\x84\xd9\x81\xd9\x82\xd8\xb1\xd8\xa9'
-                              b' \xd9\x84\xd8\xaf\xd9\x8a\xd9\x87\xd8\xa7 12 \xd9\x86\xd9\x82\xd8\xb7\xd8\xa9'
-                              b' \xd9\x82\xd8\xa8\xd9\x84\xd9\x87\xd8\xa7'
-                              b' \xd9\x88\xd8\xa8\xd8\xb9\xd8\xaf\xd9\x87\xd8\xa7\xd8\x8c'
-                              b' \xd9\x85\xd8\xad\xd8\xaf\xd8\xaf\xd8\xa9 \xd8\xa8\xd9\x80 XML.'
-                              b' \xd8\xa5\xd9\x86\xd9\x87\xd8\xa7 \xd8\xaa\xd8\xb9\xd9\x85\xd9\x84'
-                              b' \xd8\xa3\xd9\x8a\xd8\xb6\xd8\xa7! \xd9\x80.'
-                              b'</para>',
-                          styRTL))
+        story.append(Paragraph("<b><i><br/>Following texts have style.wordWrap='RTL'</i></b>",stySTD))
+        # a few additional scripts for testing.
+        story.append(
+            Paragraph(b'\xd9\x87\xd8\xb0\xd9\x87 \xd9\x81\xd9\x82\xd8\xb1\xd8\xa9'
+                          b' \xd8\xb9\xd8\xa7\xd8\xaf\xd9\x8a\xd8\xa9. ', styRTL))
+        story.append(
+            Paragraph(b'\xd9\x87\xd8\xb0\xd9\x87 \xd8\xa7\xd9\x84\xd9\x81\xd9\x82\xd8\xb1\xd8\xa9'
+                          b' \xd9\x84\xd8\xaf\xd9\x8a\xd9\x87\xd8\xa7 12'
+                          b' \xd9\x86\xd9\x82\xd8\xb7\xd8\xa9 \xd9\x82\xd8\xa8\xd9\x84\xd9\x87\xd8\xa7'
+                          b' \xd9\x88\xd8\xa8\xd8\xb9\xd8\xaf\xd9\x87\xd8\xa7. ', styRTL))
+        story.append(
+            Paragraph(b'<para spacebefore="12" spaceafter="12">'
+                          b'\xd9\x87\xd8\xb0\xd9\x87 \xd8\xa7\xd9\x84\xd9\x81\xd9\x82\xd8\xb1\xd8\xa9'
+                          b' \xd9\x84\xd8\xaf\xd9\x8a\xd9\x87\xd8\xa7 12 \xd9\x86\xd9\x82\xd8\xb7\xd8\xa9'
+                          b' \xd9\x82\xd8\xa8\xd9\x84\xd9\x87\xd8\xa7'
+                          b' \xd9\x88\xd8\xa8\xd8\xb9\xd8\xaf\xd9\x87\xd8\xa7\xd8\x8c'
+                          b' \xd9\x85\xd8\xad\xd8\xaf\xd8\xaf\xd8\xa9 \xd8\xa8\xd9\x80 XML.'
+                          b' \xd8\xa5\xd9\x86\xd9\x87\xd8\xa7 \xd8\xaa\xd8\xb9\xd9\x85\xd9\x84'
+                          b' \xd8\xa3\xd9\x8a\xd8\xb6\xd8\xa7! \xd9\x80.'
+                          b'</para>',
+                      styRTL))
 
-            # TODO: add more RTL scripts to the test (Farsi, Hebrew, etc.)
+        # TODO: add more RTL scripts to the test (Farsi, Hebrew, etc.)
 
-            template = SimpleDocTemplate(outputfile('test_paragraphs_bidi.pdf'))
-            template.build(story)
+        template = SimpleDocTemplate(outputfile('test_paragraphs_bidi.pdf'))
+        template.build(story)
 
-        def testRTLBullets(self):
-            font_name = getAFont()
-            doc = SimpleDocTemplate(outputfile('test_rtl_bullets.pdf'),showBoundary=True)
-            p_style = ParagraphStyle('default')
-            p_style.leftIndent = 0
-            p_style.rightIndent = 0
+    @rlSkipUnless(rtlSupport and haveDejaVu(),'miss RTL and/or DejaVu')
+    def testRTLBullets(self):
+        font_name = getAFont()
+        doc = SimpleDocTemplate(outputfile('test_rtl_bullets.pdf'),showBoundary=True)
+        p_style = ParagraphStyle('default')
+        p_style.leftIndent = 0
+        p_style.rightIndent = 0
 
-            list_styles=[ParagraphStyle('list%d' % n) for n in range(3)]
-            all_styles = list_styles[:]
-            all_styles.append(p_style)
+        list_styles=[ParagraphStyle('list%d' % n) for n in range(3)]
+        all_styles = list_styles[:]
+        all_styles.append(p_style)
 
-            direction='rtl'
+        direction='rtl'
 
-            for s in all_styles:
-                s.fontSize = 15
-                s.leading = s.fontSize*1.2
-                s.fontName = font_name
-                if direction=='rtl':
-                    s.wordWrap = 'RTL'
-                    s.alignment = TA_RIGHT
-                else:
-                    s.alignment = TA_JUSTIFY
+        for s in all_styles:
+            s.fontSize = 15
+            s.leading = s.fontSize*1.2
+            s.fontName = font_name
+            if direction=='rtl':
+                s.wordWrap = 'RTL'
+                s.alignment = TA_RIGHT
+            else:
+                s.alignment = TA_JUSTIFY
 
-            indent_amount = 20
+        indent_amount = 20
 
-            for list_lvl, list_style in enumerate(list_styles):
-                list_lvl += 1
-                list_style.bulletIndent = indent_amount*(list_lvl-1)
+        for list_lvl, list_style in enumerate(list_styles):
+            list_lvl += 1
+            list_style.bulletIndent = indent_amount*(list_lvl-1)
 
-                if direction=='rtl':
-                    list_style.rightIndent = indent_amount*list_lvl
-                else:
-                    list_style.leftIndent = indent_amount*list_lvl
+            if direction=='rtl':
+                list_style.rightIndent = indent_amount*list_lvl
+            else:
+                list_style.leftIndent = indent_amount*list_lvl
 
-            elements =[]
+        elements =[]
 
-            TEXTS=[
-                    b'\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f, \xd7\x94\xd7\x95\xd7\x90 \xd7\x94\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x90\xd7\x97\xd7\xa8\xd7\x90\xd7\x99 \xd7\xa2\xd7\x9c \xd7\x9e\xd7\xa9\xd7\xa8\xd7\x93 \xd7\x96\xd7\x94. \xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93 \xd7\x96\xd7\x94 \xd7\xa0\xd7\x97\xd7\xa9\xd7\x91 \xd7\x9c\xd7\x90\xd7\x97\xd7\x93 \xd7\x94\xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93\xd7\x99\xd7\x9d \xd7\x94\xd7\x91\xd7\x9b\xd7\x99\xd7\xa8\xd7\x99\xd7\x9d \xd7\x91\xd7\x9e\xd7\x9e\xd7\xa9\xd7\x9c\xd7\x94. \xd7\x9c\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f \xd7\x9e\xd7\xaa\xd7\x9e\xd7\xa0\xd7\x94 \xd7\x9c\xd7\xa8\xd7\x95\xd7\x91 \xd7\x92\xd7\x9d \xd7\xa1\xd7\x92\xd7\x9f \xd7\xa9\xd7\xa8.',
-                    b'\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f, <b>\xd7\x94\xd7\x95\xd7\x90 \xd7\x94\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x90\xd7\x97\xd7\xa8\xd7\x90\xd7\x99 \xd7\xa2\xd7\x9c \xd7\x9e\xd7\xa9\xd7\xa8\xd7\x93 \xd7\x96\xd7\x94.</b> \xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93 \xd7\x96\xd7\x94 <i>\xd7\xa0\xd7\x97\xd7\xa9\xd7\x91 \xd7\x9c\xd7\x90\xd7\x97\xd7\x93</i> \xd7\x94\xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93\xd7\x99\xd7\x9d <b><i>\xd7\x94\xd7\x91\xd7\x9b\xd7\x99\xd7\xa8\xd7\x99\xd7\x9d \xd7\x91\xd7\x9e\xd7\x9e\xd7\xa9\xd7\x9c\xd7\x94</i></b>. \xd7\x9c\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f \xd7\x9e\xd7\xaa\xd7\x9e\xd7\xa0\xd7\x94 \xd7\x9c\xd7\xa8\xd7\x95\xd7\x91 \xd7\x92\xd7\x9d \xd7\xa1\xd7\x92\xd7\x9f \xd7\xa9\xd7\xa8.',
-                    u'<bullet>\u2022</bullet>\u05e9\u05e8 \u05d4\u05d1\u05d9\u05d8\u05d7\u05d5\u05df, <b>\u05d4\u05d5\u05d0 \u05d4\u05e9\u05e8 \u05d4\u05d0\u05d7\u05e8\u05d0\u05d9 \u05e2\u05dc \u05de\u05e9\u05e8\u05d3 \u05d6\u05d4.</b> \u05ea\u05e4\u05e7\u05d9\u05d3 \u05d6\u05d4 <i>\u05e0\u05d7\u05e9\u05d1 \u05dc\u05d0\u05d7\u05d3</i> \u05d4\u05ea\u05e4\u05e7\u05d9\u05d3\u05d9\u05dd <b><i>\u05d4\u05d1\u05db\u05d9\u05e8\u05d9\u05dd \u05d1\u05de\u05de\u05e9\u05dc\u05d4</i></b>. \u05dc\u05e9\u05e8\u05d4\u05d1\u05d9\u05d8\u05d7\u05d5\u05df \u05de\u05ea\u05de\u05e0\u05d4 \u05dc\u05e8\u05d5\u05d1 \u05d2\u05dd \u05e1\u05d2\u05df \u05e9\u05e8.',
-                    ]
+        TEXTS=[
+                b'\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f, \xd7\x94\xd7\x95\xd7\x90 \xd7\x94\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x90\xd7\x97\xd7\xa8\xd7\x90\xd7\x99 \xd7\xa2\xd7\x9c \xd7\x9e\xd7\xa9\xd7\xa8\xd7\x93 \xd7\x96\xd7\x94. \xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93 \xd7\x96\xd7\x94 \xd7\xa0\xd7\x97\xd7\xa9\xd7\x91 \xd7\x9c\xd7\x90\xd7\x97\xd7\x93 \xd7\x94\xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93\xd7\x99\xd7\x9d \xd7\x94\xd7\x91\xd7\x9b\xd7\x99\xd7\xa8\xd7\x99\xd7\x9d \xd7\x91\xd7\x9e\xd7\x9e\xd7\xa9\xd7\x9c\xd7\x94. \xd7\x9c\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f \xd7\x9e\xd7\xaa\xd7\x9e\xd7\xa0\xd7\x94 \xd7\x9c\xd7\xa8\xd7\x95\xd7\x91 \xd7\x92\xd7\x9d \xd7\xa1\xd7\x92\xd7\x9f \xd7\xa9\xd7\xa8.',
+                b'\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f, <b>\xd7\x94\xd7\x95\xd7\x90 \xd7\x94\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x90\xd7\x97\xd7\xa8\xd7\x90\xd7\x99 \xd7\xa2\xd7\x9c \xd7\x9e\xd7\xa9\xd7\xa8\xd7\x93 \xd7\x96\xd7\x94.</b> \xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93 \xd7\x96\xd7\x94 <i>\xd7\xa0\xd7\x97\xd7\xa9\xd7\x91 \xd7\x9c\xd7\x90\xd7\x97\xd7\x93</i> \xd7\x94\xd7\xaa\xd7\xa4\xd7\xa7\xd7\x99\xd7\x93\xd7\x99\xd7\x9d <b><i>\xd7\x94\xd7\x91\xd7\x9b\xd7\x99\xd7\xa8\xd7\x99\xd7\x9d \xd7\x91\xd7\x9e\xd7\x9e\xd7\xa9\xd7\x9c\xd7\x94</i></b>. \xd7\x9c\xd7\xa9\xd7\xa8 \xd7\x94\xd7\x91\xd7\x99\xd7\x98\xd7\x97\xd7\x95\xd7\x9f \xd7\x9e\xd7\xaa\xd7\x9e\xd7\xa0\xd7\x94 \xd7\x9c\xd7\xa8\xd7\x95\xd7\x91 \xd7\x92\xd7\x9d \xd7\xa1\xd7\x92\xd7\x9f \xd7\xa9\xd7\xa8.',
+                u'<bullet>\u2022</bullet>\u05e9\u05e8 \u05d4\u05d1\u05d9\u05d8\u05d7\u05d5\u05df, <b>\u05d4\u05d5\u05d0 \u05d4\u05e9\u05e8 \u05d4\u05d0\u05d7\u05e8\u05d0\u05d9 \u05e2\u05dc \u05de\u05e9\u05e8\u05d3 \u05d6\u05d4.</b> \u05ea\u05e4\u05e7\u05d9\u05d3 \u05d6\u05d4 <i>\u05e0\u05d7\u05e9\u05d1 \u05dc\u05d0\u05d7\u05d3</i> \u05d4\u05ea\u05e4\u05e7\u05d9\u05d3\u05d9\u05dd <b><i>\u05d4\u05d1\u05db\u05d9\u05e8\u05d9\u05dd \u05d1\u05de\u05de\u05e9\u05dc\u05d4</i></b>. \u05dc\u05e9\u05e8\u05d4\u05d1\u05d9\u05d8\u05d7\u05d5\u05df \u05de\u05ea\u05de\u05e0\u05d4 \u05dc\u05e8\u05d5\u05d1 \u05d2\u05dd \u05e1\u05d2\u05df \u05e9\u05e8.',
+                ]
 
-            # simple text in a paragraph
-            # working with patch from Hosam Aly
-            p = Paragraph(TEXTS[0], p_style)
+        # simple text in a paragraph
+        # working with patch from Hosam Aly
+        p = Paragraph(TEXTS[0], p_style)
+        elements.append(p)
+
+        elements.append(Spacer(0, 40))
+
+        # uses intra paragraph markup -> style text
+        p = Paragraph(TEXTS[1], p_style)
+        elements.append(p)
+        elements.append(Spacer(0, 40))
+
+        # list item (just a paragraph with a leading <bullet> element
+        for list_style in list_styles:
+            p = Paragraph(TEXTS[2], list_style)
             elements.append(p)
 
-            elements.append(Spacer(0, 40))
+        doc.build(elements)
 
-            # uses intra paragraph markup -> style text
-            p = Paragraph(TEXTS[1], p_style)
-            elements.append(p)
-            elements.append(Spacer(0, 40))
-
-            # list item (just a paragraph with a leading <bullet> element
-            for list_style in list_styles:
-                p = Paragraph(TEXTS[2], list_style)
-                elements.append(p)
-
-            doc.build(elements)
-
-        def testParsing(self):
-            fontName = getAFont()
-            fontNameBI = tt2ps(fontName,1,1)
-            stySTD = ParagraphStyle('STD',fontName=fontName)
-            styBI = ParagraphStyle('BI',fontName=fontNameBI)
-            self.assertRaises(ValueError,Paragraph,'aaaa <b><i>bibibi</b></i> ccccc',stySTD)
-            self.assertRaises(ValueError,Paragraph,'AAAA <b><i>BIBIBI</b></i> CCCCC',styBI)
+    @rlSkipUnless(rtlSupport and haveDejaVu(),'miss RTL and/or DejaVu')
+    def testParsing(self):
+        fontName = getAFont()
+        fontNameBI = tt2ps(fontName,1,1)
+        stySTD = ParagraphStyle('STD',fontName=fontName)
+        styBI = ParagraphStyle('BI',fontName=fontNameBI)
+        self.assertRaises(ValueError,Paragraph,'aaaa <b><i>bibibi</b></i> ccccc',stySTD)
+        self.assertRaises(ValueError,Paragraph,'AAAA <b><i>BIBIBI</b></i> CCCCC',styBI)
     
 def makeSuite():
     return makeSuiteForClasses(ParagraphTestCase)

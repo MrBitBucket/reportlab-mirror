@@ -24,6 +24,16 @@ def haveRenderPM():
     except RenderPMError:
         return False
 
+DEJAVUSANS = ('DejaVuSans','DejaVuSans-Bold','DejaVuSans-Oblique','DejaVuSans-BoldOblique')
+def haveDejaVu():
+    from reportlab.pdfbase.ttfonts import TTFont
+    for x in DEJAVUSANS:
+        try:
+            TTFont(x,x+'.ttf')
+        except:
+            return False
+    return True
+
 # Helper functions.
 def isWritable(D):
     try:
