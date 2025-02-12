@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.3.1   10/02/2025
+---------------------------
+    * release
+
 CHANGES  4.3.1a1 10/02/2025
 ---------------------------
     * shapes.py transform.py changes to allow origin change in transforms
