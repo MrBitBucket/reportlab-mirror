@@ -14,24 +14,24 @@ from reportlab.lib.utils import isBytes, isStr, asUnicode
 from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import ShapedStr, ShapeData, _sdGuardL
-from reportlab.rl_config import rtlSupport
 from itertools import groupby
 
-log2vis = None
 def fribidiText(text,direction):
     return text
-if rtlSupport:
+try:
     try:
-        try:
-            from pyfribidi2 import log2vis, ON as DIR_ON, LTR as DIR_LTR, RTL as DIR_RTL
-        except ImportError:
-            from pyfribidi import log2vis, ON as DIR_ON, LTR as DIR_LTR, RTL as DIR_RTL
-        directionsMap = dict(LTR=DIR_LTR,RTL=DIR_RTL)
-        def fribidiText(text,direction):
-            return log2vis(text, directionsMap.get(direction,DIR_ON),clean=True) if direction in ('LTR','RTL') else text
-    except:
-        import warnings
-        warnings.warn('pyfribidi is not installed - RTL not supported')
+        from pyfribidi2 import log2vis, ON as DIR_ON, LTR as DIR_LTR, RTL as DIR_RTL
+    except ImportError:
+        from pyfribidi import log2vis, ON as DIR_ON, LTR as DIR_LTR, RTL as DIR_RTL
+    def fribidiText(text,direction):
+        return log2vis(text, directionsMap.get(direction,DIR_ON),clean=True) if direction in ('LTR','RTL') else text
+    rtlSupport = True
+except:
+    DIR_ON=DIR_LTR=DIR_RTL=None
+    def log2vis(*args,**kwds):
+        raise ValueError('pyfribidi is not installed - RTL not supported')
+    rtlSupport = False
+directionsMap = dict(LTR=DIR_LTR,RTL=DIR_RTL)
 
 class _PDFColorSetter:
     '''Abstracts the color setting operations; used in Canvas and Textobject

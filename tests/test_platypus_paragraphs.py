@@ -26,7 +26,8 @@ from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.paragraph import Paragraph, _getFragWords, _splitWord, _splitFragWord, \
                                             _fragWordSplitRep, ABag, pyphen
-from reportlab.rl_config import rtlSupport, trustedHosts, trustedSchemes
+from reportlab.rl_config import trustedHosts, trustedSchemes
+from reportlab.pdfgen.textobject import rtlSupport
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."

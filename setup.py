@@ -337,7 +337,8 @@ def main():
         extras_require={
             'accel': ['rl_accel>=0.9.0,<1.1'],
             'renderpm': ['rl_renderPM>=4.0.3,<4.1'],
-            'pycairo': ['rlPyCairo>=0.2.0,<1', 'freetype-py>=2.3.0,<2.4']
+            'pycairo': ['rlPyCairo>=0.2.0,<1', 'freetype-py>=2.3.0,<2.4'],
+            'bidi': ['pyfribidi'],
             },
         )
     print()
