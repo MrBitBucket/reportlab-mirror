@@ -2007,6 +2007,14 @@ class Paragraph(Flowable):
         #so not doing it here makes it easier to switch.
         self.drawPara(self.debug)
 
+    def bidiText(self,text, direction):
+        if direction not in ('LTR','RTL'): return text
+        fbText = getattr(self,'_fbText',None)
+        if not fbText:
+            from reportlab.pdfgen.textobject import fribidiText as fbText
+            self._gbText = fbText
+        return fbText(text,direction)
+
     def breakLines(self, width):
         """
         Returns a broken line structure. There are two cases
@@ -2046,6 +2054,7 @@ class Paragraph(Flowable):
         self.height = lineno = 0
         maxlineno = len(maxWidths)-1
         style = self.style
+        wordWrap = style.wordWrap
         shaping = bool(getFont(style.fontName).isShaped)
         hyphenator = getattr(style,'hyphenationLang','')
         if hyphenator:
@@ -2090,6 +2099,7 @@ class Paragraph(Flowable):
                 if not text:
                     return f.clone(kind=0, lines=[],ascent=ascent,descent=descent,fontSize=fontSize)
                 else:
+                    text = self.bidiText(text,wordWrap)
                     words = split(text)
             else:
                 words = f.words[:]
@@ -2532,8 +2542,9 @@ class Paragraph(Flowable):
             lim = nLines-1
             noJustifyLast = not getattr(self,'_JustifyLast',False)
             jllwc = style.justifyLastLine
-            isRTL = style.wordWrap=='RTL'
-            bRTL = isRTL and self._wrapWidths or False
+            wordWrap = style.wordWrap
+            isRTL = wordWrap=='RTL'
+            bRTL = isRTL and self._wrapWidths
 
             if blPara.kind==0:
                 if alignment == TA_LEFT:
@@ -2563,7 +2574,7 @@ class Paragraph(Flowable):
                     leading = blPara.ascent-blPara.descent
 
                 # set the paragraph direction
-                tx.direction = self.style.wordWrap
+                tx.direction = wordWrap+'-handled' if wordWrap in ('LTR','RTL') else wordWrap
 
                 #now the font for the rest of the paragraph
                 tx.setFont(f.fontName, f.fontSize, leading)
@@ -2643,7 +2654,7 @@ class Paragraph(Flowable):
                 _setTXLineProps(tx, canvas, style)
                 tx._do_line = MethodType(_do_line,tx)
                 # set the paragraph direction
-                tx.direction = self.style.wordWrap
+                tx.direction = wordWrap
 
                 xs = tx.XtraState=ABag()
                 xs.textColor=None
