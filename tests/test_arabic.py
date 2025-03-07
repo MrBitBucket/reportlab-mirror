@@ -90,30 +90,38 @@ class RtlTestCase(unittest.TestCase):
         pdfmetrics.registerFont(freshTTFont("DejaVuSans", "DejaVuSans.ttf"))
         sss = getSampleStyleSheet()
         W,H = c._pagesize
-        styN = sss.Normal.clone('Normal',fontName='DejaVuSans',bulletFontName='DejaVuSans',fontSize=12,leading=14.4)
+        leading = 14.4
+        styN = sss.Normal.clone('Normal',fontName='DejaVuSans',bulletFontName='DejaVuSans',
+                          fontSize=12,leading=leading,allowOrphans=True)
         styNRTL = styN.clone('NormalRTL',wordWrap='RTL', alignment=TA_RIGHT)#, backColor=(0,0.2,0))
-        c.setFont('DejaVuSans',12,leading=14.4)
+        c.setFont('DejaVuSans',12,leading=leading)
         x = 36
         y = H - 36
         c.drawString(x,y,'Al Riyadh is an Arab football team with 123 expensive players')
         y -= 2*14.4
         P = Paragraph(self.text0,style=styNRTL)
-        w, h = P.wrap(W-72,H-72)
-        c.saveState()
-        c.setStrokeColor((1,0,0))
-        c.rect(x,y-0.2*styNRTL.fontSize,W-72,styNRTL.leading)
-        c.restoreState()
-        P.drawOn(c, x=x, y=y)
-        y -= 4*styNRTL.leading
+        def drawP(p,aW,aH,sC):
+            w, h = p.wrap(aW,aH)
+            c.saveState()
+            c.setStrokeColor(sC)
+            c.rect(x,y-0.2*styNRTL.fontSize,aW,h)
+            c.restoreState()
+            p.drawOn(c, x=x, y=y)
+        drawP(P,W-72,H-72,(1,0,0))
+        y -= 4*leading
         P = Paragraph(self.text0,style=styNRTL)
         rW = W/3
         x = W - 36 - rW
-        w, h = P.wrap(rW, H-72)
-        c.saveState()
-        c.setStrokeColor((1,0,0))
-        c.rect(x,y-0.2*styNRTL.fontSize,rW,h)
-        c.restoreState()
-        P.drawOn(c, x=x, y=y)
+        drawP(P, rW, H-72,(1,0,0))
+
+        y -= leading
+        c.drawString(x,y,'Splitting the arabic')
+        y -= leading
+        P = Paragraph(self.text0,style=styNRTL)
+        P1, P2 = P.split(rW, leading+1)
+        drawP(P1,rW,leading+.1,(0,0.8,0))
+        y -= leading
+        drawP(P2,rW,leading+.1,(0,0,0.8))
         c.showPage()
         c.save()
 
