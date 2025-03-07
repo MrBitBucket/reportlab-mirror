@@ -53,6 +53,7 @@ class CellStyle(PropertySet):
     background = 'white'
     valign = "BOTTOM"
     href = None
+    direction = None
     destination = None
     def __init__(self, name, parent=None):
         self.name = name
@@ -2542,9 +2543,17 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
             else:
                 raise ValueError(f'Bad valign: {valign!a}')
 
-            for v in vals:
-                draw(x, y, v)
-                y -= leading
+            drawKwds = {}
+            direction = cellstyle.direction
+            if direction: drawKwds['direction'] = direction
+            if drawKwds:
+                for v in vals:
+                    draw(x, y, v, **drawKwds)
+                    y -= leading
+            else:
+                for v in vals:
+                    draw(x, y, v)
+                    y -= leading
             onDraw = getattr(cellval,'onDraw',None)
             if onDraw:
                 onDraw(self.canv,cellval.kind,cellval.label)
@@ -2646,6 +2655,8 @@ def _setCellStyle(cellStyles, i, j, op, values):
         new.href = values[0]
     elif op == 'DESTINATION':
         new.destination = values[0]
+    elif op == 'DIRECTION':
+        new.direction = values[0]
 
 GRID_STYLE = TableStyle(
     [('GRID', (0,0), (-1,-1), 0.25, colors.black),

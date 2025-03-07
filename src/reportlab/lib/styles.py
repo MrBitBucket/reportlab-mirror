@@ -165,11 +165,9 @@ def str2alignment(v,__map__=dict(
                       center=TA_CENTER,
                       left=TA_LEFT,right=TA_RIGHT,
                       justify=TA_JUSTIFY)):
-            _ = __map__.get(v.lower(),None)
-            if _ is not None:
-                return _
-            else:
-                raise ValueError(f'{v!r} is illegal value for alignment')
+    _ = __map__.get(v.lower(),None)
+    if _ is None: raise ValueError(f'{v!r} is illegal value for alignment')
+    return _
 
 class LineStyle(PropertySet):
     defaults = {
