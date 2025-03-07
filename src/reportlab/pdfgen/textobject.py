@@ -16,22 +16,73 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import ShapedStr, ShapeData, _sdGuardL
 from itertools import groupby
 
-def fribidiText(text,direction):
-    return text
+#this is to handle the optionality of rlbidi
 try:
-    try:
-        from pyfribidi2 import log2vis, ON as DIR_ON, LTR as DIR_LTR, RTL as DIR_RTL
-    except ImportError:
-        from pyfribidi import log2vis, ON as DIR_ON, LTR as DIR_LTR, RTL as DIR_RTL
-    def fribidiText(text,direction):
-        return log2vis(text, directionsMap.get(direction,DIR_ON),clean=True) if direction in ('LTR','RTL') else text
+    import rlbidi
+    log2vis = rlbidi.log2vis
+    class BidiIndexStr(str):
+        def __new__(cls, s, bidiIndex=0):
+            self = super().__new__(cls,s)
+            self.__bidiIndex__ = bidiIndex
+            return self
+    isBidiIndexStr = lambda _: isinstance(_,BidiIndexStr)
+    def bidiText(text,direction):
+        return log2vis(text, direction,clean=True) if direction in ('LTR','RTL') else text
+    from reportlab.lib.utils import KlassStore
+    from copy import deepcopy
+    _bidiKS = KlassStore()
+    def bidiIndexWrap(s, orig):
+        if not isinstance(orig,BidiIndexStr) or isinstance(s,BidiIndexStr): return s
+        sklassName = s.__class__.__name__
+        klassName = f'BidiIndexed{sklassName}'
+        if klassName not in _bidiKS:
+            NS=dict(BidiIndexStr=BidiIndexStr,klassName=klassName,klass=s.__class__,deepcopy=deepcopy)
+            exec(   f'''class {klassName}(klass,BidiIndexStr):\n'''
+                    '''\tdef __new__(cls,s,bidiIndex=-1):\n\t\tself = super(cls,cls).__new__(cls,s)\n'''
+                    '''\t\tif hasattr(s,'__dict__'): self.__dict__=deepcopy(s.__dict__)\n'''
+                    '''\t\tself.__bidiIndex__ = bidiIndex\n\t\t\n'''
+                    '''\t\treturn self\n''',
+                    NS)
+            _bidiKS.add(klassName,NS[klassName])
+        return _bidiKS[klassName](s,orig.__bidiIndex__)
+
+    import re
+    wordpat = re.compile(r'\S+')
+    del re
+    def bidiWordList(words,direction='RTL',clean=True):
+        if direction not in ('LTR','RTL'): return words
+        if not isinstance(words,(list,tuple)):
+            raise ValueError('bidiWordList argument words should be a list or tuple of strings')
+        raw = ' '.join(words)
+        V2L = []
+        bidi = log2vis(raw, base_direction=direction, clean=clean, positions_V_to_L=V2L)
+
+        VMAP = {}
+        for i, m in enumerate(wordpat.finditer(bidi)):
+            t = (m.group(0), i)
+            start, end = m.span()
+            for j in range(start,end):
+                VMAP[V2L[j]] = t
+
+        res = [].append
+        #create result by assigning a V word to a raw one
+        for w, m in enumerate(wordpat.finditer(raw)):
+            for j in range(*m.span()):
+                if j in VMAP:
+                    res(BidiIndexStr(*VMAP[j]))
+                    break
+            else:
+                #we seem to have a raw word that doesn't appear in bidi
+                pass
+        return res.__self__
     rtlSupport = True
 except:
-    DIR_ON=DIR_LTR=DIR_RTL=None
     def log2vis(*args,**kwds):
-        raise ValueError('pyfribidi is not installed - RTL not supported')
+        raise ValueError('rlbidi is not installed - RTL not supported')
+    isBidiIndexStr = lambda _: False
+    BidiIndexStr = str
+    bidiWordList = bidiText = bidiIndexWrap = lambda _,*args,**kwds: _
     rtlSupport = False
-directionsMap = dict(LTR=DIR_LTR,RTL=DIR_RTL)
 
 class _PDFColorSetter:
     '''Abstracts the color setting operations; used in Canvas and Textobject
@@ -389,7 +440,7 @@ class PDFTextObject(_PDFColorSetter):
         "Generates PDF text output operator(s)"
         if log2vis and self.direction in ('LTR','RTL'):
             # Use pyfribidi to write the text in the correct visual order.
-            text = log2vis(text, directionsMap.get(self.direction,DIR_ON),clean=True)
+            text = log2vis(text, self.direction)
         canv = self._canvas
         font = pdfmetrics.getFont(self._fontname)
         state = (self._code, self._x, self._y)

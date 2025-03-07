@@ -13,6 +13,7 @@ from string import whitespace
 from operator import truth
 from unicodedata import category
 from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent, getFont
+from reportlab.pdfgen.textobject import rtlSupport, bidiText, bidiWordList, isBidiIndexStr, bidiIndexWrap
 from reportlab.pdfbase.ttfonts import shapeFragWord
 from reportlab.platypus.paraparser import ParaParser, _PCT, _num as _parser_num, _re_us_value
 from reportlab.platypus.flowables import Flowable
@@ -1240,7 +1241,11 @@ def _hyphenateWord(hyphenator,fontName,fontSize,w,ww,newWidth,maxWidth, uriWaste
     R = _hyGenPair(hyphenator, w, ww, newWidth, maxWidth, fontName, fontSize, uriWasteReduce,embeddedHyphenation, hymwl)
     if R:
         hy, hylen, hw, tw, h, t = R
-        return [(_SplitWordHY if hy else _SplitWordH)(h+hy),_SplitWordEnd(t)]
+        if isBidiIndexStr(w):
+            return [bidiIndexWrap((_SplitWordHY if hy else _SplitWordH)(h+hy),w),
+                    bidiIndexWrap(_SplitWordEnd(t),w)]
+        else:
+            return [(_SplitWordHY if hy else _SplitWordH)(h+hy),_SplitWordEnd(t)]
 
 def _splitWord(w, lineWidth, maxWidths, lineno, fontName, fontSize, encoding='utf8'):
     '''
@@ -1261,11 +1266,12 @@ def _splitWord(w, lineWidth, maxWidths, lineno, fontName, fontSize, encoding='ut
     maxWidthNext = maxWidths[min(maxlineno,lineno+1)]
     if isBytes(w):
         w = w.decode(encoding)
+    bidi = isBidiIndexStr(w)
     for c in w:
         cw = stringWidth(c,fontName,fontSize,encoding)
         newLineWidth = lineWidth+cw
         if newLineWidth>maxWidth and (wordText or (not wordText and cw<=maxWidthNext)):
-            aR(_SplitWord(wordText))
+            aR(bidiIndexWrap(_SplitWord(wordText),w) if bidi else _SplitWord(wordText))
             lineno += 1
             maxWidth = maxWidthNext
             maxWidth = maxWidths[min(maxlineno,lineno)]
@@ -1273,7 +1279,7 @@ def _splitWord(w, lineWidth, maxWidths, lineno, fontName, fontSize, encoding='ut
             wordText = ''
         wordText += c
         lineWidth = newLineWidth
-    aR(_SplitWordEnd(wordText))
+    aR(bidiIndexWrap(_SplitWordEnd(wordText),w) if bidi else _SplitWordEnd(wordText))
     return R
 
 def _rejoinSplitWords(R):
@@ -2007,14 +2013,6 @@ class Paragraph(Flowable):
         #so not doing it here makes it easier to switch.
         self.drawPara(self.debug)
 
-    def bidiText(self,text, direction):
-        if direction not in ('LTR','RTL'): return text
-        fbText = getattr(self,'_fbText',None)
-        if not fbText:
-            from reportlab.pdfgen.textobject import fribidiText as fbText
-            self._gbText = fbText
-        return fbText(text,direction)
-
     def breakLines(self, width):
         """
         Returns a broken line structure. There are two cases
@@ -2094,13 +2092,18 @@ class Paragraph(Flowable):
             fontSize = f.fontSize
             fontName = f.fontName
             ascent, descent = getAscentDescent(fontName,fontSize)
+            bidiSort = False
             if hasattr(f,'text'):
                 text = strip(f.text)
                 if not text:
                     return f.clone(kind=0, lines=[],ascent=ascent,descent=descent,fontSize=fontSize)
                 else:
-                    text = self.bidiText(text,wordWrap)
+                    #text = bidiText(text,wordWrap)
                     words = split(text)
+                    if rtlSupport and wordWrap in ('RTL','LTR'):
+                        _words = words
+                        words = bidiWordList(_words,direction=wordWrap)
+                        bidiSort = words != _words
             else:
                 words = f.words[:]
                 for w in words:
@@ -2208,6 +2211,9 @@ class Paragraph(Flowable):
                 if currentWidth>self._width_max: self._width_max = currentWidth
                 lines.append((maxWidth - currentWidth, cLine))
 
+            if bidiSort:
+                for l in lines:
+                    l[1].sort(key = lambda _: _.__bidiIndex__)
             return f.clone(kind=0, lines=lines,ascent=ascent,descent=descent,fontSize=fontSize)
         elif nFrags<=0:
             return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,
