@@ -83,46 +83,82 @@ class RtlTestCase(unittest.TestCase):
         c.drawString(100, 520, f"so will mess it up when centered or right-aligned")
         c.save()
 
-    text0 = '\u0627\u0644\u0631\u064a\u0627\u0636 \u0647\u0648 \u0641\u0631\u064a\u0642 \u0643\u0631\u0629 \u0642\u062f\u0645 \u0639\u0631\u0628\u064a \u064a\u0636\u0645 123 \u0644\u0627\u0639\u0628\u064b\u0627 \u0628\u0627\u0647\u0638 \u0627\u0644\u062b\u0645\u0646'
     @rlSkipUnless(rtlSupport and haveDejaVu(),'miss RTL and/or DejaVu')
     def test_bidiWordList(self):
         c = Canvas(outputfile('test_arabic_bidiWordList.pdf'))
+        fontName = 'DejaVuSans'
+        fontSize = 12
+        leading = 14.4
         pdfmetrics.registerFont(freshTTFont("DejaVuSans", "DejaVuSans.ttf"))
         sss = getSampleStyleSheet()
         W,H = c._pagesize
-        leading = 14.4
         styN = sss.Normal.clone('Normal',fontName='DejaVuSans',bulletFontName='DejaVuSans',
                           fontSize=12,leading=leading,allowOrphans=True)
         styNRTL = styN.clone('NormalRTL',wordWrap='RTL', alignment=TA_RIGHT)#, backColor=(0,0.2,0))
-        c.setFont('DejaVuSans',12,leading=leading)
-        x = 36
-        y = H - 36
-        c.drawString(x,y,'Al Riyadh is an Arab football team with 123 expensive players')
-        y -= 2*14.4
-        P = Paragraph(self.text0,style=styNRTL)
-        def drawP(p,aW,aH,sC):
-            w, h = p.wrap(aW,aH)
-            c.saveState()
-            c.setStrokeColor(sC)
-            c.rect(x,y-0.2*styNRTL.fontSize,aW,h)
-            c.restoreState()
-            p.drawOn(c, x=x, y=y)
-        drawP(P,W-72,H-72,(1,0,0))
-        y -= 4*leading
-        P = Paragraph(self.text0,style=styNRTL)
-        rW = W/3
-        x = W - 36 - rW
-        drawP(P, rW, H-72,(1,0,0))
+        c.setFont(fontName, fontSize, leading=leading)
+        class ExampleP:
+            def __init__(self, x, y, p, aW, aH, sC):
+                self.w, self.h = p.wrap(aW,aH)
+                self.params = x, y, p, aW, aH, sC
+            def draw(self):
+                x, y, p, aW, aH, sC = self.params
+                y -= self.h
+                c.saveState()
+                c.setStrokeColor(sC)
+                c.rect(x,y-0.2*styNRTL.fontSize,aW,self.h)
+                c.restoreState()
+                p.drawOn(c, x=x, y=y)
 
-        y -= leading
-        c.drawString(x,y,'Splitting the arabic')
-        y -= leading
-        P = Paragraph(self.text0,style=styNRTL)
-        P1, P2 = P.split(rW, leading+1)
-        drawP(P1,rW,leading+.1,(0,0.8,0))
-        y -= leading
-        drawP(P2,rW,leading+.1,(0,0,0.8))
-        c.showPage()
+        def example(eng, arabic, dw=0):
+            fW = W - 72 #ie width - 2*36
+            x = 36
+            y = H - 36
+            w = pdfmetrics.stringWidth(eng,fontName,fontSize)
+            if w>fW:
+                c.saveState()
+                c.setFontSize(fontSize*fW/w)
+                c.drawString(x,y,eng)
+                c.restoreState()
+            else:
+                c.drawString(x,y,eng)
+            p = ExampleP(x, y, Paragraph(arabic,style=styNRTL), fW,H-72,(1,0,0))
+            p.draw()
+
+            rW = W/3
+            x = W - 36 - rW
+            y -= p.h + leading
+            p = ExampleP(x, y, Paragraph(arabic,style=styNRTL), rW, H-72,(1,0,0))
+            p.draw()
+            y -= p.h+2*leading
+            c.drawString(x,y,'Splitting the arabic')
+            P = Paragraph(arabic,style=styNRTL)
+            P1, P2 = P.split(rW, leading+1)
+            p = ExampleP(x, y, P1,rW,leading+.1,(0,0.8,0))
+            p.draw()
+            y -= leading
+            p = ExampleP(x+dw, y, P2,rW-dw,leading+.1,(0,0,0.8))
+            p.draw()
+            c.showPage()
+        example('Al Riyadh is an Arab football team with 123 expensive players',
+                '\u0627\u0644\u0631\u064a\u0627\u0636 \u0647\u0648 \u0641\u0631'
+                '\u064a\u0642 \u0643\u0631\u0629 \u0642\u062f\u0645 \u0639\u0631'
+                '\u0628\u064a \u064a\u0636\u0645 123 \u0644\u0627\u0639\u0628\u064b'
+                '\u0627 \u0628\u0627\u0647\u0638 \u0627\u0644\u062b\u0645\u0646',
+                )
+
+        example('Al Riyadh is an Arab football team with 123 expensive players including a'
+                ' Golden Boot winner and other foreign internationals.',
+                '\u0627\u0644\u0631\u064a\u0627\u0636 \u0647\u0648 \u0641\u0631\u064a\u0642'
+                ' \u0643\u0631\u0629 \u0642\u062f\u0645 \u0639\u0631\u0628\u064a \u064a\u0636'
+                '\u0645 123 \u0644\u0627\u0639\u0628\u0627\u064b \u0628\u0627\u0647\u0638'
+                ' \u0627\u0644\u062b\u0645\u0646 \u0628\u0645\u0627 \u0641\u064a \u0630'
+                '\u0644\u0643 \u0627\u0644\u0641\u0627\u0626\u0632 \u0628\u0627\u0644'
+                '\u062d\u0630\u0627\u0621 \u0627\u0644\u0630\u0647\u0628\u064a \u0648'
+                '\u0639\u062f\u062f \u0645\u0646 \u0627\u0644\u0644\u0627\u0639\u0628'
+                '\u064a\u0646 \u0627\u0644\u0623\u062c\u0627\u0646\u0628 \u0627\u0644'
+                '\u062f\u0648\u0644\u064a\u064a\u0646.',
+                dw = 15
+                )
         c.save()
 
     @rlSkipUnless(rtlSupport,'miss RTL support')
