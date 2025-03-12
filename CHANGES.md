@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.3.2a3 14/03/2025
+---------------------------
+    * Added PlacedStory flowable; tested in test_platypus_wrapping.py
+
 CHANGES  4.3.2a2 07/03/2025
 ---------------------------
     * table styles have 'DIRECTION' for RTL/LTR etc

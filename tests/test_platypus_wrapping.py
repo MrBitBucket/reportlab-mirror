@@ -5,7 +5,7 @@
 __version__='3.3.0'
 from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
 setOutDir(__name__)
-import sys, os
+import sys, os, copy
 from operator import truth
 import unittest
 from reportlab.pdfbase.pdfmetrics import stringWidth
@@ -25,7 +25,8 @@ from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.paragraph import *
 from reportlab.platypus.paragraph import _getFragWords
-from reportlab.platypus.flowables import Spacer
+from reportlab.platypus.flowables import Spacer, PlacedStory
+from reportlab.pdfgen.canvas import ShowBoundaryValue
 
 
 def myMainPageFrame(canvas, doc):
@@ -56,7 +57,6 @@ class MyDocTemplate(BaseDocTemplate):
         template2 = PageTemplate('updown', [frame2, frame3])
         self.addPageTemplates([template1, template2])
 
-
 class WrappingTestCase(unittest.TestCase):
     "Test wrapping of long urls"
 
@@ -73,28 +73,28 @@ class WrappingTestCase(unittest.TestCase):
         bt.spaceBefore = 6
 
         story.append(Paragraph('Test of paragraph wrapping',h1))
-
         story.append(Spacer(18,18))
-
         txt = "Normally we wrap paragraphs by looking for spaces between the words.  However, with long technical command references and URLs, sometimes this gives ugly results.  We attempt to split really long words on certain tokens:  slashes, dots etc."
-
         story.append(Paragraph(txt,bt))
-        
         story.append(Paragraph('This is an attempt to break long URLs sanely.  Here is a file name: <font face="Courier">C:\\Windows\\System32\\Drivers\\etc\\hosts</font>.  ', bt))
-        
-
         story.append(Paragraph('This paragraph has a URL (basically, a word) too long to fit on one line, so it just overflows. http://some-really-long-site.somewhere-verbose.com/webthingies/framework/xc4987236hgsdlkafh/foo?format=dingbats&amp;content=rubbish. Ideally, we would wrap it in the middle.', bt))
 
+        dstory = copy.deepcopy(story[2:])
+        dstory.insert(0,Paragraph('Test of PlacedStory',h1))
+        anchor = 'nw'
+        origin = 'local'
+        story.append(PlacedStory(0,0,3*72,2.5*72,content=dstory,
+                    showBoundary=ShowBoundaryValue('red',0.5),
+                    anchor = anchor,
+                    origin = origin,
+                    ))
 
-        
-        
         doc = MyDocTemplate(outputfile('test_platypus_wrapping.pdf'))
         doc.multiBuild(story)
 
 #noruntests
 def makeSuite():
     return makeSuiteForClasses(WrappingTestCase)
-
 
 #noruntests
 if __name__ == "__main__":
