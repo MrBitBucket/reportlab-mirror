@@ -2098,7 +2098,8 @@ class Paragraph(Flowable):
                 if not text:
                     return f.clone(kind=0, lines=[],ascent=ascent,descent=descent,fontSize=fontSize)
                 else:
-                    #text = bidiText(text,wordWrap)
+                    #for any Paragraph we whould come here once only.
+                    #splits will create Paragraphs with words already.
                     words = split(text)
                     if rtlSupport and wordWrap in ('RTL','LTR'):
                         _words = words
