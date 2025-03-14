@@ -890,7 +890,7 @@ def _splitFragWord(w,maxWidth,maxWidths,lineno):
     .....
     maxWidths[lineno+n]
 
-    return the new word list which is either 
+    return the new word list which is either
     _SplitFrag....._SPlitFrag or
     _SplitFrag....._SplitFragHS if the word is hanging space.
     '''
@@ -1918,7 +1918,7 @@ class Paragraph(Flowable):
         return F
 
     def _get_split_blParaFunc(self):
-        return (_split_blParaSimple if self.blPara.kind==0 
+        return (_split_blParaSimple if self.blPara.kind==0
                     else (_split_blParaHard if not _processed_frags(self.frags)
                         else self._split_blParaProcessed))
 
@@ -2053,6 +2053,7 @@ class Paragraph(Flowable):
         maxlineno = len(maxWidths)-1
         style = self.style
         wordWrap = style.wordWrap
+        doBidi = rtlSupport and wordWrap in ('RTL','LTR')
         shaping = bool(getFont(style.fontName).isShaped)
         hyphenator = getattr(style,'hyphenationLang','')
         if hyphenator:
@@ -2063,7 +2064,7 @@ class Paragraph(Flowable):
                 else:
                     hyphenator = None
             elif not callable(hyphenator):
-                raise ValueError('hyphenator should be a language spec or a callable unicode -->  pairs not %r' % hyphenator) 
+                raise ValueError('hyphenator should be a language spec or a callable unicode -->  pairs not %r' % hyphenator)
         else:
             hyphenator = None
         uriWasteReduce = style.uriWasteReduce
@@ -2085,7 +2086,7 @@ class Paragraph(Flowable):
         calcBounds = autoLeading not in ('','off')
         frags = self.frags
         nFrags= len(frags)
-        if (nFrags==1 
+        if (nFrags==1
                 and not (style.endDots or hasattr(frags[0],'cbDefn') or hasattr(frags[0],'backColor')
                             or _processed_frags(frags) or shaping)):
             f = frags[0]
@@ -2101,7 +2102,7 @@ class Paragraph(Flowable):
                     #for any Paragraph we whould come here once only.
                     #splits will create Paragraphs with words already.
                     words = split(text)
-                    if rtlSupport and wordWrap in ('RTL','LTR'):
+                    if doBidi:
                         _words = words
                         words = bidiWordList(_words,direction=wordWrap)
                         bidiSort = words != _words
@@ -2226,7 +2227,8 @@ class Paragraph(Flowable):
             FW = []
             aFW = FW.append
             _words = _getFragWords(frags,maxWidth)
-            if shaping: _words = [shapeFragWord(_) for _ in _words] 
+            if shaping:
+                _words = [shapeFragWord(_) for _ in _words]
             sFW = 0
             while _words:
                 w = _words.pop(0)
