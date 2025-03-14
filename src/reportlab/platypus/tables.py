@@ -1449,25 +1449,27 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
             newCellContent = []
             postponedContent = []
             split = False
-            cellHeight = self._listCellGeom(value, width, style)[1]
+            FH = []
+            cellHeight = self._listCellGeom(value, width, style,H=FH)[1]
 
             if style.valign == "MIDDLE":
                 usedHeight = (oldHeight - cellHeight) / 2
             else:
                 usedHeight = 0
 
-            for flowable in value:
+            for flowable,_fh in zip(value,FH):
+                flowable_height = getattr(flowable,'height',_fh)
                 if split:
-                    if flowable.height <= height1:
+                    if flowable_height <= height1:
                         postponedContent.append(flowable)
                         # Shrink the available height:
-                        height1 -= flowable.height
+                        height1 -= flowable_height
                     else:
                         # The content doesn't fit after the split:
                         return []
-                elif usedHeight + flowable.height <= height0:
+                elif usedHeight + flowable_height <= height0:
                     newCellContent.append(flowable)
-                    usedHeight += flowable.height
+                    usedHeight += flowable_height
                 else:
                     # This is where we need to split
                     splits = flowable.split(width, height0-usedHeight)
@@ -1480,10 +1482,10 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
                         # to the content, just add everything after the split.
                         # Also try adding it after the split if valign isn't TOP
                         if newCellContent or style.valign != "TOP":
-                            if flowable.height <= height1:
+                            if flowable_height <= height1:
                                 postponedContent.append(flowable)
                                 # Shrink the available height:
-                                height1 -= flowable.height
+                                height1 -= flowable_height
                             else:
                                 # The content doesn't fit after the split:
                                 return []
