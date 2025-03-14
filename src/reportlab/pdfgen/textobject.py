@@ -47,7 +47,7 @@ try:
         return _bidiKS[klassName](s,orig.__bidiIndex__)
 
     import re
-    wordpat = re.compile(r'\S+')
+    wordpat = re.compile(r'[^ ]+')
     del re
     def bidiWordList(words,direction='RTL',clean=True):
         if direction not in ('LTR','RTL'): return words
