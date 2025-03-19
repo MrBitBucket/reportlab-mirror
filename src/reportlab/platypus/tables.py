@@ -1439,6 +1439,10 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
             if er>=n: er -= n
             self._addCommand((c[0],)+((sc, sr), (ec, er))+tuple(c[3:]))
 
+    def _getPossibleHeight(self,default):
+        f = getattr(self,'_frame',None)
+        return default if f is None else f._height - f._topPadding - f._bottomPadding
+
     def _splitCell(self, value, style, oldHeight, newHeight, width):
         # Content height of the new top row
         height0 = newHeight - style.topPadding
@@ -1448,7 +1452,6 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
         if isinstance(value, (tuple, list)):
             newCellContent = []
             postponedContent = []
-            split = False
             FH = []
             cellHeight = self._listCellGeom(value, width, style,H=FH)[1]
 
@@ -1457,17 +1460,9 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
             else:
                 usedHeight = 0
 
-            for flowable,_fh in zip(value,FH):
-                flowable_height = getattr(flowable,'height',_fh)
-                if split:
-                    if flowable_height <= height1:
-                        postponedContent.append(flowable)
-                        # Shrink the available height:
-                        height1 -= flowable_height
-                    else:
-                        # The content doesn't fit after the split:
-                        return []
-                elif usedHeight + flowable_height <= height0:
+            for i,flowable in enumerate(value):
+                flowable_height = getattr(flowable,'height',FH[i])
+                if usedHeight + flowable_height <= height0:
                     newCellContent.append(flowable)
                     usedHeight += flowable_height
                 else:
@@ -1476,24 +1471,13 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
                     if splits:
                         newCellContent.append(splits[0])
                         postponedContent.append(splits[1])
+                    elif newCellContent and ((style.valign=='BOTTOM' and flowable_height<=height1)
+                                or flowable.split(width,self._getPossibleHeight(height1))):
+                        postponedContent.extend(list(value[i:]))
+                        #some progress and we could render the rest of this cell in possible space
+                        break
                     else:
-                        # We couldn't split this flowable at the desired
-                        # point. If we already has added previous paragraphs
-                        # to the content, just add everything after the split.
-                        # Also try adding it after the split if valign isn't TOP
-                        if newCellContent or style.valign != "TOP":
-                            if flowable_height <= height1:
-                                postponedContent.append(flowable)
-                                # Shrink the available height:
-                                height1 -= flowable_height
-                            else:
-                                # The content doesn't fit after the split:
-                                return []
-                        else:
-                            # We could not split this, so we fail:
-                            return []
-
-                    split = True
+                        return []
 
             return (tuple(newCellContent), tuple(postponedContent))
 
