@@ -1235,6 +1235,10 @@ class _SHYSplitHY(_SHYStr,_SplitWordHY):
 class _SHYSplit(_SHYStr,_SplitWord):
     pass
 
+class BidiList(list):
+    '''lines/words value for a bidiSorted kind==0 paragraph'''
+    pass
+
 def _hyphenateWord(hyphenator,fontName,fontSize,w,ww,newWidth,maxWidth, uriWasteReduce,embeddedHyphenation,
                     hymwl=hyphenationMinWordLength):
     if ww==0: return []
@@ -1296,30 +1300,40 @@ def _rejoinSplitWords(R):
     else:
         return ''.join(R)
 
+def _bidiIndexWrapRejoinSplitWords(R):
+    return bidiIndexWrap(_rejoinSplitWords(R),R[0])
+
 def _yieldBLParaWords(blPara,start,stop):
     R = []
     aR = R.append
+    if 0 and isinstance(blPara.lines,BidiList):
+        jfunc = _bidiIndexWrapRejoinSplitWords
+    else:
+        jfunc = _rejoinSplitWords
     for l in blPara.lines[start:stop]:
         for w in l[1]:
             if isinstance(w,_SplitWord):
                 aR(w)
                 if isinstance(w,_SplitWordEnd):
-                    yield _rejoinSplitWords(R)
+                    yield jfunc(R)
                     del R[:]
                 continue
             else:
                 if R:
-                    yield _rejoinSplitWords(R)
+                    yield jfunc(R)
                     del R[:]
             yield w
     if R:
-        yield _rejoinSplitWords(R)
+        yield jfunc(R)
 
 def _split_blParaSimple(blPara,start,stop):
     f = blPara.clone()
     for a in ('lines', 'kind', 'text'):
         if hasattr(f,a): delattr(f,a)
     f.words = list(_yieldBLParaWords(blPara,start,stop))
+    if isinstance(blPara.lines,BidiList):
+        f.words.sort(key = lambda _: _.__bidiL__)
+        f.words = BidiList(f.words)
     if isinstance(f.words[-1],_SplitWordHY):
         f.words[-1].__class__ = _SHYSplit if isinstance(f.words[-1],_SHYStr) else _SplitWordLL
     return [f]
@@ -2107,6 +2121,7 @@ class Paragraph(Flowable):
                         words = bidiWordList(_words,direction=wordWrap)
                         bidiSort = words != _words
             else:
+                bidiSort = isinstance(f.words,BidiList)
                 words = f.words[:]
                 for w in words:
                     if strip(w): break
@@ -2215,7 +2230,8 @@ class Paragraph(Flowable):
 
             if bidiSort:
                 for l in lines:
-                    l[1].sort(key = lambda _: _.__bidiIndex__)
+                    l[1].sort(key = lambda _: _.__bidiV__)
+                lines = BidiList(lines)
             return f.clone(kind=0, lines=lines,ascent=ascent,descent=descent,fontSize=fontSize)
         elif nFrags<=0:
             return ParaLines(kind=0, fontSize=style.fontSize, fontName=style.fontName,

@@ -13,7 +13,7 @@ from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor
 from reportlab.lib.utils import isBytes, isStr, asUnicode
 from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import ShapedStr, ShapeData, _sdGuardL
+from reportlab.pdfbase.ttfonts import ShapedStr, ShapeData, _sdGuardL, shapedStr
 from itertools import groupby
 
 #this is to handle the optionality of rlbidi
@@ -21,12 +21,15 @@ try:
     import rlbidi
     log2vis = rlbidi.log2vis
     class BidiIndexStr(str):
-        def __new__(cls, s, bidiIndex=0):
+        '''A str with indices visual __bidiV__, logical __bidiL__'''
+        def __new__(cls, s, bidiV=-1, bidiL=-1):
             self = super().__new__(cls,s)
-            self.__bidiIndex__ = bidiIndex
+            self.__bidiV__ = bidiV
+            self.__bidiL__ = bidiL
             return self
     isBidiIndexStr = lambda _: isinstance(_,BidiIndexStr)
     def bidiText(text,direction):
+        if direction: direction = direction.upper()
         return log2vis(text, direction,clean=True) if direction in ('LTR','RTL') else text
     from reportlab.lib.utils import KlassStore
     from copy import deepcopy
@@ -38,18 +41,22 @@ try:
         if klassName not in _bidiKS:
             NS=dict(BidiIndexStr=BidiIndexStr,klassName=klassName,klass=s.__class__,deepcopy=deepcopy)
             exec(   f'''class {klassName}(klass,BidiIndexStr):\n'''
-                    '''\tdef __new__(cls,s,bidiIndex=-1):\n\t\tself = super(cls,cls).__new__(cls,s)\n'''
+                    '''\tdef __new__(cls,s,bidiV=-1,bidiL=-1):\n\t\tself = super(cls,cls).__new__(cls,s)\n'''
                     '''\t\tif hasattr(s,'__dict__'): self.__dict__=deepcopy(s.__dict__)\n'''
-                    '''\t\tself.__bidiIndex__ = bidiIndex\n\t\t\n'''
+                    '''\t\tself.__bidiV__ = bidiV\n\t\t\n'''
                     '''\t\treturn self\n''',
                     NS)
             _bidiKS.add(klassName,NS[klassName])
-        return _bidiKS[klassName](s,orig.__bidiIndex__)
+        return _bidiKS[klassName](s,orig.__bidiV__,orig.__bidiL__)
 
     import re
     wordpat = re.compile(r'[^ ]+')
     del re
-    def bidiWordList(words,direction='RTL',clean=True):
+    def bidiWordList(words,direction='RTL', clean=True, wx=False):
+        '''takes words (list of strings) returns bidi associated lists
+        if wx is True then the V2L index only is returned
+        '''
+        if direction: direction = direction.upper()
         if direction not in ('LTR','RTL'): return words
         if not isinstance(words,(list,tuple)):
             raise ValueError('bidiWordList argument words should be a list or tuple of strings')
@@ -69,19 +76,38 @@ try:
         for w, m in enumerate(wordpat.finditer(raw)):
             for j in range(*m.span()):
                 if j in VMAP:
-                    res(BidiIndexStr(*VMAP[j]))
+                    s, i = VMAP[j]
+                    res(i if wx else BidiIndexStr(s,i,w))
                     break
             else:
                 #we seem to have a raw word that doesn't appear in bidi
                 pass
         return res.__self__
+    def bidiShapedText(text, direction='RTL', clean=True, fontName='Helvetica', fontSize=10):
+        if direction: direction = direction.upper()
+        if direction in ('RTL','LTR'):
+            #we need to reorder the text as bidi
+            if isinstance(text,ShapedStr):
+                #this should be a list of shaped strings
+                words = [text[slice(*m.span())] for m in wordpat.finditer(text)]
+                wx = bidiWordList(words,direction=direction,wx=True)
+                _text = text
+                sb = shapedStr(' ',fontName,fontSize)
+                text = ' '.join([s for i,s in sorted(zip(wx,words))])
+                width = sum((_.x_advance for _ in text.__shapeData__))*self._fontsize/1000
+            else:
+                text = log2vis(text,base_direction=direction,clean=clean)
+                width = pdfmetrics.stringWidth(text, fontName, fontSize)
+        else:
+            width = pdfmetrics.stringWidth(text, fontName, fontSize)
+        return text, width
     rtlSupport = True
 except:
     def log2vis(*args,**kwds):
         raise ValueError('rlbidi is not installed - RTL not supported')
     isBidiIndexStr = lambda _: False
     BidiIndexStr = str
-    bidiWordList = bidiText = bidiIndexWrap = lambda _,*args,**kwds: _
+    bidiShapedText = bidiWordList = bidiText = bidiIndexWrap = lambda _,*args,**kwds: _
     rtlSupport = False
 
 class _PDFColorSetter:
@@ -438,9 +464,9 @@ class PDFTextObject(_PDFColorSetter):
 
     def _formatText(self, text):
         "Generates PDF text output operator(s)"
-        if log2vis and self.direction in ('LTR','RTL'):
-            # Use pyfribidi to write the text in the correct visual order.
-            text = log2vis(text, self.direction)
+        #if log2vis and self.direction in ('LTR','RTL'):
+        #   # Use pyfribidi to write the text in the correct visual order.
+        #   text = log2vis(text, self.direction)
         canv = self._canvas
         font = pdfmetrics.getFont(self._fontname)
         state = (self._code, self._x, self._y)

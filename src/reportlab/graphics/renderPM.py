@@ -16,7 +16,7 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.renderbase import getStateDelta, renderScaledDrawing
 from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1, stringWidth
 from reportlab.pdfbase.ttfonts import ShapedStr, shapeFragWord
-from reportlab.pdfgen.textobject import bidiText
+from reportlab.pdfgen.textobject import bidiShapedText
 from reportlab.lib.utils import isUnicode, asUnicode
 from reportlab.lib.abag import ABag
 from reportlab.lib.colors import toColor, white
@@ -554,7 +554,7 @@ class PMCanvas:
             fontName = gs_fontName
             fontSize = gs_fontSize
 
-        text, textLen = self.bidiShapedText(text,direction)
+        text, textLen = bidiShapedText(text,direction,fontName=fontName,fontSize=fontSize)
 
         try:
             if text_anchor in ('end','middle', 'end'):
@@ -723,18 +723,6 @@ class PMCanvas:
     def stringWidth(self, text, fontName=None, fontSize=None):
         return stringWidth(text, fontName or self._gs.fontName,
                                 (fontSize if fontSize is not None else self._gs.fontSize))
-    def bidiShapedText(self,text,direction):
-        if not isinstance(text,ShapedStr):
-            text = _text = asUnicode(text)
-            text = bidiText(text,direction)
-            if text is _text:   #ie no bidi was done
-                font = getFont(self._gs.fontName)
-                if font.isShaped:
-                    text = shapeFragWord([0,(ABag(fontName=self._gs.fontName,fontSize=self._gs.fontSize),text)])[1][1]
-        width = (sum((_.x_advance for _ in text.__shapeData__))*self._gs.fontSize/1000 if isinstance(text,ShapedStr)
-                    else stringWidth(text, self._gs.fontName, self._gs.fontSize))
-        return text, width
-
 def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB',**kwds):
     d = renderScaledDrawing(d)
     c = PMCanvas(d.width, d.height, dpi=dpi, bg=bg, configPIL=configPIL, backend=backend,backendFmt=backendFmt)

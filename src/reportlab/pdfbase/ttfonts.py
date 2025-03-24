@@ -54,6 +54,7 @@ Canvas and TextObject have special support for dynamic fonts.
 from struct import pack, unpack, error as structError
 from fnmatch import fnmatch
 from reportlab.lib.utils import bytestr, isUnicode, char2int, isStr, isBytes
+from reportlab.lib.abag import ABag
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
 from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF, fp_str
@@ -1544,6 +1545,11 @@ else:
             new[:] = [_[1] for _ in sorted(S)]
         new.insert(0,new0)
         return new
+
+def shapedStr(s,fontName,fontSize):
+    w = ShapedFragWord([pdfmetrics.stringWidth(s,fontName,fontSize),
+                        (ABag(fontName=fontName,fontSize=fontSize),s)])
+    return w[1][1]
 
 def freshTTFont(ttfn, ttfpath,**kwds):
     '''return a new instance corrsponding to a ttf path'''

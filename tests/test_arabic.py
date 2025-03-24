@@ -13,12 +13,13 @@ from reportlab.lib.testutils import (setOutDir,makeSuiteForClasses, outputfile,
 setOutDir(__name__)
 import unittest
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.pdfgen.textobject import rtlSupport, log2vis, bidiWordList, BidiIndexStr
+from reportlab.pdfgen.textobject import rtlSupport, log2vis, bidiWordList, BidiIndexStr, bidiShapedText, bidiText
 from reportlab.platypus.paraparser import _greekConvert
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont, uharfbuzz, freshTTFont
+from reportlab.pdfbase.ttfonts import TTFont, uharfbuzz, freshTTFont, ShapedStr, shapeFragWord, shapedStr
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.styles import getSampleStyleSheet, TA_RIGHT
+from reportlab.lib.abag import ABag
 
 class RtlTestCase(unittest.TestCase):
     "Simplest test that makes PDF"
@@ -168,11 +169,11 @@ class RtlTestCase(unittest.TestCase):
 
         for i,klass in enumerate((_SHYStr, _SplitWordH, _SplitWordEnd)):
             s = 'abc\xaddef' if klass==_SHYStr else 'ABCDEF'
-            orig = BidiIndexStr('dontcare',bidiIndex=79+i)
+            orig = BidiIndexStr('dontcare',bidiV=79+i)
             ks = klass(s)
             instw = bidiIndexWrap(ks,orig)
-            self.assertTrue(hasattr(instw,'__bidiIndex__'))
-            self.assertTrue(instw.__bidiIndex__==orig.__bidiIndex__)
+            self.assertTrue(hasattr(instw,'__bidiV__'))
+            self.assertTrue(instw.__bidiV__==orig.__bidiV__)
             self.assertTrue(instw==ks)
             self.assertTrue(bidiIndexWrap(instw,orig) is instw)
             if hasattr(ks,'__dict__'):
@@ -191,8 +192,58 @@ class RtlTestCase(unittest.TestCase):
         xt = set(['BidiIndexStr'])
         self.assertEqual(rt, xt, f"bidiWordList returned wrong types {rt} not expected {xt}")
         xx = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
-        rx = [getattr(_,'__bidiIndex__','?') for _ in bwl]
+        rx = [getattr(_,'__bidiV__','?') for _ in bwl]
         self.assertEqual(xx, rx, f"bidiWordList returned wrong indeces {rx} not expected {xx}")
+        wx = bidiWordList(self.words0,wx=True)
+        self.assertEqual(xx, wx, f"bidiWordList(wx=True) returned wrong indeces {wx} not expected {xx}")
+
+    @rlSkipUnless(rtlSupport and haveDejaVu(),'miss RTL and/or DejaVu')
+    def test_bidiShapedText(self):
+        c = Canvas(outputfile('test_arabic_bidiShapedText.pdf'))
+        fontName = 'DejaVuSans'
+        fontSize = 12
+        leading = 1.2*fontSize
+        pdfmetrics.registerFont(freshTTFont("DejaVuSans", "DejaVuSans.ttf", shaped=True))
+        c.setFont(fontName, fontSize, leading)
+        x = 36
+        y = c._pagesize[1] - 36
+        dx = max((pdfmetrics.stringWidth(f'{_}: ',fontName,fontSize) for _ in ('raw rtl','btext','stext','sbtext')))
+        def example(x,y,words):
+            raw = ' '.join(words)
+            btext = bidiText(raw,direction='RTL')
+            stext = shapedStr(raw,fontName,fontSize)
+            sbtext, width = bidiShapedText(stext, direction='RTL', clean=True, fontName=fontName, fontSize=12)
+            x1 = x+dx
+            c.drawString(x,y,'raw:')
+            c.drawString(x1,y,raw)
+            y -= leading
+            c.drawString(x,y,'raw rtl:')
+            c.drawString(x1,y,raw,direction='RTL')
+            y -= leading
+            c.drawString(x,y,f'btext:')
+            c.drawString(x1,y, btext)#, direction='RTL')
+            y -= leading
+            c.drawString(x,y,f'sbtext:')
+            c.drawString(x1,y,sbtext)#, direction='RTL')
+            y -= leading
+            return y
+
+        y = example(x,y,self.words0)
+        y -= leading
+        city = "Jizan"
+        ar_month = "ﻣﺎﺭﺱ"
+        ar_date = f"13-16 {ar_month} 2025"
+        start_time = "START TIME: 23:00"
+        benWithParen = f'({city}) - {ar_date} - {start_time}'
+        benNoParen = f'{city} - {ar_date} - {start_time}'
+        y = example(x,y,benWithParen.split())
+        y -= leading
+        y = example(x,y,benNoParen.split())
+        y -= leading
+        google = "جيزان - 13-16 مارس 2025 - وقت البدء: 23:00"
+        y = example(x,y,google.split())
+        y -= leading
+        c.save()
 
 def makeSuite():
     return makeSuiteForClasses(RtlTestCase)
