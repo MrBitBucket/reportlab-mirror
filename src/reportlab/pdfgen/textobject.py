@@ -128,7 +128,7 @@ except:
         if direction in ('LTR','RTL'):
             warnings.warn(_rlbidiMsg,stacklevel=0)
         return text
-    def bidiShapedText(text, direction='RTL', clean=True, fontName='Helvetica', fontSize=10):
+    def bidiShapedText(text, direction='RTL', clean=True, fontName='Helvetica', fontSize=10, shaping=False):
         return bidiText(text,direction), pdfmetrics.stringWidth(text,fontName,fontSize)
     bidiWordList = bidiIndexWrap = bidiText
     rtlSupport = False
