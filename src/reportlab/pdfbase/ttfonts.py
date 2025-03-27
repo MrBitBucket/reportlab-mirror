@@ -1546,10 +1546,9 @@ else:
         new.insert(0,new0)
         return new
 
-def shapedStr(s,fontName,fontSize):
-    w = ShapedFragWord([pdfmetrics.stringWidth(s,fontName,fontSize),
-                        (ABag(fontName=fontName,fontSize=fontSize),s)])
-    return w[1][1]
+def shapeStr(s,fontName,fontSize):
+    return shapeFragWord([pdfmetrics.stringWidth(s,fontName,fontSize),
+                        (ABag(fontName=fontName,fontSize=fontSize),s)])[1][1]
 
 def freshTTFont(ttfn, ttfpath,**kwds):
     '''return a new instance corrsponding to a ttf path'''

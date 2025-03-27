@@ -1609,9 +1609,9 @@ class Canvas(_PDFColorSetter):
         # use PDFTextObject for multi-line text.
         ##################################################
 
-    def drawString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None):
+    def drawString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=True):
         """Draws a string in the current text styles."""
-        text, width = bidiShapedText(text,direction,fontName=self._fontname,fontSize=self._fontsize)
+        text, width = bidiShapedText(text,direction,fontName=self._fontname,fontSize=self._fontsize, shaping=shaping)
         #we could inline this for speed if needed
         t = self.beginText(x, y, direction=direction)
         if mode is not None: t.setTextRenderMode(mode)
@@ -1623,9 +1623,9 @@ class Canvas(_PDFColorSetter):
         if mode is not None: t.setTextRenderMode(0)
         self.drawText(t)
 
-    def drawRightString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None):
+    def drawRightString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=True):
         """Draws a string right-aligned with the x coordinate"""
-        text, width = bidiShapedText(text,direction,fontName=self._fontname,fontSize=self._fontsize)
+        text, width = bidiShapedText(text,direction,fontName=self._fontname,fontSize=self._fontsize, shaping=shaping)
         if charSpace: width += (len(text)-1)*charSpace
         if wordSpace: width += (text.count(u' ')+text.count(u'\xa0')-1)*wordSpace
         t = self.beginText(x - width, y)
@@ -1638,11 +1638,11 @@ class Canvas(_PDFColorSetter):
         if mode is not None: t.setTextRenderMode(0)
         self.drawText(t)
 
-    def drawCentredString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None):
+    def drawCentredString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=True):
         """Draws a string centred on the x coordinate. 
         
         We're British, dammit, and proud of our spelling!"""
-        text, width = bidiShapedText(text,direction,fontName=self._fontname,fontSize=self._fontsize)
+        text, width = bidiShapedText(text,direction,fontName=self._fontname,fontSize=self._fontsize, shaping=shaping)
         if charSpace: width += (len(text)-1)*charSpace
         if wordSpace: width += (text.count(u' ')+text.count(u'\xa0')-1)*wordSpace
         t = self.beginText(x - 0.5*width, y)
@@ -1655,7 +1655,7 @@ class Canvas(_PDFColorSetter):
         if mode is not None: t.setTextRenderMode(0)
         self.drawText(t)
 
-    def drawAlignedString(self, x, y, text, pivotChar=rl_config.decimalSymbol, mode=None, charSpace=0, direction=None, wordSpace=None):
+    def drawAlignedString(self, x, y, text, pivotChar=rl_config.decimalSymbol, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=True):
         """Draws a string aligned on the first '.' (or other pivot character).
 
         The centre position of the pivot character will be used as x.
@@ -1697,19 +1697,19 @@ class Canvas(_PDFColorSetter):
                 leftText = leftText[0:-1]
 
             self.drawRightString(x-0.5*pivW, y, leftText, mode=mode, charSpace=charSpace,
-                    direction=direction, wordSpace=wordSpace)
+                    direction=direction, wordSpace=wordSpace, shaping=shaping)
             self.drawString(x-0.5*pivW, y, rightText, mode=mode, charSpace=charSpace,
-                    direction=direction, wordSpace=wordSpace)
+                    direction=direction, wordSpace=wordSpace, shaping=shaping)
 
         else:
             #normal case
             leftText = parts[0]
             self.drawRightString(x-0.5*pivW, y, leftText, mode=mode, charSpace=charSpace,
-                    direction=direction, wordSpace=wordSpace)
+                    direction=direction, wordSpace=wordSpace, shaping=shaping)
             if len(parts) > 1:
                 rightText = pivotChar + parts[1]
                 self.drawString(x-0.5*pivW, y, rightText, mode=mode, charSpace=charSpace,
-                        direction=direction, wordSpace=wordSpace)
+                        direction=direction, wordSpace=wordSpace, shaping=shaping)
 
     def getAvailableFonts(self):
         """Returns the list of PostScript font names available.

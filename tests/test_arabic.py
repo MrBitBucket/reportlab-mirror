@@ -9,14 +9,14 @@ __doc__="""Exercising basic Canvas operations and libraries involved in Arabic/H
 This is really to build up oour own understanding at the moment.
 """
 from reportlab.lib.testutils import (setOutDir,makeSuiteForClasses, outputfile,
-                                    printLocation, rlSkipUnless, haveDejaVu)
+                                    printLocation, rlSkipUnless, haveDejaVu, )
 setOutDir(__name__)
 import unittest
 from reportlab.pdfgen.canvas import Canvas
 from reportlab.pdfgen.textobject import rtlSupport, log2vis, bidiWordList, BidiIndexStr, bidiShapedText, bidiText
 from reportlab.platypus.paraparser import _greekConvert
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont, uharfbuzz, freshTTFont, ShapedStr, shapeFragWord, shapedStr
+from reportlab.pdfbase.ttfonts import TTFont, uharfbuzz, freshTTFont, ShapedStr, shapeFragWord, shapeStr
 from reportlab.platypus.paragraph import Paragraph
 from reportlab.lib.styles import getSampleStyleSheet, TA_RIGHT
 from reportlab.lib.abag import ABag
@@ -181,8 +181,8 @@ class RtlTestCase(unittest.TestCase):
                     self.assertEqual(getattr(ks,k),getattr(instw,k),
                                     f'ks.{k}={getattr(ks,k)} not equal to instw.{k}={getattr(instw,k)}') 
 
-    words0 = '\u0627\u0644\u0631\u064a\u0627\u0636 \u0647\u0648 \u0641\u0631\u064a\u0642 \u0643\u0631\u0629 \u0642\u062f\u0645 \u0639\u0631\u0628\u064a \u064a\u0636\u0645 123 \u0644\u0627\u0639\u0628\u064b\u0627 \u0628\u0627\u0647\u0638 \u0627\u0644\u062b\u0645\u0646'.split()
     words0 = 'الرياض هو فريق كرة قدم عربي يضم 123 لاعبًا باهظ الثمن'.split()
+    words0 = '\u0627\u0644\u0631\u064a\u0627\u0636 \u0647\u0648 \u0641\u0631\u064a\u0642 \u0643\u0631\u0629 \u0642\u062f\u0645 \u0639\u0631\u0628\u064a \u064a\u0636\u0645 123 \u0644\u0627\u0639\u0628\u064b\u0627 \u0628\u0627\u0647\u0638 \u0627\u0644\u062b\u0645\u0646'.split()
 
     @rlSkipUnless(rtlSupport,'miss RTL support')
     def test_making_words(self):
@@ -207,42 +207,37 @@ class RtlTestCase(unittest.TestCase):
         c.setFont(fontName, fontSize, leading)
         x = 36
         y = c._pagesize[1] - 36
-        dx = max((pdfmetrics.stringWidth(f'{_}: ',fontName,fontSize) for _ in ('raw rtl','btext','stext','sbtext')))
+        dx = max((pdfmetrics.stringWidth(f'{_}: ',fontName,fontSize) for _ in ('raw rtl','raw rtl shaped')))
         def example(x,y,words):
             raw = ' '.join(words)
-            btext = bidiText(raw,direction='RTL')
-            stext = shapedStr(raw,fontName,fontSize)
-            sbtext, width = bidiShapedText(stext, direction='RTL', clean=True, fontName=fontName, fontSize=12)
             x1 = x+dx
-            c.drawString(x,y,'raw:')
-            c.drawString(x1,y,raw)
-            y -= leading
-            c.drawString(x,y,'raw rtl:')
-            c.drawString(x1,y,raw,direction='RTL')
-            y -= leading
-            c.drawString(x,y,f'btext:')
-            c.drawString(x1,y, btext)#, direction='RTL')
-            y -= leading
-            c.drawString(x,y,f'sbtext:')
-            c.drawString(x1,y,sbtext)#, direction='RTL')
-            y -= leading
+            for direction in ('','rtl'):
+                for shaping in (False,True):
+                    label = f"raw{' rtl' if direction else ''}{' shaped' if shaping else ''}"
+                    c.drawString(x,y,label)
+                    c.drawString(x1,y,raw, direction=direction, shaping=shaping)
+                    y -= leading
             return y
 
         y = example(x,y,self.words0)
-        y -= leading
-        city = "Jizan"
-        ar_month = "ﻣﺎﺭﺱ"
-        ar_date = f"13-16 {ar_month} 2025"
-        start_time = "START TIME: 23:00"
-        benWithParen = f'({city}) - {ar_date} - {start_time}'
-        benNoParen = f'{city} - {ar_date} - {start_time}'
-        y = example(x,y,benWithParen.split())
-        y -= leading
-        y = example(x,y,benNoParen.split())
-        y -= leading
-        google = "جيزان - 13-16 مارس 2025 - وقت البدء: 23:00"
-        y = example(x,y,google.split())
-        y -= leading
+
+        if False:
+            #Ben's example
+            y -= leading
+            city = "Jizan"
+            ar_month = "ﻣﺎﺭﺱ"
+            ar_date = f"13-16 {ar_month} 2025"
+            start_time = "START TIME: 23:00"
+            benWithParen = f'({city}) - {ar_date} - {start_time}'
+            benNoParen = f'{city} - {ar_date} - {start_time}'
+            y = example(x,y,benWithParen.split())
+            y -= leading
+            y = example(x,y,benNoParen.split())
+            y -= leading
+            google = "جيزان - 13-16 مارس 2025 - وقت البدء: 23:00"
+            y = example(x,y,google.split())
+            y -= leading
+    
         c.save()
 
 def makeSuite():

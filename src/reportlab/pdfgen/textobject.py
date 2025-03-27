@@ -13,7 +13,7 @@ from reportlab.lib.colors import Color, CMYKColor, CMYKColorSep, toColor
 from reportlab.lib.utils import isBytes, isStr, asUnicode
 from reportlab.lib.rl_accel import fp_str
 from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import ShapedStr, ShapeData, _sdGuardL, shapedStr
+from reportlab.pdfbase.ttfonts import ShapedStr, ShapeData, _sdGuardL, shapeStr
 from itertools import groupby
 
 #this is to handle the optionality of rlbidi
@@ -50,7 +50,7 @@ try:
         return _bidiKS[klassName](s,orig.__bidiV__,orig.__bidiL__)
 
     import re
-    wordpat = re.compile(r'[^ ]+')
+    wordpat = re.compile(r'[^ ]+',re.M)
     del re
     def bidiWordList(words,direction='RTL', clean=True, wx=False):
         '''takes words (list of strings) returns bidi associated lists
@@ -83,31 +83,54 @@ try:
                 #we seem to have a raw word that doesn't appear in bidi
                 pass
         return res.__self__
-    def bidiShapedText(text, direction='RTL', clean=True, fontName='Helvetica', fontSize=10):
+    def bidiShapedText(text, direction='RTL', clean=True, fontName='Helvetica', fontSize=10, shaping=False):
+        '''return shaped/bidi text and width; assumes text is aways in logical order'''
+        text = asUnicode(text)
+        if shaping:
+            font = pdfmetrics.getFont(fontName)
+            if not font.isShaped: shaping = False
         if direction: direction = direction.upper()
         if direction in ('RTL','LTR'):
-            #we need to reorder the text as bidi
-            if isinstance(text,ShapedStr):
-                #this should be a list of shaped strings
-                words = [text[slice(*m.span())] for m in wordpat.finditer(text)]
-                wx = bidiWordList(words,direction=direction,wx=True)
-                _text = text
-                sb = shapedStr(' ',fontName,fontSize)
-                text = ' '.join([s for i,s in sorted(zip(wx,words))])
-                width = sum((_.x_advance for _ in text.__shapeData__))*self._fontsize/1000
+            if shaping:
+                w = text.lstrip()
+                bL = len(text) - len(w)
+                text = w.rstrip()
+                bR = len(w) - len(text)
+                LW = [text[slice(*m.span())] for m in wordpat.finditer(text)]   #logical words
+                VW = bidiWordList(LW,direction=direction)                       #visual words
+                SW = [shapeStr(LW[w.__bidiV__],fontName,fontSize) for w in VW]  #shaped words in visual order
+                if VW[0].__bidiL__!=0:
+                    bL, bR = bR, bL
+                text = shapeStr(bL*' ',fontName,fontSize)
+                for w in SW:
+                    if w is not SW[0]: text += ' '
+                    text += w
+                if bR:
+                    text += shapeStr(bR*' ',fontName,fontSize)
             else:
                 text = log2vis(text,base_direction=direction,clean=clean)
-                width = pdfmetrics.stringWidth(text, fontName, fontSize)
         else:
-            width = pdfmetrics.stringWidth(text, fontName, fontSize)
+            if shaping:
+                text = shapeStr(text, fontName, fontSize)
+        width = (sum((_.x_advance for _ in text.__shapeData__))*fontSize/1000 if isinstance(text,ShapedStr)
+                    else pdfmetrics.stringWidth(text, fontName, fontSize))
         return text, width
     rtlSupport = True
 except:
+    import warnings
+    _rlbidiMsg = 'rlbidi is not installed - RTL/LTR not supported'
     def log2vis(*args,**kwds):
-        raise ValueError('rlbidi is not installed - RTL not supported')
+        raise ValueError(_rlbidiMsg)
     isBidiIndexStr = lambda _: False
     BidiIndexStr = str
-    bidiShapedText = bidiWordList = bidiText = bidiIndexWrap = lambda _,*args,**kwds: _
+    def bidiText(text,direction='RTL',*args,**kwds):
+        if direction: direction = direction.upper()
+        if direction in ('LTR','RTL'):
+            warnings.warn(_rlbidiMsg,stacklevel=0)
+        return text
+    def bidiShapedText(text, direction='RTL', clean=True, fontName='Helvetica', fontSize=10):
+        return bidiText(text,direction), pdfmetrics.stringWidth(text,fontName,fontSize)
+    bidiWordList = bidiIndexWrap = bidiText
     rtlSupport = False
 
 class _PDFColorSetter:

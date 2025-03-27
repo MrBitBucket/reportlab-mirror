@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.3.2a4 27/03/2025
+---------------------------
+    * another try at canvas.drawString for rtl/shaping
+    * more Table._splitCell changes
+
 CHANGES  4.3.2a3 23/03/2025
 ---------------------------
     * Added PlacedStory flowable; tested in test_platypus_wrapping.py

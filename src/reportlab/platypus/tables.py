@@ -1460,6 +1460,10 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
 
             for i,flowable in enumerate(value):
                 flowable_height = getattr(flowable,'height',FH[i])
+                if i:
+                    flowable_height += flowable.getSpaceBefore()
+                if flowable is not value[-1]:
+                    flowable_height += flowable.getSpaceAfter()
                 if split:
                     if flowable_height <= height1:
                         postponedContent.append(flowable)
@@ -1476,7 +1480,7 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
                     splits = flowable.split(width, height0-usedHeight)
                     if splits:
                         newCellContent.append(splits[0])
-                        postponedContent.append(splits[1])
+                        if len(splits)==2: postponedContent.append(splits[1])
                     else:
                         # We couldn't split this flowable at the desired
                         # point. If we already has added previous paragraphs

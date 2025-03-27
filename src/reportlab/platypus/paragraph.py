@@ -2067,7 +2067,11 @@ class Paragraph(Flowable):
         maxlineno = len(maxWidths)-1
         style = self.style
         wordWrap = style.wordWrap
-        doBidi = rtlSupport and wordWrap in ('RTL','LTR')
+        doBidi = wordWrap and wordWrap.upper() in ('RTL','LTR')
+        if doBidi:
+            doBidi = rtlSupport
+            if not rtlSupport:
+                bidiText('')
         shaping = bool(getFont(style.fontName).isShaped)
         hyphenator = getattr(style,'hyphenationLang','')
         if hyphenator:
