@@ -537,13 +537,13 @@ class PMCanvas:
         for ((x1,y1), (x2,y2),(x3,y3)) in ctrlpts:
             self.curveTo(x1,y1,x2,y2,x3,y3)
 
-    def drawCentredString(self, x, y, text, text_anchor='middle', direction=None, shaping=True):
+    def drawCentredString(self, x, y, text, text_anchor='middle', direction=None, shaping=False):
         self.drawString(x,y,text, text_anchor=text_anchor,direction=direction, shaping=shaping)
 
     def drawRightString(self, text, x, y, direction=None):
         self.drawString(text,x,y,text_anchor='end',direction=direction)
 
-    def drawString(self, x, y, text, _fontInfo=None, text_anchor='left', direction=None, shaping=True):
+    def drawString(self, x, y, text, _fontInfo=None, text_anchor='left', direction=None, shaping=False):
         gs = self._gs
         gs_fontSize = gs.fontSize
         gs_fontName = gs.fontName
@@ -554,7 +554,7 @@ class PMCanvas:
             fontName = gs_fontName
             fontSize = gs_fontSize
 
-        text, textLen = bidiShapedText(text,direction,fontName=fontName,fontSize=fontSize)
+        text, textLen = bidiShapedText(text,direction,fontName=fontName,fontSize=fontSize,shaping=shaping)
 
         try:
             if text_anchor in ('end','middle', 'end'):

@@ -1609,7 +1609,7 @@ class Canvas(_PDFColorSetter):
         # use PDFTextObject for multi-line text.
         ##################################################
 
-    def drawString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=True):
+    def drawString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=False):
         """Draws a string in the current text styles."""
         text, width = bidiShapedText(text,direction,fontName=self._fontname,fontSize=self._fontsize, shaping=shaping)
         #we could inline this for speed if needed
@@ -1623,7 +1623,7 @@ class Canvas(_PDFColorSetter):
         if mode is not None: t.setTextRenderMode(0)
         self.drawText(t)
 
-    def drawRightString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=True):
+    def drawRightString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=False):
         """Draws a string right-aligned with the x coordinate"""
         text, width = bidiShapedText(text,direction,fontName=self._fontname,fontSize=self._fontsize, shaping=shaping)
         if charSpace: width += (len(text)-1)*charSpace
@@ -1638,7 +1638,7 @@ class Canvas(_PDFColorSetter):
         if mode is not None: t.setTextRenderMode(0)
         self.drawText(t)
 
-    def drawCentredString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=True):
+    def drawCentredString(self, x, y, text, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=False):
         """Draws a string centred on the x coordinate. 
         
         We're British, dammit, and proud of our spelling!"""
@@ -1655,7 +1655,7 @@ class Canvas(_PDFColorSetter):
         if mode is not None: t.setTextRenderMode(0)
         self.drawText(t)
 
-    def drawAlignedString(self, x, y, text, pivotChar=rl_config.decimalSymbol, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=True):
+    def drawAlignedString(self, x, y, text, pivotChar=rl_config.decimalSymbol, mode=None, charSpace=0, direction=None, wordSpace=None, shaping=False):
         """Draws a string aligned on the first '.' (or other pivot character).
 
         The centre position of the pivot character will be used as x.
