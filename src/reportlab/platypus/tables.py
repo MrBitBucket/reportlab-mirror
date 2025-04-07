@@ -54,6 +54,7 @@ class CellStyle(PropertySet):
     valign = "BOTTOM"
     href = None
     direction = None
+    shaping = None
     destination = None
     def __init__(self, name, parent=None):
         self.name = name
@@ -2552,6 +2553,8 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
             drawKwds = {}
             direction = cellstyle.direction
             if direction: drawKwds['direction'] = direction
+            shaping = cellstyle.shaping
+            if shaping: drawKwds['shaping'] = shaping
             if drawKwds:
                 for v in vals:
                     draw(x, y, v, **drawKwds)
@@ -2663,6 +2666,8 @@ def _setCellStyle(cellStyles, i, j, op, values):
         new.destination = values[0]
     elif op == 'DIRECTION':
         new.direction = values[0]
+    elif op == 'SHAPING':
+        new.shaping = values[0]
 
 GRID_STYLE = TableStyle(
     [('GRID', (0,0), (-1,-1), 0.25, colors.black),
