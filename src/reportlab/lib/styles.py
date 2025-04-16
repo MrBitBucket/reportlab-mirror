@@ -130,6 +130,7 @@ class ParagraphStyle(PropertySet):
                                 #CJK use Chinese Line breaking
                                 #LTR RTL use left to right / right to left
                                 #with support from pyfribi2 if available
+        'shaping': 0,
         'borderWidth': 0,
         'borderPadding': 0,
         'borderColor': None,

@@ -13,7 +13,7 @@ from reportlab.lib.testutils import (setOutDir,makeSuiteForClasses, outputfile,
 setOutDir(__name__)
 import unittest
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.pdfgen.textobject import rtlSupport, log2vis, bidiWordList, BidiIndexStr, bidiShapedText, bidiText
+from reportlab.pdfgen.textobject import rtlSupport, log2vis, bidiWordList, BidiStr, bidiShapedText, bidiText
 from reportlab.platypus.paraparser import _greekConvert
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont, uharfbuzz, freshTTFont, ShapedStr, shapeFragWord, shapeStr
@@ -163,19 +163,19 @@ class RtlTestCase(unittest.TestCase):
         c.save()
 
     @rlSkipUnless(rtlSupport,'miss RTL support')
-    def test_bidiIndexWrap(self):
+    def test_bidiStrWrap(self):
         from reportlab.platypus.paragraph import _SHYStr, _SplitWordH, _SplitWordEnd
-        from reportlab.pdfgen.textobject import BidiIndexStr, bidiIndexWrap, _bidiKS
+        from reportlab.pdfgen.textobject import BidiStr, bidiStrWrap, _bidiKS
 
         for i,klass in enumerate((_SHYStr, _SplitWordH, _SplitWordEnd)):
             s = 'abc\xaddef' if klass==_SHYStr else 'ABCDEF'
-            orig = BidiIndexStr('dontcare',bidiV=79+i)
+            orig = BidiStr('dontcare',bidiV=79+i)
             ks = klass(s)
-            instw = bidiIndexWrap(ks,orig)
+            instw = bidiStrWrap(ks,orig)
             self.assertTrue(hasattr(instw,'__bidiV__'))
             self.assertTrue(instw.__bidiV__==orig.__bidiV__)
             self.assertTrue(instw==ks)
-            self.assertTrue(bidiIndexWrap(instw,orig) is instw)
+            self.assertTrue(bidiStrWrap(instw,orig) is instw)
             if hasattr(ks,'__dict__'):
                 for k in ks.__dict__:
                     self.assertEqual(getattr(ks,k),getattr(instw,k),
@@ -189,7 +189,7 @@ class RtlTestCase(unittest.TestCase):
         bwl = bidiWordList(self.words0)
         self.assertEqual(bwl,['\ufebd\ufe8e\ufef3\ufeae\ufedf\ufe8d', '\ufeee\ufeeb', '\ufed6\ufef3\ufeae\ufed3', '\ufe93\ufeae\ufedb', '\ufee1\ufeaa\ufed7', '\ufef2\ufe91\ufeae\ufecb', '\ufee2\ufec0\ufef3', '123', '\ufe8e\ufe92\u064b\ufecb\ufefb', '\ufec6\ufeeb\ufe8e\ufe91', '\ufee6\ufee4\ufe9c\ufedf\ufe8d'])
         rt = set([_.__class__.__name__ for _ in bwl])
-        xt = set(['BidiIndexStr'])
+        xt = set(['BidiStr'])
         self.assertEqual(rt, xt, f"bidiWordList returned wrong types {rt} not expected {xt}")
         xx = [10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
         rx = [getattr(_,'__bidiV__','?') for _ in bwl]
@@ -203,7 +203,7 @@ class RtlTestCase(unittest.TestCase):
         fontName = 'DejaVuSans'
         fontSize = 12
         leading = 1.2*fontSize
-        pdfmetrics.registerFont(freshTTFont("DejaVuSans", "DejaVuSans.ttf", shaped=True))
+        pdfmetrics.registerFont(freshTTFont("DejaVuSans", "DejaVuSans.ttf", shapable=True))
         c.setFont(fontName, fontSize, leading)
         x = 36
         y = c._pagesize[1] - 36

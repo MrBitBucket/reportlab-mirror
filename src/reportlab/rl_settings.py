@@ -71,7 +71,7 @@ xmlParser
 textPaths
 toColorCanUse
 defCWRF
-shapedFontGlob'''.split())
+unShapedFontGlob'''.split())
 
 allowTableBoundsErrors =    1 # set to 0 to die on too large elements in tables in debug (recommend 1 for production use)
 shapeChecking =             1
@@ -168,7 +168,7 @@ textPaths='freetype'                                #freetype or _renderPM or ba
 toColorCanUse='rl_extended_literal_eval'            #change to None or 'rl_safe_eval' depending on trust
 defCWRF=0.02                                        #fraction we can reduce defined column widths for overcommitted
                                                     #undefined widths
-shapedFontGlob=None                                 #None or space list of glob patterns that match shaped font names
+unShapedFontGlob=None                               #None or space list of glob patterns that force off shaping
 
 # places to look for T1Font information
 T1SearchPath =  (

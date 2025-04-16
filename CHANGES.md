@@ -11,10 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  4.3.2a5 07/04/2025
+CHANGES  4.3.2a5 16/04/2025
 ---------------------------
     * added in SHAPING to table styles, cellStyles etc
     * make default shaping False for canvas drawStrings
+    * bidi works for single frag, shaping for multi
 
 CHANGES  4.3.2a4 27/03/2025
 ---------------------------
