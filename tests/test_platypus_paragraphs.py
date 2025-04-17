@@ -26,7 +26,8 @@ from reportlab.platypus.tableofcontents import TableOfContents
 from reportlab.platypus.tables import TableStyle, Table
 from reportlab.platypus.paragraph import Paragraph, _getFragWords, _splitWord, _splitFragWord, \
                                             _fragWordSplitRep, ABag, pyphen
-from reportlab.rl_config import rtlSupport, trustedHosts, trustedSchemes
+from reportlab.rl_config import trustedHosts, trustedSchemes
+from reportlab.pdfgen.textobject import rtlSupport
 
 def myMainPageFrame(canvas, doc):
     "The page frame used for all PDF documents."
@@ -1109,36 +1110,37 @@ class FragmentTestCase(unittest.TestCase):
                 '<para hyphenationMinWordLength="%(hymwl)d">%(text1)s</para>',
                 '<para>%(text1)s</para>',
                 ]
-        for ex,x,hymwl in [
-                (72,0,None),
-                (72,0,5),
-                (72,0,4),
-                (72,2,None),
-                (72,1,5),
-                (72,1,4),
-                (72,3,None),
-                (72,4,5),
-                (72,5,4),
-                ] if getFont('Vera').isShaped else [
-                (72,0,None),    #default is 5
-                (72,0,5),
-                (60,0,4),
-                (72,2,None),    #default is 5
-                (72,1,5),
-                (60,1,4),
-                (72,3,None),    #default is 5
-                (72,4,5),
-                (60,5,4),
-                ]:
-            kwds = dict(hyphenationMinWordLength=hymwl) if hymwl!=None else {}
-            template = tmpls[x]
-            t = template % locals()
-            p = Paragraph(
-                    template % locals(),
-                    style = ParagraphStyle('P10H5', fontSize=10, fontName="Vera", hyphenationLang="ru_RU",**kwds),
-                    )
-            w,h = p.wrap(aW,0x7fffffff)
-            self.assertEqual(h,ex,'Russion hyphenation test failed for ex=%(ex)s template=%(template)r hymwl=%(hymwl)r h=%(h)s\ntext=%(t)r' % locals())
+        for shaping in (False,True) if getFont('Vera').shapable else (False,):
+            for ex,x,hymwl in [
+                    (72,0,None),
+                    (72,0,5),
+                    (72,0,4),
+                    (72,2,None),
+                    (72,1,5),
+                    (72,1,4),
+                    (72,3,None),
+                    (72,4,5),
+                    (72,5,4),
+                    ] if shaping else [
+                    (72,0,None),    #default is 5
+                    (72,0,5),
+                    (60,0,4),
+                    (72,2,None),    #default is 5
+                    (72,1,5),
+                    (60,1,4),
+                    (72,3,None),    #default is 5
+                    (72,4,5),
+                    (60,5,4),
+                    ]:
+                kwds = dict(hyphenationMinWordLength=hymwl) if hymwl!=None else {}
+                template = tmpls[x]
+                t = template % locals()
+                p = Paragraph(
+                        template % locals(),
+                        style = ParagraphStyle('P10H5', fontSize=10, fontName="Vera", hyphenationLang="ru_RU",shaping=shaping,**kwds),
+                        )
+                w,h = p.wrap(aW,0x7fffffff)
+                self.assertEqual(h,ex,f'Russion hyphenation test failed for {ex=} {template=!a} {hymwl=!a} {h=} {shaping=}\n{text=!r}')
 
     @rlSkipUnless(pyphen,'need pyphen')
     def test8(self):

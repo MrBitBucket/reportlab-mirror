@@ -565,7 +565,7 @@ end""")
         canv = Canvas(outputfile('test_pdfbase_ttfonts_hb_examples.pdf'))
         def hb_example(ttfpath, text, y, fpdfLiteral, excode):
             ttfn = os.path.splitext(os.path.basename(ttfpath))[0]
-            ttf = freshTTFont(ttfn, ttfpath, shaped=False)
+            ttf = freshTTFont(ttfn, ttfpath, shapable=False)
             try:
                 fontName = ttf.fontName
                 fontSize = 30
@@ -585,7 +585,7 @@ end""")
                    [pdfmetrics.stringWidth(text[:_],fontName,fontSize) for _ in range(len(text)+1)])
                 canv.saveState()
                 canv.translate(0,-fontSize*1.2)
-                ttf.isShaped = True
+                ttf.shapable = True
                 t = canv.beginText(36, y-1.2*fontSize) #786 - 1.2*30
                 t._textOut(new[1][1],False)
                 code = t.getCode()
@@ -633,8 +633,8 @@ end""")
         try:
             ttfn = os.path.splitext(os.path.basename(ttfpath))[0]
             ttfn1 = ttfn+'1'
-            ttf = freshTTFont(ttfn,ttfpath,shaped=False)
-            ttf1 = freshTTFont(ttfn1,ttfpath,shaped=True)
+            ttf = freshTTFont(ttfn,ttfpath,shapable=False)
+            ttf1 = freshTTFont(ttfn1,ttfpath,shapable=True)
             ttf1.face.name = ttf.face.name + b'1'
             pdfmetrics.registerFont(ttf)
             pdfmetrics.registerFont(ttf1)
@@ -642,7 +642,7 @@ end""")
             fontSize = 30
             leading = 36
             sty = stysh.Normal.clone('sty',fontName=ttfn,fontSize=fontSize,leading=leading)
-            sty1 = stysh.Normal.clone('sty1',fontName=ttfn1,fontSize=fontSize,leading=leading)
+            sty1 = stysh.Normal.clone('sty1',fontName=ttfn1,fontSize=fontSize,leading=leading,shaping=True)
             pW, pH = canv._pagesize
             x = 36
             aW = pW - 2*36
@@ -667,9 +667,9 @@ end""")
             canv.drawCentredString(xm,y,textp)
             y -= 12
             canv.setFont(ttfn1,10)
-            canv.drawString(x,y,textp)
-            canv.drawRightString(xe,y,textp)
-            canv.drawCentredString(xm,y,textp)
+            canv.drawString(x,y,textp,shaping=True)
+            canv.drawRightString(xe,y,textp,shaping=True)
+            canv.drawCentredString(xm,y,textp,shaping=True)
             canv.restoreState()
             y -= 12
         finally:

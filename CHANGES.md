@@ -11,6 +11,35 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.4.0 17/04/2025
+---------------------------
+    * merge bidi version --> 4.4.0
+
+CHANGES  4.3.2a5 16/04/2025
+---------------------------
+    * added in SHAPING to table styles, cellStyles etc
+    * make default shaping False for canvas drawStrings
+    * bidi works for single frag, shaping for multi
+
+CHANGES  4.3.2a4 27/03/2025
+---------------------------
+    * another try at canvas.drawString for rtl/shaping
+    * more Table._splitCell changes
+
+CHANGES  4.3.2a3 23/03/2025
+---------------------------
+    * Added PlacedStory flowable; tested in test_platypus_wrapping.py
+    * More changes related to RTL text and paragraphs
+
+CHANGES  4.3.2a2 07/03/2025
+---------------------------
+    * table styles have 'DIRECTION' for RTL/LTR etc
+    * now using rlbidi with bidiWordList for single frag cases, splitting works
+
+CHANGES  4.3.2a1 25/02/2025
+---------------------------
+    * fix most single frag RTL/LTR para measurements
+
 CHANGES  4.3.1.2 19/03/2025
 ---------------------------
     * change tables split in row termination

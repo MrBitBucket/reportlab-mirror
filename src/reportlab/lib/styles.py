@@ -130,6 +130,7 @@ class ParagraphStyle(PropertySet):
                                 #CJK use Chinese Line breaking
                                 #LTR RTL use left to right / right to left
                                 #with support from pyfribi2 if available
+        'shaping': 0,
         'borderWidth': 0,
         'borderPadding': 0,
         'borderColor': None,
@@ -165,11 +166,9 @@ def str2alignment(v,__map__=dict(
                       center=TA_CENTER,
                       left=TA_LEFT,right=TA_RIGHT,
                       justify=TA_JUSTIFY)):
-            _ = __map__.get(v.lower(),None)
-            if _ is not None:
-                return _
-            else:
-                raise ValueError(f'{v!r} is illegal value for alignment')
+    _ = __map__.get(v.lower(),None)
+    if _ is None: raise ValueError(f'{v!r} is illegal value for alignment')
+    return _
 
 class LineStyle(PropertySet):
     defaults = {

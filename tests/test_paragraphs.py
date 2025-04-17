@@ -14,11 +14,12 @@ from reportlab.lib.colors import red, black, navy, white, green
 from reportlab.lib.randomtext import randomText
 from reportlab.rl_config import invariant as rl_invariant
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
-from reportlab.rl_config import defaultPageSize, rtlSupport
+from reportlab.rl_config import defaultPageSize
 from reportlab.pdfbase import ttfonts
 from reportlab.pdfbase import pdfmetrics
 from reportlab.lib.fonts import addMapping, tt2ps
 from reportlab.pdfgen.canvas import Canvas
+from reportlab.pdfgen.textobject import rtlSupport
 
 (PAGE_WIDTH, PAGE_HEIGHT) = defaultPageSize
 

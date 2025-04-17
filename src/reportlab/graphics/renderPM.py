@@ -16,6 +16,7 @@ from reportlab.graphics.shapes import *
 from reportlab.graphics.renderbase import getStateDelta, renderScaledDrawing
 from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1, stringWidth
 from reportlab.pdfbase.ttfonts import ShapedStr, shapeFragWord
+from reportlab.pdfgen.textobject import bidiShapedText
 from reportlab.lib.utils import isUnicode, asUnicode
 from reportlab.lib.abag import ABag
 from reportlab.lib.colors import toColor, white
@@ -536,13 +537,13 @@ class PMCanvas:
         for ((x1,y1), (x2,y2),(x3,y3)) in ctrlpts:
             self.curveTo(x1,y1,x2,y2,x3,y3)
 
-    def drawCentredString(self, x, y, text, text_anchor='middle'):
-        self.drawString(x,y,text, text_anchor=text_anchor)
+    def drawCentredString(self, x, y, text, text_anchor='middle', direction=None, shaping=False):
+        self.drawString(x,y,text, text_anchor=text_anchor,direction=direction, shaping=shaping)
 
-    def drawRightString(self, text, x, y):
-        self.drawString(text,x,y,text_anchor='end')
+    def drawRightString(self, text, x, y, direction=None):
+        self.drawString(text,x,y,text_anchor='end',direction=direction)
 
-    def drawString(self, x, y, text, _fontInfo=None, text_anchor='left'):
+    def drawString(self, x, y, text, _fontInfo=None, text_anchor='left', direction=None, shaping=False):
         gs = self._gs
         gs_fontSize = gs.fontSize
         gs_fontName = gs.fontName
@@ -553,7 +554,7 @@ class PMCanvas:
             fontName = gs_fontName
             fontSize = gs_fontSize
 
-        text, textLen = self.shapedText(text)
+        text, textLen = bidiShapedText(text,direction,fontName=fontName,fontSize=fontSize,shaping=shaping)
 
         try:
             if text_anchor in ('end','middle', 'end'):
@@ -722,16 +723,6 @@ class PMCanvas:
     def stringWidth(self, text, fontName=None, fontSize=None):
         return stringWidth(text, fontName or self._gs.fontName,
                                 (fontSize if fontSize is not None else self._gs.fontSize))
-    def shapedText(self,text):
-        if not isinstance(text,ShapedStr):
-            text = asUnicode(text)
-            font = getFont(self._gs.fontName)
-            if font.isShaped and not isinstance(text,ShapedStr):
-                text = shapeFragWord([0,(ABag(fontName=self._gs.fontName,fontSize=self._gs.fontSize),text)])[1][1]
-        width = (sum((_.x_advance for _ in text.__shapeData__))*self._gs.fontSize/1000 if isinstance(text,ShapedStr)
-                    else stringWidth(text, self._gs.fontName, self._gs.fontSize))
-        return text, width
-
 def drawToPMCanvas(d, dpi=72, bg=0xffffff, configPIL=None, showBoundary=rl_config._unset_,backend=rl_config.renderPMBackend,backendFmt='RGB',**kwds):
     d = renderScaledDrawing(d)
     c = PMCanvas(d.width, d.height, dpi=dpi, bg=bg, configPIL=configPIL, backend=backend,backendFmt=backendFmt)

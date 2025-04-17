@@ -41,7 +41,7 @@ __all__ = '''AnchorFlowable BalancedColumns BulletDrawer CallerMacro CondPageBre
         HRFlowable Image ImageAndFlowables KeepInFrame KeepTogether LIIndenter ListFlowable ListItem
         Macro NullDraw PTOContainer PageBreak PageBreakIfNotEmpty ParagraphAndImage Preformatted
         SetPageTopFlowables SetTopFlowables SlowPageBreak Spacer TopPadder TraceInfo UseUpSpace XBox
-        splitLine splitLines'''.split()
+        splitLine splitLines PlacedStory'''.split()
 
 class TraceInfo:
     "Holder for info about where an object originated"
@@ -249,7 +249,6 @@ def _dedenter(text,dedent=0):
         lines = _trimEmptyLines(lines)
 
     return lines
-
 
 SPLIT_CHARS = "[{( ,.;:/\\-"
 
@@ -1222,6 +1221,64 @@ class KeepInFrame(_Container,Flowable):
         _Container.drawOn(self, canv, x, y, _sW=_sW, scale=scale)
         if ss: canv.restoreState()
 
+class PlacedStory(Flowable):
+    _ZEROSIZE=1
+    _SPACETRANSFER = True
+    _anchors = ('nw','n','ne','w','c','e','sw','s','se')
+    def __init__(self, x, y, maxWidth, maxHeight, content=[], mergeSpace=1, mode='shrink',
+                        name='', anchor='sw', fakeWidth=None, hAlign='LEFT',vAlign='BOTTOM',
+                        showBoundary=None, origin='page'):
+        self.kif = KeepInFrame(maxWidth, maxHeight, content=content, mergeSpace=mergeSpace,
+                         mode=mode, name=name,hAlign=hAlign,vAlign=vAlign, fakeWidth=None)
+        self.x = x
+        self.y = y
+        self.anchor = anchor
+        self.w = None
+        self.h = None
+        self.sb = showBoundary
+        self.origin = origin
+
+    def wrap(self,_aW,_aH):
+        #_aW & _aH are ignored
+        if self.w is None:
+            self.kif.canv = getattr(self,'canv')
+            self.w, self.h = self.kif.wrap(self.kif.maxWidth,self.kif.maxHeight)
+            del self.kif.canv
+        return 0,0
+
+    def drawOn(self, canv, lx, ly, _sW=0):
+        #we ignore _x and _y infavour of our own
+        if self.w is None: self.wrap(0,0)
+        origin = self.origin
+        if origin=='page':
+            dx = dy = 0
+        elif origin=='local':
+            dx = lx
+            dy = ly
+        elif origin=='frame':
+            _ = getattr(self,'_frame',None)
+            if not _: _ = self._doctemplateAttr('frame')
+            dx = _.x1
+            dy = _.y1
+        else:
+            raise ValueError(f'PlacedStory invalid {origin=} not in "page", "frame" or "local"')
+
+        anchor = self.anchor
+        if anchor not in self._anchors:
+            raise ValueError(f'PlacedStory invalid {anchor=} not in {self._anchors}')
+        if anchor in ('nw','n','ne'):
+            dy -= self.h
+        elif anchor in ('w','c','e'):
+            dy -= self.h / 2
+        if anchor in ('n','c','e'):
+            dx -= self.w/2
+        elif anchor in ('ne','e','se'):
+            dx -= self.w
+        x = self.x + dx
+        y = self.y + dy
+
+        self.kif.drawOn(canv,x,y)
+        if self.sb: canv.drawBoundary(self.sb,x,y,self.w,self.h)
 
 class _FindSplitterMixin:
     def _findSplit(self,canv,availWidth,availHeight,mergeSpace=1,obj=None,content=None,paraFix=True):
@@ -1656,7 +1713,6 @@ class BalancedColumns(_FindSplitterMixin,NullDraw):
                 overlapAttachedSpace=frame._oASpace,
                 _debug=frame._debug) for i in range(nCols)]
 
-
         #we are going to modify the current template
         T=self._doctemplateAttr('pageTemplate')
         if T is None:
@@ -1942,7 +1998,6 @@ class FrameSplitter(NullDraw):
         frame.add_generated_content(*G)
         return 0,0
 
-
 from reportlab.lib.sequencer import _type2formatter
 _bulletNames = dict(
                 bulletchar=u'\u2022',   #usually a small circle
@@ -2116,7 +2171,6 @@ class LIIndenter(DDIndenter):
         if self._bullet:
             self._bullet.drawOn(self,canv,x,y,0)
         self._flowable.drawOn(canv,x+self._leftIndent,y,max(0,_sW-self._leftIndent-self._rightIndent))
-
 
 from reportlab.lib.styles import ListStyle
 class ListItem:

@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2025
 #see LICENSE for license details
-__version__='4.2.5'
+__version__='4.4.0'
 import os, sys, glob, shutil, re, sysconfig, traceback, io, subprocess
 from urllib.parse import quote as urlquote
 platform = sys.platform
@@ -337,7 +337,9 @@ def main():
         extras_require={
             'accel': ['rl_accel>=0.9.0,<1.1'],
             'renderpm': ['rl_renderPM>=4.0.3,<4.1'],
-            'pycairo': ['rlPyCairo>=0.2.0,<1', 'freetype-py>=2.3.0,<2.4']
+            'pycairo': ['rlPyCairo>=0.2.0,<1', 'freetype-py>=2.3.0,<2.4'],
+            'bidi': ['rlbidi'],
+            'shaping': ['uharfbuzz'],
             },
         )
     print()

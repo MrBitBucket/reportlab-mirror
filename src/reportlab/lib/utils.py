@@ -1330,3 +1330,26 @@ def yieldNoneSplits(L):
 
 def _rl_docdent(s):
     return '\n'.join((_.lstrip() for _ in s.split('\n')))
+
+class KlassStore:
+    def __init__(self,lim=127):
+        self.lim = lim
+        self.store = {}
+
+    def add(self,k,v):
+        if not (isinstance(k,str) and isinstance(v,type)):
+            raise ValueError(f'{self.__class__.__name__}.add takes (str,type) arguments not ({type(k),type(v)})') 
+        store = self.store
+        store[k] = v
+        if len(store)>=self.lim:
+            for _ in list(store.keys())[:-self.lim]:
+                del store[_]
+
+    def __contains__(self,k):
+        return k in self.store
+
+    def __getitem__(self,k):
+        return self.store[k]
+
+    def get(self,k,default=None):
+        return self.store.get(k,default)

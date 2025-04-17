@@ -54,10 +54,11 @@ Canvas and TextObject have special support for dynamic fonts.
 from struct import pack, unpack, error as structError
 from fnmatch import fnmatch
 from reportlab.lib.utils import bytestr, isUnicode, char2int, isStr, isBytes
+from reportlab.lib.abag import ABag
 from reportlab.pdfbase import pdfmetrics, pdfdoc
 from reportlab import rl_config
 from reportlab.lib.rl_accel import hex32, add32, calcChecksum, instanceStringWidthTTF, fp_str
-from reportlab.rl_config import register_reset, shapedFontGlob
+from reportlab.rl_config import register_reset, unShapedFontGlob
 from collections import namedtuple
 from io import BytesIO
 import os, time, functools
@@ -1196,7 +1197,7 @@ class TTFont:
     _multiByte = 1      # We want our own stringwidth
     _dynamicFont = 1    # We want dynamic subsetting
 
-    def __init__(self, name, filename, validate=0, subfontIndex=0, asciiReadable=None, shaped=None):
+    def __init__(self, name, filename, validate=0, subfontIndex=0, asciiReadable=None, shapable=True):
         """Loads a TrueType font from filename.
 
         If validate is set to a false values, skips checksum validation.  This
@@ -1210,9 +1211,7 @@ class TTFont:
         if asciiReadable is None:
             asciiReadable = rl_config.ttfAsciiReadable
         self._asciiReadable = asciiReadable
-        if shaped is None:
-            shaped = any((fnmatch(name,_) for _ in shapedFontGlob))
-        self._shaped = bool(shaped and uharfbuzz)
+        self.shapable = shapable and not any((fnmatch(name,_) for _ in unShapedFontGlob))
 
     def stringWidth(self,text,size,encoding='utf8'):
         return instanceStringWidthTTF(self,text,size,encoding)
@@ -1384,12 +1383,12 @@ class TTFont:
         if self.face.name in pdfmetrics._dynFaceNames: del pdfmetrics._dynFaceNames[self.face.name]
 
     @property
-    def isShaped(self):
-        return bool(self._shaped and uharfbuzz)
+    def shapable(self):
+        return bool(self._shapable and uharfbuzz)
     
-    @isShaped.setter
-    def isShaped(self,v):
-        self._shaped = bool(v and uharfbuzz)
+    @shapable.setter
+    def shapable(self,v):
+        self._shapable = bool(v and uharfbuzz)
 
 #we only expect to use/see these if uharfbuzz is importable
 class ShapedFragWord(list):
@@ -1544,6 +1543,10 @@ else:
             new[:] = [_[1] for _ in sorted(S)]
         new.insert(0,new0)
         return new
+
+def shapeStr(s,fontName,fontSize):
+    return shapeFragWord([pdfmetrics.stringWidth(s,fontName,fontSize),
+                        (ABag(fontName=fontName,fontSize=fontSize),s)])[1][1]
 
 def freshTTFont(ttfn, ttfpath,**kwds):
     '''return a new instance corrsponding to a ttf path'''
