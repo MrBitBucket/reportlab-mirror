@@ -14,6 +14,9 @@ mentioned. If we missed you, please let us know!
 CHANGES  4.4.0 17/04/2025
 ---------------------------
     * merge bidi version --> 4.4.0
+    * preliminary support for glyph shaping in south Asian languages
+    * preliminary support for right-to-left scripts (e.g. Arabic + Hebrew)
+    
 
 CHANGES  4.3.2a5 16/04/2025
 ---------------------------
