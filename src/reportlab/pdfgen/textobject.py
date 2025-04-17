@@ -139,13 +139,14 @@ try:
                 text = w.rstrip()
                 bR = len(w) - len(text)
                 LW = [text[slice(*m.span())] for m in wordpat.finditer(text)]   #logical words
-                VW = bidiWordList(LW,direction=direction)                       #visual words
-                SW = [shapeStr(LW[w.__bidiV__],fontName,fontSize) for w in VW]  #shaped words in visual order
-                if VW[0].__bidiL__!=0:
+                VX = bidiWordList(LW,direction=direction,wx=True)               #visual order
+                SW = [shapeStr(LW[i],fontName,fontSize) for i in VX]    #shaped words in visual order
+                if len(VX)>1 and VX[0]>VX[-1]:
                     bL, bR = bR, bL
-                text = shapeStr(bL*' ',fontName,fontSize)
+                text = shapeStr(bL*' ',fontName,fontSize, force=True)
                 for w in SW:
-                    if w is not SW[0]: text += ' '
+                    if not hasattr(w,'__shapeData__'): w = shapeStr(w,fontName,fontSize,force=True)
+                    if w is not SW[0]: text += shapeStr(' ',fontName,fontSize, force=True)
                     text += w
                 if bR:
                     text += shapeStr(bR*' ',fontName,fontSize)

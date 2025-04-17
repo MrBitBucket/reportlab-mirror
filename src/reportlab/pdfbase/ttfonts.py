@@ -1439,7 +1439,7 @@ if not uharfbuzz:
     def shapeFragWord(w, features=None):
         return w
 else:
-    def shapeFragWord(w, features=dict(kern=True,liga=True,dlig=True)):
+    def shapeFragWord(w, features=dict(kern=True,liga=True,dlig=True), force=False):
         '''take a frag word and return a shaped fragword if uharfbuzz makes any changes
         if no changes are made return the original word
         '''
@@ -1520,7 +1520,7 @@ else:
             shaped = shaped or (x_offset!=0 or y_offset!=0 
                                 or i>=ntext 
                                 or (text[i]==uchar and x_advance!=ucharWidth))
-            changed = changed or shaped or i>=ntext or text[i]!=uchar
+            changed = changed or shaped or i>=ntext or text[i]!=uchar or force
             shapeDataAppend(ShapeData(cluster, x_advance, y_advance, x_offset, y_offset, ucharWidth))
         if nf:  #we have at least one frag
             new.append((nf,ShapedStr(ns,shapeData=shapeDataAppend.__self__)))
@@ -1544,9 +1544,9 @@ else:
         new.insert(0,new0)
         return new
 
-def shapeStr(s,fontName,fontSize):
+def shapeStr(s,fontName,fontSize, force=False):
     return shapeFragWord([pdfmetrics.stringWidth(s,fontName,fontSize),
-                        (ABag(fontName=fontName,fontSize=fontSize),s)])[1][1]
+                        (ABag(fontName=fontName,fontSize=fontSize),s)],force=force)[1][1]
 
 def freshTTFont(ttfn, ttfpath,**kwds):
     '''return a new instance corrsponding to a ttf path'''
