@@ -538,29 +538,33 @@ class Pie(AbstractPieChart):
         sideLabels = AttrMapValue(isBoolean, desc="If true attempt to make piechart with labels along side and pointers"),
         sideLabelsOffset = AttrMapValue(isNumber, desc="The fraction of the pie width that the labels are situated at from the edges of the pie"),
         labelClass=AttrMapValue(NoneOr(isCallable), desc="A class factory to use for non simple labels"),
+        angleRange = AttrMapValue(isNumber, desc='total degree range for the doughnut defaults to 360'),
         )
     other_threshold=None
 
-    def __init__(self,**kwd):
+    def __init__(self,**kwds):
         PlotArea.__init__(self)
-        self.x = 0
-        self.y = 0
-        self.width = 100
-        self.height = 100
-        self.data = [1,2.3,1.7,4.2]
-        self.labels = None  # or list of strings
-        self.startAngle = 90
-        self.direction = "clockwise"
-        self.simpleLabels = 1
-        self.checkLabelOverlap = 0
-        self.pointerLabelMode = None
-        self.sameRadii = False
-        self.orderMode = 'fixed'
-        self.xradius = self.yradius = self.innerRadiusFraction = None
-        self.sideLabels = 0
-        self.sideLabelsOffset = 0.1
+        setattr(self,'x',kwds.pop('x',0))
+        setattr(self,'y',kwds.pop('y',0))
+        setattr(self,'width',kwds.pop('width',100))
+        setattr(self,'height',kwds.pop('height',100))
+        setattr(self,'data',kwds.pop('data',[1,2.3,1.7,4.2]))
+        setattr(self,'labels',kwds.pop('labels',None))
+        setattr(self,'startAngle',kwds.pop('startAngle',90))
+        setattr(self,'direction',kwds.pop('direction',"clockwise"))
+        setattr(self,'simpleLabels',kwds.pop('simpleLabels',1))
+        setattr(self,'checkLabelOverlap',kwds.pop('checkLabelOverlap',0))
+        setattr(self,'pointerLabelMode',kwds.pop('pointerLabelMode',None))
+        setattr(self,'sameRadii',kwds.pop('sameRadii',False))
+        setattr(self,'orderMode',kwds.pop('orderMode','fixed'))
+        setattr(self,'xradius',kwds.pop('xradius',None))
+        setattr(self,'yradius',kwds.pop('yradius',None))
+        setattr(self,'innerRadiusFraction',kwds.pop('innerRadiusFraction',None))
+        setattr(self,'sideLabels',kwds.pop('sideLabels',0))
+        setattr(self,'sideLabelsOffset',kwds.pop('sideLabelsOffset',0.1))
+        setattr(self,'slices',kwds.pop('slices',TypedPropertyCollection(WedgeProperties)))
+        setattr(self,'angleRange',kwds.pop('angleRange',360))
 
-        self.slices = TypedPropertyCollection(WedgeProperties)
         self.slices[0].fillColor = colors.darkcyan
         self.slices[1].fillColor = colors.blueviolet
         self.slices[2].fillColor = colors.blue
@@ -679,7 +683,7 @@ class Pie(AbstractPieChart):
     def normalizeData(self,keepData=False):
         data = list(map(abs,self.data))
         s = self._sum = float(sum(data))
-        f = 360./s if s!=0 else 1
+        f = min(360,self.angleRange)/s if s!=0 else 1
         if keepData:
             return [AngleData(f*x,x) for x in data]
         else:
@@ -970,15 +974,9 @@ class LegendedPie(Pie):
         bottomPadding = AttrMapValue(isNumber, desc='Padding at bottom of drawing'),
         )
 
-    def __init__(self):
-        Pie.__init__(self)
-        self.x = 0
-        self.y = 0
-        self.height = 100
-        self.width = 100
-        self.data = [38.4, 20.7, 18.9, 15.4, 6.6]
-        self.labels = None
-        self.direction = 'clockwise'
+    def __init__(self,**kwds):
+        setattr(self,'data',kwds.pop('data',[38.4, 20.7, 18.9, 15.4, 6.6]))
+        Pie.__init__(self,**kwds)
         PCMYKColor, black = colors.PCMYKColor, colors.black
         self.pieAndLegend_colors = [PCMYKColor(11,11,72,0,spotName='PANTONE 458 CV'),
                                     PCMYKColor(100,65,0,30,spotName='PANTONE 288 CV'),

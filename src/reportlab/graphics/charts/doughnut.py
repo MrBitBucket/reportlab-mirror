@@ -21,6 +21,7 @@ from reportlab.lib.attrmap import *
 from reportlab.graphics.shapes import Group, Drawing, Wedge
 from reportlab.graphics.widgetbase import TypedPropertyCollection
 from reportlab.graphics.charts.piecharts import AbstractPieChart, WedgeProperties, _addWedgeLabel, fixLabelOverlaps
+from reportlab.graphics.charts.areas import PlotArea
 from functools import reduce
 
 class SectorProperties(WedgeProperties):
@@ -35,7 +36,7 @@ class SectorProperties(WedgeProperties):
             )
 
 class Doughnut(AbstractPieChart):
-    _attrMap = AttrMap(
+    _attrMap = AttrMap(BASE=AbstractPieChart,
         x = AttrMapValue(isNumber, desc='X position of the chart within its container.'),
         y = AttrMapValue(isNumber, desc='Y position of the chart within its container.'),
         width = AttrMapValue(isNumber, desc='width of doughnut bounding box. Need not be same as width.'),
@@ -52,23 +53,26 @@ class Doughnut(AbstractPieChart):
         innerRadiusFraction = AttrMapValue(isNumberOrNone,
                 desc='None or the fraction of the radius to be used as the inner hole.\nIf not a suitable default will be used.'),
         labelClass=AttrMapValue(NoneOr(isCallable), desc="A class factory to use for non simple labels"),
+        angleRange = AttrMapValue(isNumber, desc='total degree range for the doughnut defaults to 360'),
         )
 
-    def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.width = 100
-        self.height = 100
-        self.data = [1,1]
-        self.labels = None  # or list of strings
-        self.startAngle = 90
-        self.direction = "clockwise"
-        self.simpleLabels = 1
-        self.checkLabelOverlap = 0
-        self.sideLabels = 0
-        self.innerRadiusFraction = None
+    def __init__(self,**kwds):
+        PlotArea.__init__(self)
+        setattr(self,'x',kwds.pop('x',0))
+        setattr(self,'y',kwds.pop('y',0))
+        setattr(self,'width',kwds.pop('width',100))
+        setattr(self,'height',kwds.pop('height',100))
+        setattr(self,'data',kwds.pop('data',[1,1]))
+        setattr(self,'labels',kwds.pop('labels',None))
+        setattr(self,'startAngle',kwds.pop('startAngle',90))
+        setattr(self,'direction',kwds.pop('direction',"clockwise"))
+        setattr(self,'simpleLabels',kwds.pop('simpleLabels',1))
+        setattr(self,'checkLabelOverlap',kwds.pop('checkLabelOverlap',0))
+        setattr(self,'sideLabels',kwds.pop('sideLabels',0))
+        setattr(self,'innerRadiusFraction',kwds.pop('innerRadiusFraction',None))
+        setattr(self,'slices',kwds.pop('slices',TypedPropertyCollection(SectorProperties)))
+        setattr(self,'angleRange',kwds.pop('angleRange',360))
 
-        self.slices = TypedPropertyCollection(SectorProperties)
         self.slices[0].fillColor = colors.darkcyan
         self.slices[1].fillColor = colors.blueviolet
         self.slices[2].fillColor = colors.blue
@@ -107,9 +111,9 @@ class Doughnut(AbstractPieChart):
         return d
 
     def normalizeData(self, data=None):
-        from operator import add
-        sum = float(reduce(add,data,0))
-        return abs(sum)>=1e-8 and list(map(lambda x,f=360./sum: f*x, data)) or len(data)*[0]
+        s = sum(data)
+        f = min(360,self.angleRange)/s if s!=0 else 1
+        return [f*d for d in data]
 
     def makeSectors(self):
         # normalize slice data
