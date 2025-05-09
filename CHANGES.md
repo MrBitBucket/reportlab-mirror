@@ -16,6 +16,7 @@ CHANGES  4.4.0.? 17/04/2025
     * added force option to ttfonts.shapeStr/shapeFragWord
     * fix wrong lengths in bidiShapedText
     * add angleRange to Pie & Doughnut to allow less than 360 degrees
+    * fix anchor placement in PlacedStory
 
 CHANGES  4.4.0   17/04/2025
 ---------------------------

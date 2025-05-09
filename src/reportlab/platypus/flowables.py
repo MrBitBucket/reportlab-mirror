@@ -1270,7 +1270,7 @@ class PlacedStory(Flowable):
             dy -= self.h
         elif anchor in ('w','c','e'):
             dy -= self.h / 2
-        if anchor in ('n','c','e'):
+        if anchor in ('n','c','s'):
             dx -= self.w/2
         elif anchor in ('ne','e','se'):
             dx -= self.w
