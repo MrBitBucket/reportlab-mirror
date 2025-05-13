@@ -17,6 +17,9 @@ CHANGES  4.4.0.? 17/04/2025
     * fix wrong lengths in bidiShapedText
     * add angleRange to Pie & Doughnut to allow less than 360 degrees
     * fix anchor placement in PlacedStory
+    * revert 4923
+    * apply patch by James Fitzsimmons lt james at atticus dot tech gt
+    * that adds in spaceBefore/After in row splits
 
 CHANGES  4.4.0   17/04/2025
 ---------------------------

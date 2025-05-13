@@ -12,6 +12,31 @@ from reportlab.platypus.flowables import PageBreak
 import os
 import unittest
 
+class IndicatorTable(Table):
+    def __init__(self,*args,**kwds):
+        self._markY = kwds.pop('markY',())
+        self._markDash = kwds.pop('markDash',[2,2])
+        self._markColor = kwds.pop('markColor',colors.toColor('red'))
+        self._markLineWidth = kwds.pop('markLineWidth',0.5)
+        self._markOffsX = kwds.pop('markOffsX',(0,13))
+        self._markDy = kwds.pop('markDy',0)
+        self._markLineWidth = kwds.pop('markLineWidth',0.5)
+        super().__init__(*args,**kwds)
+    def draw(self):
+        Table.draw(self)
+        if not self._markY: return
+        c = self.canv
+        c.saveState()
+        x = self._width
+        c.setStrokeColor(self._markColor)
+        c.setLineWidth(self._markLineWidth)
+        c.setDash(self._markDash)
+        dx0, dx1 = self._markOffsX
+        for y in self._markY:
+            y = self._height - (y + self._markDy)
+            c.line(0+dx0,y,x+dx1,y)
+        c.restoreState()
+
 class TableTestCase(unittest.TestCase):
 
 
@@ -610,23 +635,11 @@ class TableTestCase(unittest.TestCase):
 
         def lennartExample(splitByRow=0,splitInRow=1,split=0):
             #special case examples of inRowSplit
-            class IndicatorTable(Table):
-                def draw(self):
-                    Table.draw(self)
-                    c = self.canv
-                    x = self._width
-                    y = self._height - split
-                    c.setStrokeColor(colors.toColor('red'))
-                    c.setLineWidth(0.5)
-                    c.setDash([2,2])
-                    c.line(0,y,x+13,y)
-
             storyAdd = lst.append
             storyAdd(PageBreak())
             styleSheet = getSampleStyleSheet()
             btStyle = styleSheet['BodyText']
-            def makeTable(klass=Table):
-                xkwd = {}
+            def makeTable(klass=Table,**xkwd):
                 data = [
                     ['R0C0\nR1C0\nR2C0', 'R0C1', 'R0C2', 'R0C3', 'R0C4\nR1C4', 'R0C5'],
                     ['', 'R1C1', 'R1C2', 'R1C3', '', 'R1C5\nR2C5\nR3C5'],
@@ -665,7 +678,7 @@ class TableTestCase(unittest.TestCase):
                             **xkwd,
                             )
             storyAdd(Paragraph("Illustrating splits: nosplit", btStyle))
-            storyAdd(makeTable(klass=IndicatorTable))
+            storyAdd(makeTable(klass=IndicatorTable,markY=(split,)))
             storyAdd(Spacer(0,6))
             def addSplitTable(size=30):
                 t = makeTable()
@@ -735,6 +748,70 @@ class TableTestCase(unittest.TestCase):
         lst.append(Paragraph("Table with gradient backgrounds", styleSheet['Heading1']))
         lst.append(Table(datalg,style=plainlg))
 
+        
+#       lst.append(PageBreak())
+#       lst.append(Paragraph("Splitting on LINEBELOW", styleSheet['Heading1']))
+#       T = Table(self.getDataBlock(),style=TableStyle([('LINEBELOW',(0,3),(-1,3),2,colors.green)]))
+#       lst.append(T)
+#
+#       lst.append(Spacer(0,10))
+#       lst.append(Paragraph("Splitting on LINEBELOW repeatRows==0", styleSheet['Heading1']))
+#       T = Table(self.getDataBlock(),style=TableStyle([('LINEBELOW',(0,3),(-1,3),2,colors.green)]))
+#       T1,T2 = T.split(0x7fffffff,7*12)
+#       lst.append(T1)
+#       lst.append(Spacer(0,30))
+#       lst.append(T2)
+#
+#       lst.append(Spacer(0,10))
+#       lst.append(Paragraph("Splitting on LINEBELOW repeatRows==2", styleSheet['Heading1']))
+#       T = Table(self.getDataBlock(),repeatRows=2,style=TableStyle([('LINEBELOW',(0,3),(-1,3),2,colors.green)]))
+#       T1,T2 = T.split(0x7fffffff,7*12)
+#       lst.append(T1)
+#       lst.append(Spacer(0,30))
+#       lst.append(T2)
+
+        #example and related patch by James Fitzsimmons <james at atticus dot tech>
+        lst.append(PageBreak())
+        lst.append(Paragraph("In row splitting Paragraphs with spaceBefore/spaceAfter", styleSheet['Heading1']))
+        paragraphStyle = ParagraphStyle(
+                            name="paragraph-test7",
+                            parent=styleSheet["BodyText"],
+                            leading=12,
+                            spaceAfter=15,
+                            )
+        tableStyle = TableStyle([('BOX', (0,0), (-1,-1), 1, colors.black)])
+        containerStyle = TableStyle(
+                [
+                ("TOPPADDING",(0,0),(-1,-1),0),
+                ("BOTTOMPADDING",(0,0),(-1,-1),0),
+                ("RIGHTPADDING", (0,0), (-1,-1), 5),
+                ("LEFTPADDING", (0,0), (-1,-1), 5),
+                ("VALIGN",(0,0), (-1,-1), 'TOP'),
+                ])
+
+        paragraphs = [
+                    Paragraph(
+                        f"""This is paragraph {idx}. There needs to be a lot of text here to test the
+                            spacing. Adding some more text to make it longer.""",
+                        style=paragraphStyle,
+                        )
+                    for idx in range(5)]
+
+        T0 = IndicatorTable([[paragraphs]], colWidths=[100], splitInRow=1, style=tableStyle,
+                      markY = (150,270,300), markOffsX=(0,5), markDy=0)
+        T1 = Table([[paragraphs]], colWidths=[100], splitInRow=1, style=tableStyle)
+        T1, T2 = T1.split(100,150)
+        T3 = Table([[paragraphs]], colWidths=[100], splitInRow=1, style=tableStyle)
+        T3, T4 = T3.split(100,270)
+        T5 = Table([[paragraphs]], colWidths=[100], splitInRow=1, style=tableStyle)
+        T5, T6 = T5.split(100,300)
+        T1.spaceAfter = T2.spaceAfter = T3.spaceAfter = T4.spaceAfter = T5.spaceAfter = T6.spaceAfter = 15
+        data = [
+                ['No Split','Split at 150','Split at 270', 'Split at 300'],
+                [T0,[T1,T2],[T3,T4],[T5,T6]],
+                ]
+        C = Table(data, style=containerStyle,hAlign='CENTER')
+        lst.append(C)
         SimpleDocTemplate(outputfile('test_table_layout.pdf'), showBoundary=1).build(lst)
 
 def makeSuite():
