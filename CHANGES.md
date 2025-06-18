@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.4.2   18/06/2025
+---------------------------
+    * switch to using charset-normalizer
+
 CHANGES  4.4.1   15/05/2025
 ---------------------------
     * added force option to ttfonts.shapeStr/shapeFragWord

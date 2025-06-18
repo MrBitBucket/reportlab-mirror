@@ -331,7 +331,7 @@ def main():
             ],
         
         # this probably only works for setuptools, but distutils seems to ignore it
-        install_requires=['pillow>=9.0.0','chardet'],
+        install_requires=['pillow>=9.0.0','charset-normalizer'],
         # moved to pyproject.toml
         python_requires='>=3.7,<4',
         extras_require={
