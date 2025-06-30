@@ -35,6 +35,7 @@ from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.platypus.doctemplate import Indenter, NullActionFlowable
 from reportlab.platypus.flowables import LIIndenter
 from collections import namedtuple
+from copy import deepcopy
 
 LINECAPS={None: None, 'butt':0,'round':1,'projecting':2,'squared':2}
 LINEJOINS={None: None, 'miter':0, 'mitre':0, 'round':1,'bevel':2}
@@ -2119,9 +2120,9 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
         self.onSplit(R0)
         self.onSplit(R1)
 
-        # print("Split into two tables. altText is:")
         if R0._renderCB:
             altText = R0._renderCB.altText
+            
             # does it have a suffix of form "- <digits>"?
             pagenum = 0
             prefix = altText
@@ -2133,9 +2134,13 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
                     pass
             else:
                 pagenum  = 1
+            R0._renderCB.altText = f"{prefix} - {pagenum}"  
+
+            R1._renderCB = deepcopy(R0._renderCB)  
             R1._renderCB.altText = f"{prefix} - {pagenum + 1}"
-            # print(R0._renderCB.altText)
-            # print(R1._renderCB.altText)
+            print("Split into two tables. altText as follows:")
+            print(R0._renderCB.altText)
+            print(R1._renderCB.altText)
         return [R0,R1]
 
     def _getRowImpossible(impossible,cells,ranges):
