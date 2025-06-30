@@ -2118,6 +2118,24 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
         R0.vAlign = R1.vAlign = T.vAlign
         self.onSplit(R0)
         self.onSplit(R1)
+
+        # print("Split into two tables. altText is:")
+        if R0._renderCB:
+            altText = R0._renderCB.altText
+            # does it have a suffix of form "- <digits>"?
+            pagenum = 0
+            prefix = altText
+            if " - " in altText:
+                prefix, suffix = altText.split(" - ")
+                try:
+                    pagenum = int(suffix)
+                except ValueError:
+                    pass
+            else:
+                pagenum  = 1
+            R1._renderCB.altText = f"{prefix} - {pagenum + 1}"
+            # print(R0._renderCB.altText)
+            # print(R1._renderCB.altText)
         return [R0,R1]
 
     def _getRowImpossible(impossible,cells,ranges):
