@@ -14,7 +14,7 @@ from reportlab.lib.utils import flatten
 from reportlab.graphics.widgetbase import TypedPropertyCollection, PropHolder, tpcGetItem
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing, Polygon, PolyLine
 from reportlab.graphics.widgets.signsandsymbols import NoEntry
-from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis
+from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis, YCategoryAxis, XValueAxis
 from reportlab.graphics.charts.textlabels import Label
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol, makeMarker
 from reportlab.graphics.charts.areas import PlotArea
@@ -117,6 +117,7 @@ class HorizontalLineChart(LineChart):
 
         data: chart data, a list of data series of equal length
     """
+    _flipXY = 0
 
     _attrMap = AttrMap(BASE=LineChart,
         useAbsolute = AttrMapValue(isNumber, desc='Flag to use absolute spacing values.',advancedUsage=1),
@@ -144,8 +145,12 @@ class HorizontalLineChart(LineChart):
         self.fillColor = None
 
         # Named so we have less recoding for the horizontal one :-)
-        self.categoryAxis = XCategoryAxis()
-        self.valueAxis = YValueAxis()
+        if self._flipXY:
+            self.categoryAxis = YCategoryAxis()
+            self.valueAxis = XValueAxis()
+        else:
+            self.categoryAxis = XCategoryAxis()
+            self.valueAxis = YValueAxis()
 
         # This defines two series of 3 points.  Just an example.
         self.data = [(100,110,120,130),
@@ -226,7 +231,7 @@ class HorizontalLineChart(LineChart):
             availWidth = self.categoryAxis.scale(0)[1]
             normFactor = availWidth / normWidth
         self._normFactor = normFactor
-        self._yzero = yzero = self.valueAxis.scale(0)
+        self._vzero = vzero = self.valueAxis.scale(0)
         self._hngs = hngs = 0.5 * self.groupSpacing * normFactor
 
         pairs = set()
@@ -234,6 +239,7 @@ class HorizontalLineChart(LineChart):
         cscale = self.categoryAxis.scale
         vscale = self.valueAxis.scale
         data = self.data
+        flipXY = self._flipXY
         n = len(data)
         for rowNo,row in enumerate(data):
             if isinstance(row, FillPairedData):
@@ -248,11 +254,9 @@ class HorizontalLineChart(LineChart):
             line = [].append
             for colNo,datum in enumerate(row):
                 if datum is not None:
-                    groupX, groupWidth = cscale(colNo)
-                    x = groupX + hngs
-                    y = yzero
-                    height = vscale(datum) - y
-                    line((x, y+height))
+                    c, g = cscale(colNo)
+                    v = vscale(datum)
+                    line((v, c+hngs) if flipXY else (c+hngs, v))
             P(line.__self__)
         P = P.__self__
 
@@ -309,16 +313,24 @@ class HorizontalLineChart(LineChart):
         if self.reversePlotOrder: P.reverse()
         lines = self.lines
         styleCount = len(lines)
+        flipXY = self._flipXY
+        cA = self.categoryAxis
+        vA = self.valueAxis
         _inFill = self.inFill
         if (_inFill or self._pairInFills or
                 [rowNo for rowNo in range(len(P))
                         if getattr(lines[rowNo%styleCount],'inFill',False)]
                 ):
-            inFillY = self.categoryAxis._y
-            inFillX0 = self.valueAxis._x
-            inFillX1 = inFillX0 + self.categoryAxis._length
+            if flipXY:
+                infillC = cA._x
+                infillV0 = vA._y
+                infillV1 = infillV0 + cA._length
+            else:
+                infillC = cA._y
+                infillV0 = vA._x
+                infillV1 = infillV0 + cA._length
             inFillG = getattr(self,'_inFillG',g)
-        yzero = self._yzero
+        vzero = self._vzero
         bypos = None
 
         # Iterate over data rows.
@@ -341,17 +353,25 @@ class HorizontalLineChart(LineChart):
             # Iterate over data columns.
             if lineStyle=='bar':
                 if bypos is None:
-                    x = self.valueAxis
-                    bypos = max(x._y,yzero)
-                    byneg = min(x._y+x._length,yzero)
+                    if flipXY:
+                        bypos = max(vA._x,vzero)
+                        byneg = min(vA._x+vA._length,vzero)
+                    else:
+                        bypos = max(vA._y,vzero)
+                        byneg = min(vA._y+vA._length,vzero)
                 barWidth = getattr(rowStyle,'barWidth',Percentage(50))
                 if isinstance(barWidth,Percentage):
                     hbw = self._hngs*barWidth*0.01
                 else:
                     hbw = barWidth*0.5
                 for x, y in row:
-                    _y0 = byneg if y<yzero else bypos
-                    g.add(Rect(x-hbw,_y0,2*hbw,y-_y0,strokeWidth=strokeWidth,strokeColor=strokeColor,fillColor=fillColor))
+                    if flipXY:
+                        v0 = byneg if x<vzero else bypos
+                        t = v0, y-hbw, x-v0, 2*hbw
+                    else:
+                        v0 = byneg if y<vzero else bypos
+                        t = x-hbw,v0,2*hbw,y-v0
+                    g.add(Rect(*t,strokeWidth=strokeWidth,strokeColor=strokeColor,fillColor=fillColor))
             elif self.joinedLines or lineStyle=='joinedLine':
                 points = flatten(row)
                 if inFill or isinstance(row,FillPairedData):
@@ -359,7 +379,10 @@ class HorizontalLineChart(LineChart):
                     if isinstance(row,FillPairedData):
                         fpoints = points + flatten(reversed(P[row.other]))
                     else:
-                        fpoints = [inFillX0,inFillY] + points + [inFillX1,inFillY]
+                        if flipXY:
+                            fpoints = [infillC,infillV0] + points + [infillC,infillV1]
+                        else:
+                            fpoints = [infillV0,infillC] + points + [infillV1,infillC]
                     if filler:
                         filler.fill(self,inFillG,rowNo,fillColor,fpoints)
                     else:
@@ -394,20 +417,30 @@ class HorizontalLineChart(LineChart):
         "Draws itself."
 
         vA, cA = self.valueAxis, self.categoryAxis
-        vA.setPosition(self.x, self.y, self.height)
+        if self._flipXY:
+            vA.setPosition(self.x, self.y, self.width)
+        else:
+            vA.setPosition(self.x, self.y, self.height)
         if vA: vA.joinAxis = cA
         if cA: cA.joinAxis = vA
         vA.configure(self.data)
 
-        # If zero is in chart, put x axis there, otherwise
-        # use bottom.
-        xAxisCrossesAt = vA.scale(0)
-        if ((xAxisCrossesAt > self.y + self.height) or (xAxisCrossesAt < self.y)):
-            y = self.y
+        y = self.y
+        x = self.x
+        if self._flipXY:
+            # If zero is in chart, put y axis there, otherwise
+            # use bottom.
+            crossesAt = vA.scale(0)
+            if not ((crossesAt > x + self.width) or (crossesAt < x)):
+                x = crossesAt
+            cA.setPosition(x, y, self.height)
         else:
-            y = xAxisCrossesAt
-
-        cA.setPosition(self.x, y, self.width)
+            # If zero is in chart, put x axis there, otherwise
+            # use bottom.
+            crossesAt = vA.scale(0)
+            if not ((crossesAt > y + self.height) or (crossesAt < y)):
+                y = crossesAt
+            cA.setPosition(x, y, self.width)
         cA.configure(self.data)
 
         self.calcPositions()
@@ -561,8 +594,8 @@ class HorizontalLineChart3D(HorizontalLineChart):
         for v in F.value(): g.add(v[-1])
         return g
 
-class VerticalLineChart(LineChart):
-    pass
+class VerticalLineChart(HorizontalLineChart):
+    _flipXY = 1
 
 def sample1():
     drawing = Drawing(400, 200)
