@@ -330,16 +330,42 @@ def eps():
     else:
         return ['eps']
 
+html = {}
+def writeIndex():
+    if not html: return
+    src = [].append
+    for fnRoot, formats in sorted(html.items()):
+        links = [].append
+        images = [].append
+        for x in sorted(formats):
+            if x in ('pdf', 'py', 'eps', 'ps'):
+                links(f'&nbsp;&nbsp;<a href="./{fnRoot}.{x}">{x}</a>')
+            else:
+                images(f'<p><strong>{x}</strong> <img src="./{fnRoot}.{x}" style="vertical-align:top"/></p>')
+        links = ''.join(links.__self__)
+        images = ''.join(images.__self__)
+        src(f'<p><strong style="font-size: larger">{fnRoot}</strong>{links}</p>{images}')
+    src = src.__self__
+    if not src: return
+    src = '\n'.join(src)
+    with open(os.path.join(outputfile('charts-out'),'index.html'),'w') as f:
+        f.write(f'<html>\n<body>\n{src}\n</body>\n</html>\n')
+
 def run_samples(L):
     outDir = outputfile('charts-out')
     global fontName
     oFontName = fontName
     def innerRun(formats):
         for k,f,kind in L:
-            d = f()
+            try:
+                d = f()
+            except:
+                continue
             if not renderPM: d.__dict__['preview'] = 0
             if not isinstance(d,Drawing): continue
-            d.save(formats=formats,outDir=outDir, fnRoot='test_graphics_charts_%s_%s' % (kind,k))
+            fnRoot = f'test_graphics_charts_{kind}_{k}'
+            d.save(formats=formats, outDir=outDir, fnRoot=fnRoot)
+            html.setdefault(fnRoot,set()).update(formats)
     innerRun(['pdf']+(['gif'] if renderPM else [])+['svg', 'py']+eps())
     fontName = 'Helvetica'
     innerRun(['ps'])
@@ -1058,12 +1084,18 @@ class ChartTestCase(unittest.TestCase):
 
         def extract_samples():
             S = [].extend
-            for m in ('barcharts','doughnut','linecharts','lineplots','piecharts','spider'):
+            from inspect import getmembers, isfunction, isclass
+            for m in ('barcharts','doughnut','linecharts','lineplots','piecharts','spider', 'legends',
+                        'dotbox', 'slidebox', 'textlabels'):
                 mod = {}
-                exec('from reportlab.graphics.charts import %s as mod' % m ,mod)
+                exec(f'from reportlab.graphics.charts import {m} as mod',mod)
                 mod  = mod['mod']
-                L = [(k,getattr(mod,k)) for k in dir(mod) if k.lower().startswith('sample')]
-                S([(k,v,m) for k,v in L if callable(v)])
+                def sameMod(v,modName=mod.__name__):
+                    return (isfunction(v) or isclass(v)) and v.__module__==modName
+                M = getmembers(mod,sameMod)
+                S([(k,v,m) for k,v in M if isfunction(v) and k.lower().startswith('sample')])
+                S([(f'{k}().demo',v().demo,m) for k,v in M if isclass(v)
+                            and k not in ('BarChart','BarChart3D') and hasattr(v,'demo')])
             return S.__self__
 
         run_samples([(k,v,'axes') for k,v in locals().items() if k.lower().startswith('sample')])
@@ -1318,4 +1350,5 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
+    writeIndex()
     printLocation()
