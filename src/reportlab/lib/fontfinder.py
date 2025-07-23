@@ -216,7 +216,7 @@ class FontFinder:
         """Base this on the directories...same set of directories
         should give same cache"""
         fsEncoding = self._fsEncoding
-        hash = md5(b''.join(asBytes(_,enc=fsEncoding) for _ in sorted(self._dirs))).hexdigest()
+        hash = md5(b''.join(asBytes(_,enc=fsEncoding) for _ in sorted(self._dirs)),usedforsecurity=False).hexdigest()
         from reportlab.lib.utils import get_rl_tempfile
         fn = get_rl_tempfile('fonts_%s.dat' % hash)
         return fn

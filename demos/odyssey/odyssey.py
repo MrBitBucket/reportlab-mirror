@@ -135,7 +135,7 @@ def run(verbose=1):
     print('%d pages in %0.2f seconds = %0.2f pages per second, file size %d kb' % (
                 pages, elapsed, speed, fileSize))
     import hashlib
-    print('file digest: %s' % hashlib.md5(open('odyssey.pdf','rb').read()).hexdigest())
+    print('file digest: %s' % hashlib.md5(open('odyssey.pdf','rb').read(),usedforsecurity=False).hexdigest())
 
 if __name__=='__main__':
     quiet = ('-q' in sys.argv)

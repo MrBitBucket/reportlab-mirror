@@ -72,8 +72,6 @@ try:
 except:
     showTraceback('warning could not change directory to %r' % pkgDir)
 
-from setuptools import setup
-
 def get_version():
     #determine Version
 
@@ -290,6 +288,8 @@ def main():
     PACKAGE_DIR = {'':'src','reportlab': pjoin('src','reportlab')}
     get_fonts(PACKAGE_DIR, reportlab_files)
     get_glyphlist_module(PACKAGE_DIR)
+
+    from setuptools import setup
     setup(
         name="reportlab",
         version=get_version(),
@@ -321,8 +321,6 @@ def main():
             'Topic :: Printing',
             'Topic :: Text Processing :: Markup',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.7',
-            'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
             'Programming Language :: Python :: 3.10',
             'Programming Language :: Python :: 3.11',

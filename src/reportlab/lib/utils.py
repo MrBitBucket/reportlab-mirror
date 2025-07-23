@@ -55,7 +55,7 @@ def isNative(v):
 _rl_NoneType=type(None)
 strTypes = (str,bytes)
 def _digester(s):
-    return md5(s if isBytes(s) else s.encode('utf8')).hexdigest()
+    return md5(s if isBytes(s) else s.encode('utf8'),usedforsecurity=False).hexdigest()
 
 def asBytes(v,enc='utf8'):
     if isinstance(v,bytes): return v

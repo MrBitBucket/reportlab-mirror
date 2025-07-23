@@ -252,7 +252,7 @@ class ParagraphCorners(unittest.TestCase):
                             mfText[-1] = span(mfText[-1],'blue')
                     mfText = '&#173;'.join(mfText)
                     f.addFromList([Paragraph(mfText, style)], c)
-                observed.append((len(c._code), hashlib_md5(b"".join((asBytes(b,"latin1") for b in c._code))).digest()))
+                observed.append((len(c._code), hashlib_md5(b"".join((asBytes(b,"latin1") for b in c._code)),usedforsecurity=False).digest()))
                 c.showPage()
         c.save() 
         self.assertEqual(observed, expected)
@@ -1238,7 +1238,7 @@ class FragmentTestCase(unittest.TestCase):
         c = '\n'.join(canv._code[cp0:])
         if not isBytes(c):
             c = c.encode('utf8')
-        h = hashlib.md5(c).hexdigest()
+        h = hashlib.md5(c,usedforsecurity=False).hexdigest()
         canv.showPage()
         canv.save()
         #xh = '32e0e490cc4a53c31bb19f1cc52debdd'

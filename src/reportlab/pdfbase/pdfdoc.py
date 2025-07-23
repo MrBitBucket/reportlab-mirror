@@ -134,7 +134,7 @@ class PDFDocument(PDFObject):
         self.setCompression(compression)
         self._pdfVersion = pdfVersion
         # signature for creating PDF ID
-        sig = self.signature = md5()
+        sig = self.signature = md5(usedforsecurity=False)
         sig.update(b"a reportlab document")
         self._timeStamp = TimeStamp(self.invariant)
         cat = self._timeStamp.t

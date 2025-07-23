@@ -85,7 +85,7 @@ class CIDEncoding(pdfmetrics.Encoding):
                 self.parseCMAPFile(name)
 
     def _hash(self, text):
-        hasher = md5()
+        hasher = md5(usedforsecurity=False)
         hasher.update(text)
         return hasher.digest()
 

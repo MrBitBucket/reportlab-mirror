@@ -1131,9 +1131,9 @@ class Canvas(_PDFColorSetter):
         """
         #check if we've done this one already...
         if isUnicode(command):
-            rawName = 'PS' + hashlib.md5(command.encode('utf-8')).hexdigest()
+            rawName = 'PS' + hashlib.md5(command.encode('utf-8'),usedforsecurity=False).hexdigest()
         else:
-            rawName = 'PS' + hashlib.md5(command).hexdigest()
+            rawName = 'PS' + hashlib.md5(command,usedforsecurity=False).hexdigest()
         regName = self._doc.getXObjectName(rawName)
         psObj = self._doc.idToObject.get(regName, None)
         if not psObj:

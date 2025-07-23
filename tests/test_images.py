@@ -37,7 +37,7 @@ class ReaderTestCase(unittest.TestCase):
         ir = ImageReader(imageFileName)
         assert ir.getSize() == (110,44)
         pixels = ir.getRGBData()
-        assert md5(pixels).hexdigest() == '02e000bf3ffcefe9fc9660c95d7e27cf'
+        assert md5(pixels,usedforsecurity=False).hexdigest() == '02e000bf3ffcefe9fc9660c95d7e27cf'
 
     def testUseA85(self):
         '''test for bitbucket PR #59 by Vytis Banaitis'''

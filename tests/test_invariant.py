@@ -65,7 +65,7 @@ if __name__ == "__main__":
         #tell us about the file we produced
         fileSize = os.stat(filename)[6]
         raw = open(filename,'rb').read()
-        digest = md5(bytestr(raw)).hexdigest()
+        digest = md5(bytestr(raw),usedforsecurity=False).hexdigest()
         major, minor = sys.version_info[0:2]
         print('%s on %s (Python %d.%d):\n    %d bytes, digest %s' % (
             filename,sys.platform, major, minor, fileSize, digest))
