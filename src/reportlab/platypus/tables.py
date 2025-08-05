@@ -482,6 +482,8 @@ class Table(Flowable):
         if not V: return 0,0
         aW = w - s.leftPadding - s.rightPadding
         aH = aH - s.topPadding - s.bottomPadding
+        if aW<0:
+            raise ValueError(f'{self.identity()}: flowable given negative availWidth={aW} == width={w} - leftPadding={s.leftPadding} - rightPadding={s.rightPadding}')
         t = 0
         w = 0
         canv = getattr(self,'canv',None)
