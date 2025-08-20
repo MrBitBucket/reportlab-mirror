@@ -8,6 +8,9 @@ from reportlab.lib.validators import isNumber, isColorOrNone, isBoolean, isListO
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
 from reportlab.graphics.shapes import Drawing, Group, Line, Rect, LineShape, definePath, EmptyClipPath
 from reportlab.graphics.widgetbase import Widget
+from math import radians
+from reportlab.graphics.transform import translate, rotate, mmult, transformPoints, inverse
+from reportlab.lib.utils import flatten
 
 def frange(start, end=None, inc=None):
     "A range function, that does accept float increments..."
@@ -429,7 +432,7 @@ def centroid(P):
     for x,y in P:
         cx+=x
         cy+=y
-    n = float(len(P))
+    n = len(P)
     return cx/n, cy/n
 
 def rotatedEnclosingRect(P, angle, rect):
@@ -438,33 +441,38 @@ def rotatedEnclosingRect(P, angle, rect):
     find the centroid of P and the axis at angle theta through it
     find the extreme points of P wrt axis parallel distance and axis
     orthogonal distance. Then compute the least rectangle that will still
-    enclose P when rotated by angle.
-
-    The class R
+    enclose P when rotated by angle. Positive angles correspond to clockwise
+    rotation of the enclosing rect.
     '''
-    from math import pi, cos, sin
     x0, y0 = centroid(P)
-    theta = (angle/180.)*pi
-    s,c=sin(theta),cos(theta)
-    def parallelAxisDist(xy,s=s,c=c,x0=x0,y0=y0):
-        x,y = xy
-        return (s*(y-y0)+c*(x-x0))
-    def orthogonalAxisDist(xy,s=s,c=c,x0=x0,y0=y0):
-        x,y = xy
-        return (c*(y-y0)+s*(x-x0))
-    L = list(map(parallelAxisDist,P))
-    L.sort()
-    a0, a1 = L[0], L[-1]
-    L = list(map(orthogonalAxisDist,P))
-    L.sort()
-    b0, b1 = L[0], L[-1]
-    rect.x, rect.width = a0, a1-a0
-    rect.y, rect.height = b0, b1-b0
-    g = Group(transform=(c,s,-s,c,x0,y0))
+    theta = radians(angle)
+    #translate to the centroid and rotate
+    mx = mmult(translate(x0,y0),rotate(angle))
+
+    #compute min and max of x and y of the rotated points
+    tp = flatten(transformPoints(mx,P))
+    xx = tp[::2]
+    yx = tp[1::2]
+    xn = min(xx)
+    xx = max(xx)
+    yn = min(yx)
+    yx = max(yx)
+
+    #make the enclosing rect and invert the original transform
+    rect.x = xn
+    rect.width = xx-xn
+    rect.y = yn
+    rect.height = yx-yn
+    g = Group(transform=inverse(mx))
     g.add(rect)
     return g
 
 class ShadedPolygon(Widget,LineShape):
+    '''given a list of points [(x0,y0),....] we construct an enclosing
+    shaded rectangle and mask using the polygon points.
+    At angle 0 the shading fillColorStart left --> fillColorEnd right.
+    positive angles rotate the shading clockwise.
+    '''
     _attrMap = AttrMap(BASE=LineShape,
         angle = AttrMapValue(isNumber,desc="Shading angle"),
         fillColorStart = AttrMapValue(isColorOrNone),
@@ -485,19 +493,14 @@ class ShadedPolygon(Widget,LineShape):
 
     def draw(self):
         P = self.points
-        P = list(map(lambda i, P=P:(P[i],P[i+1]),range(0,len(P),2)))
+        P = list(zip(P[::2],P[1::2]))
         path = definePath([('moveTo',)+P[0]]+[('lineTo',)+x for x in P[1:]]+['closePath'],
             fillColor=None, strokeColor=None)
         path.isClipPath = 1
         g = Group()
         g.add(path)
-        angle = self.angle
-        orientation = 'vertical'
-        if angle==180:
-            angle = 0
-        elif angle in (90,270):
-            orientation ='horizontal'
-            angle = 0
+        angle = self.angle % 360
+        orientation = 'horizontal' if 0<=angle<=45 or 315<=angle<=360 or 135<=angle<=225 else 'vertical'
         rect = ShadedRect(strokeWidth=0,strokeColor=None,orientation=orientation)
         for k in 'fillColorStart', 'fillColorEnd', 'numShades', 'cylinderMode':
             setattr(rect,k,getattr(self,k))
@@ -514,4 +517,4 @@ if __name__=='__main__': #noruntests
     angle=45
     D = Drawing(120,120)
     D.add(ShadedPolygon(points=(10,10,60,60,110,10),strokeColor=None,strokeWidth=1,angle=90,numShades=50,cylinderMode=0))
-    D.save(formats=['gif'],fnRoot='shobj',outDir='/tmp')
+    D.save(formats=['pdf','gif'],fnRoot='shobj',outDir='/tmp')

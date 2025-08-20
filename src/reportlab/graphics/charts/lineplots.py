@@ -33,7 +33,7 @@ class LinePlotProperties(PropHolder):
         name = AttrMapValue(isStringOrNone, desc='Name of the line.'),
         lineStyle = AttrMapValue(NoneOr(OneOf('line','joinedLine','bar')), desc="What kind of plot this line is",advancedUsage=1),
         barWidth = AttrMapValue(isNumberOrNone,desc="Percentage of available width to be used for a bar",advancedUsage=1),
-        inFill = AttrMapValue(isBoolean, desc='If true flood fill to x axis',advancedUsage=1),
+        inFill = AttrMapValue(OneOf(0,1,2,True,False), desc='If true flood fill to x axis',advancedUsage=1),
         )
 
 class InFillValue(int):

@@ -14,6 +14,8 @@ mentioned. If we missed you, please let us know!
 CHANGES  4.X.Y   ??/??/2025
 ---------------------------
     * raise an error for table cell flowables given negative width
+    * fix the rotatedEnclosingRect algorithm so it allows variable angles
+    * allow 2 as value for lineplots inFill lines get drawn after fill
 
 CHANGES  4.4.3   23/07/2025
 ---------------------------
