@@ -1082,6 +1082,22 @@ class ChartTestCase(unittest.TestCase):
             d.add(Hatching(spacings=(5,5),angles=(45,-45),xyLists=[5,5, 5,100, 99,105, 105,5],strokeWidth=1,strokeColor=colors.toColor('red'), strokeDashArray=None))
             return d
 
+        def sample_shading():
+            from reportlab.graphics.widgets.grids import ShadedRect, ShadedPolygon
+            from reportlab.lib.colors import blue, red, yellow, green
+
+            d = Drawing(400,200)
+            d.add(ShadedRect(),name='SR0')
+            d.SR0.fillColorEnd   = blue
+            d.SR0.fillColorStart = red
+            d.SR0.strokeColor    = yellow
+            d.add(ShadedPolygon(),name='SP0')
+            d.SP0.points  = [110,  110, 160, 180, 210, 110]
+            d.add(ShadedRect(x=220,y=10,width=50,height=180,fillColorStart=green, fillColorEnd=yellow,strokeColor=None,cylinderMode=True),name='SR1')
+            d.add(ShadedPolygon(points=[280,10,280,190,330,190,330,10],fillColorStart=green, fillColorEnd=yellow,strokeColor=None,cylinderMode=True,angle=10),name='SP1')
+            d.add(ShadedPolygon(points=[340,10,340,190,390,190,390,10],fillColorStart=green, fillColorEnd=yellow,strokeColor=None,cylinderMode=True,angle=45),name='SP2')
+            return d
+
         def extract_samples():
             S = [].extend
             from inspect import getmembers, isfunction, isclass

@@ -374,36 +374,58 @@ class ShadedRect(Widget):
         # general widget bits
         group = Group()
         x, y, w, h, c0, c1 = self._flipRectCorners()
-        numShades = self.numShades
-        if self.cylinderMode:
-            if not numShades%2: numShades = numShades+1
-            halfNumShades = int((numShades-1)/2) + 1
-        num = float(numShades) # must make it float!
         vertical = self.orientation == 'vertical'
-        if vertical:
-            if numShades == 1:
-                V = [x]
-            else:
-                V = frange(x, x + w, w/num)
-        else:
-            if numShades == 1:
-                V = [y]
-            else:
-                V = frange(y, y + h, h/num)
-
-        for v in V:
-            stripe = vertical and Rect(v, y, w/num, h) or Rect(x, v, w, h/num)
-            if self.cylinderMode:
-                if V.index(v)>=halfNumShades:
-                    col = colors.linearlyInterpolatedColor(c1,c0,V[halfNumShades],V[-1], v)
+        cylinderMode = self.cylinderMode
+        linG = getattr(getattr(self,'_canvas',None),'linearGradient',None)
+        if linG:
+            canv = linG.__self__
+            canv.saveState()
+            p = canv.beginPath()
+            p.rect(x, y, w, h)
+            canv.clipPath(p, stroke=0)
+            if cylinderMode:
+                if vertical:
+                    linG(x, y, x+w/2, y, (c0,c1), extend=False)
+                    linG(x+w/2, y, x+w, y, (c1,c0), extend=False)
                 else:
-                    col = colors.linearlyInterpolatedColor(c0,c1,V[0],V[halfNumShades], v)
+                    linG(x, y, x, y+h/2, (c0,c1), extend=False)
+                    linG(x, y+h/2, x, y+h, (c1,c0), extend=False)
             else:
-                col = colors.linearlyInterpolatedColor(c0,c1,V[0],V[-1], v)
-            stripe.fillColor = col
-            stripe.strokeColor = col
-            stripe.strokeWidth = 1
-            group.add(stripe)
+                if vertical:
+                    linG(x, y, x+w, y, (c0,c1), extend=False)
+                else:
+                    linG(x, y, x, y+h, (c0,c1), extend=False)
+            canv.restoreState()
+        else:
+            numShades = self.numShades
+            if cylinderMode:
+                if not numShades%2: numShades = numShades+1
+                halfNumShades = int((numShades-1)/2) + 1
+            num = float(numShades) # must make it float!
+            if vertical:
+                if numShades == 1:
+                    V = [x]
+                else:
+                    V = frange(x, x + w, w/num)
+            else:
+                if numShades == 1:
+                    V = [y]
+                else:
+                    V = frange(y, y + h, h/num)
+
+            for v in V:
+                stripe = vertical and Rect(v, y, w/num, h) or Rect(x, v, w, h/num)
+                if cylinderMode:
+                    if V.index(v)>=halfNumShades:
+                        col = colors.linearlyInterpolatedColor(c1,c0,V[halfNumShades],V[-1], v)
+                    else:
+                        col = colors.linearlyInterpolatedColor(c0,c1,V[0],V[halfNumShades], v)
+                else:
+                    col = colors.linearlyInterpolatedColor(c0,c1,V[0],V[-1], v)
+                stripe.fillColor = col
+                stripe.strokeColor = col
+                stripe.strokeWidth = 1
+                group.add(stripe)
         if self.strokeColor and self.strokeWidth>=0:
             rect = Rect(x, y, w, h)
             rect.strokeColor = self.strokeColor
