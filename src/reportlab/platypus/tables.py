@@ -92,6 +92,8 @@ class TableStyle:
     def getCommands(self):
         return self._cmds
 
+ShadowStyle = namedtuple('ShadowStyle', 'dx dy color0 color1 nshades', defaults=(10,-10, 'grey','white',30))
+
 def _rowLen(x):
     return not isinstance(x,(tuple,list)) and 1 or len(x)
 
@@ -266,7 +268,7 @@ class Table(Flowable):
                 hAlign=None,vAlign=None, normalizedData=0, cellStyles=None, rowSplitRange=None,
                 spaceBefore=None,spaceAfter=None, longTableOptimize=None, minRowHeights=None,
                 cornerRadii=__UNSET__, #or [topLeft, topRight, bottomLeft bottomRight]
-                renderCB=None,
+                renderCB=None, shadow=None
                 ):
         self.ident = ident
         self.hAlign = hAlign or 'CENTER'
@@ -371,7 +373,9 @@ class Table(Flowable):
             elif lmrh<nrows:
                 minRowHeights = minRowHeights+(nrows-lmrh)*minRowHeights.__class__((0,))
         self._minRowHeights = minRowHeights
-
+        if shadow and not isinstance(shadow,ShadowStyle):
+            raise ValueError(f'Table shadow argument should be None or a ShadowStyle instance not {shadow!r}')
+        self._shadow = shadow
 
     def __repr__(self):
         "incomplete, but better than nothing"
@@ -2017,6 +2021,7 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
                 longTableOptimize=self._longTableOptimize,
                 cornerRadii=getattr(self,'_cornerRadii',None),
                 renderCB=getattr(self,'_renderCB',None),
+                shadow=getattr(self,'_shadow',None),
                 )
 
             T._linecmds = self._stretchCommands(n, self._linecmds, lim)
@@ -2038,6 +2043,7 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
 
         cornerRadii = getattr(self,'_cornerRadii',None)
         renderCB = getattr(self,'_renderCB',None)
+        shadow=getattr(self,'_shadow',None)
         R0 = self.__class__( data[:n], colWidths=T._colWidths, rowHeights=splitH[:n],
                 repeatRows=repeatRows, repeatCols=repeatCols, splitByRow=self.splitByRow,
                 splitInRow=self.splitInRow, normalizedData=1, cellStyles=T._cellStyles[:n],
@@ -2046,6 +2052,7 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
                 longTableOptimize=lto,
                 cornerRadii=cornerRadii[:2] if cornerRadii else None,
                 renderCB=renderCB,
+                shadow=shadow,
                 )
 
         nrows = T._nrows
@@ -2088,6 +2095,7 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
                     longTableOptimize=lto,
                     cornerRadii = cornerRadii,
                     renderCB = renderCB,
+                    shadow=shadow,
                     )
             R1._cr_1_1(n,nrows,repeatRows,_linecmds,doInRowSplit)
             R1._cr_1_1(n,nrows,repeatRows,T._bkgrndcmds,doInRowSplit,_srflMode=True)
@@ -2104,6 +2112,7 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
                     longTableOptimize=lto,
                     cornerRadii = ([0,0] + cornerRadii[2:]) if cornerRadii else None,
                     renderCB = renderCB,
+                    shadow=shadow,
                     )
 
             R1._cr_1_0(n,_linecmds,doInRowSplit)
@@ -2177,7 +2186,40 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
         # We can't split this table in any way, raise an error:
         return []
 
-    def _makeRoundedCornersClip(self, FUZZ=rl_config._FUZZ):
+    def _makeShadow1(self):
+        dx, dy, sc0, sc1, nshades = self._shadow
+        sc0 = colors.toColor(sc0)
+        sc1 = colors.toColor(sc1)
+        c = self.canv
+        dwf = 1/(nshades+0.5)
+        ddx = dx/nshades
+        ddy = dy/nshades
+        wf = 0
+        for i in reversed(range(1,nshades+1)):
+            c.saveState()
+            c.translate(i*ddx,i*ddy)
+            c.setFillColor(colors.linearlyInterpolatedColor(sc1, sc0, 0, 1, wf))
+            self._makeRoundedCornersClip(clip=False, fill=1)
+            wf += dwf
+            c.restoreState()
+        c.saveState()
+        x0, y0, w, h, *_ = self._roundingRectDef
+        c.setFillColor(colors.white)
+        self._makeRoundedCornersClip(clip=False, fill=1)
+        c.restoreState()
+
+    def _makeShadow(self):
+        if not self._shadow: return
+        if getattr(self,'_cornerRadii',None) is None:
+            try:
+                self._cornerRadii = 0.01,0.01,0.01,0.01
+                self._makeShadow1()
+            finally:
+                self._cornerRadii = None
+        else:
+            self._makeShadow1()
+
+    def _makeRoundedCornersClip(self, FUZZ=rl_config._FUZZ, clip=True, stroke=0, fill=0, deltas=(0,0,0,0)):
         self._roundingRectDef = None
         cornerRadii = getattr(self,'_cornerRadii',None)
         if not cornerRadii or max(cornerRadii)<=FUZZ: return
@@ -2193,19 +2235,22 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
         rp = self._rowpositions
         cp = self._colpositions
 
-        x0 = cp[0]
-        y0 = rp[nrows]
-        x1 = cp[ncols]
-        y1 = rp[0]
+        x0 = cp[0] + deltas[0]
+        y0 = rp[nrows] + deltas[1]
+        x1 = cp[ncols] + deltas[2]
+        y1 = rp[0] + deltas[3]
         w = x1 - x0
         h = y1 - y0
         self._roundingRectDef = RoundingRectDef(x0, y0, w, h, x1, y1, ar, [])
-        P = self.canv.beginPath()
-        P.roundRect(x0, y0, w, h, ar)
         c = self.canv
-        c.addLiteral('%begin table rect clip')
-        c.clipPath(P,stroke=0)
-        c.addLiteral('%end table rect clip')
+        P = c.beginPath()
+        P.roundRect(x0, y0, w, h, ar)
+        if clip:
+            c.addLiteral('%begin table rect clip')
+            c.clipPath(P,stroke=stroke)
+            c.addLiteral('%end table rect clip')
+        else:
+            c.drawPath(P,stroke=stroke,fill=fill)
 
     def _restoreRoundingObscuredLines(self):
         x0, y0, w, h, x1, y1, ar, SL = self._roundingRectDef
@@ -2292,6 +2337,7 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
         if renderCB:
             renderCB(self,'startTable')
             renderCB(self,'startBG')
+        self._makeShadow()
         self._makeRoundedCornersClip()
         self._drawBkgrnd()
         if renderCB: renderCB(self,'endBG')

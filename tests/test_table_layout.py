@@ -695,6 +695,12 @@ class TableTestCase(unittest.TestCase):
                         storyAdd(s)
                         storyAdd(Spacer(0,20))
             addSplitTable(split)
+            storyAdd(Spacer(0,6))
+            from reportlab.platypus.tables import ShadowStyle
+            shadow=ShadowStyle(nshades=30)
+            storyAdd(Paragraph(f"Illustrating shadow = {shadow} ", btStyle))
+            storyAdd(Spacer(0,6))
+            storyAdd(makeTable(klass=Table,shadow=shadow))
 
         for split in (30,40,50,60):
             lennartExample(split=split)
