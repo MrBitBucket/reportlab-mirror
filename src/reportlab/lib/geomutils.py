@@ -6,7 +6,7 @@ __doc__='''Utility functions for geometrical operations.'''
 def normalizeTRBL(p):
     '''
     Useful for interpreting short descriptions of paddings, borders, margin, etc.
-    Expects a single value or a tuple of length 2 to 4.
+    Expects a single value or a tuple of length 1 to 4.
     Returns a tuple representing (clockwise) the value(s) applied to the 4 sides of a rectangle:
     If a single value is given, that value is applied to all four sides.
     If two or three values are given, the missing values are taken from the opposite side(s).
@@ -23,10 +23,11 @@ def normalizeTRBL(p):
     '''
     if not isinstance(p, (tuple, list)):
         return (p,)*4
-    elif len(p)==1:
-        return (p[0],)*4
+    else:
+        l = len(p)
 
-    l = len(p)
-    if l < 2 or l > 4:
-        raise ValueError('A padding must have between 2 and 4 values but got %d.' % l)
+    if l==1: return (p[0],)*4
+
+    if l < 1 or l > 4:
+        raise ValueError('normalizeTRBL needs between 1 and 4 values but got %d.' % l)
     return tuple(p) + tuple([ p[i-2] for i in range(l, 4) ])

@@ -5,9 +5,10 @@ __version__='3.3.0'
 
 from reportlab.lib import colors
 from reportlab.lib.utils import simpleSplit
+from reportlab.lib.geomutils import normalizeTRBL
 from reportlab.lib.validators import isNumber, isNumberOrNone, OneOf, isColorOrNone, isString, \
         isTextAnchor, isBoxAnchor, isBoolean, NoneOr, isInstanceOf, isNoneOrString, isNoneOrCallable, \
-        isSubclassOf
+        isSubclassOf, EitherOr, isListOfNumbers
 from reportlab.lib.attrmap import *
 from reportlab.pdfbase.pdfmetrics import stringWidth, getAscentDescent
 from reportlab.graphics.shapes import Drawing, Group, Circle, Rect, String, STATE_DEFAULTS
@@ -51,6 +52,8 @@ class Label(Widget):
         boxStrokeWidth = AttrMapValue(isNumber,desc='border width'),
         boxFillColor = AttrMapValue(isColorOrNone,desc='the filling color of the box'),
         boxTarget = AttrMapValue(OneOf('normal','anti','lo','hi'),desc="one of ('normal','anti','lo','hi')"),
+        boxRx = AttrMapValue(isNumber,desc='box corner x radius'),
+        boxRy = AttrMapValue(isNumber,desc='box corner y radius'),
         fillColor = AttrMapValue(isColorOrNone,desc='label text color'),
         strokeColor = AttrMapValue(isColorOrNone,desc='label text border color'),
         strokeWidth = AttrMapValue(isNumber,desc='label text border width'),
@@ -67,6 +70,7 @@ class Label(Widget):
         leftPadding = AttrMapValue(isNumber,desc='padding at left of box'),
         rightPadding = AttrMapValue(isNumber,desc='padding at right of box'),
         bottomPadding = AttrMapValue(isNumber,desc='padding at bottom of box'),
+        padding = AttrMapValue(EitherOr((isNumberOrNone,isListOfNumbers)),'TRBL css like padding'),
         useAscentDescent = AttrMapValue(isBoolean,desc="If True then the font's Ascent & Descent will be used to compute default heights and baseline."),
         customDrawChanger = AttrMapValue(isNoneOrCallable,desc="An instance of CustomDrawChanger to modify the behavior at draw time", _advancedUsage=1),
         ddf = AttrMapValue(NoneOr(isSubclassOf(DirectDraw),'NoneOrDirectDraw'),desc="A DirectDrawFlowable instance", _advancedUsage=1),
@@ -91,6 +95,8 @@ class Label(Widget):
                 boxStrokeWidth = 0.5,
                 boxStrokeColor = None,
                 boxTarget = 'normal',
+                boxRx = 0,
+                boxRy = 0,
                 strokeColor = None,
                 boxFillColor = None,
                 leading = None,
@@ -108,6 +114,19 @@ class Label(Widget):
                 ddfKlass = getattr(self.__class__,'ddfKlass',None),
                 ddfStyle = getattr(self.__class__,'ddfStyle',None),
                 )
+
+    @property
+    def padding(self):
+        p = self.topPadding, self.rightPadding, self.bottomPadding, self.leftPadding
+        n = len(set(p))
+        if n==1: return p[0]
+        elif n==2 and p[0]==p[2] and p[1]==p[3]: return p[:2]
+        elif n==3 and p[1]==p[3]: return p[:3]
+        return p
+
+    @padding.setter
+    def padding(self,p):
+        self.topPadding, self.rightPadding, self.bottomPadding, self.leftPadding = normalizeTRBL(p)
 
     def setText(self, text):
         """Set the text property.  May contain embedded newline characters.
@@ -289,8 +308,10 @@ class Label(Widget):
                         self._height,
                         strokeColor=self.boxStrokeColor,
                         strokeWidth=self.boxStrokeWidth,
-                        fillColor=self.boxFillColor)
-                        )
+                        fillColor=self.boxFillColor,
+                        rx=self.boxRx, 
+                        ry=self.boxRy, 
+                        ))
 
         if ddfKlass:
             g1 = Group()
