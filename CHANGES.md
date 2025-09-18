@@ -11,11 +11,14 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  4.X.Y   ??/??/2025
+CHANGES  4.3.4   18/09/2025
 ---------------------------
     * raise an error for table cell flowables given negative width
     * fix the rotatedEnclosingRect algorithm so it allows variable angles
     * allow 2 as value for lineplots inFill lines get drawn after fill
+    * support linear gradients for PDF in ShadedRect
+    * add single css like padding property to Label
+    * add Table drop shadow support
 
 CHANGES  4.4.3   23/07/2025
 ---------------------------
