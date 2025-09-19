@@ -19,6 +19,7 @@ CHANGES  4.3.4   18/09/2025
     * support linear gradients for PDF in ShadedRect
     * add single css like padding property to Label
     * add Table drop shadow support
+    * raise min python version to 3.9
 
 CHANGES  4.4.3   23/07/2025
 ---------------------------

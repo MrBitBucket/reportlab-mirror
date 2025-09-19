@@ -7,7 +7,7 @@ __date__='20250918'
 
 import sys, os
 
-__min_python_version__ = (3,7)
+__min_python_version__ = (3,9)
 if sys.version_info< __min_python_version__:
     raise ImportError("""reportlab requires %s.%s+; other versions are unsupported.
 If you want to try with other python versions edit line 10 of reportlab/__init__

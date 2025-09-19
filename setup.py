@@ -331,7 +331,7 @@ def main():
         # this probably only works for setuptools, but distutils seems to ignore it
         install_requires=['pillow>=9.0.0','charset-normalizer'],
         # moved to pyproject.toml
-        python_requires='>=3.7,<4',
+        python_requires='>=3.9,<4',
         extras_require={
             'accel': ['rl_accel>=0.9.0,<1.1'],
             'renderpm': ['rl_renderPM>=4.0.3,<4.1'],
