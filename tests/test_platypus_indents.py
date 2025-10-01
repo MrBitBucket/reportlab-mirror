@@ -3,7 +3,7 @@
 """Tests for context-dependent indentation
 """
 __version__='3.3.0'
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, invariantSeed
 setOutDir(__name__)
 import sys, os, random
 from reportlab.rl_config import invariant as rl_invariant
@@ -65,7 +65,7 @@ class IndentTestCase(unittest.TestCase):
 
     def test0(self):
         "IndentTestCase test0"
-        if rl_invariant: random.seed(1479316371)
+        invariantSeed(1479316371)
 
         # Build story.
         story = []

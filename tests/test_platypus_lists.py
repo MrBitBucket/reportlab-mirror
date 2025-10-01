@@ -1,8 +1,8 @@
 from random import randint
 from xml.sax.saxutils import escape as xmlEscape
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, invariantSeed
 setOutDir(__name__)
-import os,unittest, random
+import os,unittest
 from reportlab.rl_config import invariant as rl_invariant
 from reportlab.platypus import Spacer, SimpleDocTemplate, Table, TableStyle, ListFlowable, ListItem, \
         Paragraph, PageBreak, DDIndenter, MultiCol
@@ -59,8 +59,10 @@ Blah blah blah Rexx blah RFC822-compliant blah blah ...went into "yo-yo mode" bl
 class ListsTestCase(unittest.TestCase):
     "Make documents with tables"
 
+    def setUp(self):
+        invariantSeed(888147853)
+
     def test1(self):
-        if rl_invariant: random.seed(888147853)
         styleSheet = getSampleStyleSheet()
         doc = SimpleDocTemplate(outputfile('test_platypus_lists1.pdf'),showBoundary=True)
         story=[]

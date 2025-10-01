@@ -3,9 +3,9 @@
 """Test long documents with indexes, tables and cross-references
 """
 __version__='3.3.0'
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, invariantSeed
 setOutDir(__name__)
-import sys, os, time, random
+import sys, os, time
 from reportlab.rl_config import invariant as rl_invariant
 from operator import truth
 import unittest
@@ -70,7 +70,7 @@ class MyDocTemplate(BaseDocTemplate):
 def _test0(self):
     "This makes one long multi-page paragraph."
     from reportlab.platypus.flowables import DocAssign, DocExec, DocPara, DocIf, DocWhile
-    if rl_invariant: random.seed(1629812163)
+    invariantSeed(1629812163)
 
     # Build story.
     story = []

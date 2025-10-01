@@ -5,11 +5,13 @@ __version__='3.3.0'
 #tests and documents Page Layout API
 __doc__="""Tests low level programming of doc templates
 """
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, invariantSeed
 setOutDir(__name__)
 import sys, unittest
 class PlatypusProgrammingTestCase(unittest.TestCase):
     "test platypus programming"
+    def setUp(self):
+        invariantSeed(2103696747)
 
     def test0(self):
         from reportlab.lib.styles import ParagraphStyle
@@ -62,7 +64,6 @@ class PlatypusProgrammingTestCase(unittest.TestCase):
         from reportlab.lib.randomtext import randomText, PYTHON
         import random
         from reportlab.rl_config import invariant as rl_invariant
-        if rl_invariant: random.seed(2103696747)
 
         # Build story.
         story = []

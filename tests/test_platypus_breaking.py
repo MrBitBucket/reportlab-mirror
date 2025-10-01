@@ -3,9 +3,9 @@
 """Tests pageBreakBefore, frameBreakBefore, keepWithNext...
 """
 __version__='3.3.0'
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, invariantSeed
 setOutDir(__name__)
-import sys, os, time, re, random
+import sys, os, time, re
 from reportlab.rl_config import invariant as rl_invariant
 from operator import truth
 import unittest
@@ -63,7 +63,7 @@ virtual gibberish (e.g. (98d)).
 def _test0(self):
     "This makes one long multi-page paragraph in test_platypus_breaking."
 
-    if rl_invariant: random.seed(1532760416)
+    invariantSeed(1532760416)
     def RT(k,theme='PYTHON',sentences=1,cache={}):
         if k not in cache:
             cache[k] = randomText(theme=theme,sentences=sentences)

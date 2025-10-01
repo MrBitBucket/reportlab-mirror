@@ -3,16 +3,16 @@
 # tests some paragraph styles
 __version__='3.3.0'
 from reportlab.lib.testutils import (setOutDir,makeSuiteForClasses, outputfile,
-                                    printLocation, rlSkipUnless, haveDejaVu)
+                                    printLocation, rlSkipUnless, haveDejaVu,
+                                    invariantSeed)
 setOutDir(__name__)
-import unittest, os, random
+import unittest, os
 from reportlab.platypus import Paragraph, SimpleDocTemplate, XBox, Indenter, XPreformatted, PageBreak, Spacer
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.lib.abag import ABag
 from reportlab.lib.colors import red, black, navy, white, green
 from reportlab.lib.randomtext import randomText
-from reportlab.rl_config import invariant as rl_invariant
 from reportlab.lib.enums import TA_LEFT, TA_RIGHT, TA_CENTER, TA_JUSTIFY
 from reportlab.rl_config import defaultPageSize
 from reportlab.pdfbase import ttfonts
@@ -74,6 +74,9 @@ def getAFont():
 class ParagraphTestCase(unittest.TestCase):
     "Test Paragraph class (eyeball-test)."
 
+    def setUp(self):
+        invariantSeed(1854640162)
+
     def test0(self):
         """Test...
 
@@ -85,7 +88,6 @@ class ParagraphTestCase(unittest.TestCase):
             2. ...
             3. ...
         """
-        if rl_invariant: random.seed(1854640162)
         story = []
         SA = story.append
 

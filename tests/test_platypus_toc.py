@@ -7,12 +7,11 @@ one, will be generating a PDF document that needs to be eye-balled
 in order to find out if it is 'correct'.
 """
 __version__='3.3.0'
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, invariantSeed
 setOutDir(__name__)
-import sys, os
+import sys, os, random
 from os.path import join, basename, splitext
 from math import sqrt
-import random
 from reportlab.rl_config import invariant as rl_invariant
 import unittest
 from reportlab.lib.units import inch, cm
@@ -140,6 +139,9 @@ def makeTocHeaderStyle(level, delta, epsilon, fontName='Times-Roman'):
 class TocTestCase(unittest.TestCase):
     "Test TableOfContents class (eyeball-test)."
 
+    def setUp(self):
+        invariantSeed(2077179149)
+
     def test0(self):
         """Test story with TOC and a cascaded header hierarchy.
 
@@ -155,7 +157,6 @@ class TocTestCase(unittest.TestCase):
             ...
         """
         def doTest(rLPN=False):
-            if rl_invariant: random.seed(2077179149)
             maxLevels = 12
 
             # Create styles to be used for document headers
@@ -204,7 +205,7 @@ class TocTestCase(unittest.TestCase):
         with the right headings to make it go faster.  We used
         a simple 100-chapter document with one level.
         """
-        if rl_invariant: random.seed(1216902530)
+        invariantSeed(1216902530)
         chapters = 30   #goes over one page
         
         headerStyle = makeHeaderStyle(0)
@@ -304,7 +305,7 @@ class TocTestCase(unittest.TestCase):
         self.assertTrue(hasattr(doc,'seq'))
 
     def test2(self):
-        if rl_invariant: random.seed(530125105)
+        invariantSeed(530125105)
         chapters = 20   #so we know we use only one page
         from reportlab.lib.colors import pink
 

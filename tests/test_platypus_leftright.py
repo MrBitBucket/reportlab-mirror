@@ -3,9 +3,9 @@
 """Tests ability to cycle through multiple page templates
 """
 __version__='3.3.0'
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, invariantSeed
 setOutDir(__name__)
-import sys, os, time, random
+import sys, os, time
 from reportlab.rl_config import invariant as rl_invariant
 from operator import truth
 import unittest
@@ -86,10 +86,12 @@ class MyDocTemplate(BaseDocTemplate):
 
 class LeftRightTestCase(unittest.TestCase):
     "Test multi-page splitting of paragraphs (eyeball-test)."
+    def setUp(self):
+        invariantSeed(464568862)
+
     def testIt(self):
         "LeftRightTestCase.testit"
 
-        if rl_invariant: random.seed(464568862)
         # Build story.
         story = []
 

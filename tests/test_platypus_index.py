@@ -3,9 +3,9 @@
 """Tests for the Platypus SimpleIndex and AlphabeticIndex classes.
 """
 __version__='3.3.0'
-from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation
+from reportlab.lib.testutils import setOutDir,makeSuiteForClasses, outputfile, printLocation, invariantSeed
 setOutDir(__name__)
-import sys, os, random
+import sys, os
 from reportlab.rl_config import invariant as rl_invariant
 from os.path import join, basename, splitext
 from math import sqrt
@@ -76,6 +76,9 @@ def makeBodyStyle():
 class IndexTestCase(unittest.TestCase):
     "Test SimpleIndex classes (eyeball-test)."
 
+    def setUp(self):
+        invariantSeed(1753799561)
+
     def test0(self):
         '''
         Test case for Indexes. This will draw an index at the end of the
@@ -83,7 +86,6 @@ class IndexTestCase(unittest.TestCase):
         Index terms are grouped by their first 2, and first 3 characters.
         The page numbers should be clickable and link to the indexed word.
         '''
-        if rl_invariant: random.seed(1753799561)
         # Build story.
         
         for headers in False, True:
