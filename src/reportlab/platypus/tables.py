@@ -1484,11 +1484,19 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
                     usedHeight += flowable_height + flowable.getSpaceBefore() + flowable.getSpaceAfter()
                 else:
                     # This is where we need to split
-                    splits = flowable.split(width, height0-usedHeight-flowable.getSpaceBefore())
-                    if splits:
-                        newCellContent.append(splits[0])
-                        postponedContent.append(splits[1])
+                    splitHeight = height0-usedHeight-flowable.getSpaceBefore()
+                    if hasattr(flowable,'_findSplit'):
+                        _w,_H, S0, S1 = flowable._findSplit(getattr(self,'canv',None),width,splitHeight,mergeSpace=1,obj=None,content=None,paraFix=True)
+                        if S0 and S1:
+                            splits = S0
+                            newCellContent.extend(S0)
+                            postponedContent.extend(S1)
                     else:
+                        splits = flowable.split(width, splitHeight)
+                        if splits:
+                            newCellContent.append(splits[0])
+                            postponedContent.append(splits[1])
+                    if not splits:
                         # We couldn't split this flowable at the desired
                         # point. If we already has added previous paragraphs
                         # to the content, just add everything after the split.

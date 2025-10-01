@@ -1287,7 +1287,10 @@ class _FindSplitterMixin:
         H = 0
         pS = sB = 0
         atTop = 1
-        F = self._getContent(content)
+        if isinstance(self,ListFlowable):
+            F = self._getContent() if hasattr(self,'_flowables') else self._list_content
+        else:
+            F = self._getContent(content)
         for i,f in enumerate(F):
             if hasattr(f,'frameAction'):
                 from reportlab.platypus.doctemplate import Indenter
@@ -2222,7 +2225,7 @@ class _LIParams:
         self.value = value
         self.first= first
 
-class ListFlowable(_Container,Flowable):
+class ListFlowable(_Container,Flowable,_FindSplitterMixin):
     _numberStyles = '1aAiI'
     def __init__(self,
                     flowables,  #the initial flowables

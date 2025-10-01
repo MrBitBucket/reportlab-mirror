@@ -483,6 +483,105 @@ class TableTestCase(unittest.TestCase):
         lst.extend(xlst.__self__)
         SimpleDocTemplate(outputfile('test_table_inrowsplit.pdf'), showBoundary=1).build(lst)
 
+    def test_list_in_row(self):
+        LOREM = """Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."""
+
+        bulleted_data = [
+            {'indent': 0, 'para': 'Lorem Ipsum is simply dummy text of the printing and typesetting industry.'},
+            {'indent': 0, 'para': 'Lorem Ipsum has been the industry standard dummy text ever since the 1500s.'},
+            {'indent': 1, 'para': '1 0 It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.'},
+            {'indent': 1, 'para': '1 1 Contrary to popular belief, Lorem Ipsum is not simply random text. '+LOREM},
+
+            # pad this one out repeatedly until it breaks over the page at level 3
+            {'indent': 2, 'para': 'Indent level 2, with enough stuff to continue over the page break...'+LOREM},
+            {'indent': 2, 'para': 'This paragraph should be at the third level of indentation. Now let us have too much content for a page... '+LOREM},
+            {'indent': 2, 'para': '2 2 '+LOREM}, {'indent': 2, 'para': '2 3 '+LOREM}, {'indent': 2, 'para': '2 4 '+LOREM}, {'indent': 2, 'para': '2 5 '+LOREM},
+            {'indent': 2, 'para': '2 6 '+LOREM}, {'indent': 2, 'para': '2 7 '+LOREM}, {'indent': 2, 'para': '2 8 '+LOREM},
+            {'indent': 1,'para': 'Back to level one.'},
+            {'indent': 1,'para': 'All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary.'},
+            ]
+
+        class LFL(list):
+            pass
+
+        def makeUList():
+            # This holds the structured list.
+            list_stack = []
+            # Prep default style for Paragraph
+            para_style = getSampleStyleSheet()['Normal']
+            # Prep default style for ListFlowable
+            style = getSampleStyleSheet()['UnorderedList']
+            style.bulletFontSize = 12
+            style.bulletType = 'bullet'
+            style.leftIndent = 12 * 1.2
+            # Walk the list to build the nested structure
+            for next_item in bulleted_data:
+                # Get the indent value
+                indent = next_item['indent']
+                # Get the para content
+                para = next_item['para']
+                # If we have nothing, put empty list at lowest level
+                if len(list_stack) == 0:
+                    list_stack.append([])
+                # If indent value matches length of stack, start new list
+                if indent == len(list_stack):
+                    list_stack.append([])
+                    cur_list_array = list_stack[-1]
+                    cur_list_array.append(Paragraph(para, para_style))
+                # If indentation is reduced
+                elif indent < len(list_stack) - 1:
+                    i = len(list_stack) - 1
+                    while i > indent:
+                        ulist = LFL((list_stack[-1]))
+                        list_stack.pop()
+                        cur_list_array = list_stack[-1]
+                        cur_list_array.append(ulist)
+                        i = i - 1
+                    cur_list_array = list_stack[-1]
+                    cur_list_array.append(Paragraph(para, para_style))
+                # If indentation is same
+                else:
+                    cur_list_array = list_stack[-1]
+                    cur_list_array.append(Paragraph(para, para_style))
+
+            # Close remaining lists
+            ulist = None
+            while len(list_stack) > 0:
+                ulist = LFL(list_stack[-1])
+                list_stack.pop()
+                if len(list_stack) > 0:
+                    cur_list_array = list_stack[-1]
+                    cur_list_array.append(ulist)
+
+            from reportlab.platypus.flowables import _bulletNames
+            BT = list(_bulletNames.keys())
+            def findLFL(F,depth=0):
+                for i,f in enumerate(F):
+                    if isinstance(f,LFL):
+                        F[i] = findLFL(F[i],depth+1)
+                return ListFlowable(flowables=F,
+                              style=style.clone(name=f'gen-{depth}-{i}',start=BT[depth]))
+            ulist = findLFL(ulist,depth=0)
+            return ulist
+
+        story = []
+        styGrid = TableStyle([
+                ('GRID', (0,0), (-1,-1), 0.5, colors.green),
+                ('TOPPADDING', (0,0), (-1,-1), 3),
+                ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+                ('LEFTPADDING', (0,0), (-1,-1), 0),
+                ('RIGHTPADDING', (0,0), (-1,-1), 0),
+                #('VALIGN',(0,0), (-1,-1), "MIDDLE"),
+                ])
+        tbl = Table([
+            [makeUList()],
+            ],
+            splitInRow = 1,
+            style=styGrid)
+        story.append(tbl)
+
+        SimpleDocTemplate(outputfile('test_table_listsplit.pdf'), showBoundary=1).build(story)
+
 def makeSuite():
     return makeSuiteForClasses(TableTestCase)
 
@@ -490,5 +589,6 @@ def makeSuite():
 #noruntests
 if __name__ == "__main__":
     unittest.TextTestRunner().run(makeSuite())
-    print('saved '+outputfile('test_table_inrowsplit.pdf'))
+    print(f'saved {outputfile("test_table_inrowsplit.pdf")}')
+    print(f' and  {outputfile("test_table_listsplit.pdf")}')
     printLocation()

@@ -11,6 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.3.5   ??/??/2025
+---------------------------
+    * remove random monkey patches in randomtext
+    * add and use testutils.invariantSeed in tests
+    * fix (maybe partially) Table row splitting of ListFlowable
+
 CHANGES  4.3.4   18/09/2025
 ---------------------------
     * raise an error for table cell flowables given negative width
