@@ -1460,7 +1460,7 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
         if isinstance(value, (tuple, list)):
             newCellContent = []
             postponedContent = []
-            split = False
+            flowable_split_attempted = False
             FH = []
             cellHeight = self._listCellGeom(value, width, style,H=FH)[1]
 
@@ -1471,20 +1471,17 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
 
             for flowable,_fh in zip(value,FH):
                 flowable_height = getattr(flowable,'height',_fh)
-                if split:
-                    if flowable_height <= height1:
-                        postponedContent.append(flowable)
-                        # Shrink the available height:
-                        height1 -= flowable_height
-                    else:
-                        # The content doesn't fit after the split:
-                        return []
+                if flowable_split_attempted:
+                    # the flowable split may have failed, but we made some progress,
+                    # so postpone everything else and hope it can be split/wrapped later on
+                    postponedContent.append(flowable)
                 elif usedHeight + flowable_height + flowable.getSpaceBefore() <= height0:
                     newCellContent.append(flowable)
                     usedHeight += flowable_height + flowable.getSpaceBefore() + flowable.getSpaceAfter()
                 else:
                     # This is where we need to split
                     splitHeight = height0-usedHeight-flowable.getSpaceBefore()
+                    splits = None
                     if hasattr(flowable,'_findSplit'):
                         _w,_H, S0, S1 = flowable._findSplit(getattr(self,'canv',None),width,splitHeight,mergeSpace=1,obj=None,content=None,paraFix=True)
                         if S0 and S1:
@@ -1497,23 +1494,16 @@ only rows may be strings with values in {_SPECIALROWS!r}''')
                             newCellContent.append(splits[0])
                             postponedContent.append(splits[1])
                     if not splits:
-                        # We couldn't split this flowable at the desired
-                        # point. If we already has added previous paragraphs
-                        # to the content, just add everything after the split.
-                        # Also try adding it after the split if valign isn't TOP
-                        if newCellContent or style.valign != "TOP":
-                            if flowable_height <= height1:
-                                postponedContent.append(flowable)
-                                # Shrink the available height:
-                                height1 -= flowable_height
-                            else:
-                                # The content doesn't fit after the split:
-                                return []
-                        else:
-                            # We could not split this, so we fail:
+                        # We couldn't split this flowable at the desired point
+                        if (not newCellContent) and style.valign == "TOP":
+                            # This is the first flowable in the cell, and the cell
+                            # is top-aligned - since splitting the flowable failed,
+                            # splitting the cell has failed.
                             return []
 
-                    split = True
+                        # postpone this flowable, and hope we can wrap/split later
+                        postponedContent.append(flowable)
+                    flowable_split_attempted = True
 
             return (tuple(newCellContent), tuple(postponedContent))
 

@@ -15,7 +15,6 @@ import unittest
 
 class TableTestCase(unittest.TestCase):
 
-
     def getDataBlock(self):
         "Helper - data for our spanned table"
         return [
@@ -582,9 +581,22 @@ class TableTestCase(unittest.TestCase):
 
         SimpleDocTemplate(outputfile('test_table_listsplit.pdf'), showBoundary=1).build(story)
 
+    def test_small_para_inrowsplit(self):
+        '''test bug reported by Christian Zwicknagl via Yoshua Wakeham'''
+
+        data = [([Paragraph(f"({x})" + " This is a small paragraph." * 4) for x in range(38)],)]
+        colWidths = 200
+
+        t = Table(
+            data,
+            colWidths=colWidths,
+            splitInRow=1,
+        )
+
+        SimpleDocTemplate(outputfile("test_small_para_inrowsplit.pdf"), showBoundary=1).build([t])
+
 def makeSuite():
     return makeSuiteForClasses(TableTestCase)
-
 
 #noruntests
 if __name__ == "__main__":
