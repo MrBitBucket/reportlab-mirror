@@ -186,7 +186,7 @@ class PDFDocument(PDFObject):
         digest = self.signature.digest()
         doc = DummyDoc()
         IDs = PDFText(digest,enc='raw').format(doc)
-        self._ID = (b'\n['+IDs+IDs+b']\n% ReportLab generated PDF document -- digest (http://www.reportlab.com)\n')
+        self._ID = (b'\n['+IDs+IDs+b']\n% ReportLab generated PDF document -- digest (opensource)\n')
         return self._ID
 
     def SaveToFile(self, filename, canvas):
@@ -891,7 +891,7 @@ class PDFFile(PDFObject):
         # any other encoding, and we'll be able to tell if something
         # has run our PDF files through a dodgy Unicode conversion.
         self.add((pdfdocEnc("%%PDF-%s.%s" % pdfVersion) +
-            b'\n%\223\214\213\236 ReportLab Generated PDF document http://www.reportlab.com\n'
+            b'\n%\223\214\213\236 ReportLab Generated PDF document (opensource)\n'
             ))
 
     def closeOrReset(self):
@@ -1549,13 +1549,13 @@ def count(tree, closedict=None):
         return sum(counts)  #used to be: return reduce(add, counts)
     return 1
 
-_default_producer = "ReportLab PDF Library - www.reportlab.com"
+_default_producer = "ReportLab PDF Library - (opensource)"
 class PDFInfo(PDFObject):
     """PDF documents can have basic information embedded, viewable from
     File | Document Info in Acrobat Reader.  If this is wrong, you get
     Postscript errors while printing, even though it does not print."""
     producer = _default_producer
-    creator = "ReportLab PDF Library - www.reportlab.com"
+    creator = "anonymous"
     title = "untitled"
     author = "anonymous"
     subject = "unspecified"
@@ -1617,7 +1617,7 @@ class Annotation(PDFObject):
         d.update(kw)
         for name in self.required:
             if name not in d:
-                raise ValueError("keyword argument %s missing" % name)
+                raise ValueError(f"keyword argument {name} missing")
         d = self.cvtdict(d,escape=escape)
         permitted = self.permitted
         for name in d.keys():

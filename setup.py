@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2025
 #see LICENSE for license details
-__version__='4.4.0'
+__version__='4.4.5'
 import os, sys, glob, shutil, re, sysconfig, traceback, io, subprocess
 from urllib.parse import quote as urlquote
 platform = sys.platform
@@ -321,11 +321,11 @@ def main():
             'Topic :: Printing',
             'Topic :: Text Processing :: Markup',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.9',
             'Programming Language :: Python :: 3.10',
             'Programming Language :: Python :: 3.11',
             'Programming Language :: Python :: 3.12',
             'Programming Language :: Python :: 3.13',
+            'Programming Language :: Python :: 3.14',
             ],
         
         # this probably only works for setuptools, but distutils seems to ignore it

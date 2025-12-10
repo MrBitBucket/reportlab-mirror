@@ -11,14 +11,19 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES  4.3.5   17/11/2025
+CHANGES  4.4.6   10/12/2025
+---------------------------
+    * fix CHANGES versions wrongly marked as 4.3.x --> 4.4.x
+    * remove url from default PDF metadata
+
+CHANGES  4.4.5   17/11/2025
 ---------------------------
     * remove random monkey patches in randomtext
     * add and use testutils.invariantSeed in tests
     * fix (maybe partially) Table row splitting of ListFlowable
     * apply patch for in row splitting bug reported by Christian Zwicknagl via Yoshua Wakeham
 
-CHANGES  4.3.4   18/09/2025
+CHANGES  4.4.4   18/09/2025
 ---------------------------
     * raise an error for table cell flowables given negative width
     * fix the rotatedEnclosingRect algorithm so it allows variable angles
