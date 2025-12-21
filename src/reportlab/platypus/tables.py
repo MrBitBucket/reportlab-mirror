@@ -937,7 +937,7 @@ class Table(Flowable):
                 #transfer percentages to the defined cols
                 d = []
                 for colNo, w in minimums.items():
-                    if w.endswith('%'):
+                    if isinstance(w,str) and w.endswith('%'):
                         W[colNo] = w = availWidth*float(w[:-1])/percentTotal
                         totalDefined += w
                         d.append(colNo)

@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.4.7   21/12/2025
+---------------------------
+    * fix table layout error reported by Andy Hagar atboom33w at gmail dot com
+
 CHANGES  4.4.6   10/12/2025
 ---------------------------
     * fix CHANGES versions wrongly marked as 4.3.x --> 4.4.x

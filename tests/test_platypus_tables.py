@@ -1161,6 +1161,32 @@ class TablesTestCase(unittest.TestCase):
         expectedWidth = 544
         self.assertEqual(w,expectedWidth,"long paragraph as not been wrapped as expected")
 
+    def test_endswith_error(self):
+        '''test error reported by Andy Hagar atboom33w at gmail dot com'''
+        styles = getSampleStyleSheet()
+
+        data = [
+            ['Header 1', 'Header 2', 'Header 3'],
+            [Paragraph('Row 1, Col 1 wide data wide data wide data wide data', styles['Normal']), 'Row 1, Col 2 wide data wide data wide data', 'Row 1, Col 3 wide data wide data wide data']
+        ]
+
+        story = []
+
+        colwidths = [None, "20%", None]
+        table = Table(data, colWidths=colwidths)
+        story.append(table)
+
+        pdffn = outputfile('test_endswith_error.pdf')
+        doc = SimpleDocTemplate(pdffn)
+        try:
+            doc.build(story)
+        except:
+            ok = False
+        else:
+            ok = True
+        self.assertEqual(ok,True,f'\n{pdffn} not built')
+
+
 def makeSuite():
     return makeSuiteForClasses(TablesTestCase)
 
