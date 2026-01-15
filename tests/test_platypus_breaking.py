@@ -175,7 +175,7 @@ class RenderMeasuringPara:
             if measuring and label=='end':
                 ends.append(canv._curr_tx_info)
             annotations.append(canv._curr_tx_info)
-        setattr(canv,onDrawFuncName,_onDrawFunc)
+        canv.setNamedCB(onDrawFuncName,_onDrawFunc)
         self._state = (canv,style,aW,measuring,ends,annotations,errors,length_errors)
         if measuring:
             self._end = ('<ondraw name="%s" label="end"/>' % onDrawFuncName)

@@ -330,9 +330,11 @@ def _putFragLine(cur_x, tx, line, last, pKind):
                 if kind=='anchor':
                     tx._canvas.bookmarkHorizontal(name,cur_x,cur_y+leading)
                 else:
-                    func = getattr(tx._canvas,name,None)
+                    func = tx._canvas.getNamedCB(name)
                     if not func:
                         raise AttributeError("Missing %s callback attribute '%s'" % (kind,name))
+                    #with open('/tmp/dbg.txt','a') as _:
+                    #   print(f'{kind=} {name=} {func=}',file=_)
                     tx._canvas._curr_tx_info=dict(tx=tx,cur_x=cur_x,cur_y=cur_y,leading=leading,xs=tx.XtraState)
                     try:
                         func(tx._canvas,kind,getattr(cbDefn,'label',None))

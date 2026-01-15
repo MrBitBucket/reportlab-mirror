@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.4.8   15/01/2026
+---------------------------
+    * fix callback security hole reported by Pedro "gankd"  lt pedrovgcruz at icloud dot com gt
+
 CHANGES  4.4.7   21/12/2025
 ---------------------------
     * fix table layout error reported by Andy Hagar atboom33w at gmail dot com

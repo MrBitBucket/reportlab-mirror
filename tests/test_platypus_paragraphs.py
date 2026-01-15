@@ -814,7 +814,7 @@ providing the ultimate in ease of installation.''',
         normal.leading = 12
         normal.alignment = TA_JUSTIFY
         canv = Canvas(outputfile('test_splitJustBug.pdf'))
-        canv._odW = _odW
+        canv.setNamedCB('_odW', _odW)
         W, H = canv._pagesize
         aW = W-2*72
         aH = H-2*72

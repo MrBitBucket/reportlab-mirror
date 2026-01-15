@@ -116,10 +116,10 @@ def bytestr(x,enc='utf8'):
         return str(x).encode(enc)
 
 def encode_label(args):
-    return base64_encodebytes(pickle.dumps(args)).strip().decode('latin1')
+    return base64_encodebytes(ascii(args).encode('ascii')).strip().decode('ascii')
 
 def decode_label(label):
-    return pickle.loads(base64_decodebytes(label.encode('latin1')))
+    return literal_eval(base64_decodebytes(label.encode('ascii')).decode('ascii'))
 
 def rawUnicode(s):
     '''converts first 256 unicodes 1-1'''

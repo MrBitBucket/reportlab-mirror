@@ -249,7 +249,7 @@ class TableOfContents(IndexingFlowable):
                 dot = ''
             if self.formatter: page = self.formatter(page)
             drawPageNumbers(canvas, style, [(page, key)], availWidth, availHeight, dot)
-        self.canv.drawTOCEntryEnd = drawTOCEntryEnd
+        self.canv.setNamedCB('drawTOCEntryEnd',drawTOCEntryEnd)
 
         tableData = []
         for (level, text, pageNum, key) in _tempEntries:
@@ -377,7 +377,7 @@ class SimpleIndex(IndexingFlowable):
         def newcanvasmaker(*args, **kwargs):
             from reportlab.pdfgen import canvas
             c = canvasmaker(*args, **kwargs)
-            setattr(c,self.name,self)
+            c.setNamedCB(self.name,self)
             return c
 
         return newcanvasmaker
@@ -437,7 +437,7 @@ class SimpleIndex(IndexingFlowable):
             style = self.getLevelStyle(leveloffset)
             pages = [(p[1],k) for p,k in sorted(decode_label(label))]
             drawPageNumbers(canvas, style, pages, availWidth, availHeight, self.dot)
-        self.canv.drawIndexEntryEnd = drawIndexEntryEnd
+        self.canv.setNamedCB('drawIndexEntryEnd',drawIndexEntryEnd)
 
         alpha = ''
         tableData = []

@@ -369,6 +369,7 @@ class Canvas(_PDFColorSetter):
         self.state_stack = []
 
         self.setEncrypt(encrypt)
+        self._namedCB = {}  #named callbacks
 
     def setEncrypt(self, encrypt):
         '''
@@ -2009,6 +2010,16 @@ class Canvas(_PDFColorSetter):
             if da: self.setDash(da)
         self.rect(x1,y1,width,height)
         if ss: self.restoreState()
+
+    def setNamedCB(self, name, cb):
+        self._namedCB[name] = cb
+
+    def getNamedCB(self,name):
+        return self._namedCB.get(name,None)
+
+    def __setattr__(self,a,v):
+        if a=='_indexAdd': breakpoint()
+        return super().__setattr__(a,v)
 
 if __name__ == '__main__':
     print('For test scripts, look in tests')
