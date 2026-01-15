@@ -2017,9 +2017,5 @@ class Canvas(_PDFColorSetter):
     def getNamedCB(self,name):
         return self._namedCB.get(name,None)
 
-    def __setattr__(self,a,v):
-        if a=='_indexAdd': breakpoint()
-        return super().__setattr__(a,v)
-
 if __name__ == '__main__':
     print('For test scripts, look in tests')
