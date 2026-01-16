@@ -18,6 +18,7 @@ CHANGES  4.4.9   15/01/2026
 CHANGES  4.4.8   15/01/2026
 ---------------------------
     * fix callback security hole reported by Pedro "gankd"  lt pedrovgcruz at icloud dot com gt
+    * https://www.linkedin.com/in/pedro-cruz-967b2524b/
 
 CHANGES  4.4.7   21/12/2025
 ---------------------------
