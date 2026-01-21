@@ -1,8 +1,30 @@
-#Copyright ReportLab Europe Ltd. 2000-2017
+#Copyright ReportLab Europe Ltd. 2000-2026
 #see license.txt for license details
 #history https://hg.reportlab.com/hg-public/reportlab/log/tip/src/reportlab/graphics/charts/utils.py
+__all__ = (
+            'angle2corner',
+            'angle2dir',
+            'boxCornerCoords',
+            'CustomDrawChanger',
+            'DrawTimeCollector',
+            'FillPairedData',
+            'find_good_grid',
+            'find_interval',
+            'findNones',
+            'lineSegmentIntersect',
+            'makeCircularString',
+            'maverage',
+            'mkTimeTuple',
+            'nextRoundNumber',
+            'pairFixNones',
+            'pairMaverage',
+            'seconds2str',
+            'str2seconds',
+            'ticks',
+            'xyDist',
+            )
 
-__version__='3.3.0'
+__version__='3.4.8'
 __doc__="Utilities used here and there."
 from time import mktime, gmtime, strftime
 from math import log10, pi, floor, sin, cos, hypot
@@ -393,3 +415,69 @@ class FillPairedData(list):
     def __init__(self,v,other=0):
         list.__init__(self,v)
         self.other = other
+
+_arange2dirs = [
+        (-1,22.5,'e'),
+        (22.5,67.5,'ne'),
+        (67.5,112.5,'n'),
+        (112.5,157.5,'nw'),
+        (157.5,202.5,'w'),
+        (202.5,247.5,'sw'),
+        (247.5,292.5,'s'),
+        (292.5,337.5,'se'),
+        (337.5,361,'e'),
+        ]
+def angle2dir(angle):
+    '''converts mathematical angle to a compass point from a math angle where
+    0 degrees lies along the x axis ie east==0 degrees
+
+    >>> [angle2dir(_) for _ in [0,360]+[__[0] for __ in _arange2dirs]+[__[1] for __ in _arange2dirs]]
+    ['e', 'e', 'e', 'e', 'ne', 'n', 'nw', 'w', 'sw', 's', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw', 's', 'se', 'e']
+    '''
+    a = angle % 360
+    for lo, hi, d in _arange2dirs:
+        if lo<a<=hi: return d
+    return 'c'
+    #I tested the bisect version below; it works, but is fractionally slower
+    #import bisect
+    #_elemk = lambda _: _[1]
+    #return _arange2dirs[bisect.bisect_left(_arange2dirs,angle % 360,key=_elemk)][2]
+
+_cornerNames=dict(e='w',ne='sw',n='s',nw='se',w='e',sw='ne',s='n',se='nw',c='c')
+def angle2corner(angle):
+    '''converts a direction angle to a box corner name effectively the reverse direction
+    >>> [angle2corner(_) for _ in [0,360]+[__[0] for __ in _arange2dirs]+[__[1] for __ in _arange2dirs]]
+    ['w', 'w', 'w', 'w', 'sw', 's', 'se', 'e', 'ne', 'n', 'nw', 'w', 'sw', 's', 'se', 'e', 'ne', 'n', 'nw', 'w']
+    '''
+    return _cornerNames[angle2dir(angle)]
+
+def boxCornerCoords(bb, cn):
+    '''return (x,y) for bounding box and corner name
+    >>> bb=(1,0,0,1);[boxCornerCoords(bb,_) for _ in 'c n ne e se s sw w nw'.split()]
+    [(0.5, 0.5), (0.5, 1), (1, 1), (1, 0.5), (1, 0), (0.5, 0), (0, 0), (0, 0.5), (0, 1)]
+    >>> boxCornerCoords(bb,'z')
+    Traceback (most recent call last):
+        ...
+    ValueError: invalid box corner name 'z'
+    '''
+    if bb[0]>bb[2] or bb[1]>bb[3]:
+        bb = (min(bb[0],bb[2]),min(bb[1],bb[3]),max(bb[0],bb[2]),max(bb[1],bb[3]))
+    if cn not in ('n', 'ne', 'e', 'se', 's', 'sw', 'w', 'nw', 'c'):
+        raise ValueError(f'invalid box corner name {cn!r}')
+    if cn in ('c','s','n'):
+        x = (bb[0]+bb[2])/2
+    elif cn in ('ne','e','se'):
+        x = bb[2]
+    else:
+        x = bb[0]
+    if cn in ('e','c','w'):
+        y = (bb[1]+bb[3])/2
+    elif cn in ('nw','n','ne'):
+            y = bb[3]
+    else:
+        y = bb[1]
+    return x, y
+
+if __name__=='__main__':
+    import doctest
+    doctest.testmod()
