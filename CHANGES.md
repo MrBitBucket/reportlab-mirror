@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.5.0   ??/02/2026
+---------------------------
+    * fix __rl_get_module__ for Python 3.15
+
 CHANGES  4.4.10  12/02/2026
 ---------------------------
     * fix security issue found by Ethan Kim lt ethan 4t cremit d0t io gt

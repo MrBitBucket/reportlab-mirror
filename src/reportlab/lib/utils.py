@@ -583,7 +583,9 @@ def __rl_get_module__(name,dir):
         path = os.path.join(dir,name+ext)
         if os.path.isfile(path):
             spec = importlib_util.spec_from_file_location(name,path)
-            return spec.loader.load_module()
+            module = importlib_util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            return module
     raise ImportError('no suitable file found')
 
 def rl_get_module(name,dir):
