@@ -666,16 +666,12 @@ class UntrustedAstTransformer(ast.NodeTransformer):
 		"""Allow function definitions (`def`) with some restrictions."""
 		self.isAllowedName(node, node.name)
 		self.check_function_argument_names(node)
-
-		return node
+		return self.visit_children(node)
 
 	def visit_Lambda(self, node):
 		"""Allow lambda with some restrictions."""
 		self.check_function_argument_names(node)
-
-		node = self.visit_children(node)
-
-		return node
+		return self.visit_children(node)
 
 	def visit_ClassDef(self, node):
 		"""Check the name of a class definition."""

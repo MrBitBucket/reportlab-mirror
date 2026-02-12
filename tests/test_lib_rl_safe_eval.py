@@ -138,17 +138,17 @@ class SafeEvalTestCase(unittest.TestCase):
         except:
             print('expr=%r' % expr)
             annotateException('\nexpr=%r\n' % expr)
-        self.assertEqual(answer,result,"rl_safe_eval(%r) = %r not expected %r" % (expr,result,answer))
+        self.assertEqual(answer,result,f"rl_safe_eval({expr!r}) = {result!r}) not expected {answer!r}")
     def skips(self,*args,**kwds):
         raise unittest.SkipTest
     def fails(self, expr, g=None, l=None, timeout=None, exception=BadCode):
         try:
             result = rl_safe_eval(expr,g,l,timeout=timeout)
-            self.assertEqual(True,False,"rl_safe_eval(%r)=%r did not raise %s" % (expr,result,exception.__name__))
+            self.assertEqual(True,False,f"rl_safe_eval({expr!r}) = {result!r} did not raise {exception.__name__}")
         except exception:
             return
         except:
-            self.assertEqual(True,False,"rl_safe_eval(%r) raised %s: %s instead of %s" % (expr,sys.exc_info()[0].__name__,str(sys.exc_info()[1]),exception.__name__))
+            self.assertEqual(True,False,"rl_safe_eval({expr!r}) raised {sys.exc_info()[0].__name__}: {str(sys.exc_info()[1])} instead of {exception.__name__}")
 
 GA = 'ga'
 class SafeEvalTestBasics(unittest.TestCase):
@@ -157,6 +157,25 @@ class SafeEvalTestBasics(unittest.TestCase):
         self.assertTrue(rl_safe_eval("A==3"))
     def test_002(self):
         self.assertTrue(rl_safe_eval("GA=='ga'"))
+
+class SafeExecTestBasics(unittest.TestCase):
+    def test_funcdef_blocks(self):
+        '''test security issue found by Ethan Kim lt ethan 4t cremit d0t io gt'''
+        codes = (
+            '().__class__.__bases__[0]',
+            'def f():\n'
+             '\tfor c in ().__class__.__bases__[0].__subclasses__():\n'
+              '\t\tif c.__name__ == "_wrap_close":\n'
+               '\t\t\treturn c.__init__.__globals__["system"]("id")\n'
+            'f()\n',
+            )
+        blocked = 0
+        for c in codes:
+            try:
+                rl_safe_exec(c,{},{})
+            except BadCode:
+                blocked += 1
+        self.assertEqual(blocked,2,f'{blocked=} expected 2; probably BadCode detection in FunctionDef fails')
 
 class ExtendedLiteralEval(unittest.TestCase):
     def test_001(self):
@@ -197,7 +216,7 @@ class ExtendedLiteralEval(unittest.TestCase):
             self.assertEqual(showVal(expr),expected,f"rl_extended_literal_eval({expr!r}) is not equal to expected {expected}")
 
 def makeSuite():
-    return makeSuiteForClasses(SafeEvalTestCase,SafeEvalTestBasics,ExtendedLiteralEval)
+    return makeSuiteForClasses(SafeEvalTestCase,SafeEvalTestBasics,SafeExecTestBasics,ExtendedLiteralEval)
 
 if __name__ == "__main__": #noruntests
     unittest.TextTestRunner().run(makeSuite())

@@ -11,6 +11,11 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES  4.4.10  12/02/2026
+---------------------------
+    * fix security issue found by Ethan Kim lt ethan 4t cremit d0t io gt
+    * add a User-Agent header in rlUrlRead to overcome some anti bot actions
+
 CHANGES  4.4.9   15/01/2026
 ---------------------------
     * remove unwanted debug
