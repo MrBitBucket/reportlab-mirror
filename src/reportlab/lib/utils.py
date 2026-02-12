@@ -471,9 +471,11 @@ def open_for_read_by_name(name,mode='b'):
         return BytesIO(s)
 
 from urllib.parse import unquote, urlparse
-from urllib.request import urlopen
-def rlUrlRead(name):
-    return urlopen(name).read()
+from urllib.request import urlopen, Request
+def rlUrlRead(name, headers=None):
+    if headers==None: headers = {}
+    headers.setdefault('User-Agent','ReportLabAgent')
+    return urlopen(Request(name,headers=headers)).read()
 
 def open_for_read(name,mode='b'):
     #auto initialized function`
