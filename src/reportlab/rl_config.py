@@ -53,9 +53,9 @@ def _enumChk(name,value,allowed=()):
 
 from functools import partial
 _rlChecks=dict(
-        renderPMBackend = partial(_enumChk,allowed=('rlPyCairo','_renderPM')),
-        xmlParser = partial(_enumChk,allowed=('lxml','pyrxp')),
-        textPaths = partial(_enumChk,allowed=('freetype','_renderPM','backend')),
+        renderPMBackend = partial(_enumChk,allowed=('rlPyCairo',)),
+        xmlParser = partial(_enumChk,allowed=('lxml',)),
+        textPaths = partial(_enumChk,allowed=('freetype','backend')),
         )
 
 #this is used to set the options from

@@ -38,17 +38,9 @@ class ImageTestCase(unittest.TestCase):
         renderPDF.drawToFile(d, outPath) #, '')
         assert os.path.exists(outPath)
 
-        try:
-            import _rl_renderPM
-        except ImportError:
-            _rl_renderPM = None
-
         from reportlab.rl_config import renderPMBackend
         if rlPyCairo:
             d.save(formats=['png', 'gif', 'ps','svg'],outDir=os.path.dirname(outPath), fnRoot='test_graphics_images', _renderPM_backend='rlPyCairo')
-        if _rl_renderPM:
-            d.save(formats=['png', 'gif'],outDir=os.path.dirname(outPath), fnRoot='test_graphics_images-libart', _renderPM_backend='_renderPM')
-
 
     def test0(self):
         "Test convert a bitmap file as Image shape into a tmp. PDF file."

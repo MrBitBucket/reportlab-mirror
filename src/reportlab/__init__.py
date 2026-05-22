@@ -1,7 +1,7 @@
 #Copyright ReportLab Europe Ltd. 2000-2026
 #see license.txt for license details
 __doc__="""The Reportlab PDF generation library."""
-Version = "5.0a1"
+Version = "5.0.0a1"
 __version__=Version
 __date__='20260522'
 

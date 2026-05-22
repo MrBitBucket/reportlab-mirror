@@ -3166,7 +3166,7 @@ class ParaParser(HTMLParser):
         return style, fragList, bFragList
 
     def _tt_handle(self,tt):
-        "Iterate through a pre-parsed tuple tree (e.g. from pyrxp)"
+        "Iterate through a pre-parsed tuple tree"
         #import pprint
         #pprint.pprint(tt)
         #find the corresponding start_tagname and end_tagname methods.

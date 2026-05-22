@@ -972,7 +972,7 @@ class DebugMemo:
             self._finish(k)
 
     def _show_extensions(self):
-        for mn in ('_rl_accel','_renderPM','sgmlop','pyRXP','pyRXPU','_imaging','Image'):
+        for mn in ('_rl_accel','sgmlop','_imaging','Image'):
             try:
                 A = [mn].append
                 __import__(mn)

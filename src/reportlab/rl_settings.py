@@ -166,9 +166,9 @@ trustedHosts=None                                   #set to a list of trusted fo
                                                     #None or other false value means no hosts are trusted
 trustedSchemes=['file', 'rml', 'data', 'https',     #these url schemes are trusted
                 'http', 'ftp']
-renderPMBackend='rlPyCairo'                         #or '_renderPM' if available
-xmlParser='lxml'                                    #or 'pyrxp' for preferred xml parsing
-textPaths='freetype'                                #freetype or _renderPM or backend
+renderPMBackend='rlPyCairo'                         #rl_renderPM is gone
+xmlParser='lxml'                                    #pyRXP is gone
+textPaths='freetype'                                #freetype or backend, rl_renderPM is gone
                                                     #determines what code is used to create Paths from str
                                                     #see reportlab/graphics/utils.py for full horror
 toColorCanUse='rl_extended_literal_eval'            #change to None or 'rl_safe_eval' depending on trust

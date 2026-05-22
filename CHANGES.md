@@ -12,11 +12,11 @@ The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
 
-CHANGES 5.0a1    21/05/2026
+CHANGES 5.0.0a1  21/05/2026
 ---------------------------
     * make trustedHosts None mean no hosts are trusted in open_for_read
     * suggested by Rami Altai lt me at rami dash altai dot com gt
-    * version --> 5.0a1
+    * version --> 5.0.0a1
 
 CHANGES  4.5.1   12/05/2026
 ---------------------------
