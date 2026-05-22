@@ -22,7 +22,7 @@ if __name__=='__main__':
                 print('+++++ inserted %r into rl_config.%s' % (d,x))
         del reportlab, rl_config, d, x, P
     P=[]
-    os.environ['RL_trustedHosts'] = '*.reportlab.com'
+    os.environ['RL_trustedHosts'] = '*.reportlab.com,localhost'
     try:
         from reportlab.lib.testutils import setOutDir
     except ImportError:

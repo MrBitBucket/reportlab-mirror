@@ -518,6 +518,7 @@ def open_for_read(name,mode='b'):
         trustedHosts = re.compile(''.join(('^(?:',
                                 '|'.join(map(xre,trustedHosts)),
                                 ')\\Z')))
+
     def open_for_read(name,mode='b'):
         '''attempt to open a file or URL for reading'''
         if hasattr(name,'read'): return name
@@ -525,13 +526,22 @@ def open_for_read(name,mode='b'):
             return open_for_read_by_name(name,mode)
         except:
             try:
-                if trustedHosts is not None:
-                    purl = urlparse(name)
-                    if purl[0] and not ((purl[0] in ('data','file') or trustedHosts.match(purl[1])) and (purl[0] in trustedSchemes)):
-                        raise ValueError('Attempted untrusted host access')
-                return BytesIO((datareader if name[:5].lower()=='data:' else rlUrlRead)(name))
+                if not trustedHosts: raise ValueError
+                netloc = urlparse(name)
+                scheme = netloc.scheme
+                netloc = netloc.netloc.lower()
+                if (not scheme 
+                    or scheme not in trustedSchemes 
+                    or (scheme=='file' and not (
+                                    (netloc=='' and trustedHosts.match('localhost'))
+                                    or
+                                    (netloc!='' and trustedHosts.match(netloc))
+                                    ))
+                    or (scheme not in ('data','file') and not trustedHosts.match(netloc))):
+                    raise ValueError 
+                return BytesIO((datareader if scheme=='data' else rlUrlRead)(name))
             except:
-                raise IOError('Cannot open resource "%s"' % name)
+                raise IOError(f'Cannot open resource {name!r}')
     globals()['open_for_read'] = open_for_read
     return open_for_read(name,mode)
 
