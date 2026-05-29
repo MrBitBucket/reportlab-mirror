@@ -2,7 +2,7 @@
 #see license.txt for license details
 '''default settings for reportlab
 
-to override these drop a module rl_local_settings.py parallel to this file or
+to override these drop a module local_rl_settings.py parallel to this file or
 anywhere on the path.
 '''
 import os, sys
