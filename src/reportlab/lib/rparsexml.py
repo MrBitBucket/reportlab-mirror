@@ -5,10 +5,6 @@ parsers available.  Constructs the lightest possible in-memory
 representation; parses most files we have seen in pure python very
 quickly.
 
-The output structure is the same as the one produced by pyRXP,
-our validating C-based parser, which was written later.  It will
-use pyRXP if available.
-
 This is used to parse intra-paragraph markup.
 
 Example parse::
@@ -53,29 +49,7 @@ IN A POST-PROCESSING STEP.
 PROLOGUES ARE NOT UNDERSTOOD.  OTHER STUFF IS PROBABLY MISSING.
 """
 
-RequirePyRXP = 0        # set this to 1 to disable the nonvalidating fallback parser.
-
-try:
-    #raise ImportError, "dummy error"
-    simpleparse = 0
-    import pyRXPU
-    def warnCB(s):
-        print(s)
-    pyRXP_parser = pyRXPU.Parser(
-                        ErrorOnValidityErrors=1,
-                        NoNoDTDWarning=1,
-                        ExpandCharacterEntities=1,
-                        ExpandGeneralEntities=1,
-                        warnCB = warnCB,
-                        srcName='string input',
-                        ReturnUTF8 = 0,
-                        )
-    def parsexml(xmlText, oneOutermostTag=0,eoCB=None,entityReplacer=None,parseOpts={}):
-        pyRXP_parser.eoCB = eoCB
-        p = pyRXP_parser.parse(xmlText,**parseOpts)
-        return oneOutermostTag and p or ('',None,[p],None)
-except ImportError:
-    simpleparse = 1
+simpleparse = 1
 
 class smartDecode:
     @staticmethod
@@ -108,8 +82,6 @@ def unEscapeContentList(contentList):
 
 def parsexmlSimple(xmltext, oneOutermostTag=0,eoCB=None,entityReplacer=unEscapeContentList):
     """official interface: discard unused cursor info"""
-    if RequirePyRXP:
-        raise ImportError("pyRXP not found, fallback parser disabled")
     (result, cursor) = parsexml0(xmltext,entityReplacer=entityReplacer)
     if oneOutermostTag:
         return result[2][0]

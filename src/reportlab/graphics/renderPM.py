@@ -29,29 +29,13 @@ from math import sin, cos, pi, ceil
 
 def _getPMBackend(backend=None):
     if not backend: backend = rl_config.renderPMBackend
-    if backend=='_renderPM':
-        try:
-            import _rl_renderPM as M
-        except ImportError as errMsg:
-            try:
-                import rlPyCairo as M
-            except ImportError:
-                raise RenderPMError("""Cannot import desired renderPM backend, {backend}.
-No module named _rl_renderPM
-it may be badly or not installed!
-You may need to install development tools
-or seek advice at the users list see
-https://pairlist2.pair.net/mailman/listinfo/reportlab-users""")
-    elif 'cairo' in backend.lower():
+    if 'cairo' in backend.lower():
         try:
             import rlPyCairo as M
         except ImportError as errMsg:
-            try:
-                import _rl_renderPM as M
-            except ImportError:
-                raise RenderPMError(f"""cannot import desired renderPM backend {backend}
+            raise RenderPMError(f"""cannot import desired renderPM backend {backend}
 Seek advice at the users list see
-https://pairlist2.pair.net/mailman/listinfo/reportlab-users""")
+https://groups.google.com/g/reportlab-users""")
     else:
         raise RenderPMError(f'Invalid renderPM backend, {backend}')
     return M
@@ -320,8 +304,7 @@ class PMCanvas:
         self.__dict__['_clipPaths'] = []
         self.__dict__['configPIL'] = configPIL
         self.__dict__['_dpi'] = dpi
-        #the _rl_renderPM.gstate object doesn't support hasattr so we use this as a proxy test for 'isbuiltin' 
-        self.__dict__['_backend'] = '_renderPM' if type(self._gs._aapixbuf)==type(pow) else 'rlPyCairo'
+        self.__dict__['_backend'] = 'rlPyCairo'
         self.__dict__['_backendfmt'] = backendFmt
         self.__dict__['_colorConverter'] = CairoColor if self._backend=='rlPyCairo' else Color2Hex
         self.ctm = self._baseCTM
@@ -331,15 +314,7 @@ class PMCanvas:
         mod = _getPMBackend(backend)
         if backend is None:
             backend = rl_config.renderPMBackend
-        if backend=='_renderPM':
-            try:
-                return mod.gstate(w,h,bg=bg)
-            except TypeError:
-                try:
-                    return mod.GState(w,h,bg,fmt=fmt)
-                except:
-                    pass
-        elif 'cairo' in backend.lower():
+        if 'cairo' in backend.lower():
             fmt = fmt.upper()
             fmt = _pycairoFmtsMap.get(fmt,fmt)
             try:

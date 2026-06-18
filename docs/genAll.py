@@ -11,12 +11,6 @@ def _genAll(verbose=1):
             #'tools/docco/graphdocpy.py',
             )   
         ]
-    for f in ('src/rl_addons/pyRXP/docs/PyRXP_Documentation.rml',
-            ):
-        f = os.path.join(topDir,f)
-        if os.path.isfile(f):
-            L += [f]
-            break
     for p in L:
         os.chdir(os.path.dirname(p))
         if p[-4:]=='.rml':
