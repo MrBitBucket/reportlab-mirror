@@ -1308,7 +1308,7 @@ class Canvas(_PDFColorSetter):
         if len(self._code): self.showPage()
         s = self._doc.GetPDFData(self)
         if isUnicode(s):
-            s = s.encode('utf-8')
+            s = s.encode('latin1')  #this is what pdfdoc.py uses; could not detect need in tests
         return s
 
     def setPageSize(self, size):
