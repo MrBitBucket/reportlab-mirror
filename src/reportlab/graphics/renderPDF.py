@@ -295,7 +295,7 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, **kwds
         a = 'initialFont'+x
         kwds[a] = getattr(d,a,kwds.pop(a,STATE_DEFAULTS['font'+x]))
     metadataPath = kwds.pop('metadataPath',None)
-    c = Canvas(fn,**kwds)
+    c = kwds.pop('canvasMaker',Canvas)(fn,**kwds)
     if msg:
         c.setFont(rl_config.defaultGraphicsFontName, 36)
         c.drawString(80, 750, msg)
