@@ -471,13 +471,8 @@ def open_for_read_by_name(name,mode='b'):
         return BytesIO(s)
 
 from urllib.parse import unquote, urlparse
-from urllib.request import urlopen, Request
-def rlUrlRead(name, headers=None):
-    if headers==None: headers = {}
-    headers.setdefault('User-Agent','ReportLabAgent')
-    return urlopen(Request(name,headers=headers)).read()
-
-def open_for_read(name,mode='b'):
+_tHaS = {}  #cache for (trustedHosts,trustedSchemes)
+def rlUrlRead(url, headers=None):
     #auto initialized function`
     #copied here from urllib.URLopener.open_data because
     # 1) they want to remove it
@@ -509,41 +504,69 @@ def open_for_read(name,mode='b'):
         else:
             data = unquote(data).encode('latin-1')
         return data
-    from reportlab.rl_config import trustedHosts, trustedSchemes
-    if trustedHosts:
-        import re, fnmatch
-        def xre(s):
-            s = fnmatch.translate(s)
-            return s[4:-3] if s.startswith('(?s:') else s[:-7]
-        trustedHosts = re.compile(''.join(('^(?:',
-                                '|'.join(map(xre,trustedHosts)),
-                                ')\\Z')))
-
-    def open_for_read(name,mode='b'):
-        '''attempt to open a file or URL for reading'''
-        if hasattr(name,'read'): return name
+    import socket
+    from urllib.request import OpenerDirector, build_opener, Request
+    import re, fnmatch
+    def xre(s):
+        s = fnmatch.translate(s)
+        return s[4:-3] if s.startswith('(?s:') else s[:-7]
+    def keyval(v):
+        return v if v is None else tuple(v)
+    class RLOpenerDirector(OpenerDirector):
+        def open(self, req, data=None, timeout=socket._GLOBAL_DEFAULT_TIMEOUT):
+            if isinstance(req, str):
+                req = Request(url, data)
+            url = req.full_url
+            if data is not None:
+                req.data = data
+            #do the import here in case these change between calls
+            from reportlab.rl_config import trustedHosts, trustedSchemes
+            key = keyval(trustedHosts),keyval(trustedSchemes)
+            if key not in _tHaS:
+                if trustedHosts:
+                    tHosts = re.compile(''.join(('^(?:',
+                                            '|'.join(map(xre,trustedHosts)),
+                                            ')\\Z')))
+                _tHaS.clear()
+                _tHaS[key] = (tHosts,trustedSchemes)
+            tHosts, tSchemes =_tHaS[key]
+            if not tHosts: raise ValueError
+            netloc = urlparse(url)
+            scheme = netloc.scheme
+            netloc = netloc.netloc.lower()
+            if (not scheme 
+                or scheme not in tSchemes 
+                or (scheme=='file' and not (
+                                (netloc=='' and tHosts.match('localhost'))
+                                or
+                                (netloc!='' and tHosts.match(netloc))
+                                ))
+                or (scheme not in ('data','file') and not tHosts.match(netloc))):
+                raise ValueError 
+            if scheme=='data':
+                return datareader(url)
+            else:
+                return super().open(req,data=data,timeout=timeout)
+    _rlOpener = build_opener()
+    _rlOpener.__class__ = RLOpenerDirector
+    def rlUrlRead(url, headers=None):
         try:
-            return open_for_read_by_name(name,mode)
+            if headers==None: headers = {}
+            headers.setdefault('User-Agent','ReportLabAgent')
+            return _rlOpener.open(Request(url,headers=headers))
         except:
-            try:
-                if not trustedHosts: raise ValueError
-                netloc = urlparse(name)
-                scheme = netloc.scheme
-                netloc = netloc.netloc.lower()
-                if (not scheme 
-                    or scheme not in trustedSchemes 
-                    or (scheme=='file' and not (
-                                    (netloc=='' and trustedHosts.match('localhost'))
-                                    or
-                                    (netloc!='' and trustedHosts.match(netloc))
-                                    ))
-                    or (scheme not in ('data','file') and not trustedHosts.match(netloc))):
-                    raise ValueError 
-                return BytesIO((datareader if scheme=='data' else rlUrlRead)(name))
-            except:
-                raise IOError(f'Cannot open resource {name!r}')
-    globals()['open_for_read'] = open_for_read
-    return open_for_read(name,mode)
+            raise IOError(f'Cannot open resource {url!r}')
+    globals()['rlUrlRead'] = rlUrlRead
+    return rlUrlRead(url,headers=headers)
+
+def open_for_read(name,mode='b'):
+    '''attempt to open a file or URL for reading'''
+    if hasattr(name,'read'): return name
+    try:
+        return open_for_read_by_name(name,mode)
+    except:
+        r = rlUrlRead(name)
+        return BytesIO(r.fp.read()) if not isinstance(r,bytes) else BytesIO(r)
 
 def open_and_read(name,mode='b'):
     f = open_for_read(name,mode)
@@ -656,7 +679,10 @@ class ImageReader:
                     raise ValueError('imageReaderFlags values other than 0 are no longer supported; all images are interned now')
                 fp = open_for_read(fileName,'b')
                 if not isinstance(fp, BytesIO):
-                    tfp, fp = fp, BytesIO(fp.read())
+                    try:
+                        tfp, fp = fp, BytesIO(fp.read())
+                    except:
+                        raise
                     tfp.close()
                     del tfp
                 self.fp = fp

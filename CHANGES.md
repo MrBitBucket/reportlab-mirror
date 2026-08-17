@@ -15,6 +15,7 @@ CHANGES 5.0.1    ??/08/2026
 ---------------------------
     * use latin1 encoding in Canvas.getpdfdata
     * allow overriding canvas construction in renderPDF.drawToFile
+    * apply trustedHosts/Schemes checks to redirected hosts bug reported by Ezinne Kalu
 
 CHANGES 5.0.0  18/06/2026
 ---------------------------
