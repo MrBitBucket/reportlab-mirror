@@ -11,11 +11,12 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES 5.0.1    ??/08/2026
+CHANGES 5.0.1    20/08/2026
 ---------------------------
     * use latin1 encoding in Canvas.getpdfdata
     * allow overriding canvas construction in renderPDF.drawToFile
     * apply trustedHosts/Schemes checks to redirected hosts bug reported by Ezinne Kalu
+    * fix indexing & setattr issue reported by Darius Houle
 
 CHANGES 5.0.0  18/06/2026
 ---------------------------

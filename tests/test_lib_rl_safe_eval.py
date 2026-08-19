@@ -100,6 +100,9 @@ class SafeEvalTestSequenceMeta(type):
                 '"{1}{2}".format(1,2)',
                 'builtins',
                 '[ [ [ [ ftype(ctype(0, 0, 0, 0, 3, 67, b"t\\x00d\\x01\\x83\\x01\\xa0\\x01d\\x02\\xa1\\x01\\x01\\x00d\\x00S\\x00", (None, "os", "touch /tmp/exploited"), ("__import__", "system"), (), "<stdin>", "", 1, b"\\x12\\x01"), {})() for ftype in [type(lambda: None)] ] for ctype in [type(getattr(lambda: {None}, Word("__code__")))] ] for Word in [orgTypeFun("Word", (str,), { "mutated": 1, "startswith": lambda self, x: False, "__eq__": lambda self,x: self.mutate() and self.mutated < 0 and str(self) == x, "mutate": lambda self: {setattr(self, "mutated", self.mutated - 1)}, "__hash__": lambda self: hash(str(self)) })] ] for orgTypeFun in [type(type(1))]] and "red"',
+                'dict[1]',
+                ('list[1]',dict(exception=(BadCode,TypeError))),
+                'tuple[1]',
                 )
                 ),
                 ):
@@ -148,7 +151,7 @@ class SafeEvalTestCase(unittest.TestCase):
         except exception:
             return
         except:
-            self.assertEqual(True,False,"rl_safe_eval({expr!r}) raised {sys.exc_info()[0].__name__}: {str(sys.exc_info()[1])} instead of {exception.__name__}")
+            self.assertEqual(True,False,f"rl_safe_eval({expr!r}) raised {sys.exc_info()[0].__name__}: {str(sys.exc_info()[1])} instead of {exception.__name__}")
 
 GA = 'ga'
 class SafeEvalTestBasics(unittest.TestCase):

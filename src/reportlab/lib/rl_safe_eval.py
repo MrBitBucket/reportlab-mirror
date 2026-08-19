@@ -9,6 +9,11 @@ strTypes = (bytes,str)
 isPy39 = sys.version_info[:2]>=(3,9)
 isPy313 = sys.version_info[:2]>=(3,13)
 
+try:
+	GenericAlias = types.GenericAlias
+except:
+	GenericAlias = None
+
 import textwrap
 
 class BadCode(ValueError):
@@ -919,6 +924,7 @@ class __RL_SAFE_ENV__:
 		__rl_builtins__['__rl_sd__'] = self.__rl_sd__
 		__rl_builtins__['__rl_augAssign__'] = self.__rl_augAssign__
 		__rl_builtins__['__rl_getitem__'] = self.__rl_getitem__
+		__rl_builtins__['__rl_setattr__'] = self.__rl_setattr__
 		__rl_builtins__['__rl_getattr__'] = self.__rl_getattr__
 		__rl_builtins__['__rl_getiter__'] = self.__rl_getiter__
 		__rl_builtins__['__rl_max_len__'] = self.__rl_max_len__
@@ -929,6 +935,7 @@ class __RL_SAFE_ENV__:
 		__rl_builtins__['__rl_SafeIter__'] = __rl_SafeIter__
 
 		#these are tested builtins
+		__rl_builtins__['setattr'] = self.__rl_setattr__
 		__rl_builtins__['getattr'] = self.__rl_getattr__
 		__rl_builtins__['dict'] = __rl_dict__
 		__rl_builtins__['iter'] = self.__rl_getiter__
@@ -1075,7 +1082,12 @@ class __RL_SAFE_ENV__:
 		self.__rl_is_allowed_name__(a)
 		return getattr(obj,a,*args)
 
-	def __rl_getitem__(self, obj, a):
+	def __rl_setattr__(self, obj, a, v, *args):
+		#remediation for using odd magics
+		self.__rl_is_allowed_name__(a)
+		return setattr(obj,a,v,*args)
+
+	def __inner_rl_getitem__(self, obj, a):
 		if type(a) is self.__slicetype__:
 			if a.step is not None:
 				v = obj[a]
@@ -1093,6 +1105,17 @@ class __RL_SAFE_ENV__:
 			self.__rl_is_allowed_name__(a)
 			return obj[a]
 		return obj[a]
+
+	def __rl_getitem__(self, obj, a):
+		try:
+			v = self.__inner_rl_getitem__(obj,a)
+		except (IndexError,KeyError,KeyboardInterrupt,ValueError,TypeError):
+			raise
+		except:
+			raise BadCode("subscript operation %s[%r] failed" % (obj.__class__.__name__,a))
+		if isinstance(v,GenericAlias):
+			raise BadCode("subscript operation %s[%r] created a GenericAlias" % (obj.__class__.__name__,a))
+		return v
 
 	__rl_tmax__ = 5
 	__rl_max_len__ = 100000
