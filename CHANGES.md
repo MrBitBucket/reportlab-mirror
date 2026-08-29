@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES 5.0.2    ??/??/2026
+---------------------------
+    * rltempfile.py fix export \_\_all\_\_ contrib Max R  maxrozentsveyg at gmail dot com
+
 CHANGES 5.0.1    20/08/2026
 ---------------------------
     * use latin1 encoding in Canvas.getpdfdata
