@@ -10,7 +10,9 @@ import reportlab
 from reportlab import rl_config
 import unittest
 from reportlab.lib import colors
-from reportlab.lib.utils import rl_safe_eval, rl_safe_exec, annotateException, rl_extended_literal_eval
+from reportlab.lib.rl_safe_eval import rl_safe_eval, rl_safe_exec, rl_extended_literal_eval, FilteredModule
+from reportlab.lib.utils import annotateException
+from reportlab.lib import utils as rl_lib_utils
 from reportlab.lib.rl_safe_eval import BadCode
 
 testObj = [1,('a','b',2),{'A':1,'B':2.0},"32"]
@@ -20,6 +22,8 @@ class TestClass:
 testInst = TestClass()
 def testFunc(bad=False):
     return open('/tmp/myfile','r') if bad else testObj
+
+rl_aaa = rl_safe_eval
 
 class SafeEvalTestSequenceMeta(type):
     def __new__(cls, name, bases, cdict):
@@ -68,6 +72,7 @@ class SafeEvalTestSequenceMeta(type):
                 'list(range(1,10,3))',
                 '({1,2,3},set([4,5,6]),frozenset([7,8,9]),{i for i in range(1,10,3)})',
                 '"%s%s" % (1,2)',
+                ('rl_lib_utils',dict(mnames='reportlab')),  #test allowing some imports to be seen
                 )
                 ),
                 (
@@ -103,6 +108,12 @@ class SafeEvalTestSequenceMeta(type):
                 'dict[1]',
                 ('list[1]',dict(exception=(BadCode,TypeError))),
                 'tuple[1]',
+                #these tests address issues raised by Ammae C ammarc26627 at gmail dot com 
+                ('sys.version',dict(exception=(NameError,BadCode))),
+                ('os.system("echo hello > test-output.txt")',dict(exception=(NameError,BadCode))),  #os is forbidden
+                ('rl_lib_utils.os',dict(mnames='reportlab',exception=AttributeError)),  #import reportlab, but os is disallowed attribute
+                ('rl_safe_eval("1")',dict(mnames='reportlab')),
+                ('rl_aaa("1")',dict(mnames='reportlab')),
                 )
                 ),
                 ):
@@ -134,19 +145,21 @@ def addMeta(mcs):
 
 @addMeta(SafeEvalTestSequenceMeta)
 class SafeEvalTestCase(unittest.TestCase):
-    def works(self, expr, g=None, l=None):
+    def works(self, expr, g=None, l=None, mnames=None):
         try:
             answer = eval(expr,g,l)
-            result = rl_safe_eval(expr,g,l)
+            result = rl_safe_eval(expr,g,l,mnames=mnames)
+            if isinstance(result,FilteredModule):
+                result = result._FilteredModule__mod
         except:
             print('expr=%r' % expr)
             annotateException('\nexpr=%r\n' % expr)
         self.assertEqual(answer,result,f"rl_safe_eval({expr!r}) = {result!r}) not expected {answer!r}")
     def skips(self,*args,**kwds):
         raise unittest.SkipTest
-    def fails(self, expr, g=None, l=None, timeout=None, exception=BadCode):
+    def fails(self, expr, g=None, l=None, timeout=None, exception=BadCode, mnames=None):
         try:
-            result = rl_safe_eval(expr,g,l,timeout=timeout)
+            result = rl_safe_eval(expr,g,l,timeout=timeout, mnames=mnames)
             self.assertEqual(True,False,f"rl_safe_eval({expr!r}) = {result!r} did not raise {exception.__name__}")
         except exception:
             return

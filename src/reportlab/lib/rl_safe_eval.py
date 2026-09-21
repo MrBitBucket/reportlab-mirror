@@ -3,7 +3,8 @@
 #https://github.com/zopefoundation/RestrictedPython
 #https://github.com/danthedeckie/simpleeval
 #hopefully we are standing on giants' shoulders
-import sys, os, ast, re, weakref, time, copy, math, types
+import sys, os, ast, re, weakref, time, copy, math, types, textwrap, \
+		inspect, functools
 eval_debug = int(os.environ.get('EVAL_DEBUG','0'))
 strTypes = (bytes,str)
 isPy39 = sys.version_info[:2]>=(3,9)
@@ -14,7 +15,84 @@ try:
 except:
 	GenericAlias = None
 
-import textwrap
+@functools.lru_cache(maxsize=20)
+def _mnames_pattern(mname, mnames):
+	'''
+	mname shoule be Non or the name of a module
+	mnames should be a list of acceptable module name starts
+	a value "-rl-" in mnames is replaced by reportlab friends
+	'''
+	if not mnames:
+		mnames = []
+	elif isinstance(mnames,str):
+		mnames = [mnames]
+	elif isinstance(mnames,tuple):
+		mnames = list(mnames)
+	elif not isinstance(mnames,list):
+		raise ValueError(f'wrong type for {mnames=}')
+	if mname:
+		if isinstance(mname,str):
+			if mname not in mnames:
+				mnames.append(mname)
+		else:
+			raise ValueError(f'wrong type for {mname=}')
+	mnames = set(mnames)
+	if '-rl-' in mnames: mnames = (mnames | {'reportlab','rlextra','rlPyCairo'}) - {'-rl-'}
+	return re.compile(rf'^(?:{"|".join(set(mnames))})(?:\.|$)' )if mnames else None
+	
+class FilteredModule:
+	def __init__(self, m, mnames=(), mpattern=None):
+		self.__mod = m
+		self.__mpattern = mpattern if mpattern else _mnames_pattern(m.__name__,mnames)
+
+	def __getattr__(self,a):
+		r = getattr(self.__mod,a)
+		if not inspect.ismodule(r) or self.__mpattern.match(r.__name__):
+			return r
+		raise AttributeError(f'{self.__mod} has no attribute {a}')
+
+def _g_accept(
+		    n,		#var name
+			v,		#var value
+		    mpattern, #module name matcher
+			name_rejects=set(('builtins', '__builtins__', '__all__', '__doc__',	#names to reject
+								'__file__', '__name__', '__package__', '__spec __')),
+			):
+	if n in name_rejects: return False
+	if isinstance(v,(str, bytes, float, complex, int, list, tuple, dict)): return True
+	if inspect.ismodule(v): return mpattern.match(v.__name__)
+	if not mpattern: return True
+	if inspect.isclass(v): return mpattern.match(v.__module__)
+	if inspect.isfunction(v): return mpattern.match(v.__module__)
+	return mpattern.match(v.__class__.__module__)
+
+
+def _g_accept_gen(
+			g,			#the start dict
+			mpattern,	#allowed module starts
+			name_rejects=set(('builtins', '__builtins__', '__all__', '__doc__',	#names to reject
+								'__file__', '__name__', '__package__', '__spec __')),
+			):
+	for n,v in g.items():
+		if n in name_rejects: continue
+		if isinstance(v,(str, bytes, float, complex, int, list, tuple, dict)): yield n, v
+		if inspect.ismodule(v):
+			if mpattern and mpattern.match(v.__name__):
+				yield n, FilteredModule(v,mpattern=mpattern)
+			else:
+				continue
+		if not mpattern: yield n, v
+		if mpattern.match(
+						v.__module__ if inspect.isclass(v) or inspect.isfunction(v) 
+						else v.__class__.__module__):
+			yield n,v
+
+
+def _g_filter(g, mname=None, mnames=()):
+	if not mname: mname = g.get('__name__',None)
+	mpattern = _mnames_pattern(mname,mnames)
+	return dict(_g_accept_gen(g,_mnames_pattern(mname,mnames)))
+	return {n:v for n,v in g.items() if _g_accept( n, v, mpattern)}
 
 class BadCode(ValueError):
 	pass
@@ -69,6 +147,7 @@ __rl_unsafe__ = frozenset('''builtins breakpoint __annotations__ co_argcount co_
 						__globals__ im_class im_func im_self __iter__ __kwdefaults__ __module__
 						__name__ next __qualname__ __self__ tb_frame tb_lasti tb_lineno tb_next
 						globals vars locals
+						rl_safe_exec __rl_safe_exec__ rl_safe_eval __rl_safe_eval__ rl_less_safe_eval
 						type eval exec aiter anext compile open
 						dir print classmethod staticmethod __import__ super property'''.split()
 						)
@@ -864,6 +943,7 @@ class __RL_SAFE_ENV__:
 	__time_time__ = time.time
 	__weakref_ref__ = weakref.ref
 	__slicetype__ = type(slice(0))
+	__recur__ = False
 	def __init__(self, timeout=None, allowed_magic_methods=None, allowed_magic_names=None):
 		self.timeout = timeout if timeout is not None else self.__rl_tmax__
 		self.allowed_magic_methods = __fix_set__(allowed_magic_methods, __allowed_magic_methods__)
@@ -1191,7 +1271,7 @@ class __RL_SAFE_ENV__:
 		return bcode, names_seen
 
 	def __rl_safe_eval__(self, expr, g, l, mode, timeout=None, allowed_magic_methods=None, __frame_depth__=3,
-					  allowed_magic_names=None):
+					  allowed_magic_names=None, mnames=()):
 		if allowed_magic_methods is not None:
 			self.allowed_magic_methods = __fix_set__(allowed_magic_methods, __allowed_magic_methods__)
 		if allowed_magic_names is not None:
@@ -1200,9 +1280,12 @@ class __RL_SAFE_ENV__:
 		bcode, ns = self.__rl_compile__(expr, fname='<string>', mode=mode, flags=0, inherit=True,
 				visit=UntrustedAstTransformer(nameIsAllowed=self.__rl_is_allowed_name__).visit)
 		if None in (l,g):
-			G = sys._getframe(__frame_depth__)
-			L = {n:r for n,r in G.f_locals.items()} if l is None else l
-			G = G.f_globals.copy() if g is None else g
+			frame = sys._getframe(__frame_depth__)
+			G = frame.f_globals
+			mname = G.get('__name__',None)
+			#G = G.f_globals.copy() if g is None else g
+			G = _g_filter(G,mnames=mnames) if g is None else g
+			L = _g_filter(frame.f_locals, mname=mname, mnames=mnames) if l is None else l
 		else:
 			G = g
 			L = l
@@ -1219,8 +1302,11 @@ class __RL_SAFE_ENV__:
 			sbi(getattr(bi,n))
 			setattr(bi,n,r)
 		try:
+			if self.__recur__: raise BadCode('recursive safe evaluation is not allowed')
+			self.__recur__ = True
 			return eval(bcode,G,L)
 		finally:
+			self.__recur__ = False
 			sbi = sbi.__self__
 			for i, (n, r) in enumerate(bir):
 				setattr(bi,n,sbi[i])
@@ -1233,11 +1319,11 @@ class __rl_safe_eval__:
 	def __init__(self):
 		self.env = None
 
-	def __call__(self, expr, g=None, l=None, timeout=None, allowed_magic_methods=None, allowed_magic_names=None):
+	def __call__(self, expr, g=None, l=None, timeout=None, allowed_magic_methods=None, allowed_magic_names=None, mnames=()):
 		if not self.env: self.env = __RL_SAFE_ENV__()
 		return self.env.__rl_safe_eval__(expr, g, l, self.mode, timeout=timeout,
 			allowed_magic_methods=allowed_magic_methods,
-			__frame_depth__=2, allowed_magic_names=allowed_magic_names)
+			__frame_depth__=2, allowed_magic_names=allowed_magic_names, mnames=mnames)
 
 class __rl_safe_exec__(__rl_safe_eval__):
 	mode = 'exec'
