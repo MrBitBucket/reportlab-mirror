@@ -50,15 +50,13 @@ class FilteredModule:
 		if not inspect.ismodule(r) or self.__mpattern.match(r.__name__):
 			return r
 		raise AttributeError(f'{self.__mod} has no attribute {a}')
+	def __eq__(self,other):
+		if isinstance(other,self.__class__):
+			return self.__mod == other.__mod
+		else:
+			return self.__mod == other
 
-def _g_accept(
-		    n,		#var name
-			v,		#var value
-		    mpattern, #module name matcher
-			name_rejects=set(('builtins', '__builtins__', '__all__', '__doc__',	#names to reject
-								'__file__', '__name__', '__package__', '__spec __')),
-			):
-	if n in name_rejects: return False
+def _g_accept_v(v,mpattern):
 	if isinstance(v,(str, bytes, float, complex, int, list, tuple, dict)): return True
 	if inspect.ismodule(v): return mpattern.match(v.__name__)
 	if not mpattern: return True
@@ -66,16 +64,25 @@ def _g_accept(
 	if inspect.isfunction(v): return mpattern.match(v.__module__)
 	return mpattern.match(v.__class__.__module__)
 
+_g_reject_names = set(('builtins', '__builtins__', '__all__', '__doc__',
+						'__file__', '__name__', '__package__', '__spec __'))
+def _g_accept(
+			n,		#var name
+			v,		#var value
+			mpattern, #module name matcher
+			name_rejects=_g_reject_names,
+			):
+	if n in name_rejects: return False
+	return _g_accept_v(v,mpattern)
 
 def _g_accept_gen(
 			g,			#the start dict
 			mpattern,	#allowed module starts
-			name_rejects=set(('builtins', '__builtins__', '__all__', '__doc__',	#names to reject
-								'__file__', '__name__', '__package__', '__spec __')),
+			name_rejects=_g_reject_names,
 			):
 	for n,v in g.items():
 		if n in name_rejects: continue
-		if isinstance(v,(str, bytes, float, complex, int, list, tuple, dict)): yield n, v
+		if isinstance(v,(str, bytes, float, complex, int, list, tuple, dict, set)): yield n, v
 		if inspect.ismodule(v):
 			if mpattern and mpattern.match(v.__name__):
 				yield n, FilteredModule(v,mpattern=mpattern)
@@ -88,11 +95,8 @@ def _g_accept_gen(
 			yield n,v
 
 
-def _g_filter(g, mname=None, mnames=()):
-	if not mname: mname = g.get('__name__',None)
-	mpattern = _mnames_pattern(mname,mnames)
-	return dict(_g_accept_gen(g,_mnames_pattern(mname,mnames)))
-	return {n:v for n,v in g.items() if _g_accept( n, v, mpattern)}
+def _g_filter(g, mpattern):
+	return dict(_g_accept_gen(g,mpattern))
 
 class BadCode(ValueError):
 	pass
@@ -943,7 +947,6 @@ class __RL_SAFE_ENV__:
 	__time_time__ = time.time
 	__weakref_ref__ = weakref.ref
 	__slicetype__ = type(slice(0))
-	__recur__ = False
 	def __init__(self, timeout=None, allowed_magic_methods=None, allowed_magic_names=None):
 		self.timeout = timeout if timeout is not None else self.__rl_tmax__
 		self.allowed_magic_methods = __fix_set__(allowed_magic_methods, __allowed_magic_methods__)
@@ -970,11 +973,22 @@ class __RL_SAFE_ENV__:
 			def __call__(self,*args,**kwds):
 				raise BadCode('missing global %s' % self.__name__)
 
-		self.real_bi = builtins
-		self.bi_replace = (
-				('open',__rl_missing_func__('open')),
-				('iter',self.__rl_getiter__),
-				)
+		if False:
+			self.real_bi = os, builtins
+			self.bi_replace = (
+						(self.real_bi[0], tuple((
+							(_f,__rl_missing_func__(_f)) for _f in 
+								dir(self.real_bi[0]) if inspect.isfunction(_f)
+							)),
+						),
+						(self.real_bi[1], (
+							('open',__rl_missing_func__('open')),
+							('iter',self.__rl_getiter__),
+							),
+						),
+					)
+		else:
+			self.bi_replace = ()
 
 		__rl_safe_builtins__.update({_:getattr(builtins,_) for _ in
 			('''None False True abs bool callable chr complex divmod float hash hex id int
@@ -1142,6 +1156,10 @@ class __RL_SAFE_ENV__:
 			ret[idx] = self.__rl_unpack_sequence__(ret[idx], child_spec, _getiter_)
 		return ret
 
+	def __rl_allowed_obj__(self,obj):
+		if not _g_accept_v(obj,self.__rl_mpattern__):
+			raise BadCode(f'{obj} access is not allowed')
+
 	def __rl_is_allowed_name__(self, name, crash=True):
 		"""Check names if they are allowed.
 		If ``allow_magic_methods is True`` names in `__allowed_magic_methods__`
@@ -1157,10 +1175,15 @@ class __RL_SAFE_ENV__:
 			return True
 
 	def __rl_getattr__(self, obj, a, *args):
-		if isinstance(obj, strTypes) and a=='format':
-			raise BadCode('%s.format is not implemented' % type(obj))
+		if ((isinstance(obj, strTypes) or (inspect.isclass(obj) and issubclass(obj,str)))
+					and a in ('format', 'format_map')):
+			raise BadCode(f'{obj if inspect.isclass(obj) else type(obj)}.{a} is not implemented')
 		self.__rl_is_allowed_name__(a)
-		return getattr(obj,a,*args)
+		r = getattr(obj,a,*args)
+		if (inspect.ismodule(r) and self.__rl_mpattern__ and
+						not self.__rl_mpattern__.match(r.__name__)):
+			raise BadCode(f'{obj} access is not allowed')
+		return r
 
 	def __rl_setattr__(self, obj, a, v, *args):
 		#remediation for using odd magics
@@ -1195,6 +1218,7 @@ class __RL_SAFE_ENV__:
 			raise BadCode("subscript operation %s[%r] failed" % (obj.__class__.__name__,a))
 		if isinstance(v,GenericAlias):
 			raise BadCode("subscript operation %s[%r] created a GenericAlias" % (obj.__class__.__name__,a))
+		self.__rl_allowed_obj__(v)
 		return v
 
 	__rl_tmax__ = 5
@@ -1241,7 +1265,13 @@ class __RL_SAFE_ENV__:
 		if obj:
 			if isinstance(obj,dict) and func.__name__ in ('pop','setdefault','get', 'popitem'):
 				self.__rl_is_allowed_name__(args[0])
-		return func(*[a for a in self.__rl_getiter__(args)], **{k:v for k,v in kwds.items()})
+		else:
+			if func.__class__.__name__ in ('__rl_safe_exec__','__rl_safe_eval__'):
+				raise BadCode('recursive safe evaluation is not allowed')
+		r = func(*[a for a in self.__rl_getiter__(args)], **{k:v for k,v in kwds.items()})
+		if inspect.ismodule(r) and not self.__rl_mpattern__.match(r.__name__):
+			raise BadCode(f'{obj} access is not allowed')
+		return r
 
 	def __rl_args_iter__(self,*args):
 		if len(args) == 1:
@@ -1271,7 +1301,7 @@ class __RL_SAFE_ENV__:
 		return bcode, names_seen
 
 	def __rl_safe_eval__(self, expr, g, l, mode, timeout=None, allowed_magic_methods=None, __frame_depth__=3,
-					  allowed_magic_names=None, mnames=()):
+					  allowed_magic_names=None, mnames=(), excluded_names=None):
 		if allowed_magic_methods is not None:
 			self.allowed_magic_methods = __fix_set__(allowed_magic_methods, __allowed_magic_methods__)
 		if allowed_magic_names is not None:
@@ -1283,12 +1313,18 @@ class __RL_SAFE_ENV__:
 			frame = sys._getframe(__frame_depth__)
 			G = frame.f_globals
 			mname = G.get('__name__',None)
-			#G = G.f_globals.copy() if g is None else g
-			G = _g_filter(G,mnames=mnames) if g is None else g
-			L = _g_filter(frame.f_locals, mname=mname, mnames=mnames) if l is None else l
+			mpattern = _mnames_pattern(mname,mnames)
+			#G = _g_filter(G,mpattern) if g is None else g
+			G = DefaultNamespace() if g is None else g
+			L = _g_filter(frame.f_locals, mpattern) if l is None else l
 		else:
 			G = g
 			L = l
+			mpattern = None
+		xset = __rl_unsafe__.union(set(excluded_names) if excluded_names else set())
+		xset =  xset - self.allowed_magic_names.union(self.allowed_magic_methods)
+		G = {k:v for k,v in G.items() if k not in xset}
+		self.__rl_mpattern__ = mpattern
 		obi = (G['__builtins__'],) if '__builtins__' in G else False
 		G['__builtins__'] = self.__rl_builtins__
 		self.__rl_limit__ = self.__time_time__() + (timeout if timeout is not None else self.timeout)
@@ -1296,20 +1332,24 @@ class __RL_SAFE_ENV__:
 			self.allowed_magic_methods = ( __allowed_magic_methods__ if allowed_magic_methods==True
 										else allowed_magic_methods) if allowed_magic_methods else []
 		sbi = [].append
-		bi = self.real_bi
-		bir = self.bi_replace
-		for n, r in bir:
-			sbi(getattr(bi,n))
-			setattr(bi,n,r)
+		#bi = self.real_bi
+		#bir = self.bi_replace
+		#for n, r in bir:
+		#	sbi(getattr(bi,n))
+		#	setattr(bi,n,r)
+		for bi, bir in self.bi_replace:
+			for n, r in bir:
+				sbi(getattr(bi,n))
+				setattr(bi,n,r)
 		try:
-			if self.__recur__: raise BadCode('recursive safe evaluation is not allowed')
-			self.__recur__ = True
 			return eval(bcode,G,L)
 		finally:
-			self.__recur__ = False
 			sbi = sbi.__self__
-			for i, (n, r) in enumerate(bir):
-				setattr(bi,n,sbi[i])
+			i = 0
+			for bi, bir in self.bi_replace:
+				for n, r in bir:
+					setattr(bi,n,sbi[i])
+					i += 1
 			if obi:
 				G['__builtins__'] = obi[0]
 
@@ -1319,11 +1359,15 @@ class __rl_safe_eval__:
 	def __init__(self):
 		self.env = None
 
-	def __call__(self, expr, g=None, l=None, timeout=None, allowed_magic_methods=None, allowed_magic_names=None, mnames=()):
+	def __call__(self, expr, g=None, l=None, timeout=None, allowed_magic_methods=None,
+			  allowed_magic_names=None, mnames=(), excluded_names=None):
+		_loc = inspect.stack()[1]
+		#print(f'+++++ {os.path.basename(_loc[1])}:{_loc[2]} {expr=}')
 		if not self.env: self.env = __RL_SAFE_ENV__()
 		return self.env.__rl_safe_eval__(expr, g, l, self.mode, timeout=timeout,
 			allowed_magic_methods=allowed_magic_methods,
-			__frame_depth__=2, allowed_magic_names=allowed_magic_names, mnames=mnames)
+			__frame_depth__=2, allowed_magic_names=allowed_magic_names, mnames=mnames,
+				excluded_names=excluded_names)
 
 class __rl_safe_exec__(__rl_safe_eval__):
 	mode = 'exec'
@@ -1394,3 +1438,62 @@ def rl_less_safe_eval(expr,NS):
 	if not __rl_safe_builtins__:
 		rl_safe_eval('""')
 	return eval(expr,__rl_safe_builtins__,NS)
+
+class DefaultNamespace:
+	__NS = None
+
+	def __addMod(self,mod):
+		NS = self.__NS
+		mpattern = re.compile(fr'^{mod.__name__}$')	#exact match of module name
+		g0 = vars(mod).copy()
+		g = dict(_g_accept_gen(g0,mpattern))
+		NS['__by_module_name__'][mod.__name__] = g
+		if '__version__' in g: del g['__version__']
+		if self.__warn:
+			dups = [_ for _ in g if _ in NS and g[_] != NS[_]]
+			if dups:
+				print(f'{mod.__name__} has these duplicates {", ".join(dups)}')
+		NS.update(g)
+
+	def __cleanMod(self,mod):
+		NS = self.__NS
+		bmn = NS.get('__by_module_name__',None)
+		if not bmn: return
+		mname = mod.__name__
+		mns = bmn.get(mname,None)
+		if mns:
+			for k in mns:
+				if k in NS: del NS[k]
+			del bmn[mname]
+
+	def __call__(self,warn=False):
+		self.__warn = warn
+		if not self.__NS:
+			import reportlab
+			from reportlab.lib import colors, units, pagesizes
+			g = dict( Version = reportlab.Version, __version__ = reportlab.Version,
+					__date__ = reportlab.__date__, __name__=reportlab.__name__,
+					__doc__=reportlab.__doc__)
+			self.__NS = {'__by_module_name__': dict(reportlab=g)}
+			for mod in (colors,units,pagesizes): self.__addMod(mod)
+		from reportlab import rl_config
+		self.__cleanMod(rl_config)
+		self.__addMod(rl_config)
+		return self.__NS
+
+	def check(self, strict=False):
+		checked = '''reportlab.rl_config._defaults_init reportlab.rl_config._setOpt
+					reportlab.rl_config._startUp'''.split()
+		frags = 'sys os subprocess open pathlib format format_map globals'.split()
+		pat = re.compile(rf'\b(?:{"|".join(frags)})\b')
+		for m, g in self()['__by_module_name__'].items():
+			for k,v in g.items():
+				if inspect.isclass(v) or inspect.isfunction(v):
+					src = inspect.getsource(v)
+					if pat.search(src):
+						fullname = f'{m}.{k}'
+						ok = fullname in checked
+						if strict or not ok:
+							print(f'{fullname} might be unsafe please check {"again" if ok else ""} ')
+
+DefaultNamespace = DefaultNamespace()

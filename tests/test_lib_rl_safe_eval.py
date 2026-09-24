@@ -10,15 +10,25 @@ import reportlab
 from reportlab import rl_config
 import unittest
 from reportlab.lib import colors
-from reportlab.lib.rl_safe_eval import rl_safe_eval, rl_safe_exec, rl_extended_literal_eval, FilteredModule
+from reportlab.lib.rl_safe_eval import rl_safe_eval, rl_safe_exec, rl_extended_literal_eval, \
+        FilteredModule, _g_filter, _mnames_pattern
 from reportlab.lib.utils import annotateException
 from reportlab.lib import utils as rl_lib_utils
 from reportlab.lib.rl_safe_eval import BadCode
+
+lcontainer = [os]           #for container breakout test
+tcontainer = (os,)          #for container breakout test
+dcontainer = dict(k0=os)    #for container breakout test
+scontainer = set((os,))
 
 testObj = [1,('a','b',2),{'A':1,'B':2.0},"32"]
 class TestClass:
     a = 1
     format = 3
+    bango = os
+    def meth2os(self):
+        return os
+
 testInst = TestClass()
 def testFunc(bad=False):
     return open('/tmp/myfile','r') if bad else testObj
@@ -73,6 +83,8 @@ class SafeEvalTestSequenceMeta(type):
                 '({1,2,3},set([4,5,6]),frozenset([7,8,9]),{i for i in range(1,10,3)})',
                 '"%s%s" % (1,2)',
                 ('rl_lib_utils',dict(mnames='reportlab')),  #test allowing some imports to be seen
+                ('rl_lib_utils.isPyPy',dict(mnames='reportlab')),
+                ('TestClass().meth2os.__name__',dict(allowed_magic_names=('__name__',))),
                 )
                 ),
                 (
@@ -100,7 +112,7 @@ class SafeEvalTestSequenceMeta(type):
                 '{"__class__":1}.pop("__class__",2)',
                 '{"_":1 for _ in (1,2)}.pop("__class__",2)',
                 'type("Devil",[dict],{__init__:lambda self:self.__class__})',
-                'testFunc(bad=True)',
+                ('testFunc(bad=True)',dict(excluded_names=('testFunc',),exception=NameError)),
                 'getattr(testInst,"__class__",14)',
                 '"{1}{2}".format(1,2)',
                 'builtins',
@@ -114,6 +126,15 @@ class SafeEvalTestSequenceMeta(type):
                 ('rl_lib_utils.os',dict(mnames='reportlab',exception=AttributeError)),  #import reportlab, but os is disallowed attribute
                 ('rl_safe_eval("1")',dict(mnames='reportlab')),
                 ('rl_aaa("1")',dict(mnames='reportlab')),
+                'lcontainer[0].system',
+                'tcontainer[0].system',
+                'dcontainer["k0"].system',
+                'list(dcontainer.values())[0].system',
+                'list(scontainer)[0].system',
+                '"abc".format',
+                ('getattr(rl_lib_utils,"os").system',dict(mnames='reportlab',exception=AttributeError)),    #import reportlab, but os is disallowed attribute
+                ('TestClass.bango.system',dict(mnames='reportlab')),
+                'TestClass().meth2os()',    #returns os
                 )
                 ),
                 ):
@@ -143,12 +164,18 @@ def addMeta(mcs):
         return mcs(cls.__name__, cls.__bases__, ov)
     return wrap
 
+_oldG = vars()
 @addMeta(SafeEvalTestSequenceMeta)
 class SafeEvalTestCase(unittest.TestCase):
-    def works(self, expr, g=None, l=None, mnames=None):
+    def works(self, expr, g=None, l=None, mnames=None, allowed_magic_names=None, excluded_names=None):
+        if g is None:
+            mpattern = _mnames_pattern(__name__,mnames)
+            g = _g_filter(_oldG,mpattern) if g is None else g
         try:
             answer = eval(expr,g,l)
-            result = rl_safe_eval(expr,g,l,mnames=mnames)
+            result = rl_safe_eval(expr,g,l,mnames=mnames,
+                         allowed_magic_names=allowed_magic_names,
+                         excluded_names=excluded_names)
             if isinstance(result,FilteredModule):
                 result = result._FilteredModule__mod
         except:
@@ -157,14 +184,21 @@ class SafeEvalTestCase(unittest.TestCase):
         self.assertEqual(answer,result,f"rl_safe_eval({expr!r}) = {result!r}) not expected {answer!r}")
     def skips(self,*args,**kwds):
         raise unittest.SkipTest
-    def fails(self, expr, g=None, l=None, timeout=None, exception=BadCode, mnames=None):
+    def fails(self, expr, g=None, l=None, exception=BadCode, timeout=None, mnames=None,
+           allowed_magic_names=None, excluded_names=None):
+        if g is None:
+            mpattern = _mnames_pattern(__name__,mnames)
+            g = _g_filter(_oldG,mpattern) if g is None else g
         try:
-            result = rl_safe_eval(expr,g,l,timeout=timeout, mnames=mnames)
-            self.assertEqual(True,False,f"rl_safe_eval({expr!r}) = {result!r} did not raise {exception.__name__}")
+            result = rl_safe_eval(expr,g,l,timeout=timeout, mnames=mnames,
+                         allowed_magic_names=allowed_magic_names,
+                         excluded_names=excluded_names)
         except exception:
             return
         except:
             self.assertEqual(True,False,f"rl_safe_eval({expr!r}) raised {sys.exc_info()[0].__name__}: {str(sys.exc_info()[1])} instead of {exception.__name__}")
+        else:
+            self.assertEqual(True,False,f"rl_safe_eval({expr!r}) = {result!r} did not raise {exception.__name__}")
 
 GA = 'ga'
 class SafeEvalTestBasics(unittest.TestCase):
@@ -172,7 +206,7 @@ class SafeEvalTestBasics(unittest.TestCase):
         A=3
         self.assertTrue(rl_safe_eval("A==3"))
     def test_002(self):
-        self.assertTrue(rl_safe_eval("GA=='ga'"))
+        self.assertTrue(rl_safe_eval("GA=='ga'", g=_oldG))
 
 class SafeExecTestBasics(unittest.TestCase):
     def test_funcdef_blocks(self):
