@@ -1307,7 +1307,7 @@ class __RL_SAFE_ENV__:
             mpattern = _mnames_pattern(mname,mnames)
             #G = _g_filter(G,mpattern) if g is None else g
             G = DefaultNamespace() if g is None else g
-            L = _g_filter(frame.f_locals, mpattern) if l is None else l
+            L = {} if l is None else l
         else:
             G = g
             L = l
