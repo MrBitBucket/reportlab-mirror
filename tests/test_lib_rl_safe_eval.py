@@ -204,7 +204,7 @@ GA = 'ga'
 class SafeEvalTestBasics(unittest.TestCase):
     def test_001(self):
         A=3
-        self.assertTrue(rl_safe_eval("A==3"))
+        self.assertTrue(rl_safe_eval("A==3",l=locals()))
     def test_002(self):
         self.assertTrue(rl_safe_eval("GA=='ga'", g=_oldG))
 
