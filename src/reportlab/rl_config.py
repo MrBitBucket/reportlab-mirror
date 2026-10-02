@@ -14,18 +14,18 @@ def _defaults_init():
     import os
 
     _DEFAULTS={}
-    rl_exec('from reportlab.rl_settings import *',_DEFAULTS)
+    rl_exec('from reportlab.rl_settings import *',{},_DEFAULTS)
 
     _overrides=_DEFAULTS.copy()
     try:
-        rl_exec('from reportlab.local_rl_settings import *',_overrides)
+        rl_exec('from reportlab.local_rl_settings import *',{},_overrides)
         _DEFAULTS.update(_overrides)
     except ImportError:
         pass
 
     _overrides=_DEFAULTS.copy()
     try:
-        rl_exec('from reportlab_settings import *',_overrides)
+        rl_exec('from reportlab_settings import *',{},_overrides)
         _DEFAULTS.update(_overrides)
     except ImportError:
         _overrides=_DEFAULTS.copy()
@@ -36,7 +36,7 @@ def _defaults_init():
                 fn = None
             if fn:
                 with open(fn,'rb') as f:
-                    rl_exec(f.read(),_overrides)
+                    rl_exec(f.read(),{},_overrides)
                 _DEFAULTS.update(_overrides)
         except:
             pass
@@ -127,6 +127,14 @@ def _startUp():
                 conv = lambda v: list(filter(None,(_.strip() for _ in v.split()))) if v else []
             else: conv = None
             _setOpt(k,v,conv)
+
+def currentSettings():
+    from copy import deepcopy
+    g = globals()
+    return {k:deepcopy(g[k]) for k in _SAVED}
+
+def applySettings(S):
+    globals().update(S)
 
 _registered_resets=[]
 def register_reset(func, callback=None):

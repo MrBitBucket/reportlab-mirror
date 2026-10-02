@@ -6,10 +6,10 @@ __all__ = (
         'text2Path',
         'RenderPMError',
         )
-from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1, stringWidth
+from reportlab.pdfbase.pdfmetrics import getFont, unicode2T1, stringWidth, baseGFont
 from reportlab.pdfbase.ttfonts import ShapedStr
 from reportlab.lib.utils import open_and_read, isBytes, rl_exec
-from .shapes import _baseGFontName, _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, definePath
+from .shapes import _PATH_OP_ARG_COUNT, _PATH_OP_NAMES, definePath
 from sys import exc_info
 
 class RenderPMError(Exception):
@@ -114,8 +114,8 @@ def __makeTextPathsCode__(tp=None, _TP = ('freetype',)):
                 def close_path(self,ctx=None):
                     self.P.append(('closePath',))
 
-                def _text2Path(self, text, x=0, y=0, fontName=_baseGFontName, fontSize=1000, **kwds):
-                    face, font = self.setFont(fontName)
+                def _text2Path(self, text, x=0, y=0, fontName=None, fontSize=1000, **kwds):
+                    face, font = self.setFont(baseGFont(default=fontName))
                     scale = fontSize/face.units_per_EM  #font scaling
                     __dx__ = x/scale
                     __dy__ = y/scale
@@ -159,12 +159,13 @@ def __makeTextPathsCode__(tp=None, _TP = ('freetype',)):
                     if self.P: self.P_append(('closePath',))
                     return self.P
 
-            def text2PathDescription(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
+            def text2PathDescription(text, x=0, y=0, fontName=None, fontSize=1000,
                                         anchor='start', truncate=1, pathReverse=0, gs=None):
                 '''freetype text2PathDescription(text, x=0, y=0, fontName='fontname',
                                     fontSize=1000, font = 'fontName',
                                     anchor='start', truncate=1, pathReverse=0, gs=None)
                 '''
+                fontName = baseGFont(default=fontName)
                 font = getFont(fontName)
                 if font._multiByte and not font._dynamicFont:
                     raise ValueError("text2PathDescription doesn't support multi byte fonts like %r" % fontName)
@@ -204,8 +205,8 @@ Could not create text2PathDescription for using backends from {TP!a}''')
 
 globals().update(__makeTextPathsCode__())
 
-def text2Path(text, x=0, y=0, fontName=_baseGFontName, fontSize=1000,
+def text2Path(text, x=0, y=0, fontName=None, fontSize=1000,
                 anchor='start', truncate=1, pathReverse=0, gs=None, **kwds):
     t2pd = kwds.pop('text2PathDescription',text2PathDescription)
-    return definePath(t2pd(text,x=x,y=y,fontName=fontName,
+    return definePath(t2pd(text,x=x,y=y,fontName=baseGFont(default=fontName),
                     fontSize=fontSize,anchor=anchor,truncate=truncate,pathReverse=pathReverse, gs=gs),**kwds)

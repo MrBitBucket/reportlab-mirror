@@ -9,7 +9,7 @@ import os, sys
 from math import pi, cos, sin, sqrt, radians, floor
 
 from reportlab.platypus import Flowable
-from reportlab.rl_config import shapeChecking, verbose, defaultGraphicsFontName as _baseGFontName, _unset_, decimalSymbol
+from reportlab.rl_config import shapeChecking, verbose, _unset_, decimalSymbol
 from reportlab.lib import logger
 from reportlab.lib import colors
 from reportlab.lib.validators import *
@@ -17,12 +17,8 @@ from reportlab.lib.utils import isSeq, asBytes
 isOpacity = NoneOr(isNumberInRange(0,1))
 from reportlab.lib.attrmap import *
 from reportlab.lib.rl_accel import fp_str
-from reportlab.pdfbase.pdfmetrics import stringWidth
-from reportlab.lib.fonts import tt2ps
+from reportlab.pdfbase.pdfmetrics import stringWidth, baseGFont
 from reportlab.pdfgen.canvas import FILL_EVEN_ODD, FILL_NON_ZERO
-_baseGFontNameB = tt2ps(_baseGFontName,1,0)
-_baseGFontNameI = tt2ps(_baseGFontName,0,1)
-_baseGFontNameBI = tt2ps(_baseGFontName,1,1)
 
 # two constants for filling rules
 NON_ZERO_WINDING = 'Non-Zero Winding'
@@ -55,7 +51,7 @@ STATE_DEFAULTS = {   # sensible defaults for all
     'fillMode': FILL_EVEN_ODD,      #same as pdfgen.canvas
 
     'fontSize': 10,
-    'fontName': _baseGFontName,
+    'fontName': baseGFont(),
     'textAnchor':  'start' # can be start, middle, end, inherited
     }
 

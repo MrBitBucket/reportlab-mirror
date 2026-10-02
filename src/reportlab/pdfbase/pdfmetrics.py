@@ -22,7 +22,7 @@ import os, sys, encodings
 from reportlab.pdfbase import _fontdata
 from reportlab.lib.logger import warnOnce
 from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, open_and_readlines, findInPaths, isSeq, isStr
-from reportlab.rl_config import defaultEncoding, T1SearchPath
+from reportlab import rl_config
 from reportlab.lib.rl_accel import unicode2T1, instanceStringWidthT1
 from reportlab.pdfbase import rl_codecs
 _notdefChar = b'n'
@@ -181,7 +181,7 @@ class TypeFace:
         return r
 
 def bruteForceSearchForFile(fn,searchPath=None):
-    if searchPath is None: from reportlab.rl_config import T1SearchPath as searchPath
+    if searchPath is None: searchPath = rl_config.T1SearchPath
     if rl_isfile(fn): return fn
     bfn = os.path.basename(fn)
     for dirname in searchPath:
@@ -194,9 +194,8 @@ def bruteForceSearchForAFM(faceName):
     """Looks in all AFM files on path for face with given name.
 
     Returns AFM file name or None.  Ouch!"""
-    from reportlab.rl_config import T1SearchPath
 
-    for dirname in T1SearchPath:
+    for dirname in rl_config.T1SearchPath:
         if not rl_isdir(dirname): continue
         possibles = rl_glob(dirname + os.sep + '*.[aA][fF][mM]')
         for possible in possibles:
@@ -225,14 +224,14 @@ class Encoding:
             self.vector = _fontdata.encodings[name]
         elif base == None:
             # assume based on the usual one
-            self.baseEncodingName = defaultEncoding
-            self.vector = _fontdata.encodings[defaultEncoding]
+            self.baseEncodingName = rl_config.defaultEncoding
+            self.vector = _fontdata.encodings[rl_config.defaultEncoding]
         elif isStr(base):
             baseEnc = getEncoding(base)
             self.baseEncodingName = baseEnc.name
             self.vector = baseEnc.vector[:]
         elif isSeq(base):
-            self.baseEncodingName = defaultEncoding
+            self.baseEncodingName = rl_config.defaultEncoding
             self.vector = base[:]
         elif isinstance(base, Encoding):
             # accept a vector
@@ -456,8 +455,8 @@ class EmbeddedType1Face(TypeFace):
         TypeFace.__init__(self, None)
         #None is a hack, name will be supplied by AFM parse lower done
         #in this __init__ method.
-        afmFileName = findInPaths(afmFileName,T1SearchPath)
-        pfbFileName = findInPaths(pfbFileName,T1SearchPath)
+        afmFileName = findInPaths(afmFileName,rl_config.T1SearchPath)
+        pfbFileName = findInPaths(pfbFileName,rl_config.T1SearchPath)
         self.afmFileName = os.path.abspath(afmFileName)
         self.pfbFileName = os.path.abspath(pfbFileName)
         self.requiredEncoding = None
@@ -597,7 +596,9 @@ def registerEncoding(enc):
         enc.freeze()
     # have not yet dealt with immutability!
 
-def registerFontFamily(family,normal=None,bold=None,italic=None,boldItalic=None):
+def registerFontFamily(family,normal=None,bold=None,italic=None,boldItalic=None,
+                       baseFontFor=""):
+    'baseFontFor should be a string containing canvas and or graphics'
     from reportlab.lib import fonts
     if not normal: normal = family
     family = family.lower()
@@ -608,6 +609,17 @@ def registerFontFamily(family,normal=None,bold=None,italic=None,boldItalic=None)
     fonts.addMapping(family, 1, 0, bold)
     fonts.addMapping(family, 0, 1, italic)
     fonts.addMapping(family, 1, 1, boldItalic)
+    if baseFontFor.strip():
+        if 'all' in baseFontFor or 'both' in baseFontFor:
+            baseFontFor='canvas graphics'
+        used = False
+        for k, a in dict(canvas='canvas_basefontname',
+                        graphics='defaultGraphicsFontName').items():
+            if k in baseFontFor:
+                used = True
+                setattr(rl_config,a,normal)
+        if not used:
+            raise ValueError(f'{baseFontFor=} is invalid should contain canvas and/or graphics')
 
 def registerFont(font):
     "Registers a font, including setting up info for accelerated stringWidth"
@@ -683,7 +695,7 @@ def findFontAndRegister(fontName):
     if face.requiredEncoding:
         font = Font(fontName, fontName, face.requiredEncoding)
     else:
-        font = Font(fontName, fontName, defaultEncoding)
+        font = Font(fontName, fontName, rl_config.defaultEncoding)
     registerFont(font)
     return font
 
@@ -781,6 +793,33 @@ def test3widths(texts):
         t1 = time.time()
         print('class lookup and stringWidth took %0.4f' % (t1 - t0))
         print()
+
+class BaseFontName:
+    __k2t__ = (
+            (('normal','n'),(0,0)),
+            (('bold','b'),(1,0)),
+            (('italic','i','oblique','o'),(0,1)),
+            (('bolditalic','bi','boldoblique','bo'),(1,1))
+            )
+    def __init__(self,bfna):
+        self.__bfna__ = bfna    #the rl_config attribute
+        self.__cbfn__ = None    #the current value of that attribute
+        self.__k2bf__ = None    #the current kind to base font name
+
+    def __call__(self, kind='normal', default=None):
+        cbfn = getattr(rl_config,self.__bfna__)
+        if cbfn!=self.__cbfn__:
+            from reportlab.lib.fonts import tt2ps
+            k2bf = self.__k2bf__ = {}
+            for kinds, tup in self.__k2t__:
+                bfn = tt2ps(cbfn,*tup)
+                for k in kinds:
+                    k2bf[k] = bfn
+            self.__cbfn__ = cbfn
+        return default if default else self.__k2bf__[kind.lower()]
+
+baseGFont = BaseFontName('defaultGraphicsFontName')
+baseCFont = BaseFontName('canvas_basefontname')
 
 def testStringWidthAlgorithms():
     rawdata = open('../../rlextra/rml2pdf/doc/rml_user_guide.prep').read()

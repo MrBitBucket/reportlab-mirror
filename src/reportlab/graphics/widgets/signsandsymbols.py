@@ -28,6 +28,7 @@ Widgets include:
 - CrossHair
 """
 
+from reportlab.pdfbase.pdfmetrics import baseGFont
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
@@ -380,7 +381,7 @@ class StopSign(_Symbol):
         if self.stopColor:
             g.add(shapes.String(self.x+(s*0.5),self.y+(s*0.4),
                             'STOP', fillColor=self.stopColor, textAnchor='middle',
-                            fontSize=s/3, fontName="Helvetica-Bold"))
+                            fontSize=s/3, fontName=baseGFont("bold")))
 
         return g
 

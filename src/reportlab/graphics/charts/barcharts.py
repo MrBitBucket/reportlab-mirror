@@ -19,7 +19,7 @@ from reportlab.lib.validators import isNumber, isNumberOrNone, isColorOrNone, is
 from reportlab.lib.utils import isStr, yieldNoneSplits
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.attrmap import AttrMap, AttrMapValue
-from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.pdfmetrics import stringWidth, baseGFont
 from reportlab.graphics.widgetbase import TypedPropertyCollection, PropHolder, tpcGetItem
 from reportlab.graphics.shapes import Line, Rect, Group, Drawing, PolyLine
 from reportlab.graphics.charts.axes import XCategoryAxis, YValueAxis, YCategoryAxis, XValueAxis
@@ -1216,13 +1216,13 @@ def sampleV2a():
     bc.valueAxis.valueMin = -15
     bc.valueAxis.valueMax = +15
     bc.valueAxis.valueStep = 5
-    bc.valueAxis.labels.fontName = 'Helvetica'
+    bc.valueAxis.labels.fontName = baseGFont()
     bc.valueAxis.labels.fontSize = 8
     bc.valueAxis.labels.boxAnchor = 'n'   # irrelevant (becomes 'c')
     bc.valueAxis.labels.textAnchor = 'middle'
 
     bc.categoryAxis.categoryNames = labels
-    bc.categoryAxis.labels.fontName = 'Helvetica'
+    bc.categoryAxis.labels.fontName = baseGFont()
     bc.categoryAxis.labels.fontSize = 8
     bc.categoryAxis.labels.dy = -60
 
@@ -1257,13 +1257,13 @@ def sampleV2b():
     bc.valueAxis.valueMin = -15
     bc.valueAxis.valueMax = +15
     bc.valueAxis.valueStep = 5
-    bc.valueAxis.labels.fontName = 'Helvetica'
+    bc.valueAxis.labels.fontName = baseGFont()
     bc.valueAxis.labels.fontSize = 8
     bc.valueAxis.labels.boxAnchor = 'n'   # irrelevant (becomes 'c')
     bc.valueAxis.labels.textAnchor = 'middle'
 
     bc.categoryAxis.categoryNames = labels
-    bc.categoryAxis.labels.fontName = 'Helvetica'
+    bc.categoryAxis.labels.fontName = baseGFont()
     bc.categoryAxis.labels.fontSize = 8
     bc.categoryAxis.labels.dy = -60
 
@@ -1298,11 +1298,11 @@ def sampleV2c():
     bc.valueAxis.valueMin = -15
     bc.valueAxis.valueMax = +15
     bc.valueAxis.valueStep = 5
-    bc.valueAxis.labels.fontName = 'Helvetica'
+    bc.valueAxis.labels.fontName = baseGFont()
     bc.valueAxis.labels.fontSize = 8
 
     bc.categoryAxis.categoryNames = labels
-    bc.categoryAxis.labels.fontName = 'Helvetica'
+    bc.categoryAxis.labels.fontName = baseGFont()
     bc.categoryAxis.labels.fontSize = 8
     bc.valueAxis.labels.boxAnchor = 'n'
     bc.valueAxis.labels.textAnchor = 'middle'
@@ -1314,7 +1314,7 @@ def sampleV2c():
     bc.barLabels.dx = 0
     bc.barLabels.dy = 0
     bc.barLabels.boxAnchor = 'n'  # irrelevant (becomes 'c')
-    bc.barLabels.fontName = 'Helvetica'
+    bc.barLabels.fontName = baseGFont()
     bc.barLabels.fontSize = 6
 
     drawing.add(bc)
@@ -1350,7 +1350,7 @@ def sampleV3():
     bc.barLabels.dy = 0
     bc.barLabels.boxAnchor = 'w' # irrelevant (becomes 'c')
     bc.barLabels.angle = 90
-    bc.barLabels.fontName = 'Helvetica'
+    bc.barLabels.fontName = baseGFont()
     bc.barLabels.fontSize = 6
     bc.barLabels.nudge = 10
 
@@ -1366,7 +1366,7 @@ def sampleV3():
     bc.categoryAxis.labels.boxAnchor = 'w'
     bc.categoryAxis.labels.dx = 0
     bc.categoryAxis.labels.dy = -125
-    bc.categoryAxis.labels.fontName = 'Helvetica'
+    bc.categoryAxis.labels.fontName = baseGFont()
     bc.categoryAxis.labels.fontSize = 6
 
     g = Group(bc)
@@ -1837,14 +1837,14 @@ def sampleH2a():
     bc.valueAxis.valueMin = -15
     bc.valueAxis.valueMax = +15
     bc.valueAxis.valueStep = 5
-    bc.valueAxis.labels.fontName = 'Helvetica'
+    bc.valueAxis.labels.fontName = baseGFont()
     bc.valueAxis.labels.fontSize = 8
     bc.valueAxis.labels.boxAnchor = 'n'   # irrelevant (becomes 'c')
     bc.valueAxis.labels.textAnchor = 'middle'
     bc.valueAxis.configure(bc.data)
 
     bc.categoryAxis.categoryNames = labels
-    bc.categoryAxis.labels.fontName = 'Helvetica'
+    bc.categoryAxis.labels.fontName = baseGFont()
     bc.categoryAxis.labels.fontSize = 8
     bc.categoryAxis.labels.dx = -150
 
@@ -1879,13 +1879,13 @@ def sampleH2b():
     bc.valueAxis.valueMin = -15
     bc.valueAxis.valueMax = +15
     bc.valueAxis.valueStep = 5
-    bc.valueAxis.labels.fontName = 'Helvetica'
+    bc.valueAxis.labels.fontName = baseGFont()
     bc.valueAxis.labels.fontSize = 8
     bc.valueAxis.labels.boxAnchor = 'n'   # irrelevant (becomes 'c')
     bc.valueAxis.labels.textAnchor = 'middle'
 
     bc.categoryAxis.categoryNames = labels
-    bc.categoryAxis.labels.fontName = 'Helvetica'
+    bc.categoryAxis.labels.fontName = baseGFont()
     bc.categoryAxis.labels.fontSize = 8
     bc.categoryAxis.labels.dx = -150
 
@@ -1920,13 +1920,13 @@ def sampleH2c():
     bc.valueAxis.valueMin = -15
     bc.valueAxis.valueMax = +15
     bc.valueAxis.valueStep = 5
-    bc.valueAxis.labels.fontName = 'Helvetica'
+    bc.valueAxis.labels.fontName = baseGFont()
     bc.valueAxis.labels.fontSize = 8
     bc.valueAxis.labels.boxAnchor = 'n'
     bc.valueAxis.labels.textAnchor = 'middle'
 
     bc.categoryAxis.categoryNames = labels
-    bc.categoryAxis.labels.fontName = 'Helvetica'
+    bc.categoryAxis.labels.fontName = baseGFont()
     bc.categoryAxis.labels.fontSize = 8
     bc.categoryAxis.labels.dx = -150
 
@@ -1936,7 +1936,7 @@ def sampleH2c():
     bc.barLabels.dx = 0
     bc.barLabels.dy = 0
     bc.barLabels.boxAnchor = 'n'  # irrelevant (becomes 'c')
-    bc.barLabels.fontName = 'Helvetica'
+    bc.barLabels.fontName = baseGFont()
     bc.barLabels.fontSize = 6
 
     drawing.add(bc)
@@ -1971,7 +1971,7 @@ def sampleH3():
     bc.barLabels.dx = 0
     bc.barLabels.dy = 0
     bc.barLabels.boxAnchor = 'w' # irrelevant (becomes 'c')
-    bc.barLabels.fontName = 'Helvetica'
+    bc.barLabels.fontName = baseGFont()
     bc.barLabels.fontSize = 6
     bc.barLabels.nudge = 10
 
@@ -1985,7 +1985,7 @@ def sampleH3():
     bc.categoryAxis.categoryNames = names
     bc.categoryAxis.labels.boxAnchor = 'w'
     bc.categoryAxis.labels.dx = -170
-    bc.categoryAxis.labels.fontName = 'Helvetica'
+    bc.categoryAxis.labels.fontName = baseGFont()
     bc.categoryAxis.labels.fontSize = 6
 
     g = Group(bc)

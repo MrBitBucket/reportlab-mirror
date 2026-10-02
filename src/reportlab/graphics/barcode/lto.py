@@ -4,6 +4,7 @@
 from reportlab.graphics.barcode.code39 import Standard39
 from reportlab.lib import colors
 from reportlab.lib.units import cm
+from reportlab.pdfbase.pdfmetrics import baseGFont
 from string import ascii_uppercase, digits as string_digits
 
 class BaseLTOLabel(Standard39) :
@@ -85,7 +86,7 @@ class VerticalLTOLabel(BaseLTOLabel) :
     """
     A class for LTO labels with rectangular blocks around the tape identifier.
     """
-    LABELFONT = ("Helvetica-Bold", 14)
+    LABELFONT = (baseGFont("b"), 14)
     BLOCKWIDTH = 1*cm
     BLOCKHEIGHT = 0.45*cm
     LINEWIDTH = 0.0125
@@ -160,7 +161,7 @@ def test() :
     from reportlab.lib import pagesizes
 
     canvas = Canvas("labels.pdf", pagesize=pagesizes.A4)
-    canvas.setFont("Helvetica", 30)
+    canvas.setFont(baseGFont(), 30)
     (width, height) = pagesizes.A4
     canvas.drawCentredString(width/2.0, height-4*cm, "Sample LTO labels")
     xpos = xorig = 2 * cm

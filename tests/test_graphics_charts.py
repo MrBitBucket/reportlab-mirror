@@ -655,7 +655,7 @@ class ChartTestCase(unittest.TestCase):
 
         def sample1():
             "Sample drawing containing two unconnected axes."
-            from reportlab.graphics.shapes import _baseGFontNameB
+            from reportlab.graphics.shapes import baseGFont
             drawing = Drawing(400, 200)
             data = [(10, 20, 30, 42)]
             xAxis = XCategoryAxis()
@@ -665,7 +665,7 @@ class ChartTestCase(unittest.TestCase):
             xAxis.labels.boxAnchor = 'n'
             xAxis.labels[3].dy = -15
             xAxis.labels[3].angle = 30
-            xAxis.labels[3].fontName = _baseGFontNameB
+            xAxis.labels[3].fontName = baseGFont('b')
             yAxis = YValueAxis()
             yAxis.setPosition(50, 50, 125)
             yAxis.configure(data)

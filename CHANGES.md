@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES 5.0.4     02/102026
+---------------------------
+    * start on using baseC/GFont removing usage of Times
+
 CHANGES 5.0.3a2  25/092026
 ---------------------------
     * improve DefaultNamespace efficiency in rl_safe_eval.py

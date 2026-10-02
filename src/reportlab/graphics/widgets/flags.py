@@ -30,6 +30,7 @@ USA, Czech Republic, European Union, Switzerland, Turkey, Brazil
 (Brazilian flag contributed by Publio da Costa Melo [publio@planetarium.com.br]).
 """
 
+from reportlab.pdfbase.pdfmetrics import baseGFont
 from reportlab.lib import colors
 from reportlab.lib.validators import *
 from reportlab.lib.attrmap import *
@@ -204,7 +205,7 @@ class Flag(_Symbol):
         labelFontSize = int(fx.size/4.0)
         D.add(String(fx.x+(fx.size),(fx.y+((fx.size/2.0))),
                             "SAMPLE", fillColor=colors.gold, textAnchor='middle',
-                            fontSize=labelFontSize, fontName="Helvetica-Bold"))
+                            fontSize=labelFontSize, fontName=baseGFont("Bold")))
         return D
 
     def _Flag_UK(self):
@@ -809,7 +810,7 @@ class Flag(_Symbol):
                 z = 0.35*m
             else:
                 z= 0.45*m
-            g2 = Group(String(x, y, sTmp[i], fontName='Helvetica-Bold',
+            g2 = Group(String(x, y, sTmp[i], fontName=baseGFont('bold'),
                 fontSize = z,strokeColor=None,fillColor=colors.green))
             g2.rotate(rad)
             g.add(g2)

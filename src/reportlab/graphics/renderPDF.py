@@ -19,7 +19,7 @@ from io import BytesIO
 
 from reportlab.graphics.shapes import *
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.pdfmetrics import stringWidth, baseGFont
 from reportlab import rl_config
 from reportlab.graphics.renderbase import Renderer, getStateDelta, renderScaledDrawing, STATE_DEFAULTS
 
@@ -297,7 +297,7 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, **kwds
     metadataPath = kwds.pop('metadataPath',None)
     c = kwds.pop('canvasMaker',Canvas)(fn,**kwds)
     if msg:
-        c.setFont(rl_config.defaultGraphicsFontName, 36)
+        c.setFont(baseGFont(), 36)
         c.drawString(80, 750, msg)
     c.setTitle(msg)
 
@@ -306,7 +306,7 @@ def drawToFile(d, fn, msg="", showBoundary=rl_config._unset_, autoSize=1, **kwds
         draw(d, c, 0, 0, showBoundary=showBoundary)
     else:
         #show with a title
-        c.setFont(rl_config.defaultGraphicsFontName, 12)
+        c.setFont(baseGFont(), 12)
         y = 740
         i = 1
         y = y - d.height
@@ -338,14 +338,15 @@ def drawToString(d, msg="", showBoundary=rl_config._unset_,autoSize=1,**kwds):
 #
 #########################################################
 def test(outDir='pdfout',shout=False):
-    from reportlab.graphics.shapes import _baseGFontName, _baseGFontNameBI
+    gFontName = baseGFont()
+    gFontNameBI = baseGFont('bi')
     from reportlab.rl_config import verbose
     import os
     if not os.path.isdir(outDir):
         os.mkdir(outDir)
     fn = os.path.join(outDir,'renderPDF.pdf')
     c = Canvas(fn)
-    c.setFont(_baseGFontName, 36)
+    c.setFont(gFontName, 36)
     c.drawString(80, 750, 'Graphics Test')
 
     # print all drawings and their doc strings from the test
@@ -362,7 +363,7 @@ def test(outDir='pdfout',shout=False):
             drawings.append((drawing, docstring))
 
     #print in a loop, with their doc strings
-    c.setFont(_baseGFontName, 12)
+    c.setFont(gFontName, 12)
     y = 740
     i = 1
     for (drawing, docstring) in drawings:
@@ -372,9 +373,9 @@ def test(outDir='pdfout',shout=False):
             y = 740
         # draw a title
         y = y - 30
-        c.setFont(_baseGFontNameBI,12)
+        c.setFont(gFontNameBI,12)
         c.drawString(80, y, 'Drawing %d' % i)
-        c.setFont(_baseGFontName,12)
+        c.setFont(gFontName,12)
         y = y - 14
         textObj = c.beginText(80, y)
         textObj.textLines(docstring)
