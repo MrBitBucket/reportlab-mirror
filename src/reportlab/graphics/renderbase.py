@@ -41,7 +41,7 @@ class StateTracker:
         if defaults is None:
             defaults = STATE_DEFAULTS.copy()
         if defaultObj:
-            for k in STATE_DEFAULTS.keys():
+            for k in STATE_DEFAULTS:
                 a = 'initial'+k[:1].upper()+k[1:]
                 if hasattr(defaultObj,a):
                     defaults[k] = getattr(defaultObj,a)

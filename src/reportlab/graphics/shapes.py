@@ -31,7 +31,17 @@ EVEN_ODD = 'Even-Odd'
 #making shapes; one use is to substitute another
 #color model cleanly throughout the drawing.
 
-STATE_DEFAULTS = {   # sensible defaults for all
+class RL_STATE_DEFAULTS(dict):
+    def __getitem__(self,x):
+        v = super().__getitem__(x)
+        return v() if callable(v) else v
+    def get(self,x,default=None):
+        v = super().get(x,default)
+        return v() if callable(v) else v
+    def copy(self):
+        return self.__class__(super().copy())
+
+STATE_DEFAULTS = RL_STATE_DEFAULTS({     # sensible defaults for all
     'transform': (1,0,0,1,0,0),
 
     # styles follow SVG naming
@@ -51,9 +61,9 @@ STATE_DEFAULTS = {   # sensible defaults for all
     'fillMode': FILL_EVEN_ODD,      #same as pdfgen.canvas
 
     'fontSize': 10,
-    'fontName': baseGFont(),
+    'fontName': baseGFont,
     'textAnchor':  'start' # can be start, middle, end, inherited
-    }
+    })
 
 ####################################################################
 # math utilities.  These are now in reportlab.graphics.transform
