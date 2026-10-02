@@ -80,7 +80,7 @@ allowTableBoundsErrors =    1                       # bit 0 --> ignore overall w
                                                     # (recommend 1 for production use)
 shapeChecking =             1
 defaultEncoding =           'WinAnsiEncoding'       # 'WinAnsi' or 'MacRoman'
-defaultGraphicsFontName=    'Times-Roman'           #initializer for STATE_DEFAULTS in shapes.py
+defaultGraphicsFontName=    'Helvetica'             #initializer for STATE_DEFAULTS in shapes.py
 pageCompression =           1                       # default page compression mode
 useA85 =                    1                       #set to 0 to disable Ascii Base 85 stream filters
 defaultPageSize =           'A4'                    #default page size
