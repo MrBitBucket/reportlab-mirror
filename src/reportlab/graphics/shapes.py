@@ -39,7 +39,7 @@ class RL_STATE_DEFAULTS(dict):
         v = super().get(x,default)
         return v() if callable(v) else v
     def copy(self):
-        return self.__class__(super().copy())
+        return {k:self[k] for k in self}
 
 STATE_DEFAULTS = RL_STATE_DEFAULTS({     # sensible defaults for all
     'transform': (1,0,0,1,0,0),
