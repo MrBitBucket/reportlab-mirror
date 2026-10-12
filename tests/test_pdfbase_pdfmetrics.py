@@ -53,9 +53,9 @@ def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
         glyphName = glyphNames[i]
         if glyphName is not None:
             canv.setFont('Helvetica', 10)
-            text = bytes([i]).decode(encName)*30
 
             try:
+                text = bytes([i]).decode(encName)*30
                 w = canv.stringWidth(text, fontName, 10)
                 canv.drawString(80, y, '%03d   %s w=%3d' % (i, glyphName, int((w/3.)*10)))
                 canv.setFont(fontName, 10)
@@ -65,8 +65,8 @@ def makeWidthTestForAllGlyphs(canv, fontName, outlining=1):
                 canv.setFillColor(colors.red)
                 canv.rect(200 + w, y-1, 1, 10, stroke=0, fill=1)
                 canv.setFillColor(colors.black)
-            except KeyError:
-                canv.drawString(200, y, 'Could not find glyph named "%s"' % glyphName)
+            except (KeyError, UnicodeDecodeError):
+                canv.drawString(200, y, f'Could not find glyph #{i} named {glyphName!r}')
             y = y - 12
 
 

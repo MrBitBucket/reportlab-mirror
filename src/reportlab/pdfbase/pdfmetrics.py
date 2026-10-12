@@ -25,11 +25,25 @@ from reportlab.lib.utils import rl_isfile, rl_glob, rl_isdir, open_and_read, ope
 from reportlab import rl_config
 from reportlab.lib.rl_accel import unicode2T1, instanceStringWidthT1
 from reportlab.pdfbase import rl_codecs
+reportlab_fonts_dir = os.path.normpath(os.path.join(os.path.dirname(__file__),'..','fonts'))
+
 _notdefChar = b'n'
 
 rl_codecs.RL_Codecs.register()
 standardFonts = _fontdata.standardFonts
+def __standardFontsChange__():
+    regen = [].append
+    for fn in standardFonts:
+        for mn in '_typefaces _fonts'.split():
+            m = globals()[mn]
+            if fn in m:
+                del m[fn]
+                if mn=='_fonts': regen(fn)
+    for fn in regen.__self__:
+        getFont(fn)
+standardFonts.__change__ = __standardFontsChange__
 standardEncodings = _fontdata.standardEncodings
+font2fnrMap = _fontdata._font2fnrMapWin32
 
 _typefaces = {}
 _encodings = {}
@@ -135,7 +149,7 @@ class TypeFace:
             self.requiredEncoding = 'SymbolEncoding'
         else:
             self.requiredEncoding = None
-        if name in standardFonts:
+        if name in standardFonts and not standardFonts.__embed__:
             self.builtIn = 1
             self._loadBuiltInData(name)
         else:
@@ -191,7 +205,8 @@ def bruteForceSearchForFile(fn,searchPath=None):
     return fn
 
 def bruteForceSearchForAFM(faceName):
-    """Looks in all AFM files on path for face with given name.
+    """Looks in all AFM files on path for face with given root name.
+    if faceName is not None it's used in the search
 
     Returns AFM file name or None.  Ouch!"""
 
@@ -205,7 +220,7 @@ def bruteForceSearchForAFM(faceName):
                     return possible
             except:
                 t,v,b=sys.exc_info()
-                v.args = (' '.join(map(str,v.args))+', while looking for faceName=%r' % faceName,)
+                v.args = (' '.join(map(str,v.args))+f', while looking for {faceName}')
                 raise 
 
 
@@ -351,12 +366,12 @@ class Font:
         face = self.face = getTypeFace(faceName)
         self.encoding= getEncoding(encName)
         self.encName = encName
-        self.substitutionFonts = (standardT1SubstitutionFonts
-                                    if face.builtIn and face.requiredEncoding is None
-                                    else substitutionFonts or [])
         self._calcWidths()
         self._notdefChar = _notdefChar
-        self._notdefFont = name=='ZapfDingbats' and self or _notdefFont
+        self._notdefFont = name=='ZapfDingbats' and self or getFont('ZapfDingbats')
+        self.substitutionFonts = ([getFont('Symbol'),self._notdefFont]
+                                    if face.builtIn and face.requiredEncoding is None
+                                    else substitutionFonts or [])
 
     def stringWidth(self, text, size, encoding='utf8'):
         return instanceStringWidthT1(self, text, size, encoding=encoding)
@@ -414,7 +429,7 @@ class Font:
             pdfFont.Encoding = e
 
         # is it a built-in one?  if not, need more stuff.
-        if not self.face.name in standardFonts:
+        if self.face.name not in standardFonts or standardFonts.__embed__:
             pdfFont.FirstChar = 0
             pdfFont.LastChar = 255
             pdfFont.Widths = pdfdoc.PDFArray(self.widths)
@@ -450,9 +465,9 @@ class EmbeddedType1Face(TypeFace):
     """A Type 1 font other than one of the basic 14.
 
     Its glyph data will be embedded in the PDF file."""
-    def __init__(self, afmFileName, pfbFileName):
+    def __init__(self, afmFileName, pfbFileName, faceName=None):
         # ignore afm file for now
-        TypeFace.__init__(self, None)
+        TypeFace.__init__(self, faceName)
         #None is a hack, name will be supplied by AFM parse lower done
         #in this __init__ method.
         afmFileName = findInPaths(afmFileName,rl_config.T1SearchPath)
@@ -515,39 +530,49 @@ class EmbeddedType1Face(TypeFace):
         # for font-specific encodings like Symbol, Dingbats, Carta we
         # need to make a new encoding as well....
         if topLevel.get('EncodingScheme', None) == 'FontSpecific':
-            global _postScriptNames2Unicode
-            if _postScriptNames2Unicode is None:
-                try:
-                    from reportlab.pdfbase._glyphlist import _glyphname2unicode
-                    _postScriptNames2Unicode = _glyphname2unicode
-                    del _glyphname2unicode
-                except:
-                    _postScriptNames2Unicode = {}
-                    raise ValueError(
-                            "cannot import module reportlab.pdfbase._glyphlist module\n"
-                            "you can obtain a version from here\n"
-                            "https://www.reportlab.com/ftp/_glyphlist.py\n"
-                            )
+            if self.name in standardFonts:
+                if self.name in ('ZapfDingbats','Symbol'):
+                    self.requiredEncoding = self.name+'Encoding'
+                else:
+                    raise ValueError(f"Don't know how to handle font specific encoding for face {self.name}")
+            else:
+                global _postScriptNames2Unicode
+                if _postScriptNames2Unicode is None:
+                    try:
+                        from reportlab.pdfbase._glyphlist import _glyphname2unicode
+                        _postScriptNames2Unicode = _glyphname2unicode
+                        del _glyphname2unicode
+                    except:
+                        _postScriptNames2Unicode = {}
+                        raise ValueError(
+                                "cannot import module reportlab.pdfbase._glyphlist module\n"
+                                "you can obtain a version from here\n"
+                                "https://www.reportlab.com/ftp/_glyphlist.py\n"
+                                )
 
-            names = [None] * 256
-            ex = {}
-            rex  = {}
-            for (code, width, name) in glyphData:
-                if 0<=code<=255:
-                    names[code] = name
-                    u = _postScriptNames2Unicode.get(name,None)
-                    if u is not None:
-                        rex[code] = u
-                        ex[u] = code
-            encName = encodings.normalize_encoding('rl-dynamic-%s-encoding' % self.name)
-            rl_codecs.RL_Codecs.add_dynamic_codec(encName,ex,rex)
-            self.requiredEncoding = encName
-            enc = Encoding(encName, names)
-            registerEncoding(enc)
+                names = [None] * 256
+                ex = {}
+                rex  = {}
+                for (code, width, name) in glyphData:
+                    if 0<=code<=255:
+                        names[code] = name
+                        u = _postScriptNames2Unicode.get(name,None)
+                        if u is not None:
+                            rex[code] = u
+                            ex[u] = code
+                encName = encodings.normalize_encoding('rl-dynamic-%s-encoding' % self.name)
+                rl_codecs.RL_Codecs.add_dynamic_codec(encName,ex,rex)
+                self.requiredEncoding = encName
+                enc = Encoding(encName, names)
+                registerEncoding(enc)
 
     def addObjects(self, doc):
         """Add whatever needed to PDF file, and return a FontDescriptor reference"""
         from reportlab.pdfbase import pdfdoc
+        refName = 'fontFile:' + self.pfbFileName
+        fontDescriptor = doc.idToObject.get(refName,None)   
+        if fontDescriptor:
+            return fontDescriptor
 
         fontFile = pdfdoc.PDFStream()
         fontFile.content = self._binaryData
@@ -557,7 +582,7 @@ class EmbeddedType1Face(TypeFace):
         fontFile.dictionary['Length3'] = self._length3
         #fontFile.filters = [pdfdoc.PDFZCompress]
 
-        fontFileRef = doc.Reference(fontFile, 'fontFile:' + self.pfbFileName)
+        fontFileRef = doc.Reference(fontFile, refName)
 
         fontDescriptor = pdfdoc.PDFDictionary({
             'Type': '/FontDescriptor',
@@ -578,8 +603,8 @@ class EmbeddedType1Face(TypeFace):
 def registerTypeFace(face):
     assert isinstance(face, TypeFace), 'Not a TypeFace: %s' % face
     _typefaces[face.name] = face
-    if not face.name in standardFonts:
-        # HACK - bold/italic do not apply for type 1, so egister
+    if face.name not in standardFonts:
+        # HACK - bold/italic do not apply for type 1, so register
         # all combinations of mappings.
         registerFontFamily(face.name)
 
@@ -645,6 +670,25 @@ def registerFont(font):
         # bold tags
         registerFontFamily(font.fontName)
 
+def faceFromAFM(afm, faceName=None):
+    possibles = rl_glob(f'{os.path.splitext(afm)[0]}.[pP][fF][bB]')
+    for pfb in possibles:
+        if rl_isfile(pfb):
+            face = EmbeddedType1Face(afm, pfb, faceName)
+            if faceName: face.familyName = face.name = faceName
+            registerTypeFace(face)
+            return face
+    raise KeyError(f'Could not find pfb parallel to {afm}')
+
+def faceFromRLFD(fnr, faceName):
+    import __main__
+    if getattr(__main__,'breaknow',False): breakpoint()
+    possibles = rl_glob(f'{os.path.join(reportlab_fonts_dir,fnr)}.[aA][fF][mM]')
+    if possibles:
+        return faceFromAFM(possibles[0],faceName)
+    else:
+        raise KeyError(f'faceFromRLD: no afm found for {fnr=}')
+
 def getTypeFace(faceName):
     """Lazily construct known typefaces if not found"""
     try:
@@ -652,25 +696,20 @@ def getTypeFace(faceName):
     except KeyError:
         # not found, construct it if known
         if faceName in standardFonts:
-            face = TypeFace(faceName)
-            (face.familyName, face.bold, face.italic) = _fontdata.standardFontAttributes[faceName]
-            registerTypeFace(face)
-##            print 'auto-constructing type face %s with family=%s, bold=%d, italic=%d' % (
-##                face.name, face.familyName, face.bold, face.italic)
-            return face
+            if standardFonts.__embed__:
+                face = faceFromRLFD(font2fnrMap[faceName.lower()],faceName)
+            else:
+                face = TypeFace(faceName)
+                registerTypeFace(face)
+            face.familyName, face.bold, face.italic = _fontdata.standardFontAttributes[faceName]
         else:
-            #try a brute force search
+            #try a brute force search for {fnr}.AFM 
             afm = bruteForceSearchForAFM(faceName)
             if afm:
-                for e in ('.pfb', '.PFB'):
-                    pfb = os.path.splitext(afm)[0] + e
-                    if rl_isfile(pfb): break
-                assert rl_isfile(pfb), 'file %s not found!' % pfb
-                face = EmbeddedType1Face(afm, pfb)
-                registerTypeFace(face)
-                return face
+                face = faceFromAFM(afm)
             else:
-                raise
+                raise KeyError(f'getTypeFace: no afm found for {faceName=}')
+        return face
 
 def getEncoding(encName):
     """Lazily construct known encodings if not found"""
@@ -710,9 +749,6 @@ def getFont(fontName):
         return _fonts[fontName]
     except KeyError:
         return findFontAndRegister(fontName)
-
-_notdefFont = getFont('ZapfDingbats')
-standardT1SubstitutionFonts.extend([getFont('Symbol'),_notdefFont])
 
 def getAscentDescent(fontName,fontSize=None):
     font = getFont(fontName)
