@@ -5,7 +5,7 @@ from reportlab.graphics.widgetbase import Widget
 from reportlab.lib.attrmap import *
 from reportlab.lib.validators import *
 from reportlab.lib.units import cm
-from reportlab.pdfbase.pdfmetrics import getFont
+from reportlab.pdfbase.pdfmetrics import getFont, baseGFont
 from reportlab.graphics.widgets.grids import ShadedRect
 
 class SlideBox(Widget):
@@ -42,7 +42,7 @@ class SlideBox(Widget):
         )
 
     def __init__(self):
-        self.labelFontName = "Helvetica-Bold"
+        self.labelFontName = baseGFont("b")
         self.labelFontSize = 10
         self.labelStrokeColor = black
         self.labelFillColor = white
@@ -67,7 +67,7 @@ class SlideBox(Widget):
         self.background=None
         self.sourceLabelText = "Source: ReportLab"
         self.sourceLabelOffset = 0.2*cm
-        self.sourceLabelFontName = "Helvetica-Oblique"
+        self.sourceLabelFontName = baseGFont("i")
         self.sourceLabelFontSize = 6
         self.sourceLabelFillColor = black
 

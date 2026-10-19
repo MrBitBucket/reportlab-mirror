@@ -71,7 +71,8 @@ xmlParser
 textPaths
 toColorCanUse
 defCWRF
-unShapedFontGlob'''.split())
+unShapedFontGlob
+std14Embed'''.split())
 
 allowTableBoundsErrors =    1                       # bit 0 --> ignore overall width excession
                                                     # bit 1 --> ignore negative available width
@@ -80,7 +81,7 @@ allowTableBoundsErrors =    1                       # bit 0 --> ignore overall w
                                                     # (recommend 1 for production use)
 shapeChecking =             1
 defaultEncoding =           'WinAnsiEncoding'       # 'WinAnsi' or 'MacRoman'
-defaultGraphicsFontName=    'Times-Roman'           #initializer for STATE_DEFAULTS in shapes.py
+defaultGraphicsFontName=    'Helvetica'             #initializer for STATE_DEFAULTS in shapes.py
 pageCompression =           1                       # default page compression mode
 useA85 =                    1                       #set to 0 to disable Ascii Base 85 stream filters
 defaultPageSize =           'A4'                    #default page size
@@ -175,6 +176,7 @@ toColorCanUse='rl_extended_literal_eval'            #change to None or 'rl_safe_
 defCWRF=0.02                                        #fraction we can reduce defined column widths for overcommitted
                                                     #undefined widths
 unShapedFontGlob=None                               #None or space list of glob patterns that force off shaping
+std14Embed=False                                    #force embed standard 14 adobe fonts if True
 
 # places to look for T1Font information
 T1SearchPath =  (

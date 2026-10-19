@@ -4,7 +4,7 @@ __all__=(
         )
 from reportlab.graphics.shapes import Group, String, Rect
 from reportlab.lib import colors
-from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.pdfmetrics import stringWidth, baseGFont
 from reportlab.lib.validators import isNumber, isColor, isString, Validator, isBoolean, NoneOr
 from reportlab.lib.attrmap import *
 from reportlab.graphics.charts.areas import PlotArea
@@ -181,7 +181,7 @@ class Ean13BarcodeWidget(PlotArea):
             "9": (0,1,1,0,1,0)
             }
     fontSize = 8        #millimeters
-    fontName = 'Helvetica'
+    fontName = baseGFont()
     textColor = barFillColor = colors.black
     barStrokeColor = None
     barStrokeWidth = 0

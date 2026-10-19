@@ -14,18 +14,18 @@ def _defaults_init():
     import os
 
     _DEFAULTS={}
-    rl_exec('from reportlab.rl_settings import *',_DEFAULTS)
+    rl_exec('from reportlab.rl_settings import *',{},_DEFAULTS)
 
     _overrides=_DEFAULTS.copy()
     try:
-        rl_exec('from reportlab.local_rl_settings import *',_overrides)
+        rl_exec('from reportlab.local_rl_settings import *',{},_overrides)
         _DEFAULTS.update(_overrides)
     except ImportError:
         pass
 
     _overrides=_DEFAULTS.copy()
     try:
-        rl_exec('from reportlab_settings import *',_overrides)
+        rl_exec('from reportlab_settings import *',{},_overrides)
         _DEFAULTS.update(_overrides)
     except ImportError:
         _overrides=_DEFAULTS.copy()
@@ -36,7 +36,7 @@ def _defaults_init():
                 fn = None
             if fn:
                 with open(fn,'rb') as f:
-                    rl_exec(f.read(),_overrides)
+                    rl_exec(f.read(),{},_overrides)
                 _DEFAULTS.update(_overrides)
         except:
             pass
@@ -101,6 +101,15 @@ def _startUp():
         'sys_version': sys_version,
         'XDG_DATA_HOME': os.environ.get('XDG_DATA_HOME','~/.local/share'),
         }
+    def boolConv(v):
+        if isinstance(v,bool): return v
+        uv = v.upper()
+        if uv in ('Y','YES','1','TRUE'):
+            return True
+        elif uv in ('N','NO','0','FALSE'):
+            return False
+        else:
+            raise ValueError(f'cannot convert {v!r} to a bool value')
 
     for k in _SAVED:
         if k.endswith('SearchPath'):
@@ -117,7 +126,9 @@ def _startUp():
             globals()[k] = list(filter(rl_isdir,globals()[k]))
         else:
             v = _SAVED[k]
-            if isinstance(v,(int,float)):
+            if isinstance(v,bool):
+                conv = boolConv
+            elif isinstance(v,(int,float)):
                 conv = type(v)
             elif k=='defaultPageSize':
                 conv = lambda v,M=pagesizes: getattr(M,v)
@@ -127,6 +138,26 @@ def _startUp():
                 conv = lambda v: list(filter(None,(_.strip() for _ in v.split()))) if v else []
             else: conv = None
             _setOpt(k,v,conv)
+
+def currentSettings():
+    from copy import deepcopy
+    g = globals()
+    return {k:deepcopy(g[k]) for k in _SAVED}
+
+def applySettings(S):
+    G = globals()
+    for k in _SAVED:
+        if k not in S or k not in S: continue
+        if isinstance(S[k],list):
+            G[k][:] = S[k]
+        elif isinstance(S[k],dict):
+            G[k].clear()
+            G[k].update(S[k])
+        elif isinstance(S[k],set):
+            G[k].clear()
+            G[k] |= S[k]
+        else:
+            G[k] = S[k]
 
 _registered_resets=[]
 def register_reset(func, callback=None):

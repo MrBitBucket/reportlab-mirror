@@ -17,6 +17,7 @@ import functools
 from math import sin, cos, pi
 
 from reportlab.lib import colors
+from reportlab.pdfbase.pdfmetrics import baseGFont
 from reportlab.lib.validators import isNumber, isListOfNumbersOrNone,\
                                     isListOfNumbers, isColorOrNone, isString,\
                                     isListOfStringsOrNone, OneOf,\
@@ -1016,7 +1017,7 @@ class LegendedPie(Pie):
         self.legend_names = ['AAA:','AA:','A:','BBB:','NR:']
         for f in range(len(self.data)):
             self.legend1.colorNamePairs.append((self.pieAndLegend_colors[f], self.legend_names[f]))
-        self.legend1.fontName = "Helvetica-Bold"
+        self.legend1.fontName = baseGFont("b")
         self.legend1.fontSize = 6
         self.legend1.strokeColor = black
         self.legend1.strokeWidth = 0.5
@@ -1025,7 +1026,7 @@ class LegendedPie(Pie):
         self._legend2.dxTextSpace = 0
         self._legend2.dx = 0
         self._legend2.alignment = 'right'
-        self._legend2.fontName = "Helvetica-Oblique"
+        self._legend2.fontName = baseGFont("i")
         self._legend2.fontSize = 6
         self._legend2.strokeColor = self.legend1.strokeColor
 

@@ -41,7 +41,7 @@ class StateTracker:
         if defaults is None:
             defaults = STATE_DEFAULTS.copy()
         if defaultObj:
-            for k in STATE_DEFAULTS.keys():
+            for k in STATE_DEFAULTS:
                 a = 'initial'+k[:1].upper()+k[1:]
                 if hasattr(defaultObj,a):
                     defaults[k] = getattr(defaultObj,a)
@@ -114,10 +114,10 @@ class StateTracker:
 def testStateTracker():
     print('Testing state tracker')
     defaults = {'fillColor':None, 'strokeColor':None,'fontName':None, 'transform':[1,0,0,1,0,0]}
-    from reportlab.graphics.shapes import _baseGFontName
+    gFontName = baseGFont()
     deltas = [
         {'fillColor':'red'},
-        {'fillColor':'green', 'strokeColor':'blue','fontName':_baseGFontName},
+        {'fillColor':'green', 'strokeColor':'blue','fontName':gFontName},
         {'transform':[0.5,0,0,0.5,0,0]},
         {'transform':[0.5,0,0,0.5,2,3]},
         {'strokeColor':'red'}

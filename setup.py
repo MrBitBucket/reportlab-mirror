@@ -1,6 +1,6 @@
 #Copyright ReportLab Europe Ltd. 2000-2025
 #see LICENSE for license details
-__version__='4.4.5'
+__version__='5.1.0'
 import os, sys, glob, shutil, re, sysconfig, traceback, io, subprocess
 from urllib.parse import quote as urlquote
 platform = sys.platform
@@ -145,6 +145,16 @@ def listFiles(root,followlinks=True,strJoin=None):
     R = R.__self__
     return strJoin.join(R) if strJoin else R
 
+def fnrfiles(ext, bfnrs = """_abi____ _ab_____ _ai_____ _a______
+                            cobo____ cob_____ com_____ coo_____
+                            _ebi____ _eb_____ _ei_____ _er_____
+                            sy______ zd______ zx______ zy______
+                            callig15""".split(),
+               pfx='fonts/'):
+    return [f'{pfx}{_}.{ext}' for _ in bfnrs]
+
+
+
 reportlab_files= [
         'fonts/00readme.txt',
         'fonts/bitstream-vera-license.txt',
@@ -160,31 +170,16 @@ reportlab_files= [
         'fonts/VeraBd.ttf',
         'fonts/VeraBI.ttf',
         'fonts/VeraIt.ttf',
-        'fonts/_abi____.pfb',
-        'fonts/_ab_____.pfb',
-        'fonts/_ai_____.pfb',
-        'fonts/_a______.pfb',
-        'fonts/cobo____.pfb',
-        'fonts/cob_____.pfb',
-        'fonts/com_____.pfb',
-        'fonts/coo_____.pfb',
-        'fonts/_ebi____.pfb',
-        'fonts/_eb_____.pfb',
-        'fonts/_ei_____.pfb',
-        'fonts/_er_____.pfb',
-        'fonts/sy______.pfb',
-        'fonts/zd______.pfb',
-        'fonts/zx______.pfb',
-        'fonts/zy______.pfb',
-        'fonts/callig15.pfb',
-        'fonts/callig15.afm',
-        'reportlab/graphics/barcode/README'
-        'reportlab/graphics/barcode/TODO'
+        'graphics/barcode/README'
+        'graphics/barcode/TODO'
         'license.txt',
-        ]
+        ]+fnrfiles('afm')+fnrfiles('pfb')
 
 def url2data(url,returnRaw=False):
     import urllib.request as ureq
+    opener = ureq.build_opener()
+    opener.addheaders = [('User-Agent', 'ReportLabApp/1.0')]
+    ureq.install_opener(opener)
     remotehandle = ureq.urlopen(url)
     try:
         raw = remotehandle.read()
@@ -201,18 +196,21 @@ def get_fonts(PACKAGE_DIR, reportlab_files):
         xitmsg = "not downloading T1 font curve files"
     else:
         try:
-            infoline("Downloading standard T1 font curves")
-            zipdata = url2data("https://www.reportlab.com/ftp/pfbfer-20180109.zip")
-            archive = zipfile.ZipFile(zipdata)
-            dst = pjoin(rl_dir, 'fonts')
+            infoline("Downloading standard T1 font files")
+            for zipurl in ("https://www.reportlab.com/ftp/pfbfer-20180109.zip",
+                            "https://www.reportlab.com/ftp/afmfer-20261009.zip",
+                            ):
+                zipdata = url2data(zipurl)
+                archive = zipfile.ZipFile(zipdata)
+                dst = pjoin(rl_dir, 'fonts')
 
-            for name in archive.namelist():
-                if not name.endswith('/'):
-                    with open(pjoin(dst, name), 'wb') as outfile:
-                        outfile.write(archive.read(name))
-            xitmsg = "Finished download of standard T1 font curves"
+                for name in archive.namelist():
+                    if not name.endswith('/'):
+                        with open(pjoin(dst, name), 'wb') as outfile:
+                            outfile.write(archive.read(name))
+            xitmsg = "Finished download of standard T1 font files"
         except:
-            xitmsg = "Failed to download standard T1 font curves"
+            xitmsg = "Failed to download standard T1 font files"
     infoline(xitmsg)
 
 def get_glyphlist_module(PACKAGE_DIR):

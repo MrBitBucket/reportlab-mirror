@@ -5,7 +5,7 @@ from reportlab.graphics.widgetbase import Widget
 from reportlab.lib.attrmap import *
 from reportlab.lib.validators import *
 from reportlab.lib.units import cm
-from reportlab.pdfbase.pdfmetrics import getFont
+from reportlab.pdfbase.pdfmetrics import getFont, baseGFont
 from reportlab.graphics.charts.lineplots import _maxWidth
 
 class DotBox(Widget):
@@ -46,7 +46,7 @@ class DotBox(Widget):
     def __init__(self):
         self.xlabels=["Value", "Blend", "Growth"]
         self.ylabels=["Small", "Medium", "Large"]
-        self.labelFontName = "Helvetica"
+        self.labelFontName = baseGFont()
         self.labelFontSize = 6
         self.labelOffset = 5
         self.strokeWidth = 0.5

@@ -22,7 +22,7 @@ from reportlab.lib import colors
 from reportlab.lib.units import cm
 from reportlab.lib.utils import asNative, base64_decodebytes
 from reportlab.pdfgen.canvas import Canvas
-from reportlab.pdfbase.pdfmetrics import stringWidth
+from reportlab.pdfbase.pdfmetrics import stringWidth, baseGFont
 from reportlab.graphics.shapes import *
 import unittest
 
@@ -34,7 +34,7 @@ def _setup():
     pdfmetrics.registerFont(ttfonts.TTFont("VeraBd", "VeraBd.ttf"))
     pdfmetrics.registerFont(ttfonts.TTFont("VeraIt", "VeraIt.ttf"))
     pdfmetrics.registerFont(ttfonts.TTFont("VeraBI", "VeraBI.ttf"))
-    F = ['Times-Roman','Courier','Helvetica','Vera', 'VeraBd', 'VeraIt', 'VeraBI']
+    F = ['Times-Roman','Courier',baseGFont(),'Vera', 'VeraBd', 'VeraIt', 'VeraBI']
     if sys.platform=='win32':
         for name, ttf in [
             ('Adventurer Light SF','Advlit.ttf'),('ArialMS','ARIAL.TTF'),
@@ -233,7 +233,7 @@ def getDrawing06():
                fillColor=green))  #square corners
     D.add(Rect(220, 150, 60, 30, 10, 10, fillColor=green))  #round corners
 
-    D.add(String(10,50, 'Basic Shapes', fillColor=colors.black, fontName='Helvetica'))
+    D.add(String(10,50, 'Basic Shapes', fillColor=colors.black, fontName=baseGFont()))
 
     return D
 

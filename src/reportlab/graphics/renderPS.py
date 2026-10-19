@@ -6,7 +6,7 @@ __doc__="""Render drawing objects in Postscript"""
 
 import math
 from io import BytesIO, StringIO
-from reportlab.pdfbase.pdfmetrics import getFont, stringWidth, unicode2T1 # for font info
+from reportlab.pdfbase.pdfmetrics import getFont, stringWidth, unicode2T1, baseGFont # for font info
 from reportlab.lib.utils import asBytes, char2int, rawBytes, asNative, isUnicode
 from reportlab.lib.rl_accel import fp_str
 from reportlab.graphics.renderbase import Renderer, getStateDelta, renderScaledDrawing
@@ -939,7 +939,7 @@ def test(outDir='epsout',shout=False):
     from reportlab.graphics import testshapes
     from reportlab.rl_config import verbose
     OLDFONTS = testshapes._FONTS[:]
-    testshapes._FONTS[:] = ['Times-Roman','Times-Bold','Times-Italic', 'Times-BoldItalic','Courier']
+    testshapes._FONTS[:] = [baseGFont(),baseGFont("b"),baseGFont("i"), baseGFont("bi"),'Courier']
     try:
         import os
         # save all drawings and their doc strings from the test file

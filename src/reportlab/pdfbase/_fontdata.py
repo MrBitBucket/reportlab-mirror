@@ -18,6 +18,8 @@ __doc__="""Database of font related things
     code of a Python module.  
 """
 import os, sys
+from reportlab.rl_config import T1SearchPath, std14Embed
+from reportlab.lib.utils import rl_isfile
 
 # mapping of name to width vector, starts empty until fonts are added
 # e.g. widths['Courier'] = [...600,600,600,...]
@@ -25,11 +27,29 @@ widthVectorsByFont = {}
 fontsByName = {}
 fontsByBaseEnc = {}
 # this is a list of the standard 14 font names in Acrobat Reader
-standardFonts = (
+class standardFonts(tuple):
+    def __new__(cls,items):
+        self = tuple.__new__(cls,items)
+        self.__embed = bool(std14Embed)
+        self.__change__ = lambda : None
+        return self
+
+    @property
+    def __embed__(self):
+        return self.__embed
+
+    @__embed__.setter
+    def __embed__(self,v):
+        v = bool(v)
+        if self.__embed != v:
+            self.__embed = v
+            self.__change__()
+
+standardFonts = standardFonts((
     'Courier', 'Courier-Bold', 'Courier-Oblique', 'Courier-BoldOblique',
     'Helvetica', 'Helvetica-Bold', 'Helvetica-Oblique', 'Helvetica-BoldOblique',
     'Times-Roman', 'Times-Bold', 'Times-Italic', 'Times-BoldItalic',
-    'Symbol','ZapfDingbats')
+    'Symbol','ZapfDingbats'))
 
 standardFontAttributes = {
     #family, bold, italic defined for basic ones
@@ -50,7 +70,6 @@ standardFontAttributes = {
 
     'Symbol':('Symbol',0,0),
     'ZapfDingbats':('ZapfDingbats',0,0)
-
     }
 
 #this maps fontnames to the equivalent filename root.
@@ -70,6 +89,7 @@ _font2fnrMapWin32 = {
                     'courier':                  'com_____',
                     'courier-oblique':          'coo_____',
                     }
+
 if sys.platform in ('linux2',):
     _font2fnrMapLinux2 ={
                 'symbol': 'Symbol',
@@ -98,8 +118,6 @@ else:
 def _findFNR(fontName):
     return _font2fnrMap[fontName.lower()]
 
-from reportlab.rl_config import T1SearchPath
-from reportlab.lib.utils import rl_isfile
 def _searchT1Dirs(n,rl_isfile=rl_isfile,T1SearchPath=T1SearchPath):
     assert T1SearchPath!=[], "No Type-1 font search path"
     for d in T1SearchPath:
@@ -243,12 +261,14 @@ def _reset(
             standardFontAttributes=standardFontAttributes.copy(),
             widthVectorsByFont=widthVectorsByFont.copy(),
             widthsByFontGlyph=widthsByFontGlyph.copy(),
-            )
+            ),
+        standardFonts_embed = standardFonts.__embed__,
         ):
     for k,v in initial_dicts.items():
         d=globals()[k]
         d.clear()
         d.update(v)
+    standardFonts.__embed__ = standardFonts_embed
 
 from reportlab.rl_config import register_reset
 register_reset(_reset)

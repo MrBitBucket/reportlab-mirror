@@ -12,12 +12,11 @@ from reportlab.lib.validators import isNumber, OneOf, isString, isColorOrNone,\
         isNumberOrNone, isListOfNumbersOrNone, isBoolean,\
         EitherOr, NoneOr, AutoOr, isAuto, Auto, isBoxAnchor, SequenceOf, isInstanceOf
 from reportlab.lib.attrmap import *
-from reportlab.pdfbase.pdfmetrics import stringWidth, getFont
+from reportlab.pdfbase.pdfmetrics import stringWidth, getFont, baseGFont
 from reportlab.graphics.widgetbase import Widget, TypedPropertyCollection, PropHolder
 from reportlab.graphics.shapes import Drawing, Group, String, Rect, Line, STATE_DEFAULTS
 from reportlab.graphics.widgets.markers import uSymbol2Symbol, isSymbol
 from reportlab.lib.utils import isSeq, find_locals, isStr, asNative
-from reportlab.graphics.shapes import _baseGFontName
 
 def _transMax(n,A):
     X = n*[0]
@@ -547,12 +546,12 @@ class Legend(Widget):
         return d
 
 class TotalAnnotator(LegendColEndCallout):
-    def __init__(self, lText='Total', rText='0.0', fontName=_baseGFontName, fontSize=10,
+    def __init__(self, lText='Total', rText='0.0', fontName=None, fontSize=10,
             fillColor=colors.black, strokeWidth=0.5, strokeColor=colors.black, strokeDashArray=None,
             dx=0, dy=0, dly=0, dlx=(0,0)):
         self.lText = lText
         self.rText = rText
-        self.fontName = fontName
+        self.fontName = baseGFont(default=fontName)
         self.fontSize = fontSize
         self.fillColor = fillColor
         self.dy = dy
