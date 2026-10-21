@@ -15,6 +15,8 @@ CHANGES 5.1.0a1   13/102026
 ---------------------------
     * allow for bool values in rl_config.py
     * fix some file issues and download afmfer in setup.py
+    * special case ListFloables in PTOContainer
+    * require 3.10 at least (3.9 is now EOL)
 
 CHANGES 5.0.4     02/102026
 ---------------------------
