@@ -11,6 +11,10 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
+CHANGES 5.1.0     22/102026
+---------------------------
+    * release 5.1.0
+
 CHANGES 5.1.0a1   13/102026
 ---------------------------
     * allow for bool values in rl_config.py
