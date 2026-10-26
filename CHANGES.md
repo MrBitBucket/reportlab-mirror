@@ -11,30 +11,34 @@ E.g. to retrieve the changes made between release 3.4 and release 3.5, type::
 The contributors lists are in no order and apologies to those accidentally not
 mentioned. If we missed you, please let us know!
 
-CHANGES 5.1.0     22/102026
+CHANGES 5.1.1    ??/11/2026
+---------------------------
+    * Fix hypenation bug; patch contributed by Matthias Kestenholz lt mk at feinheit dot ch gt
+
+CHANGES 5.1.0    22/10/2026
 ---------------------------
     * release 5.1.0
 
-CHANGES 5.1.0a1   13/102026
+CHANGES 5.1.0a1  13/10/2026
 ---------------------------
     * allow for bool values in rl_config.py
     * fix some file issues and download afmfer in setup.py
     * special case ListFloables in PTOContainer
     * require 3.10 at least (3.9 is now EOL)
 
-CHANGES 5.0.4     02/102026
+CHANGES 5.0.4    02/10/2026
 ---------------------------
     * start on using baseC/GFont removing usage of Times
 
-CHANGES 5.0.3a2  25/092026
+CHANGES 5.0.3a2  25/09/2026
 ---------------------------
     * improve DefaultNamespace efficiency in rl_safe_eval.py
 
-CHANGES 5.0.3a1  24/092026
+CHANGES 5.0.3a1  24/09/2026
 ---------------------------
     * address security issues raised by Ammar Chechatwala ammarc26627 at gmail dot com
 
-CHANGES 5.0.2    22/092026
+CHANGES 5.0.2    22/09/2026
 ---------------------------
     * rltempfile.py fix export \_\_all\_\_ contrib Max R  maxrozentsveyg at gmail dot com
     * security fixes for problems reported by Ammar Chechatwala ammarc26627 at gmail dot com

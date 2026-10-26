@@ -479,6 +479,43 @@ class BreakingTestCase(unittest.TestCase):
         canv.showPage()
         canv.save()
 
+    def test7(self):
+        '''test contributed by Matthias Kestenholz lt mk at feinheit dot ch gt'''
+        import io
+
+        from reportlab.lib.styles import ParagraphStyle
+        from reportlab.platypus import BaseDocTemplate, Frame, PageTemplate, Paragraph
+
+        style = ParagraphStyle(
+            "t", fontName="Helvetica", fontSize=10, leading=12, hyphenationLang="en_GB"
+        )
+        TEXT = """First line.<br/>We meet at the old cotton-mill near the river and then walk
+                together along the well-known path through the village to the town hall,
+                where the mayor welcomes everybody."""
+        WIDTH, HEIGHT = 100, 72.5
+
+        def lines(paragraph):
+            return [
+                "".join(getattr(f, "text", "") for f in line.words)
+                for line in paragraph.blPara.lines
+            ]
+
+        paragraph = Paragraph(TEXT, style)
+        paragraph.wrap(WIDTH, HEIGHT)
+
+        first, rest = paragraph.split(WIDTH, HEIGHT)
+        if False:
+            print("lines of the whole paragraph:", *lines(paragraph), sep="\n   | ")
+            print(f"first part: height {first.wrap(WIDTH, HEIGHT)[1]}, available {HEIGHT}")
+            print(*lines(first), sep="\n   | ")
+
+        doc = BaseDocTemplate(io.BytesIO(), pagesize=(WIDTH, HEIGHT))
+        doc.addPageTemplates(PageTemplate(frames=[Frame(
+            0, 0, WIDTH, HEIGHT,
+            leftPadding=0, rightPadding=0, topPadding=0, bottomPadding=0,
+        )]))
+        self.assertEqual(doc.build([Paragraph(TEXT, style)]), None, 'Hyphen rejoining bug detected')
+
 def makeSuite():
     return makeSuiteForClasses(BreakingTestCase)
 

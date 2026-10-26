@@ -583,6 +583,16 @@ class _SHYIndexedStr(str):
         self._shyIndices = X
         return self
 
+def _shyJoin(s,ss):
+    #Matthias Kestenholz lt mk at feinheit dot ch gt
+    '''join two parts of a split word keeping any hyphen at the end of s'''
+    u = s + ss
+    if hasattr(s,'_shyIndices') or hasattr(ss,'_shyIndices'):
+        X = list(getattr(s,'_shyIndices',[]))
+        X.extend([_+len(s) for _ in getattr(ss,'_shyIndices',[])])
+        return _SHYIndexedStr(u,X)
+    return u
+
 def _shyUnsplit(s,ss=None):
     '''rejoin two parts of an original _SHYIndexedStr or str that was split'''
     u = s.rstrip('-')
@@ -674,7 +684,9 @@ def _rejoinSplitFragWords(F):
                 wLen -= stringWidth(t[-1],sty.fontName,sty.fontSize) + 1e-8
                 t = _shyUnsplit(t) #strip the '-'
             if psty is sty:
-                R[-1] = (sty, _shyUnsplit(R[-1][1],t))
+                #Matthias Kestenholz lt mk at feinheit dot ch gt
+                R[-1] = (sty, _shyJoin(R[-1][1],t))
+                #R[-1] = (sty, _shyUnsplit(R[-1][1],t))
             else:
                 aR((sty,t))
                 psty = sty
