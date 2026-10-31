@@ -162,8 +162,9 @@ class StandardEncryption:
 
             # Calculate the User encryption key (UE)
             md = sha256(asBytes(self.userPassword[:127]) + uks)
-            
-            encrypter = pyaes.Encrypter(pyaes.AESModeOfOperationCBC(md.digest(), iv=iv))
+
+            # NB no padding: UE must be exactly 32 bytes per ISO 32000-2
+            encrypter = pyaes.Encrypter(pyaes.AESModeOfOperationCBC(md.digest(), iv=iv), padding=pyaes.PADDING_NONE)
             self.UE = encrypter.feed(self.key)
             self.UE += encrypter.feed()
 
@@ -184,7 +185,8 @@ class StandardEncryption:
             # Calculate the User encryption key (OE)
             md = sha256(asBytes(self.ownerPassword[:127]) + oks + self.U)
 
-            encrypter = pyaes.Encrypter(pyaes.AESModeOfOperationCBC(md.digest(), iv=iv))
+            # NB no padding: OE must be exactly 32 bytes per ISO 32000-2
+            encrypter = pyaes.Encrypter(pyaes.AESModeOfOperationCBC(md.digest(), iv=iv), padding=pyaes.PADDING_NONE)
             self.OE = encrypter.feed(self.key)
             self.OE += encrypter.feed()
 
@@ -212,7 +214,8 @@ class StandardEncryption:
             ]
 
             # the permission array should be enrypted in the Perms field
-            encrypter = pyaes.Encrypter(pyaes.AESModeOfOperationCBC(self.key, iv=iv))
+            # NB no padding: Perms must be exactly 16 bytes per ISO 32000-2
+            encrypter = pyaes.Encrypter(pyaes.AESModeOfOperationCBC(self.key, iv=iv), padding=pyaes.PADDING_NONE)
             self.Perms = encrypter.feed(bytes(permsarr))
             self.Perms += encrypter.feed()
                         
